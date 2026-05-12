@@ -439,6 +439,22 @@ export default function SimpleCatalogAdd({ businessProfileId, onSuccess, onClose
                                 </div>
                             </div>
                         </button>
+
+                        <a
+                            href={`/mi-negocio/catalogo/importar?business=${businessProfileId}&mode=bulk_images`}
+                            className="w-full p-4 rounded-xl border-2 text-left hover:shadow-md transition-all block"
+                            style={{ borderColor: 'var(--brand-blue)', backgroundColor: 'white' }}
+                        >
+                            <div className="flex items-center gap-3">
+                                <div className="w-12 h-12 rounded-lg flex items-center justify-center bg-blue-50 text-blue-600">
+                                    <IconImage size={24} />
+                                </div>
+                                <div className="flex-1">
+                                    <div className="font-bold text-blue-700">🖼️ Múltiples Imágenes</div>
+                                    <div className="text-sm text-slate-500">Arrastra 10, 20 o más imágenes a la vez</div>
+                                </div>
+                            </div>
+                        </a>
                     </div>
 
                     <button

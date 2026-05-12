@@ -215,6 +215,11 @@ function CatalogImportPageContent() {
             const param = searchParams.get('business');
             const id = param && opts.some((o) => o.id === param) ? param : opts[0]?.id ?? null;
             setSelectedBusinessId(id);
+            
+            const modeParam = searchParams.get('mode');
+            if (modeParam === 'excel' || modeParam === 'manual' || modeParam === 'bulk_images') {
+                setMode(modeParam);
+            }
         })();
     }, [user, authLoading, searchParams]);
 
