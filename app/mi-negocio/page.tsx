@@ -11,8 +11,10 @@ import React, { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
-import { createBusinessProfile, listBusinessProfilesForUser, updateBusinessProfile, getBusinessCatalog } from '@/lib/business';
-import { hasPermission, type BusinessMemberRole, type BusinessWithRole } from '@/lib/business-access';
+import { createBusinessProfile, getBusinessCatalog } from '@/lib/business';
+import { type BusinessMemberRole, type BusinessWithRole } from '@/lib/business-access';
+
+import { publishBusinessViaAPI, saveBusinessViaAPI } from '@/lib/business-api';
 import { BusinessProfile } from '@/types/business';
 import { Adiso } from '@/types';
 import { IconEye, IconEdit, IconX, IconCheck } from '@/components/Icons';
@@ -24,6 +26,7 @@ import SimpleCatalogAdd from '@/components/business/SimpleCatalogAdd';
 import { useDebounce } from '@/hooks/useDebounce';
 import { useToast } from '@/hooks/useToast';
 import { ProductEditor } from '@/components/business/ProductEditor';
+import { supabase } from '@/lib/supabase';
 
 function BusinessBuilderPageContent() {
     const { user, loading: authLoading } = useAuth();
@@ -132,8 +135,6 @@ function BusinessBuilderPageContent() {
 
         try {
             setProfileLoading(true);
-            const memberships = await listBusinessProfilesForUser(user.id);
-            setBusinessOptions(memberships);
 
             const forceNew = searchParams.get('new') === '1';
             if (forceNew) {
@@ -155,16 +156,25 @@ function BusinessBuilderPageContent() {
                 return;
             }
 
-            const paramBusinessId = searchParams.get('business');
-            const picked =
-                (paramBusinessId && memberships.find((m) => m.profile.id === paramBusinessId)) ||
-                memberships[0] ||
-                null;
+            // Use server API to bypass RLS issues
+            const session = await supabase?.auth.getSession();
+            const token = session?.data?.session?.access_token;
+            if (!token) {
+                setIsFirstTime(true);
+                setChatbotMinimized(false);
+                setProfile((prev) => ({ ...prev, user_id: user.id }));
+                setProfileLoading(false);
+                return;
+            }
 
-            if (picked) {
-                const existingProfile = picked.profile;
-                setMemberRole(picked.role);
+            const res = await fetch('/api/business/me', {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            const json = res.ok ? await res.json() : null;
+            const existingProfile: BusinessProfile | null = json?.profile ?? null;
 
+            if (existingProfile) {
+                setMemberRole((json?.role as BusinessMemberRole) || 'owner');
                 setProfile(existingProfile);
                 lastSavedProfileStr.current = JSON.stringify(existingProfile);
                 setIsFirstTime(false);
@@ -180,7 +190,6 @@ function BusinessBuilderPageContent() {
                 if (existingProfile.id) {
                     const products = await getBusinessCatalog(existingProfile.id);
                     setCatalogProducts(products);
-
                     const mappedAdisos: Adiso[] = products.map(p => ({
                         id: p.id,
                         titulo: p.title || '',
@@ -199,55 +208,11 @@ function BusinessBuilderPageContent() {
                     setAdisos(mappedAdisos);
                 }
             } else {
-                // No membership records found — try direct lookup by user_id as fallback
-                // (covers cases where business_members was not populated)
-                const { data: directProfile } = await (await import('@/lib/supabase')).supabase!
-                    .from('business_profiles')
-                    .select('*')
-                    .eq('user_id', user.id)
-                    .order('created_at', { ascending: true })
-                    .limit(1)
-                    .single();
-
-                if (directProfile) {
-                    setMemberRole('owner');
-                    setProfile(directProfile);
-                    lastSavedProfileStr.current = JSON.stringify(directProfile);
-                    setIsFirstTime(false);
-                    setChatbotMinimized(true);
-
-                    if (directProfile.slug) {
-                        router.push(`/negocio/${directProfile.slug}?edit=true`);
-                        return;
-                    }
-
-                    if (directProfile.id) {
-                        const products = await getBusinessCatalog(directProfile.id);
-                        setCatalogProducts(products);
-                        const mappedAdisos: Adiso[] = products.map((p: any) => ({
-                            id: p.id,
-                            titulo: p.title || '',
-                            descripcion: p.description || '',
-                            precio: p.price,
-                            imagenesUrls: Array.isArray(p.images) ? p.images.map((img: any) => typeof img === 'string' ? img : img.url) : [],
-                            imagenUrl: Array.isArray(p.images) && p.images.length > 0 ? (typeof p.images[0] === 'string' ? p.images[0] : p.images[0].url) : '',
-                            slug: p.id,
-                            categoria: (p.category as any) || 'productos',
-                            user_id: user.id,
-                            contacto: directProfile.contact_phone || '',
-                            ubicacion: directProfile.contact_address || '',
-                            fechaPublicacion: p.created_at ? new Date(p.created_at).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
-                            horaPublicacion: p.created_at ? new Date(p.created_at).toLocaleTimeString() : new Date().toLocaleTimeString()
-                        }));
-                        setAdisos(mappedAdisos);
-                    }
-                } else {
-                    // Truly first time
-                    setMemberRole(null);
-                    setIsFirstTime(true);
-                    setChatbotMinimized(false);
-                    setProfile((prev) => ({ ...prev, user_id: user.id }));
-                }
+                // Truly first time
+                setMemberRole(null);
+                setIsFirstTime(true);
+                setChatbotMinimized(false);
+                setProfile((prev) => ({ ...prev, user_id: user.id }));
             }
         } catch (err) {
             console.error('Error loading profile:', err);
@@ -259,52 +224,36 @@ function BusinessBuilderPageContent() {
 
     const handleSave = React.useCallback(async (showNotification = true) => {
         if (!user || !profile.name) return;
-
-        if (profile.id && memberRole && !hasPermission(memberRole, 'business:write')) {
-            error('No tienes permiso para editar este negocio');
-            return;
-        }
-
         try {
             setSaving(true);
-
-            // Optimistic update of ref to prevent double triggering if debounce fires again quickly
-            // But better to do it after success to ensure consistency
-
-            let savedProfile;
+            let savedProfile: BusinessProfile | null = null;
             if (profile.id) {
-                savedProfile = await updateBusinessProfile(profile.id, profile);
+                // Use server API to bypass RLS
+                savedProfile = await saveBusinessViaAPI(profile.id, profile as BusinessProfile);
             } else {
                 savedProfile = await createBusinessProfile({
                     ...profile,
                     user_id: user.id,
                     created_by: user.id,
-                    slug: profile.slug || profile.name.toLowerCase().replace(/\s+/g, '-')
+                    slug: profile.slug || (profile.name || '').toLowerCase().replace(/\s+/g, '-')
                 } as BusinessProfile);
             }
-
             if (savedProfile) {
                 setProfile(savedProfile);
                 lastSavedProfileStr.current = JSON.stringify(savedProfile);
                 setLastSavedTime(new Date());
-
                 if (!profile.id && savedProfile.id) {
                     router.replace(`${pathname}?business=${savedProfile.id}`);
                 }
-
-                if (showNotification) {
-                    success('¡Cambios guardados!');
-                }
+                if (showNotification) success('¡Cambios guardados!');
             }
         } catch (err: any) {
             console.error('Error saving profile:', err);
-            if (showNotification) {
-                error('Error al guardar: ' + err.message);
-            }
+            if (showNotification) error('Error al guardar: ' + (err?.message || JSON.stringify(err)));
         } finally {
             setSaving(false);
         }
-    }, [user, profile, memberRole, success, error, router, pathname]);
+    }, [user, profile, success, error, router, pathname]);
 
     // Load profile on mount
     useEffect(() => {
@@ -375,23 +324,13 @@ function BusinessBuilderPageContent() {
             error('Carga tu negocio primero (recarga la página)');
             return;
         }
-
-        // Skip client-side permission check — let Supabase RLS be the authority.
-        // This handles cases where business_members table doesn't have a record.
         try {
             setSaving(true);
-            const updated = await updateBusinessProfile(profile.id, {
-                ...profile,
-                is_published: !profile.is_published
-            });
-
-            if (updated) {
-                setProfile(updated);
-                lastSavedProfileStr.current = JSON.stringify(updated);
-                success(updated.is_published ? '¡Página publicada! 🎉' : 'Página despublicada');
-            } else {
-                error('No se pudo publicar. Verifica tus permisos en Supabase.');
-            }
+            const newState = !profile.is_published;
+            const updated = await publishBusinessViaAPI(profile.id, newState);
+            setProfile(updated);
+            lastSavedProfileStr.current = JSON.stringify(updated);
+            success(newState ? '¡Página publicada! 🎉' : 'Página despublicada');
         } catch (err: any) {
             console.error('Error en handlePublish:', err);
             error('Error al publicar: ' + (err?.message || JSON.stringify(err)));
