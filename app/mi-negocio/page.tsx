@@ -516,6 +516,7 @@ function BusinessBuilderPageContent() {
                             onRefreshCatalog={handleRefreshCatalog}
                             onToggleView={() => setViewMode('preview')}
                             isPublished={!!profile.is_published}
+                            onPublish={handlePublish}
                         />
                     </div>
                 </div>

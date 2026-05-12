@@ -40,6 +40,7 @@ interface EditorStepsProps {
     onRefreshCatalog?: () => void;
     onToggleView?: () => void;
     isPublished?: boolean;
+    onPublish?: () => void;
 }
 
 export function EditorSteps({
@@ -55,7 +56,8 @@ export function EditorSteps({
     setEditingProduct,
     onRefreshCatalog,
     onToggleView,
-    isPublished
+    isPublished,
+    onPublish
 }: EditorStepsProps) {
     const [uploadingImage, setUploadingImage] = useState<string | null>(null);
     const [catalogSearch, setCatalogSearch] = useState('');
@@ -161,10 +163,14 @@ export function EditorSteps({
                         </button>
                     )}
 
-                    {/* Publish Status Badge (Static for now as requested) */}
-                    <div className="px-3 py-1.5 bg-green-600 text-white text-xs font-bold rounded-full shadow-sm shadow-green-200">
+                    {/* Publish Button */}
+                    <button 
+                        onClick={onPublish}
+                        disabled={saving}
+                        className="px-3 py-1.5 bg-green-600 text-white text-xs font-bold rounded-full shadow-sm shadow-green-200 hover:bg-green-700 transition-colors disabled:opacity-50"
+                    >
                         {isPublished ? 'Publicado' : 'Publicar'}
-                    </div>
+                    </button>
                 </div>
             </div>
 
