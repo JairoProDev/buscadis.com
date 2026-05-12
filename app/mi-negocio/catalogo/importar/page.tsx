@@ -18,7 +18,7 @@ import { useToast } from '@/hooks/useToast';
 import { ToastContainer } from '@/components/Toast';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
-import { listBusinessProfilesForUser } from '@/lib/business';
+import { listBusinessProfilesForUser, uploadProductImage } from '@/lib/business';
 import { useAuth } from '@/hooks/useAuth';
 
 interface ImportResult {
@@ -97,7 +97,7 @@ function CatalogImportPageContent() {
     const [showSectorPicker, setShowSectorPicker] = useState(false);
 
     // UI Mode state
-    const [mode, setMode] = useState<'excel' | 'manual'>('excel');
+    const [mode, setMode] = useState<'excel' | 'manual' | 'bulk_images'>('excel');
 
     // Excel Import State
     const [uploading, setUploading] = useState(false);
@@ -106,6 +106,91 @@ function CatalogImportPageContent() {
 
     const [businessOptions, setBusinessOptions] = useState<{ id: string; name: string }[]>([]);
     const [selectedBusinessId, setSelectedBusinessId] = useState<string | null>(null);
+
+    // Bulk Images State
+    const [bulkImages, setBulkImages] = useState<{ id: string; file: File; title: string; preview: string; status: 'pending' | 'uploading' | 'success' | 'error' }[]>([]);
+    const [bulkUploading, setBulkUploading] = useState(false);
+    const bulkDropzone = useDropzone({
+        accept: { 'image/*': [] },
+        onDrop: (acceptedFiles) => {
+            const newImages = acceptedFiles.map(file => ({
+                id: Math.random().toString(36).substring(7),
+                file,
+                title: file.name.replace(/\.[^/.]+$/, "").replace(/[-_]/g, ' '),
+                preview: URL.createObjectURL(file),
+                status: 'pending' as const
+            }));
+            setBulkImages(prev => [...prev, ...newImages]);
+        }
+    });
+
+    const removeBulkImage = (id: string) => {
+        setBulkImages(prev => prev.filter(img => img.id !== id));
+    };
+
+    const updateBulkTitle = (id: string, newTitle: string) => {
+        setBulkImages(prev => prev.map(img => img.id === id ? { ...img, title: newTitle } : img));
+    };
+
+    const handleBulkSubmit = async () => {
+        if (!selectedBusinessId) return showError('Selecciona un negocio primero');
+        if (bulkImages.length === 0) return;
+
+        try {
+            setBulkUploading(true);
+            const { data: { user } } = await supabase!.auth.getUser();
+            if (!user) throw new Error('No se encontró el usuario');
+
+            let successCount = 0;
+            let errorCount = 0;
+
+            for (let i = 0; i < bulkImages.length; i++) {
+                const img = bulkImages[i];
+                if (img.status === 'success') continue;
+
+                // Update UI to uploading
+                setBulkImages(prev => prev.map(p => p.id === img.id ? { ...p, status: 'uploading' } : p));
+
+                try {
+                    const imageUrl = await uploadProductImage(img.file, user.id);
+                    if (!imageUrl) throw new Error('Error al subir imagen');
+
+                    const { error } = await supabase!
+                        .from('catalog_products')
+                        .insert({
+                            business_profile_id: selectedBusinessId,
+                            title: img.title,
+                            status: 'published',
+                            images: [{ url: imageUrl, alt: img.title }],
+                            import_source: 'bulk_images'
+                        });
+
+                    if (error) throw error;
+                    
+                    setBulkImages(prev => prev.map(p => p.id === img.id ? { ...p, status: 'success' } : p));
+                    successCount++;
+                } catch (e) {
+                    console.error('Bulk upload error:', e);
+                    setBulkImages(prev => prev.map(p => p.id === img.id ? { ...p, status: 'error' } : p));
+                    errorCount++;
+                }
+            }
+
+            if (successCount > 0) showSuccess(`✅ ${successCount} productos subidos correctamente`);
+            if (errorCount > 0) showError(`❌ ${errorCount} productos fallaron`);
+
+            if (errorCount === 0) {
+                setTimeout(() => {
+                    router.push('/mi-negocio/catalogo');
+                }, 1500);
+            }
+
+        } catch (err: any) {
+            showError('Error en subida masiva: ' + err.message);
+        } finally {
+            setBulkUploading(false);
+        }
+    };
 
     // Manual Add State
     const [manualLoading, setManualLoading] = useState(false);
@@ -423,6 +508,16 @@ function CatalogImportPageContent() {
                             <IconCamera size={18} />
                             Agregar Manual
                         </button>
+                        <button
+                            onClick={() => setMode('bulk_images')}
+                            className={`flex-1 md:flex-none px-6 py-2 rounded-lg text-sm font-bold transition-all flex items-center justify-center gap-2 ${mode === 'bulk_images'
+                                ? 'bg-white text-[var(--brand-blue)] shadow-sm'
+                                : 'text-slate-500 hover:text-slate-700'
+                                }`}
+                        >
+                            <IconImage size={18} />
+                            Múltiples Imágenes
+                        </button>
                     </div>
 
                     {/* MODE: EXCEL IMPORT */}
@@ -672,6 +767,124 @@ function CatalogImportPageContent() {
                             <p className="text-center text-slate-400 text-sm mt-6">
                                 💡 Tip: Usa el modo &quot;Importar Excel&quot; para subir productos masivamente.
                             </p>
+                        </div>
+                    )}
+
+                    {/* MODE: BULK IMAGES */}
+                    {mode === 'bulk_images' && (
+                        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 md:p-8 mb-8 animate-in fade-in slide-in-from-bottom-4 duration-300">
+                            <div className="mb-6">
+                                <h2 className="text-xl font-bold text-slate-900 flex items-center gap-2">
+                                    <IconImage className="text-blue-600" /> Subida Masiva de Imágenes
+                                </h2>
+                                <p className="text-slate-500 text-sm mt-1">
+                                    Arrastra múltiples imágenes a la vez. El nombre de cada archivo se usará como título del producto automáticamente.
+                                </p>
+                            </div>
+
+                            <div
+                                {...bulkDropzone.getRootProps()}
+                                className={`relative border-3 border-dashed rounded-xl p-8 mb-6 transition-all cursor-pointer group ${bulkDropzone.isDragActive
+                                    ? 'border-[var(--brand-blue)] bg-sky-50'
+                                    : 'border-slate-300 hover:border-[var(--brand-blue)] hover:bg-slate-50'
+                                    }`}
+                            >
+                                <input {...bulkDropzone.getInputProps()} />
+                                <div className="text-center">
+                                    <div className="mx-auto w-16 h-16 bg-white rounded-full shadow-sm flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                                        <IconUpload size={32} className="text-slate-400 group-hover:text-blue-500" />
+                                    </div>
+                                    <p className="font-bold text-slate-700 mb-1">
+                                        Arrastra aquí todas tus imágenes o haz clic para seleccionar
+                                    </p>
+                                    <p className="text-xs text-slate-400">Puedes seleccionar 10, 20 o más imágenes a la vez (Formatos: JPG, PNG, WEBP)</p>
+                                </div>
+                            </div>
+
+                            {bulkImages.length > 0 && (
+                                <div className="mt-8">
+                                    <div className="flex items-center justify-between mb-4 pb-4 border-b border-slate-100">
+                                        <h3 className="font-bold text-slate-800">
+                                            {bulkImages.length} imágenes seleccionadas
+                                        </h3>
+                                        <button
+                                            onClick={() => setBulkImages([])}
+                                            disabled={bulkUploading}
+                                            className="text-sm font-bold text-red-500 hover:text-red-600 disabled:opacity-50"
+                                        >
+                                            Limpiar todo
+                                        </button>
+                                    </div>
+
+                                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 mb-6">
+                                        {bulkImages.map((img) => (
+                                            <div key={img.id} className="relative group rounded-xl overflow-hidden border border-slate-200 bg-slate-50">
+                                                <div className="aspect-square relative">
+                                                    <img src={img.preview} alt={img.title} className="w-full h-full object-cover" />
+                                                    
+                                                    {img.status === 'pending' && !bulkUploading && (
+                                                        <button 
+                                                            onClick={() => removeBulkImage(img.id)}
+                                                            className="absolute top-2 right-2 w-6 h-6 bg-white rounded-full flex items-center justify-center shadow-md text-slate-400 hover:text-red-500 hover:bg-red-50 transition-colors opacity-0 group-hover:opacity-100"
+                                                        >
+                                                            <IconX size={14} />
+                                                        </button>
+                                                    )}
+                                                    {img.status === 'uploading' && (
+                                                        <div className="absolute inset-0 bg-white/70 flex items-center justify-center">
+                                                            <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
+                                                        </div>
+                                                    )}
+                                                    {img.status === 'success' && (
+                                                        <div className="absolute inset-0 bg-green-500/20 flex items-center justify-center">
+                                                            <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center text-white shadow-lg">
+                                                                <IconCheck size={20} />
+                                                            </div>
+                                                        </div>
+                                                    )}
+                                                    {img.status === 'error' && (
+                                                        <div className="absolute inset-0 bg-red-500/20 flex items-center justify-center">
+                                                            <div className="bg-red-500 text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg">
+                                                                Error
+                                                            </div>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                                <div className="p-2">
+                                                    <input
+                                                        type="text"
+                                                        value={img.title}
+                                                        onChange={(e) => updateBulkTitle(img.id, e.target.value)}
+                                                        disabled={bulkUploading || img.status === 'success'}
+                                                        className="w-full text-xs font-bold text-slate-700 bg-transparent border-b border-transparent hover:border-slate-300 focus:border-blue-500 outline-none px-1 py-0.5 transition-colors disabled:opacity-70 disabled:bg-transparent disabled:border-transparent truncate"
+                                                        title={img.title}
+                                                    />
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+
+                                    <div className="flex justify-end pt-4 border-t border-slate-100">
+                                        <button
+                                            onClick={handleBulkSubmit}
+                                            disabled={bulkUploading || bulkImages.every(img => img.status === 'success')}
+                                            className="py-3 px-8 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                                        >
+                                            {bulkUploading ? (
+                                                <>
+                                                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                                    <span>Subiendo ({bulkImages.filter(i => i.status === 'success').length}/{bulkImages.length})...</span>
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <IconUpload size={20} />
+                                                    <span>Subir {bulkImages.filter(i => i.status !== 'success').length} productos</span>
+                                                </>
+                                            )}
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     )}
                 </div>
