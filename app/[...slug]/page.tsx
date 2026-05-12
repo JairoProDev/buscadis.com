@@ -5,6 +5,8 @@ import { getBusinessProductAsAdiso } from '@/lib/business';
 import { getIdFromSlug } from '@/lib/url';
 import ClientAdisoWrapper from '@/components/ClientAdisoWrapper';
 import { Categoria, Adiso } from '@/types';
+import PublicBusinessPage from '@/app/negocio/[slug]/page';
+import { createClient } from '@supabase/supabase-js';
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://buscadis.com';
 
@@ -12,15 +14,35 @@ interface PageProps {
     params: Promise<{
         slug: string[]; // Catch-all array
     }>;
+    searchParams?: Promise<{ [key: string]: string | string[] | undefined }>;
 }
 
-export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-    const { slug } = await params;
+export async function generateMetadata(props: PageProps): Promise<Metadata> {
+    const params = await props.params;
+    const { slug } = params;
 
     // Format 1: /[ubicacion]/[categoria]/[slug] (Length 3)
     // Format 2: /[categoria]/[id] (Length 2) - Legacy
+    // Format 3: /[business_slug] (Length 1)
 
-    if (slug.length === 3) {
+    if (slug.length === 1) {
+        const targetSlug = decodeURIComponent(slug[0]);
+        const supabaseAdmin = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
+        try {
+            const { data } = await supabaseAdmin.from('business_profiles').select('name, description, logo_url, banner_url').eq('slug', targetSlug).single();
+            if (data) {
+                const title = `${data.name} | Buscadis`;
+                const description = data.description || `Página oficial de ${data.name} en Buscadis`;
+                const imageUrl = data.logo_url || data.banner_url || `${siteUrl}/og-image.jpg`;
+                return {
+                    title, description,
+                    openGraph: { title, description, url: `${siteUrl}/${targetSlug}`, images: [{ url: imageUrl }] }
+                };
+            }
+        } catch (e) {
+            // Ignore error, fallback to default
+        }
+    } else if (slug.length === 3) {
         const [ubicacion, categoria, adSlug] = slug;
         const id = getIdFromSlug(adSlug);
         if (!id) return { title: 'Adiso no encontrado' };
@@ -88,13 +110,18 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     return { title: 'Buscadis' };
 }
 
-export default async function Page({ params }: PageProps) {
-    const { slug } = await params;
+export default async function Page(props: PageProps) {
+    const params = await props.params;
+    const searchParams = props.searchParams ? await props.searchParams : {};
+    const { slug } = params;
 
     let targetId: string | null = null;
     let isLegacy = false;
 
-    if (slug.length === 3) {
+    if (slug.length === 1) {
+        // Format 3: /[business_slug]
+        return <PublicBusinessPage params={{ slug: slug[0] }} searchParams={searchParams} />;
+    } else if (slug.length === 3) {
         // New SEO URL: /[ubicacion]/[categoria]/[slug]
         targetId = getIdFromSlug(slug[2]);
     } else if (slug.length === 2) {

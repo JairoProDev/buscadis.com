@@ -16,6 +16,7 @@ import { useToast } from '@/hooks/useToast';
 import { useBusinessData } from '@/hooks/useBusinessData';
 import { useNetworkStatus } from '@/hooks/useNetworkStatus';
 import { updateBusinessProfile } from '@/lib/business';
+import { saveBusinessViaAPI, publishBusinessViaAPI } from '@/lib/business-api';
 import { useDebounce } from '@/hooks/useDebounce';
 import { IconCheck, IconEdit, IconEye, IconX } from '@/components/Icons';
 
@@ -115,7 +116,7 @@ export default function PublicBusinessPage({
         if (!profileToSave.id) return;
         try {
             setSaving(true);
-            const saved = await updateBusinessProfile(profileToSave.id, profileToSave);
+            const saved = await saveBusinessViaAPI(profileToSave.id, profileToSave);
             if (saved) {
                 setLocalProfile(saved);
                 lastSavedStr.current = JSON.stringify(saved);
@@ -151,10 +152,7 @@ export default function PublicBusinessPage({
         try {
             setSaving(true);
             const newState = !localProfile.is_published;
-            const saved = await updateBusinessProfile(localProfile.id, {
-                ...localProfile,
-                is_published: newState,
-            });
+            const saved = await publishBusinessViaAPI(localProfile.id, newState);
             if (saved) {
                 setLocalProfile(saved);
                 lastSavedStr.current = JSON.stringify(saved);

@@ -239,7 +239,7 @@ export function EditorSteps({
                                                     <label className="block">
                                                         <span className="text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wide">Nombre de Usuario (URL)</span>
                                                         <div className="flex items-center bg-white border border-slate-200 rounded-xl focus-within:border-blue-500 overflow-hidden">
-                                                            <span className="pl-4 pr-1 text-slate-400 text-sm font-mono">adis.lat/negocio/</span>
+                                                            <span className="pl-4 pr-1 text-slate-400 text-sm font-mono">adis.lat/</span>
                                                             <input
                                                                 type="text"
                                                                 value={profile.slug || ''}
@@ -439,7 +439,7 @@ export function EditorSteps({
                                                                         >
                                                                             <IconEdit size={12} />
                                                                         </button>
-                                                                        <Link href={`/negocio/${profile.slug}?product=${p.id}`} target="_blank" className="p-1.5 bg-white text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded shadow-sm border border-slate-100">
+                                                                        <Link href={`/${profile.slug}?product=${p.id}`} target="_blank" className="p-1.5 bg-white text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded shadow-sm border border-slate-100">
                                                                             <IconArrowRight size={12} />
                                                                         </Link>
                                                                         {/* Botón eliminar individual */}

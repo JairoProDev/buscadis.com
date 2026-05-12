@@ -182,7 +182,7 @@ function BusinessBuilderPageContent() {
 
                 // If business has a slug, redirect to the unified page editor
                 if (existingProfile.slug) {
-                    router.push(`/negocio/${existingProfile.slug}?edit=true`);
+                    router.push(`/${existingProfile.slug}?edit=true`);
                     return;
                 }
 

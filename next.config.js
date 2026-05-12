@@ -42,6 +42,15 @@ const nextConfig = {
       },
     ];
   },
+  async redirects() {
+    return [
+      {
+        source: '/negocio/:slug*',
+        destination: '/:slug*',
+        permanent: true,
+      },
+    ];
+  },
   async rewrites() {
     return [];
   },
