@@ -270,7 +270,9 @@ function BusinessBuilderPageContent() {
 
     // Auto-save on debounced profile change
     useEffect(() => {
-        if (!profile.id || profileLoading) return;
+        if (profileLoading) return;
+        // Require at least a name to auto-create a new business
+        if (!profile.id && (!profile.name || profile.name.trim() === '')) return;
 
         const currentStr = JSON.stringify(debouncedProfile);
         if (currentStr === lastSavedProfileStr.current) return;
@@ -320,17 +322,44 @@ function BusinessBuilderPageContent() {
             error('Debes iniciar sesión');
             return;
         }
-        if (!profile.id) {
-            error('Carga tu negocio primero (recarga la página)');
-            return;
-        }
+
         try {
             setSaving(true);
-            const newState = !profile.is_published;
-            const updated = await publishBusinessViaAPI(profile.id, newState);
+            let targetId = profile.id;
+            let currentIsPublished = profile.is_published;
+
+            // If it hasn't been saved yet, save it first
+            if (!targetId) {
+                if (!profile.name || profile.name.trim() === '') {
+                    error('Ponle un nombre a tu negocio primero');
+                    setSaving(false);
+                    return;
+                }
+                const newProfile = await createBusinessProfile({
+                    ...profile,
+                    user_id: user.id,
+                    created_by: user.id,
+                    slug: profile.slug || profile.name.toLowerCase().replace(/\s+/g, '-')
+                } as BusinessProfile);
+                if (newProfile) {
+                    targetId = newProfile.id;
+                    currentIsPublished = newProfile.is_published;
+                    setProfile(newProfile);
+                } else {
+                    throw new Error('No se pudo crear el negocio');
+                }
+            }
+
+            const newState = !currentIsPublished;
+            const updated = await publishBusinessViaAPI(targetId, newState);
             setProfile(updated);
             lastSavedProfileStr.current = JSON.stringify(updated);
             success(newState ? '¡Página publicada! 🎉' : 'Página despublicada');
+            
+            // If we just created it and published, redirect
+            if (!profile.id) {
+                router.replace(`${pathname}?business=${targetId}`);
+            }
         } catch (err: any) {
             console.error('Error en handlePublish:', err);
             error('Error al publicar: ' + (err?.message || JSON.stringify(err)));
