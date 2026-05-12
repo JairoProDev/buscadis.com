@@ -31,9 +31,38 @@ export async function POST(req: NextRequest) {
 
         // 2. Parse request body
         const body = await req.json();
-        const { businessId, is_published, updates } = body;
+        const { businessId, is_published, updates, action } = body;
+
+        // CREATE NEW BUSINESS (Bypass RLS)
+        if (action === 'create') {
+            if (!updates || !updates.name) {
+                return NextResponse.json({ error: 'Nombre de negocio requerido' }, { status: 400 });
+            }
+            const safePayload = sanitizeBusinessProfilePayload(updates);
+            // Force ownership to the authenticated user
+            safePayload.user_id = user.id;
+            safePayload.created_by = user.id;
+            // Generate slug if missing
+            if (!safePayload.slug) {
+                safePayload.slug = safePayload.name.toLowerCase().replace(/\s+/g, '-');
+            }
+
+            const { data: inserted, error: insertError } = await supabaseAdmin
+                .from('business_profiles')
+                .insert([safePayload])
+                .select()
+                .single();
+
+            if (insertError) {
+                console.error('Error creating business profile via admin API:', insertError);
+                return NextResponse.json({ error: insertError.message }, { status: 500 });
+            }
+
+            return NextResponse.json({ success: true, profile: inserted });
+        }
+
         if (!businessId) {
-            return NextResponse.json({ error: 'businessId requerido' }, { status: 400 });
+            return NextResponse.json({ error: 'businessId requerido para actualizar' }, { status: 400 });
         }
 
         // 3. Verify the user owns this business (by user_id OR business_members)

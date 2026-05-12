@@ -66,6 +66,32 @@ export async function saveBusinessViaAPI(
 }
 
 /**
+ * Create a new business profile via the server API.
+ * Bypasses Supabase RLS using the service role key.
+ */
+export async function createBusinessViaAPI(
+    profileData: Partial<BusinessProfile>
+): Promise<BusinessProfile> {
+    const token = await getAuthToken();
+    if (!token) throw new Error('Debes iniciar sesión');
+
+    const res = await fetch('/api/business/publish', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ action: 'create', updates: profileData }),
+    });
+
+    const json = await res.json();
+    if (!res.ok) {
+        throw new Error(json.error || `Error ${res.status}`);
+    }
+    return json.profile as BusinessProfile;
+}
+
+/**
  * Load the business profile for the current user via the server API.
  * Returns null if not found.
  */

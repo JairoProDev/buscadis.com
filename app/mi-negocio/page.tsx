@@ -11,10 +11,10 @@ import React, { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
-import { createBusinessProfile, getBusinessCatalog } from '@/lib/business';
+import { getBusinessCatalog } from '@/lib/business';
 import { type BusinessMemberRole, type BusinessWithRole } from '@/lib/business-access';
 
-import { publishBusinessViaAPI, saveBusinessViaAPI } from '@/lib/business-api';
+import { publishBusinessViaAPI, saveBusinessViaAPI, createBusinessViaAPI } from '@/lib/business-api';
 import { BusinessProfile } from '@/types/business';
 import { Adiso } from '@/types';
 import { IconEye, IconEdit, IconX, IconCheck } from '@/components/Icons';
@@ -231,10 +231,8 @@ function BusinessBuilderPageContent() {
                 // Use server API to bypass RLS
                 savedProfile = await saveBusinessViaAPI(profile.id, profile as BusinessProfile);
             } else {
-                savedProfile = await createBusinessProfile({
+                savedProfile = await createBusinessViaAPI({
                     ...profile,
-                    user_id: user.id,
-                    created_by: user.id,
                     slug: profile.slug || (profile.name || '').toLowerCase().replace(/\s+/g, '-')
                 } as BusinessProfile);
             }
@@ -335,10 +333,8 @@ function BusinessBuilderPageContent() {
                     setSaving(false);
                     return;
                 }
-                const newProfile = await createBusinessProfile({
+                const newProfile = await createBusinessViaAPI({
                     ...profile,
-                    user_id: user.id,
-                    created_by: user.id,
                     slug: profile.slug || profile.name.toLowerCase().replace(/\s+/g, '-')
                 } as BusinessProfile);
                 if (newProfile) {
