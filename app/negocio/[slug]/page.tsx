@@ -68,8 +68,32 @@ export default function PublicBusinessPage({
         updateBusiness,
     } = useBusinessData(slug, false);
 
-    // Derived owner check (necesita que el business ya esté cargado)
-    const isOwner = Boolean(user?.id && business?.user_id && user.id === business.user_id);
+    // Derived owner check — also works when user_id in business_profiles matches auth user
+    // OR when the user is in business_members with a role >= editor
+    const isOwner = Boolean(
+        user?.id &&
+        business &&
+        (business.user_id === user.id)
+    );
+
+    // Secondary check via membership (handles cases where user_id differs)
+    const [isMember, setIsMember] = React.useState(false);
+    useEffect(() => {
+        if (!user?.id || !business?.id || isOwner) return;
+        supabase!.from('business_members')
+            .select('role')
+            .eq('user_id', user.id)
+            .eq('business_profile_id', business.id)
+            .eq('status', 'active')
+            .single()
+            .then(({ data }) => {
+                if (data?.role && ['owner','admin','editor'].includes(data.role)) {
+                    setIsMember(true);
+                }
+            });
+    }, [user?.id, business?.id, isOwner]);
+
+    const canEdit = isOwner || isMember;
 
     // When business loads, initialize local editing profile
     useEffect(() => {
@@ -81,10 +105,10 @@ export default function PublicBusinessPage({
 
     // Reload catalog when ownership is confirmed to ensure drafts are visible
     useEffect(() => {
-        if (business?.id && isOwner && isOnline) {
+        if (business?.id && canEdit && isOnline) {
             reloadCatalog(business.id);
         }
-    }, [isOwner, business?.id, isOnline, reloadCatalog]);
+    }, [canEdit, business?.id, isOnline, reloadCatalog]);
 
     // ─── REAL SAVE TO SUPABASE ────────────────────────────────────────
     const handleSave = useCallback(async (profileToSave: Partial<BusinessProfile>, showNotification = false) => {
@@ -96,12 +120,12 @@ export default function PublicBusinessPage({
                 setLocalProfile(saved);
                 lastSavedStr.current = JSON.stringify(saved);
                 setLastSavedTime(new Date());
-                // Also update the cached view so preview reflects changes
                 updateBusiness(() => saved);
                 if (showNotification) success('¡Cambios guardados!');
             }
         } catch (err: any) {
-            showError('Error al guardar: ' + err.message);
+            console.error('handleSave error:', err);
+            showError('Error al guardar: ' + (err?.message || JSON.stringify(err)));
         } finally {
             setSaving(false);
         }
@@ -119,10 +143,11 @@ export default function PublicBusinessPage({
 
     // ─── PUBLISH TOGGLE ───────────────────────────────────────────────
     const handlePublish = useCallback(async () => {
-        if (!localProfile?.id || !isOwner) {
-            showError('No tienes permiso para publicar este negocio');
+        if (!localProfile?.id) {
+            showError('Carga tu negocio primero (recarga la página)');
             return;
         }
+        // Skip client-side permission check — let Supabase RLS be the authority
         try {
             setSaving(true);
             const newState = !localProfile.is_published;
@@ -135,13 +160,16 @@ export default function PublicBusinessPage({
                 lastSavedStr.current = JSON.stringify(saved);
                 updateBusiness(() => saved);
                 success(newState ? '¡Página publicada! 🎉' : 'Página despublicada');
+            } else {
+                showError('No se pudo publicar. Verifica permisos en Supabase.');
             }
         } catch (err: any) {
-            showError('Error al publicar: ' + err.message);
+            console.error('handlePublish error:', err);
+            showError('Error al publicar: ' + (err?.message || JSON.stringify(err)));
         } finally {
             setSaving(false);
         }
-    }, [localProfile, isOwner, updateBusiness, success, showError]);
+    }, [localProfile, updateBusiness, success, showError]);
 
     const trackEvent = useCallback(async (eventType: string, businessId: string, productId?: string) => {
         if (!isOnline) return;
@@ -234,7 +262,7 @@ export default function PublicBusinessPage({
         <div className="min-h-screen bg-slate-50 relative flex flex-col overflow-x-hidden">
 
             {/* ─── TOP BAR (only for owner in edit mode) ─────────────────────── */}
-            {isOwner && isEditing && (
+            {canEdit && isEditing && (
                 <div className="sticky top-0 z-[70] bg-white border-b border-slate-200 shadow-sm h-14 flex items-center px-4 gap-3">
                     {/* Left: close + title */}
                     <button
@@ -321,11 +349,11 @@ export default function PublicBusinessPage({
                 {/* EDITOR SIDEBAR */}
                 <div className={cn(
                     "fixed inset-y-0 left-0 z-[60] w-full md:w-[450px] bg-white shadow-2xl transform transition-transform duration-300 ease-in-out border-r border-slate-200",
-                    isOwner && isEditing ? "translate-x-0" : "-translate-x-full"
+                    canEdit && isEditing ? "translate-x-0" : "-translate-x-full"
                 )}
-                    style={{ top: isOwner && isEditing ? '3.5rem' : '0' }}
+                    style={{ top: canEdit && isEditing ? '3.5rem' : '0' }}
                 >
-                    {isEditing && isOwner && (
+                    {isEditing && canEdit && (
                         <EditorSteps
                             profile={editableProfile as any}
                             setProfile={(p: any) => {
@@ -356,12 +384,12 @@ export default function PublicBusinessPage({
                 {/* MAIN CONTENT */}
                 <div className={cn(
                     "flex-1 min-w-0 transition-all duration-300",
-                    isOwner && isEditing ? "md:ml-[450px]" : ""
+                    canEdit && isEditing ? "md:ml-[450px]" : ""
                 )}>
                     <BusinessPublicView
                         profile={editableProfile as any}
                         adisos={adisos}
-                        editMode={isOwner && isEditing}
+                        editMode={canEdit && isEditing}
                         onEditPart={(part) => {
                             setIsEditing(true);
                             if (part === 'logo' || part === 'visual') setActiveStep(1);
@@ -382,7 +410,7 @@ export default function PublicBusinessPage({
                     />
 
                     {/* "Editar página" floating button for owner (when not editing) */}
-                    {isOwner && !isEditing && (
+                    {canEdit && !isEditing && (
                         <button
                             onClick={() => setIsEditing(true)}
                             className="fixed bottom-6 right-6 z-50 flex items-center gap-2 px-4 py-2.5 bg-slate-800 text-white rounded-full shadow-xl font-bold text-sm hover:bg-slate-700 transition-all hover:scale-105 active:scale-95"
@@ -393,7 +421,7 @@ export default function PublicBusinessPage({
                     )}
 
                     {/* CHATBOT GUIDE */}
-                    {isOwner && (
+                    {canEdit && (
                         <>
                             <ChatbotGuide
                                 profile={editableProfile as any}

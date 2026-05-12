@@ -181,7 +181,6 @@ function BusinessBuilderPageContent() {
                     const products = await getBusinessCatalog(existingProfile.id);
                     setCatalogProducts(products);
 
-                    // Map to Adiso for View
                     const mappedAdisos: Adiso[] = products.map(p => ({
                         id: p.id,
                         titulo: p.title || '',
@@ -200,12 +199,55 @@ function BusinessBuilderPageContent() {
                     setAdisos(mappedAdisos);
                 }
             } else {
-                // Primera vez: mostrar chatbot
-                setMemberRole(null);
-                setIsFirstTime(true);
-                setChatbotMinimized(false);
-                setProfile((prev) => ({ ...prev, user_id: user.id }));
-                // Don't set lastSavedProfileStr here so it saves on first meaningful change or creation
+                // No membership records found — try direct lookup by user_id as fallback
+                // (covers cases where business_members was not populated)
+                const { data: directProfile } = await (await import('@/lib/supabase')).supabase!
+                    .from('business_profiles')
+                    .select('*')
+                    .eq('user_id', user.id)
+                    .order('created_at', { ascending: true })
+                    .limit(1)
+                    .single();
+
+                if (directProfile) {
+                    setMemberRole('owner');
+                    setProfile(directProfile);
+                    lastSavedProfileStr.current = JSON.stringify(directProfile);
+                    setIsFirstTime(false);
+                    setChatbotMinimized(true);
+
+                    if (directProfile.slug) {
+                        router.push(`/negocio/${directProfile.slug}?edit=true`);
+                        return;
+                    }
+
+                    if (directProfile.id) {
+                        const products = await getBusinessCatalog(directProfile.id);
+                        setCatalogProducts(products);
+                        const mappedAdisos: Adiso[] = products.map((p: any) => ({
+                            id: p.id,
+                            titulo: p.title || '',
+                            descripcion: p.description || '',
+                            precio: p.price,
+                            imagenesUrls: Array.isArray(p.images) ? p.images.map((img: any) => typeof img === 'string' ? img : img.url) : [],
+                            imagenUrl: Array.isArray(p.images) && p.images.length > 0 ? (typeof p.images[0] === 'string' ? p.images[0] : p.images[0].url) : '',
+                            slug: p.id,
+                            categoria: (p.category as any) || 'productos',
+                            user_id: user.id,
+                            contacto: directProfile.contact_phone || '',
+                            ubicacion: directProfile.contact_address || '',
+                            fechaPublicacion: p.created_at ? new Date(p.created_at).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+                            horaPublicacion: p.created_at ? new Date(p.created_at).toLocaleTimeString() : new Date().toLocaleTimeString()
+                        }));
+                        setAdisos(mappedAdisos);
+                    }
+                } else {
+                    // Truly first time
+                    setMemberRole(null);
+                    setIsFirstTime(true);
+                    setChatbotMinimized(false);
+                    setProfile((prev) => ({ ...prev, user_id: user.id }));
+                }
             }
         } catch (err) {
             console.error('Error loading profile:', err);
@@ -325,20 +367,17 @@ function BusinessBuilderPageContent() {
     };
 
     const handlePublish = async () => {
-        if (!user || !profile.id) {
-            error('Guarda los cambios primero');
+        if (!user) {
+            error('Debes iniciar sesión');
+            return;
+        }
+        if (!profile.id) {
+            error('Carga tu negocio primero (recarga la página)');
             return;
         }
 
-        // Allow if owner by user_id OR has publish permission via memberRole
-        const canPublish = profile.user_id === user.id || 
-            (memberRole && hasPermission(memberRole, 'business:publish'));
-
-        if (!canPublish) {
-            error('No tienes permiso para publicar este negocio');
-            return;
-        }
-
+        // Skip client-side permission check — let Supabase RLS be the authority.
+        // This handles cases where business_members table doesn't have a record.
         try {
             setSaving(true);
             const updated = await updateBusinessProfile(profile.id, {
@@ -350,9 +389,12 @@ function BusinessBuilderPageContent() {
                 setProfile(updated);
                 lastSavedProfileStr.current = JSON.stringify(updated);
                 success(updated.is_published ? '¡Página publicada! 🎉' : 'Página despublicada');
+            } else {
+                error('No se pudo publicar. Verifica tus permisos en Supabase.');
             }
         } catch (err: any) {
-            error('Error al publicar: ' + err.message);
+            console.error('Error en handlePublish:', err);
+            error('Error al publicar: ' + (err?.message || JSON.stringify(err)));
         } finally {
             setSaving(false);
         }
