@@ -26,7 +26,7 @@ export default function PublicBusinessPage({
     params: { slug: string };
     searchParams: { [key: string]: string | string[] | undefined };
 }) {
-    const slug = params.slug;
+    const slug = decodeURIComponent(params.slug);
     const { user } = useAuth();
     const { success, error: showError } = useToast();
     const { isOnline, justCameOnline } = useNetworkStatus();

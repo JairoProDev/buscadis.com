@@ -269,14 +269,14 @@ function BusinessBuilderPageContent() {
     // Auto-save on debounced profile change
     useEffect(() => {
         if (profileLoading) return;
-        // Require at least a name to auto-create a new business
-        if (!profile.id && (!profile.name || profile.name.trim() === '')) return;
+        // Require both name and slug to auto-create a new business during onboarding
+        if (!profile.id && (!profile.name || !profile.slug)) return;
 
         const currentStr = JSON.stringify(debouncedProfile);
         if (currentStr === lastSavedProfileStr.current) return;
 
         handleSave(false);
-    }, [debouncedProfile, profile.id, profileLoading, handleSave]);
+    }, [debouncedProfile, profile.id, profileLoading, handleSave, profile.name, profile.slug]);
 
     const handleChatbotUpdate = (field: keyof BusinessProfile, value: any) => {
         setProfile(prev => ({ ...prev, [field]: value }));
