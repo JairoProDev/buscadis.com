@@ -4,6 +4,25 @@ import type { BusinessMemberRole, BusinessWithRole } from './business-access';
 
 export const BUSINESS_TABLE = 'business_profiles';
 
+const VALID_BUSINESS_COLUMNS = [
+    'id', 'user_id', 'created_by', 'slug', 'name', 'description',
+    'logo_url', 'banner_url', 'tagline', 'theme_color', 'theme_mode',
+    'layout_style', 'contact_email', 'contact_phone', 'contact_whatsapp',
+    'contact_address', 'contact_maps_url', 'business_hours', 'social_links',
+    'custom_blocks', 'is_published', 'view_count', 'created_at', 'updated_at'
+];
+
+export function sanitizeBusinessProfilePayload(profile: any) {
+    const payload: any = {};
+    for (const key of Object.keys(profile)) {
+        if (VALID_BUSINESS_COLUMNS.includes(key) && profile[key] !== undefined) {
+            payload[key] = profile[key];
+        }
+    }
+    return payload;
+}
+
+
 /**
  * All businesses the user can access (membership / RBAC).
  * Ordered by business created_at ascending (stable default).
@@ -83,9 +102,10 @@ export async function getBusinessProfileBySlug(slug: string): Promise<BusinessPr
 export async function createBusinessProfile(profile: Partial<BusinessProfile>): Promise<BusinessProfile | null> {
     if (!supabase) return null;
 
+    const payload = sanitizeBusinessProfilePayload(profile);
     const { data, error } = await supabase
         .from(BUSINESS_TABLE)
-        .insert([profile])
+        .insert([payload])
         .select()
         .single();
 
@@ -104,7 +124,8 @@ export async function updateBusinessProfile(
     if (!supabase) return null;
 
     // Remove fields that shouldn't be updated directly or are read-only
-    const { id, created_at, updated_at, user_id, ...cleanUpdates } = updates as any;
+    const { id, created_at, updated_at, user_id, ...rawUpdates } = updates as any;
+    const cleanUpdates = sanitizeBusinessProfilePayload(rawUpdates);
 
     const { data, error } = await supabase
         .from(BUSINESS_TABLE)

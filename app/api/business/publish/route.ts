@@ -8,6 +8,7 @@
  */
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { sanitizeBusinessProfilePayload } from '@/lib/business';
 
 const supabaseAdmin = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -91,8 +92,9 @@ export async function POST(req: NextRequest) {
 
         // If updates object is provided (for save), merge it
         if (updates && typeof updates === 'object') {
-            // Exclude fields that shouldn't be updated
-            const { id, created_at, updated_at, ...safeUpdates } = updates;
+            // Exclude fields that shouldn't be updated, then sanitize
+            const { id, created_at, updated_at, ...rawUpdates } = updates;
+            const safeUpdates = sanitizeBusinessProfilePayload(rawUpdates);
             Object.assign(updatePayload, safeUpdates);
         }
 
