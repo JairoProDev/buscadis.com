@@ -57,89 +57,89 @@ const getCtaLink = (contacto: string, titulo: string) => {
     return null;
 };
 
-// --- THEME ENGINE ---
+// --- THEME ENGINE (tonos suaves, alineados al resto de Buscadis) ---
 const getCategoriaTheme = (categoria: Categoria) => {
     switch (categoria) {
         case 'empleos':
             return {
-                text: 'text-slate-800 dark:text-slate-200',
-                bg: 'bg-[#2c3e50]/5',
-                border: 'border-slate-200 dark:border-slate-800',
-                gradient: 'from-[#2c3e50] to-[#4b79a1]',
-                iconColor: 'text-white/90',
-                badgeBg: 'bg-[#2c3e50] text-white shadow-lg'
+                text: 'text-slate-700 dark:text-slate-300',
+                bg: 'bg-slate-50 dark:bg-slate-900/40',
+                border: 'border-slate-200 dark:border-slate-700',
+                gradient: 'from-slate-100 to-slate-300 dark:from-slate-800 dark:to-slate-600',
+                iconColor: 'text-slate-500 dark:text-slate-400',
+                badgeBg: 'bg-slate-600/85 text-white shadow-sm'
             };
         case 'inmuebles':
             return {
-                text: 'text-[#134E5E] dark:text-emerald-400',
-                bg: 'bg-[#134E5E]/5',
-                border: 'border-emerald-100 dark:border-emerald-900/30',
-                gradient: 'from-[#134E5E] to-[#71B280]',
-                iconColor: 'text-white/90',
-                badgeBg: 'bg-[#134E5E] text-white shadow-lg'
+                text: 'text-emerald-800 dark:text-emerald-300',
+                bg: 'bg-emerald-50/50 dark:bg-emerald-950/30',
+                border: 'border-emerald-100 dark:border-emerald-900/40',
+                gradient: 'from-emerald-50 to-emerald-200 dark:from-emerald-950 dark:to-emerald-800',
+                iconColor: 'text-emerald-600/80 dark:text-emerald-400/80',
+                badgeBg: 'bg-emerald-600/85 text-white shadow-sm'
             };
         case 'vehiculos':
             return {
-                text: 'text-[#1A2980] dark:text-indigo-400',
-                bg: 'bg-[#1A2980]/5',
-                border: 'border-indigo-100 dark:border-indigo-900/30',
-                gradient: 'from-[#1A2980] to-[#26D0CE]',
-                iconColor: 'text-white/90',
-                badgeBg: 'bg-[#1A2980] text-white shadow-lg'
+                text: 'text-sky-800 dark:text-sky-300',
+                bg: 'bg-sky-50/50 dark:bg-sky-950/30',
+                border: 'border-sky-100 dark:border-sky-900/40',
+                gradient: 'from-sky-50 to-sky-200 dark:from-sky-950 dark:to-sky-800',
+                iconColor: 'text-sky-600/80 dark:text-sky-400/80',
+                badgeBg: 'bg-sky-600/85 text-white shadow-sm'
             };
         case 'servicios':
             return {
-                text: 'text-[#f2994a] dark:text-amber-400',
-                bg: 'bg-[#f2994a]/5',
-                border: 'border-amber-100 dark:border-amber-900/30',
-                gradient: 'from-[#f2994a] to-[#f2c94c]',
-                iconColor: 'text-white/90',
-                badgeBg: 'bg-[#f2994a] text-white shadow-lg'
+                text: 'text-amber-800 dark:text-amber-300',
+                bg: 'bg-amber-50/50 dark:bg-amber-950/30',
+                border: 'border-amber-100 dark:border-amber-900/40',
+                gradient: 'from-amber-50 to-amber-200 dark:from-amber-950 dark:to-amber-800',
+                iconColor: 'text-amber-600/80 dark:text-amber-400/80',
+                badgeBg: 'bg-amber-600/85 text-white shadow-sm'
             };
         case 'productos':
             return {
-                text: 'text-[#b31217] dark:text-rose-400',
-                bg: 'bg-[#b31217]/5',
-                border: 'border-rose-100 dark:border-rose-900/30',
-                gradient: 'from-[#e52d27] to-[#b31217]',
-                iconColor: 'text-white/90',
-                badgeBg: 'bg-[#b31217] text-white shadow-lg'
+                text: 'text-rose-800 dark:text-rose-300',
+                bg: 'bg-rose-50/50 dark:bg-rose-950/30',
+                border: 'border-rose-100 dark:border-rose-900/40',
+                gradient: 'from-rose-50 to-rose-200 dark:from-rose-950 dark:to-rose-900',
+                iconColor: 'text-rose-500/80 dark:text-rose-400/80',
+                badgeBg: 'bg-rose-600/85 text-white shadow-sm'
             };
         case 'eventos':
             return {
-                text: 'text-[#4facfe] dark:text-sky-400',
-                bg: 'bg-[#4facfe]/5',
-                border: 'border-sky-100 dark:border-sky-900/30',
-                gradient: 'from-[#4facfe] to-[#00f2fe]',
-                iconColor: 'text-white/90',
-                badgeBg: 'bg-[#4facfe] text-white shadow-lg'
+                text: 'text-violet-800 dark:text-violet-300',
+                bg: 'bg-violet-50/50 dark:bg-violet-950/30',
+                border: 'border-violet-100 dark:border-violet-900/40',
+                gradient: 'from-violet-50 to-violet-200 dark:from-violet-950 dark:to-violet-800',
+                iconColor: 'text-violet-500/80 dark:text-violet-400/80',
+                badgeBg: 'bg-violet-600/85 text-white shadow-sm'
             };
         case 'negocios':
             return {
-                text: 'text-[#434343] dark:text-slate-400',
-                bg: 'bg-[#434343]/5',
-                border: 'border-slate-200 dark:border-slate-800',
-                gradient: 'from-[#434343] to-[#000000]',
-                iconColor: 'text-white/90',
-                badgeBg: 'bg-[#333333] text-white shadow-lg'
+                text: 'text-slate-700 dark:text-slate-300',
+                bg: 'bg-slate-50 dark:bg-slate-900/40',
+                border: 'border-slate-200 dark:border-slate-700',
+                gradient: 'from-slate-100 to-slate-300 dark:from-slate-800 dark:to-slate-700',
+                iconColor: 'text-slate-500 dark:text-slate-400',
+                badgeBg: 'bg-slate-600/85 text-white shadow-sm'
             };
         case 'comunidad':
             return {
-                text: 'text-[#0072ff] dark:text-blue-400',
-                bg: 'bg-[#0072ff]/5',
-                border: 'border-blue-100 dark:border-blue-900/30',
-                gradient: 'from-[#00c6ff] to-[#0072ff]',
-                iconColor: 'text-white/90',
-                badgeBg: 'bg-[#0072ff] text-white shadow-lg'
+                text: 'text-cyan-800 dark:text-cyan-300',
+                bg: 'bg-cyan-50/50 dark:bg-cyan-950/30',
+                border: 'border-cyan-100 dark:border-cyan-900/40',
+                gradient: 'from-cyan-50 to-cyan-200 dark:from-cyan-950 dark:to-cyan-800',
+                iconColor: 'text-cyan-600/80 dark:text-cyan-400/80',
+                badgeBg: 'bg-cyan-600/85 text-white shadow-sm'
             };
         default:
             return {
-                text: 'text-zinc-600 dark:text-zinc-400',
-                bg: 'bg-[#bdc3c7]/5',
-                border: 'border-zinc-200 dark:border-zinc-800',
-                gradient: 'from-[#bdc3c7] to-[#2c3e50]',
-                iconColor: 'text-white/90',
-                badgeBg: 'bg-[#666666] text-white shadow-lg'
+                text: 'text-slate-600 dark:text-slate-400',
+                bg: 'bg-slate-50 dark:bg-slate-900/40',
+                border: 'border-slate-200 dark:border-slate-700',
+                gradient: 'from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-700',
+                iconColor: 'text-slate-500 dark:text-slate-400',
+                badgeBg: 'bg-slate-500/85 text-white shadow-sm'
             };
     }
 };
@@ -364,14 +364,13 @@ const AdisoCard = forwardRef<HTMLDivElement, AdisoCardProps>(({ adiso, onClick, 
                                 className="object-cover transition-transform duration-700 group-hover:scale-105"
                                 loading="lazy"
                             />
-                            {/* Modern Gradient Overlay */}
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent opacity-80" />
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-60" />
                         </>
                     ) : (
                         <div className="flex flex-col items-center justify-center relative w-full h-full">
                             {/* Subtle Glassmorphism Overlay */}
                             <div className="absolute inset-0 opacity-20 bg-black/10" />
-                            <IconComponent size={64} color="white" className="drop-shadow-2xl relative z-10 opacity-90" />
+                            <IconComponent size={64} className={`drop-shadow-sm relative z-10 opacity-80 ${theme.iconColor}`} />
                         </div>
                     )}
 

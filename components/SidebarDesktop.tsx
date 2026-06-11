@@ -47,7 +47,7 @@ export default function SidebarDesktop({
   seccionActiva,
   onMinimizadoChange,
   todosLosAdisos = [],
-  minimizado = false
+  minimizado = true
 }: SidebarDesktopProps) {
   const isDesktop = useMediaQuery('(min-width: 768px)');
   const [internalMinimizado, setInternalMinimizado] = useState(minimizado);

@@ -141,7 +141,7 @@ function HomeContent() {
     }
   }, [seccionUrl, isDesktop]);
   const [vista, setVista] = useState<'grid' | 'list' | 'feed'>('grid');
-  const [isSidebarMinimizado, setIsSidebarMinimizado] = useState(false);
+  const [isSidebarMinimizado, setIsSidebarMinimizado] = useState(true);
   const { toasts, removeToast, success, error } = useToast();
   const marketplacePulse = getMarketplacePulse(adisosFiltrados);
   const [isOnlineState, setIsOnlineState] = useState(() => {
@@ -298,6 +298,9 @@ function HomeContent() {
 
     if (!adisoId) {
       setAdisoAbierto(null);
+      if (isDesktop) {
+        setIsSidebarMinimizado(true);
+      }
       return;
     }
 
@@ -305,12 +308,9 @@ function HomeContent() {
     const adisoLocal = adisos.find(a => a.id === adisoId);
     if (adisoLocal) {
       setAdisoAbierto(adisoLocal);
-      // En mobile, abrir sección de adiso
-      /*
-      if (!isDesktop) {
-        setSeccionMobileActiva('adiso');
+      if (isDesktop) {
+        setIsSidebarMinimizado(false);
       }
-      */
       return;
     }
 
@@ -318,19 +318,15 @@ function HomeContent() {
     getAdisoById(adisoId).then(adiso => {
       if (adiso) {
         setAdisoAbierto(adiso);
-        // Agregar a la lista si no existe - el useEffect de ordenamiento se encargará de adisosFiltrados
+        if (isDesktop) {
+          setIsSidebarMinimizado(false);
+        }
         setAdisos(prev => {
           if (!prev.find(a => a.id === adisoId)) {
             return [adiso, ...prev];
           }
           return prev;
         });
-        // En mobile, abrir sección de adiso si no es desktop
-        /*
-        if (!isDesktop) {
-          setSeccionMobileActiva('adiso');
-        }
-        */
       }
     }).catch(console.error);
   }, [adisoId, adisos, cargando, isDesktop]);
@@ -660,12 +656,9 @@ function HomeContent() {
 
   const handleCerrarAdiso = () => {
     setAdisoAbierto(null);
-    // En mobile, si estaba en sección de adiso, cerrarla también
-    /*
-    if (!isDesktop && seccionMobileActiva === 'adiso') {
-      setSeccionMobileActiva(null);
+    if (isDesktop) {
+      setIsSidebarMinimizado(true);
     }
-    */
     router.push('/', { scroll: false });
   };
 
@@ -872,7 +865,9 @@ function HomeContent() {
           seccionActiva={seccionDesktopActiva}
           onSeccionChange={(seccion) => {
             setSeccionDesktopActiva(seccion);
-            setIsSidebarMinimizado(false);
+            if (seccion !== 'adiso') {
+              setIsSidebarMinimizado(false);
+            }
           }}
         />
         {/* Category Bar - Horizontal Scroll */}
