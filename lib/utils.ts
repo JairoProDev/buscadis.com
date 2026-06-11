@@ -125,23 +125,7 @@ export const LIMITS = {
 // Generar ID único y amigable usando NanoID
 export const generarIdUnico = (): string => {
   // NanoID con 10 caracteres (64 caracteres posibles: A-Z, a-z, 0-9, _, -)
-  // Combinaciones posibles: 64^10 = 1,152,921,504,606,846,976 (más de 1 quintillón)
-  // 
-  // Probabilidad de colisión:
-  // - Con 1 millón de publicaciones/día: ~3,157,000 años para 1% de probabilidad
-  // - Con 10 millones/día: ~315,700 años para 1% de probabilidad
-  // - Con 100 millones/día: ~31,570 años para 1% de probabilidad
-  //
-  // Conclusión: Es prácticamente imposible que se acaben las combinaciones.
-  // Incluso con miles de millones de publicaciones, tomaría millones de años.
-  //
-  // URL-safe, más corto y legible que UUID o timestamp+random
-  // Ejemplo: "V1StGXR8_Z" (10 caracteres) vs "1764436785116-tjrfgcu9g" (25 caracteres)
-  // Use crypto.randomUUID if available (modern browsers/Node), otherwise fallback to nanoid
-  // This ensures compatibility if database uses UUID type
-  if (typeof crypto !== 'undefined' && crypto.randomUUID) {
-    return crypto.randomUUID();
-  }
+  // URL-safe y corto: "V1StGXR8_Z" vs UUID "d9e7063d-be4a-45d0-ab03-bde870306c8d"
   return nanoid(10);
 };
 
