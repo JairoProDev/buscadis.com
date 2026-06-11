@@ -76,30 +76,23 @@ export default function SidebarDesktop({
   };
 
   return (
-    <motion.div
+    <div
       style={{
         position: 'fixed',
-        top: '64px', // Below header height (approx)
+        top: '72px',
         right: 0,
-        bottom: 0,
-        zIndex: 900, // Below header z-index (1000)
+        height: 'calc(100vh - 72px)',
+        width: anchoSidebar,
+        zIndex: 900,
         display: 'flex',
         flexDirection: 'column',
-        backgroundColor: 'var(--bg-primary)', // Solid background
+        backgroundColor: 'var(--bg-primary)',
         borderLeft: 'none',
-        boxShadow: '-10px 0 30px rgba(0,0,0,0.03)',
+        boxShadow: internalMinimizado ? 'none' : '-10px 0 30px rgba(0,0,0,0.03)',
         borderTopLeftRadius: '24px',
         borderBottomLeftRadius: '24px',
-      }}
-      initial={{ x: anchoSidebar }}
-      animate={{
-        width: anchoSidebar,
-        x: 0
-      }}
-      transition={{
-        type: 'spring',
-        stiffness: 260,
-        damping: 20
+        overflow: internalMinimizado ? 'visible' : 'hidden',
+        transition: 'width 0.35s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.35s ease',
       }}
     >
       {/* Minimize/Expand Button */}
@@ -216,6 +209,6 @@ export default function SidebarDesktop({
           </motion.div>
         )}
       </AnimatePresence>
-    </motion.div>
+    </div>
   );
 }

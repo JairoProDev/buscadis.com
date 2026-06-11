@@ -112,7 +112,8 @@ export default function PullToRefresh({ onRefresh, children }: PullToRefreshProp
             </div>
             <div
                 style={{
-                    transform: `translateY(${pullDistance}px)`,
+                    // Avoid transform when idle — it breaks position:fixed descendants (sidebar, FAB, etc.)
+                    transform: pullDistance > 0 ? `translateY(${pullDistance}px)` : undefined,
                     transition: isPulling ? 'none' : 'transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
                 }}
             >

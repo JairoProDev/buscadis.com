@@ -1196,26 +1196,6 @@ function HomeContent() {
         </main>
         <FeedbackButton />
 
-        {/* Sidebar Desktop - siempre visible */}
-        {/* Sidebar Desktop - Controlled via Header */}
-        {isDesktop && (
-          <SidebarDesktop
-            adisoAbierto={adisoAbierto}
-            onCerrarAdiso={handleCerrarAdiso}
-            onAnterior={handleAnterior}
-            onSiguiente={handleSiguiente}
-            puedeAnterior={indiceAdisoActual > 0}
-            puedeSiguiente={indiceAdisoActual < adisosFiltrados.length - 1}
-            onPublicar={handlePublicar}
-            onError={(msg) => error(msg)}
-            onSuccess={(msg) => success(msg)}
-            seccionActiva={seccionDesktopActiva}
-            minimizado={isSidebarMinimizado}
-            onMinimizadoChange={setIsSidebarMinimizado}
-            todosLosAdisos={adisosFiltrados}
-          />
-        )}
-
         {/* Left Sidebar (Desktop/Mobile if requested) */}
         <LeftSidebar
           isOpen={isLeftSidebarOpen}
@@ -1260,6 +1240,23 @@ function HomeContent() {
         <ToastContainer toasts={toasts} removeToast={removeToast} />
       </div>
     </PullToRefresh>
+    {isDesktop && (
+      <SidebarDesktop
+        adisoAbierto={adisoAbierto}
+        onCerrarAdiso={handleCerrarAdiso}
+        onAnterior={handleAnterior}
+        onSiguiente={handleSiguiente}
+        puedeAnterior={indiceAdisoActual > 0}
+        puedeSiguiente={indiceAdisoActual < adisosFiltrados.length - 1}
+        onPublicar={handlePublicar}
+        onError={(msg) => error(msg)}
+        onSuccess={(msg) => success(msg)}
+        seccionActiva={seccionDesktopActiva}
+        minimizado={isSidebarMinimizado}
+        onMinimizadoChange={setIsSidebarMinimizado}
+        todosLosAdisos={adisosFiltrados}
+      />
+    )}
     {!isDesktop && (
       <NavbarMobile
         seccionActiva={seccionMobileActiva || (adisoAbierto ? 'adiso' : null)}
