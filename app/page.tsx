@@ -4,7 +4,7 @@
 export const dynamic = 'force-dynamic';
 export const fetchCache = 'force-no-store';
 
-import { Suspense, useState, useEffect, useRef, useCallback } from 'react';
+import { Suspense, useState, useEffect, useRef, useCallback, type CSSProperties } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Adiso, Categoria } from '@/types';
 import { getAdisos, getAdisoById, saveAdiso, getAdisosCache } from '@/lib/storage';
@@ -47,8 +47,11 @@ import {
   IconShare,
   IconGrid,
   IconFeed,
-  IconList
+  IconList,
+  IconEye,
+  IconClose,
 } from '@/components/Icons';
+import { getCategoriaLabel, adisoTieneImagen } from '@/lib/adiso-display';
 import Buscador from '@/components/Buscador';
 import Ordenamiento, { TipoOrdenamiento } from '@/components/Ordenamiento';
 import FiltroUbicacion from '@/components/FiltroUbicacion';
@@ -88,6 +91,34 @@ type SeccionMobile = 'adiso' | 'mapa' | 'publicar' | 'chatbot' | 'gratuitos';
 
 // Expresión regular profesional para limpiar datos de prueba residuales
 const TEST_REGEX = /toyota test|test adiso|test anuncio/i;
+
+const filterChipStyle: CSSProperties = {
+  display: 'inline-flex',
+  alignItems: 'center',
+  gap: '6px',
+  padding: '6px 12px',
+  borderRadius: '999px',
+  border: '1px solid var(--border-color)',
+  backgroundColor: 'var(--bg-primary)',
+  color: 'var(--text-primary)',
+  fontSize: '0.8rem',
+  fontWeight: 600,
+  cursor: 'pointer',
+  minHeight: '32px',
+};
+
+function getBrowseCountLabel(
+  count: number,
+  categoria: Categoria | 'todos',
+  filtro?: { distrito?: string; departamento?: string }
+): string {
+  const ubic = filtro?.distrito || filtro?.departamento || 'Cusco';
+  const noun = count === 1 ? 'anuncio' : 'anuncios';
+  if (categoria !== 'todos') {
+    return `${noun} · ${getCategoriaLabel(categoria)}`;
+  }
+  return `${noun} en ${ubic}`;
+}
 
 function HomeContent() {
   const router = useRouter();
@@ -141,6 +172,9 @@ function HomeContent() {
     }
   }, [seccionUrl, isDesktop]);
   const [vista, setVista] = useState<'grid' | 'list' | 'feed'>('grid');
+  const [ocultarHistoricos, setOcultarHistoricos] = useState(true);
+  const [soloConFotos, setSoloConFotos] = useState(false);
+  const [browseScrolled, setBrowseScrolled] = useState(false);
   const [isSidebarMinimizado, setIsSidebarMinimizado] = useState(true);
   const { toasts, removeToast, success, error } = useToast();
   const marketplacePulse = getMarketplacePulse(adisosFiltrados);
@@ -150,6 +184,13 @@ function HomeContent() {
     }
     return true;
   });
+
+  useEffect(() => {
+    const onScroll = () => setBrowseScrolled(window.scrollY > 80);
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
 
   // Detectar cambios en el estado de conexión
   useEffect(() => {
@@ -390,6 +431,14 @@ function HomeContent() {
       filtrados = filtrados.filter(a => a.categoria === categoriaFiltro);
     }
 
+    if (ocultarHistoricos) {
+      filtrados = filtrados.filter(a => !a.esHistorico);
+    }
+
+    if (soloConFotos) {
+      filtrados = filtrados.filter(adisoTieneImagen);
+    }
+
     // Filtrar por búsqueda
     if (busquedaDebounced.trim()) {
       const busquedaLower = busquedaDebounced.toLowerCase();
@@ -497,7 +546,7 @@ function HomeContent() {
 
 
     setAdisosFiltrados(filtradosOrdenados);
-  }, [busquedaDebounced, categoriaFiltro, ordenamiento, adisos, filtroUbicacion, profile, user?.id]);
+  }, [busquedaDebounced, categoriaFiltro, ordenamiento, adisos, filtroUbicacion, profile, user?.id, ocultarHistoricos, soloConFotos]);
 
   // Resetear visibilidad local y estado de paginación SOLO cuando cambian los filtros principales
   // (Esto evita resetear la página actual cuando se cargan más adisos en el mismo filtro)
@@ -880,16 +929,23 @@ function HomeContent() {
             }
           }}
         />
-        {/* Category Bar - Horizontal Scroll */}
+        {/* Category Bar - sticky, colapsa al scroll */}
         <div
           className="no-scrollbar"
           style={{
+            position: 'sticky',
+            top: '72px',
+            zIndex: 900,
             display: 'flex',
             justifyContent: isDesktop ? 'center' : 'flex-start',
             overflowX: 'auto',
-            gap: '1.5rem',
-            padding: '1.25rem 1rem',
-            backgroundColor: 'transparent',
+            gap: isDesktop ? '1.5rem' : '1rem',
+            padding: browseScrolled ? '0 1rem' : '1.25rem 1rem',
+            maxHeight: browseScrolled ? 0 : 120,
+            opacity: browseScrolled ? 0 : 1,
+            backgroundColor: browseScrolled ? 'transparent' : 'var(--glass-bg)',
+            backdropFilter: browseScrolled ? 'none' : 'blur(12px)',
+            WebkitBackdropFilter: browseScrolled ? 'none' : 'blur(12px)',
             scrollbarWidth: 'none',
             msOverflowStyle: 'none',
             WebkitOverflowScrolling: 'touch',
@@ -899,8 +955,9 @@ function HomeContent() {
               ? 'calc(100% - var(--sidebar-width, 0px))'
               : '100%',
             margin: '0 auto',
-            transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
-            ...(isDesktop && { marginRight: 'var(--sidebar-width, 0px)' })
+            transition: 'max-height 0.3s ease, opacity 0.3s ease, padding 0.3s ease',
+            pointerEvents: browseScrolled ? 'none' : 'auto',
+            ...(isDesktop && { marginRight: 'var(--sidebar-width, 0px)' }),
           }}
         >
           {[
@@ -996,14 +1053,18 @@ function HomeContent() {
           transition: 'max-width 0.3s ease, margin-right 0.3s ease, padding-bottom 0.3s ease',
           ...(isDesktop && { marginRight: 'var(--sidebar-width, 0px)' })
         }}>
-          <div style={{ marginBottom: '1.5rem' }}>
+          <div
+            style={{
+              marginBottom: browseScrolled ? '0.75rem' : '1.5rem',
+              position: browseScrolled ? 'sticky' : 'relative',
+              top: browseScrolled ? '72px' : undefined,
+              zIndex: browseScrolled ? 895 : undefined,
+            }}
+          >
             <Buscador
               value={busqueda}
-              onChange={(value) => {
-                setBusqueda(value);
-              }}
-              onAudioSearch={() => alert("Próximamente: Búsqueda por voz")}
-              onVisualSearch={() => alert("Próximamente: Búsqueda visual con cámara/fotos")}
+              onChange={setBusqueda}
+              compact={browseScrolled}
             />
           </div>
 
@@ -1060,20 +1121,16 @@ function HomeContent() {
                     {adisosFiltrados.length}
                   </div>
                   <span style={{
-                    fontSize: '0.85rem',
+                    fontSize: '0.875rem',
                     fontWeight: 600,
-                    color: 'var(--text-secondary)'
+                    color: 'var(--text-secondary)',
                   }}>
-                    <span className="hidden sm:inline">
-                      {adisosFiltrados.length === 1 ? 'adiso encontrado' : 'adisos encontrados'}
-                    </span>
-                    <span className="sm:hidden inline">
-                      adisos
-                    </span>
+                    {getBrowseCountLabel(adisosFiltrados.length, categoriaFiltro, filtroUbicacion)}
                   </span>
 
                   {!cargando && (
                     <button
+                      className="hidden md:flex hover:bg-sky-500 hover:text-white"
                       onClick={async () => {
                         const url = getBusquedaUrl(categoriaFiltro, busqueda);
                         try {
@@ -1097,7 +1154,6 @@ function HomeContent() {
                         justifyContent: 'center',
                         transition: 'all 0.2s'
                       }}
-                      className="hover:bg-sky-500 hover:text-white"
                       title="Compartir búsqueda"
                     >
                       <IconShare size={14} />
@@ -1116,10 +1172,12 @@ function HomeContent() {
                     padding: '6px 10px',
                     borderRadius: '999px',
                     fontSize: '0.75rem',
-                    fontWeight: 700
+                    fontWeight: 600,
+                    height: '32px',
                   }}
                 >
-                  🔵 {marketplacePulse}
+                  <IconEye size={14} aria-hidden="true" />
+                  <span>{marketplacePulse}</span>
                 </div>
               )}
             </div>
@@ -1175,6 +1233,100 @@ function HomeContent() {
               </div>
             </div>
           </div>
+
+          {(categoriaFiltro !== 'todos' || filtroUbicacion || busquedaDebounced.trim() || soloConFotos || !ocultarHistoricos) && (
+            <div
+              style={{
+                display: 'flex',
+                flexWrap: 'wrap',
+                gap: '8px',
+                marginBottom: '1rem',
+                alignItems: 'center',
+              }}
+            >
+              {categoriaFiltro !== 'todos' && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setCategoriaFiltro('todos');
+                    const params = new URLSearchParams(searchParams.toString());
+                    params.delete('categoria');
+                    router.push(params.toString() ? `/?${params.toString()}` : '/', { scroll: false });
+                  }}
+                  style={filterChipStyle}
+                >
+                  {getCategoriaLabel(categoriaFiltro)}
+                  <IconClose size={12} />
+                </button>
+              )}
+              {filtroUbicacion && (filtroUbicacion.distrito || filtroUbicacion.departamento) && (
+                <button
+                  type="button"
+                  onClick={() => setFiltroUbicacion(undefined)}
+                  style={filterChipStyle}
+                >
+                  {filtroUbicacion.distrito || filtroUbicacion.departamento}
+                  <IconClose size={12} />
+                </button>
+              )}
+              {busquedaDebounced.trim() && (
+                <button
+                  type="button"
+                  onClick={() => setBusqueda('')}
+                  style={filterChipStyle}
+                >
+                  &quot;{busquedaDebounced.trim()}&quot;
+                  <IconClose size={12} />
+                </button>
+              )}
+              {soloConFotos && (
+                <button type="button" onClick={() => setSoloConFotos(false)} style={filterChipStyle}>
+                  Solo con fotos
+                  <IconClose size={12} />
+                </button>
+              )}
+              {!ocultarHistoricos && (
+                <button type="button" onClick={() => setOcultarHistoricos(true)} style={filterChipStyle}>
+                  Incluye archivo
+                  <IconClose size={12} />
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={() => {
+                  setCategoriaFiltro('todos');
+                  setBusqueda('');
+                  setFiltroUbicacion(undefined);
+                  setSoloConFotos(false);
+                  setOcultarHistoricos(true);
+                  router.push('/', { scroll: false });
+                }}
+                style={{
+                  ...filterChipStyle,
+                  backgroundColor: 'transparent',
+                  border: '1px dashed var(--border-color)',
+                  color: 'var(--text-secondary)',
+                }}
+              >
+                Limpiar todo
+              </button>
+            </div>
+          )}
+
+          {!cargando && (
+            <div style={{ display: 'flex', gap: '8px', marginBottom: '1rem', flexWrap: 'wrap' }}>
+              {!soloConFotos && (
+                <button type="button" onClick={() => setSoloConFotos(true)} style={filterChipStyle}>
+                  Solo con fotos
+                </button>
+              )}
+              {ocultarHistoricos && (
+                <button type="button" onClick={() => setOcultarHistoricos(false)} style={filterChipStyle}>
+                  Ver archivo histórico
+                </button>
+              )}
+            </div>
+          )}
 
           {/* ── Cards: skeleton during first load, grid once ready ── */}
           {cargando ? (
