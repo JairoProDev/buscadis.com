@@ -139,15 +139,15 @@ export default function Buscador({
       <div className="relative group z-30">
         <div
           className={`
-            relative flex items-center bg-white dark:bg-slate-800/40 border border-sky-100 dark:border-sky-400/30 rounded-full
+            brand-search-shell relative flex items-center bg-white dark:bg-slate-800/40 border rounded-full
             ${compact ? 'px-4 py-2.5' : 'px-6 py-4 rounded-2xl'}
             shadow-[0_4px_20px_rgba(0,0,0,0.06)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.3)]
             backdrop-blur-md transition-all duration-300 motion-reduce:transition-none
-            hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)] dark:hover:border-sky-400/60 motion-reduce:hover:translate-y-0 hover:-translate-y-0.5
-            focus-within:shadow-[0_8px_24px_rgba(56,189,248,0.2)] focus-within:ring-2 focus-within:ring-sky-400/40 dark:focus-within:ring-sky-400/60
+            hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)] motion-reduce:hover:translate-y-0 hover:-translate-y-0.5
+            focus-within:shadow-[0_8px_24px_rgba(var(--brand-primary-rgb),0.2)] focus-within:ring-2 focus-within:ring-[var(--brand-blue)]/35 dark:focus-within:ring-[var(--brand-blue)]/55
           `}
         >
-          <FaSearch className="w-5 h-5 text-sky-500 dark:text-sky-400 mr-3 flex-shrink-0 transition-transform group-focus-within:scale-110" />
+          <FaSearch className="w-5 h-5 text-[var(--brand-blue)] mr-3 flex-shrink-0 transition-transform group-focus-within:scale-110" />
 
           <input
             type="search"
@@ -157,7 +157,7 @@ export default function Buscador({
             className="flex-1 min-w-0 border-none outline-none text-[16px] text-gray-700 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 bg-transparent truncate h-full py-1"
           />
 
-          <div className="flex items-center gap-1 ml-2 pl-2 border-l border-gray-100 dark:border-sky-400/20">
+          <div className="flex items-center gap-1 ml-2 pl-2 border-l border-gray-100 dark:border-white/10">
             <button
               type="button"
               onClick={handleVoiceSearch}
@@ -165,7 +165,7 @@ export default function Buscador({
               className={`${actionBtnClass} ${
                 isListening
                   ? 'text-red-500 bg-red-50 dark:bg-red-500/10 animate-pulse'
-                  : 'text-sky-600/80 dark:text-sky-400/80 hover:text-sky-500 hover:bg-sky-50 dark:hover:bg-sky-500/10'
+                  : 'text-[var(--brand-blue)]/80 hover:text-[var(--brand-blue)] hover:bg-[rgba(var(--brand-primary-rgb),0.08)] dark:hover:bg-[rgba(var(--brand-primary-rgb),0.15)]'
               }`}
               title={isListening ? 'Escuchando… (tocar para detener)' : 'Búsqueda por voz'}
               aria-label={isListening ? 'Detener búsqueda por voz' : 'Búsqueda por voz'}
@@ -185,8 +185,8 @@ export default function Buscador({
                 }
               }}
               disabled={isAnalyzingImage || isListening}
-              className={`${actionBtnClass} text-gray-500 dark:text-gray-400 hover:text-[var(--brand-blue)] hover:bg-blue-50 dark:hover:bg-sky-500/10 ${
-                isAnalyzingImage ? 'animate-pulse text-sky-500' : ''
+              className={`${actionBtnClass} text-gray-500 dark:text-gray-400 hover:text-[var(--brand-yellow)] hover:bg-[rgba(var(--brand-yellow-rgb),0.12)] dark:hover:bg-[rgba(var(--brand-yellow-rgb),0.15)] ${
+                isAnalyzingImage ? 'animate-pulse text-[var(--brand-yellow)]' : ''
               }`}
               title="Búsqueda visual (foto)"
               aria-label="Búsqueda visual con foto"

@@ -105,10 +105,10 @@ export function getPublisherAvatar(adiso: Adiso): PublisherAvatar {
   if (isPlatformPublished(adiso)) {
     return {
       kind: 'buscadis',
-      imageUrl: '/logo.svg',
+      imageUrl: '/logo.png',
       initials: 'B',
       backgroundColor: '#ffffff',
-      textColor: '#0ea5e9',
+      textColor: '#53acc5',
       label: 'Publicado por Buscadis',
       isCompany: true,
     };

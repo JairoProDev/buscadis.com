@@ -1,6 +1,6 @@
 'use client';
 
-import React, { forwardRef, useRef, useState } from 'react';
+import React, { forwardRef } from 'react';
 import Image from 'next/image';
 import { Adiso, Categoria, PAQUETES } from '@/types';
 import {
@@ -24,11 +24,9 @@ import { getCategoriaThemeTokens } from '@/lib/categoria-theme';
 import {
     formatPrecioDisplay,
     formatUbicacionCorta,
-    getCardCtaShortLabel,
     sanitizeAdisoDescripcion,
     toDisplayTitle,
 } from '@/lib/adiso-display';
-import { getWhatsAppUrl } from '@/lib/utils';
 import { pickCardSignal } from '@/lib/social-proof';
 import AdisoPublisherStrip from '@/components/AdisoPublisherStrip';
 
@@ -74,12 +72,8 @@ const AdisoCard = forwardRef<HTMLDivElement, AdisoCardProps>(
         const { isFavorite, isHidden, toggleFav, markNotInterested } = useAdInteraction(adiso.id);
         const isDark = useDarkMode();
         const IconComponent = getCategoriaIcon(adiso.categoria);
-        const [showDismiss, setShowDismiss] = useState(false);
-        const timerRef = useRef<NodeJS.Timeout | null>(null);
         const themeTokens = getCategoriaThemeTokens(adiso.categoria);
         const placeholderBg = isDark ? themeTokens.placeholderBgDark : themeTokens.placeholderBg;
-        const cardCtaLabel = getCardCtaShortLabel(adiso.categoria);
-        const canContact = Boolean(adiso.contacto?.trim());
 
         if (isHidden) return null;
 
@@ -96,36 +90,6 @@ const AdisoCard = forwardRef<HTMLDivElement, AdisoCardProps>(
 
         const gridColumnSpan = paquete.columnas;
         const gridRowSpan = paquete.filas;
-
-        const clearLongPress = () => {
-            if (timerRef.current) {
-                clearTimeout(timerRef.current);
-                timerRef.current = null;
-            }
-        };
-
-        const handleTouchStart = () => {
-            clearLongPress();
-            timerRef.current = setTimeout(() => {
-                setShowDismiss(true);
-                if (navigator.vibrate) navigator.vibrate(50);
-            }, 600);
-        };
-
-        const handleCardContact = (e: React.MouseEvent) => {
-            e.stopPropagation();
-            if (!canContact) {
-                onClick();
-                return;
-            }
-            const url = getWhatsAppUrl(
-                adiso.contacto!,
-                adiso.titulo,
-                adiso.categoria,
-                adiso.id,
-            );
-            window.open(url, '_blank', 'noopener,noreferrer');
-        };
 
         return (
             <div
@@ -146,9 +110,9 @@ const AdisoCard = forwardRef<HTMLDivElement, AdisoCardProps>(
                     bg-[var(--bg-primary)] rounded-[var(--card-radius)] border border-[var(--border-color)]
                     transition-shadow duration-300 overflow-hidden outline-none cursor-pointer font-sans
                     motion-reduce:transition-none motion-reduce:transform-none
-                    focus-visible:ring-2 focus-visible:ring-sky-400 focus-visible:ring-offset-2
+                    focus-visible:ring-2 focus-visible:ring-[var(--brand-blue)] focus-visible:ring-offset-2 dark:focus-visible:ring-offset-[var(--bg-primary)]
                     ${estaSeleccionado
-                        ? 'ring-2 ring-sky-400 shadow-[var(--card-shadow-hover)] z-10'
+                        ? 'ring-2 ring-[var(--brand-blue)] shadow-[var(--card-shadow-hover)] z-10'
                         : 'shadow-[var(--card-shadow)] hover:shadow-[var(--card-shadow-hover)] hover:-translate-y-0.5 motion-reduce:hover:translate-y-0'
                     }
                     ${vista === 'feed' ? 'w-full' : ''}
@@ -213,24 +177,19 @@ const AdisoCard = forwardRef<HTMLDivElement, AdisoCardProps>(
                         )}
                     </button>
 
-                    {(isDesktop || showDismiss) && (
-                        <button
-                            type="button"
-                            onClick={(e) => {
-                                markNotInterested(e);
-                                setShowDismiss(false);
-                            }}
-                            className={`min-w-[36px] min-h-[36px] flex items-center justify-center rounded-full bg-transparent border-0 transition-transform hover:scale-110 active:scale-95 ${
-                                imagenUrl
-                                    ? 'text-white drop-shadow-[0_1px_4px_rgba(0,0,0,0.85)]'
-                                    : 'text-[var(--text-tertiary)]'
-                            }`}
-                            title="No me interesa (Ocultar)"
-                            aria-label="No me interesa"
-                        >
-                            <IconDismiss size={18} />
-                        </button>
-                    )}
+                    <button
+                        type="button"
+                        onClick={(e) => markNotInterested(e)}
+                        className={`min-w-[36px] min-h-[36px] flex items-center justify-center rounded-full bg-transparent border-0 transition-transform hover:scale-110 active:scale-95 ${
+                            imagenUrl
+                                ? 'text-white drop-shadow-[0_1px_4px_rgba(0,0,0,0.85)]'
+                                : 'text-[var(--text-tertiary)]'
+                        }`}
+                        title="No me interesa (Ocultar)"
+                        aria-label="No me interesa"
+                    >
+                        <IconDismiss size={18} />
+                    </button>
                 </div>
 
                 <div
@@ -239,10 +198,6 @@ const AdisoCard = forwardRef<HTMLDivElement, AdisoCardProps>(
                         ${getMediaAspectClass(tamaño, vista)}
                     `}
                     style={{ backgroundColor: placeholderBg }}
-                    onTouchStart={handleTouchStart}
-                    onTouchEnd={clearLongPress}
-                    onTouchMove={clearLongPress}
-                    onTouchCancel={clearLongPress}
                 >
                     {imagenUrl ? (
                         <>
@@ -277,39 +232,27 @@ const AdisoCard = forwardRef<HTMLDivElement, AdisoCardProps>(
                         </span>
                     )}
 
-                    {vista !== 'feed' && (locationShort || priceLabel || (!priceLabel && canContact)) && (
-                        <div className="absolute bottom-2 left-2 right-2 flex justify-between items-end gap-2 z-10">
+                    {vista !== 'feed' && (locationShort || priceLabel) && (
+                        <div className="absolute bottom-2 left-2 right-2 flex justify-between items-end gap-2 z-10 pointer-events-none">
                             {locationShort ? (
-                                <span className="inline-flex items-center gap-1 max-w-[58%] px-2 py-0.5 rounded-full text-xs font-medium bg-black/55 text-white truncate pointer-events-none">
+                                <span className="inline-flex items-center gap-1 max-w-[70%] px-2 py-0.5 rounded-full text-xs font-medium bg-black/55 text-white truncate">
                                     <IconLocation size={10} className="flex-shrink-0" />
                                     <span className="truncate">{locationShort}</span>
                                 </span>
                             ) : (
                                 <span className="flex-1" />
                             )}
-                            <div className="flex-shrink-0 ml-auto">
-                                {priceLabel ? (
-                                    <span
-                                        className={`inline-flex px-2 py-0.5 rounded-full text-sm font-bold shadow-sm ${
-                                            imagenUrl
-                                                ? 'bg-white/95 text-[var(--brand-blue)]'
-                                                : 'bg-black/55 text-white'
-                                        }`}
-                                    >
-                                        {priceLabel}
-                                    </span>
-                                ) : canContact ? (
-                                    <button
-                                        type="button"
-                                        onClick={handleCardContact}
-                                        className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold text-white shadow-sm transition-transform hover:scale-105 active:scale-95"
-                                        style={{ backgroundColor: themeTokens.accent }}
-                                        title={cardCtaLabel}
-                                    >
-                                        {cardCtaLabel}
-                                    </button>
-                                ) : null}
-                            </div>
+                            {priceLabel && (
+                                <span
+                                    className={`flex-shrink-0 ml-auto inline-flex px-2 py-0.5 rounded-full text-sm font-bold shadow-sm ${
+                                        imagenUrl
+                                            ? 'bg-white/95 text-[var(--brand-blue)]'
+                                            : 'bg-black/55 text-white'
+                                    }`}
+                                >
+                                    {priceLabel}
+                                </span>
+                            )}
                         </div>
                     )}
 

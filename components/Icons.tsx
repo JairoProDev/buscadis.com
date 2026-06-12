@@ -13,7 +13,6 @@ import {
 } from 'react-icons/fa';
 import { FcGoogle } from 'react-icons/fc';
 import { MdCenterFocusWeak } from 'react-icons/md';
-import { IoCloseOutline } from 'react-icons/io5';
 
 /**
  * Icons Registry
@@ -58,8 +57,26 @@ export const IconTrash = (p: IconProps) => <FaTrash size={getSize(p)} color={p.c
 export const IconExternalLink = (p: IconProps) => <FaExternalLinkAlt size={getSize(p)} color={p.color || 'currentColor'} className={p.className} onClick={p.onClick} />;
 export const IconHeart = (p: IconProps) => <FaHeart size={getSize(p)} color={p.color || 'currentColor'} className={p.className} onClick={p.onClick} />;
 export const IconHeartOutline = (p: IconProps) => <FaRegHeart size={getSize(p)} color={p.color || 'currentColor'} className={p.className} onClick={p.onClick} />;
-/** Contorno fino, mismo peso visual que IconHeartOutline en cards. */
-export const IconDismiss = (p: IconProps) => <IoCloseOutline size={getSize(p)} color={p.color || 'currentColor'} className={p.className} onClick={p.onClick} />;
+/** X en contorno — stroke calibrado para emparejar FaRegHeart en cards. */
+export const IconDismiss = (p: IconProps) => {
+  const size = getSize(p);
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke={p.color || 'currentColor'}
+      strokeWidth="2.25"
+      strokeLinecap="round"
+      className={p.className}
+      onClick={p.onClick}
+      aria-hidden
+    >
+      <path d="M18 6L6 18M6 6l12 12" />
+    </svg>
+  );
+};
 export const IconStar = (p: IconProps) => <FaStar size={getSize(p)} color={p.color || 'currentColor'} className={p.className} onClick={p.onClick} />;
 export const IconFileAlt = (p: IconProps) => <FaFileAlt size={getSize(p)} color={p.color || 'currentColor'} className={p.className} onClick={p.onClick} />;
 export const IconAdiso = (p: IconProps) => <FaFileAlt size={getSize(p)} color={p.color || 'currentColor'} className={p.className} onClick={p.onClick} />;

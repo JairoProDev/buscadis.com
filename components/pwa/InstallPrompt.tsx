@@ -95,7 +95,7 @@ export default function InstallPrompt() {
                     }}
                 >
                     <div style={{ flexShrink: 0, width: '48px', height: '48px', backgroundColor: 'var(--brand-blue)', borderRadius: '14px', display: 'flex', justifyContent: 'center', alignItems: 'center', color: 'white' }}>
-                        <img src="/logo.svg" alt="Buscadis" style={{ width: '30px', height: '30px', objectFit: 'contain' }} />
+                        <img src="/logo.png" alt="Buscadis" style={{ width: '30px', height: '30px', objectFit: 'contain' }} />
                     </div>
                     <div style={{ flex: 1 }}>
                         <h4 style={{ margin: 0, fontSize: '15px', fontWeight: 800, color: 'var(--text-primary)' }}>Instalar App</h4>

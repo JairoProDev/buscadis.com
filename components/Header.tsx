@@ -183,7 +183,7 @@ export default function Header({
               flexShrink: 0,
             }}>
               <img
-                src="/logo.svg"
+                src="/logo.png"
                 alt="Buscadis"
                 style={{
                   height: '100%',
@@ -304,6 +304,13 @@ export default function Header({
               ));
 
               const isHovered = hoveredItem === item.id;
+              const isPublishCta = item.id === 'publicar';
+              const accentColor = isPublishCta ? 'var(--brand-yellow)' : 'var(--brand-blue)';
+              const navColor = isActive || isHovered
+                ? accentColor
+                : isPublishCta
+                  ? 'var(--text-secondary)'
+                  : 'var(--text-secondary)';
 
               return (
                 <Link
@@ -322,7 +329,7 @@ export default function Header({
                     flexDirection: 'column',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    color: isActive ? 'var(--brand-blue)' : (isHovered ? 'var(--brand-blue)' : 'var(--text-secondary)'),
+                    color: navColor,
                     transition: 'all 0.2s ease',
                     textDecoration: 'none'
                   }}
@@ -338,12 +345,13 @@ export default function Header({
                     transition: 'transform 0.2s',
                     transform: isHovered ? 'scale(1.1)' : 'scale(1)'
                   }}>
-                    <Icon size={24} color={isActive || isHovered ? 'var(--brand-blue)' : undefined} />
+                    <Icon size={24} color={isActive || isHovered ? accentColor : isPublishCta ? 'var(--brand-yellow)' : undefined} />
                   </span>
                   <span style={{
                     fontSize: '11px',
                     fontWeight: isActive ? 600 : 500,
-                    opacity: isActive || isHovered ? 1 : 0.8
+                    opacity: isActive || isHovered ? 1 : 0.8,
+                    color: isPublishCta && !isActive && !isHovered ? 'var(--brand-yellow)' : undefined,
                   }}>
                     {item.label}
                   </span>
@@ -355,7 +363,7 @@ export default function Header({
                     left: 0,
                     right: 0,
                     height: '3px',
-                    backgroundColor: 'var(--brand-blue)',
+                    backgroundColor: accentColor,
                     opacity: isActive ? 1 : 0,
                     transition: 'opacity 0.2s',
                     borderTopLeftRadius: '3px',

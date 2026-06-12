@@ -19,13 +19,13 @@
 
 :root {
   /* ========================================
-     PALETA DE MARCA - MÁS VIBRANTE
+     PALETA DE MARCA (logo oficial)
+     Celeste #53acc5 + amarillo #ffc24a
      ======================================== */
-  --brand-blue: #38bdf8;
-  /* Sky blue más brillante */
-  --brand-yellow: #fbbf24;
-  /* Amber más vivo */
-  --brand-primary-rgb: 56, 189, 248;
+  --brand-blue: #53acc5;
+  --brand-yellow: #ffc24a;
+  --brand-primary-rgb: 83, 172, 197;
+  --brand-yellow-rgb: 255, 194, 74;
 
   /* ========================================
      COLORES DE TEXTO
@@ -47,11 +47,12 @@
   --border-color: rgba(0, 0, 0, 0.04);
   /* Casi invisible */
   --border-subtle: rgba(0, 0, 0, 0.02);
-  --hover-bg: rgba(56, 189, 248, 0.05);
+  --hover-bg: rgba(var(--brand-primary-rgb), 0.08);
+  --hover-bg-yellow: rgba(var(--brand-yellow-rgb), 0.12);
 
-  /* Legacy - Mantener compatibilidad */
-  --color-secondary: #ffc24a;
-  --accent-color: #53acc5;
+  /* Alias legacy */
+  --color-secondary: var(--brand-yellow);
+  --accent-color: var(--brand-blue);
 
   /* Glassmorphism Refined */
   --glass-bg: rgba(255, 255, 255, 0.7);
@@ -60,8 +61,8 @@
   /* Shadows - More depth, less "dirty" gray */
   --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.02);
   --shadow-md: 0 10px 25px -5px rgba(0, 0, 0, 0.03), 0 8px 10px -6px rgba(0, 0, 0, 0.03);
-  --shadow-lg: 0 20px 25px -5px rgba(56, 189, 248, 0.05), 0 10px 10px -5px rgba(56, 189, 248, 0.02);
-  --shadow-hover: 0 20px 50px -12px rgba(56, 189, 248, 0.2);
+  --shadow-lg: 0 20px 25px -5px rgba(var(--brand-primary-rgb), 0.06), 0 10px 10px -5px rgba(var(--brand-primary-rgb), 0.03);
+  --shadow-hover: 0 20px 50px -12px rgba(var(--brand-primary-rgb), 0.18);
 
   /* Category accent (spec §2.2) — borde 3px, no fondo completo */
   --cat-empleos: #64748b;
@@ -99,8 +100,6 @@
     --text-primary: #f8fafc;
     --text-secondary: #94a3b8;
     --text-tertiary: #64748b;
-    --color-secondary: #ffc24a;
-    --accent-color: #53acc5;
     --border-color: rgba(255, 255, 255, 0.05);
     --border-subtle: rgba(255, 255, 255, 0.03);
     --hover-bg: #333333;
@@ -121,8 +120,6 @@
   --text-primary: #050505;
   --text-secondary: #65676b;
   --text-tertiary: #b0b3b8;
-  --color-secondary: #ffc24a;
-  --accent-color: #53acc5;
   --border-color: #ced0d4;
   --border-subtle: rgba(0, 0, 0, 0.1);
   --hover-bg: #f2f2f2;
@@ -141,11 +138,9 @@
   --text-primary: #e4e6eb;
   --text-secondary: #b0b3b8;
   --text-tertiary: #e4e6eb;
-  --color-secondary: #ffc24a;
-  --accent-color: #53acc5;
   --border-color: #3e4042;
   --border-subtle: rgba(255, 255, 255, 0.1);
-  --hover-bg: #333333;
+  --hover-bg: rgba(var(--brand-primary-rgb), 0.12);
   --glass-bg: rgba(26, 26, 26, 0.85);
   --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
   --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -1px rgba(0, 0, 0, 0.3);
@@ -161,10 +156,10 @@ body {
   -moz-osx-font-smoothing: grayscale;
   background-color: var(--bg-secondary);
   background-image:
-    radial-gradient(at 0% 0%, rgba(56, 189, 248, 0.05) 0px, transparent 50%),
-    radial-gradient(at 100% 0%, rgba(251, 191, 36, 0.05) 0px, transparent 50%),
-    radial-gradient(at 100% 100%, rgba(56, 189, 248, 0.03) 0px, transparent 50%),
-    radial-gradient(at 0% 100%, rgba(251, 191, 36, 0.03) 0px, transparent 50%);
+    radial-gradient(at 0% 0%, rgba(var(--brand-primary-rgb), 0.07) 0px, transparent 50%),
+    radial-gradient(at 100% 0%, rgba(var(--brand-yellow-rgb), 0.08) 0px, transparent 50%),
+    radial-gradient(at 100% 100%, rgba(var(--brand-primary-rgb), 0.04) 0px, transparent 50%),
+    radial-gradient(at 0% 100%, rgba(var(--brand-yellow-rgb), 0.05) 0px, transparent 50%);
   background-attachment: fixed;
   color: var(--text-primary);
   line-height: 1.6;
@@ -268,6 +263,34 @@ a {
 
 .border-border-subtle {
   border-color: var(--border-subtle);
+}
+
+/* Superficies y bordes con marca — light + dark */
+.brand-tint-surface {
+  background-color: rgba(var(--brand-primary-rgb), 0.1);
+}
+
+.brand-yellow-tint-surface {
+  background-color: rgba(var(--brand-yellow-rgb), 0.14);
+}
+
+.brand-search-shell {
+  border-color: rgba(var(--brand-primary-rgb), 0.22);
+}
+
+.dark-mode .brand-search-shell,
+html.dark .brand-search-shell {
+  border-color: rgba(var(--brand-primary-rgb), 0.38);
+  background-color: rgba(15, 23, 42, 0.45);
+}
+
+.dark-mode body,
+html.dark body {
+  background-image:
+    radial-gradient(at 0% 0%, rgba(var(--brand-primary-rgb), 0.1) 0px, transparent 55%),
+    radial-gradient(at 100% 0%, rgba(var(--brand-yellow-rgb), 0.07) 0px, transparent 50%),
+    radial-gradient(at 100% 100%, rgba(var(--brand-primary-rgb), 0.06) 0px, transparent 50%),
+    radial-gradient(at 0% 100%, rgba(var(--brand-yellow-rgb), 0.05) 0px, transparent 45%);
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -206,7 +206,7 @@ export function getMarketplacePulse(adisos: Adiso[]): string | null {
 export function cardSignalClassName(tone: CardSignal['tone']): string {
   switch (tone) {
     case 'highlight':
-      return 'bg-amber-400/95 text-amber-950 border-amber-300/50';
+      return 'bg-[var(--brand-yellow)] text-slate-900 border-[var(--brand-yellow)]/70';
     case 'positive':
       return 'bg-emerald-500/90 text-white border-emerald-400/40';
     case 'warm':

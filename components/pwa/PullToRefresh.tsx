@@ -100,7 +100,7 @@ export default function PullToRefresh({ onRefresh, children }: PullToRefreshProp
                         <div style={{
                             width: '24px',
                             height: '24px',
-                            border: '3px solid rgba(56, 189, 248, 0.3)',
+                            border: '3px solid rgba(var(--brand-primary-rgb), 0.35)',
                             borderTopColor: 'var(--brand-blue)',
                             borderRadius: '50%',
                             animation: 'spin 0.8s linear infinite'

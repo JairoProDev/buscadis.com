@@ -1047,7 +1047,7 @@ function HomeContent() {
                 backgroundColor: categoriaFiltro === id ? 'var(--brand-blue)' : 'var(--bg-primary)',
                 color: categoriaFiltro === id ? 'white' : 'var(--text-secondary)',
                 boxShadow: categoriaFiltro === id
-                  ? '0 10px 20px -5px rgba(56, 189, 248, 0.4)'
+                  ? '0 10px 20px -5px rgba(var(--brand-primary-rgb), 0.35)'
                   : '0 4px 6px -1px rgba(0, 0, 0, 0.05)',
                 transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                 position: 'relative',
@@ -1155,7 +1155,8 @@ function HomeContent() {
                     alignItems: 'center',
                     justifyContent: 'center',
                     fontSize: '0.85rem',
-                    fontWeight: 800
+                    fontWeight: 800,
+                    boxShadow: '0 0 0 2px var(--brand-yellow)',
                   }}>
                     {adisosFiltrados.length}
                   </div>
@@ -1169,7 +1170,7 @@ function HomeContent() {
 
                   {!cargando && (
                     <button
-                      className="hidden md:flex hover:bg-sky-500 hover:text-white"
+                      className="hidden md:flex hover:opacity-90"
                       onClick={async () => {
                         const url = getBusquedaUrl(categoriaFiltro, busqueda);
                         try {
@@ -1185,7 +1186,7 @@ function HomeContent() {
                         height: '26px',
                         borderRadius: '50%',
                         border: 'none',
-                        backgroundColor: 'rgba(56, 189, 248, 0.1)',
+                        backgroundColor: 'rgba(var(--brand-primary-rgb), 0.12)',
                         color: 'var(--brand-blue)',
                         cursor: 'pointer',
                         display: 'flex',
@@ -1206,8 +1207,9 @@ function HomeContent() {
                     display: 'flex',
                     alignItems: 'center',
                     gap: '6px',
-                    backgroundColor: 'rgba(56, 189, 248, 0.08)',
-                    color: 'var(--brand-blue)',
+                    backgroundColor: 'rgba(var(--brand-yellow-rgb), 0.14)',
+                    color: 'var(--text-secondary)',
+                    border: '1px solid rgba(var(--brand-yellow-rgb), 0.28)',
                     padding: '6px 10px',
                     borderRadius: '999px',
                     fontSize: '0.75rem',
@@ -1215,7 +1217,7 @@ function HomeContent() {
                     height: '32px',
                   }}
                 >
-                  <IconEye size={14} aria-hidden="true" />
+                  <IconEye size={14} aria-hidden="true" color="var(--brand-yellow)" />
                   <span>{marketplacePulse}</span>
                 </div>
               )}

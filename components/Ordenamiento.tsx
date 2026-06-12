@@ -76,7 +76,7 @@ export default function Ordenamiento({ valor, onChange }: OrdenamientoProps) {
           textAlign: 'left',
           border: 'none',
           borderRadius: '12px',
-          backgroundColor: isSelected ? 'rgba(56, 189, 248, 0.1)' : 'transparent',
+          backgroundColor: isSelected ? 'rgba(var(--brand-primary-rgb), 0.12)' : 'transparent',
           color: isSelected ? 'var(--brand-blue)' : 'var(--text-primary)',
           cursor: 'pointer',
           display: 'flex',
@@ -119,7 +119,7 @@ export default function Ordenamiento({ valor, onChange }: OrdenamientoProps) {
         }}
         className="hover:shadow-md motion-reduce:hover:translate-y-0 hover:-translate-y-0.5"
       >
-        <CurrentIcon size={16} aria-hidden="true" className="text-sky-500" />
+        <CurrentIcon size={16} aria-hidden="true" className="text-[var(--brand-blue)]" />
         <span className="hidden sm:inline">{t(opcionActual.labelKey)}</span>
         <span className="sm:hidden">Ordenar</span>
         <span style={{ fontSize: '10px', color: 'var(--text-tertiary)', marginLeft: '4px', opacity: 0.5 }}>▼</span>

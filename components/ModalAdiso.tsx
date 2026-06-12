@@ -456,7 +456,7 @@ Ref: ${adiso.edicionNumero || adiso.id}`;
       justifyContent: 'center',
       gap: '0.75rem',
       transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-      boxShadow: '0 10px 25px -5px rgba(56, 189, 248, 0.4)',
+      boxShadow: '0 10px 25px -5px rgba(var(--brand-primary-rgb), 0.35)',
       textTransform: 'none'
     };
 
@@ -693,7 +693,7 @@ Ref: ${adiso.edicionNumero || adiso.id}`;
                     color: 'var(--brand-blue)',
                     textTransform: 'uppercase',
                     letterSpacing: '0.05em',
-                    backgroundColor: 'rgba(56, 189, 248, 0.1)',
+                    backgroundColor: 'rgba(var(--brand-primary-rgb), 0.12)',
                     padding: '4px 12px',
                     borderRadius: '20px'
                   }}>
