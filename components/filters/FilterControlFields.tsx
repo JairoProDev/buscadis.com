@@ -79,9 +79,13 @@ export default function FilterControlFields({
           <div className={compact ? 'space-y-3' : 'space-y-4'}>
             {groupDefs.map((def) => {
               if (def.type === 'price-range') {
+                const hasMin = filters.precioMin != null && filters.precioMin > 0;
+                const hasMax = filters.precioMax != null && filters.precioMax > 0;
                 return (
                   <div key={def.id}>
-                    <label className={labelClass}>{def.label}</label>
+                    <label className={`${labelClass} ${hasMin || hasMax ? 'text-[var(--brand-blue)] font-bold' : ''}`}>
+                      {def.label}
+                    </label>
                     <div className="flex items-center gap-2">
                       <input
                         type="number"
@@ -92,7 +96,11 @@ export default function FilterControlFields({
                           const v = e.target.value ? Number(e.target.value) : undefined;
                           onChange({ ...filters, precioMin: v && v > 0 ? v : undefined });
                         }}
-                        className="flex-1 min-w-0 px-3 py-2 rounded-xl border border-[var(--border-color)] bg-[var(--bg-primary)] text-[var(--text-primary)] text-sm"
+                        className={`flex-1 min-w-0 px-3 py-2 rounded-xl border text-[var(--text-primary)] text-sm transition-all ${
+                          hasMin
+                            ? 'border-[var(--brand-blue)] bg-blue-50/10 dark:bg-blue-950/10 shadow-sm'
+                            : 'border-[var(--border-color)] bg-[var(--bg-primary)]'
+                        }`}
                       />
                       <span className="text-[var(--text-tertiary)]">—</span>
                       <input
@@ -104,7 +112,11 @@ export default function FilterControlFields({
                           const v = e.target.value ? Number(e.target.value) : undefined;
                           onChange({ ...filters, precioMax: v && v > 0 ? v : undefined });
                         }}
-                        className="flex-1 min-w-0 px-3 py-2 rounded-xl border border-[var(--border-color)] bg-[var(--bg-primary)] text-[var(--text-primary)] text-sm"
+                        className={`flex-1 min-w-0 px-3 py-2 rounded-xl border text-[var(--text-primary)] text-sm transition-all ${
+                          hasMax
+                            ? 'border-[var(--brand-blue)] bg-blue-50/10 dark:bg-blue-950/10 shadow-sm'
+                            : 'border-[var(--border-color)] bg-[var(--bg-primary)]'
+                        }`}
                       />
                     </div>
                   </div>
@@ -123,7 +135,7 @@ export default function FilterControlFields({
                     key={def.id}
                     className="flex items-center justify-between gap-3 py-1 cursor-pointer min-h-[44px]"
                   >
-                    <span className="text-sm text-[var(--text-primary)]">{def.label}</span>
+                    <span className={`text-sm transition-colors ${checked ? 'text-[var(--brand-blue)] font-semibold' : 'text-[var(--text-primary)]'}`}>{def.label}</span>
                     <button
                       type="button"
                       role="switch"
@@ -151,16 +163,21 @@ export default function FilterControlFields({
               }
 
               if (def.type === 'select' && def.options) {
+                const hasSelect = Boolean(filters.publicadoEn);
                 return (
                   <div key={def.id}>
-                    <label className={labelClass}>{def.label}</label>
+                    <label className={`${labelClass} ${hasSelect ? 'text-[var(--brand-blue)] font-bold' : ''}`}>{def.label}</label>
                     <select
                       value={(filters.publicadoEn as string) ?? ''}
                       onChange={(e) => {
                         const v = e.target.value as BrowseFilterState['publicadoEn'];
                         onChange({ ...filters, publicadoEn: v || undefined });
                       }}
-                      className="w-full px-3 py-2.5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-primary)] text-[var(--text-primary)] text-sm"
+                      className={`w-full px-3 py-2.5 rounded-xl border text-sm transition-all ${
+                        hasSelect
+                          ? 'border-[var(--brand-blue)] bg-blue-50/10 dark:bg-blue-950/10 text-[var(--brand-blue)] font-semibold shadow-sm'
+                          : 'border-[var(--border-color)] bg-[var(--bg-primary)] text-[var(--text-primary)]'
+                      }`}
                     >
                       <option value="">Cualquier fecha</option>
                       {def.options.map((o) => (
@@ -173,14 +190,19 @@ export default function FilterControlFields({
 
               if (def.type === 'ubicacion') {
                 const u = filters.ubicacion;
+                const hasUbi = Boolean(u?.distrito || u?.provincia || u?.departamento);
                 const label = u?.distrito || u?.provincia || u?.departamento || 'Elegir ubicación';
                 return (
                   <div key={def.id}>
-                    <label className={labelClass}>{def.label}</label>
+                    <label className={`${labelClass} ${hasUbi ? 'text-[var(--brand-blue)] font-bold' : ''}`}>{def.label}</label>
                     <button
                       type="button"
                       onClick={onOpenUbicacion}
-                      className="w-full px-3 py-2.5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-primary)] text-left text-sm text-[var(--text-primary)] hover:border-[var(--brand-blue)] transition-colors"
+                      className={`w-full px-3 py-2.5 rounded-xl border text-left text-sm transition-all ${
+                        hasUbi
+                          ? 'border-[var(--brand-blue)] bg-blue-50/10 dark:bg-blue-950/10 text-[var(--brand-blue)] font-semibold shadow-sm'
+                          : 'border-[var(--border-color)] bg-[var(--bg-primary)] text-[var(--text-primary)] hover:border-[var(--brand-blue)]/50'
+                      }`}
                     >
                       {label}
                     </button>

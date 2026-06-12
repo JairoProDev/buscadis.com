@@ -152,3 +152,47 @@ export const IconLayers = (p: IconProps) => <FaLayerGroup size={getSize(p)} colo
 export const IconSort = (p: IconProps) => <FaSort size={getSize(p)} color={p.color || 'currentColor'} className={p.className} onClick={p.onClick} />;
 export const IconSortDown = (p: IconProps) => <FaSortAmountDown size={getSize(p)} color={p.color || 'currentColor'} className={p.className} onClick={p.onClick} />;
 export const IconSortUp = (p: IconProps) => <FaSortAmountUp size={getSize(p)} color={p.color || 'currentColor'} className={p.className} onClick={p.onClick} />;
+
+// Custom Filter Icons
+export const IconFilterFunnel = (p: IconProps) => (
+  <svg
+    width={getSize(p)}
+    height={getSize(p)}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke={p.color || 'currentColor'}
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={p.className}
+    onClick={p.onClick}
+  >
+    <path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z" />
+  </svg>
+);
+
+export const IconFilterSliders = (p: IconProps) => (
+  <svg
+    width={getSize(p)}
+    height={getSize(p)}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke={p.color || 'currentColor'}
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={p.className}
+    onClick={p.onClick}
+  >
+    <line x1="4" y1="21" x2="4" y2="14" />
+    <line x1="4" y1="10" x2="4" y2="3" />
+    <line x1="12" y1="21" x2="12" y2="12" />
+    <line x1="12" y1="8" x2="12" y2="3" />
+    <line x1="20" y1="21" x2="20" y2="16" />
+    <line x1="20" y1="12" x2="20" y2="3" />
+    <line x1="1" y1="14" x2="7" y2="14" />
+    <line x1="9" y1="8" x2="15" y2="8" />
+    <line x1="17" y1="16" x2="23" y2="16" />
+  </svg>
+);
+

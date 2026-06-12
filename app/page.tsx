@@ -51,6 +51,7 @@ import {
 import Buscador from '@/components/Buscador';
 import BrowseFilters from '@/components/filters/BrowseFilters';
 import FilterSidePanel from '@/components/filters/FilterSidePanel';
+import FilterControlFields from '@/components/filters/FilterControlFields';
 import Ordenamiento, { TipoOrdenamiento } from '@/components/Ordenamiento';
 import FiltroUbicacion from '@/components/FiltroUbicacion';
 import GrillaAdisos from '@/components/GrillaAdisos';
@@ -154,8 +155,8 @@ function HomeContent() {
   }, [seccionUrl, isDesktop]);
   const [vista, setVista] = useState<'grid' | 'list' | 'feed'>('grid');
   const [browseScrolled, setBrowseScrolled] = useState(false);
-  const [filterLayoutMode, setFilterLayoutMode] = useState<FilterLayoutMode>('inline');
   const [filterSidebarCollapsed, setFilterSidebarCollapsed] = useState(false);
+  const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
   const [isSidebarMinimizado, setIsSidebarMinimizado] = useState(true);
   const { toasts, removeToast, success, error } = useToast();
   const marketplacePulse = getMarketplacePulse(adisosFiltrados);
@@ -952,8 +953,9 @@ function HomeContent() {
             userLat={profile?.latitud}
             userLng={profile?.longitud}
             onOpenUbicacion={() => setMostrarFiltroUbicacion(true)}
-            layoutMode={filterLayoutMode}
-            onLayoutModeChange={setFilterLayoutMode}
+            sidebarCollapsed={filterSidebarCollapsed}
+            onToggleSidebar={() => setFilterSidebarCollapsed((c) => !c)}
+            onOpenMobileFilters={() => setIsMobileFiltersOpen(true)}
           />
         </div>
         </div>
@@ -968,7 +970,7 @@ function HomeContent() {
             ...(isDesktop && { marginRight: 'var(--sidebar-width, 0px)' }),
           }}
         >
-        {isDesktop && filterLayoutMode === 'panel' && (
+        {isDesktop && (
           <FilterSidePanel
             categoria={categoriaFiltro}
             filters={browseFilters}
@@ -992,6 +994,72 @@ function HomeContent() {
           width: '100%',
           transition: 'padding-bottom 0.3s ease, padding-top 0.3s ease',
         }}>
+
+          {/* Drawer de Filtros Mobile */}
+          {!isDesktop && isMobileFiltersOpen && (
+            <div className="fixed inset-0 z-[1100] flex">
+              <style dangerouslySetInnerHTML={{ __html: `
+                @keyframes slideIn {
+                  from { transform: translateX(-100%); }
+                  to { transform: translateX(0); }
+                }
+                @keyframes fadeIn {
+                  from { opacity: 0; }
+                  to { opacity: 1; }
+                }
+              `}} />
+              {/* Backdrop */}
+              <div
+                className="fixed inset-0 bg-black/50 backdrop-blur-sm"
+                style={{ animation: 'fadeIn 0.2s ease-out forwards' }}
+                onClick={() => setIsMobileFiltersOpen(false)}
+              />
+              {/* Drawer Content */}
+              <div
+                className="relative flex w-full max-w-[320px] flex-col bg-[var(--bg-primary)] h-full shadow-2xl overflow-hidden z-10"
+                style={{
+                  animation: 'slideIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+                }}
+              >
+                <div className="flex items-center justify-between p-4 border-b border-[var(--border-color)] bg-[var(--bg-secondary)]">
+                  <h2 className="text-base font-bold text-[var(--text-primary)]">Filtros</h2>
+                  <button
+                    onClick={() => setIsMobileFiltersOpen(false)}
+                    className="p-1.5 rounded-lg hover:bg-[var(--hover-bg)] text-[var(--text-secondary)] transition-colors"
+                  >
+                    <IconClose size={20} />
+                  </button>
+                </div>
+                <div className="flex-1 p-4 overflow-y-auto no-scrollbar">
+                  <FilterControlFields
+                    categoria={categoriaFiltro}
+                    filters={browseFilters}
+                    onChange={setBrowseFilters}
+                    adisos={adisos}
+                    busqueda={busquedaDebounced}
+                    userLat={profile?.latitud}
+                    userLng={profile?.longitud}
+                    onOpenUbicacion={() => {
+                      setMostrarFiltroUbicacion(true);
+                      setIsMobileFiltersOpen(false);
+                    }}
+                    compact={false}
+                  />
+                </div>
+                <div className="p-4 border-t border-[var(--border-color)] bg-[var(--bg-secondary)] flex items-center justify-between gap-3">
+                  <span className="text-xs font-semibold text-[var(--text-secondary)]">
+                    {adisosFiltrados.length} resultados
+                  </span>
+                  <button
+                    onClick={() => setIsMobileFiltersOpen(false)}
+                    className="px-4 py-2 bg-[var(--brand-blue)] text-white text-xs font-bold rounded-xl hover:opacity-90 active:scale-95 transition-all"
+                  >
+                    Ver resultados
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Modal de Filtro de Ubicación */}
           {mostrarFiltroUbicacion && (

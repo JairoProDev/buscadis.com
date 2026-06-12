@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { Adiso, Categoria } from '@/types';
 import { BrowseFilterState } from '@/lib/filters/types';
 import { getFiltersForCategory, getFilterDefinition } from '@/lib/filters/definitions';
@@ -9,7 +10,7 @@ import { countFacetOption } from '@/lib/filters/apply';
 import { IconChevronDown, IconClose } from '@/components/Icons';
 
 const pillClass =
-  'inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold border flex-shrink-0 min-h-[32px] transition-colors';
+  'inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold border flex-shrink-0 min-h-[32px] transition-all duration-200';
 
 interface FilterInlineSelectorsProps {
   categoria: Categoria | 'todos';
@@ -33,12 +34,24 @@ export default function FilterInlineSelectors({
   userLng,
 }: FilterInlineSelectorsProps) {
   const [openId, setOpenId] = useState<string | null>(null);
+  const [openAnchor, setOpenAnchor] = useState<HTMLElement | null>(null);
+  const [coords, setCoords] = useState({ top: 0, left: 0 });
+  const [mounted, setMounted] = useState(false);
+
   const rowRef = useRef<HTMLDivElement>(null);
+  const popoverRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     if (!openId) return;
     const onDoc = (e: MouseEvent) => {
-      if (rowRef.current && !rowRef.current.contains(e.target as Node)) {
+      const target = e.target as Node;
+      const clickedInsideRow = rowRef.current && rowRef.current.contains(target);
+      const clickedInsidePopover = popoverRef.current && popoverRef.current.contains(target);
+      if (!clickedInsideRow && !clickedInsidePopover) {
         setOpenId(null);
       }
     };
@@ -53,6 +66,34 @@ export default function FilterInlineSelectors({
     };
   }, [openId]);
 
+  useEffect(() => {
+    if (!openId || !openAnchor) return;
+    const updatePosition = () => {
+      const rect = openAnchor.getBoundingClientRect();
+      const popoverWidth = 240; // Estimated maximum width
+      let left = rect.left;
+      
+      // Prevent running off the right side of the screen
+      if (left + popoverWidth > window.innerWidth) {
+        left = Math.max(8, window.innerWidth - popoverWidth - 16);
+      }
+      left = Math.max(8, left);
+
+      setCoords({
+        top: rect.bottom + window.scrollY + 6,
+        left: left + window.scrollX,
+      });
+    };
+
+    updatePosition();
+    window.addEventListener('resize', updatePosition);
+    window.addEventListener('scroll', updatePosition, true); // Capture phase handles inner containers scrolling
+    return () => {
+      window.removeEventListener('resize', updatePosition);
+      window.removeEventListener('scroll', updatePosition, true);
+    };
+  }, [openId, openAnchor]);
+
   const buttons = getInlineFilterButtons(categoria, filters);
 
   const renderPopover = (buttonId: string) => {
@@ -61,7 +102,7 @@ export default function FilterInlineSelectors({
 
     if (buttonId === 'precio') {
       return (
-        <div className="p-3 space-y-2">
+        <div className="p-3 space-y-2 w-[220px]">
           <div className="flex items-center gap-2">
             <input
               type="number"
@@ -69,7 +110,7 @@ export default function FilterInlineSelectors({
               placeholder="Mín"
               defaultValue={filters.precioMin ?? ''}
               id="precio-min-input"
-              className="w-full px-2 py-1.5 rounded-lg border border-[var(--border-color)] bg-[var(--bg-primary)] text-sm"
+              className="w-full px-2.5 py-1.5 rounded-lg border border-[var(--border-color)] bg-[var(--bg-primary)] text-sm"
             />
             <span className="text-[var(--text-tertiary)]">—</span>
             <input
@@ -78,12 +119,12 @@ export default function FilterInlineSelectors({
               placeholder="Máx"
               defaultValue={filters.precioMax ?? ''}
               id="precio-max-input"
-              className="w-full px-2 py-1.5 rounded-lg border border-[var(--border-color)] bg-[var(--bg-primary)] text-sm"
+              className="w-full px-2.5 py-1.5 rounded-lg border border-[var(--border-color)] bg-[var(--bg-primary)] text-sm"
             />
           </div>
           <button
             type="button"
-            className="w-full py-2 rounded-lg text-sm font-semibold text-white"
+            className="w-full py-2 rounded-lg text-sm font-semibold text-white hover:opacity-90 active:scale-95 transition-all"
             style={{ backgroundColor: 'var(--brand-blue)' }}
             onClick={() => {
               const minEl = document.getElementById('precio-min-input') as HTMLInputElement;
@@ -106,7 +147,7 @@ export default function FilterInlineSelectors({
 
     if (buttonId === 'publicadoEn' && def?.options) {
       return (
-        <ul className="py-1 max-h-[240px] overflow-y-auto">
+        <ul className="py-1 min-w-[200px]">
           <li>
             <button
               type="button"
@@ -142,7 +183,7 @@ export default function FilterInlineSelectors({
     const facetId = def?.id ?? buttonId;
     if (def?.type === 'chips' && def.options) {
       return (
-        <ul className="py-1 max-h-[240px] overflow-y-auto">
+        <ul className="py-1 min-w-[200px]">
           {def.options.map((opt) => {
             const count = categoria !== 'todos'
               ? countFacetOption(adisos, categoria, busqueda, filters, facetId, opt.value, userLat, userLng)
@@ -184,7 +225,7 @@ export default function FilterInlineSelectors({
         : Boolean(filters[buttonId as keyof BrowseFilterState]);
 
       return (
-        <div className="p-2">
+        <div className="p-1 min-w-[180px]">
           <button
             type="button"
             className="w-full text-left px-3 py-2 text-sm rounded-lg hover:bg-[var(--hover-bg)]"
@@ -224,23 +265,33 @@ export default function FilterInlineSelectors({
               <div
                 className={`${pillClass} ${
                   btn.isActive
-                    ? 'border-[rgba(var(--brand-yellow-rgb),0.55)] bg-[rgba(var(--brand-yellow-rgb),0.12)]'
-                    : 'border-[var(--border-color)] bg-[var(--bg-primary)]'
+                    ? 'border-[var(--brand-blue)] bg-[var(--brand-blue)] text-white shadow-sm'
+                    : 'border-[var(--border-color)] bg-[var(--bg-primary)] text-[var(--text-primary)] hover:border-[var(--brand-blue)]/50'
                 }`}
               >
                 <button
                   type="button"
-                  onClick={() => {
+                  onClick={(e) => {
                     if (btn.type === 'ubicacion') {
                       onOpenUbicacion?.();
                       return;
                     }
+                    setOpenAnchor(e.currentTarget);
                     setOpenId(isOpen ? null : btn.id);
                   }}
-                  className="inline-flex items-center gap-1 text-[var(--text-primary)]"
+                  className={`inline-flex items-center gap-1.5 font-semibold text-xs transition-colors active:scale-95 duration-150 ${
+                    btn.isActive ? 'text-white' : 'text-[var(--text-primary)]'
+                  }`}
                 >
                   <span className="max-w-[140px] truncate">{displayText}</span>
-                  {!btn.isActive && <IconChevronDown size={12} className="opacity-60 flex-shrink-0" />}
+                  {btn.type !== 'ubicacion' && (
+                    <IconChevronDown
+                      size={10}
+                      className={`flex-shrink-0 transition-transform duration-300 ${
+                        isOpen ? 'rotate-180' : ''
+                      } ${btn.isActive ? 'text-white' : 'opacity-60'}`}
+                    />
+                  )}
                 </button>
                 {btn.isActive && (
                   <button
@@ -248,27 +299,36 @@ export default function FilterInlineSelectors({
                     onClick={(e) => {
                       e.stopPropagation();
                       onChange(clearInlineFilter(filters, btn.id, btn.facetId));
+                      if (openId === btn.id) setOpenId(null);
                     }}
-                    className="ml-0.5 p-0.5 rounded-full hover:bg-black/10 dark:hover:bg-white/10"
+                    className="ml-1 p-0.5 rounded-full hover:bg-white/20 text-white inline-flex items-center justify-center transition-colors"
                     aria-label={`Quitar ${btn.label}`}
                   >
-                    <IconClose size={12} />
+                    <IconClose size={10} />
                   </button>
                 )}
               </div>
-
-              {isOpen && btn.type !== 'ubicacion' && (
-                <div
-                  className="absolute left-0 top-[calc(100%+6px)] z-[920] min-w-[200px] rounded-xl border border-[var(--border-color)] bg-[var(--bg-primary)] shadow-lg"
-                  style={{ boxShadow: 'var(--shadow-md)' }}
-                >
-                  {renderPopover(btn.facetId ?? btn.id)}
-                </div>
-              )}
             </div>
           );
         })}
       </div>
+
+      {/* Render Popover outside overflow-hidden row via Portal */}
+      {mounted && openId && openAnchor && createPortal(
+        <div
+          ref={popoverRef}
+          className="fixed z-[9999] rounded-xl border border-[var(--border-color)] bg-[var(--bg-primary)] shadow-2xl p-1 animate-in fade-in slide-in-from-top-1 duration-150"
+          style={{
+            top: coords.top,
+            left: coords.left,
+            boxShadow: '0 10px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1), 0 0 0 1px var(--border-color)',
+          }}
+        >
+          {renderPopover(openId)}
+        </div>,
+        document.body
+      )}
     </div>
   );
 }
+

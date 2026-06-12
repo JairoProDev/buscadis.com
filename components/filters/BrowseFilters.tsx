@@ -1,11 +1,10 @@
 'use client';
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Adiso, Categoria } from '@/types';
-import { BrowseFilterState, FilterLayoutMode } from '@/lib/filters/types';
+import { BrowseFilterState, countActiveFilters } from '@/lib/filters/types';
 import FilterInlineSelectors from './FilterInlineSelectors';
-
-const LAYOUT_KEY = 'buscadis_filter_layout';
+import { IconFilterFunnel, IconFilterSliders } from '@/components/Icons';
 
 interface BrowseFiltersProps {
   categoria: Categoria | 'todos';
@@ -17,8 +16,9 @@ interface BrowseFiltersProps {
   onOpenUbicacion?: () => void;
   userLat?: number;
   userLng?: number;
-  layoutMode: FilterLayoutMode;
-  onLayoutModeChange: (mode: FilterLayoutMode) => void;
+  sidebarCollapsed: boolean;
+  onToggleSidebar: () => void;
+  onOpenMobileFilters: () => void;
 }
 
 export default function BrowseFilters({
@@ -31,40 +31,35 @@ export default function BrowseFilters({
   onOpenUbicacion,
   userLat,
   userLng,
-  layoutMode,
-  onLayoutModeChange,
+  sidebarCollapsed,
+  onToggleSidebar,
+  onOpenMobileFilters,
 }: BrowseFiltersProps) {
-  useEffect(() => {
-    try {
-      const saved = localStorage.getItem(LAYOUT_KEY) as FilterLayoutMode | null;
-      if (saved === 'inline' || saved === 'panel') onLayoutModeChange(saved);
-    } catch { /* ignore */ }
-  }, [onLayoutModeChange]);
+  const activeFiltersCount = countActiveFilters(filters, categoria);
 
-  const toggleLayout = () => {
-    const next: FilterLayoutMode = layoutMode === 'inline' ? 'panel' : 'inline';
-    onLayoutModeChange(next);
-    try { localStorage.setItem(LAYOUT_KEY, next); } catch { /* ignore */ }
-  };
-
-  const layoutToggle = isDesktop ? (
+  const toggleBtn = (
     <button
       type="button"
-      onClick={toggleLayout}
-      className="flex-shrink-0 text-[11px] font-semibold text-[var(--text-secondary)] hover:text-[var(--brand-blue)] px-2 py-1.5 rounded-lg hover:bg-[var(--hover-bg)] whitespace-nowrap self-center"
+      onClick={isDesktop ? onToggleSidebar : onOpenMobileFilters}
+      className="flex-shrink-0 flex items-center justify-center w-[36px] h-[36px] rounded-xl border border-[var(--border-color)] bg-[var(--bg-primary)] hover:border-[var(--brand-blue)]/50 text-[var(--text-primary)] hover:text-[var(--brand-blue)] active:scale-90 transition-all duration-150 relative"
+      title="Filtros"
+      aria-label="Alternar panel de filtros"
     >
-      {layoutMode === 'panel' ? 'En línea' : 'Panel'}
+      {isDesktop && !sidebarCollapsed ? (
+        <IconFilterSliders size={18} className="transition-all" />
+      ) : (
+        <IconFilterFunnel size={18} className="transition-all" />
+      )}
+      {activeFiltersCount > 0 && (
+        <span className="absolute -top-1 -right-1 w-3 h-3 bg-[var(--brand-blue)] border-2 border-[var(--bg-primary)] rounded-full animate-pulse" />
+      )}
     </button>
-  ) : null;
-
-  if (layoutMode === 'panel' && isDesktop) {
-    return <div className="flex justify-end pb-1">{layoutToggle}</div>;
-  }
+  );
 
   return (
     <div className="pb-1">
-
-      <div className="flex items-start gap-1 min-w-0">
+      <div className="flex items-center gap-2 min-w-0">
+        {toggleBtn}
         <div className="flex-1 min-w-0">
           <FilterInlineSelectors
             categoria={categoria}
@@ -77,8 +72,8 @@ export default function BrowseFilters({
             userLng={userLng}
           />
         </div>
-        {layoutToggle}
       </div>
     </div>
   );
 }
+
