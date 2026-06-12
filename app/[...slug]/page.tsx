@@ -119,6 +119,10 @@ export default async function Page(props: PageProps) {
     let isLegacy = false;
 
     if (slug.length === 1) {
+        // Custom static landings live in public/{slug}/ (see next.config.js rewrites)
+        if (slug[0].toLowerCase() === 'villachaco') {
+            notFound();
+        }
         // Format 3: /[business_slug]
         return <PublicBusinessPage params={{ slug: slug[0] }} searchParams={searchParams} />;
     } else if (slug.length === 3) {

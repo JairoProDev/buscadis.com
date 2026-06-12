@@ -52,7 +52,13 @@ const nextConfig = {
     ];
   },
   async rewrites() {
-    return [];
+    // Custom client landings (static HTML in public/{slug}/)
+    return {
+      beforeFiles: [
+        { source: '/villachaco', destination: '/villachaco/index.html' },
+        { source: '/villachaco/', destination: '/villachaco/index.html' },
+      ],
+    };
   },
   transpilePackages: ['@imgly/background-removal', 'onnxruntime-web'],
   webpack: (config, { isServer }) => {
