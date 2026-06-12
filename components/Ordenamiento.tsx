@@ -5,7 +5,7 @@ import { IconSort, IconSortDown, IconSortUp } from './Icons';
 import { useTranslation } from '@/hooks/useTranslation';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
 
-export type TipoOrdenamiento = 'recientes' | 'antiguos' | 'titulo-asc' | 'titulo-desc';
+export type TipoOrdenamiento = 'recientes' | 'antiguos' | 'titulo-asc' | 'titulo-desc' | 'precio-asc' | 'precio-desc';
 
 interface OrdenamientoProps {
   valor: TipoOrdenamiento;
@@ -27,6 +27,8 @@ export default function Ordenamiento({ valor, onChange }: OrdenamientoProps) {
     { valor: 'antiguos', labelKey: 'sort.oldest', icon: IconSortUp },
     { valor: 'titulo-asc', labelKey: 'sort.titleAsc', icon: IconSort },
     { valor: 'titulo-desc', labelKey: 'sort.titleDesc', icon: IconSort },
+    { valor: 'precio-asc', labelKey: 'sort.priceAsc', icon: IconSortUp },
+    { valor: 'precio-desc', labelKey: 'sort.priceDesc', icon: IconSortDown },
   ];
 
   useEffect(() => {

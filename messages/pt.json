@@ -35,7 +35,9 @@
     "recent": "Mais recentes",
     "oldest": "Mais antigos",
     "titleAsc": "Título A-Z",
-    "titleDesc": "Título Z-A"
+    "titleDesc": "Título Z-A",
+    "priceAsc": "Preço: menor para maior",
+    "priceDesc": "Preço: maior para menor"
   },
   "adiso": {
     "published": "Publicado",

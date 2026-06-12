@@ -35,7 +35,9 @@
     "recent": "Most recent",
     "oldest": "Oldest",
     "titleAsc": "Title A-Z",
-    "titleDesc": "Title Z-A"
+    "titleDesc": "Title Z-A",
+    "priceAsc": "Price: low to high",
+    "priceDesc": "Price: high to low"
   },
   "adiso": {
     "published": "Published",

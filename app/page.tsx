@@ -19,18 +19,6 @@ import { useUser } from '@/hooks/useUser';
 import { UbicacionDetallada } from '@/types';
 import { useNavigation } from '@/contexts/NavigationContext';
 
-// Función para calcular distancia entre dos puntos (Haversine)
-function calcularDistanciaKm(lat1: number, lon1: number, lat2: number, lon2: number): number {
-  const R = 6371; // Radio de la Tierra en km
-  const dLat = (lat2 - lat1) * Math.PI / 180;
-  const dLon = (lon2 - lon1) * Math.PI / 180;
-  const a =
-    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-    Math.sin(dLon / 2) * Math.sin(dLon / 2);
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  return R * c;
-}
 import { registrarBusqueda } from '@/lib/analytics';
 import { onOnlineStatusChange, getOfflineMessage } from '@/lib/offline';
 import dynamicImport from 'next/dynamic';
@@ -51,8 +39,16 @@ import {
   IconEye,
   IconClose,
 } from '@/components/Icons';
-import { getCategoriaLabel, adisoTieneImagen } from '@/lib/adiso-display';
+import { getCategoriaLabel } from '@/lib/adiso-display';
+import {
+  applyBrowseFilters,
+  browseFiltersFromSearchParams,
+  browseFiltersToSearchParams,
+  DEFAULT_BROWSE_FILTERS,
+  BrowseFilterState,
+} from '@/lib/filters';
 import Buscador from '@/components/Buscador';
+import BrowseFilters from '@/components/filters/BrowseFilters';
 import Ordenamiento, { TipoOrdenamiento } from '@/components/Ordenamiento';
 import FiltroUbicacion from '@/components/FiltroUbicacion';
 import GrillaAdisos from '@/components/GrillaAdisos';
@@ -141,12 +137,10 @@ function HomeContent() {
   const [ordenamiento, setOrdenamiento] = useState<TipoOrdenamiento>('recientes');
 
 
-  const [filtroUbicacion, setFiltroUbicacion] = useState<{
-    departamento?: string;
-    provincia?: string;
-    distrito?: string;
-    radioKm?: number;
-  } | undefined>(undefined);
+  const [browseFilters, setBrowseFilters] = useState<BrowseFilterState>(() => {
+    if (typeof window === 'undefined') return { ...DEFAULT_BROWSE_FILTERS, facets: {} };
+    return browseFiltersFromSearchParams(new URLSearchParams(window.location.search));
+  });
   const [adisoAbierto, setAdisoAbierto] = useState<Adiso | null>(null);
   const [indiceAdisoActual, setIndiceAdisoActual] = useState(0);
   const [cargando, setCargando] = useState(true);
@@ -174,8 +168,6 @@ function HomeContent() {
     }
   }, [seccionUrl, isDesktop]);
   const [vista, setVista] = useState<'grid' | 'list' | 'feed'>('grid');
-  const [ocultarHistoricos, setOcultarHistoricos] = useState(true);
-  const [soloConFotos, setSoloConFotos] = useState(false);
   const [browseScrolled, setBrowseScrolled] = useState(false);
   const [isSidebarMinimizado, setIsSidebarMinimizado] = useState(true);
   const { toasts, removeToast, success, error } = useToast();
@@ -197,6 +189,15 @@ function HomeContent() {
   useEffect(() => {
     adisosRef.current = adisos;
   }, [adisos]);
+
+  const prevCategoriaRef = useRef(categoriaFiltro);
+  // Al cambiar categoría manualmente, limpiar facetas específicas (conservar precio, ubicación, etc.)
+  useEffect(() => {
+    if (prevCategoriaRef.current !== categoriaFiltro) {
+      setBrowseFilters((prev) => ({ ...prev, facets: {} }));
+      prevCategoriaRef.current = categoriaFiltro;
+    }
+  }, [categoriaFiltro]);
 
   useEffect(() => {
     if (isDesktop && seccionDesktopActiva === 'adiso' && !adisoAbierto && !adisoId) {
@@ -406,171 +407,29 @@ function HomeContent() {
     };
   }, [adisoId, cargando, isDesktop, error, router, searchParams]);
 
-  // Filtrado y ordenamiento
+  // Filtrado y ordenamiento (sistema unificado)
   useEffect(() => {
-    // Si no hay adisos, no hacer nada
     if (adisos.length === 0) {
       setAdisosFiltrados([]);
       return;
     }
 
-    // Filtrar siempre datos de prueba como salvaguarda final
-    let filtrados = adisos.filter(a => !TEST_REGEX.test(a.titulo || ''));
+    const filtrados = applyBrowseFilters({
+      adisos,
+      categoria: categoriaFiltro,
+      busqueda: busquedaDebounced,
+      filters: browseFilters,
+      ordenamiento,
+      userLat: profile?.latitud,
+      userLng: profile?.longitud,
+    });
 
-    // Función auxiliar para parsear fechas - DEFINIDA DENTRO del useEffect
-    const parsearFecha = (fechaPublicacion: string, horaPublicacion: string): number => {
-      if (!fechaPublicacion) return 0;
-
-      try {
-        // Formato esperado: "YYYY-MM-DD" y "HH:MM"
-        let hora = horaPublicacion || '00:00';
-
-        // Normalizar formato de hora
-        if (hora.length === 4) {
-          // Si es "HHMM" sin los dos puntos, agregarlos
-          hora = `${hora.substring(0, 2)}:${hora.substring(2)}`;
-        } else if (hora.length !== 5) {
-          // Si no tiene el formato correcto, intentar parsearlo
-          hora = '00:00';
-        }
-
-        // Construir fecha completa en formato ISO
-        const fechaStr = `${fechaPublicacion}T${hora}:00`;
-        const fecha = new Date(fechaStr);
-
-        // Verificar que la fecha sea válida
-        if (isNaN(fecha.getTime())) {
-          return 0;
-        }
-
-        return fecha.getTime();
-      } catch (error) {
-        return 0;
-      }
-    };
-
-    // Filtrar por categoría
-    if (categoriaFiltro !== 'todos') {
-      filtrados = filtrados.filter(a => a.categoria === categoriaFiltro);
-    }
-
-    const hayAnunciosActivos = filtrados.some((a) => !a.esHistorico);
-    if (ocultarHistoricos && hayAnunciosActivos) {
-      filtrados = filtrados.filter((a) => !a.esHistorico);
-    }
-
-    if (soloConFotos) {
-      filtrados = filtrados.filter(adisoTieneImagen);
-    }
-
-    // Filtrar por búsqueda
     if (busquedaDebounced.trim()) {
-      const busquedaLower = busquedaDebounced.toLowerCase();
-      filtrados = filtrados.filter(
-        a => {
-          const tituloMatch = a.titulo.toLowerCase().includes(busquedaLower);
-          const descripcionMatch = a.descripcion.toLowerCase().includes(busquedaLower);
-
-          // Buscar en ubicación (string o UbicacionDetallada)
-          let ubicacionMatch = false;
-          if (typeof a.ubicacion === 'string') {
-            ubicacionMatch = a.ubicacion.toLowerCase().includes(busquedaLower);
-          } else if (typeof a.ubicacion === 'object' && a.ubicacion !== null) {
-            const ubi = a.ubicacion as any;
-            ubicacionMatch =
-              (ubi.departamento?.toLowerCase().includes(busquedaLower)) ||
-              (ubi.provincia?.toLowerCase().includes(busquedaLower)) ||
-              (ubi.distrito?.toLowerCase().includes(busquedaLower)) ||
-              (ubi.direccion?.toLowerCase().includes(busquedaLower));
-          }
-
-          return tituloMatch || descripcionMatch || ubicacionMatch;
-        }
-      );
-
-      // Registrar búsqueda (solo una vez por término)
       registrarBusqueda(user?.id, busquedaDebounced.trim(), filtrados.length);
     }
 
-    // Filtrar por ubicación
-    if (filtroUbicacion) {
-      filtrados = filtrados.filter(a => {
-        // Si no tiene ubicación, excluir solo si el filtro de ubicación es obligatorio
-        if (!a.ubicacion) return false;
-
-        const ubi = typeof a.ubicacion === 'string'
-          ? { departamento: a.ubicacion, provincia: '', distrito: '' }
-          : a.ubicacion as any;
-
-        // Filtrar por distrito (más específico)
-        if (filtroUbicacion.distrito) {
-          const matchDistrito = ubi.distrito?.toLowerCase().trim() === filtroUbicacion.distrito.toLowerCase().trim();
-          if (matchDistrito) return true;
-
-          // Si hay radio de búsqueda y coordenadas, verificar distancia
-          if (filtroUbicacion.radioKm && ubi.latitud && ubi.longitud &&
-            profile?.latitud && profile?.longitud) {
-            const distancia = calcularDistanciaKm(
-              profile.latitud,
-              profile.longitud,
-              ubi.latitud,
-              ubi.longitud
-            );
-            return distancia <= (filtroUbicacion.radioKm || 5);
-          }
-          return false;
-        }
-
-        // Filtrar por provincia
-        if (filtroUbicacion.provincia) {
-          const matchProvincia = ubi.provincia?.toLowerCase().trim() === filtroUbicacion.provincia.toLowerCase().trim();
-          if (matchProvincia) return true;
-          if (!filtroUbicacion.distrito) return false;
-        }
-
-        // Filtrar por departamento
-        if (filtroUbicacion.departamento) {
-          const matchDepartamento = ubi.departamento?.toLowerCase().trim() === filtroUbicacion.departamento.toLowerCase().trim();
-          if (matchDepartamento) return true;
-          if (!filtroUbicacion.provincia && !filtroUbicacion.distrito) return false;
-        }
-
-        return true;
-      });
-    }
-
-    // Ordenar según el tipo seleccionado
-    // IMPORTANTE: Crear una nueva copia del array para que React detecte el cambio
-    const filtradosOrdenados = [...filtrados].sort((a, b) => {
-      switch (ordenamiento) {
-        case 'recientes': {
-          const fechaA = parsearFecha(a.fechaPublicacion, a.horaPublicacion);
-          const fechaB = parsearFecha(b.fechaPublicacion, b.horaPublicacion);
-          // Más recientes primero (fecha mayor primero)
-          const comparacion = fechaB - fechaA;
-          // Si las fechas son iguales, usar ID como desempate para orden consistente
-          return comparacion !== 0 ? comparacion : a.id.localeCompare(b.id);
-        }
-        case 'antiguos': {
-          const fechaA = parsearFecha(a.fechaPublicacion, a.horaPublicacion);
-          const fechaB = parsearFecha(b.fechaPublicacion, b.horaPublicacion);
-          // Más antiguos primero (fecha menor primero)
-          const comparacion = fechaA - fechaB;
-          // Si las fechas son iguales, usar ID como desempate para orden consistente
-          return comparacion !== 0 ? comparacion : a.id.localeCompare(b.id);
-        }
-        case 'titulo-asc':
-          return a.titulo.localeCompare(b.titulo, 'es', { sensitivity: 'base' });
-        case 'titulo-desc':
-          return b.titulo.localeCompare(a.titulo, 'es', { sensitivity: 'base' });
-        default:
-          return 0;
-      }
-    });
-
-
-    setAdisosFiltrados(filtradosOrdenados);
-  }, [busquedaDebounced, categoriaFiltro, ordenamiento, adisos, filtroUbicacion, profile, user?.id, ocultarHistoricos, soloConFotos]);
+    setAdisosFiltrados(filtrados);
+  }, [busquedaDebounced, categoriaFiltro, ordenamiento, adisos, browseFilters, profile?.latitud, profile?.longitud, user?.id]);
 
   // Resetear visibilidad local y estado de paginación SOLO cuando cambian los filtros principales
   // (Esto evita resetear la página actual cuando se cargan más adisos en el mismo filtro)
@@ -580,7 +439,7 @@ function HomeContent() {
     setPaginaActual(1);
     // El scroll infinito (hook useInfiniteScroll) se encargará de cargar más
     // automáticamente si el sentinel queda visible después del filtrado inicial.
-  }, [busquedaDebounced, categoriaFiltro, filtroUbicacion]);
+  }, [busquedaDebounced, categoriaFiltro, browseFilters]);
 
   // Actualizar índice del adiso abierto cuando cambian los filtrados o el adiso abierto
   useEffect(() => {
@@ -592,38 +451,30 @@ function HomeContent() {
     }
   }, [adisoAbierto, adisosFiltrados]);
 
-  // Actualizar URL cuando cambian búsqueda o categoría (después del debounce)
+  // Sincronizar URL: categoría, búsqueda y filtros avanzados
   useEffect(() => {
-    const params = new URLSearchParams();
+    let params = new URLSearchParams();
 
-    // Agregar categoría si no es "todos"
     if (categoriaFiltro !== 'todos') {
       params.set('categoria', categoriaFiltro);
     }
-
-    // Agregar búsqueda si existe
     if (busquedaDebounced.trim()) {
       params.set('buscar', busquedaDebounced.trim());
     }
-
-    // Mantener adiso si está abierto
     if (adisoId) {
       params.set('adiso', adisoId);
     }
+    const seccion = searchParams.get('seccion');
+    if (seccion) params.set('seccion', seccion);
 
-    const newUrl = params.toString() ? `/?${params.toString()}` : '/';
-    const currentUrl = window.location.search;
-    const currentParams = new URLSearchParams(currentUrl);
+    params = browseFiltersToSearchParams(browseFilters, params);
 
-    // Solo actualizar si hay cambios
-    const hasChanges =
-      (categoriaFiltro === 'todos' ? currentParams.has('categoria') : currentParams.get('categoria') !== categoriaFiltro) ||
-      (busquedaDebounced.trim() ? currentParams.get('buscar') !== busquedaDebounced.trim() : currentParams.has('buscar'));
-
-    if (hasChanges) {
-      router.replace(newUrl, { scroll: false });
+    const newQuery = params.toString();
+    const currentQuery = window.location.search.replace(/^\?/, '');
+    if (newQuery !== currentQuery) {
+      router.replace(newQuery ? `/?${newQuery}` : '/', { scroll: false });
     }
-  }, [busquedaDebounced, categoriaFiltro, adisoId, router]);
+  }, [busquedaDebounced, categoriaFiltro, browseFilters, adisoId, router, searchParams]);
 
   const handlePublicar = (nuevoAdiso: Adiso) => {
     // Optimistic update: mostrar inmediatamente
@@ -945,7 +796,7 @@ function HomeContent() {
         </a>
         <Header
           onToggleLeftSidebar={() => setIsLeftSidebarOpen(!isLeftSidebarOpen)}
-          ubicacion={filtroUbicacion?.distrito || filtroUbicacion?.departamento || 'Perú'}
+          ubicacion={browseFilters.ubicacion?.distrito || browseFilters.ubicacion?.departamento || 'Perú'}
           onUbicacionClick={() => setMostrarFiltroUbicacion(true)}
           seccionActiva={seccionDesktopActiva}
           onSeccionChange={(seccion) => {
@@ -1103,6 +954,20 @@ function HomeContent() {
             }}
           />
         </div>
+        <div style={{ padding: '0 1rem 0.5rem' }}>
+          <BrowseFilters
+            categoria={categoriaFiltro}
+            filters={browseFilters}
+            onChange={setBrowseFilters}
+            adisos={adisos}
+            busqueda={busquedaDebounced}
+            resultCount={adisosFiltrados.length}
+            isDesktop={isDesktop}
+            userLat={profile?.latitud}
+            userLng={profile?.longitud}
+            onOpenUbicacion={() => setMostrarFiltroUbicacion(true)}
+          />
+        </div>
         </div>
         <main id="main-content" style={{
           flex: 1,
@@ -1121,9 +986,9 @@ function HomeContent() {
           {/* Modal de Filtro de Ubicación */}
           {mostrarFiltroUbicacion && (
             <FiltroUbicacion
-              filtrosActuales={filtroUbicacion}
+              filtrosActuales={browseFilters.ubicacion}
               onAplicar={(filtros) => {
-                setFiltroUbicacion(filtros);
+                setBrowseFilters((prev) => ({ ...prev, ubicacion: filtros }));
                 setMostrarFiltroUbicacion(false);
               }}
               onCerrar={() => setMostrarFiltroUbicacion(false)}
@@ -1176,7 +1041,7 @@ function HomeContent() {
                     fontWeight: 600,
                     color: 'var(--text-secondary)',
                   }}>
-                    {getBrowseCountLabel(adisosFiltrados.length, categoriaFiltro, filtroUbicacion)}
+                    {getBrowseCountLabel(adisosFiltrados.length, categoriaFiltro, browseFilters.ubicacion)}
                   </span>
 
                   {!cargando && (
@@ -1286,13 +1151,13 @@ function HomeContent() {
             </div>
           </div>
 
-          {(categoriaFiltro !== 'todos' || filtroUbicacion || busquedaDebounced.trim() || soloConFotos || !ocultarHistoricos) && (
+          {(categoriaFiltro !== 'todos' || busquedaDebounced.trim()) && (
             <div
               style={{
                 display: 'flex',
                 flexWrap: 'wrap',
                 gap: '8px',
-                marginBottom: '1rem',
+                marginBottom: '0.75rem',
                 alignItems: 'center',
               }}
             >
@@ -1311,16 +1176,6 @@ function HomeContent() {
                   <IconClose size={12} />
                 </button>
               )}
-              {filtroUbicacion && (filtroUbicacion.distrito || filtroUbicacion.departamento) && (
-                <button
-                  type="button"
-                  onClick={() => setFiltroUbicacion(undefined)}
-                  style={filterChipStyle}
-                >
-                  {filtroUbicacion.distrito || filtroUbicacion.departamento}
-                  <IconClose size={12} />
-                </button>
-              )}
               {busquedaDebounced.trim() && (
                 <button
                   type="button"
@@ -1329,52 +1184,6 @@ function HomeContent() {
                 >
                   &quot;{busquedaDebounced.trim()}&quot;
                   <IconClose size={12} />
-                </button>
-              )}
-              {soloConFotos && (
-                <button type="button" onClick={() => setSoloConFotos(false)} style={filterChipStyle}>
-                  Solo con fotos
-                  <IconClose size={12} />
-                </button>
-              )}
-              {!ocultarHistoricos && (
-                <button type="button" onClick={() => setOcultarHistoricos(true)} style={filterChipStyle}>
-                  Incluye más anuncios
-                  <IconClose size={12} />
-                </button>
-              )}
-              <button
-                type="button"
-                onClick={() => {
-                  setCategoriaFiltro('todos');
-                  setBusqueda('');
-                  setFiltroUbicacion(undefined);
-                  setSoloConFotos(false);
-                  setOcultarHistoricos(true);
-                  router.push('/', { scroll: false });
-                }}
-                style={{
-                  ...filterChipStyle,
-                  backgroundColor: 'transparent',
-                  border: '1px dashed var(--border-color)',
-                  color: 'var(--text-secondary)',
-                }}
-              >
-                Limpiar todo
-              </button>
-            </div>
-          )}
-
-          {!cargando && (
-            <div style={{ display: 'flex', gap: '8px', marginBottom: '1rem', flexWrap: 'wrap' }}>
-              {!soloConFotos && (
-                <button type="button" onClick={() => setSoloConFotos(true)} style={filterChipStyle}>
-                  Solo con fotos
-                </button>
-              )}
-              {ocultarHistoricos && (
-                <button type="button" onClick={() => setOcultarHistoricos(false)} style={filterChipStyle}>
-                  Ver más anuncios
                 </button>
               )}
             </div>
@@ -1400,15 +1209,15 @@ function HomeContent() {
                   padding: '3rem 1rem',
                   color: 'var(--text-secondary)'
                 }}>
-                  {busqueda || categoriaFiltro !== 'todos' || soloConFotos || filtroUbicacion
+                  {busqueda || categoriaFiltro !== 'todos' || browseFilters.conFotos || browseFilters.ubicacion
                     ? 'No se encontraron adisos con esos filtros'
-                    : ocultarHistoricos && adisos.some((a) => a.esHistorico)
+                    : !browseFilters.incluirMasAnuncios && adisos.some((a) => a.esHistorico)
                       ? (
                         <span>
                           Hay más anuncios disponibles.{' '}
                           <button
                             type="button"
-                            onClick={() => setOcultarHistoricos(false)}
+                            onClick={() => setBrowseFilters((prev) => ({ ...prev, incluirMasAnuncios: true }))}
                             style={{
                               background: 'none',
                               border: 'none',
