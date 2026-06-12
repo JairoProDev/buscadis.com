@@ -115,17 +115,23 @@ export const getAdisos = async (): Promise<Adiso[]> => {
   return [];
 };
 
-export const saveAdiso = async (adiso: Adiso): Promise<void> => {
-  // Guardar en cache inmediatamente (optimistic update)
-  saveAdisoLocal(adiso);
+export const removeAdisoFromLocalCache = (id: string): void => {
+  if (typeof window === 'undefined') return;
+  try {
+    const adisos = getAdisosLocal().filter((a) => a.id !== id);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(adisos));
+  } catch (error) {
+    console.error('Error al quitar adiso del cache local:', error);
+  }
+};
 
+export const saveAdiso = async (adiso: Adiso): Promise<void> => {
   if (USE_LOCAL_STORAGE) {
+    saveAdisoLocal(adiso);
     return;
   }
 
-  // IMPORTANTE: Guardar en API INMEDIATAMENTE, incluso con previews locales
-  // Esto asegura que el adiso exista en Supabase y no desaparezca al recargar
-  // Las imágenes se actualizarán cuando se suban a Supabase Storage
+  // Guardar en Supabase primero; el cache local solo si el servidor confirma
   if (typeof window !== 'undefined') {
     try {
       const { createAdiso, updateAdiso } = await import('./api');
@@ -133,13 +139,14 @@ export const saveAdiso = async (adiso: Adiso): Promise<void> => {
       try {
         const resultado = await createAdiso(adiso);
         console.log('✅ Adiso guardado en Supabase:', resultado.id);
-        // Marcar como propio cuando se crea exitosamente
-        markAdisoAsOwn(adiso.id);
+        saveAdisoLocal(resultado);
+        markAdisoAsOwn(resultado.id);
       } catch (error: any) {
         // Si el error es 409 (conflict) o el adiso ya existe, actualizar
         if (error?.message?.includes('ya existe') || error?.message?.includes('duplicado') || error?.response?.status === 409) {
           const resultado = await updateAdiso(adiso);
           console.log('✅ Adiso actualizado en Supabase:', resultado.id);
+          saveAdisoLocal(resultado);
         } else {
           // Re-lanzar el error para que se maneje arriba
           throw error;
@@ -177,14 +184,14 @@ export const getAdisoById = async (id: string): Promise<Adiso | null> => {
       const { fetchAdisoById } = await import('./api');
       const adiso = await fetchAdisoById(id);
       if (adiso) {
-        // Guardar en cache para próxima vez
-        const adisos = getAdisosLocal();
-        if (!adisos.find(a => a.id === id)) {
-          adisos.unshift(adiso);
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(adisos));
-        }
+        saveAdisoLocal(adiso);
+        return adiso;
       }
-      return adiso || cacheAdiso;
+      // No existe en el servidor: quitar entradas fantasma de publicaciones fallidas
+      if (cacheAdiso) {
+        removeAdisoFromLocalCache(id);
+      }
+      return null;
     } catch (error) {
       console.error('Error al cargar desde API:', error);
       return cacheAdiso;

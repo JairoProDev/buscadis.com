@@ -304,17 +304,16 @@ function HomeContent() {
       return;
     }
 
-    // Buscar en adisos actuales primero (más rápido)
+    // Mostrar desde cache mientras se verifica en el servidor
     const adisoLocal = adisos.find(a => a.id === adisoId);
     if (adisoLocal) {
       setAdisoAbierto(adisoLocal);
       if (isDesktop) {
         setIsSidebarMinimizado(false);
       }
-      return;
     }
 
-    // Si no está en local, cargarlo en background (sin bloquear UI)
+    // Siempre confirmar contra el servidor (evita adisos fantasma solo en localStorage)
     getAdisoById(adisoId).then(adiso => {
       if (adiso) {
         setAdisoAbierto(adiso);
@@ -325,11 +324,23 @@ function HomeContent() {
           if (!prev.find(a => a.id === adisoId)) {
             return [adiso, ...prev];
           }
-          return prev;
+          return prev.map(a => a.id === adisoId ? adiso : a);
         });
+        return;
       }
+
+      // El enlace apunta a un adiso que no existe en el servidor
+      setAdisos(prev => prev.filter(a => a.id !== adisoId));
+      setAdisoAbierto(null);
+      if (isDesktop) {
+        setIsSidebarMinimizado(true);
+      }
+      const params = new URLSearchParams(searchParams.toString());
+      params.delete('adiso');
+      router.replace(params.toString() ? `/?${params.toString()}` : '/', { scroll: false });
+      error('Este anuncio no está disponible. Puede que no se haya guardado correctamente.');
     }).catch(console.error);
-  }, [adisoId, adisos, cargando, isDesktop]);
+  }, [adisoId, adisos, cargando, isDesktop, error, router, searchParams]);
 
   // Filtrado y ordenamiento
   useEffect(() => {
@@ -573,7 +584,6 @@ function HomeContent() {
       const params = new URLSearchParams(searchParams.toString());
       params.set('adiso', nuevoAdiso.id);
       router.replace(`/?${params.toString()}`, { scroll: false });
-      success('¡Adiso publicado exitosamente!');
     } else {
       // Si es una actualización (con imagen), actualizar el modal si está abierto
       if (adisoAbierto?.id === nuevoAdiso.id) {

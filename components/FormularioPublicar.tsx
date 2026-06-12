@@ -277,6 +277,32 @@ export default function FormularioPublicar({
     });
   };
 
+  const subirImagenesAdiso = async (previews: ImagenPreview[]): Promise<string[]> => {
+    const urls: string[] = [];
+
+    for (const imgPreview of previews) {
+      const formDataUpload = new FormData();
+      formDataUpload.append('image', imgPreview.file);
+      formDataUpload.append('bucket', 'adisos-images');
+
+      const uploadResponse = await fetch('/api/upload-image', {
+        method: 'POST',
+        body: formDataUpload
+      });
+
+      if (!uploadResponse.ok) {
+        throw new Error('No se pudo subir una de las imágenes. Revisa tu conexión e intenta de nuevo.');
+      }
+
+      const uploadData = await uploadResponse.json();
+      if (uploadData.url) {
+        urls.push(uploadData.url);
+      }
+    }
+
+    return urls;
+  };
+
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
 
@@ -294,13 +320,25 @@ export default function FormularioPublicar({
       const fecha = ahora.toISOString().split('T')[0];
       const hora = ahora.toTimeString().split(' ')[0].substring(0, 5);
       const idUnico = generarIdUnico();
-      const previewsUrls = imagenesPreviews.map(img => img.preview);
+      const paqueteSeleccionado = PAQUETES[formData.tamaño || 'miniatura'];
 
       const ubicacionFinal = formData.ubicacion
         ? (formData.ubicacion.distrito
           ? `${formData.ubicacion.distrito}, ${formData.ubicacion.provincia}, ${formData.ubicacion.departamento}${formData.ubicacion.direccion ? `, ${formData.ubicacion.direccion}` : ''}`
           : formData.ubicacion as any)
         : '';
+
+      let imagenesUrls: string[] | undefined;
+      if (imagenesPreviews.length > 0) {
+        if (paqueteSeleccionado.maxImagenes === 0) {
+          onError?.('El paquete Miniatura no permite imágenes. Elige otro paquete o quita las fotos.');
+          return;
+        }
+        imagenesUrls = await subirImagenesAdiso(imagenesPreviews);
+        if (imagenesUrls.length === 0) {
+          throw new Error('No se pudieron subir las imágenes. Intenta de nuevo.');
+        }
+      }
 
       const nuevoAdiso: Adiso = {
         id: idUnico,
@@ -310,73 +348,32 @@ export default function FormularioPublicar({
         contacto: formData.contacto,
         ubicacion: formData.ubicacion || ubicacionFinal,
         tamaño: formData.tamaño || 'miniatura',
-        imagenesUrls: previewsUrls,
+        imagenesUrls,
         fechaPublicacion: fecha,
         horaPublicacion: hora
       };
 
-      setEnviando(false);
+      await saveAdiso(nuevoAdiso);
       onPublicar(nuevoAdiso);
       onSuccess?.('¡Adiso publicado con éxito!');
-
-      try {
-        await saveAdiso(nuevoAdiso);
-      } catch (error: any) {
-        onError?.(`El adiso se publicó localmente, pero hubo un error al guardarlo en la base de datos: ${error?.message || 'Error desconocido'}. Por favor, intenta publicarlo nuevamente.`);
-      }
-
-      if (imagenesPreviews.length > 0) {
-        (async () => {
-          const urlsSubidas: string[] = [];
-          const uploadPromises = imagenesPreviews.map(async (imgPreview) => {
-            try {
-              const formDataUpload = new FormData();
-              formDataUpload.append('image', imgPreview.file);
-              formDataUpload.append('bucket', 'adisos-images');
-
-              const uploadResponse = await fetch('/api/upload-image', {
-                method: 'POST',
-                body: formDataUpload
-              });
-
-              if (uploadResponse.ok) {
-                const uploadData = await uploadResponse.json();
-                return uploadData.url;
-              }
-              return null;
-            } catch (err) {
-              return null;
-            }
-          });
-
-          const resultados = await Promise.all(uploadPromises);
-          urlsSubidas.push(...resultados.filter((url): url is string => url !== null));
-
-          if (urlsSubidas.length > 0) {
-            const adisoActualizado: Adiso = {
-              ...nuevoAdiso,
-              imagenesUrls: urlsSubidas
-            };
-            onPublicar(adisoActualizado);
-            saveAdiso(adisoActualizado).catch(() => { });
-          }
-        })();
-      }
     } catch (error: any) {
       console.error('Error al publicar:', error);
-      let errorMessage = 'Hubo un error al publicar el adiso. Por favor intenta nuevamente.';
+      let errorMessage = 'No se pudo publicar el adiso. Por favor intenta nuevamente.';
 
       if (error?.message?.includes('conexión') || error?.message?.includes('network') || error?.message?.includes('fetch failed')) {
-        errorMessage = 'No hay conexión a internet. El adiso se guardó localmente y se publicará cuando se restablezca la conexión.';
-      } else if (error?.message?.includes('validación') || error?.message?.includes('inválido')) {
-        errorMessage = 'Por favor verifica que todos los campos estén correctamente completados.';
-      } else if (error?.message?.includes('imagen') || error?.message?.includes('upload')) {
-        errorMessage = 'Hubo un problema al subir las imágenes. El adiso se publicó sin imágenes. Puedes editarlo más tarde.';
+        errorMessage = 'Sin conexión a internet. Conéctate e intenta publicar de nuevo.';
+      } else if (error?.message?.includes('validación') || error?.message?.includes('inválido') || error?.message?.includes('inválidos')) {
+        errorMessage = 'Revisa que todos los campos estén correctos (teléfono, ubicación, paquete).';
+      } else if (error?.message?.includes('imagen') || error?.message?.includes('upload') || error?.message?.includes('Miniatura')) {
+        errorMessage = error.message;
+      } else if (error?.message?.includes('Supabase') || error?.message?.includes('guardar adiso')) {
+        errorMessage = error.message.replace(/^Error al guardar adiso en Supabase:\s*/i, '');
       } else if (error?.message) {
         errorMessage = error.message;
       }
 
       onError?.(errorMessage);
+    } finally {
       setEnviando(false);
     }
   };
