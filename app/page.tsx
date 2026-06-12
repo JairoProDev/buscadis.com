@@ -773,232 +773,232 @@ function HomeContent() {
 
   return (
     <>
-    <PullToRefresh onRefresh={handleRefresh}>
-      <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
-        />
-        <a href="#main-content" className="skip-link">
-          Ir al contenido
-        </a>
-        <Header
-          onToggleLeftSidebar={() => setIsLeftSidebarOpen(!isLeftSidebarOpen)}
-          ubicacion={browseFilters.ubicacion?.distrito || browseFilters.ubicacion?.departamento || 'Perú'}
-          onUbicacionClick={() => setMostrarFiltroUbicacion(true)}
-          seccionActiva={seccionDesktopActiva}
-          onSeccionChange={(seccion) => {
-            setSeccionDesktopActiva(seccion);
-            if (seccion !== 'adiso') {
-              setIsSidebarMinimizado(false);
-            } else if (!adisoAbierto) {
-              setIsSidebarMinimizado(true);
-            }
-          }}
-        />
-        {/* Categorías + buscador: un solo sticky (evita superposición al scroll) */}
-        <div
-          style={{
-            position: 'sticky',
-            top: '72px',
-            zIndex: 900,
-            width: '100%',
-            maxWidth: isDesktop
-              ? 'calc(100% - var(--sidebar-width, 0px))'
-              : '100%',
-            margin: '0 auto',
-            backgroundColor: 'var(--glass-bg)',
-            backdropFilter: 'blur(12px)',
-            WebkitBackdropFilter: 'blur(12px)',
-            borderBottom: browseScrolled ? '1px solid var(--border-color)' : 'none',
-            transition: 'border-color 0.25s ease',
-            ...(isDesktop && { marginRight: 'var(--sidebar-width, 0px)' }),
-          }}
-        >
-        <div
-          className="no-scrollbar"
-          style={{
-            display: 'flex',
-            justifyContent: isDesktop ? 'center' : 'flex-start',
-            overflowX: browseScrolled ? 'hidden' : 'auto',
-            overflowY: 'hidden',
-            gap: isDesktop ? '1.5rem' : '1rem',
-            padding: browseScrolled ? '0 1rem' : '1.25rem 1rem 0.75rem',
-            maxHeight: browseScrolled ? 0 : 120,
-            opacity: browseScrolled ? 0 : 1,
-            scrollbarWidth: 'none',
-            msOverflowStyle: 'none',
-            WebkitOverflowScrolling: 'touch',
-            alignItems: 'center',
-            transition: 'max-height 0.3s ease, opacity 0.3s ease, padding 0.3s ease',
-            pointerEvents: browseScrolled ? 'none' : 'auto',
-          }}
-        >
-          {[
-            { id: 'empleos', label: 'Empleos', Icon: IconEmpleos },
-            { id: 'inmuebles', label: 'Inmuebles', Icon: IconInmuebles },
-            { id: 'vehiculos', label: 'Vehículos', Icon: IconVehiculos },
-            { id: 'servicios', label: 'Servicios', Icon: IconServicios },
-            { id: 'productos', label: 'Productos', Icon: IconProductos },
-            { id: 'eventos', label: 'Eventos', Icon: IconEventos },
-            { id: 'negocios', label: 'Negocios', Icon: IconNegocios },
-            { id: 'comunidad', label: 'Comunidad', Icon: IconComunidad },
-          ].map(({ id, label, Icon }) => (
-            <button
-              key={id}
-              onClick={() => {
-                const nuevaCategoria = categoriaFiltro === id ? 'todos' : (id as Categoria);
-                setCategoriaFiltro(nuevaCategoria);
-
-                // Actualizar URL sin recargar
-                const params = new URLSearchParams(searchParams.toString());
-                if (nuevaCategoria === 'todos') {
-                  params.delete('categoria');
-                } else {
-                  params.set('categoria', nuevaCategoria);
-                }
-                // Mantener búsqueda si existe
-                if (busqueda.trim()) {
-                  params.set('buscar', busqueda.trim());
-                } else {
-                  params.delete('buscar');
-                }
-                router.push(`/?${params.toString()}`, { scroll: false });
-              }}
+      <PullToRefresh onRefresh={handleRefresh}>
+        <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+          />
+          <a href="#main-content" className="skip-link">
+            Ir al contenido
+          </a>
+          <Header
+            onToggleLeftSidebar={() => setIsLeftSidebarOpen(!isLeftSidebarOpen)}
+            ubicacion={browseFilters.ubicacion?.distrito || browseFilters.ubicacion?.departamento || 'Perú'}
+            onUbicacionClick={() => setMostrarFiltroUbicacion(true)}
+            seccionActiva={seccionDesktopActiva}
+            onSeccionChange={(seccion) => {
+              setSeccionDesktopActiva(seccion);
+              if (seccion !== 'adiso') {
+                setIsSidebarMinimizado(false);
+              } else if (!adisoAbierto) {
+                setIsSidebarMinimizado(true);
+              }
+            }}
+          />
+          {/* Categorías + buscador: un solo sticky (evita superposición al scroll) */}
+          <div
+            style={{
+              position: 'sticky',
+              top: '72px',
+              zIndex: 900,
+              width: '100%',
+              maxWidth: isDesktop
+                ? 'calc(100% - var(--sidebar-width, 0px))'
+                : '100%',
+              margin: '0 auto',
+              backdropFilter: 'blur(12px)',
+              WebkitBackdropFilter: 'blur(12px)',
+              borderBottom: browseScrolled ? '1px solid var(--border-color)' : 'none',
+              transition: 'border-color 0.25s ease',
+              ...(isDesktop && { marginRight: 'var(--sidebar-width, 0px)' }),
+            }}
+          >
+            <div
+              className="no-scrollbar"
               style={{
                 display: 'flex',
-                flexDirection: 'column',
+                justifyContent: isDesktop ? 'center' : 'flex-start',
+                overflowX: browseScrolled ? 'hidden' : 'auto',
+                overflowY: 'hidden',
+                gap: isDesktop ? '1.5rem' : '1rem',
+                padding: browseScrolled ? '0 1rem' : '1.25rem 1rem 0.75rem',
+                maxHeight: browseScrolled ? 0 : 120,
+                opacity: browseScrolled ? 0 : 1,
+                scrollbarWidth: 'none',
+                msOverflowStyle: 'none',
+                WebkitOverflowScrolling: 'touch',
                 alignItems: 'center',
-                gap: '0.5rem',
-                background: 'none',
-                border: 'none',
-                cursor: 'pointer',
-                minWidth: '80px',
-                flexShrink: 0,
-                padding: '4px',
-                borderRadius: '12px',
-                opacity: categoriaFiltro === id ? 1 : 0.8,
-                transform: categoriaFiltro === id ? 'scale(1.05)' : 'scale(1)',
-                transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+                transition: 'max-height 0.3s ease, opacity 0.3s ease, padding 0.3s ease',
+                pointerEvents: browseScrolled ? 'none' : 'auto',
               }}
-              className="group"
             >
-              <div style={{
-                width: '48px',
-                height: '48px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                borderRadius: '16px',
-                boxSizing: 'border-box',
-                border: categoriaFiltro === id
-                  ? '2px solid var(--brand-yellow)'
-                  : '2px solid rgba(var(--brand-yellow-rgb), 0.65)',
-                backgroundColor: categoriaFiltro === id ? 'var(--brand-blue)' : 'var(--bg-primary)',
-                color: categoriaFiltro === id ? 'white' : 'var(--text-secondary)',
-                boxShadow: categoriaFiltro === id
-                  ? '0 10px 20px -5px rgba(var(--brand-primary-rgb), 0.35), 0 0 0 1px rgba(var(--brand-yellow-rgb), 0.35)'
-                  : '0 4px 6px -1px rgba(0, 0, 0, 0.05)',
-                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                position: 'relative',
-                overflow: 'hidden'
-              }}
-                className="group-hover:shadow-lg group-hover:-translate-y-1"
-              >
-                <Icon size={24} color={categoriaFiltro === id ? 'white' : undefined} />
-              </div>
-              <span style={{
-                fontSize: '0.75rem',
-                fontWeight: categoriaFiltro === id ? 700 : 500,
-                textAlign: 'center',
-                whiteSpace: 'nowrap',
-                color: categoriaFiltro === id ? 'var(--brand-blue)' : 'var(--text-secondary)'
-              }}>
-                {label}
-              </span>
-            </button>
-          ))}
-        </div>
-        <div
-          style={{
-            padding: browseScrolled ? '0.5rem 1rem' : '0 1rem 1rem',
-            transition: 'padding 0.3s ease',
-          }}
-        >
-          <Buscador
-            value={busqueda}
-            onChange={setBusqueda}
-            compact={browseScrolled}
-            onCategoryDetected={(categoria) => {
-              setCategoriaFiltro(categoria);
-              const params = new URLSearchParams(searchParams.toString());
-              params.set('categoria', categoria);
-              router.replace(`/?${params.toString()}`, { scroll: false });
-            }}
-            onNotify={(message, type) => {
-              if (type === 'error') error(message);
-              else if (type === 'success') success(message);
-              else success(message);
-            }}
-          />
-        </div>
-        <div style={{ padding: '0 1rem 0.5rem' }}>
-          <BrowseFilters
-            categoria={categoriaFiltro}
-            filters={browseFilters}
-            onChange={setBrowseFilters}
-            adisos={adisos}
-            busqueda={busquedaDebounced}
-            isDesktop={isDesktop}
-            userLat={profile?.latitud}
-            userLng={profile?.longitud}
-            onOpenUbicacion={() => setMostrarFiltroUbicacion(true)}
-            sidebarCollapsed={filterSidebarCollapsed}
-            onToggleSidebar={() => setFilterSidebarCollapsed((c) => !c)}
-            onOpenMobileFilters={() => setIsMobileFiltersOpen(true)}
-          />
-        </div>
-        </div>
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'flex-start',
-            flex: 1,
-            width: '100%',
-            maxWidth: isDesktop ? 'calc(100% - var(--sidebar-width, 0px))' : '100%',
-            margin: '0 auto',
-            ...(isDesktop && { marginRight: 'var(--sidebar-width, 0px)' }),
-          }}
-        >
-        {isDesktop && (
-          <FilterSidePanel
-            categoria={categoriaFiltro}
-            filters={browseFilters}
-            onChange={setBrowseFilters}
-            adisos={adisos}
-            busqueda={busquedaDebounced}
-            collapsed={filterSidebarCollapsed}
-            onToggleCollapse={() => setFilterSidebarCollapsed((c) => !c)}
-            onOpenUbicacion={() => setMostrarFiltroUbicacion(true)}
-            userLat={profile?.latitud}
-            userLng={profile?.longitud}
-            resultCount={adisosFiltrados.length}
-          />
-        )}
-        <main id="main-content" style={{
-          flex: 1,
-          minWidth: 0,
-          padding: '1rem',
-          paddingTop: browseScrolled ? '0.5rem' : '0.25rem',
-          paddingBottom: isDesktop ? '1rem' : '5rem',
-          width: '100%',
-          transition: 'padding-bottom 0.3s ease, padding-top 0.3s ease',
-        }}>
+              {[
+                { id: 'empleos', label: 'Empleos', Icon: IconEmpleos },
+                { id: 'inmuebles', label: 'Inmuebles', Icon: IconInmuebles },
+                { id: 'vehiculos', label: 'Vehículos', Icon: IconVehiculos },
+                { id: 'servicios', label: 'Servicios', Icon: IconServicios },
+                { id: 'productos', label: 'Productos', Icon: IconProductos },
+                { id: 'eventos', label: 'Eventos', Icon: IconEventos },
+                { id: 'negocios', label: 'Negocios', Icon: IconNegocios },
+                { id: 'comunidad', label: 'Comunidad', Icon: IconComunidad },
+              ].map(({ id, label, Icon }) => (
+                <button
+                  key={id}
+                  onClick={() => {
+                    const nuevaCategoria = categoriaFiltro === id ? 'todos' : (id as Categoria);
+                    setCategoriaFiltro(nuevaCategoria);
 
-          {/* Drawer de Filtros Mobile */}
-          {!isDesktop && isMobileFiltersOpen && (
-            <div className="fixed inset-0 z-[1100] flex">
-              <style dangerouslySetInnerHTML={{ __html: `
+                    // Actualizar URL sin recargar
+                    const params = new URLSearchParams(searchParams.toString());
+                    if (nuevaCategoria === 'todos') {
+                      params.delete('categoria');
+                    } else {
+                      params.set('categoria', nuevaCategoria);
+                    }
+                    // Mantener búsqueda si existe
+                    if (busqueda.trim()) {
+                      params.set('buscar', busqueda.trim());
+                    } else {
+                      params.delete('buscar');
+                    }
+                    router.push(`/?${params.toString()}`, { scroll: false });
+                  }}
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    gap: '0.5rem',
+                    background: 'none',
+                    border: 'none',
+                    cursor: 'pointer',
+                    minWidth: '80px',
+                    flexShrink: 0,
+                    padding: '4px',
+                    borderRadius: '12px',
+                    opacity: categoriaFiltro === id ? 1 : 0.8,
+                    transform: categoriaFiltro === id ? 'scale(1.05)' : 'scale(1)',
+                    transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+                  }}
+                  className="group"
+                >
+                  <div style={{
+                    width: '48px',
+                    height: '48px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    borderRadius: '16px',
+                    boxSizing: 'border-box',
+                    border: categoriaFiltro === id
+                      ? '2px solid var(--brand-yellow)'
+                      : '2px solid rgba(var(--brand-yellow-rgb), 0.65)',
+                    backgroundColor: categoriaFiltro === id ? 'var(--brand-blue)' : 'var(--bg-primary)',
+                    color: categoriaFiltro === id ? 'white' : 'var(--text-secondary)',
+                    boxShadow: categoriaFiltro === id
+                      ? '0 10px 20px -5px rgba(var(--brand-primary-rgb), 0.35), 0 0 0 1px rgba(var(--brand-yellow-rgb), 0.35)'
+                      : '0 4px 6px -1px rgba(0, 0, 0, 0.05)',
+                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                    position: 'relative',
+                    overflow: 'hidden'
+                  }}
+                    className="group-hover:shadow-lg group-hover:-translate-y-1"
+                  >
+                    <Icon size={24} color={categoriaFiltro === id ? 'white' : undefined} />
+                  </div>
+                  <span style={{
+                    fontSize: '0.75rem',
+                    fontWeight: categoriaFiltro === id ? 700 : 500,
+                    textAlign: 'center',
+                    whiteSpace: 'nowrap',
+                    color: categoriaFiltro === id ? 'var(--brand-blue)' : 'var(--text-secondary)'
+                  }}>
+                    {label}
+                  </span>
+                </button>
+              ))}
+            </div>
+            <div
+              style={{
+                padding: browseScrolled ? '0.5rem 1rem' : '0 1rem 1rem',
+                transition: 'padding 0.3s ease',
+              }}
+            >
+              <Buscador
+                value={busqueda}
+                onChange={setBusqueda}
+                compact={browseScrolled}
+                onCategoryDetected={(categoria) => {
+                  setCategoriaFiltro(categoria);
+                  const params = new URLSearchParams(searchParams.toString());
+                  params.set('categoria', categoria);
+                  router.replace(`/?${params.toString()}`, { scroll: false });
+                }}
+                onNotify={(message, type) => {
+                  if (type === 'error') error(message);
+                  else if (type === 'success') success(message);
+                  else success(message);
+                }}
+              />
+            </div>
+            <div style={{ padding: '0 1rem 0.5rem' }}>
+              <BrowseFilters
+                categoria={categoriaFiltro}
+                filters={browseFilters}
+                onChange={setBrowseFilters}
+                adisos={adisos}
+                busqueda={busquedaDebounced}
+                isDesktop={isDesktop}
+                userLat={profile?.latitud}
+                userLng={profile?.longitud}
+                onOpenUbicacion={() => setMostrarFiltroUbicacion(true)}
+                sidebarCollapsed={filterSidebarCollapsed}
+                onToggleSidebar={() => setFilterSidebarCollapsed((c) => !c)}
+                onOpenMobileFilters={() => setIsMobileFiltersOpen(true)}
+              />
+            </div>
+          </div>
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'flex-start',
+              flex: 1,
+              width: '100%',
+              maxWidth: isDesktop ? 'calc(100% - var(--sidebar-width, 0px))' : '100%',
+              margin: '0 auto',
+              ...(isDesktop && { marginRight: 'var(--sidebar-width, 0px)' }),
+            }}
+          >
+            {isDesktop && (
+              <FilterSidePanel
+                categoria={categoriaFiltro}
+                filters={browseFilters}
+                onChange={setBrowseFilters}
+                adisos={adisos}
+                busqueda={busquedaDebounced}
+                collapsed={filterSidebarCollapsed}
+                onToggleCollapse={() => setFilterSidebarCollapsed((c) => !c)}
+                onOpenUbicacion={() => setMostrarFiltroUbicacion(true)}
+                userLat={profile?.latitud}
+                userLng={profile?.longitud}
+                resultCount={adisosFiltrados.length}
+              />
+            )}
+            <main id="main-content" style={{
+              flex: 1,
+              minWidth: 0,
+              padding: '1rem',
+              paddingTop: browseScrolled ? '0.5rem' : '0.25rem',
+              paddingBottom: isDesktop ? '1rem' : '5rem',
+              width: '100%',
+              transition: 'padding-bottom 0.3s ease, padding-top 0.3s ease',
+            }}>
+
+              {/* Drawer de Filtros Mobile */}
+              {!isDesktop && isMobileFiltersOpen && (
+                <div className="fixed inset-0 z-[1100] flex">
+                  <style dangerouslySetInnerHTML={{
+                    __html: `
                 @keyframes slideIn {
                   from { transform: translateX(-100%); }
                   to { transform: translateX(0); }
@@ -1008,352 +1008,352 @@ function HomeContent() {
                   to { opacity: 1; }
                 }
               `}} />
-              {/* Backdrop */}
-              <div
-                className="fixed inset-0 bg-black/50 backdrop-blur-sm"
-                style={{ animation: 'fadeIn 0.2s ease-out forwards' }}
-                onClick={() => setIsMobileFiltersOpen(false)}
-              />
-              {/* Drawer Content */}
-              <div
-                className="relative flex w-full max-w-[320px] flex-col bg-[var(--bg-primary)] h-full shadow-2xl overflow-hidden z-10"
-                style={{
-                  animation: 'slideIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards',
-                }}
-              >
-                <div className="flex items-center justify-between p-4 border-b border-[var(--border-color)] bg-[var(--bg-secondary)]">
-                  <h2 className="text-base font-bold text-[var(--text-primary)]">Filtros</h2>
-                  <button
+                  {/* Backdrop */}
+                  <div
+                    className="fixed inset-0 bg-black/50 backdrop-blur-sm"
+                    style={{ animation: 'fadeIn 0.2s ease-out forwards' }}
                     onClick={() => setIsMobileFiltersOpen(false)}
-                    className="p-1.5 rounded-lg hover:bg-[var(--hover-bg)] text-[var(--text-secondary)] transition-colors"
-                  >
-                    <IconClose size={20} />
-                  </button>
-                </div>
-                <div className="flex-1 p-4 overflow-y-auto no-scrollbar">
-                  <FilterControlFields
-                    categoria={categoriaFiltro}
-                    filters={browseFilters}
-                    onChange={setBrowseFilters}
-                    adisos={adisos}
-                    busqueda={busquedaDebounced}
-                    userLat={profile?.latitud}
-                    userLng={profile?.longitud}
-                    onOpenUbicacion={() => {
-                      setMostrarFiltroUbicacion(true);
-                      setIsMobileFiltersOpen(false);
-                    }}
-                    compact={false}
                   />
-                </div>
-                <div className="p-4 border-t border-[var(--border-color)] bg-[var(--bg-secondary)] flex items-center justify-between gap-3">
-                  <span className="text-xs font-semibold text-[var(--text-secondary)]">
-                    {adisosFiltrados.length} resultados
-                  </span>
-                  <button
-                    onClick={() => setIsMobileFiltersOpen(false)}
-                    className="px-4 py-2 bg-[var(--brand-blue)] text-white text-xs font-bold rounded-xl hover:opacity-90 active:scale-95 transition-all"
+                  {/* Drawer Content */}
+                  <div
+                    className="relative flex w-full max-w-[320px] flex-col bg-[var(--bg-primary)] h-full shadow-2xl overflow-hidden z-10"
+                    style={{
+                      animation: 'slideIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+                    }}
                   >
-                    Ver resultados
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Modal de Filtro de Ubicación */}
-          {mostrarFiltroUbicacion && (
-            <FiltroUbicacion
-              filtrosActuales={browseFilters.ubicacion}
-              onAplicar={(filtros) => {
-                setBrowseFilters((prev) => ({ ...prev, ubicacion: filtros }));
-                setMostrarFiltroUbicacion(false);
-              }}
-              onCerrar={() => setMostrarFiltroUbicacion(false)}
-            />
-          )}
-          {/* ── Toolbar: una sola línea ── */}
-          <div style={{
-            marginBottom: '1rem',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            padding: '0.25rem 0',
-            gap: '8px',
-            width: '100%',
-            flexWrap: 'nowrap',
-            overflow: 'hidden',
-          }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', minWidth: 0, flexShrink: 1, overflow: 'hidden' }}>
-              {cargando ? (
-                <div className="skeleton-shimmer" style={{ width: 100, height: 36, borderRadius: '18px', flexShrink: 0 }} />
-              ) : (
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  backgroundColor: 'var(--bg-primary)',
-                  padding: '4px 10px 4px 5px',
-                  borderRadius: '20px',
-                  boxShadow: '0 4px 12px rgba(0,0,0,0.03)',
-                  height: '36px',
-                  flexShrink: 0,
-                }}>
-                  <div style={{
-                    backgroundColor: 'var(--brand-blue)',
-                    color: 'white',
-                    height: '24px',
-                    minWidth: '24px',
-                    padding: '0 7px',
-                    borderRadius: '12px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: '0.8rem',
-                    fontWeight: 800,
-                    boxShadow: '0 0 0 2px var(--brand-yellow)',
-                  }}>
-                    {adisosFiltrados.length}
+                    <div className="flex items-center justify-between p-4 border-b border-[var(--border-color)] bg-[var(--bg-secondary)]">
+                      <h2 className="text-base font-bold text-[var(--text-primary)]">Filtros</h2>
+                      <button
+                        onClick={() => setIsMobileFiltersOpen(false)}
+                        className="p-1.5 rounded-lg hover:bg-[var(--hover-bg)] text-[var(--text-secondary)] transition-colors"
+                      >
+                        <IconClose size={20} />
+                      </button>
+                    </div>
+                    <div className="flex-1 p-4 overflow-y-auto no-scrollbar">
+                      <FilterControlFields
+                        categoria={categoriaFiltro}
+                        filters={browseFilters}
+                        onChange={setBrowseFilters}
+                        adisos={adisos}
+                        busqueda={busquedaDebounced}
+                        userLat={profile?.latitud}
+                        userLng={profile?.longitud}
+                        onOpenUbicacion={() => {
+                          setMostrarFiltroUbicacion(true);
+                          setIsMobileFiltersOpen(false);
+                        }}
+                        compact={false}
+                      />
+                    </div>
+                    <div className="p-4 border-t border-[var(--border-color)] bg-[var(--bg-secondary)] flex items-center justify-between gap-3">
+                      <span className="text-xs font-semibold text-[var(--text-secondary)]">
+                        {adisosFiltrados.length} resultados
+                      </span>
+                      <button
+                        onClick={() => setIsMobileFiltersOpen(false)}
+                        className="px-4 py-2 bg-[var(--brand-blue)] text-white text-xs font-bold rounded-xl hover:opacity-90 active:scale-95 transition-all"
+                      >
+                        Ver resultados
+                      </button>
+                    </div>
                   </div>
-                  <span style={{
-                    fontSize: '0.8rem',
-                    fontWeight: 600,
-                    color: 'var(--text-secondary)',
-                    whiteSpace: 'nowrap',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                  }}>
-                    {getBrowseCountLabel(categoriaFiltro, browseFilters.ubicacion)}
-                  </span>
+                </div>
+              )}
 
-                  {!cargando && (
-                    <button
-                      className="hidden lg:flex hover:opacity-90"
-                      onClick={async () => {
-                        const url = getBusquedaUrl(categoriaFiltro, busqueda);
-                        try {
-                          await navigator.clipboard.writeText(url);
-                          success('Link de búsqueda copiado');
-                        } catch (err) {
-                          error('Error al copiar link');
-                        }
-                      }}
-                      style={{
-                        marginLeft: '4px',
-                        width: '26px',
-                        height: '26px',
-                        borderRadius: '50%',
-                        border: 'none',
-                        backgroundColor: 'rgba(var(--brand-primary-rgb), 0.12)',
-                        color: 'var(--brand-blue)',
-                        cursor: 'pointer',
+              {/* Modal de Filtro de Ubicación */}
+              {mostrarFiltroUbicacion && (
+                <FiltroUbicacion
+                  filtrosActuales={browseFilters.ubicacion}
+                  onAplicar={(filtros) => {
+                    setBrowseFilters((prev) => ({ ...prev, ubicacion: filtros }));
+                    setMostrarFiltroUbicacion(false);
+                  }}
+                  onCerrar={() => setMostrarFiltroUbicacion(false)}
+                />
+              )}
+              {/* ── Toolbar: una sola línea ── */}
+              <div style={{
+                marginBottom: '1rem',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                padding: '0.25rem 0',
+                gap: '8px',
+                width: '100%',
+                flexWrap: 'nowrap',
+                overflow: 'hidden',
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', minWidth: 0, flexShrink: 1, overflow: 'hidden' }}>
+                  {cargando ? (
+                    <div className="skeleton-shimmer" style={{ width: 100, height: 36, borderRadius: '18px', flexShrink: 0 }} />
+                  ) : (
+                    <div style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      backgroundColor: 'var(--bg-primary)',
+                      padding: '4px 10px 4px 5px',
+                      borderRadius: '20px',
+                      boxShadow: '0 4px 12px rgba(0,0,0,0.03)',
+                      height: '36px',
+                      flexShrink: 0,
+                    }}>
+                      <div style={{
+                        backgroundColor: 'var(--brand-blue)',
+                        color: 'white',
+                        height: '24px',
+                        minWidth: '24px',
+                        padding: '0 7px',
+                        borderRadius: '12px',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        transition: 'all 0.2s'
+                        fontSize: '0.8rem',
+                        fontWeight: 800,
+                        boxShadow: '0 0 0 2px var(--brand-yellow)',
+                      }}>
+                        {adisosFiltrados.length}
+                      </div>
+                      <span style={{
+                        fontSize: '0.8rem',
+                        fontWeight: 600,
+                        color: 'var(--text-secondary)',
+                        whiteSpace: 'nowrap',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                      }}>
+                        {getBrowseCountLabel(categoriaFiltro, browseFilters.ubicacion)}
+                      </span>
+
+                      {!cargando && (
+                        <button
+                          className="hidden lg:flex hover:opacity-90"
+                          onClick={async () => {
+                            const url = getBusquedaUrl(categoriaFiltro, busqueda);
+                            try {
+                              await navigator.clipboard.writeText(url);
+                              success('Link de búsqueda copiado');
+                            } catch (err) {
+                              error('Error al copiar link');
+                            }
+                          }}
+                          style={{
+                            marginLeft: '4px',
+                            width: '26px',
+                            height: '26px',
+                            borderRadius: '50%',
+                            border: 'none',
+                            backgroundColor: 'rgba(var(--brand-primary-rgb), 0.12)',
+                            color: 'var(--brand-blue)',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            transition: 'all 0.2s'
+                          }}
+                          title="Compartir búsqueda"
+                        >
+                          <IconShare size={14} />
+                        </button>
+                      )}
+                    </div>
+                  )}
+                  {!cargando && marketplacePulse && (
+                    <div
+                      className="hidden xl:flex"
+                      style={{
+                        alignItems: 'center',
+                        gap: '6px',
+                        backgroundColor: 'rgba(var(--brand-yellow-rgb), 0.14)',
+                        color: 'var(--text-secondary)',
+                        border: '1px solid rgba(var(--brand-yellow-rgb), 0.28)',
+                        padding: '6px 10px',
+                        borderRadius: '999px',
+                        fontSize: '0.7rem',
+                        fontWeight: 600,
+                        height: '32px',
+                        flexShrink: 1,
+                        minWidth: 0,
+                        overflow: 'hidden',
                       }}
-                      title="Compartir búsqueda"
                     >
-                      <IconShare size={14} />
-                    </button>
+                      <IconEye size={14} aria-hidden="true" color="var(--brand-yellow)" />
+                      <span className="truncate">{marketplacePulse}</span>
+                    </div>
                   )}
                 </div>
-              )}
-              {!cargando && marketplacePulse && (
-                <div
-                  className="hidden xl:flex"
-                  style={{
-                    alignItems: 'center',
-                    gap: '6px',
-                    backgroundColor: 'rgba(var(--brand-yellow-rgb), 0.14)',
-                    color: 'var(--text-secondary)',
-                    border: '1px solid rgba(var(--brand-yellow-rgb), 0.28)',
-                    padding: '6px 10px',
-                    borderRadius: '999px',
-                    fontSize: '0.7rem',
-                    fontWeight: 600,
-                    height: '32px',
-                    flexShrink: 1,
-                    minWidth: 0,
-                    overflow: 'hidden',
-                  }}
-                >
-                  <IconEye size={14} aria-hidden="true" color="var(--brand-yellow)" />
-                  <span className="truncate">{marketplacePulse}</span>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
+                  <Ordenamiento
+                    valor={ordenamiento}
+                    onChange={setOrdenamiento}
+                  />
+
+                  {/* View Mode Switcher */}
+                  <div style={{
+                    display: 'flex',
+                    backgroundColor: 'var(--bg-primary)',
+                    padding: '4px',
+                    borderRadius: '14px',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.03)',
+                    height: '42px',
+                    alignItems: 'center'
+                  }}>
+                    {[
+                      { id: 'grid', icon: IconGrid, title: 'Cuadrícula' },
+                      { id: 'feed', icon: IconFeed, title: 'Individual' },
+                      { id: 'list', icon: IconList, title: 'Lista' }
+                    ].map((m) => {
+                      const Icon = m.icon;
+                      const active = vista === m.id;
+                      return (
+                        <button
+                          key={m.id}
+                          onClick={() => setVista(m.id as any)}
+                          style={{
+                            width: '34px',
+                            height: '34px',
+                            borderRadius: '10px',
+                            backgroundColor: active ? 'var(--brand-blue)' : 'transparent',
+                            color: active ? 'white' : 'var(--text-tertiary)',
+                            border: 'none',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            cursor: 'pointer',
+                            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                            margin: '0 2px'
+                          }}
+                          title={m.title}
+                        >
+                          <Icon size={18} />
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
-              )}
-            </div>
-
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
-              <Ordenamiento
-                valor={ordenamiento}
-                onChange={setOrdenamiento}
-              />
-
-              {/* View Mode Switcher */}
-              <div style={{
-                display: 'flex',
-                backgroundColor: 'var(--bg-primary)',
-                padding: '4px',
-                borderRadius: '14px',
-                boxShadow: '0 4px 12px rgba(0,0,0,0.03)',
-                height: '42px',
-                alignItems: 'center'
-              }}>
-                {[
-                  { id: 'grid', icon: IconGrid, title: 'Cuadrícula' },
-                  { id: 'feed', icon: IconFeed, title: 'Individual' },
-                  { id: 'list', icon: IconList, title: 'Lista' }
-                ].map((m) => {
-                  const Icon = m.icon;
-                  const active = vista === m.id;
-                  return (
-                    <button
-                      key={m.id}
-                      onClick={() => setVista(m.id as any)}
-                      style={{
-                        width: '34px',
-                        height: '34px',
-                        borderRadius: '10px',
-                        backgroundColor: active ? 'var(--brand-blue)' : 'transparent',
-                        color: active ? 'white' : 'var(--text-tertiary)',
-                        border: 'none',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        cursor: 'pointer',
-                        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                        margin: '0 2px'
-                      }}
-                      title={m.title}
-                    >
-                      <Icon size={18} />
-                    </button>
-                  );
-                })}
               </div>
-            </div>
-          </div>
 
-          {/* ── Cards: skeleton during first load, grid once ready ── */}
-          {cargando ? (
-            <SkeletonAdisos isDesktop={isDesktop} />
-          ) : (
-            <>
-              <GrillaAdisos
-                adisos={adisosFiltrados.slice(0, visibleCount)}
-                onAbrirAdiso={handleAbrirAdiso}
-                adisoSeleccionadoId={adisoAbierto?.id}
-                espacioAdicional={isSidebarMinimizado ? 360 : 0}
-                cargandoMas={cargandoMas}
-                sentinelRef={sentinelRef}
-                vista={vista}
-              />
-              {adisosFiltrados.length === 0 && !cargando && (
-                <div style={{
-                  textAlign: 'center',
-                  padding: '3rem 1rem',
-                  color: 'var(--text-secondary)'
-                }}>
-                  {busqueda || categoriaFiltro !== 'todos' || browseFilters.conFotos || browseFilters.ubicacion
-                    ? 'No se encontraron adisos con esos filtros'
-                    : !browseFilters.incluirMasAnuncios && adisos.some((a) => a.esHistorico)
-                      ? (
-                        <span>
-                          Hay más anuncios disponibles.{' '}
-                          <button
-                            type="button"
-                            onClick={() => setBrowseFilters((prev) => ({ ...prev, incluirMasAnuncios: true }))}
-                            style={{
-                              background: 'none',
-                              border: 'none',
-                              color: 'var(--brand-blue)',
-                              fontWeight: 700,
-                              cursor: 'pointer',
-                              textDecoration: 'underline',
-                            }}
-                          >
-                            Ver más anuncios
-                          </button>
-                        </span>
-                      )
-                      : 'Aún no hay adisos publicados'}
-                </div>
+              {/* ── Cards: skeleton during first load, grid once ready ── */}
+              {cargando ? (
+                <SkeletonAdisos isDesktop={isDesktop} />
+              ) : (
+                <>
+                  <GrillaAdisos
+                    adisos={adisosFiltrados.slice(0, visibleCount)}
+                    onAbrirAdiso={handleAbrirAdiso}
+                    adisoSeleccionadoId={adisoAbierto?.id}
+                    espacioAdicional={isSidebarMinimizado ? 360 : 0}
+                    cargandoMas={cargandoMas}
+                    sentinelRef={sentinelRef}
+                    vista={vista}
+                  />
+                  {adisosFiltrados.length === 0 && !cargando && (
+                    <div style={{
+                      textAlign: 'center',
+                      padding: '3rem 1rem',
+                      color: 'var(--text-secondary)'
+                    }}>
+                      {busqueda || categoriaFiltro !== 'todos' || browseFilters.conFotos || browseFilters.ubicacion
+                        ? 'No se encontraron adisos con esos filtros'
+                        : !browseFilters.incluirMasAnuncios && adisos.some((a) => a.esHistorico)
+                          ? (
+                            <span>
+                              Hay más anuncios disponibles.{' '}
+                              <button
+                                type="button"
+                                onClick={() => setBrowseFilters((prev) => ({ ...prev, incluirMasAnuncios: true }))}
+                                style={{
+                                  background: 'none',
+                                  border: 'none',
+                                  color: 'var(--brand-blue)',
+                                  fontWeight: 700,
+                                  cursor: 'pointer',
+                                  textDecoration: 'underline',
+                                }}
+                              >
+                                Ver más anuncios
+                              </button>
+                            </span>
+                          )
+                          : 'Aún no hay adisos publicados'}
+                    </div>
+                  )}
+                </>
               )}
-            </>
+            </main>
+          </div>
+          <FeedbackButton />
+
+          {/* Left Sidebar (Desktop/Mobile if requested) */}
+          <LeftSidebar
+            isOpen={isLeftSidebarOpen}
+            onClose={() => setIsLeftSidebarOpen(false)}
+          />
+
+          {/* Modal Adiso Mobile - Standalone Slide Up */}
+          {!isDesktop && adisoAbierto && !seccionMobileActiva && (
+            <ModalAdiso
+              adiso={adisoAbierto}
+              onCerrar={handleCerrarAdiso}
+              onAnterior={handleAnterior}
+              onSiguiente={handleSiguiente}
+              puedeAnterior={indiceAdisoActual > 0}
+              puedeSiguiente={indiceAdisoActual < adisosFiltrados.length - 1}
+              onSuccess={(msg) => success(msg)}
+              onError={(msg) => error(msg)}
+              dentroSidebar={false}
+            />
           )}
-        </main>
+
+          {/* Modal Mobile Overlay - solo cuando hay sección activa (EXCEPTO ADISO que va standalone) */}
+          {!isDesktop && seccionMobileActiva && seccionMobileActiva !== 'adiso' && (
+            <ModalNavegacionMobile
+              abierto={!!seccionMobileActiva}
+              onCerrar={handleCerrarSeccionMobile}
+              seccionInicial={seccionMobileActiva || undefined}
+              adisoAbierto={adisoAbierto}
+              onCerrarAdiso={handleCerrarAdiso}
+              onAnterior={handleAnterior}
+              onSiguiente={handleSiguiente}
+              puedeAnterior={indiceAdisoActual > 0}
+              puedeSiguiente={indiceAdisoActual < adisosFiltrados.length - 1}
+              onPublicar={handlePublicar}
+              todosLosAdisos={adisosFiltrados}
+              onError={(msg) => error(msg)}
+              onSuccess={(msg) => success(msg)}
+              onCambiarSeccion={handleCambiarSeccionMobile}
+            />
+          )}
+
+          <ToastContainer toasts={toasts} removeToast={removeToast} />
         </div>
-        <FeedbackButton />
-
-        {/* Left Sidebar (Desktop/Mobile if requested) */}
-        <LeftSidebar
-          isOpen={isLeftSidebarOpen}
-          onClose={() => setIsLeftSidebarOpen(false)}
+      </PullToRefresh>
+      {isDesktop && (
+        <SidebarDesktop
+          adisoAbierto={adisoAbierto}
+          onCerrarAdiso={handleCerrarAdiso}
+          onAnterior={handleAnterior}
+          onSiguiente={handleSiguiente}
+          puedeAnterior={indiceAdisoActual > 0}
+          puedeSiguiente={indiceAdisoActual < adisosFiltrados.length - 1}
+          onPublicar={handlePublicar}
+          onError={(msg) => error(msg)}
+          onSuccess={(msg) => success(msg)}
+          seccionActiva={seccionDesktopActiva}
+          minimizado={isSidebarMinimizado}
+          onMinimizadoChange={setIsSidebarMinimizado}
+          todosLosAdisos={adisosFiltrados}
         />
-
-        {/* Modal Adiso Mobile - Standalone Slide Up */}
-        {!isDesktop && adisoAbierto && !seccionMobileActiva && (
-          <ModalAdiso
-            adiso={adisoAbierto}
-            onCerrar={handleCerrarAdiso}
-            onAnterior={handleAnterior}
-            onSiguiente={handleSiguiente}
-            puedeAnterior={indiceAdisoActual > 0}
-            puedeSiguiente={indiceAdisoActual < adisosFiltrados.length - 1}
-            onSuccess={(msg) => success(msg)}
-            onError={(msg) => error(msg)}
-            dentroSidebar={false}
-          />
-        )}
-
-        {/* Modal Mobile Overlay - solo cuando hay sección activa (EXCEPTO ADISO que va standalone) */}
-        {!isDesktop && seccionMobileActiva && seccionMobileActiva !== 'adiso' && (
-          <ModalNavegacionMobile
-            abierto={!!seccionMobileActiva}
-            onCerrar={handleCerrarSeccionMobile}
-            seccionInicial={seccionMobileActiva || undefined}
-            adisoAbierto={adisoAbierto}
-            onCerrarAdiso={handleCerrarAdiso}
-            onAnterior={handleAnterior}
-            onSiguiente={handleSiguiente}
-            puedeAnterior={indiceAdisoActual > 0}
-            puedeSiguiente={indiceAdisoActual < adisosFiltrados.length - 1}
-            onPublicar={handlePublicar}
-            todosLosAdisos={adisosFiltrados}
-            onError={(msg) => error(msg)}
-            onSuccess={(msg) => success(msg)}
-            onCambiarSeccion={handleCambiarSeccionMobile}
-          />
-        )}
-
-        <ToastContainer toasts={toasts} removeToast={removeToast} />
-      </div>
-    </PullToRefresh>
-    {isDesktop && (
-      <SidebarDesktop
-        adisoAbierto={adisoAbierto}
-        onCerrarAdiso={handleCerrarAdiso}
-        onAnterior={handleAnterior}
-        onSiguiente={handleSiguiente}
-        puedeAnterior={indiceAdisoActual > 0}
-        puedeSiguiente={indiceAdisoActual < adisosFiltrados.length - 1}
-        onPublicar={handlePublicar}
-        onError={(msg) => error(msg)}
-        onSuccess={(msg) => success(msg)}
-        seccionActiva={seccionDesktopActiva}
-        minimizado={isSidebarMinimizado}
-        onMinimizadoChange={setIsSidebarMinimizado}
-        todosLosAdisos={adisosFiltrados}
-      />
-    )}
-    {!isDesktop && (
-      <NavbarMobile
-        seccionActiva={seccionMobileActiva || (adisoAbierto ? 'adiso' : null)}
-        onCambiarSeccion={handleCambiarSeccionMobile}
-        tieneAdisoAbierto={!!adisoAbierto}
-      />
-    )}
+      )}
+      {!isDesktop && (
+        <NavbarMobile
+          seccionActiva={seccionMobileActiva || (adisoAbierto ? 'adiso' : null)}
+          onCambiarSeccion={handleCambiarSeccionMobile}
+          tieneAdisoAbierto={!!adisoAbierto}
+        />
+      )}
     </>
   );
 }
