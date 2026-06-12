@@ -957,35 +957,42 @@ function HomeContent() {
             }
           }}
         />
-        {/* Category Bar - sticky, colapsa al scroll */}
+        {/* Categorías + buscador: un solo sticky (evita superposición al scroll) */}
         <div
-          className="no-scrollbar"
           style={{
             position: 'sticky',
             top: '72px',
             zIndex: 900,
-            display: 'flex',
-            justifyContent: isDesktop ? 'center' : 'flex-start',
-            overflowX: 'auto',
-            gap: isDesktop ? '1.5rem' : '1rem',
-            padding: browseScrolled ? '0 1rem' : '1.25rem 1rem',
-            maxHeight: browseScrolled ? 0 : 120,
-            opacity: browseScrolled ? 0 : 1,
-            backgroundColor: browseScrolled ? 'transparent' : 'var(--glass-bg)',
-            backdropFilter: browseScrolled ? 'none' : 'blur(12px)',
-            WebkitBackdropFilter: browseScrolled ? 'none' : 'blur(12px)',
-            scrollbarWidth: 'none',
-            msOverflowStyle: 'none',
-            WebkitOverflowScrolling: 'touch',
-            alignItems: 'center',
             width: '100%',
             maxWidth: isDesktop
               ? 'calc(100% - var(--sidebar-width, 0px))'
               : '100%',
             margin: '0 auto',
+            backgroundColor: 'var(--glass-bg)',
+            backdropFilter: 'blur(12px)',
+            WebkitBackdropFilter: 'blur(12px)',
+            borderBottom: browseScrolled ? '1px solid var(--border-color)' : 'none',
+            transition: 'border-color 0.25s ease',
+            ...(isDesktop && { marginRight: 'var(--sidebar-width, 0px)' }),
+          }}
+        >
+        <div
+          className="no-scrollbar"
+          style={{
+            display: 'flex',
+            justifyContent: isDesktop ? 'center' : 'flex-start',
+            overflowX: browseScrolled ? 'hidden' : 'auto',
+            overflowY: 'hidden',
+            gap: isDesktop ? '1.5rem' : '1rem',
+            padding: browseScrolled ? '0 1rem' : '1.25rem 1rem 0.75rem',
+            maxHeight: browseScrolled ? 0 : 120,
+            opacity: browseScrolled ? 0 : 1,
+            scrollbarWidth: 'none',
+            msOverflowStyle: 'none',
+            WebkitOverflowScrolling: 'touch',
+            alignItems: 'center',
             transition: 'max-height 0.3s ease, opacity 0.3s ease, padding 0.3s ease',
             pointerEvents: browseScrolled ? 'none' : 'auto',
-            ...(isDesktop && { marginRight: 'var(--sidebar-width, 0px)' }),
           }}
         >
           {[
@@ -1044,10 +1051,14 @@ function HomeContent() {
                 alignItems: 'center',
                 justifyContent: 'center',
                 borderRadius: '16px',
+                boxSizing: 'border-box',
+                border: categoriaFiltro === id
+                  ? '2px solid var(--brand-yellow)'
+                  : '2px solid rgba(var(--brand-yellow-rgb), 0.65)',
                 backgroundColor: categoriaFiltro === id ? 'var(--brand-blue)' : 'var(--bg-primary)',
                 color: categoriaFiltro === id ? 'white' : 'var(--text-secondary)',
                 boxShadow: categoriaFiltro === id
-                  ? '0 10px 20px -5px rgba(var(--brand-primary-rgb), 0.35)'
+                  ? '0 10px 20px -5px rgba(var(--brand-primary-rgb), 0.35), 0 0 0 1px rgba(var(--brand-yellow-rgb), 0.35)'
                   : '0 4px 6px -1px rgba(0, 0, 0, 0.05)',
                 transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                 position: 'relative',
@@ -1069,43 +1080,43 @@ function HomeContent() {
             </button>
           ))}
         </div>
+        <div
+          style={{
+            padding: browseScrolled ? '0.5rem 1rem' : '0 1rem 1rem',
+            transition: 'padding 0.3s ease',
+          }}
+        >
+          <Buscador
+            value={busqueda}
+            onChange={setBusqueda}
+            compact={browseScrolled}
+            onCategoryDetected={(categoria) => {
+              setCategoriaFiltro(categoria);
+              const params = new URLSearchParams(searchParams.toString());
+              params.set('categoria', categoria);
+              router.replace(`/?${params.toString()}`, { scroll: false });
+            }}
+            onNotify={(message, type) => {
+              if (type === 'error') error(message);
+              else if (type === 'success') success(message);
+              else success(message);
+            }}
+          />
+        </div>
+        </div>
         <main id="main-content" style={{
           flex: 1,
           padding: '1rem',
+          paddingTop: browseScrolled ? '0.5rem' : '0.25rem',
           paddingBottom: isDesktop ? '1rem' : '5rem', // Espacio para navbar mobile permanente
           maxWidth: isDesktop
             ? 'calc(100% - var(--sidebar-width, 0px))'
             : '1400px',
           margin: '0 auto',
           width: '100%',
-          transition: 'max-width 0.3s ease, margin-right 0.3s ease, padding-bottom 0.3s ease',
+          transition: 'max-width 0.3s ease, margin-right 0.3s ease, padding-bottom 0.3s ease, padding-top 0.3s ease',
           ...(isDesktop && { marginRight: 'var(--sidebar-width, 0px)' })
         }}>
-          <div
-            style={{
-              marginBottom: browseScrolled ? '0.75rem' : '1.5rem',
-              position: browseScrolled ? 'sticky' : 'relative',
-              top: browseScrolled ? '72px' : undefined,
-              zIndex: browseScrolled ? 895 : undefined,
-            }}
-          >
-            <Buscador
-              value={busqueda}
-              onChange={setBusqueda}
-              compact={browseScrolled}
-              onCategoryDetected={(categoria) => {
-                setCategoriaFiltro(categoria);
-                const params = new URLSearchParams(searchParams.toString());
-                params.set('categoria', categoria);
-                router.replace(`/?${params.toString()}`, { scroll: false });
-              }}
-              onNotify={(message, type) => {
-                if (type === 'error') error(message);
-                else if (type === 'success') success(message);
-                else success(message);
-              }}
-            />
-          </div>
 
           {/* Modal de Filtro de Ubicación */}
           {mostrarFiltroUbicacion && (

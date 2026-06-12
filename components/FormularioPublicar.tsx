@@ -110,10 +110,12 @@ export default function FormularioPublicar({
     tamaño: 'miniatura'
   });
   const [imagenesPreviews, setImagenesPreviews] = useState<ImagenPreview[]>([]);
+  const [isDragOverImagenes, setIsDragOverImagenes] = useState(false);
   const [enviando, setEnviando] = useState(false);
   const [publishError, setPublishError] = useState<string | null>(null);
   const [errors, setErrors] = useState<Partial<Record<keyof AdisoFormData, string>>>({});
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const dragImagenesCounterRef = useRef(0);
   const { user } = useAuth();
 
   const reportPublishError = (message: string) => {
@@ -231,16 +233,21 @@ export default function FormularioPublicar({
     }
   };
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || []);
-    if (files.length === 0) return;
+  const agregarImagenes = (fileList: File[]) => {
+    const files = fileList.filter((file) => file.type.startsWith('image/'));
+    if (files.length === 0) {
+      reportPublishError('Solo puedes arrastrar archivos de imagen (JPG, PNG, WebP, etc.).');
+      return;
+    }
 
     const paqueteSeleccionado = formData.tamaño ? PAQUETES[formData.tamaño] : PAQUETES.miniatura;
     const maxImagenes = paqueteSeleccionado.maxImagenes;
     const totalImagenes = imagenesPreviews.length + files.length;
 
     if (totalImagenes > maxImagenes) {
-      onError?.(`El paquete "${paqueteSeleccionado.nombre}" permite máximo ${maxImagenes} imagen${maxImagenes !== 1 ? 'es' : ''}.`);
+      reportPublishError(
+        `El paquete "${paqueteSeleccionado.nombre}" permite máximo ${maxImagenes} imagen${maxImagenes !== 1 ? 'es' : ''}.`
+      );
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }
@@ -249,12 +256,7 @@ export default function FormularioPublicar({
 
     files.forEach((file) => {
       if (file.size > 5 * 1024 * 1024) {
-        onError?.('Una o más imágenes son demasiado grandes. Máximo 5MB por imagen.');
-        return;
-      }
-
-      if (!file.type.startsWith('image/')) {
-        onError?.('Por favor selecciona solo imágenes válidas.');
+        reportPublishError('Una o más imágenes son demasiado grandes. Máximo 5MB por imagen.');
         return;
       }
 
@@ -263,9 +265,9 @@ export default function FormularioPublicar({
         const preview: ImagenPreview = {
           id: generarIdUnico(),
           file,
-          preview: reader.result as string
+          preview: reader.result as string,
         };
-        setImagenesPreviews(prev => [...prev, preview]);
+        setImagenesPreviews((prev) => [...prev, preview]);
       };
       reader.readAsDataURL(file);
     });
@@ -273,6 +275,43 @@ export default function FormularioPublicar({
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
+  };
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
+    agregarImagenes(files);
+  };
+
+  const handleImagenesDragEnter = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    dragImagenesCounterRef.current += 1;
+    setIsDragOverImagenes(true);
+  };
+
+  const handleImagenesDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    dragImagenesCounterRef.current -= 1;
+    if (dragImagenesCounterRef.current <= 0) {
+      dragImagenesCounterRef.current = 0;
+      setIsDragOverImagenes(false);
+    }
+  };
+
+  const handleImagenesDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    e.dataTransfer.dropEffect = 'copy';
+  };
+
+  const handleImagenesDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    dragImagenesCounterRef.current = 0;
+    setIsDragOverImagenes(false);
+    agregarImagenes(Array.from(e.dataTransfer.files));
   };
 
   const handleRemoveImage = (idToRemove: string) => {
@@ -1067,37 +1106,52 @@ export default function FormularioPublicar({
           style={{ display: 'none' }}
           id="adiso-images-input"
         />
-        <label
-          htmlFor="adiso-images-input"
+        <div
+          role="button"
+          tabIndex={0}
+          aria-label="Agregar imágenes: clic o arrastrar archivos aquí"
+          onClick={() => fileInputRef.current?.click()}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              fileInputRef.current?.click();
+            }
+          }}
+          onDragEnter={handleImagenesDragEnter}
+          onDragLeave={handleImagenesDragLeave}
+          onDragOver={handleImagenesDragOver}
+          onDrop={handleImagenesDrop}
           style={{
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             gap: '0.5rem',
             padding: '2rem',
-            border: '2px dashed var(--border-color)',
+            border: `2px dashed ${isDragOverImagenes ? 'var(--brand-blue)' : 'var(--border-color)'}`,
             borderRadius: '12px',
             cursor: 'pointer',
             fontSize: '0.875rem',
-            color: 'var(--text-secondary)',
+            color: isDragOverImagenes ? 'var(--brand-blue)' : 'var(--text-secondary)',
             transition: 'all 0.2s',
-            backgroundColor: 'var(--bg-secondary)',
-            marginBottom: '1rem'
+            backgroundColor: isDragOverImagenes ? 'rgba(56, 189, 248, 0.08)' : 'var(--bg-secondary)',
+            marginBottom: '1rem',
           }}
           onMouseEnter={(e) => {
+            if (isDragOverImagenes) return;
             e.currentTarget.style.borderColor = 'var(--brand-blue)';
-            e.currentTarget.style.backgroundColor = 'rgba(83, 172, 197, 0.05)';
+            e.currentTarget.style.backgroundColor = 'rgba(56, 189, 248, 0.05)';
             e.currentTarget.style.color = 'var(--brand-blue)';
           }}
           onMouseLeave={(e) => {
+            if (isDragOverImagenes) return;
             e.currentTarget.style.borderColor = 'var(--border-color)';
             e.currentTarget.style.backgroundColor = 'var(--bg-secondary)';
             e.currentTarget.style.color = 'var(--text-secondary)';
           }}
         >
           <FaPlus size={20} />
-          <span>Haz clic o arrastra imágenes aquí</span>
-        </label>
+          <span>{isDragOverImagenes ? 'Suelta las imágenes aquí' : 'Haz clic o arrastra imágenes aquí'}</span>
+        </div>
 
         {imagenesPreviews.length > 0 && (
           <div style={{
