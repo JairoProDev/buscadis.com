@@ -63,15 +63,30 @@
   --shadow-lg: 0 20px 25px -5px rgba(56, 189, 248, 0.05), 0 10px 10px -5px rgba(56, 189, 248, 0.02);
   --shadow-hover: 0 20px 50px -12px rgba(56, 189, 248, 0.2);
 
-  /* Category Colors - More Professional Palette */
-  --cat-empleos: #2c3e50;
-  --cat-inmuebles: #134E5E;
-  --cat-vehiculos: #1A2980;
-  --cat-servicios: #f2994a;
-  --cat-productos: #b31217;
-  --cat-eventos: #4facfe;
-  --cat-negocios: #434343;
-  --cat-comunidad: #0072ff;
+  /* Category accent (spec §2.2) — borde 3px, no fondo completo */
+  --cat-empleos: #64748b;
+  --cat-inmuebles: #059669;
+  --cat-vehiculos: #0284c7;
+  --cat-servicios: #d97706;
+  --cat-productos: #e11d48;
+  --cat-eventos: #7c3aed;
+  --cat-negocios: #475569;
+  --cat-comunidad: #0891b2;
+
+  /* Spacing scale (spec §2.4) */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+
+  /* Card surfaces (spec §2.5) */
+  --card-radius: 16px;
+  --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 4px 12px rgba(0, 0, 0, 0.04);
+  --card-shadow-hover: 0 8px 24px rgba(0, 0, 0, 0.08);
+  --focus-ring: 0 0 0 2px var(--brand-blue);
 }
 
 /* Modo oscuro vibrant */
@@ -253,6 +268,17 @@ a {
 
 .border-border-subtle {
   border-color: var(--border-subtle);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 
 @media print {

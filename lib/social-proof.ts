@@ -26,16 +26,26 @@ export function formatCompactNumber(value: number): string {
   return new Intl.NumberFormat('es-PE', { notation: 'compact', maximumFractionDigits: 1 }).format(value);
 }
 
-export function getViewSignal(adiso: Pick<Adiso, 'vistas' | 'fechaPublicacion' | 'horaPublicacion'>): SocialSignal | null {
+type ViewSignalInput = Pick<Adiso, 'vistas' | 'fechaPublicacion' | 'horaPublicacion' | 'esHistorico' | 'fuenteOriginal'>;
+
+function isImportedHistoricAdiso(adiso: ViewSignalInput): boolean {
+  if (adiso.esHistorico) return true;
+  const fuente = adiso.fuenteOriginal?.toLowerCase() ?? '';
+  return fuente.includes('rueda') || fuente.includes('import') || fuente.includes('pdf');
+}
+
+export function getViewSignal(adiso: ViewSignalInput): SocialSignal | null {
+  if (isImportedHistoricAdiso(adiso)) return null;
+
   const views = Math.max(0, adiso.vistas || 0);
   const ageHours = getAgeInHours(adiso);
   if (views < 20 && ageHours !== null && ageHours <= 12) return null;
   if (views < 20) return null;
 
-  if (views < 50) return { label: '+20 vistas', tone: 'neutral' };
-  if (views < 100) return { label: '+50 vistas', tone: 'neutral' };
-  if (views < 500) return { label: '+100 vistas', tone: 'positive' };
-  if (views < 1000) return { label: '+500 vistas', tone: 'positive' };
+  if (views < 50) return { label: '20+ vistas', tone: 'neutral' };
+  if (views < 100) return { label: '50+ vistas', tone: 'neutral' };
+  if (views < 500) return { label: '100+ vistas', tone: 'positive' };
+  if (views < 1000) return { label: '500+ vistas', tone: 'positive' };
   return { label: `${formatCompactNumber(views)} vistas`, tone: 'positive' };
 }
 
@@ -50,11 +60,14 @@ export function getInterestSignal(contacts?: number): SocialSignal | null {
 export function getMarketplacePulse(adisos: Adiso[]): string | null {
   if (adisos.length === 0) return null;
 
-  const viewsTotal = adisos.reduce((acc, adiso) => acc + (adiso.vistas || 0), 0);
-  const withActivity = adisos.filter((adiso) => (adiso.vistas || 0) >= 20).length;
+  const activos = adisos.filter((a) => !isImportedHistoricAdiso(a));
+  if (activos.length === 0) return null;
+
+  const viewsTotal = activos.reduce((acc, adiso) => acc + (adiso.vistas || 0), 0);
+  const withActivity = activos.filter((adiso) => getViewSignal(adiso) !== null).length;
 
   if (withActivity === 0) {
-    return 'Actividad en crecimiento';
+    return null;
   }
 
   return `${withActivity} anuncios con actividad · ${formatCompactNumber(viewsTotal)} vistas en total`;
