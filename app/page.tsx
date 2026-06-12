@@ -1326,7 +1326,7 @@ function HomeContent() {
               )}
               {!ocultarHistoricos && (
                 <button type="button" onClick={() => setOcultarHistoricos(true)} style={filterChipStyle}>
-                  Incluye archivo
+                  Incluye más anuncios
                   <IconClose size={12} />
                 </button>
               )}
@@ -1361,7 +1361,7 @@ function HomeContent() {
               )}
               {ocultarHistoricos && (
                 <button type="button" onClick={() => setOcultarHistoricos(false)} style={filterChipStyle}>
-                  Ver archivo histórico
+                  Ver más anuncios
                 </button>
               )}
             </div>
@@ -1392,7 +1392,7 @@ function HomeContent() {
                     : ocultarHistoricos && adisos.some((a) => a.esHistorico)
                       ? (
                         <span>
-                          Los anuncios disponibles están en el archivo histórico.{' '}
+                          Hay más anuncios disponibles.{' '}
                           <button
                             type="button"
                             onClick={() => setOcultarHistoricos(false)}
@@ -1405,7 +1405,7 @@ function HomeContent() {
                               textDecoration: 'underline',
                             }}
                           >
-                            Ver archivo histórico
+                            Ver más anuncios
                           </button>
                         </span>
                       )

@@ -1,5 +1,5 @@
 import { Adiso, Categoria, UbicacionDetallada } from '@/types';
-import { getInterestSignal, getViewSignal } from '@/lib/social-proof';
+import { pickCardSignal } from '@/lib/social-proof';
 
 const CATEGORIA_LABELS: Record<Categoria, string> = {
   empleos: 'Empleos',
@@ -22,6 +22,27 @@ const CTA_LABELS: Record<Categoria, string> = {
   negocios: 'Contactar negocio',
   comunidad: 'Contactar por WhatsApp',
 };
+
+/** Etiqueta corta para CTA en overlay de la imagen del card (sin precio). */
+const CARD_CTA_SHORT: Record<Categoria, string> = {
+  empleos: 'Postular',
+  inmuebles: 'Visitar',
+  vehiculos: 'Consultar',
+  servicios: 'Pedir info',
+  productos: 'Consultar',
+  eventos: 'Info',
+  negocios: 'Contactar',
+  comunidad: 'WhatsApp',
+};
+
+/*
+ * Roadmap — señales y CTAs en card (no exponer al usuario aún):
+ * - Precio en esquina inferior derecha de la imagen cuando exista.
+ * - Sin precio: CTA de contacto directo (1 tap → WhatsApp) con color de categoría.
+ * - CTAs distintos por categoría (CARD_CTA_SHORT / CTA_LABELS).
+ * - Futuro: favorito entre buscadores, precio bajo promedio, últimas plazas,
+ *   top en distrito, respuesta rápida medida, etc.
+ */
 
 /** Limpia descripciones rotas de importación (WhatsApp: ., ..) */
 export function sanitizeAdisoDescripcion(descripcion: string | undefined | null): string {
@@ -73,41 +94,27 @@ export function getCtaLabelPorCategoria(categoria: Categoria): string {
   return CTA_LABELS[categoria] ?? 'Contactar por WhatsApp';
 }
 
+export function getCardCtaShortLabel(categoria: Categoria): string {
+  return CARD_CTA_SHORT[categoria] ?? 'Contactar';
+}
+
 export function adisoTieneImagen(adiso: Adiso): boolean {
   if (adiso.imagenUrl?.trim()) return true;
   return (adiso.imagenesUrls?.filter((u) => u?.trim()).length ?? 0) > 0;
 }
 
-export type SocialBadgeType = 'destacado' | 'interes' | 'vistas';
+export type SocialBadgeType = string;
 
 export interface SocialBadge {
   type: SocialBadgeType;
   label: string;
 }
 
-/** Una sola señal social por card (spec §1.3) */
+/** Una sola señal social por card — delega a pickCardSignal */
 export function pickSocialBadge(adiso: Adiso): SocialBadge | null {
-  if (adiso.esDestacado) {
-    return { type: 'destacado', label: 'Destacado' };
-  }
-
-  const interest = getInterestSignal(adiso.contactos);
-  if (interest) {
-    return { type: 'interes', label: interest.label };
-  }
-
-  const views = getViewSignal({
-    vistas: adiso.vistas,
-    fechaPublicacion: adiso.fechaPublicacion,
-    horaPublicacion: adiso.horaPublicacion,
-    esHistorico: adiso.esHistorico,
-    fuenteOriginal: adiso.fuenteOriginal,
-  });
-  if (views) {
-    return { type: 'vistas', label: views.label };
-  }
-
-  return null;
+  const signal = pickCardSignal(adiso);
+  if (!signal) return null;
+  return { type: signal.type, label: signal.label };
 }
 
 export function formatPrecioDisplay(adiso: Adiso): string | null {

@@ -8,8 +8,9 @@ import { getWhatsAppUrl, copiarLink, compartirNativo } from '@/lib/utils';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
 import { isMyAdiso } from '@/lib/storage';
 import { useAuth } from '@/hooks/useAuth';
-import { esFavorito, toggleFavorito } from '@/lib/favoritos';
-import { registrarVisualizacion, registrarClick, registrarContacto, registrarFavorito } from '@/lib/analytics';
+import { registrarVisualizacion, registrarClick, registrarContacto } from '@/lib/analytics';
+import { useAdInteraction } from '@/hooks/useAdInteraction';
+import { getCategoriaThemeTokens } from '@/lib/categoria-theme';
 import {
   IconClose,
   IconArrowLeft,
@@ -18,6 +19,8 @@ import {
   IconShare,
   IconWhatsApp,
   IconCheck,
+  IconHeart,
+  IconHeartOutline,
   IconLocation,
   IconEmpleos,
   IconInmuebles,
@@ -100,21 +103,14 @@ export default function ModalAdiso({
   const [galleryIndex, setGalleryIndex] = useState(0);
   const [mostrarConfirmarEliminar, setMostrarConfirmarEliminar] = useState(false);
   const [eliminando, setEliminando] = useState(false);
-  const [esFavoritoState, setEsFavoritoState] = useState(false);
-  const [cargandoFavorito, setCargandoFavorito] = useState(false);
   const modalRef = useRef<HTMLDivElement>(null);
   const isDesktop = useMediaQuery('(min-width: 768px)');
   const esMiAdiso = isMyAdiso(adiso.id);
   const { user } = useAuth();
+  const { isFavorite, toggleFav } = useAdInteraction(adiso.id);
+  const categoryAccent = getCategoriaThemeTokens(adiso.categoria).accent;
 
   const minSwipeDistance = 50;
-
-  // Cargar estado de favorito
-  useEffect(() => {
-    if (user?.id) {
-      esFavorito(user.id, adiso.id).then(setEsFavoritoState).catch(console.error);
-    }
-  }, [user?.id, adiso.id]);
 
   const [vistasLocales, setVistasLocales] = useState(adiso.vistas || 0);
   const [contactosLocales, setContactosLocales] = useState(adiso.contactos || 0);
@@ -151,28 +147,6 @@ export default function ModalAdiso({
     setVistasLocales(prev => prev + 1);
   }, [user?.id, adiso.id]);
 
-
-  const handleToggleFavorito = async () => {
-    if (!user?.id) {
-      // TODO: Mostrar modal de autenticación
-      return;
-    }
-
-    setCargandoFavorito(true);
-    try {
-      const nuevoEstado = await toggleFavorito(user.id, adiso.id);
-      setEsFavoritoState(nuevoEstado);
-      // Registrar favorito solo si se agregó (no si se removió)
-      if (nuevoEstado) {
-        registrarFavorito(user.id, adiso.id);
-      }
-    } catch (error) {
-      console.error('Error al toggle favorito:', error);
-      alert('Error al guardar favorito');
-    } finally {
-      setCargandoFavorito(false);
-    }
-  };
 
   const getCategoriaTheme = (categoria: Categoria) => {
     const themes: Record<Categoria, { color: string; bg: string; iconBg: string }> = {
@@ -427,8 +401,7 @@ Ref: ${adiso.edicionNumero || adiso.id}`;
         {copiado ? <IconCheck size={18} /> : <IconCopy size={18} />}
       </button>
       <button
-        onClick={handleToggleFavorito}
-        disabled={cargandoFavorito}
+        onClick={(e) => toggleFav(e)}
         className="hover:scale-105 active:scale-95 transition-all"
         style={{
           width: '38px',
@@ -436,19 +409,20 @@ Ref: ${adiso.edicionNumero || adiso.id}`;
           borderRadius: '12px',
           border: 'none',
           backgroundColor: 'var(--bg-tertiary)',
-          color: esFavoritoState ? '#fbbf24' : 'var(--text-secondary)',
+          color: isFavorite ? '#ef4444' : 'var(--text-secondary)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           cursor: 'pointer',
           boxShadow: '0 4px 10px rgba(0,0,0,0.03)'
         }}
-        title="Guardar en favoritos"
+        title={isFavorite ? 'Quitar de favoritos' : 'Guardar en favoritos'}
+        aria-label={isFavorite ? 'Quitar de favoritos' : 'Guardar en favoritos'}
       >
-        {cargandoFavorito ? (
-          <div style={{ width: '16px', height: '16px', borderRadius: '50%', border: '2px solid var(--text-tertiary)', borderTopColor: 'transparent', animation: 'spin 1s linear infinite' }} />
+        {isFavorite ? (
+          <IconHeart size={18} className="text-red-500" />
         ) : (
-          esFavoritoState ? <span style={{ fontSize: '1.2rem' }}>⭐</span> : <span style={{ fontSize: '1.2rem' }}>☆</span>
+          <IconHeartOutline size={18} />
         )}
       </button>
     </div>
@@ -532,9 +506,9 @@ Ref: ${adiso.edicionNumero || adiso.id}`;
         className="hover:-translate-y-1 hover:brightness-110 active:scale-[0.98]"
         style={{
           ...baseButtonStyle,
-          backgroundColor: '#22c55e',
-          backgroundImage: 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)',
-          boxShadow: '0 10px 25px -5px rgba(34, 197, 94, 0.4)'
+          backgroundColor: categoryAccent,
+          backgroundImage: `linear-gradient(135deg, ${categoryAccent} 0%, ${categoryAccent}dd 100%)`,
+          boxShadow: `0 10px 25px -5px ${categoryAccent}66`,
         }}
       >
         <IconWhatsApp size={22} />

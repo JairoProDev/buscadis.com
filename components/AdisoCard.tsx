@@ -16,18 +16,21 @@ import {
     IconComunidad,
     IconHeart,
     IconHeartOutline,
-    IconClose,
+    IconDismiss,
 } from '@/components/Icons';
 import { useAdInteraction } from '@/hooks/useAdInteraction';
-import TrustBadge from '@/components/trust/TrustBadge';
+import { useDarkMode } from '@/hooks/useDarkMode';
 import { getCategoriaThemeTokens } from '@/lib/categoria-theme';
 import {
     formatPrecioDisplay,
     formatUbicacionCorta,
-    pickSocialBadge,
+    getCardCtaShortLabel,
     sanitizeAdisoDescripcion,
     toDisplayTitle,
 } from '@/lib/adiso-display';
+import { getWhatsAppUrl } from '@/lib/utils';
+import { pickCardSignal } from '@/lib/social-proof';
+import AdisoPublisherStrip from '@/components/AdisoPublisherStrip';
 
 const getCategoriaIcon = (categoria: Categoria) => {
     const iconMap = {
@@ -69,10 +72,14 @@ function getMediaAspectClass(tamaño: string, vista: string): string {
 const AdisoCard = forwardRef<HTMLDivElement, AdisoCardProps>(
     ({ adiso, onClick, estaSeleccionado, isDesktop = true, vista = 'grid' }, ref) => {
         const { isFavorite, isHidden, toggleFav, markNotInterested } = useAdInteraction(adiso.id);
+        const isDark = useDarkMode();
         const IconComponent = getCategoriaIcon(adiso.categoria);
         const [showDismiss, setShowDismiss] = useState(false);
         const timerRef = useRef<NodeJS.Timeout | null>(null);
         const themeTokens = getCategoriaThemeTokens(adiso.categoria);
+        const placeholderBg = isDark ? themeTokens.placeholderBgDark : themeTokens.placeholderBg;
+        const cardCtaLabel = getCardCtaShortLabel(adiso.categoria);
+        const canContact = Boolean(adiso.contacto?.trim());
 
         if (isHidden) return null;
 
@@ -84,7 +91,7 @@ const AdisoCard = forwardRef<HTMLDivElement, AdisoCardProps>(
         const displayDescription = sanitizeAdisoDescripcion(adiso.descripcion);
         const locationShort = formatUbicacionCorta(adiso.ubicacion);
         const priceLabel = formatPrecioDisplay(adiso);
-        const socialBadge = pickSocialBadge(adiso);
+        const cardSignal = pickCardSignal(adiso);
         const sellerName = getSellerDisplayName(adiso);
 
         const gridColumnSpan = paquete.columnas;
@@ -103,6 +110,21 @@ const AdisoCard = forwardRef<HTMLDivElement, AdisoCardProps>(
                 setShowDismiss(true);
                 if (navigator.vibrate) navigator.vibrate(50);
             }, 600);
+        };
+
+        const handleCardContact = (e: React.MouseEvent) => {
+            e.stopPropagation();
+            if (!canContact) {
+                onClick();
+                return;
+            }
+            const url = getWhatsAppUrl(
+                adiso.contacto!,
+                adiso.titulo,
+                adiso.categoria,
+                adiso.id,
+            );
+            window.open(url, '_blank', 'noopener,noreferrer');
         };
 
         return (
@@ -172,14 +194,11 @@ const AdisoCard = forwardRef<HTMLDivElement, AdisoCardProps>(
                     </div>
                 )}
 
-                <div className="absolute top-1.5 right-1.5 flex gap-2 z-30">
+                <div className="absolute top-1.5 right-1.5 flex items-center gap-0 z-30">
                     <button
                         type="button"
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            toggleFav();
-                        }}
-                        className={`min-w-[40px] min-h-[40px] flex items-center justify-center rounded-full bg-transparent border-0 transition-transform hover:scale-110 active:scale-95 ${
+                        onClick={(e) => toggleFav(e)}
+                        className={`min-w-[36px] min-h-[36px] flex items-center justify-center rounded-full bg-transparent border-0 transition-transform hover:scale-110 active:scale-95 ${
                             imagenUrl
                                 ? 'text-white drop-shadow-[0_1px_4px_rgba(0,0,0,0.85)]'
                                 : 'text-[var(--text-secondary)]'
@@ -188,9 +207,9 @@ const AdisoCard = forwardRef<HTMLDivElement, AdisoCardProps>(
                         aria-label={isFavorite ? 'Quitar de favoritos' : 'Guardar para más tarde'}
                     >
                         {isFavorite ? (
-                            <IconHeart size={20} className="text-red-500 drop-shadow-sm" />
+                            <IconHeart size={18} className="text-red-500 drop-shadow-sm" />
                         ) : (
-                            <IconHeartOutline size={20} />
+                            <IconHeartOutline size={18} />
                         )}
                     </button>
 
@@ -198,11 +217,10 @@ const AdisoCard = forwardRef<HTMLDivElement, AdisoCardProps>(
                         <button
                             type="button"
                             onClick={(e) => {
-                                e.stopPropagation();
-                                markNotInterested();
+                                markNotInterested(e);
                                 setShowDismiss(false);
                             }}
-                            className={`min-w-[40px] min-h-[40px] flex items-center justify-center rounded-full bg-transparent border-0 transition-transform hover:scale-110 active:scale-95 ${
+                            className={`min-w-[36px] min-h-[36px] flex items-center justify-center rounded-full bg-transparent border-0 transition-transform hover:scale-110 active:scale-95 ${
                                 imagenUrl
                                     ? 'text-white drop-shadow-[0_1px_4px_rgba(0,0,0,0.85)]'
                                     : 'text-[var(--text-tertiary)]'
@@ -210,7 +228,7 @@ const AdisoCard = forwardRef<HTMLDivElement, AdisoCardProps>(
                             title="No me interesa (Ocultar)"
                             aria-label="No me interesa"
                         >
-                            <IconClose size={18} />
+                            <IconDismiss size={18} />
                         </button>
                     )}
                 </div>
@@ -220,7 +238,7 @@ const AdisoCard = forwardRef<HTMLDivElement, AdisoCardProps>(
                         relative flex-shrink-0 overflow-hidden
                         ${getMediaAspectClass(tamaño, vista)}
                     `}
-                    style={{ backgroundColor: themeTokens.placeholderBg }}
+                    style={{ backgroundColor: placeholderBg }}
                     onTouchStart={handleTouchStart}
                     onTouchEnd={clearLongPress}
                     onTouchMove={clearLongPress}
@@ -241,7 +259,7 @@ const AdisoCard = forwardRef<HTMLDivElement, AdisoCardProps>(
                     ) : (
                         <div
                             className="absolute inset-0 flex items-center justify-center dark:bg-opacity-100"
-                            style={{ backgroundColor: themeTokens.placeholderBg }}
+                            style={{ backgroundColor: placeholderBg }}
                         >
                             <div className="opacity-50" style={{ color: themeTokens.accent }}>
                                 <IconComponent size={tamaño === 'miniatura' ? 24 : 32} />
@@ -249,20 +267,8 @@ const AdisoCard = forwardRef<HTMLDivElement, AdisoCardProps>(
                         </div>
                     )}
 
-                    {socialBadge && vista !== 'feed' && (
-                        <div className="absolute top-2 left-2 z-10">
-                            <span
-                                className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold backdrop-blur-md border ${
-                                    socialBadge.type === 'destacado'
-                                        ? 'bg-amber-400/95 text-amber-950 border-amber-300/50'
-                                        : socialBadge.type === 'interes'
-                                          ? 'bg-emerald-500/90 text-white border-emerald-400/40'
-                                          : 'bg-black/55 text-white border-white/20'
-                                }`}
-                            >
-                                {socialBadge.label}
-                            </span>
-                        </div>
+                    {vista !== 'feed' && (
+                        <AdisoPublisherStrip adiso={adiso} tamaño={tamaño} vista={vista} />
                     )}
 
                     {extraFotos > 0 && tamaño !== 'miniatura' && (
@@ -271,25 +277,42 @@ const AdisoCard = forwardRef<HTMLDivElement, AdisoCardProps>(
                         </span>
                     )}
 
-                    {locationShort && vista !== 'feed' && (
-                        <div className="absolute bottom-2 left-2 right-2 flex justify-between items-end gap-2 z-10 pointer-events-none">
-                            <span className="inline-flex items-center gap-1 max-w-[70%] px-2 py-0.5 rounded-full text-xs font-medium bg-black/55 text-white truncate">
-                                <IconLocation size={10} className="flex-shrink-0" />
-                                <span className="truncate">{locationShort}</span>
-                            </span>
-                            {priceLabel && (
-                                <span className="flex-shrink-0 px-2 py-0.5 rounded-full text-sm font-bold bg-white/95 text-[var(--brand-blue)] shadow-sm">
-                                    {priceLabel}
+                    {vista !== 'feed' && (locationShort || priceLabel || (!priceLabel && canContact)) && (
+                        <div className="absolute bottom-2 left-2 right-2 flex justify-between items-end gap-2 z-10">
+                            {locationShort ? (
+                                <span className="inline-flex items-center gap-1 max-w-[58%] px-2 py-0.5 rounded-full text-xs font-medium bg-black/55 text-white truncate pointer-events-none">
+                                    <IconLocation size={10} className="flex-shrink-0" />
+                                    <span className="truncate">{locationShort}</span>
                                 </span>
+                            ) : (
+                                <span className="flex-1" />
                             )}
+                            <div className="flex-shrink-0 ml-auto">
+                                {priceLabel ? (
+                                    <span
+                                        className={`inline-flex px-2 py-0.5 rounded-full text-sm font-bold shadow-sm ${
+                                            imagenUrl
+                                                ? 'bg-white/95 text-[var(--brand-blue)]'
+                                                : 'bg-black/55 text-white'
+                                        }`}
+                                    >
+                                        {priceLabel}
+                                    </span>
+                                ) : canContact ? (
+                                    <button
+                                        type="button"
+                                        onClick={handleCardContact}
+                                        className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold text-white shadow-sm transition-transform hover:scale-105 active:scale-95"
+                                        style={{ backgroundColor: themeTokens.accent }}
+                                        title={cardCtaLabel}
+                                    >
+                                        {cardCtaLabel}
+                                    </button>
+                                ) : null}
+                            </div>
                         </div>
                     )}
 
-                    {adiso.vendedor?.esVerificado && (
-                        <div className="absolute bottom-2 right-2 z-10 backdrop-blur-md bg-blue-500/20 rounded-full p-0.5 border border-blue-200/30">
-                            <TrustBadge type="verified" size="sm" showLabel={false} />
-                        </div>
-                    )}
                 </div>
 
                 <div
@@ -323,17 +346,10 @@ const AdisoCard = forwardRef<HTMLDivElement, AdisoCardProps>(
                         <p className="text-[15px] font-bold text-[var(--brand-blue)] mb-2">{priceLabel}</p>
                     )}
 
-                    {socialBadge && vista === 'feed' && (
+                    {cardSignal && vista === 'feed' && (
                         <div className="flex items-center gap-1.5 text-xs text-[var(--text-tertiary)] font-medium mt-auto pt-2 border-t border-[var(--border-color)]">
-                            {socialBadge.type === 'vistas' && <IconEye size={12} />}
-                            <span>{socialBadge.label}</span>
-                        </div>
-                    )}
-
-                    {socialBadge && vista !== 'feed' && socialBadge.type === 'vistas' && (
-                        <div className="flex items-center gap-1.5 text-xs text-[var(--text-tertiary)] font-medium mt-auto pt-2 border-t border-[var(--border-color)]">
-                            <IconEye size={12} />
-                            <span>{socialBadge.label}</span>
+                            {cardSignal.type === 'popular' && <IconEye size={12} />}
+                            <span>{cardSignal.label}</span>
                         </div>
                     )}
                 </div>
