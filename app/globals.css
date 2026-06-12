@@ -184,21 +184,37 @@ a {
   text-decoration: none;
 }
 
-/* Skip link para navegación por teclado */
+/* Skip link: solo visible al navegar con teclado (no barra negra al hacer clic) */
 .skip-link {
-  position: absolute;
-  top: -40px;
-  left: 0;
-  background: var(--text-primary);
-  color: var(--bg-primary);
-  padding: 0.5rem 1rem;
+  position: fixed;
+  left: -9999px;
+  top: auto;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+  background: var(--brand-blue);
+  color: #fff;
+  padding: 0;
   text-decoration: none;
   z-index: 10000;
-  border-radius: 0 0 4px 0;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 0.875rem;
 }
 
-.skip-link:focus {
-  top: 0;
+.skip-link:focus-visible {
+  left: 1rem;
+  top: 1rem;
+  width: auto;
+  height: auto;
+  overflow: visible;
+  clip: auto;
+  clip-path: none;
+  padding: 0.6rem 1rem;
+  box-shadow: 0 8px 24px rgba(56, 189, 248, 0.35);
 }
 
 

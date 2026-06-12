@@ -941,7 +941,7 @@ function HomeContent() {
           dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
         />
         <a href="#main-content" className="skip-link">
-          Saltar al contenido principal
+          Ir al contenido
         </a>
         <Header
           onToggleLeftSidebar={() => setIsLeftSidebarOpen(!isLeftSidebarOpen)}

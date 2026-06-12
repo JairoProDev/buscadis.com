@@ -9,6 +9,7 @@ import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
 import { ToastContainer } from '@/components/Toast';
 import { useToast } from '@/hooks/useToast';
+import FeedbackButton from '@/components/FeedbackButton';
 
 const FormularioPublicar = dynamic(() => import('@/components/FormularioPublicar'), {
     loading: () => <div className="p-8 text-center">Cargando formulario...</div>,
@@ -62,6 +63,7 @@ export default function PublicarPage() {
                 />
             </div>
             <ToastContainer toasts={toasts} removeToast={removeToast} />
+            <FeedbackButton />
         </div>
     );
 }

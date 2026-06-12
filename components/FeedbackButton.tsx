@@ -1,413 +1,161 @@
 'use client';
 
-import { useState, useRef } from 'react';
-import { FaLightbulb, FaExclamationTriangle, FaTimes, FaCheckCircle, FaCommentDots, FaImage, FaTrash } from 'react-icons/fa';
-import { enviarFeedbackInmediato } from '@/lib/feedback';
-import { useToast } from '@/hooks/useToast';
+import { useEffect, useRef, useState } from 'react';
+import { FaTimes, FaWhatsapp } from 'react-icons/fa';
+import { IconClose } from '@/components/Icons';
+import { MOTIVOS_AYUDA, getSoporteWhatsAppUrl, type MotivoAyuda } from '@/lib/soporte';
 
 interface FeedbackButtonProps {
   variant?: 'floating';
 }
 
 export default function FeedbackButton({ variant = 'floating' }: FeedbackButtonProps) {
-  const [mostrarModal, setMostrarModal] = useState(false);
-  const [texto, setTexto] = useState('');
-  const [tipoSeleccionado, setTipoSeleccionado] = useState<'sugerencia' | 'problema'>('sugerencia');
-  const [imagenPreview, setImagenPreview] = useState<string | null>(null);
-  const [imagenFile, setImagenFile] = useState<File | null>(null);
-  const [enviado, setEnviado] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const { success, error: errorToast } = useToast();
+  const [abierto, setAbierto] = useState(false);
+  const panelRef = useRef<HTMLDivElement>(null);
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  useEffect(() => {
+    if (!abierto) return;
 
-    // Validar tamaño (máximo 5MB)
-    if (file.size > 5 * 1024 * 1024) {
-      errorToast('La imagen es demasiado grande. Máximo 5MB.');
-      return;
-    }
-
-    // Validar tipo
-    if (!file.type.startsWith('image/')) {
-      errorToast('Por favor selecciona una imagen válida.');
-      return;
-    }
-
-    setImagenFile(file);
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setImagenPreview(reader.result as string);
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setAbierto(false);
     };
-    reader.readAsDataURL(file);
-  };
-
-  const handleRemoveImage = () => {
-    setImagenPreview(null);
-    setImagenFile(null);
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
-    }
-  };
-
-  const handleSubmit = async () => {
-    if (!texto.trim()) return;
-
-    setEnviado(true);
-    
-    // Subir imagen si existe
-    let imagenUrl: string | undefined = undefined;
-    if (imagenFile) {
-      try {
-        const formData = new FormData();
-        formData.append('image', imagenFile);
-        
-        const uploadResponse = await fetch('/api/upload-image', {
-          method: 'POST',
-          body: formData
-        });
-
-        if (uploadResponse.ok) {
-          const uploadData = await uploadResponse.json();
-          imagenUrl = uploadData.url;
-        } else {
-          console.warn('Error al subir imagen, continuando sin imagen');
-        }
-      } catch (err) {
-        console.warn('Error al subir imagen:', err);
+    const onClickOutside = (e: MouseEvent) => {
+      if (panelRef.current && !panelRef.current.contains(e.target as Node)) {
+        setAbierto(false);
       }
-    }
-    
-    // Intentar enviar inmediatamente
-    const enviado = await enviarFeedbackInmediato({
-      tipo: tipoSeleccionado,
-      texto: texto.trim(),
-      imagenUrl
-    });
-
-    if (enviado) {
-      success('¡Gracias por tu feedback! Lo revisaremos pronto.');
-    } else {
-      success('¡Gracias por tu feedback! Se guardó localmente y se enviará pronto.');
-    }
-    
-    setTimeout(() => {
-      setMostrarModal(false);
-      setTexto('');
-      setImagenPreview(null);
-      setImagenFile(null);
-      setEnviado(false);
-      setTipoSeleccionado('sugerencia');
-      if (fileInputRef.current) {
-        fileInputRef.current.value = '';
-      }
-    }, 1500);
-  };
-
-  const getButtonStyle = () => {
-    return {
-      padding: '0.75rem 1rem',
-      borderRadius: '50px',
-      border: 'none',
-      cursor: 'pointer',
-      fontSize: '0.875rem',
-      fontWeight: 600,
-      display: 'flex',
-      alignItems: 'center',
-      gap: '0.5rem',
-      transition: 'all 0.2s',
-      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
-      zIndex: 999,
-      position: 'fixed' as const,
-      bottom: '1rem',
-      left: '1rem',
-      backgroundColor: 'var(--text-primary)',
-      color: 'var(--bg-primary)'
     };
+
+    document.addEventListener('keydown', onKey);
+    document.addEventListener('mousedown', onClickOutside);
+    return () => {
+      document.removeEventListener('keydown', onKey);
+      document.removeEventListener('mousedown', onClickOutside);
+    };
+  }, [abierto]);
+
+  const abrirWhatsApp = (motivo: MotivoAyuda) => {
+    window.open(getSoporteWhatsAppUrl(motivo), '_blank', 'noopener,noreferrer');
+    setAbierto(false);
   };
+
+  if (variant !== 'floating') return null;
 
   return (
-    <>
-      <button
-        onClick={() => setMostrarModal(true)}
-        style={getButtonStyle()}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.transform = 'scale(1.05)';
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.transform = 'scale(1)';
-        }}
-      >
-        <FaCommentDots size={14} />
-        Feedback
-      </button>
-
-      {mostrarModal && (
+    <div
+      ref={panelRef}
+      style={{
+        position: 'fixed',
+        bottom: 'max(1rem, env(safe-area-inset-bottom))',
+        left: 'max(1rem, env(safe-area-inset-left))',
+        zIndex: 999,
+      }}
+    >
+      {abierto && (
         <div
+          role="dialog"
+          aria-label="Opciones de ayuda"
           style={{
-            position: 'fixed',
-            top: 0,
+            position: 'absolute',
+            bottom: 'calc(100% + 10px)',
             left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: 'rgba(0, 0, 0, 0.5)',
-            zIndex: 3000,
+            width: 'min(300px, calc(100vw - 2rem))',
+            backgroundColor: 'var(--bg-primary)',
+            borderRadius: '16px',
+            border: '1px solid var(--border-color)',
+            boxShadow: '0 12px 40px rgba(0,0,0,0.12)',
+            padding: '0.75rem',
             display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '1rem'
+            flexDirection: 'column',
+            gap: '0.5rem',
           }}
-          onClick={() => !enviado && setMostrarModal(false)}
         >
-          <div
-            style={{
-              backgroundColor: 'var(--bg-primary)',
-              borderRadius: '12px',
-              padding: '2rem',
-              width: '100%',
-              maxWidth: '500px',
-              boxShadow: '0 20px 60px rgba(0, 0, 0, 0.3)',
-              position: 'relative'
-            }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            {!enviado ? (
-              <>
-                <button
-                  onClick={() => setMostrarModal(false)}
-                  style={{
-                    position: 'absolute',
-                    top: '1rem',
-                    right: '1rem',
-                    background: 'none',
-                    border: 'none',
-                    color: 'var(--text-secondary)',
-                    cursor: 'pointer',
-                    padding: '0.5rem',
-                    borderRadius: '6px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center'
-                  }}
-                >
-                  <FaTimes size={20} />
-                </button>
-
-                <h3 style={{
-                  fontSize: '1.25rem',
-                  fontWeight: 600,
-                  color: 'var(--text-primary)',
-                  marginBottom: '1rem'
-                }}>
-                  {tipoSeleccionado === 'problema' 
-                    ? '🚨 Reportar un problema' 
-                    : '✨ Sugerir una mejora'}
-                </h3>
-
-                <p style={{
-                  fontSize: '0.875rem',
-                  color: 'var(--text-secondary)',
-                  marginBottom: '1.5rem',
-                  lineHeight: 1.6
-                }}>
-                  {tipoSeleccionado === 'problema'
-                    ? 'Ayúdanos a mejorar reportando cualquier problema que encuentres.'
-                    : 'Tu opinión es valiosa. ¿Qué te gustaría ver en la plataforma?'
-                  }
-                </p>
-
-                <div style={{
-                  display: 'flex',
-                  gap: '0.5rem',
-                  marginBottom: '1rem'
-                }}>
-                  {(['sugerencia', 'problema'] as const).map((t) => (
-                    <button
-                      key={t}
-                      onClick={() => setTipoSeleccionado(t)}
-                      style={{
-                        flex: 1,
-                        padding: '0.5rem',
-                        borderRadius: '6px',
-                        border: `1px solid ${tipoSeleccionado === t ? 'var(--text-primary)' : 'var(--border-color)'}`,
-                        backgroundColor: tipoSeleccionado === t ? 'var(--text-primary)' : 'var(--bg-primary)',
-                        color: tipoSeleccionado === t ? 'var(--bg-primary)' : 'var(--text-primary)',
-                        cursor: 'pointer',
-                        fontSize: '0.75rem',
-                        fontWeight: 500,
-                        transition: 'all 0.2s'
-                      }}
-                    >
-                      {t === 'sugerencia' ? '💡 Sugerencia' : '🚨 Problema'}
-                    </button>
-                  ))}
-                </div>
-
-                <textarea
-                  value={texto}
-                  onChange={(e) => setTexto(e.target.value)}
-                  placeholder={
-                    tipoSeleccionado === 'problema'
-                      ? 'Describe el problema que encontraste...'
-                      : 'Cuéntanos tu idea o sugerencia...'
-                  }
-                  rows={6}
-                  style={{
-                    width: '100%',
-                    padding: '0.75rem',
-                    fontSize: '0.875rem',
-                    border: '1px solid var(--border-color)',
-                    borderRadius: '8px',
-                    backgroundColor: 'var(--bg-primary)',
-                    color: 'var(--text-primary)',
-                    outline: 'none',
-                    resize: 'vertical',
-                    fontFamily: 'inherit',
-                    marginBottom: '1rem'
-                  }}
-                />
-
-                {/* Input de imagen */}
-                <div style={{ marginBottom: '1rem' }}>
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageChange}
-                    style={{ display: 'none' }}
-                    id="feedback-image-input"
-                  />
-                  <label
-                    htmlFor="feedback-image-input"
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '0.5rem',
-                      padding: '0.75rem',
-                      border: '1px dashed var(--border-color)',
-                      borderRadius: '8px',
-                      cursor: 'pointer',
-                      fontSize: '0.875rem',
-                      color: 'var(--text-secondary)',
-                      transition: 'all 0.2s'
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.borderColor = 'var(--text-primary)';
-                      e.currentTarget.style.color = 'var(--text-primary)';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.borderColor = 'var(--border-color)';
-                      e.currentTarget.style.color = 'var(--text-secondary)';
-                    }}
-                  >
-                    <FaImage size={16} />
-                    {imagenPreview ? 'Cambiar imagen' : 'Agregar captura de pantalla (opcional)'}
-                  </label>
-                  
-                  {imagenPreview && (
-                    <div style={{
-                      marginTop: '0.75rem',
-                      position: 'relative',
-                      display: 'inline-block'
-                    }}>
-                      <img
-                        src={imagenPreview}
-                        alt="Preview"
-                        style={{
-                          maxWidth: '100%',
-                          maxHeight: '200px',
-                          borderRadius: '8px',
-                          border: '1px solid var(--border-color)'
-                        }}
-                      />
-                      <button
-                        onClick={handleRemoveImage}
-                        style={{
-                          position: 'absolute',
-                          top: '0.5rem',
-                          right: '0.5rem',
-                          background: 'rgba(0, 0, 0, 0.7)',
-                          border: 'none',
-                          borderRadius: '50%',
-                          width: '28px',
-                          height: '28px',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          cursor: 'pointer',
-                          color: 'white'
-                        }}
-                      >
-                        <FaTrash size={12} />
-                      </button>
-                    </div>
-                  )}
-                </div>
-
-                <div style={{
-                  display: 'flex',
-                  gap: '0.75rem',
-                  justifyContent: 'flex-end'
-                }}>
-                  <button
-                    onClick={() => setMostrarModal(false)}
-                    style={{
-                      padding: '0.75rem 1.5rem',
-                      borderRadius: '8px',
-                      border: '1px solid var(--border-color)',
-                      backgroundColor: 'var(--bg-primary)',
-                      color: 'var(--text-primary)',
-                      cursor: 'pointer',
-                      fontSize: '0.875rem'
-                    }}
-                  >
-                    Cancelar
-                  </button>
-                  <button
-                    onClick={handleSubmit}
-                    disabled={!texto.trim()}
-                    style={{
-                      padding: '0.75rem 1.5rem',
-                      borderRadius: '8px',
-                      border: 'none',
-                      backgroundColor: texto.trim() ? 'var(--text-primary)' : 'var(--bg-secondary)',
-                      color: texto.trim() ? 'var(--bg-primary)' : 'var(--text-tertiary)',
-                      cursor: texto.trim() ? 'pointer' : 'not-allowed',
-                      fontSize: '0.875rem',
-                      fontWeight: 600
-                    }}
-                  >
-                    Enviar
-                  </button>
-                </div>
-              </>
-            ) : (
-              <div style={{
-                textAlign: 'center',
-                padding: '2rem 0'
-              }}>
-                <FaCheckCircle size={48} color="#10b981" style={{ marginBottom: '1rem' }} />
-                <h3 style={{
-                  fontSize: '1.25rem',
-                  fontWeight: 600,
-                  color: 'var(--text-primary)',
-                  marginBottom: '0.5rem'
-                }}>
-                  ¡Gracias!
-                </h3>
-                <p style={{
-                  fontSize: '0.875rem',
-                  color: 'var(--text-secondary)'
-                }}>
-                  Tu feedback ha sido guardado. Lo revisaremos pronto.
-                </p>
-              </div>
-            )}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.25rem 0.35rem 0.5rem' }}>
+            <div>
+              <p style={{ margin: 0, fontSize: '0.95rem', fontWeight: 700, color: 'var(--text-primary)' }}>
+                ¿En qué te ayudamos?
+              </p>
+              <p style={{ margin: '0.15rem 0 0', fontSize: '0.78rem', color: 'var(--text-secondary)' }}>
+                Te atendemos por WhatsApp
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setAbierto(false)}
+              aria-label="Cerrar menú de ayuda"
+              style={{
+                width: '32px',
+                height: '32px',
+                borderRadius: '8px',
+                border: '1px solid var(--border-color)',
+                background: 'var(--bg-secondary)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer',
+                color: 'var(--text-secondary)',
+              }}
+            >
+              <IconClose size={14} />
+            </button>
           </div>
+
+          {MOTIVOS_AYUDA.map((motivo) => (
+            <button
+              key={motivo.id}
+              type="button"
+              onClick={() => abrirWhatsApp(motivo.id)}
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'flex-start',
+                gap: '0.15rem',
+                padding: '0.75rem 0.85rem',
+                borderRadius: '12px',
+                border: '1px solid var(--border-color)',
+                backgroundColor: 'var(--bg-secondary)',
+                cursor: 'pointer',
+                textAlign: 'left',
+                transition: 'background-color 0.15s ease, border-color 0.15s ease',
+              }}
+              className="hover:border-sky-300 hover:bg-sky-50 dark:hover:bg-sky-950/30"
+            >
+              <span style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-primary)' }}>
+                {motivo.label}
+              </span>
+              <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
+                {motivo.descripcion}
+              </span>
+            </button>
+          ))}
         </div>
       )}
-    </>
+
+      <button
+        type="button"
+        onClick={() => setAbierto((v) => !v)}
+        aria-expanded={abierto}
+        aria-haspopup="dialog"
+        style={{
+          padding: '0.7rem 1rem',
+          borderRadius: '999px',
+          border: '1px solid rgba(56, 189, 248, 0.35)',
+          cursor: 'pointer',
+          fontSize: '0.875rem',
+          fontWeight: 600,
+          display: 'flex',
+          alignItems: 'center',
+          gap: '0.5rem',
+          transition: 'transform 0.15s ease, box-shadow 0.15s ease',
+          boxShadow: '0 6px 20px rgba(56, 189, 248, 0.25)',
+          backgroundColor: 'var(--brand-blue)',
+          color: '#fff',
+        }}
+        className="motion-reduce:transform-none hover:-translate-y-0.5"
+      >
+        <FaWhatsapp size={16} aria-hidden="true" />
+        Ayuda
+        {abierto ? <FaTimes size={12} aria-hidden="true" /> : null}
+      </button>
+    </div>
   );
 }
-

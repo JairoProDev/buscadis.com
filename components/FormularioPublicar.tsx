@@ -292,11 +292,10 @@ export default function FormularioPublicar({
     for (const imgPreview of previews) {
       const formDataUpload = new FormData();
       formDataUpload.append('image', imgPreview.file);
-      formDataUpload.append('bucket', 'adisos-images');
-
       const uploadResponse = await fetch('/api/upload-image', {
         method: 'POST',
-        body: formDataUpload
+        headers: { 'x-upload-type': 'adisos' },
+        body: formDataUpload,
       });
 
       if (!uploadResponse.ok) {

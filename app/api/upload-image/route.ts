@@ -3,6 +3,7 @@ import { supabase } from '@/lib/supabase';
 import { validateImageFile } from '@/lib/validations';
 import { rateLimit, getClientIP } from '@/lib/rate-limit';
 import sharp from 'sharp';
+import { ADISO_IMAGES_BUCKET_FALLBACKS, FEEDBACK_IMAGES_BUCKET } from '@/lib/storage-buckets';
 
 // Configuración de exportación dinámica para evitar errores en build
 export const dynamic = 'force-dynamic';
@@ -110,44 +111,55 @@ export async function POST(request: NextRequest) {
     const tipo = request.headers.get('x-upload-type') || 'adisos'; // Por defecto adisos
     const fileName = `${tipo}/${timestamp}-${random}.${extension}`;
 
-    // Determinar el bucket según el tipo
-    const bucketName = tipo === 'feedback' ? 'feedback-images' : 'adisos-images';
+    const bucketCandidates =
+      tipo === 'feedback' ? [FEEDBACK_IMAGES_BUCKET] : ADISO_IMAGES_BUCKET_FALLBACKS;
 
-    // Subir a Supabase Storage usando el buffer optimizado
-    const { data, error } = await supabase!.storage
-      .from(bucketName)
-      .upload(fileName, finalBuffer, {
-        contentType: finalContentType,
-        upsert: false
-      });
+    let bucketUsado: string | null = null;
+    let uploadError: { message?: string } | null = null;
 
-    if (error) {
-      // Log detallado solo en desarrollo
-      if (process.env.NODE_ENV === 'development') {
-        console.error('Error al subir imagen a Supabase Storage:', {
-          message: error.message,
-          code: (error as any).code,
-          error: error
+    for (const bucketName of bucketCandidates) {
+      const { error } = await supabase!.storage
+        .from(bucketName)
+        .upload(fileName, finalBuffer, {
+          contentType: finalContentType,
+          upsert: false,
         });
+
+      if (!error) {
+        bucketUsado = bucketName;
+        uploadError = null;
+        break;
       }
 
-      // Mensaje más específico según el tipo de error
-      let errorMessage = 'Error al subir la imagen';
-      if (error.message?.includes('bucket') || error.message?.includes('Bucket')) {
-        errorMessage = 'El bucket de almacenamiento no está configurado. Verifica la configuración de Supabase Storage.';
-      } else if (error.message?.includes('permission') || error.message?.includes('403')) {
-        errorMessage = 'No tienes permisos para subir imágenes. Verifica las políticas de Supabase Storage.';
-      }
+      uploadError = error;
+      const bucketMissing =
+        error.message?.toLowerCase().includes('bucket') ||
+        error.message?.toLowerCase().includes('not found');
 
-      return NextResponse.json(
-        { error: errorMessage },
-        { status: 500 }
-      );
+      if (!bucketMissing) {
+        break;
+      }
     }
 
-    // Obtener URL pública
+    if (!bucketUsado || uploadError) {
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Error al subir imagen a Supabase Storage:', uploadError);
+      }
+
+      let errorMessage = 'No se pudo subir la imagen. Intenta de nuevo en unos minutos.';
+      const msg = uploadError?.message?.toLowerCase() ?? '';
+      if (msg.includes('bucket') || msg.includes('not found')) {
+        errorMessage =
+          'No encontramos el bucket de imágenes en Supabase. Crea el bucket público "avisos-images" o contacta soporte.';
+      } else if (msg.includes('permission') || msg.includes('403')) {
+        errorMessage = 'No hay permiso para subir imágenes. Revisa las políticas de Storage en Supabase.';
+      }
+
+      return NextResponse.json({ error: errorMessage }, { status: 500 });
+    }
+
     const { data: urlData } = supabase!.storage
-      .from(bucketName)
+      .from(bucketUsado)
       .getPublicUrl(fileName);
 
     return NextResponse.json({
