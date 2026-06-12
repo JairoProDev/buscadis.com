@@ -207,9 +207,9 @@ a {
 }
 
 
-/* Focus visible para navegación por teclado */
+/* Focus visible para navegación por teclado (spec §10) */
 *:focus-visible {
-  outline: 2px solid var(--text-primary);
+  outline: 2px solid var(--brand-blue);
   outline-offset: 2px;
 }
 

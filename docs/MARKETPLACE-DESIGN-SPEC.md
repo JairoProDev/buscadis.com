@@ -348,24 +348,24 @@ Cuando `categoria !== todos` o `filtroUbicacion` o `busqueda`:
 ## 12. Roadmap de implementación
 
 ### P0 — Esta sprint (impacto visual inmediato)
-- [ ] AdisoCard: quitar uppercase, subir tipografía, pill ubicación
-- [ ] Placeholder icono 32px, miniatura con franja visual
-- [ ] Hover/selected sin scale agresivo
-- [ ] Toolbar: pulse sin emoji, sort bottom sheet móvil
-- [ ] Ocultar botones búsqueda voz/cámara (hasta existir)
-- [ ] Sanitizar descripciones en render
+- [x] AdisoCard: quitar uppercase, subir tipografía, pill ubicación
+- [x] Placeholder icono 32px, miniatura con franja visual
+- [x] Hover/selected sin scale agresivo
+- [x] Toolbar: pulse sin emoji, sort bottom sheet móvil
+- [x] Ocultar botones búsqueda voz/cámara (hasta existir)
+- [x] Sanitizar descripciones en render
 
 ### P1 — Siguiente sprint
-- [ ] Chips filtros activos
-- [ ] Category bar sticky
-- [ ] Sidebar: orden contenido, CTA por categoría, ocultar fecha
+- [x] Chips filtros activos
+- [x] Category bar sticky
+- [x] Sidebar: orden contenido, CTA por categoría, ocultar fecha
 - [ ] Dark mode: fondos categoría menos saturados
-- [ ] Skeleton cards en infinite scroll
+- [x] Skeleton cards en infinite scroll
 
 ### P2 — Producto
-- [ ] Filtro “solo con fotos”
-- [ ] Separar browse activo / archivo
-- [ ] Galería multi-imagen en sidebar
+- [x] Filtro “solo con fotos”
+- [x] Separar browse activo / archivo (toggle histórico)
+- [x] Galería multi-imagen en sidebar
 - [ ] Virtualización lista larga
 
 ---
