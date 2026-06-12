@@ -141,8 +141,10 @@ export default function Header({
       <div style={{
         display: 'flex',
         alignItems: 'center',
-        minWidth: isDesktop ? '340px' : 'auto',
-        gap: '12px'
+        minWidth: isDesktop ? '340px' : 0,
+        flex: isDesktop ? 'none' : 1,
+        gap: '12px',
+        overflow: 'hidden',
       }}>
 
 
@@ -169,14 +171,16 @@ export default function Header({
               display: 'flex',
               alignItems: 'center',
               gap: '10px',
-              padding: '4px'
+              padding: '4px',
+              flexShrink: 0,
             }}>
             <div style={{
-              height: isDesktop ? '42px' : '50px',
+              height: isDesktop ? '42px' : '40px',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              overflow: 'hidden'
+              overflow: 'hidden',
+              flexShrink: 0,
             }}>
               <img
                 src="/logo.svg"
@@ -203,15 +207,20 @@ export default function Header({
                   }
                 }}
               />
-              <span style={{
-                fontSize: isDesktop ? '1.72rem' : '1.16rem',
-                fontWeight: 800,
-                color: 'var(--brand-blue)',
-                letterSpacing: '0.01em',
-                marginLeft: '8px',
-                lineHeight: 1,
-                fontFamily: '"Plus Jakarta Sans", "Avenir Next", "Segoe UI", sans-serif'
-              }}>
+              <span
+                className="hidden min-[380px]:inline"
+                style={{
+                  fontSize: isDesktop ? '1.72rem' : '1.16rem',
+                  fontWeight: 800,
+                  color: 'var(--brand-blue)',
+                  letterSpacing: '0.01em',
+                  marginLeft: '8px',
+                  lineHeight: 1,
+                  fontFamily: '"Plus Jakarta Sans", "Avenir Next", "Segoe UI", sans-serif',
+                  whiteSpace: 'nowrap',
+                  flexShrink: 0,
+                }}
+              >
                 Buscadis
               </span>
             </div>
