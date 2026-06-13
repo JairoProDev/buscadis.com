@@ -10,15 +10,23 @@ export const UNIVERSAL_FILTERS: FilterDefinition[] = [
   },
   {
     id: 'soloConPrecio',
-    label: 'Solo con precio publicado',
-    type: 'toggle',
+    label: 'Precio publicado',
+    type: 'tri-toggle',
     group: 'General',
+    options: [
+      { value: 'con', label: 'Con precio' },
+      { value: 'sin', label: 'Sin precio' },
+    ],
   },
   {
     id: 'conFotos',
-    label: 'Solo con fotos',
-    type: 'toggle',
+    label: 'Fotos',
+    type: 'tri-toggle',
     group: 'General',
+    options: [
+      { value: 'con', label: 'Con fotos' },
+      { value: 'sin', label: 'Sin fotos' },
+    ],
   },
   {
     id: 'publicadoEn',
@@ -48,12 +56,6 @@ export const UNIVERSAL_FILTERS: FilterDefinition[] = [
     label: 'Ubicación',
     type: 'ubicacion',
     group: 'Ubicación',
-  },
-  {
-    id: 'incluirMasAnuncios',
-    label: 'Incluir más anuncios del catálogo',
-    type: 'toggle',
-    group: 'General',
   },
 ];
 
@@ -351,11 +353,10 @@ const CATEGORY_FILTERS: Record<Categoria, FilterDefinition[]> = {
 };
 
 export function getFiltersForCategory(categoria: Categoria | 'todos'): FilterDefinition[] {
-  const universal = UNIVERSAL_FILTERS.filter((f) => f.id !== 'incluirMasAnuncios' || categoria !== 'todos');
   if (categoria === 'todos') {
-    return universal.filter((f) => !f.requiresCategory);
+    return UNIVERSAL_FILTERS.filter((f) => !f.requiresCategory);
   }
-  return [...universal, ...(CATEGORY_FILTERS[categoria] ?? [])];
+  return [...UNIVERSAL_FILTERS, ...(CATEGORY_FILTERS[categoria] ?? [])];
 }
 
 export function getFilterDefinition(id: string, categoria: Categoria | 'todos'): FilterDefinition | undefined {

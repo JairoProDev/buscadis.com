@@ -5,12 +5,13 @@ import { createPortal } from 'react-dom';
 import { Adiso, Categoria } from '@/types';
 import { BrowseFilterState } from '@/lib/filters/types';
 import { getFiltersForCategory, getFilterDefinition } from '@/lib/filters/definitions';
-import { clearInlineFilter, getInlineFilterButtons } from '@/lib/filters/inline-display';
+import { clearInlineFilter, getInlineFilterButtons, getQuickToggleDefs } from '@/lib/filters/inline-display';
 import { countFacetOption } from '@/lib/filters/apply';
 import { IconChevronDown, IconClose } from '@/components/Icons';
+import { TriStateSegment, ToggleCheck } from './FilterUI';
 
 const pillClass =
-  'inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold border flex-shrink-0 min-h-[32px] transition-all duration-200';
+  'inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold flex-shrink-0 min-h-[32px] transition-all duration-200';
 
 interface FilterInlineSelectorsProps {
   categoria: Categoria | 'todos';
@@ -70,9 +71,9 @@ export default function FilterInlineSelectors({
     if (!openId || !openAnchor) return;
     const updatePosition = () => {
       const rect = openAnchor.getBoundingClientRect();
-      const popoverWidth = 240; // Estimated maximum width
+      const popoverWidth = 260; // Estimated maximum width
       let left = rect.left;
-      
+
       // Prevent running off the right side of the screen
       if (left + popoverWidth > window.innerWidth) {
         left = Math.max(8, window.innerWidth - popoverWidth - 16);
@@ -110,7 +111,7 @@ export default function FilterInlineSelectors({
               placeholder="Mín"
               defaultValue={filters.precioMin ?? ''}
               id="precio-min-input"
-              className="w-full px-2.5 py-1.5 rounded-lg border border-[var(--border-color)] bg-[var(--bg-primary)] text-sm"
+              className="w-full px-2.5 py-1.5 rounded-lg bg-[var(--bg-tertiary)] text-[var(--text-primary)] text-sm"
             />
             <span className="text-[var(--text-tertiary)]">—</span>
             <input
@@ -119,7 +120,7 @@ export default function FilterInlineSelectors({
               placeholder="Máx"
               defaultValue={filters.precioMax ?? ''}
               id="precio-max-input"
-              className="w-full px-2.5 py-1.5 rounded-lg border border-[var(--border-color)] bg-[var(--bg-primary)] text-sm"
+              className="w-full px-2.5 py-1.5 rounded-lg bg-[var(--bg-tertiary)] text-[var(--text-primary)] text-sm"
             />
           </div>
           <button
@@ -151,7 +152,7 @@ export default function FilterInlineSelectors({
           <li>
             <button
               type="button"
-              className="w-full text-left px-3 py-2 text-sm hover:bg-[var(--hover-bg)]"
+              className="w-full text-left px-3 py-2 rounded-lg text-sm hover:bg-[var(--hover-bg)]"
               onClick={() => {
                 onChange({ ...filters, publicadoEn: undefined });
                 setOpenId(null);
@@ -164,7 +165,7 @@ export default function FilterInlineSelectors({
             <li key={opt.value}>
               <button
                 type="button"
-                className={`w-full text-left px-3 py-2 text-sm hover:bg-[var(--hover-bg)] ${
+                className={`w-full text-left px-3 py-2 rounded-lg text-sm hover:bg-[var(--hover-bg)] ${
                   filters.publicadoEn === opt.value ? 'text-[var(--brand-blue)] font-semibold' : ''
                 }`}
                 onClick={() => {
@@ -183,7 +184,7 @@ export default function FilterInlineSelectors({
     const facetId = def?.id ?? buttonId;
     if (def?.type === 'chips' && def.options) {
       return (
-        <ul className="py-1 min-w-[200px]">
+        <ul className="py-1 min-w-[200px] max-h-[260px] overflow-y-auto">
           {def.options.map((opt) => {
             const count = categoria !== 'todos'
               ? countFacetOption(adisos, categoria, busqueda, filters, facetId, opt.value, userLat, userLng)
@@ -195,7 +196,7 @@ export default function FilterInlineSelectors({
                 <button
                   type="button"
                   disabled={disabled}
-                  className={`w-full text-left px-3 py-2 text-sm hover:bg-[var(--hover-bg)] disabled:opacity-40 ${
+                  className={`w-full text-left px-3 py-2 rounded-lg text-sm hover:bg-[var(--hover-bg)] disabled:opacity-40 ${
                     selected ? 'text-[var(--brand-blue)] font-semibold' : ''
                   }`}
                   onClick={() => {
@@ -218,31 +219,55 @@ export default function FilterInlineSelectors({
       );
     }
 
-    if (def?.type === 'toggle' || ['soloConPrecio', 'conFotos', 'verificado', 'destacado', 'incluirMasAnuncios'].includes(buttonId)) {
-      const isFacet = Boolean(def?.requiresCategory);
-      const active = isFacet
-        ? filters.facets[facetId] === true
-        : Boolean(filters[buttonId as keyof BrowseFilterState]);
-
+    if (buttonId === 'panel') {
+      const quickToggleDefs = getQuickToggleDefs(categoria);
       return (
-        <div className="p-1 min-w-[180px]">
-          <button
-            type="button"
-            className="w-full text-left px-3 py-2 text-sm rounded-lg hover:bg-[var(--hover-bg)]"
-            onClick={() => {
-              if (isFacet) {
-                const facets = { ...filters.facets };
-                if (active) delete facets[facetId];
-                else facets[facetId] = true;
-                onChange({ ...filters, facets });
-              } else {
-                onChange({ ...filters, [buttonId]: active ? undefined : true });
-              }
-              setOpenId(null);
-            }}
-          >
-            {active ? '✓ Activado — tocar para quitar' : 'Activar'}
-          </button>
+        <div className="p-3 w-[260px] space-y-4">
+          <TriStateSegment
+            label="Fotos"
+            value={filters.conFotos}
+            onChange={(v) => onChange({ ...filters, conFotos: v })}
+            labels={['Todos', 'Con fotos', 'Sin fotos']}
+          />
+          <TriStateSegment
+            label="Precio publicado"
+            value={filters.soloConPrecio}
+            onChange={(v) => onChange({ ...filters, soloConPrecio: v })}
+            labels={['Todos', 'Con precio', 'Sin precio']}
+          />
+          <div className="pt-1 border-t border-[var(--border-color)]">
+            <p className="text-[11px] font-bold uppercase tracking-wide text-[var(--text-tertiary)] mb-1 mt-2">Confianza</p>
+            <ToggleCheck
+              label="Anunciante verificado"
+              checked={Boolean(filters.verificado)}
+              onToggle={() => onChange({ ...filters, verificado: filters.verificado ? undefined : true })}
+            />
+            <ToggleCheck
+              label="Solo destacados"
+              checked={Boolean(filters.destacado)}
+              onToggle={() => onChange({ ...filters, destacado: filters.destacado ? undefined : true })}
+            />
+          </div>
+          {quickToggleDefs.length > 0 && (
+            <div className="pt-1 border-t border-[var(--border-color)]">
+              <p className="text-[11px] font-bold uppercase tracking-wide text-[var(--text-tertiary)] mb-1 mt-2">
+                {quickToggleDefs[0].group ?? 'Categoría'}
+              </p>
+              {quickToggleDefs.map((qDef) => (
+                <ToggleCheck
+                  key={qDef.id}
+                  label={qDef.label}
+                  checked={filters.facets[qDef.id] === true}
+                  onToggle={() => {
+                    const facets = { ...filters.facets };
+                    if (facets[qDef.id] === true) delete facets[qDef.id];
+                    else facets[qDef.id] = true;
+                    onChange({ ...filters, facets });
+                  }}
+                />
+              ))}
+            </div>
+          )}
         </div>
       );
     }
@@ -265,8 +290,8 @@ export default function FilterInlineSelectors({
               <div
                 className={`${pillClass} ${
                   btn.isActive
-                    ? 'border-[var(--brand-blue)] bg-[var(--brand-blue)] text-white shadow-sm'
-                    : 'border-[var(--border-color)] bg-[var(--bg-primary)] text-[var(--text-primary)] hover:border-[var(--brand-blue)]/50'
+                    ? 'bg-[var(--brand-blue)] text-white shadow-sm'
+                    : 'bg-[var(--bg-tertiary)] text-[var(--text-primary)] hover:bg-[var(--hover-bg)]'
                 }`}
               >
                 <button
@@ -317,11 +342,11 @@ export default function FilterInlineSelectors({
       {mounted && openId && openAnchor && createPortal(
         <div
           ref={popoverRef}
-          className="fixed z-[9999] rounded-xl border border-[var(--border-color)] bg-[var(--bg-primary)] shadow-2xl p-1 animate-in fade-in slide-in-from-top-1 duration-150"
+          className="fixed z-[9999] rounded-2xl bg-[var(--bg-primary)] shadow-2xl p-1 animate-in fade-in slide-in-from-top-1 duration-150"
           style={{
             top: coords.top,
             left: coords.left,
-            boxShadow: '0 10px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1), 0 0 0 1px var(--border-color)',
+            boxShadow: '0 10px 25px -5px rgba(0,0,0,0.12), 0 8px 10px -6px rgba(0,0,0,0.08)',
           }}
         >
           {renderPopover(openId)}
@@ -331,4 +356,3 @@ export default function FilterInlineSelectors({
     </div>
   );
 }
-

@@ -8,12 +8,13 @@ export type FilterLayoutMode = 'inline' | 'panel';
 export interface BrowseFilterState {
   precioMin?: number;
   precioMax?: number;
+  /** true = solo con precio publicado, false = solo sin precio, undefined = indiferente */
   soloConPrecio?: boolean;
+  /** true = solo con fotos, false = solo sin fotos, undefined = indiferente */
   conFotos?: boolean;
   publicadoEn?: PublicadoEn;
   verificado?: boolean;
   destacado?: boolean;
-  incluirMasAnuncios?: boolean;
   ubicacion?: {
     departamento?: string;
     provincia?: string;
@@ -26,6 +27,7 @@ export interface BrowseFilterState {
 
 export type FilterControlType =
   | 'toggle'
+  | 'tri-toggle'
   | 'chips'
   | 'select'
   | 'price-range'
@@ -52,14 +54,13 @@ export interface FilterChip {
   id: string;
   label: string;
   /** clave en BrowseFilterState o facet id */
-  field: 'facet' | 'precioMin' | 'precioMax' | 'soloConPrecio' | 'conFotos' | 'publicadoEn' | 'verificado' | 'destacado' | 'incluirMasAnuncios' | 'ubicacion';
+  field: 'facet' | 'precioMin' | 'precioMax' | 'soloConPrecio' | 'conFotos' | 'publicadoEn' | 'verificado' | 'destacado' | 'ubicacion';
   facetId?: string;
   value?: string;
 }
 
 export const DEFAULT_BROWSE_FILTERS: BrowseFilterState = {
   facets: {},
-  incluirMasAnuncios: false,
 };
 
 export function countActiveFilters(
@@ -69,12 +70,11 @@ export function countActiveFilters(
   let n = 0;
   if (state.precioMin != null && state.precioMin > 0) n++;
   if (state.precioMax != null && state.precioMax > 0) n++;
-  if (state.soloConPrecio) n++;
-  if (state.conFotos) n++;
+  if (state.soloConPrecio !== undefined) n++;
+  if (state.conFotos !== undefined) n++;
   if (state.publicadoEn) n++;
   if (state.verificado) n++;
   if (state.destacado) n++;
-  if (state.incluirMasAnuncios) n++;
   if (state.ubicacion?.distrito || state.ubicacion?.departamento || state.ubicacion?.provincia) n++;
 
   const defs = Object.keys(state.facets);

@@ -1,29 +1,40 @@
 import { Categoria } from '@/types';
 import { BrowseFilterState } from './types';
-import { getFilterDefinition, getFiltersForCategory } from './definitions';
+import { getFiltersForCategory } from './definitions';
 
 export interface InlineFilterButton {
   id: string;
   label: string;
   activeLabel?: string;
   isActive: boolean;
-  type: 'precio' | 'toggle' | 'select' | 'chips' | 'ubicacion';
+  type: 'precio' | 'select' | 'chips' | 'ubicacion' | 'panel';
   facetId?: string;
 }
-
-const TOGGLE_SHORT: Record<string, string> = {
-  soloConPrecio: 'Con precio',
-  conFotos: 'Con fotos',
-  verificado: 'Verificado',
-  destacado: 'Destacado',
-  incluirMasAnuncios: 'Más catálogo',
-};
 
 const PUB_LABELS: Record<string, string> = {
   '24h': 'Últimas 24 h',
   '7d': 'Última semana',
   '30d': 'Último mes',
 };
+
+/** Filtros booleanos rápidos de la categoría actual (toggles simples sí/no) */
+export function getQuickToggleDefs(categoria: Categoria | 'todos') {
+  if (categoria === 'todos') return [];
+  return getFiltersForCategory(categoria).filter((d) => d.requiresCategory && d.type === 'toggle');
+}
+
+/** Cuenta cuántos filtros "rápidos" (panel unificado) están activos */
+export function countQuickFilters(categoria: Categoria | 'todos', filters: BrowseFilterState): number {
+  let n = 0;
+  if (filters.conFotos !== undefined) n++;
+  if (filters.soloConPrecio !== undefined) n++;
+  if (filters.verificado) n++;
+  if (filters.destacado) n++;
+  for (const def of getQuickToggleDefs(categoria)) {
+    if (filters.facets[def.id] === true) n++;
+  }
+  return n;
+}
 
 export function getInlineFilterButtons(
   categoria: Categoria | 'todos',
@@ -49,15 +60,22 @@ export function getInlineFilterButtons(
     type: 'precio',
   });
 
-  for (const [key, short] of Object.entries(TOGGLE_SHORT)) {
-    const active = Boolean(filters[key as keyof BrowseFilterState]);
-    buttons.push({
-      id: key,
-      label: short,
-      activeLabel: short,
-      isActive: active,
-      type: 'toggle',
-    });
+  // Filtros de categoría (chips) primero: hacen evidente el cambio de categoría
+  if (categoria !== 'todos') {
+    const catDefs = getFiltersForCategory(categoria).filter((d) => d.requiresCategory && d.type === 'chips' && d.options);
+    for (const def of catDefs) {
+      const raw = filters.facets[def.id];
+      const val = typeof raw === 'string' ? raw : (Array.isArray(raw) ? raw[0] : undefined);
+      const opt = val ? def.options!.find((o) => o.value === val) : undefined;
+      buttons.push({
+        id: def.id,
+        label: def.label,
+        activeLabel: opt?.label,
+        isActive: Boolean(val),
+        type: 'chips',
+        facetId: def.id,
+      });
+    }
   }
 
   buttons.push({
@@ -78,36 +96,15 @@ export function getInlineFilterButtons(
     type: 'ubicacion',
   });
 
-  if (categoria !== 'todos') {
-    const catDefs = getFiltersForCategory(categoria).filter((d) => d.requiresCategory);
-    for (const def of catDefs) {
-      const raw = filters.facets[def.id];
-      if (def.type === 'toggle') {
-        const active = raw === true;
-        buttons.push({
-          id: def.id,
-          label: def.label,
-          activeLabel: def.label,
-          isActive: active,
-          type: 'toggle',
-          facetId: def.id,
-        });
-        continue;
-      }
-      if (def.type === 'chips' && def.options) {
-        const val = typeof raw === 'string' ? raw : undefined;
-        const opt = val ? def.options.find((o) => o.value === val) : undefined;
-        buttons.push({
-          id: def.id,
-          label: def.label,
-          activeLabel: opt?.label,
-          isActive: Boolean(val),
-          type: 'chips',
-          facetId: def.id,
-        });
-      }
-    }
-  }
+  // Panel unificado: fotos, precio publicado, verificado, destacado y toggles de categoría
+  const quickCount = countQuickFilters(categoria, filters);
+  buttons.push({
+    id: 'panel',
+    label: 'Filtros',
+    activeLabel: quickCount > 0 ? `Filtros · ${quickCount}` : undefined,
+    isActive: quickCount > 0,
+    type: 'panel',
+  });
 
   return buttons;
 }
@@ -132,8 +129,14 @@ export function clearInlineFilter(
     delete next.publicadoEn;
     return next;
   }
-  if (TOGGLE_SHORT[buttonId]) {
-    delete next[buttonId as keyof BrowseFilterState];
+  if (buttonId === 'panel') {
+    delete next.conFotos;
+    delete next.soloConPrecio;
+    delete next.verificado;
+    delete next.destacado;
+    for (const key of Object.keys(next.facets)) {
+      if (next.facets[key] === true) delete next.facets[key];
+    }
     return next;
   }
   if (facetId) {

@@ -14,11 +14,15 @@ export function buildFilterChips(
   if (filters.precioMax) {
     chips.push({ id: 'precioMax', field: 'precioMax', label: `Hasta S/ ${filters.precioMax.toLocaleString('es-PE')}` });
   }
-  if (filters.soloConPrecio) {
+  if (filters.soloConPrecio === true) {
     chips.push({ id: 'soloConPrecio', field: 'soloConPrecio', label: 'Con precio' });
+  } else if (filters.soloConPrecio === false) {
+    chips.push({ id: 'soloConPrecio', field: 'soloConPrecio', label: 'Sin precio' });
   }
-  if (filters.conFotos) {
+  if (filters.conFotos === true) {
     chips.push({ id: 'conFotos', field: 'conFotos', label: 'Con fotos' });
+  } else if (filters.conFotos === false) {
+    chips.push({ id: 'conFotos', field: 'conFotos', label: 'Sin fotos' });
   }
   if (filters.publicadoEn) {
     const labels = { '24h': 'Últimas 24 h', '7d': 'Última semana', '30d': 'Último mes' };
@@ -29,9 +33,6 @@ export function buildFilterChips(
   }
   if (filters.destacado) {
     chips.push({ id: 'destacado', field: 'destacado', label: 'Destacado' });
-  }
-  if (filters.incluirMasAnuncios) {
-    chips.push({ id: 'incluirMasAnuncios', field: 'incluirMasAnuncios', label: 'Más anuncios' });
   }
   if (filters.ubicacion?.distrito) {
     chips.push({ id: 'ubicacion', field: 'ubicacion', label: filters.ubicacion.distrito });
@@ -94,9 +95,6 @@ export function removeFilterChip(
     break;
   case 'destacado':
     delete next.destacado;
-    break;
-  case 'incluirMasAnuncios':
-    delete next.incluirMasAnuncios;
     break;
   case 'ubicacion':
     delete next.ubicacion;

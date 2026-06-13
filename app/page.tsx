@@ -804,14 +804,14 @@ function HomeContent() {
               zIndex: 900,
               width: '100%',
               maxWidth: isDesktop
-                ? 'calc(100% - var(--sidebar-width, 0px))'
+                ? 'calc(100% - var(--sidebar-width, 0px) - var(--left-sidebar-width, 0px))'
                 : '100%',
               margin: '0 auto',
               backdropFilter: 'blur(12px)',
               WebkitBackdropFilter: 'blur(12px)',
               borderBottom: browseScrolled ? '1px solid var(--border-color)' : 'none',
-              transition: 'border-color 0.25s ease',
-              ...(isDesktop && { marginRight: 'var(--sidebar-width, 0px)' }),
+              transition: 'border-color 0.25s ease, margin-left 0.35s cubic-bezier(0.4, 0, 0.2, 1), max-width 0.35s cubic-bezier(0.4, 0, 0.2, 1)',
+              ...(isDesktop && { marginRight: 'var(--sidebar-width, 0px)', marginLeft: 'var(--left-sidebar-width, 0px)' }),
             }}
           >
             <div
@@ -1255,29 +1255,9 @@ function HomeContent() {
                       padding: '3rem 1rem',
                       color: 'var(--text-secondary)'
                     }}>
-                      {busqueda || categoriaFiltro !== 'todos' || browseFilters.conFotos || browseFilters.ubicacion
+                      {busqueda || categoriaFiltro !== 'todos' || browseFilters.conFotos != null || browseFilters.ubicacion
                         ? 'No se encontraron adisos con esos filtros'
-                        : !browseFilters.incluirMasAnuncios && adisos.some((a) => a.esHistorico)
-                          ? (
-                            <span>
-                              Hay más anuncios disponibles.{' '}
-                              <button
-                                type="button"
-                                onClick={() => setBrowseFilters((prev) => ({ ...prev, incluirMasAnuncios: true }))}
-                                style={{
-                                  background: 'none',
-                                  border: 'none',
-                                  color: 'var(--brand-blue)',
-                                  fontWeight: 700,
-                                  cursor: 'pointer',
-                                  textDecoration: 'underline',
-                                }}
-                              >
-                                Ver más anuncios
-                              </button>
-                            </span>
-                          )
-                          : 'Aún no hay adisos publicados'}
+                        : 'Aún no hay adisos publicados'}
                     </div>
                   )}
                 </>

@@ -19,11 +19,14 @@ export function browseFiltersFromSearchParams(params: URLSearchParams): BrowseFi
 
   state.precioMin = parseNum(params.get('precio_min'));
   state.precioMax = parseNum(params.get('precio_max'));
-  if (params.get('con_precio') === '1') state.soloConPrecio = true;
-  if (params.get('fotos') === '1') state.conFotos = true;
+  const conPrecio = params.get('con_precio');
+  if (conPrecio === '1') state.soloConPrecio = true;
+  else if (conPrecio === '0') state.soloConPrecio = false;
+  const fotos = params.get('fotos');
+  if (fotos === '1') state.conFotos = true;
+  else if (fotos === '0') state.conFotos = false;
   if (params.get('verificado') === '1') state.verificado = true;
   if (params.get('destacado') === '1') state.destacado = true;
-  if (params.get('mas') === '1') state.incluirMasAnuncios = true;
 
   const pub = params.get('publicado');
   if (pub === '24h' || pub === '7d' || pub === '30d') {
@@ -69,18 +72,17 @@ export function browseFiltersToSearchParams(
 
   const del = [
     'precio_min', 'precio_max', 'con_precio', 'fotos', 'publicado',
-    'verificado', 'destacado', 'mas', 'depto', 'prov', 'dist', 'radio', 'facet',
+    'verificado', 'destacado', 'depto', 'prov', 'dist', 'radio', 'facet',
   ];
   del.forEach((k) => params.delete(k));
 
   if (filters.precioMin) params.set('precio_min', String(filters.precioMin));
   if (filters.precioMax) params.set('precio_max', String(filters.precioMax));
-  if (filters.soloConPrecio) params.set('con_precio', '1');
-  if (filters.conFotos) params.set('fotos', '1');
+  if (filters.soloConPrecio !== undefined) params.set('con_precio', filters.soloConPrecio ? '1' : '0');
+  if (filters.conFotos !== undefined) params.set('fotos', filters.conFotos ? '1' : '0');
   if (filters.publicadoEn) params.set('publicado', filters.publicadoEn);
   if (filters.verificado) params.set('verificado', '1');
   if (filters.destacado) params.set('destacado', '1');
-  if (filters.incluirMasAnuncios) params.set('mas', '1');
 
   if (filters.ubicacion) {
     if (filters.ubicacion.departamento) params.set('depto', filters.ubicacion.departamento);

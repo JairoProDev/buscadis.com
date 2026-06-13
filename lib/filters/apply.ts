@@ -87,17 +87,16 @@ export function applyBrowseFilters({
     filtrados = filtrados.filter((a) => a.categoria === categoria);
   }
 
-  const hayActivos = filtrados.some((a) => !a.esHistorico);
-  if (!filters.incluirMasAnuncios && hayActivos) {
-    filtrados = filtrados.filter((a) => !a.esHistorico);
-  }
-
-  if (filters.conFotos) {
+  if (filters.conFotos === true) {
     filtrados = filtrados.filter(adisoTieneImagen);
+  } else if (filters.conFotos === false) {
+    filtrados = filtrados.filter((a) => !adisoTieneImagen(a));
   }
 
-  if (filters.soloConPrecio) {
+  if (filters.soloConPrecio === true) {
     filtrados = filtrados.filter((a) => a.precio != null && a.precio > 0);
+  } else if (filters.soloConPrecio === false) {
+    filtrados = filtrados.filter((a) => a.precio == null || a.precio <= 0);
   }
 
   if (filters.precioMin != null && filters.precioMin > 0) {

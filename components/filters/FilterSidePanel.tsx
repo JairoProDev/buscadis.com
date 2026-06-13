@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Adiso, Categoria } from '@/types';
 import { BrowseFilterState } from '@/lib/filters/types';
 import FilterControlFields from './FilterControlFields';
@@ -20,6 +20,9 @@ interface FilterSidePanelProps {
   resultCount: number;
 }
 
+const COLLAPSED_WIDTH = 44;
+const EXPANDED_WIDTH = 280;
+
 export default function FilterSidePanel({
   categoria,
   filters,
@@ -33,16 +36,24 @@ export default function FilterSidePanel({
   userLng,
   resultCount,
 }: FilterSidePanelProps) {
+  useEffect(() => {
+    const width = collapsed ? COLLAPSED_WIDTH : EXPANDED_WIDTH;
+    document.documentElement.style.setProperty('--left-sidebar-width', `${width}px`);
+    return () => {
+      document.documentElement.style.setProperty('--left-sidebar-width', '0px');
+    };
+  }, [collapsed]);
+
   if (collapsed) {
     return (
       <aside
-        className="flex-shrink-0 sticky top-[72px] self-start border-r border-[var(--border-color)] bg-[var(--bg-primary)]"
-        style={{ width: 44, minHeight: 120 }}
+        className="flex-shrink-0 sticky top-[72px] self-start bg-[var(--bg-primary)] rounded-2xl shadow-sm my-2"
+        style={{ width: COLLAPSED_WIDTH, minHeight: 120 }}
       >
         <button
           type="button"
           onClick={onToggleCollapse}
-          className="w-full py-4 flex flex-col items-center gap-2 text-[var(--text-secondary)] hover:text-[var(--brand-blue)] hover:bg-[var(--hover-bg)]"
+          className="w-full h-full py-4 flex flex-col items-center gap-2 rounded-2xl text-[var(--text-secondary)] hover:text-[var(--brand-blue)] hover:bg-[var(--hover-bg)] transition-colors"
           title="Abrir filtros"
           aria-label="Abrir panel de filtros"
         >
@@ -60,27 +71,25 @@ export default function FilterSidePanel({
 
   return (
     <aside
-      className="flex-shrink-0 sticky top-[72px] self-start border-r border-[var(--border-color)] bg-[var(--bg-primary)] overflow-y-auto"
+      className="flex-shrink-0 sticky top-[72px] self-start bg-[var(--bg-primary)] overflow-y-auto rounded-2xl shadow-sm my-2 no-scrollbar"
       style={{
-        width: 280,
-        maxHeight: 'calc(100vh - 72px)',
+        width: EXPANDED_WIDTH,
+        maxHeight: 'calc(100vh - 72px - 1rem)',
       }}
     >
-      <div className="flex items-center justify-between px-3 py-3 border-b border-[var(--border-color)]">
+      <div className="flex items-center justify-between px-4 py-3 sticky top-0 bg-[var(--bg-primary)] z-10">
         <h2 className="text-sm font-bold text-[var(--text-primary)]">Filtros</h2>
-        <div className="flex items-center gap-1">
-          <button
-            type="button"
-            onClick={onToggleCollapse}
-            className="p-2 rounded-lg hover:bg-[var(--hover-bg)]"
-            title="Minimizar"
-            aria-label="Minimizar panel"
-          >
-            <IconChevronLeft size={16} />
-          </button>
-        </div>
+        <button
+          type="button"
+          onClick={onToggleCollapse}
+          className="p-2 rounded-xl hover:bg-[var(--hover-bg)] text-[var(--text-secondary)] transition-colors"
+          title="Minimizar"
+          aria-label="Minimizar panel"
+        >
+          <IconChevronLeft size={16} />
+        </button>
       </div>
-      <div className="p-3">
+      <div className="px-4 pb-4">
         <FilterControlFields
           categoria={categoria}
           filters={filters}
@@ -93,8 +102,8 @@ export default function FilterSidePanel({
           compact
         />
       </div>
-      <div className="px-3 py-2 border-t border-[var(--border-color)] text-xs text-[var(--text-secondary)]">
-        {resultCount} resultados
+      <div className="px-4 py-3 text-xs font-semibold text-[var(--text-secondary)] bg-[var(--bg-tertiary)] rounded-b-2xl">
+        {resultCount} resultado{resultCount === 1 ? '' : 's'}
       </div>
     </aside>
   );
