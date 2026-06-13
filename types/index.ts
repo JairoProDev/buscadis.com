@@ -85,6 +85,71 @@ export const PAQUETES: Record<TamañoPaquete, PaqueteInfo> = {
   }
 };
 
+// ============================================
+// HISTORIAS (STORIES)
+// ============================================
+
+export type StoryMediaType = 'image' | 'video';
+export type StoryPromotionTier = 'gratis' | 'destacada' | 'premium';
+
+export interface StoryTierInfo {
+  tier: StoryPromotionTier;
+  nombre: string;
+  precio: number;
+  duracionHoras: number;
+  descripcion: string;
+}
+
+export const STORY_TIERS: Record<StoryPromotionTier, StoryTierInfo> = {
+  gratis: {
+    tier: 'gratis',
+    nombre: 'Gratis',
+    precio: 0,
+    duracionHoras: 24,
+    descripcion: 'Visible 24 horas, orden normal',
+  },
+  destacada: {
+    tier: 'destacada',
+    nombre: 'Destacada',
+    precio: 9,
+    duracionHoras: 24,
+    descripcion: 'Aparece antes que las historias gratuitas, con anillo dorado',
+  },
+  premium: {
+    tier: 'premium',
+    nombre: 'Premium',
+    precio: 19,
+    duracionHoras: 48,
+    descripcion: '48 horas visibles y primer lugar en la barra de historias',
+  },
+};
+
+export interface Story {
+  id: string;
+  user_id: string;
+  media_url: string;
+  media_type: StoryMediaType;
+  caption?: string;
+  categoria?: Categoria;
+  adiso_id?: string;
+  promotion_tier: StoryPromotionTier;
+  view_count: number;
+  created_at: string;
+  expires_at: string;
+  vendedor?: {
+    nombre: string;
+    avatarUrl?: string;
+  };
+}
+
+export interface StoryGroup {
+  userId: string;
+  vendedor?: { nombre: string; avatarUrl?: string };
+  stories: Story[];
+  hasUnseen: boolean;
+  topTier: StoryPromotionTier;
+}
+
 export interface Adiso {
   id: string;
   categoria: Categoria;

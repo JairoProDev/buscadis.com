@@ -9,7 +9,7 @@ import {
   FaInfoCircle, FaQrcode, FaRegHeart, FaMicrophone, FaLinkedin, FaYoutube,
   FaFile, FaCamera, FaTable, FaUpload, FaList, FaFilter, FaMapPin, FaShoppingCart, FaMagic, FaMinus,
   FaFileExcel, FaDownload, FaLightbulb, FaSyncAlt, FaBolt, FaTag, FaEyeSlash, FaLayerGroup, FaSquare,
-  FaSort, FaSortAmountDown, FaSortAmountUp
+  FaSort, FaSortAmountDown, FaSortAmountUp, FaVideo
 } from 'react-icons/fa';
 import { FcGoogle } from 'react-icons/fc';
 import { MdCenterFocusWeak } from 'react-icons/md';
@@ -125,6 +125,7 @@ export const IconMinimize = (p: IconProps) => <FaChevronRight size={getSize(p)} 
 export const IconExpand = (p: IconProps) => <FaChevronLeft size={getSize(p)} color={p.color || 'currentColor'} className={p.className} onClick={p.onClick} />;
 export const IconPlus = (p: IconProps) => <FaPlus size={getSize(p)} color={p.color || 'currentColor'} className={p.className} onClick={p.onClick} />;
 export const IconImage = (p: IconProps) => <FaImage size={getSize(p)} color={p.color || 'currentColor'} className={p.className} onClick={p.onClick} />;
+export const IconVideo = (p: IconProps) => <FaVideo size={getSize(p)} color={p.color || 'currentColor'} className={p.className} onClick={p.onClick} />;
 export const IconFile = (p: IconProps) => <FaFile size={getSize(p)} color={p.color || 'currentColor'} className={p.className} onClick={p.onClick} />;
 export const IconCamera = (p: IconProps) => <FaCamera size={getSize(p)} color={p.color || 'currentColor'} className={p.className} onClick={p.onClick} />;
 export const IconTable = (p: IconProps) => <FaTable size={getSize(p)} color={p.color || 'currentColor'} className={p.className} onClick={p.onClick} />;

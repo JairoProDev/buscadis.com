@@ -49,6 +49,7 @@ import {
   FilterLayoutMode,
 } from '@/lib/filters';
 import Buscador from '@/components/Buscador';
+import StoriesBar from '@/components/StoriesBar';
 import BrowseFilters from '@/components/filters/BrowseFilters';
 import FilterSidePanel from '@/components/filters/FilterSidePanel';
 import FilterControlFields from '@/components/filters/FilterControlFields';
@@ -917,6 +918,19 @@ function HomeContent() {
                   </span>
                 </button>
               ))}
+            </div>
+            <div
+              className="no-scrollbar"
+              style={{
+                overflow: 'hidden',
+                maxHeight: browseScrolled ? 0 : 100,
+                opacity: browseScrolled ? 0 : 1,
+                padding: browseScrolled ? '0 1rem' : '0 1rem 0.5rem',
+                transition: 'max-height 0.3s ease, opacity 0.3s ease, padding 0.3s ease',
+                pointerEvents: browseScrolled ? 'none' : 'auto',
+              }}
+            >
+              <StoriesBar />
             </div>
             <div
               style={{
