@@ -64,12 +64,6 @@ export default function Header({
       const currentScrollY = window.scrollY;
       const delta = currentScrollY - lastScrollY.current;
 
-      if (window.innerWidth >= 768) {
-        setHeaderVisible(true);
-        lastScrollY.current = currentScrollY;
-        return;
-      }
-
       if (currentScrollY < 60) {
         setHeaderVisible(true);
       } else if (delta > 4) {
@@ -84,6 +78,14 @@ export default function Header({
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, [mounted]);
+
+  useEffect(() => {
+    if (!mounted) return;
+    document.documentElement.style.setProperty('--header-height', headerVisible ? '72px' : '0px');
+    return () => {
+      document.documentElement.style.setProperty('--header-height', '72px');
+    };
+  }, [headerVisible, mounted]);
 
   const [showMobileSettings, setShowMobileSettings] = useState(false);
   const [activePopover, setActivePopover] = useState<'notifications' | 'messages' | null>(null);

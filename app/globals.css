@@ -300,6 +300,31 @@ html.dark .brand-search-shell {
   background-color: rgba(15, 23, 42, 0.45);
 }
 
+/* Borde animado celeste/amarillo que rodea el buscador principal */
+@property --search-glow-angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+
+@keyframes search-glow-rotate {
+  to {
+    --search-glow-angle: 360deg;
+  }
+}
+
+.brand-search-glow {
+  background: conic-gradient(from var(--search-glow-angle, 0deg),
+      var(--brand-blue), var(--brand-yellow), var(--brand-blue));
+  animation: search-glow-rotate 5s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .brand-search-glow {
+    animation: none;
+  }
+}
+
 .dark-mode body,
 html.dark body {
   background-image:

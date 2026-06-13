@@ -800,7 +800,7 @@ function HomeContent() {
           <div
             style={{
               position: 'sticky',
-              top: '72px',
+              top: 'var(--header-height, 72px)',
               zIndex: 900,
               width: '100%',
               maxWidth: isDesktop
@@ -810,7 +810,7 @@ function HomeContent() {
               backdropFilter: 'blur(12px)',
               WebkitBackdropFilter: 'blur(12px)',
               borderBottom: browseScrolled ? '1px solid var(--border-color)' : 'none',
-              transition: 'border-color 0.25s ease, margin-left 0.35s cubic-bezier(0.4, 0, 0.2, 1), max-width 0.35s cubic-bezier(0.4, 0, 0.2, 1)',
+              transition: 'top 0.35s ease, border-color 0.25s ease, margin-left 0.35s cubic-bezier(0.4, 0, 0.2, 1), max-width 0.35s cubic-bezier(0.4, 0, 0.2, 1)',
               ...(isDesktop && { marginRight: 'var(--sidebar-width, 0px)', marginLeft: 'var(--left-sidebar-width, 0px)' }),
             }}
           >
@@ -966,7 +966,8 @@ function HomeContent() {
               width: '100%',
               maxWidth: isDesktop ? 'calc(100% - var(--sidebar-width, 0px))' : '100%',
               margin: '0 auto',
-              ...(isDesktop && { marginRight: 'var(--sidebar-width, 0px)' }),
+              transition: 'margin-left 0.35s cubic-bezier(0.4, 0, 0.2, 1)',
+              ...(isDesktop && { marginRight: 'var(--sidebar-width, 0px)', marginLeft: 'var(--left-sidebar-width, 0px)' }),
             }}
           >
             {isDesktop && (
@@ -976,6 +977,19 @@ function HomeContent() {
                 onChange={setBrowseFilters}
                 adisos={adisos}
                 busqueda={busquedaDebounced}
+                searchValue={busqueda}
+                onBusquedaChange={setBusqueda}
+                onCategoryDetected={(categoria) => {
+                  setCategoriaFiltro(categoria);
+                  const params = new URLSearchParams(searchParams.toString());
+                  params.set('categoria', categoria);
+                  router.replace(`/?${params.toString()}`, { scroll: false });
+                }}
+                onNotify={(message, type) => {
+                  if (type === 'error') error(message);
+                  else if (type === 'success') success(message);
+                  else success(message);
+                }}
                 collapsed={filterSidebarCollapsed}
                 onToggleCollapse={() => setFilterSidebarCollapsed((c) => !c)}
                 onOpenUbicacion={() => setMostrarFiltroUbicacion(true)}

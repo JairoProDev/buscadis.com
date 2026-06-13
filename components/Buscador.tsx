@@ -118,6 +118,8 @@ export default function Buscador({
   const actionBtnClass =
     'p-2 rounded-full transition-all min-w-[44px] min-h-[44px] flex items-center justify-center disabled:opacity-50 disabled:pointer-events-none';
 
+  const radiusClass = compact ? 'rounded-full' : 'rounded-2xl';
+
   return (
     <div className={`-mx-4 px-4 ${compact ? 'py-1' : 'py-2'} md:mx-0 md:px-0 transition-all duration-300`}>
       <input
@@ -136,17 +138,18 @@ export default function Buscador({
         onChange={(e) => handleImageSelected(e.target.files?.[0])}
       />
 
-      <div className="relative group z-30">
-        <div
-          className={`
-            brand-search-shell relative flex items-center bg-white dark:bg-slate-800/40 border rounded-full
-            ${compact ? 'px-4 py-2.5' : 'px-6 py-4 rounded-2xl'}
-            shadow-[0_4px_20px_rgba(0,0,0,0.06)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.3)]
-            backdrop-blur-md transition-all duration-300 motion-reduce:transition-none
-            hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)] motion-reduce:hover:translate-y-0 hover:-translate-y-0.5
-            focus-within:shadow-[0_8px_24px_rgba(var(--brand-primary-rgb),0.2)] focus-within:ring-2 focus-within:ring-[var(--brand-blue)]/35 dark:focus-within:ring-[var(--brand-blue)]/55
-          `}
-        >
+      <div className="relative group z-30 md:mx-auto md:max-w-2xl">
+        <div className={`brand-search-glow relative ${radiusClass} p-[2px]`}>
+          <div
+            className={`
+              brand-search-shell relative flex items-center bg-white dark:bg-slate-800/40 ${radiusClass}
+              ${compact ? 'px-4 py-2.5' : 'px-6 py-4'}
+              shadow-[0_4px_20px_rgba(0,0,0,0.06)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.3)]
+              backdrop-blur-md transition-all duration-300 motion-reduce:transition-none
+              hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)] motion-reduce:hover:translate-y-0 hover:-translate-y-0.5
+              focus-within:shadow-[0_8px_24px_rgba(var(--brand-primary-rgb),0.2)] focus-within:ring-2 focus-within:ring-[var(--brand-blue)]/35 dark:focus-within:ring-[var(--brand-blue)]/55
+            `}
+          >
           <FaSearch className="w-5 h-5 text-[var(--brand-blue)] mr-3 flex-shrink-0 transition-transform group-focus-within:scale-110" />
 
           <input
@@ -193,6 +196,7 @@ export default function Buscador({
             >
               <IconGoogleLens size={20} />
             </button>
+          </div>
           </div>
         </div>
       </div>
