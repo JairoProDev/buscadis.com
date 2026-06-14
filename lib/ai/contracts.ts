@@ -11,6 +11,7 @@ export type AIIntent =
 export interface AIChatRequest {
   message: string;
   sessionId?: string;
+  userId?: string;
   imageUrl?: string;
   context?: {
     category?: Categoria;

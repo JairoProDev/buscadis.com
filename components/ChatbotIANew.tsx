@@ -11,6 +11,7 @@ import { FaPaperPlane, FaSpinner, FaSearch, FaImage, FaMapMarkerAlt, FaTag, FaRo
 import { AiOutlineClear } from 'react-icons/ai';
 import { nanoid } from 'nanoid';
 import { useNavigation } from '@/contexts/NavigationContext';
+import { useAuth } from '@/hooks/useAuth';
 import Image from 'next/image';
 import { AIChatResponse } from '@/lib/ai/contracts';
 
@@ -33,6 +34,7 @@ interface ChatbotIAProps {
 export default function ChatbotIANew({ onPublicar, onError, onSuccess, onMinimize }: ChatbotIAProps) {
   const useUnifiedChat = process.env.NEXT_PUBLIC_AI_UNIFIED_CHAT !== 'false';
   const { abrirAdiso } = useNavigation();
+  const { user } = useAuth();
   const [mensajes, setMensajes] = useState<Mensaje[]>([]);
   const [inputMensaje, setInputMensaje] = useState('');
   const [procesando, setProcesando] = useState(false);
@@ -121,6 +123,7 @@ export default function ChatbotIANew({ onPublicar, onError, onSuccess, onMinimiz
       body: JSON.stringify({
         message,
         imageUrl: imageUrl || undefined,
+        userId: user?.id || undefined,
       }),
     });
 
@@ -364,6 +367,7 @@ export default function ChatbotIANew({ onPublicar, onError, onSuccess, onMinimiz
                   { icon: FaTag, text: "Vender mi laptop usada", color: "text-emerald-500" },
                   { icon: FaUser, text: "Encontrar trabajo de medio tiempo", color: "text-violet-500" },
                   { icon: FaMapMarkerAlt, text: "Tiendas de ropa cerca de mí", color: "text-amber-500" },
+                  ...(user ? [{ icon: FaRobot, text: "Recomiéndame algo según mis intereses", color: "text-pink-500" }] : []),
                 ].map((item, idx) => (
                   <button
                     key={idx}
@@ -371,7 +375,7 @@ export default function ChatbotIANew({ onPublicar, onError, onSuccess, onMinimiz
                       setInputMensaje(item.text);
                       if (textareaRef.current) textareaRef.current.focus();
                     }}
-                    className="group p-4 text-sm text-left bg-white dark:bg-zinc-800/50 border border-gray-100 dark:border-zinc-700/50 rounded-2xl hover:border-blue-400 dark:hover:border-blue-500 hover:shadow-xl hover:shadow-blue-500/5 transition-all text-gray-700 dark:text-gray-300 flex items-center gap-4 active:scale-95"
+                    className={`group p-4 text-sm text-left bg-white dark:bg-zinc-800/50 border border-gray-100 dark:border-zinc-700/50 rounded-2xl hover:border-blue-400 dark:hover:border-blue-500 hover:shadow-xl hover:shadow-blue-500/5 transition-all text-gray-700 dark:text-gray-300 flex items-center gap-4 active:scale-95 ${idx === 4 ? 'md:col-span-2' : ''}`}
                   >
                     <div className={`w-8 h-8 rounded-lg bg-gray-50 dark:bg-zinc-700/50 flex items-center justify-center ${item.color} group-hover:bg-blue-50 dark:group-hover:bg-blue-900/20 transition-colors`}>
                       <item.icon size={14} />

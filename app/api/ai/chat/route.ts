@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { Categoria } from '@/types';
+import { Adiso, Categoria } from '@/types';
 import { rateLimit, getClientIP } from '@/lib/rate-limit';
 import {
   AIChatRequest,
@@ -20,10 +20,14 @@ import { hybridSearch } from '@/actions/ai-search';
 import { snapAndSell } from '@/actions/ai-vision';
 import { analizarBusqueda } from '@/lib/chatbot-nlu';
 import { buscarMejorada, generarRespuestaBusqueda } from '@/lib/busqueda-mejorada';
+import { getAdisosFromSupabase } from '@/lib/supabase';
+import { getInteraccionesUsuario, getUserInterestProfile } from '@/lib/interactions';
+import { personalizeAdisos, topInterestCategories } from '@/lib/ai/personalization';
 
 const bodySchema = z.object({
   message: z.string().min(1),
   sessionId: z.string().optional(),
+  userId: z.string().uuid().optional(),
   imageUrl: z.string().optional(),
   context: z
     .object({
@@ -59,7 +63,7 @@ function detectIntent(msg: string, hasImage: boolean): { intent: AIIntent; confi
   const t = msg.toLowerCase();
   if (hasImage || t.includes('foto') || t.includes('imagen')) return { intent: 'vision', confidence: 0.8 };
   if (/(publicar|vender|crear anuncio|subir anuncio)/.test(t)) return { intent: 'publish', confidence: 0.85 };
-  if (/(recomienda|recomendaci[oó]n|sugerir)/.test(t)) return { intent: 'recommend', confidence: 0.7 };
+  if (/(recom|sugerir|algo para mi|para mí)/.test(t)) return { intent: 'recommend', confidence: 0.7 };
   if (/(hola|buenas|ayuda|cómo funciona)/.test(t)) return { intent: 'help', confidence: 0.75 };
   if (t.length > 3) return { intent: 'search', confidence: 0.7 };
   return { intent: 'other', confidence: 0.4 };
@@ -141,6 +145,11 @@ export async function POST(request: NextRequest) {
       } else {
         const analisis = analizarBusqueda(body.message);
         items = await buscarMejorada(analisis, 10);
+      }
+
+      if (body.userId) {
+        const profile = await getUserInterestProfile(body.userId);
+        items = personalizeAdisos(items, profile);
       }
 
       const text = items.length
@@ -240,6 +249,49 @@ export async function POST(request: NextRequest) {
         intent,
         tool: 'publish_assistant_tool',
         status: 'ok',
+      });
+      return NextResponse.json(resp);
+    }
+
+    if (intent === 'recommend') {
+      const profile = body.userId ? await getUserInterestProfile(body.userId) : null;
+      const ocultos = body.userId ? await getInteraccionesUsuario(body.userId, 'not_interested') : new Set<string>();
+      const topCategorias = profile ? topInterestCategories(profile) : [];
+
+      let items: Adiso[] = [];
+      if (topCategorias.length > 0) {
+        const porCategoria = await Promise.all(
+          topCategorias.map((categoria) => getAdisosFromSupabase({ categoria, soloActivos: true, limit: 8 }))
+        );
+        items = personalizeAdisos(porCategoria.flat().filter((a) => !ocultos.has(a.id)), profile).slice(0, 10);
+      }
+
+      if (items.length === 0) {
+        const recientes = await getAdisosFromSupabase({ soloActivos: true, limit: 10 });
+        items = recientes.filter((a) => !ocultos.has(a.id)).slice(0, 10);
+      }
+
+      const text = topCategorias.length > 0
+        ? `Según tus intereses, estos anuncios de ${topCategorias[0]} podrían gustarte.`
+        : 'Aquí tienes algunos anuncios recientes que podrían interesarte.';
+
+      const resp: AIChatResponse = {
+        sessionId: session.sessionId,
+        intent,
+        confidence,
+        text,
+        payload: { type: 'recommendations', items },
+        meta: { provider: 'heuristic', latencyMs: Date.now() - started, costUsd: estimated },
+      };
+      appendTurn(session.sessionId, 'assistant', text);
+      trackAIEvent({
+        name: 'chat.tool.executed',
+        sessionId: session.sessionId,
+        intent,
+        tool: 'recommendation_tool',
+        status: 'ok',
+        latencyMs: Date.now() - started,
+        metadata: { total: items.length, personalized: topCategorias.length > 0 },
       });
       return NextResponse.json(resp);
     }

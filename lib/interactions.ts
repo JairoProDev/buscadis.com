@@ -149,6 +149,35 @@ export async function setInteractionReason(
     }
 }
 
+export interface UserInterestProfile {
+    categoriaSignals: Record<string, number>;
+    keywordSignals: Record<string, number>;
+    dismissReasons: Record<string, number>;
+}
+
+/**
+ * Obtiene el perfil agregado de intereses del usuario (afinidad por
+ * categoría y por keywords), usado para personalizar el asistente de IA
+ * y las recomendaciones del feed principal.
+ */
+export async function getUserInterestProfile(userId: string): Promise<UserInterestProfile | null> {
+    if (!supabase) return null;
+
+    const { data, error } = await supabase
+        .from('user_interest_profile')
+        .select('categoria_signals, keyword_signals, dismiss_reasons')
+        .eq('user_id', userId)
+        .maybeSingle();
+
+    if (error || !data) return null;
+
+    return {
+        categoriaSignals: (data.categoria_signals as Record<string, number>) || {},
+        keywordSignals: (data.keyword_signals as Record<string, number>) || {},
+        dismissReasons: (data.dismiss_reasons as Record<string, number>) || {},
+    };
+}
+
 /**
  * Obtiene las interacciones de un usuario para una lista de adisos (optimización)
  * o para todos si no se pasa lista.
