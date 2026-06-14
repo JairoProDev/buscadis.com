@@ -2,6 +2,8 @@ import { Adiso, UbicacionDetallada } from '@/types';
 import { TipoOrdenamiento } from '@/components/Ordenamiento';
 import { BrowseFilterState } from './types';
 import { adisoMatchesFacets, adisoPublicadoDentroDe, adisoTieneImagen } from './matchers';
+import { personalizationFreshnessBoostMs } from '@/lib/ai/personalization';
+import type { UserInterestProfile } from '@/lib/interactions';
 
 const TEST_REGEX = /toyota test|test adiso|test anuncio/i;
 
@@ -70,6 +72,7 @@ export interface ApplyBrowseFiltersInput {
   ordenamiento: TipoOrdenamiento;
   userLat?: number;
   userLng?: number;
+  interestProfile?: UserInterestProfile | null;
 }
 
 export function applyBrowseFilters({
@@ -80,6 +83,7 @@ export function applyBrowseFilters({
   ordenamiento,
   userLat,
   userLng,
+  interestProfile,
 }: ApplyBrowseFiltersInput): Adiso[] {
   let filtrados = adisos.filter((a) => !TEST_REGEX.test(a.titulo || ''));
 
@@ -155,8 +159,8 @@ export function applyBrowseFilters({
       const ra = a.promotionRank ?? 0;
       const rb = b.promotionRank ?? 0;
       if (ra !== rb) return rb - ra;
-      const fa = parsearFecha(a.fechaPublicacion, a.horaPublicacion);
-      const fb = parsearFecha(b.fechaPublicacion, b.horaPublicacion);
+      const fa = parsearFecha(a.fechaPublicacion, a.horaPublicacion) + personalizationFreshnessBoostMs(a, interestProfile);
+      const fb = parsearFecha(b.fechaPublicacion, b.horaPublicacion) + personalizationFreshnessBoostMs(b, interestProfile);
       const c = fb - fa;
       return c !== 0 ? c : a.id.localeCompare(b.id);
     }

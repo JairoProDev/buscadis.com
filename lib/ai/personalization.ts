@@ -3,7 +3,7 @@
 // keywords derivada de favoritos/descartes).
 
 import { Adiso, Categoria } from '@/types';
-import { UserInterestProfile } from '@/lib/interactions';
+import type { UserInterestProfile } from '@/lib/interactions';
 
 /**
  * Calcula un puntaje de afinidad de un adiso con el perfil del usuario:
@@ -50,4 +50,20 @@ export function topInterestCategories(profile: UserInterestProfile, max = 2): Ca
     .sort((a, b) => b[1] - a[1])
     .slice(0, max)
     .map(([categoria]) => categoria as Categoria);
+}
+
+const HORAS_POR_PUNTO_AFINIDAD = 4 * 60 * 60 * 1000; // 4h de "antigüedad" perdonada por punto de afinidad
+const MAX_BOOST_MS = 3 * 24 * 60 * 60 * 1000; // tope de 3 días, para no romper el orden cronológico
+
+/**
+ * Convierte la afinidad de un adiso con el perfil del usuario en un
+ * adelanto temporal (ms) que se suma a su fecha de publicación al
+ * ordenar el feed por "recientes". Así, anuncios afines a los intereses
+ * del usuario aparecen un poco antes sin desordenar por completo el feed.
+ */
+export function personalizationFreshnessBoostMs(adiso: Adiso, profile: UserInterestProfile | null | undefined): number {
+  if (!profile) return 0;
+  const boost = personalizationBoost(adiso, profile);
+  if (boost <= 0) return 0;
+  return Math.min(boost * HORAS_POR_PUNTO_AFINIDAD, MAX_BOOST_MS);
 }

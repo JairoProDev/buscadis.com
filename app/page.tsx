@@ -20,6 +20,7 @@ import { UbicacionDetallada } from '@/types';
 import { useNavigation } from '@/contexts/NavigationContext';
 
 import { registrarBusqueda } from '@/lib/analytics';
+import { getUserInterestProfile, UserInterestProfile } from '@/lib/interactions';
 import { onOnlineStatusChange, getOfflineMessage } from '@/lib/offline';
 import dynamicImport from 'next/dynamic';
 import Header from '@/components/Header';
@@ -122,6 +123,7 @@ function HomeContent() {
   const busquedaDebounced = useDebounce(busqueda, 300);
   const [categoriaFiltro, setCategoriaFiltro] = useState<Categoria | 'todos'>(categoriaUrl && ['empleos', 'inmuebles', 'vehiculos', 'servicios', 'productos', 'eventos', 'negocios', 'comunidad'].includes(categoriaUrl) ? categoriaUrl : 'todos');
   const [ordenamiento, setOrdenamiento] = useState<TipoOrdenamiento>('recientes');
+  const [interestProfile, setInterestProfile] = useState<UserInterestProfile | null>(null);
 
 
   const [browseFilters, setBrowseFilters] = useState<BrowseFilterState>(() => {
@@ -396,6 +398,21 @@ function HomeContent() {
     };
   }, [adisoId, cargando, isDesktop, error, router, searchParams]);
 
+  // Perfil de intereses del usuario, para personalizar el orden del feed "recientes"
+  useEffect(() => {
+    if (!user?.id) {
+      setInterestProfile(null);
+      return;
+    }
+    let cancelled = false;
+    getUserInterestProfile(user.id).then((perfil) => {
+      if (!cancelled) setInterestProfile(perfil);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [user?.id]);
+
   // Filtrado y ordenamiento (sistema unificado)
   useEffect(() => {
     if (adisos.length === 0) {
@@ -411,6 +428,7 @@ function HomeContent() {
       ordenamiento,
       userLat: profile?.latitud,
       userLng: profile?.longitud,
+      interestProfile,
     });
 
     if (busquedaDebounced.trim()) {
@@ -418,7 +436,7 @@ function HomeContent() {
     }
 
     setAdisosFiltrados(filtrados);
-  }, [busquedaDebounced, categoriaFiltro, ordenamiento, adisos, browseFilters, profile?.latitud, profile?.longitud, user?.id]);
+  }, [busquedaDebounced, categoriaFiltro, ordenamiento, adisos, browseFilters, profile?.latitud, profile?.longitud, user?.id, interestProfile]);
 
   // Resetear visibilidad local y estado de paginación SOLO cuando cambian los filtros principales
   // (Esto evita resetear la página actual cuando se cargan más adisos en el mismo filtro)
