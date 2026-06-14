@@ -11,6 +11,8 @@ interface BuscadorProps {
   value: string;
   onChange: (value: string) => void;
   compact?: boolean;
+  /** Panel lateral: delgado, sin botones de acción */
+  minimal?: boolean;
   onCategoryDetected?: (categoria: Categoria) => void;
   onNotify?: (message: string, type?: 'info' | 'error' | 'success') => void;
   /** Muestra el botón de embudo en la barra de acciones (solo buscador principal) */
@@ -33,6 +35,7 @@ export default function Buscador({
   value,
   onChange,
   compact = false,
+  minimal = false,
   onCategoryDetected,
   onNotify,
   showFilterToggle = false,
@@ -124,13 +127,25 @@ export default function Buscador({
     }
   };
 
+  const isCompact = compact && !minimal;
   const actionBtnClass =
-    'p-2 rounded-full transition-all min-w-[44px] min-h-[44px] flex items-center justify-center disabled:opacity-50 disabled:pointer-events-none';
+    'flex items-center justify-center rounded-full transition-all disabled:opacity-50 disabled:pointer-events-none w-8 h-8 md:w-10 md:h-10 shrink-0';
 
-  const radiusClass = compact ? 'rounded-full' : 'rounded-2xl';
+  const radiusClass = minimal ? 'rounded-xl' : isCompact ? 'rounded-full' : 'rounded-2xl';
+  const shellPadding = minimal
+    ? 'px-2.5 py-1'
+    : isCompact
+      ? 'px-3 py-2 md:px-4 md:py-2.5'
+      : 'px-3 py-2 md:px-6 md:py-3.5';
+  const iconSize = minimal ? 16 : isCompact ? 18 : 20;
+  const searchIconClass = minimal ? 'w-4 h-4 mr-2' : 'w-5 h-5 mr-2 md:mr-3';
 
   return (
-    <div className={`-mx-4 px-4 ${compact ? 'py-1' : 'py-2'} md:mx-0 md:px-0 transition-all duration-300`}>
+    <div
+      className={`transition-all duration-300 ${
+        minimal ? '' : `-mx-4 px-4 ${isCompact ? 'py-1' : 'py-2'} md:mx-0 md:px-0`
+      }`}
+    >
       <input
         ref={fileInputRef}
         type="file"
@@ -147,29 +162,31 @@ export default function Buscador({
         onChange={(e) => handleImageSelected(e.target.files?.[0])}
       />
 
-      <div className="relative group z-30 md:mx-auto md:max-w-2xl">
-        <div className={`brand-search-glow relative ${radiusClass} p-[2px]`}>
+      <div className={`relative group z-30 ${minimal ? 'w-full' : 'md:mx-auto md:max-w-2xl'}`}>
+        <div className={`brand-search-glow relative ${radiusClass} ${minimal ? 'p-[1px]' : 'p-[2px]'}`}>
           <div
             className={`
-              brand-search-shell relative flex items-center ${radiusClass}
-              ${compact ? 'px-4 py-2.5' : 'px-6 py-4'}
+              brand-search-shell relative flex items-center ${radiusClass} ${shellPadding}
               transition-all duration-300 motion-reduce:transition-none
-              hover:-translate-y-0.5 motion-reduce:hover:translate-y-0
+              ${minimal ? '' : 'hover:-translate-y-0.5 motion-reduce:hover:translate-y-0'}
               focus-within:ring-2 focus-within:ring-[var(--brand-blue)]/35 dark:focus-within:ring-[var(--brand-blue)]/50
               focus-within:shadow-[0_8px_24px_rgba(var(--brand-primary-rgb),0.18)]
             `}
           >
-          <FaSearch className="w-5 h-5 text-[var(--brand-blue)] mr-3 flex-shrink-0 transition-transform group-focus-within:scale-110" />
+          <FaSearch className={`${searchIconClass} text-[var(--brand-blue)] flex-shrink-0 transition-transform group-focus-within:scale-110`} />
 
           <input
             type="search"
             placeholder={t('search.placeholder') || '¿Qué estás buscando?'}
             value={value}
             onChange={(e) => onChange(e.target.value)}
-            className="brand-search-input flex-1 min-w-0 border-none outline-none text-[16px] bg-transparent truncate h-full py-1"
+            className={`brand-search-input flex-1 min-w-0 border-none outline-none bg-transparent truncate h-full ${
+              minimal ? 'text-sm py-0' : 'text-[16px] py-1'
+            }`}
           />
 
-          <div className="brand-search-divider flex items-center gap-1 ml-2 pl-2 border-l">
+          {!minimal && (
+          <div className="brand-search-divider flex items-center shrink-0 gap-0 ml-1 pl-1 border-l md:gap-0.5 md:ml-2 md:pl-2">
             {showFilterToggle && onToggleFilters && (
               <button
                 type="button"
@@ -183,9 +200,9 @@ export default function Buscador({
                 aria-label={filtersVisible ? 'Ocultar filtros' : 'Mostrar filtros'}
                 aria-pressed={filtersVisible}
               >
-                <IconFilterFunnel size={20} />
+                <IconFilterFunnel size={iconSize} />
                 {activeFiltersCount > 0 && (
-                  <span className="absolute top-2 right-2 w-2 h-2 bg-[var(--brand-blue)] border border-[var(--search-bg,var(--bg-primary))] rounded-full" />
+                  <span className="absolute top-1 right-1 w-1.5 h-1.5 bg-[var(--brand-blue)] border border-[var(--search-bg,var(--bg-primary))] rounded-full" />
                 )}
               </button>
             )}
@@ -203,7 +220,7 @@ export default function Buscador({
               aria-label={isListening ? 'Detener búsqueda por voz' : 'Búsqueda por voz'}
               aria-pressed={isListening}
             >
-              <IconMicrophone size={20} />
+              <IconMicrophone size={iconSize} />
             </button>
 
             <button
@@ -223,9 +240,10 @@ export default function Buscador({
               title="Búsqueda visual (foto)"
               aria-label="Búsqueda visual con foto"
             >
-              <IconGoogleLens size={20} />
+              <IconGoogleLens size={iconSize} />
             </button>
           </div>
+          )}
           </div>
         </div>
       </div>
