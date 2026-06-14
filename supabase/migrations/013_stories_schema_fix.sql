@@ -1,6 +1,4 @@
--- Stories: ephemeral (24h) media posts shown in a horizontal bar above the
--- search bar (Facebook/WhatsApp style). Paid promotion tiers boost ordering
--- and visual prominence (highlighted ring, longer duration).
+-- Repara el esquema de stories cuando 010 falló por adiso_id uuid vs adisos.id text.
 
 CREATE TABLE IF NOT EXISTS public.stories (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -15,6 +13,23 @@ CREATE TABLE IF NOT EXISTS public.stories (
   created_at timestamptz NOT NULL DEFAULT now(),
   expires_at timestamptz NOT NULL DEFAULT (now() + interval '24 hours')
 );
+
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema = 'public'
+      AND table_name = 'stories'
+      AND column_name = 'adiso_id'
+      AND udt_name = 'uuid'
+  ) THEN
+    ALTER TABLE public.stories DROP CONSTRAINT IF EXISTS stories_adiso_id_fkey;
+    ALTER TABLE public.stories ALTER COLUMN adiso_id TYPE text USING adiso_id::text;
+    ALTER TABLE public.stories
+      ADD CONSTRAINT stories_adiso_id_fkey
+      FOREIGN KEY (adiso_id) REFERENCES public.adisos(id) ON DELETE SET NULL;
+  END IF;
+END $$;
 
 CREATE INDEX IF NOT EXISTS idx_stories_user ON public.stories (user_id, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_stories_expires ON public.stories (expires_at);
@@ -41,7 +56,6 @@ CREATE POLICY "Users can delete own stories"
   ON public.stories FOR DELETE
   USING (auth.uid() = user_id);
 
-
 CREATE TABLE IF NOT EXISTS public.story_views (
   story_id uuid NOT NULL REFERENCES public.stories(id) ON DELETE CASCADE,
   user_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
@@ -61,7 +75,6 @@ CREATE POLICY "Users can record own story views"
   ON public.story_views FOR INSERT
   WITH CHECK (auth.uid() = user_id);
 
--- Atomically records a view (once per user) and bumps the story's counter.
 CREATE OR REPLACE FUNCTION public.fn_register_story_view(p_story_id uuid, p_user_id uuid)
 RETURNS void
 LANGUAGE plpgsql
@@ -80,5 +93,3 @@ END;
 $$;
 
 GRANT EXECUTE ON FUNCTION public.fn_register_story_view(uuid, uuid) TO authenticated;
-
-COMMENT ON TABLE public.stories IS 'Ephemeral (24h) media posts shown above the search bar; promotion_tier controls ordering and visual prominence for paid placements.';

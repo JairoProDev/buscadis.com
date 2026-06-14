@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "db:push": "supabase db push --linked --yes",
+    "db:migrations": "supabase migration list --linked"
   },
   "dependencies": {
     "@ai-sdk/openai": "^1.0.8",

@@ -5,7 +5,6 @@ import { createPortal } from 'react-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/useToast';
 import { Categoria, StoryPromotionTier, STORY_TIERS } from '@/types';
-import { uploadStoryMedia, createStory } from '@/lib/stories';
 import { getCategoriaLabel } from '@/lib/adiso-display';
 import { IconClose, IconImage, IconVideo } from '@/components/Icons';
 
@@ -19,7 +18,7 @@ const CATEGORIAS: Categoria[] = [
 ];
 
 export default function StoryUploadModal({ onClose, onPublished }: StoryUploadModalProps) {
-  const { user } = useAuth();
+  const { user, session } = useAuth();
   const { success, error: toastError } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [file, setFile] = useState<File | null>(null);
@@ -49,30 +48,36 @@ export default function StoryUploadModal({ onClose, onPublished }: StoryUploadMo
   const handlePublish = async () => {
     if (!user?.id || !file) return;
 
+    const token = session?.access_token;
+    if (!token) {
+      toastError('Inicia sesión para publicar tu historia.');
+      return;
+    }
+
     setPublishing(true);
     try {
-      const uploaded = await uploadStoryMedia(file, user.id);
-      if (!uploaded) {
-        toastError('No se pudo subir el archivo. Intenta de nuevo.');
-        return;
-      }
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('caption', caption.trim());
+      if (categoria) formData.append('categoria', categoria);
+      formData.append('tier', tier);
 
-      const story = await createStory(user.id, {
-        mediaUrl: uploaded.url,
-        mediaType: uploaded.mediaType,
-        caption: caption.trim() || undefined,
-        categoria: categoria || undefined,
-        promotionTier: tier,
+      const res = await fetch('/api/stories', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+        body: formData,
       });
 
-      if (!story) {
-        toastError('No se pudo publicar la historia.');
+      const data = (await res.json()) as { error?: string; success?: boolean };
+
+      if (!res.ok) {
+        toastError(data.error || 'No se pudo publicar la historia.');
         return;
       }
 
       success('¡Historia publicada!');
       onPublished();
-    } catch (err) {
+    } catch {
       toastError('Error al publicar la historia.');
     } finally {
       setPublishing(false);
