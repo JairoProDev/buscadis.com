@@ -91,6 +91,8 @@ const getCategoriaIcon = (categoria: Categoria): React.ComponentType<{ size?: nu
 
 const PASOS_TOTALES = 6;
 const PASOS_TOTALES_GRATUITO = 4; // Sin paquete ni imágenes
+import { consumeSeekIntent } from '@/lib/seek-intent';
+
 const PUBLISH_DRAFT_KEY = 'publish_draft_v1';
 
 export default function FormularioPublicar({
@@ -129,6 +131,17 @@ export default function FormularioPublicar({
   const [showVerificationGate, setShowVerificationGate] = useState(false);
 
   useEffect(() => {
+    const seek = consumeSeekIntent();
+    if (seek?.titulo) {
+      setFormData((prev) => ({
+        ...prev,
+        titulo: seek.titulo,
+        descripcion: seek.descripcion || prev.descripcion,
+        categoria: (seek.categoria as AdisoFormData['categoria']) || 'comunidad',
+      }));
+      setPasoActual(2);
+      return;
+    }
     try {
       const raw = sessionStorage.getItem(PUBLISH_DRAFT_KEY);
       if (!raw) return;

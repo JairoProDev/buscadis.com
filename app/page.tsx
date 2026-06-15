@@ -92,14 +92,27 @@ import type { SeccionSidebar } from '@/components/SidebarDesktop';
 
 type SeccionMobile = 'adiso' | 'mapa' | 'publicar' | 'chatbot' | 'gratuitos';
 
-import { formatLocationShort, getLocationFlag } from '@/lib/geo/format';
+import { formatLocationShort } from '@/lib/geo/format';
+import { getLocationCountryCode } from '@/lib/geo/flags';
+import { getCountryByCode, DEFAULT_COUNTRY_CODE } from '@/lib/geo/countries-data';
+import BrowseEmptyState from '@/components/BrowseEmptyState';
 const TEST_REGEX = /toyota test|test adiso|test anuncio/i;
 
 function getBrowseCountLabel(
   categoria: Categoria | 'todos',
-  filtro?: { distrito?: string; departamento?: string; provincia?: string },
+  filtro?: {
+    distrito?: string;
+    departamento?: string;
+    provincia?: string;
+    countryCode?: string;
+  },
 ): string {
-  const ubic = filtro?.distrito || filtro?.provincia || filtro?.departamento || 'Cusco';
+  const ubic =
+    filtro?.distrito ||
+    filtro?.provincia ||
+    filtro?.departamento ||
+    (filtro?.countryCode ? getCountryByCode(filtro.countryCode)?.name : null) ||
+    'Cusco';
   if (categoria !== 'todos') {
     return `· ${getCategoriaLabel(categoria)}`;
   }
@@ -135,6 +148,7 @@ function HomeContent() {
   const [adisoAbierto, setAdisoAbierto] = useState<Adiso | null>(null);
   const [indiceAdisoActual, setIndiceAdisoActual] = useState(0);
   const [cargando, setCargando] = useState(true);
+  const [filtrando, setFiltrando] = useState(false);
   // Estados para scroll infinito
   const [cargandoMas, setCargandoMas] = useState(false);
   const [hayMasAdisos, setHayMasAdisos] = useState(true);
@@ -460,6 +474,22 @@ function HomeContent() {
     setAdisosFiltrados(filtrados);
   }, [busquedaDebounced, categoriaFiltro, ordenamiento, adisos, browseFilters, profile?.latitud, profile?.longitud, user?.id, interestProfile]);
 
+  // Breve skeleton al cambiar filtros (no en carga inicial)
+  useEffect(() => {
+    if (cargando) return;
+    setFiltrando(true);
+    const t = window.setTimeout(() => setFiltrando(false), 280);
+    return () => window.clearTimeout(t);
+  }, [busquedaDebounced, categoriaFiltro, browseFilters, ordenamiento, cargando]);
+
+  // Sin resultados filtrados: no seguir pidiendo más páginas a la API
+  useEffect(() => {
+    if (!cargando && adisosFiltrados.length === 0 && adisos.length > 0) {
+      setHayMasAdisos(false);
+      setCargandoMas(false);
+    }
+  }, [cargando, adisosFiltrados.length, adisos.length]);
+
   // Resetear visibilidad local y estado de paginación SOLO cuando cambian los filtros principales
   // (Esto evita resetear la página actual cuando se cargan más adisos en el mismo filtro)
   useEffect(() => {
@@ -660,8 +690,8 @@ function HomeContent() {
 
   // Función optimizada para cargar más anuncios (scroll infinito)
   const cargarMasAdisos = useCallback(async () => {
-    // Si ya estamos cargando, no hacer nada
     if (cargandoMas) return;
+    if (adisosFiltrados.length === 0) return;
 
     // Caso 1: Todavía hay anuncios en memoria que no se están mostrando (Client-side)
     if (visibleCount < adisosFiltrados.length) {
@@ -742,7 +772,10 @@ function HomeContent() {
     isLoading: cargandoMas,
     onLoadMore: cargarMasAdisos,
     threshold: 200, // Cargar cuando queden 200px para el final
-    enabled: !cargando && (hayMasAdisos || visibleCount < adisosFiltrados.length)
+    enabled:
+      !cargando &&
+      adisosFiltrados.length > 0 &&
+      (hayMasAdisos || visibleCount < adisosFiltrados.length),
   });
 
   // Prefetch de imágenes de adisos relacionados cuando se abre un adiso
@@ -828,7 +861,7 @@ function HomeContent() {
           <Header
             onToggleLeftSidebar={() => setIsLeftSidebarOpen(!isLeftSidebarOpen)}
             ubicacion={formatLocationShort(browseFilters.ubicacion)}
-            ubicacionFlag={getLocationFlag(browseFilters.ubicacion)}
+            ubicacionCountryCode={getLocationCountryCode(browseFilters.ubicacion)}
             categoria={categoriaFiltro}
             onUbicacionClick={() => setMostrarFiltroUbicacion(true)}
             seccionActiva={seccionDesktopActiva}
@@ -1286,32 +1319,48 @@ function HomeContent() {
                 </div>
               </div>
 
-              {/* ── Cards: skeleton during first load, grid once ready ── */}
-              {cargando ? (
+              {/* ── Cards: skeleton breve al filtrar, grilla o estado vacío ── */}
+              {cargando || filtrando ? (
                 <SkeletonAdisos isDesktop={isDesktop} />
+              ) : adisosFiltrados.length === 0 ? (
+                <BrowseEmptyState
+                  variant={
+                    browseFilters.ubicacion?.countryCode &&
+                    browseFilters.ubicacion.countryCode !== DEFAULT_COUNTRY_CODE
+                      ? 'location'
+                      : browseFilters.ubicacion?.departamento ||
+                          browseFilters.ubicacion?.distrito ||
+                          browseFilters.ubicacion?.provincia
+                        ? 'location'
+                        : busquedaDebounced.trim()
+                          ? 'search'
+                          : categoriaFiltro !== 'todos'
+                            ? 'category'
+                            : countActiveFilters(browseFilters, categoriaFiltro) > 0
+                              ? 'filtered'
+                              : 'global'
+                  }
+                  busqueda={busquedaDebounced}
+                  categoria={categoriaFiltro}
+                  ubicacion={browseFilters.ubicacion}
+                  activeFilterCount={countActiveFilters(browseFilters, categoriaFiltro)}
+                  onClearFilters={() => {
+                    setBrowseFilters({ facets: {} });
+                    setBusqueda('');
+                    setCategoriaFiltro('todos');
+                  }}
+                  onChangeLocation={() => setMostrarFiltroUbicacion(true)}
+                />
               ) : (
-                <>
-                  <GrillaAdisos
-                    adisos={adisosFiltrados.slice(0, visibleCount)}
-                    onAbrirAdiso={handleAbrirAdiso}
-                    adisoSeleccionadoId={adisoAbierto?.id}
-                    espacioAdicional={0}
-                    cargandoMas={cargandoMas}
-                    sentinelRef={sentinelRef}
-                    vista={vista}
-                  />
-                  {adisosFiltrados.length === 0 && !cargando && (
-                    <div style={{
-                      textAlign: 'center',
-                      padding: '3rem 1rem',
-                      color: 'var(--text-secondary)'
-                    }}>
-                      {busqueda || categoriaFiltro !== 'todos' || browseFilters.conFotos != null || browseFilters.ubicacion
-                        ? 'No se encontraron adisos con esos filtros'
-                        : 'Aún no hay adisos publicados'}
-                    </div>
-                  )}
-                </>
+                <GrillaAdisos
+                  adisos={adisosFiltrados.slice(0, visibleCount)}
+                  onAbrirAdiso={handleAbrirAdiso}
+                  adisoSeleccionadoId={adisoAbierto?.id}
+                  espacioAdicional={0}
+                  cargandoMas={cargandoMas}
+                  sentinelRef={sentinelRef}
+                  vista={vista}
+                />
               )}
             </main>
             </div>

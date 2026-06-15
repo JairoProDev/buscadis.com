@@ -2,11 +2,13 @@
 
 import React, { useEffect, useId, useRef, useState } from 'react';
 import { IconChevronDown, IconSearch, IconClose } from '@/components/Icons';
+import CountryFlag from '@/components/location/CountryFlag';
 
 export interface ComboboxOption {
   value: string;
   label: string;
-  flag?: string;
+  /** ISO 3166-1 alpha-2 — muestra bandera real (no emoji) */
+  countryCode?: string;
   sublabel?: string;
 }
 
@@ -116,10 +118,8 @@ export default function LocationCombobox({
           transition: 'border-color 0.15s, box-shadow 0.15s',
         }}
       >
-        {showFlag && selected?.flag && (
-          <span style={{ fontSize: '1.25rem', lineHeight: 1 }} aria-hidden>
-            {selected.flag}
-          </span>
+        {showFlag && selected?.countryCode && (
+          <CountryFlag code={selected.countryCode} size={22} />
         )}
         <span style={{ flex: 1, minWidth: 0 }}>
           <span
@@ -257,10 +257,8 @@ export default function LocationCombobox({
                         fontSize: '0.9rem',
                       }}
                     >
-                      {showFlag && opt.flag && (
-                        <span style={{ fontSize: '1.15rem' }} aria-hidden>
-                          {opt.flag}
-                        </span>
+                      {showFlag && opt.countryCode && (
+                        <CountryFlag code={opt.countryCode} size={20} />
                       )}
                       <span style={{ flex: 1, minWidth: 0 }}>
                         <span style={{ display: 'block' }}>{opt.label}</span>

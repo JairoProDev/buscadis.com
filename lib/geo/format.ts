@@ -11,11 +11,10 @@ export function formatLocationShort(filter?: BrowseLocationFilter | null): strin
   if (!filter) {
     return getCountryByCode(DEFAULT_COUNTRY_CODE)?.name || 'Perú';
   }
-  const leaf =
-    filter.distrito || filter.provincia || filter.departamento || filter.country;
+  const leaf = filter.distrito || filter.provincia || filter.departamento;
   if (leaf) return leaf;
   const country = getCountryByCode(filter.countryCode || DEFAULT_COUNTRY_CODE);
-  return country?.name || 'Perú';
+  return country?.name || filter.country || 'Perú';
 }
 
 /** Texto completo con jerarquía */

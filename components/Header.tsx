@@ -17,6 +17,7 @@ import { useConversations } from '@/hooks/useConversations';
 import { useNotifications } from '@/hooks/useNotifications';
 import { SeccionSidebar } from './SidebarDesktop';
 import { publishCta } from '@/lib/publish-cta-styles';
+import CountryFlag from '@/components/location/CountryFlag';
 import {
   IconMap,
   IconMegaphone,
@@ -39,7 +40,7 @@ interface HeaderProps {
   onSeccionChange?: (seccion: SeccionSidebar) => void;
   onToggleLeftSidebar?: () => void;
   ubicacion?: string;
-  ubicacionFlag?: string;
+  ubicacionCountryCode?: string;
   onUbicacionClick?: () => void;
   categoria?: Categoria | 'todos';
 }
@@ -50,7 +51,7 @@ export default function Header({
   onChangelogClick,
   onToggleLeftSidebar,
   ubicacion = 'Perú',
-  ubicacionFlag = '🇵🇪',
+  ubicacionCountryCode = 'PE',
   onUbicacionClick,
   categoria = 'todos',
 }: HeaderProps) {
@@ -73,7 +74,7 @@ export default function Header({
   const categoriaLabel =
     categoria !== 'todos' ? getCategoriaLabel(categoria as Categoria) : 'Todas las categorías';
   const contextLine =
-    categoria !== 'todos' ? `${categoriaLabel} · ${ubicacionFlag} ${ubicacion}` : `${ubicacionFlag} ${ubicacion}`;
+    categoria !== 'todos' ? `${categoriaLabel} · ${ubicacion}` : ubicacion;
 
   useEffect(() => {
     setMounted(true);
@@ -201,7 +202,9 @@ export default function Header({
         </div>
         <span
           style={{
-            display: 'block',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '5px',
             fontSize: '10px',
             fontWeight: 600,
             color: 'var(--text-secondary)',
@@ -213,7 +216,8 @@ export default function Header({
             maxWidth: isDesktop ? '200px' : '160px',
           }}
         >
-          {contextLine}
+          <CountryFlag code={ubicacionCountryCode} size={14} />
+          <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>{contextLine}</span>
         </span>
       </div>
     </button>

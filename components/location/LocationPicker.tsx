@@ -9,6 +9,7 @@ import {
   getCountryLevelLabels,
 } from '@/lib/geo/countries-data';
 import type { BrowseLocationFilter, GeoSearchResult } from '@/lib/geo/types';
+import CountryFlag from '@/components/location/CountryFlag';
 import { IconLocation, IconSearch } from '@/components/Icons';
 import { FaCrosshairs } from 'react-icons/fa';
 
@@ -48,7 +49,7 @@ export default function LocationPicker({
   const countryOptions: ComboboxOption[] = COUNTRIES.map((c) => ({
     value: c.code,
     label: c.name,
-    flag: c.flag,
+    countryCode: c.code,
     sublabel: c.nameEn !== c.name ? c.nameEn : undefined,
   }));
 
@@ -261,9 +262,7 @@ export default function LocationPicker({
             }}
           />
           {country && (
-            <span style={{ fontSize: '1.2rem' }} title={country.name}>
-              {country.flag}
-            </span>
+            <CountryFlag code={country.code} size={22} title={country.name} />
           )}
         </div>
 
@@ -307,7 +306,7 @@ export default function LocationPicker({
                     textAlign: 'left',
                   }}
                 >
-                  <span style={{ fontSize: '1.15rem' }}>{r.flag}</span>
+                  <CountryFlag code={r.countryCode} size={20} title={r.countryName} />
                   <span style={{ flex: 1, minWidth: 0 }}>
                     <span style={{ display: 'block', fontWeight: 600, fontSize: '0.9rem', color: 'var(--text-primary)' }}>
                       {r.label}

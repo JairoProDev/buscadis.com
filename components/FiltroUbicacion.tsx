@@ -4,7 +4,9 @@ import React, { useRef, useEffect, useState } from 'react';
 import { FaTimes } from 'react-icons/fa';
 import LocationPicker, { LocationPickerHeader } from '@/components/location/LocationPicker';
 import type { BrowseLocationFilter } from '@/lib/geo/types';
-import { formatLocationFull, getLocationFlag } from '@/lib/geo/format';
+import { formatLocationFull } from '@/lib/geo/format';
+import CountryFlag from '@/components/location/CountryFlag';
+import { getLocationCountryCode } from '@/lib/geo/flags';
 import { DEFAULT_COUNTRY_CODE } from '@/lib/geo/countries-data';
 import { IconLocation } from './Icons';
 
@@ -201,7 +203,7 @@ export default function FiltroUbicacion({
   }
 
   const active = value || filtrosActuales;
-  const flag = getLocationFlag(active);
+  const countryCode = getLocationCountryCode(active);
   const textoFiltro = active ? formatLocationFull(active) : 'Filtrar por ubicación';
 
   return (
@@ -224,7 +226,7 @@ export default function FiltroUbicacion({
           fontWeight: 600,
         }}
       >
-        <span style={{ fontSize: '1rem' }}>{flag}</span>
+        <CountryFlag code={countryCode} size={18} />
         <IconLocation size={14} color="var(--brand-blue)" />
         <span>{textoFiltro}</span>
       </button>
