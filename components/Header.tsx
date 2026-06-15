@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import {
   FaChartLine,
 } from 'react-icons/fa';
@@ -55,6 +56,7 @@ export default function Header({
   onUbicacionClick,
   categoria = 'todos',
 }: HeaderProps) {
+  const pathname = usePathname();
   const [mounted, setMounted] = useState(false);
   const { t } = useTranslation();
   const isDesktop = useMediaQuery('(min-width: 768px)');
@@ -136,8 +138,6 @@ export default function Header({
     applyTheme(next);
   };
 
-  if (!mounted) return null;
-
   const brandBlock = (
     <button
       type="button"
@@ -217,7 +217,12 @@ export default function Header({
           }}
         >
           <CountryFlag code={ubicacionCountryCode} size={14} />
-          <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>{contextLine}</span>
+          <span
+            style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}
+            suppressHydrationWarning
+          >
+            {contextLine}
+          </span>
         </span>
       </div>
     </button>
@@ -246,7 +251,7 @@ export default function Header({
         )}
       </HeaderIconButton>
 
-      {isAuthenticated && (
+      {mounted && isAuthenticated && (
         <>
           {onChangelogClick && isDesktop && (
             <HeaderIconButton
@@ -349,16 +354,14 @@ export default function Header({
       </div>
 
       {/* CENTER: navegación desktop — columna auto = centrada en la grilla */}
-      {isDesktop && (
+      {mounted && isDesktop && (
         <nav style={{ display: 'flex', gap: '4px', height: '100%', alignItems: 'stretch' }}>
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive =
-              typeof window !== 'undefined' &&
-              ((item.href === '/' &&
-                window.location.pathname === '/' &&
-                !window.location.search.includes('seccion=')) ||
-                (item.href !== '/' && window.location.pathname.startsWith(item.href)));
+              item.href === '/'
+                ? pathname === '/'
+                : pathname.startsWith(item.href);
 
             const isHovered = hoveredItem === item.id;
             const isPublishCta = item.id === 'publicar';
@@ -487,13 +490,17 @@ export default function Header({
         style={{ gap: isDesktop ? '4px' : '2px' }}
       >
         {actionButtons}
-        {isAuthenticated && (
+        {mounted && isAuthenticated && (
           <span
             className="mx-1 hidden h-6 w-px shrink-0 bg-[var(--border-color)] sm:block"
             aria-hidden
           />
         )}
-        <UserMenu onProgressClick={onChangelogClick} onSidebarToggle={onToggleLeftSidebar} />
+        {mounted ? (
+          <UserMenu onProgressClick={onChangelogClick} onSidebarToggle={onToggleLeftSidebar} />
+        ) : (
+          <div style={{ width: 36, height: 36, flexShrink: 0 }} aria-hidden />
+        )}
       </div>
     </header>
   );

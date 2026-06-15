@@ -15,8 +15,13 @@ interface OrdenamientoProps {
 export default function Ordenamiento({ valor, onChange }: OrdenamientoProps) {
   const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const isMobile = useMediaQuery('(max-width: 767px)');
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const opcionesOrdenamiento: Array<{
     valor: TipoOrdenamiento;
@@ -122,19 +127,23 @@ export default function Ordenamiento({ valor, onChange }: OrdenamientoProps) {
         className="brand-pill-glass hover:shadow-md motion-reduce:hover:translate-y-0 hover:-translate-y-0.5"
       >
         <CurrentIcon size={16} aria-hidden="true" className="text-[var(--brand-blue)]" />
-        <span className="hidden md:inline max-w-[120px] truncate">{t(opcionActual.labelKey)}</span>
-        <span
-          className="hidden md:inline-flex"
-          aria-hidden
-          style={{
-            marginLeft: '2px',
-            opacity: 0.75,
-            transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)',
-            transition: 'transform 0.2s ease',
-          }}
-        >
-          <IconChevronDown size={12} color="var(--text-tertiary)" />
-        </span>
+        {mounted && !isMobile && (
+          <>
+            <span className="max-w-[120px] truncate">{t(opcionActual.labelKey)}</span>
+            <span
+              aria-hidden
+              style={{
+                marginLeft: '2px',
+                opacity: 0.75,
+                transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+                transition: 'transform 0.2s ease',
+                display: 'inline-flex',
+              }}
+            >
+              <IconChevronDown size={12} color="var(--text-tertiary)" />
+            </span>
+          </>
+        )}
       </button>
 
       {isOpen && !isMobile && (

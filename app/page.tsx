@@ -141,10 +141,9 @@ function HomeContent() {
   const [interestProfile, setInterestProfile] = useState<UserInterestProfile | null>(null);
 
 
-  const [browseFilters, setBrowseFilters] = useState<BrowseFilterState>(() => {
-    if (typeof window === 'undefined') return { ...DEFAULT_BROWSE_FILTERS, facets: {} };
-    return browseFiltersFromSearchParams(new URLSearchParams(window.location.search));
-  });
+  const [browseFilters, setBrowseFilters] = useState<BrowseFilterState>(() =>
+    browseFiltersFromSearchParams(searchParams),
+  );
   const [adisoAbierto, setAdisoAbierto] = useState<Adiso | null>(null);
   const [indiceAdisoActual, setIndiceAdisoActual] = useState(0);
   const [cargando, setCargando] = useState(true);
