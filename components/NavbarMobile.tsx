@@ -11,6 +11,7 @@ import {
   IconStore,
   IconSearch
 } from './Icons';
+import { publishCta } from '@/lib/publish-cta-styles';
 
 interface NavbarMobileProps {
   seccionActiva: SeccionSidebar | null;
@@ -81,6 +82,12 @@ export default function NavbarMobile({
             transform: translateY(0);
           }
         }
+        .navbar-item--cta:active > span:first-child {
+          transform: scale(0.94);
+        }
+        .navbar-item--cta > span:first-child {
+          transition: transform 0.15s ease, box-shadow 0.15s ease;
+        }
       `}</style>
       <nav
         style={{
@@ -88,13 +95,14 @@ export default function NavbarMobile({
           bottom: 0,
           left: 0,
           right: 0,
-          height: '4rem',
+          height: 'calc(4rem + env(safe-area-inset-bottom, 0px))',
+          paddingBottom: 'env(safe-area-inset-bottom, 0px)',
           backgroundColor: 'var(--bg-primary)',
           borderTop: '1px solid var(--border-color)',
           display: 'flex',
           justifyContent: 'space-around',
-          alignItems: 'center',
-          padding: '0.5rem 0',
+          alignItems: 'flex-end',
+          paddingTop: '0.35rem',
           boxShadow: '0 -2px 10px rgba(0, 0, 0, 0.05)',
           zIndex: 1500,
           transform: navVisible ? 'translateY(0)' : 'translateY(100%)',
@@ -112,33 +120,92 @@ export default function NavbarMobile({
           const esPublicar = seccion.id === 'publicar';
           const tieneNotificacion = seccion.id === 'adiso' && tieneAdisoAbierto && !estaActiva;
 
+          const handleClick = () => {
+            if (seccion.href) {
+              router.push(seccion.href);
+            } else if (onCambiarSeccion) {
+              onCambiarSeccion(seccion.id as SeccionSidebar);
+            }
+          };
+
+          if (esPublicar) {
+            return (
+              <button
+                key={seccion.id}
+                type="button"
+                onClick={handleClick}
+                aria-label="Publicar aviso"
+                aria-current={estaActiva ? 'page' : undefined}
+                style={{
+                  flex: 1,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'flex-end',
+                  gap: '0.2rem',
+                  padding: '0 0.25rem 0.4rem',
+                  border: 'none',
+                  background: 'transparent',
+                  cursor: 'pointer',
+                  position: 'relative',
+                  minHeight: '64px',
+                }}
+                className="navbar-item navbar-item--cta"
+              >
+                <span
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    width: '52px',
+                    height: '52px',
+                    marginTop: '-18px',
+                    borderRadius: '50%',
+                    background: estaActiva ? publishCta.backgroundActive : publishCta.background,
+                    boxShadow: estaActiva ? publishCta.shadowActive : publishCta.shadow,
+                    transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+                  }}
+                >
+                  <IconMegaphone size={26} color={publishCta.iconColor} />
+                </span>
+                <span
+                  style={{
+                    fontSize: '0.7rem',
+                    fontWeight: 700,
+                    color: publishCta.labelColor,
+                    letterSpacing: '0.01em',
+                  }}
+                >
+                  {seccion.label}
+                </span>
+              </button>
+            );
+          }
+
           return (
-            <span
+            <button
               key={seccion.id}
-              onClick={() => {
-                if (seccion.href) {
-                  router.push(seccion.href);
-                } else if (onCambiarSeccion) {
-                  onCambiarSeccion(seccion.id as SeccionSidebar);
-                }
-              }}
+              type="button"
+              onClick={handleClick}
+              aria-label={seccion.label}
+              aria-current={estaActiva ? 'page' : undefined}
               style={{
                 flex: 1,
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
-                justifyContent: 'center',
+                justifyContent: 'flex-end',
                 gap: '0.25rem',
-                padding: '0.5rem',
+                padding: '0 0.5rem 0.55rem',
                 border: 'none',
                 backgroundColor: 'transparent',
                 color: estaActiva ? 'var(--brand-blue)' : 'var(--text-tertiary)',
                 cursor: 'pointer',
-                fontSize: '0.75rem', // Larger text
+                fontSize: '0.7rem',
                 fontWeight: estaActiva ? 600 : 500,
-                transition: 'all 0.2s',
+                transition: 'color 0.2s',
                 position: 'relative',
-                minHeight: '64px' // Taller touch target
+                minHeight: '64px',
               }}
               className="navbar-item"
             >
@@ -147,24 +214,10 @@ export default function NavbarMobile({
                   position: 'relative',
                   display: 'flex',
                   alignItems: 'center',
-                  justifyContent: 'center'
+                  justifyContent: 'center',
                 }}
               >
-                <IconComponent size={esPublicar ? 26 : 24} />
-                {esPublicar && (
-                  <span
-                    style={{
-                      position: 'absolute',
-                      top: '-4px',
-                      right: '-4px',
-                      width: '8px',
-                      height: '8px',
-                      borderRadius: '50%',
-                      backgroundColor: 'var(--color-secondary)',
-                      border: '2px solid var(--bg-primary)'
-                    }}
-                  />
-                )}
+                <IconComponent size={24} color={estaActiva ? 'var(--brand-blue)' : undefined} />
                 {tieneNotificacion && (
                   <span
                     style={{
@@ -175,7 +228,7 @@ export default function NavbarMobile({
                       height: '8px',
                       borderRadius: '50%',
                       backgroundColor: 'var(--text-primary)',
-                      border: '2px solid var(--bg-primary)'
+                      border: '2px solid var(--bg-primary)',
                     }}
                   />
                 )}
@@ -191,11 +244,11 @@ export default function NavbarMobile({
                     width: '30px',
                     height: '3px',
                     backgroundColor: 'var(--brand-blue)',
-                    borderRadius: '2px 2px 0 0'
+                    borderRadius: '2px 2px 0 0',
                   }}
                 />
               )}
-            </span>
+            </button>
           );
         })}
       </nav>

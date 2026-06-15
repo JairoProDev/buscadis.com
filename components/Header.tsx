@@ -16,6 +16,7 @@ import { useMediaQuery } from '@/hooks/useMediaQuery';
 import { useConversations } from '@/hooks/useConversations';
 import { useNotifications } from '@/hooks/useNotifications';
 import { SeccionSidebar } from './SidebarDesktop';
+import { publishCta } from '@/lib/publish-cta-styles';
 import {
   IconMap,
   IconMegaphone,
@@ -355,7 +356,57 @@ export default function Header({
 
             const isHovered = hoveredItem === item.id;
             const isPublishCta = item.id === 'publicar';
-            const accentColor = isPublishCta ? 'var(--brand-yellow)' : 'var(--brand-blue)';
+            const accentColor = 'var(--brand-blue)';
+
+            if (isPublishCta) {
+              return (
+                <Link
+                  href={item.href}
+                  key={item.id}
+                  onMouseEnter={() => setHoveredItem(item.id as SeccionSidebar)}
+                  onMouseLeave={() => setHoveredItem(null)}
+                  aria-current={isActive ? 'page' : undefined}
+                  style={{
+                    height: '100%',
+                    padding: '0 16px',
+                    position: 'relative',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    textDecoration: 'none',
+                    gap: '2px',
+                  }}
+                >
+                  <span
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      width: '40px',
+                      height: '40px',
+                      borderRadius: '50%',
+                      background: isActive ? publishCta.backgroundActive : publishCta.background,
+                      boxShadow: isActive ? publishCta.shadowActive : publishCta.shadow,
+                      transform: isHovered ? 'scale(1.06)' : 'scale(1)',
+                      transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+                    }}
+                  >
+                    <IconMegaphone size={20} color={publishCta.iconColor} />
+                  </span>
+                  <span
+                    style={{
+                      fontSize: '11px',
+                      fontWeight: 700,
+                      color: publishCta.labelColor,
+                      opacity: isActive || isHovered ? 1 : 0.92,
+                    }}
+                  >
+                    {item.label}
+                  </span>
+                </Link>
+              );
+            }
 
             return (
               <Link
@@ -389,13 +440,7 @@ export default function Header({
                 >
                   <Icon
                     size={22}
-                    color={
-                      isActive || isHovered
-                        ? accentColor
-                        : isPublishCta
-                          ? 'var(--brand-yellow)'
-                          : undefined
-                    }
+                    color={isActive || isHovered ? accentColor : undefined}
                   />
                 </span>
                 <span
