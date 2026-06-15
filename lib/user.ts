@@ -180,6 +180,7 @@ async function createDefaultPreferences(userId: string): Promise<UserPreferences
     categorias_favoritas: [],
     notificaciones_email: true,
     notificaciones_push: false,
+    notificaciones_whatsapp: true,
     oportunidades_personalizadas: true,
     idioma: 'es',
     tema: 'auto',

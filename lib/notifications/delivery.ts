@@ -1,4 +1,5 @@
 import { supabaseAdmin } from '@/lib/supabase-admin';
+import { getWhatsAppUrl } from '@/lib/utils';
 
 async function sendExpoPush(
   tokens: string[],
@@ -86,6 +87,48 @@ export async function sendOpportunityEmail(
   return sendEmailTo(email, title, body, adisoId, apiKey);
 }
 
+export async function sendOpportunityWhatsApp(
+  userId: string,
+  title: string,
+  body: string,
+  adisoId: string
+): Promise<boolean> {
+  const { data: prefs } = await supabaseAdmin
+    .from('user_preferences')
+    .select('notificaciones_whatsapp')
+    .eq('user_id', userId)
+    .maybeSingle();
+
+  if (prefs?.notificaciones_whatsapp === false) return false;
+
+  const { data: profile } = await supabaseAdmin
+    .from('profiles')
+    .select('telefono')
+    .eq('id', userId)
+    .maybeSingle();
+
+  const phone = (profile?.telefono as string | undefined)?.replace(/\D/g, '');
+  if (!phone || phone.length < 9) return false;
+
+  const appUrl = (process.env.NEXT_PUBLIC_APP_URL || 'https://buscadis.com').replace(/\/$/, '');
+  const waUrl = getWhatsAppUrl(
+    phone,
+    title,
+    'oportunidad',
+    adisoId
+  );
+
+  const { error } = await supabaseAdmin.from('notifications').insert({
+    user_id: userId,
+    type: 'system',
+    title: `${title} (WhatsApp)`,
+    message: `${body}\nAbrir: ${appUrl}/?adiso=${adisoId}`,
+    data: { adiso_id: adisoId, whatsapp_url: waUrl, channel: 'whatsapp' },
+  });
+
+  return !error;
+}
+
 async function sendEmailTo(
   to: string,
   title: string,
@@ -121,7 +164,7 @@ export async function deliverOpportunityToUser(params: {
   body: string;
   adisoId: string;
   matchScore: number;
-}): Promise<{ inApp: boolean; push: boolean; email: boolean }> {
+}): Promise<{ inApp: boolean; whatsapp: boolean; push: boolean; email: boolean }> {
   const data = {
     adiso_id: params.adisoId,
     match_score: params.matchScore,
@@ -137,6 +180,12 @@ export async function deliverOpportunityToUser(params: {
   });
 
   const pushOk = await sendPushToUser(params.userId, params.title, params.body, data);
+  const whatsappOk = await sendOpportunityWhatsApp(
+    params.userId,
+    params.title,
+    params.body,
+    params.adisoId
+  );
   const emailOk = await sendOpportunityEmail(params.userId, params.title, params.body, params.adisoId);
 
   await supabaseAdmin.from('campaign_deliveries').insert([
@@ -147,6 +196,14 @@ export async function deliverOpportunityToUser(params: {
       match_score: params.matchScore,
       status: notifErr ? 'failed' : 'sent',
       sent_at: notifErr ? null : new Date().toISOString(),
+    },
+    {
+      campaign_id: params.campaignId,
+      user_id: params.userId,
+      channel: 'whatsapp',
+      match_score: params.matchScore,
+      status: whatsappOk ? 'sent' : 'failed',
+      sent_at: whatsappOk ? new Date().toISOString() : null,
     },
     {
       campaign_id: params.campaignId,
@@ -166,5 +223,5 @@ export async function deliverOpportunityToUser(params: {
     },
   ]);
 
-  return { inApp: !notifErr, push: pushOk, email: emailOk };
+  return { inApp: !notifErr, whatsapp: whatsappOk, push: pushOk, email: emailOk };
 }

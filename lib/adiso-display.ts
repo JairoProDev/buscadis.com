@@ -124,3 +124,28 @@ export function formatPrecioDisplay(adiso: Adiso): string | null {
   if (adiso.tipoPrecio === 'a_convenir') return 'A convenir';
   return null;
 }
+
+/** Cards públicos: no mostrar precio (fomentar clic + chat). */
+export function shouldShowPriceOnCard(_adiso?: Adiso): boolean {
+  return false;
+}
+
+export function shouldShowLocationOnCard(_adiso?: Adiso): boolean {
+  return false;
+}
+
+export function getCardDescriptionSnippet(descripcion: string, maxLen = 100): string {
+  const clean = sanitizeAdisoDescripcion(descripcion);
+  if (clean.length <= maxLen) return clean;
+  return `${clean.slice(0, maxLen).trim()}…`;
+}
+
+export function getPublicCardFields(adiso: Adiso) {
+  return {
+    title: toDisplayTitle(adiso.titulo),
+    snippet: getCardDescriptionSnippet(adiso.descripcion),
+    showPrice: shouldShowPriceOnCard(adiso),
+    showLocation: shouldShowLocationOnCard(adiso),
+    ctaShort: getCardCtaShortLabel(adiso.categoria),
+  };
+}

@@ -93,6 +93,13 @@ export function dbToAdiso(row: any): Adiso {
     promotionRank: row.promotion_rank || 0,
     promotionExpiresAt: row.promotion_expires_at || undefined,
     esDestacado: Boolean(row.promotion_tier && row.promotion_tier !== 'gratis'),
+    publishTier: row.publish_tier || 'paid',
+    expiresAt: row.expires_at || undefined,
+    features: row.features || undefined,
+    privateData: row.private_data || undefined,
+    precio: row.precio ?? undefined,
+    moneda: row.moneda || undefined,
+    tipoPrecio: row.tipo_precio || undefined,
     // Add user ID mapping
     usuario_id: row.user_id || row.usuario_id || undefined,
     user_id: row.user_id || row.usuario_id || undefined
@@ -153,6 +160,13 @@ export function adisoToDb(adiso: Adiso): any {
     edicion_numero: adiso.edicionNumero || null,
     fecha_publicacion_original: adiso.fechaPublicacionOriginal || null,
     contactos_multiples: contactosMultiplesJson,
+    publish_tier: adiso.publishTier || (adiso.esGratuito ? 'free' : 'paid'),
+    expires_at: adiso.expiresAt || adiso.fechaExpiracion || null,
+    features: adiso.features || {},
+    private_data: adiso.privateData || {},
+    precio: adiso.precio ?? null,
+    moneda: adiso.moneda || null,
+    tipo_precio: adiso.tipoPrecio || null,
     // Map user_id to DB column
     user_id: adiso.user_id || adiso.usuario_id || (typeof window !== 'undefined' ? (window as any).__SUPABASE_USER_ID : null)
   };

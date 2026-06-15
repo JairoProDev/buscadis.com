@@ -246,6 +246,11 @@ export interface Adiso {
   vistas?: number;
   contactos?: number;
 
+  publishTier?: 'free' | 'paid';
+  expiresAt?: string;
+  features?: Record<string, unknown>;
+  privateData?: Record<string, unknown>;
+
   // Confianza y Reputación (Trust Architecture)
   vendedor?: {
     id: string;
@@ -329,6 +334,7 @@ export interface UserPreferences {
   categorias_favoritas: Categoria[];
   notificaciones_email: boolean;
   notificaciones_push: boolean;
+  notificaciones_whatsapp?: boolean;
   oportunidades_personalizadas?: boolean;
   idioma: string;
   tema: TemaPreferencia;
@@ -544,4 +550,6 @@ export interface Message {
   content: string;
   read: boolean;
   created_at: string;
+  message_kind?: 'user' | 'system_buyer' | 'system_seller' | 'reveal';
+  metadata?: Record<string, unknown>;
 }

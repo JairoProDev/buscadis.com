@@ -9,6 +9,7 @@ import {
 } from '@/lib/packages/server';
 import { createMercadoPagoPreference, isMercadoPagoConfigured } from '@/lib/mercadopago';
 import { matchInterestedUsers } from '@/lib/matching/server';
+import { applyPaidTierToAdiso } from '@/lib/publish/paid-publish';
 import { createAdisoInSupabase } from '@/lib/supabase';
 import { runInstantMatchCampaign } from '@/lib/activation/instant-match';
 import {
@@ -66,14 +67,19 @@ export async function POST(request: NextRequest) {
     );
 
     if (isPackageDevBypassEnabled() || amount === 0) {
-      const adiso = await createAdisoInSupabase({
-        ...draft,
-        tamaño: tier,
-        user_id: user.id,
-        usuario_id: user.id,
-        estaActivo: true,
-        esHistorico: false,
-      } as Parameters<typeof createAdisoInSupabase>[0]);
+      const adiso = await createAdisoInSupabase(
+        applyPaidTierToAdiso(
+          {
+            ...draft,
+            tamaño: tier,
+            user_id: user.id,
+            usuario_id: user.id,
+            estaActivo: true,
+            esHistorico: false,
+          } as Parameters<typeof createAdisoInSupabase>[0],
+          tier
+        )
+      );
 
       const order = await createPackageOrder({
         userId: user.id,

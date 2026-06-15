@@ -462,6 +462,11 @@ export default function ProfileSettingsTab({
               value: effectivePrefs?.oportunidades_personalizadas !== false,
             },
             {
+              key: 'notificaciones_whatsapp' as const,
+              label: 'Oportunidades por WhatsApp (recomendado)',
+              value: effectivePrefs?.notificaciones_whatsapp !== false,
+            },
+            {
               key: 'notificaciones_push' as const,
               label: 'Notificaciones push (app móvil)',
               value: effectivePrefs?.notificaciones_push ?? false,

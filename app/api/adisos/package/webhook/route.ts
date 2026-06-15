@@ -5,6 +5,7 @@ import {
   markPackageOrderPaid,
   updatePackageOrderAdiso,
 } from '@/lib/packages/server';
+import { applyPaidTierToAdiso } from '@/lib/publish/paid-publish';
 import { createAdisoInSupabase } from '@/lib/supabase';
 import { runInstantMatchCampaign } from '@/lib/activation/instant-match';
 import {
@@ -61,14 +62,19 @@ export async function POST(request: NextRequest) {
     await markPackageOrderPaid(orderId, paymentId);
 
     const draft = order.draft_payload as Record<string, unknown>;
-    const adiso = await createAdisoInSupabase({
-      ...draft,
-      tamaño: order.package_tier as TamañoPaquete,
-      user_id: order.user_id,
-      usuario_id: order.user_id,
-      estaActivo: true,
-      esHistorico: false,
-    } as Parameters<typeof createAdisoInSupabase>[0]);
+    const adiso = await createAdisoInSupabase(
+      applyPaidTierToAdiso(
+        {
+          ...draft,
+          tamaño: order.package_tier as TamañoPaquete,
+          user_id: order.user_id,
+          usuario_id: order.user_id,
+          estaActivo: true,
+          esHistorico: false,
+        } as Parameters<typeof createAdisoInSupabase>[0],
+        order.package_tier as TamañoPaquete
+      )
+    );
 
     await updatePackageOrderAdiso(orderId, adiso.id);
     await supabaseAdmin

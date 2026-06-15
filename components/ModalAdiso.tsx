@@ -11,11 +11,8 @@ import { useAuth } from '@/hooks/useAuth';
 import { useUI } from '@/contexts/UIContext';
 import { trackViewHistory } from '@/lib/profile/view-history-client';
 import { registrarVisualizacion, registrarClick, registrarContacto } from '@/lib/analytics';
-import {
-  consumeOpportunityContext,
-  buildMatchInitialMessage,
-} from '@/lib/opportunity-context';
 import { useAdInteraction } from '@/hooks/useAdInteraction';
+import { useAdInteractionSession } from '@/hooks/useAdInteractionSession';
 import { getCategoriaThemeTokens } from '@/lib/categoria-theme';
 import PromoteAdisoModal from '@/components/PromoteAdisoModal';
 import { IconZap } from './Icons';
@@ -348,6 +345,11 @@ Ref: ${adiso.edicionNumero || adiso.id}`;
   };
 
   const sellerUserId = adiso.user_id || adiso.usuario_id || adiso.vendedor?.id;
+  const canAutoInteract = Boolean(sellerUserId && !esMiAdiso && user);
+  const { askField, isRevealed, upsell: interactionUpsell } = useAdInteractionSession(
+    adiso.id,
+    canAutoInteract
+  );
 
   const handleMensajeBuscadis = async () => {
     if (!sellerUserId || esMiAdiso) return;
@@ -357,30 +359,18 @@ Ref: ${adiso.edicionNumero || adiso.id}`;
     }
     setEnviandoMensaje(true);
     try {
-      const opp = consumeOpportunityContext(adiso.id);
-      const initialMsg =
-        opp?.initialMessage ||
-        buildMatchInitialMessage(adiso.titulo, opp?.matchScore);
-
-      const res = await fetch('/api/conversations', {
+      const res = await fetch('/api/interactions/open', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${session?.access_token}`,
         },
-        body: JSON.stringify({
-          recipientId: sellerUserId,
-          adisoId: adiso.id,
-          initialMessage: initialMsg,
-        }),
+        body: JSON.stringify({ adisoId: adiso.id }),
       });
-      const data = (await res.json()) as { conversationId?: string };
+      const data = (await res.json()) as { conversationId?: string; adisoTitle?: string };
       if (data.conversationId) {
-        registrarContacto(user.id, adiso.id, adiso.categoria, 'chat');
         openChat(data.conversationId, {
-          matchScore: opp?.matchScore,
-          adisoTitle: adiso.titulo,
-          initialMessage: initialMsg,
+          adisoTitle: data.adisoTitle || adiso.titulo,
           adisoId: adiso.id,
         });
       }
@@ -562,18 +552,18 @@ Ref: ${adiso.edicionNumero || adiso.id}`;
         }}
       >
         <IconSend size={20} />
-        {enviandoMensaje ? 'Abriendo…' : 'Mensaje en Buscadis'}
+        {enviandoMensaje ? 'Abriendo…' : 'Continuar en chat'}
       </button>
     );
 
-    const wrap = (primary: React.ReactNode) =>
+    const wrap = (secondary: React.ReactNode) =>
       canMessageInApp ? (
         <div style={{ display: 'flex', gap: '0.75rem', width: fullWidth ? '100%' : 'auto', flexDirection: fullWidth ? 'column' : 'row' }}>
-          {primary}
           {buscadisButton}
+          {secondary}
         </div>
       ) : (
-        primary
+        secondary
       );
 
     if (estaCaducado || esHistorico) {
@@ -584,15 +574,11 @@ Ref: ${adiso.edicionNumero || adiso.id}`;
       const contactoPrincipal = contactosMultiples[0];
       const isWA = contactoPrincipal.tipo === 'whatsapp';
       return wrap(
-        waButton(
-          () => handleContactar(contactoPrincipal.valor),
-          contactoPrincipal.etiqueta || 'Contactar ahora',
-          isWA ? '#22c55e' : '#3b82f6'
-        )
+        waButton(() => handleContactar(contactoPrincipal.valor), 'Prefiero WhatsApp', isWA ? '#22c55e' : '#3b82f6')
       );
     }
 
-    return wrap(waButton(() => handleContactar(), ctaLabel, categoryAccent));
+    return wrap(waButton(() => handleContactar(), 'Prefiero WhatsApp', categoryAccent));
   };
 
   const galleryNavBtnStyle: React.CSSProperties = {
@@ -605,6 +591,19 @@ Ref: ${adiso.edicionNumero || adiso.id}`;
     alignItems: 'center',
     justifyContent: 'center',
     cursor: 'pointer',
+  };
+
+  const askBtnStyle: React.CSSProperties = {
+    padding: '10px 14px',
+    borderRadius: '12px',
+    border: '1px dashed var(--brand-blue)',
+    background: 'rgba(var(--brand-primary-rgb), 0.06)',
+    color: 'var(--brand-blue)',
+    fontSize: '0.875rem',
+    fontWeight: 600,
+    cursor: 'pointer',
+    textAlign: 'left' as const,
+    width: '100%',
   };
 
   const ContentBody = () => (
@@ -645,7 +644,11 @@ Ref: ${adiso.edicionNumero || adiso.id}`;
               </span>
               <button
                 type="button"
-                onClick={() => setGalleryIndex((i) => Math.min(imagenesGaleria.length - 1, i + 1))}
+                onClick={() => {
+                  const next = Math.min(imagenesGaleria.length - 1, galleryIndex + 1);
+                  setGalleryIndex(next);
+                  void askField('fotos', next);
+                }}
                 disabled={galleryIndex >= imagenesGaleria.length - 1}
                 style={galleryNavBtnStyle}
                 aria-label="Imagen siguiente"
@@ -706,12 +709,27 @@ Ref: ${adiso.edicionNumero || adiso.id}`;
           <div style={{ color: theme.color }}>
             <IconLocation size={18} />
           </div>
-          <span style={{ fontSize: '0.9rem', color: 'var(--text-primary)', fontWeight: 600 }}>
-            {formatearUbicacion(adiso.ubicacion).texto}
-          </span>
+          {isRevealed('ubicacion') ? (
+            <span style={{ fontSize: '0.9rem', color: 'var(--text-primary)', fontWeight: 600 }}>
+              {formatearUbicacion(adiso.ubicacion).texto}
+            </span>
+          ) : (
+            <button type="button" style={askBtnStyle} onClick={() => void askField('ubicacion')}>
+              ¿Dónde puedo verlo o recogerlo?
+            </button>
+          )}
         </div>
-        {priceLabel && (
+        {isRevealed('precio') && priceLabel ? (
           <div style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--brand-blue)' }}>{priceLabel}</div>
+        ) : (
+          <button type="button" style={askBtnStyle} onClick={() => void askField('precio')}>
+            ¿Cuál es el precio?
+          </button>
+        )}
+        {interactionUpsell && (
+          <p style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', margin: 0 }}>
+            Con un plan pago las respuestas pueden ser automáticas e instantáneas.
+          </p>
         )}
         {sellerName && (
           <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>

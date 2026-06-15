@@ -24,6 +24,9 @@ import { useDarkMode } from '@/hooks/useDarkMode';
 import { getCategoriaThemeTokens } from '@/lib/categoria-theme';
 import {
     formatPrecioDisplay,
+    shouldShowPriceOnCard,
+    shouldShowLocationOnCard,
+    getCardDescriptionSnippet,
     formatUbicacionCorta,
     sanitizeAdisoDescripcion,
     toDisplayTitle,
@@ -81,9 +84,9 @@ const AdisoCard = forwardRef<HTMLDivElement, AdisoCardProps>(
         const tamaño = adiso.tamaño || 'miniatura';
         const paquete = PAQUETES[tamaño];
         const displayTitle = toDisplayTitle(adiso.titulo);
-        const displayDescription = sanitizeAdisoDescripcion(adiso.descripcion);
-        const locationShort = formatUbicacionCorta(adiso.ubicacion);
-        const priceLabel = formatPrecioDisplay(adiso);
+        const displayDescription = getCardDescriptionSnippet(adiso.descripcion);
+        const locationShort = shouldShowLocationOnCard(adiso) ? formatUbicacionCorta(adiso.ubicacion) : '';
+        const priceLabel = shouldShowPriceOnCard(adiso) ? formatPrecioDisplay(adiso) : null;
         const cardSignal = pickCardSignal(adiso);
         const sellerName = getSellerDisplayName(adiso);
 

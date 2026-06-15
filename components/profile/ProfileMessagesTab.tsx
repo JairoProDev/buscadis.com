@@ -1,16 +1,13 @@
 'use client';
 
-import { useState } from 'react';
 import { useConversations } from '@/hooks/useConversations';
 import { useUI } from '@/contexts/UIContext';
 import ProfileEmptyState from './ProfileEmptyState';
 import { IconMessages } from '@/components/Icons';
-import ChatWindow from '@/components/ChatWindow';
 
 export default function ProfileMessagesTab() {
   const { conversations, loading } = useConversations();
   const { openChat } = useUI();
-  const [inlineChat, setInlineChat] = useState<string | null>(null);
 
   if (loading) return <div className="skeleton-shimmer h-48 rounded-2xl" />;
 
@@ -37,10 +34,7 @@ export default function ProfileMessagesTab() {
             <button
               key={conv.id}
               type="button"
-              onClick={() => {
-                setInlineChat(conv.id);
-                openChat(conv.id);
-              }}
+              onClick={() => openChat(conv.id)}
               className="flex w-full items-center gap-3 px-4 py-3 text-left hover:bg-[var(--hover-bg)]"
             >
               <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center overflow-hidden rounded-full bg-[var(--brand-blue)]/15 text-sm font-bold text-[var(--brand-blue)]">
@@ -79,10 +73,6 @@ export default function ProfileMessagesTab() {
           );
         })}
       </div>
-
-      {inlineChat && (
-        <ChatWindow conversationId={inlineChat} onClose={() => setInlineChat(null)} />
-      )}
     </>
   );
 }

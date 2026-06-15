@@ -13,7 +13,7 @@ import {
 } from './Icons';
 import ModalAdiso from './ModalAdiso';
 import MapaInteractivo from './MapaInteractivo';
-import FormularioPublicar from './FormularioPublicar';
+import PublishSidebarFlow from './PublishSidebarFlow';
 import ChatbotIANew from './ChatbotIANew';
 import { useNavigation } from '@/contexts/NavigationContext';
 
@@ -296,12 +296,11 @@ export default function SidebarDesktop({
 
             {seccionActiva === 'publicar' && (
               <div className="min-h-0 flex-1 overflow-y-auto">
-                <FormularioPublicar
-                  onPublicar={onPublicar}
-                  onCerrar={() => onSeccionChange?.('adiso')}
-                  onError={onError}
-                  onSuccess={onSuccess}
-                  dentroSidebar={true}
+                <PublishSidebarFlow
+                  onNotify={(msg, type) => {
+                    if (type === 'error') onError?.(msg);
+                    else onSuccess?.(msg);
+                  }}
                 />
               </div>
             )}
