@@ -163,12 +163,24 @@ export async function rebuildUserBehaviorProfile(userId: string): Promise<void> 
         .gte('created_at', view.created_at)
         .limit(1);
       if (!contact?.length) {
+        const { data: adiso } = await supabaseAdmin
+          .from('adisos')
+          .select('categoria')
+          .eq('id', view.entity_id)
+          .maybeSingle();
+
+        const cat = adiso?.categoria as string | undefined;
+        if (cat) {
+          categoryAffinity = bumpJson(categoryAffinity, cat, -0.3);
+          negativeSignals = bumpJson(negativeSignals, `view_no_contact:${view.entity_id}`, 1);
+        }
+
         await supabaseAdmin.from('inference_log').insert({
           user_id: userId,
           inference_type: 'disinterest_soft',
-          input_summary: { adiso_id: view.entity_id },
-          output_summary: { action: 'decay_pending' },
-          confidence: 0.4,
+          input_summary: { adiso_id: view.entity_id, categoria: cat },
+          output_summary: { action: 'category_decay', delta: -0.3 },
+          confidence: 0.5,
         });
       }
     }

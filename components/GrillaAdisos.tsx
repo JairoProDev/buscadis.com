@@ -5,6 +5,7 @@ import { Adiso } from '@/types';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
 import { useAuth } from '@/hooks/useAuth';
 import { registrarClick } from '@/lib/analytics';
+import { trackEvent } from '@/lib/events';
 import AdisoCard from './AdisoCard';
 import { SkeletonCard } from './SkeletonAdisos';
 
@@ -34,6 +35,7 @@ export default function GrillaAdisos({
   vista = 'grid',
 }: GrillaAdisosProps) {
   const adisoRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
+  const impressedRef = useRef<Set<string>>(new Set());
   const isDesktop = useMediaQuery('(min-width: 768px)');
   const { user } = useAuth();
   const columnMin = espacioAdicional > 0 ? 240 : 200;
@@ -42,6 +44,34 @@ export default function GrillaAdisos({
     registrarClick(user?.id, adiso.id, adiso.categoria);
     onAbrirAdiso(adiso);
   };
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (!entry.isIntersecting) continue;
+          const id = entry.target.getAttribute('data-adiso-id');
+          if (!id || impressedRef.current.has(id)) continue;
+          impressedRef.current.add(id);
+          const adiso = adisos.find((a) => a.id === id);
+          trackEvent('ad.impression', {
+            entityType: 'adiso',
+            entityId: id,
+            payload: { categoria: adiso?.categoria, vista },
+            userId: user?.id,
+          });
+        }
+      },
+      { threshold: 0.6, rootMargin: '0px' }
+    );
+
+    for (const id of Object.keys(adisoRefs.current)) {
+      const el = adisoRefs.current[id];
+      if (el) observer.observe(el);
+    }
+
+    return () => observer.disconnect();
+  }, [adisos, user?.id, vista]);
 
   useEffect(() => {
     if (!adisoSeleccionadoId) return;
@@ -84,54 +114,43 @@ export default function GrillaAdisos({
         @media (min-width: 768px) {
           .grilla-adisos {
             grid-template-columns: repeat(auto-fill, minmax(${columnMin}px, 1fr));
-            gap: var(--space-6, 24px);
-          }
-
-          .grilla-adisos.vista-feed {
-            max-width: 560px;
+            gap: var(--space-4, 16px);
           }
         }
       `}</style>
 
-      <div
-        className={`grilla-adisos pb-20 ${
-          vista === 'list' ? 'vista-list' : vista === 'feed' ? 'vista-feed' : ''
-        }`}
-      >
+      <div className={`grilla-adisos vista-${vista}`}>
         {adisos.map((adiso) => (
-          <AdisoCard
+          <div
             key={adiso.id}
             ref={(el) => {
               adisoRefs.current[adiso.id] = el;
             }}
-            adiso={adiso}
-            onClick={() => handleClickAdiso(adiso)}
-            estaSeleccionado={adiso.id === adisoSeleccionadoId}
-            isDesktop={isDesktop}
-            vista={vista}
-          />
+            data-adiso-id={adiso.id}
+          >
+            <AdisoCard
+              adiso={adiso}
+              onClick={() => handleClickAdiso(adiso)}
+              estaSeleccionado={adisoSeleccionadoId === adiso.id}
+              vista={vista}
+            />
+          </div>
         ))}
-
-        {cargandoMas &&
-          Array.from({ length: 4 }).map((_, i) => (
-            <div key={`skeleton-${i}`} style={{ gridColumn: vista === 'grid' ? 'span 1' : '1 / -1' }}>
-              <SkeletonCard />
-            </div>
-          ))}
-
-        <div
-          ref={sentinelRef}
-          style={{
-            gridColumn: '1 / -1',
-            minHeight: '20px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: cargandoMas ? '0.5rem' : '0.25rem',
-          }}
-          aria-hidden={!cargandoMas}
-        />
       </div>
+
+      {cargandoMas && (
+        <div
+          className={`grilla-adisos vista-${vista}`}
+          style={{ marginTop: 'var(--space-3, 12px)' }}
+          aria-hidden="true"
+        >
+          {Array.from({ length: isDesktop ? 4 : 2 }).map((_, i) => (
+            <SkeletonCard key={`sk-${i}`} />
+          ))}
+        </div>
+      )}
+
+      {sentinelRef && <div ref={sentinelRef} style={{ height: 1, width: '100%' }} aria-hidden="true" />}
     </>
   );
 }

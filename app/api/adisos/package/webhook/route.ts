@@ -7,6 +7,10 @@ import {
 } from '@/lib/packages/server';
 import { createAdisoInSupabase } from '@/lib/supabase';
 import { runInstantMatchCampaign } from '@/lib/activation/instant-match';
+import {
+  linkUserDemandIntentOnPublish,
+  processBothPaidMatchesForDemandAdiso,
+} from '@/lib/matching/both-paid';
 import { supabaseAdmin } from '@/lib/supabase-admin';
 import { TamañoPaquete } from '@/types';
 
@@ -83,6 +87,13 @@ export async function POST(request: NextRequest) {
           ? (draft.ubicacion as Record<string, unknown>)
           : {},
     });
+
+    await linkUserDemandIntentOnPublish(
+      order.user_id,
+      adiso.id,
+      String(draft.categoria || '')
+    );
+    await processBothPaidMatchesForDemandAdiso(adiso.id);
 
     return NextResponse.json({ ok: true, adisoId: adiso.id });
   } catch (e) {

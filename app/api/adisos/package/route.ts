@@ -11,6 +11,10 @@ import { createMercadoPagoPreference, isMercadoPagoConfigured } from '@/lib/merc
 import { matchInterestedUsers } from '@/lib/matching/server';
 import { createAdisoInSupabase } from '@/lib/supabase';
 import { runInstantMatchCampaign } from '@/lib/activation/instant-match';
+import {
+  linkUserDemandIntentOnPublish,
+  processBothPaidMatchesForDemandAdiso,
+} from '@/lib/matching/both-paid';
 import { supabaseAdmin } from '@/lib/supabase-admin';
 
 const bodySchema = z.object({
@@ -96,6 +100,9 @@ export async function POST(request: NextRequest) {
         descripcion: draft.descripcion,
         categoria: draft.categoria,
       });
+
+      await linkUserDemandIntentOnPublish(user.id, adiso.id, draft.categoria);
+      await processBothPaidMatchesForDemandAdiso(adiso.id);
 
       return NextResponse.json({
         status: 'fulfilled',

@@ -19,6 +19,11 @@ interface PreviewItem {
   lastActiveAt?: string;
 }
 
+interface DemandZone {
+  zone: string;
+  count: number;
+}
+
 export default function InterestPreviewPanel({
   categoria,
   titulo,
@@ -28,6 +33,7 @@ export default function InterestPreviewPanel({
 }: InterestPreviewPanelProps) {
   const [count, setCount] = useState<number | null>(null);
   const [items, setItems] = useState<PreviewItem[]>([]);
+  const [demandByZone, setDemandByZone] = useState<DemandZone[]>([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -49,9 +55,10 @@ export default function InterestPreviewPanel({
 
       fetch(`/api/publish/interest-preview?${params}`, { signal: controller.signal })
         .then((r) => r.json())
-        .then((data: { count?: number; interested?: PreviewItem[] }) => {
+        .then((data: { count?: number; interested?: PreviewItem[]; demandByZone?: DemandZone[] }) => {
           setCount(data.count ?? 0);
           setItems(data.interested ?? []);
+          setDemandByZone(data.demandByZone ?? []);
         })
         .catch(() => {
           if (!controller.signal.aborted) {
@@ -102,6 +109,30 @@ export default function InterestPreviewPanel({
           </p>
         </div>
       </div>
+
+      {demandByZone.length > 0 && (
+        <div className="mt-3 border-t pt-3" style={{ borderColor: 'rgba(var(--brand-primary-rgb), 0.15)' }}>
+          <p className="text-xs font-semibold text-[var(--text-primary)] m-0 mb-2">Demanda por zona</p>
+          <div className="space-y-1.5">
+            {demandByZone.map((z) => {
+              const max = demandByZone[0]?.count || 1;
+              const pct = Math.round((z.count / max) * 100);
+              return (
+                <div key={z.zone} className="flex items-center gap-2 text-xs">
+                  <span className="w-24 truncate text-[var(--text-secondary)]">{z.zone}</span>
+                  <div className="flex-1 h-2 rounded-full bg-[var(--bg-secondary)] overflow-hidden">
+                    <div
+                      className="h-full rounded-full"
+                      style={{ width: `${pct}%`, background: 'var(--brand-blue)' }}
+                    />
+                  </div>
+                  <span className="w-6 text-right font-medium text-[var(--text-tertiary)]">{z.count}</span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {items.length > 0 && (
         <ul className="mt-3 space-y-2 border-t pt-3" style={{ borderColor: 'rgba(var(--brand-primary-rgb), 0.15)' }}>

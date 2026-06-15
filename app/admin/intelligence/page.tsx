@@ -9,8 +9,17 @@ interface IntelligenceStats {
     behaviorProfiles: number;
     activeDemandIntents: number;
     campaigns: number;
+    packageOrdersPaid: number;
+    connectedMatches: number;
+  };
+  funnel: {
+    demandIntents: number;
+    paidPublications: number;
+    campaignsLaunched: number;
+    crossMatchesConnected: number;
   };
   demandByCategory: Record<string, number>;
+  deliveriesByChannel: Record<string, { sent: number; failed: number }>;
   recentInferences: { inference_type: string; confidence: number; created_at: string }[];
 }
 
@@ -51,6 +60,42 @@ export default function AdminIntelligencePage() {
               </div>
             ))}
           </div>
+
+          <section>
+            <h2 className="font-semibold mb-2">Funnel publicar → conectar</h2>
+            <ul className="space-y-1 text-sm">
+              <li className="flex justify-between border-b py-1">
+                <span>Intenciones de demanda activas</span>
+                <span className="font-medium">{stats.funnel.demandIntents}</span>
+              </li>
+              <li className="flex justify-between border-b py-1">
+                <span>Publicaciones pagadas</span>
+                <span className="font-medium">{stats.funnel.paidPublications}</span>
+              </li>
+              <li className="flex justify-between border-b py-1">
+                <span>Campañas lanzadas</span>
+                <span className="font-medium">{stats.funnel.campaignsLaunched}</span>
+              </li>
+              <li className="flex justify-between border-b py-1">
+                <span>Matches conectados (both paid)</span>
+                <span className="font-medium">{stats.funnel.crossMatchesConnected}</span>
+              </li>
+            </ul>
+          </section>
+
+          <section>
+            <h2 className="font-semibold mb-2">Entregas por canal</h2>
+            <ul className="space-y-1 text-sm">
+              {Object.entries(stats.deliveriesByChannel || {}).map(([ch, v]) => (
+                <li key={ch} className="flex justify-between border-b py-1">
+                  <span>{ch}</span>
+                  <span className="font-medium">
+                    {v.sent} enviados · {v.failed} fallidos
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </section>
 
           <section>
             <h2 className="font-semibold mb-2">Demanda por categoría</h2>

@@ -3,10 +3,12 @@
 import { useEffect, useRef, useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useUser } from '@/hooks/useUser';
+import { UserPreferences } from '@/types';
 import {
   updateProfile,
   uploadProfileAvatar,
   updateUserSocialLinks,
+  updateUserPreferences,
   UserSocialLinks,
 } from '@/lib/user';
 import {
@@ -79,7 +81,7 @@ export default function ProfileSettingsTab({
   focusSection?: string | null;
 }) {
   const { user, refreshProfile } = useAuth();
-  const { profile } = useUser();
+  const { profile, preferences } = useUser();
 
   const photoRef = useRef<HTMLElement>(null);
   const personalRef = useRef<HTMLElement>(null);
@@ -101,6 +103,7 @@ export default function ProfileSettingsTab({
   const [saving, setSaving] = useState(false);
   const [avatarUploading, setAvatarUploading] = useState(false);
   const [savedFlash, setSavedFlash] = useState(false);
+  const [localPrefs, setLocalPrefs] = useState<Partial<UserPreferences>>({});
 
   const [form, setForm] = useState({
     nombre: '',
@@ -132,6 +135,12 @@ export default function ProfileSettingsTab({
       setSocial(parsed);
     }
   }, [profile, user?.user_metadata]);
+
+  useEffect(() => {
+    setLocalPrefs({});
+  }, [preferences]);
+
+  const effectivePrefs = { ...preferences, ...localPrefs };
 
   useEffect(() => {
     if (!focusSection) return;
@@ -434,9 +443,67 @@ export default function ProfileSettingsTab({
       </SettingsSection>
 
       <SettingsSection id="section-prefs" title="Preferencias">
-        <div className="flex flex-wrap items-center gap-4">
+        <div className="flex flex-wrap items-center gap-4 mb-5">
           <ThemeToggle />
           <LanguageSelector />
+        </div>
+
+        <div className="space-y-3 border-t border-[var(--border-color)] pt-4">
+          <p className="text-sm font-semibold text-[var(--text-primary)] m-0">
+            Oportunidades personalizadas
+          </p>
+          <p className="text-xs text-[var(--text-secondary)] m-0 mb-2">
+            Recibe avisos cuando publiquen algo que coincide con lo que buscas.
+          </p>
+          {[
+            {
+              key: 'oportunidades_personalizadas' as const,
+              label: 'Quiero recibir oportunidades personalizadas',
+              value: effectivePrefs?.oportunidades_personalizadas !== false,
+            },
+            {
+              key: 'notificaciones_push' as const,
+              label: 'Notificaciones push (app móvil)',
+              value: effectivePrefs?.notificaciones_push ?? false,
+            },
+            {
+              key: 'notificaciones_email' as const,
+              label: 'Notificaciones por email',
+              value: effectivePrefs?.notificaciones_email !== false,
+            },
+          ].map((item) => (
+            <label
+              key={item.key}
+              className="flex items-center gap-3 cursor-pointer text-sm text-[var(--text-primary)]"
+            >
+              <input
+                type="checkbox"
+                checked={item.value}
+                disabled={!user?.id}
+                onChange={async (e) => {
+                  if (!user?.id) return;
+                  const checked = e.target.checked;
+                  setLocalPrefs((p) => ({ ...p, [item.key]: checked }));
+                  setSaving(true);
+                  try {
+                    await updateUserPreferences(user.id, { [item.key]: checked });
+                    setSavedFlash(true);
+                    setTimeout(() => setSavedFlash(false), 2000);
+                  } catch {
+                    setLocalPrefs((p) => {
+                      const next = { ...p };
+                      delete next[item.key];
+                      return next;
+                    });
+                  } finally {
+                    setSaving(false);
+                  }
+                }}
+                className="h-4 w-4 rounded border-[var(--border-color)] accent-[var(--brand-blue)]"
+              />
+              {item.label}
+            </label>
+          ))}
         </div>
       </SettingsSection>
 

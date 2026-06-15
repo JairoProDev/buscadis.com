@@ -127,6 +127,11 @@ export default function FormularioPublicar({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const dragImagenesCounterRef = useRef(0);
   const pendingPublishRef = useRef(false);
+  const publishCompletedRef = useRef(false);
+  const pasoRef = useRef(pasoActual);
+  const formRef = useRef(formData);
+  pasoRef.current = pasoActual;
+  formRef.current = formData;
   const router = useRouter();
   const { user } = useAuth();
   const { isVerificado } = useUser();
@@ -170,6 +175,18 @@ export default function FormularioPublicar({
       userId: user?.id,
     });
   }, [pasoActual, formData.categoria, user?.id]);
+
+  useEffect(() => {
+    return () => {
+      if (!publishCompletedRef.current && !modoGratuito && pasoRef.current > 1) {
+        trackEvent('publish.abandon', {
+          entityType: 'publish_draft',
+          payload: { paso: pasoRef.current, categoria: formRef.current.categoria },
+          userId: user?.id,
+        });
+      }
+    };
+  }, [modoGratuito, user?.id]);
 
   useEffect(() => {
     sessionStorage.setItem(
@@ -489,6 +506,7 @@ export default function FormularioPublicar({
 
         const adisoGuardado = pkgData.adiso || nuevoAdiso;
         sessionStorage.removeItem(PUBLISH_DRAFT_KEY);
+        publishCompletedRef.current = true;
         onPublicar(adisoGuardado);
         onSuccess?.('¡Adiso publicado! Tus interesados ya están siendo notificados.');
         router.push(`/perfil?tab=interesados&highlight=${adisoGuardado.id}`);
@@ -497,6 +515,7 @@ export default function FormularioPublicar({
 
       const adisoGuardado = await saveAdiso(nuevoAdiso);
       sessionStorage.removeItem(PUBLISH_DRAFT_KEY);
+      publishCompletedRef.current = true;
       onPublicar(adisoGuardado);
       onSuccess?.('¡Adiso publicado con éxito!');
       router.push(`/perfil?tab=publicar&highlight=${adisoGuardado.id}`);

@@ -1396,6 +1396,11 @@ function HomeContent() {
                   ubicacion={browseFilters.ubicacion}
                   activeFilterCount={countActiveFilters(browseFilters, categoriaFiltro)}
                   onClearFilters={() => {
+                    trackEvent('filter.cleared', {
+                      entityType: 'filter',
+                      payload: { categoria: categoriaFiltro, filters: browseFilters },
+                      userId: user?.id,
+                    });
                     setBrowseFilters({ facets: {} });
                     setBusqueda('');
                     setCategoriaFiltro('todos');

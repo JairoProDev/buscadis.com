@@ -11,6 +11,10 @@ import { useAuth } from '@/hooks/useAuth';
 import { useUI } from '@/contexts/UIContext';
 import { trackViewHistory } from '@/lib/profile/view-history-client';
 import { registrarVisualizacion, registrarClick, registrarContacto } from '@/lib/analytics';
+import {
+  consumeOpportunityContext,
+  buildMatchInitialMessage,
+} from '@/lib/opportunity-context';
 import { useAdInteraction } from '@/hooks/useAdInteraction';
 import { getCategoriaThemeTokens } from '@/lib/categoria-theme';
 import PromoteAdisoModal from '@/components/PromoteAdisoModal';
@@ -150,13 +154,19 @@ export default function ModalAdiso({
     setPromotionTier(adiso.promotionTier || 'gratis');
   }, [adiso.id, adiso.vistas, adiso.contactos, adiso.promotionTier]);
 
-  // Registrar visualización del adiso (Optimistic + Backend)
+  // Registrar visualización + dwell time al cerrar
   useEffect(() => {
-    // Backend
+    const openedAt = Date.now();
     registrarVisualizacion(user?.id, adiso.id);
     trackViewHistory({ adisoId: adiso.id, source: 'direct' }, session?.access_token);
-    // Optimistic UI: Incrementamos 1 sobre el valor base
-    setVistasLocales(prev => prev + 1);
+    setVistasLocales((prev) => prev + 1);
+
+    return () => {
+      const dwellSec = Math.round((Date.now() - openedAt) / 1000);
+      if (dwellSec >= 3) {
+        void registrarVisualizacion(user?.id, adiso.id, dwellSec);
+      }
+    };
   }, [user?.id, adiso.id, session?.access_token]);
 
 
@@ -347,6 +357,11 @@ Ref: ${adiso.edicionNumero || adiso.id}`;
     }
     setEnviandoMensaje(true);
     try {
+      const opp = consumeOpportunityContext(adiso.id);
+      const initialMsg =
+        opp?.initialMessage ||
+        buildMatchInitialMessage(adiso.titulo, opp?.matchScore);
+
       const res = await fetch('/api/conversations', {
         method: 'POST',
         headers: {
@@ -356,13 +371,18 @@ Ref: ${adiso.edicionNumero || adiso.id}`;
         body: JSON.stringify({
           recipientId: sellerUserId,
           adisoId: adiso.id,
-          initialMessage: `Hola, me interesa: ${adiso.titulo}`,
+          initialMessage: initialMsg,
         }),
       });
       const data = (await res.json()) as { conversationId?: string };
       if (data.conversationId) {
         registrarContacto(user.id, adiso.id, adiso.categoria, 'chat');
-        openChat(data.conversationId);
+        openChat(data.conversationId, {
+          matchScore: opp?.matchScore,
+          adisoTitle: adiso.titulo,
+          initialMessage: initialMsg,
+          adisoId: adiso.id,
+        });
       }
     } finally {
       setEnviandoMensaje(false);

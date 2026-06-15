@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase-admin';
+import { getUserFromRouteRequest } from '@/lib/supabase-route-auth';
 
 const EXPO_TOKEN_PREFIX = 'ExponentPushToken[';
 
@@ -36,11 +37,18 @@ export async function POST(request: NextRequest) {
     const appVersion =
       typeof body.appVersion === 'string' ? body.appVersion.slice(0, 64) : null;
 
+    const authUser = await getUserFromRouteRequest(request);
+    const userId =
+      authUser?.id ||
+      (typeof body.userId === 'string' ? body.userId.trim() : null) ||
+      null;
+
     const { error } = await supabaseAdmin.from('expo_push_tokens').upsert(
       {
         expo_push_token: token,
         platform,
         app_version: appVersion,
+        user_id: userId,
         updated_at: new Date().toISOString(),
         last_seen_at: new Date().toISOString(),
       },

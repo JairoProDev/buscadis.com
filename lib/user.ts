@@ -180,6 +180,7 @@ async function createDefaultPreferences(userId: string): Promise<UserPreferences
     categorias_favoritas: [],
     notificaciones_email: true,
     notificaciones_push: false,
+    oportunidades_personalizadas: true,
     idioma: 'es',
     tema: 'auto',
     radio_busqueda_km: 10

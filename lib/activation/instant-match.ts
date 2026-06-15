@@ -3,6 +3,8 @@ import { matchInterestedUsers } from '@/lib/matching/server';
 import { filterEligibleRecipients, buildOpportunityCopy } from '@/lib/notifications/intent-router';
 import { createSupplyDemandMatches } from '@/lib/matching/server';
 import { rebuildUserBehaviorProfile } from '@/lib/behavior/rebuild-profiles';
+import { deliverOpportunityToUser } from '@/lib/notifications/delivery';
+import { processBothPaidMatchesForSupplyAdiso } from '@/lib/matching/both-paid';
 
 export async function runInstantMatchCampaign(params: {
   adisoId: string;
@@ -46,28 +48,15 @@ export async function runInstantMatchCampaign(params: {
 
   let notified = 0;
   for (const user of eligible) {
-    const { error: notifErr } = await supabaseAdmin.from('notifications').insert({
-      user_id: user.userId,
-      type: 'system',
+    const result = await deliverOpportunityToUser({
+      userId: user.userId,
+      campaignId: campaign.id as string,
       title: copy.title,
-      message: `${copy.body} Ver anuncio: /?adiso=${params.adisoId}`,
-      data: {
-        adiso_id: params.adisoId,
-        match_score: user.matchScore,
-        campaign_id: campaign.id,
-      },
+      body: copy.body,
+      adisoId: params.adisoId,
+      matchScore: user.matchScore,
     });
-
-    await supabaseAdmin.from('campaign_deliveries').insert({
-      campaign_id: campaign.id,
-      user_id: user.userId,
-      channel: 'in_app',
-      match_score: user.matchScore,
-      status: notifErr ? 'failed' : 'sent',
-      sent_at: notifErr ? null : new Date().toISOString(),
-    });
-
-    if (!notifErr) notified += 1;
+    if (result.inApp) notified += 1;
   }
 
   await supabaseAdmin
@@ -86,7 +75,8 @@ export async function runInstantMatchCampaign(params: {
     ubicacion: params.ubicacion,
   });
 
-  // Graph sync for advertiser
+  await processBothPaidMatchesForSupplyAdiso(params.adisoId);
+
   await supabaseAdmin.rpc('fn_upsert_graph_node', {
     p_node_type: 'Ad',
     p_ref_id: params.adisoId,

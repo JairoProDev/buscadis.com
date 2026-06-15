@@ -11,8 +11,16 @@ interface UIContextType {
     openAuthModal: () => void;
     closeAuthModal: () => void;
     activeChatId: string | null;
-    openChat: (conversationId: string) => void;
+    chatContext: ChatOpenContext | null;
+    openChat: (conversationId: string, context?: ChatOpenContext) => void;
     closeChat: () => void;
+}
+
+export interface ChatOpenContext {
+    matchScore?: number;
+    adisoTitle?: string;
+    initialMessage?: string;
+    adisoId?: string;
 }
 
 const UIContext = createContext<UIContextType | undefined>(undefined);
@@ -20,21 +28,36 @@ const UIContext = createContext<UIContextType | undefined>(undefined);
 export function UIProvider({ children }: { children: ReactNode }) {
     const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
     const [activeChatId, setActiveChatId] = useState<string | null>(null);
+    const [chatContext, setChatContext] = useState<ChatOpenContext | null>(null);
 
     const openAuthModal = useCallback(() => setIsAuthModalOpen(true), []);
     const closeAuthModal = useCallback(() => setIsAuthModalOpen(false), []);
 
-    const openChat = useCallback((id: string) => setActiveChatId(id), []);
-    const closeChat = useCallback(() => setActiveChatId(null), []);
+    const openChat = useCallback((id: string, context?: ChatOpenContext) => {
+        setActiveChatId(id);
+        setChatContext(context || null);
+    }, []);
+    const closeChat = useCallback(() => {
+        setActiveChatId(null);
+        setChatContext(null);
+    }, []);
 
     return (
         <UIContext.Provider value={{
             isAuthModalOpen, openAuthModal, closeAuthModal,
-            activeChatId, openChat, closeChat
+            activeChatId, chatContext, openChat, closeChat
         }}>
             {children}
             <AuthModal abierto={isAuthModalOpen} onCerrar={closeAuthModal} />
-            {activeChatId && <ChatWindow conversationId={activeChatId} onClose={closeChat} />}
+            {activeChatId && (
+                <ChatWindow
+                    conversationId={activeChatId}
+                    onClose={closeChat}
+                    matchScore={chatContext?.matchScore}
+                    adisoTitle={chatContext?.adisoTitle}
+                    initialMessage={chatContext?.initialMessage}
+                />
+            )}
         </UIContext.Provider>
     );
 }

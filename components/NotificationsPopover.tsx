@@ -1,16 +1,49 @@
 import React from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useNotifications } from '@/hooks/useNotifications';
 import { IconBell, IconHeart, IconMessages, IconCheck, IconMegaphone } from '@/components/Icons';
-import { NotificationType } from '@/types';
+import { Notification, NotificationType } from '@/types';
 import { formatTimeAgo } from '@/utils/date';
+import { saveOpportunityContext } from '@/lib/opportunity-context';
 
 interface NotificationsPopoverProps {
     onClose: () => void;
 }
 
+function getNotificationData(notification: Notification): Record<string, unknown> {
+    const raw = (notification as Notification & { data?: Record<string, unknown> }).data;
+    return raw && typeof raw === 'object' ? raw : {};
+}
+
 export default function NotificationsPopover({ onClose }: NotificationsPopoverProps) {
+    const router = useRouter();
     const { notifications, unreadCount, loading, markAsRead, markAllAsRead } = useNotifications();
+
+    const handleNotificationClick = (notification: Notification) => {
+        markAsRead(notification.id);
+        const data = getNotificationData(notification);
+        const adisoId = typeof data.adiso_id === 'string' ? data.adiso_id : null;
+        const matchScore = typeof data.match_score === 'number' ? data.match_score : undefined;
+
+        if (adisoId) {
+            if (matchScore != null) {
+                saveOpportunityContext({
+                    adisoId,
+                    matchScore,
+                    adisoTitle: notification.title,
+                });
+            }
+            onClose();
+            router.push(`/?adiso=${adisoId}`);
+            return;
+        }
+
+        if (notification.type === 'message') {
+            onClose();
+            router.push('/perfil?tab=mensajes');
+        }
+    };
 
     const getIcon = (type: NotificationType) => {
         switch (type) {
@@ -87,7 +120,7 @@ export default function NotificationsPopover({ onClose }: NotificationsPopoverPr
                                 className={`cursor-pointer px-4 py-3 transition-colors hover:bg-[var(--hover-bg)] ${
                                     !notification.read ? 'bg-[rgba(var(--brand-primary-rgb),0.06)]' : ''
                                 }`}
-                                onClick={() => markAsRead(notification.id)}
+                                onClick={() => handleNotificationClick(notification)}
                             >
                                 <div className="flex gap-3">
                                     <div
