@@ -1,10 +1,10 @@
 'use client';
 
-import { useRef, useState, useEffect, useCallback } from 'react';
+import { useRef, useState, useEffect, useCallback, type KeyboardEvent } from 'react';
 import { FaSearch } from 'react-icons/fa';
 import { useTranslation } from '@/hooks/useTranslation';
 import { useSpeechRecognition } from '@/hooks/useSpeechRecognition';
-import { IconMicrophone, IconGoogleLens, IconFilterFunnel } from './Icons';
+import { IconMicrophone, IconGoogleLens, IconFilterFunnel, IconSearch, IconMegaphone } from './Icons';
 import ComposerModeToggle, { type ComposerMode } from './ComposerModeToggle';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Categoria } from '@/types';
@@ -28,6 +28,11 @@ interface BuscadorProps {
   composerMode?: ComposerMode;
   onComposerModeChange?: (mode: ComposerMode) => void;
   placeholder?: string;
+  /** Acción principal al final de la barra (buscar / publicar) */
+  onPrimaryAction?: () => void;
+  primaryActionDisabled?: boolean;
+  primaryActionLoading?: boolean;
+  primaryActionLabel?: string;
 }
 
 function readFileAsDataUrl(file: File): Promise<string> {
@@ -53,6 +58,10 @@ export default function Buscador({
   composerMode = 'search',
   onComposerModeChange,
   placeholder: placeholderProp,
+  onPrimaryAction,
+  primaryActionDisabled = false,
+  primaryActionLoading = false,
+  primaryActionLabel,
 }: BuscadorProps) {
   const { t } = useTranslation();
   const { isListening, isSupported, start: startVoice, stop: stopVoice } = useSpeechRecognition('es-PE');
@@ -203,6 +212,18 @@ export default function Buscador({
   const iconSize = minimal ? 16 : isCompact ? 18 : 20;
   const searchIconClass = minimal ? 'w-4 h-4 mr-2' : 'w-5 h-5 mr-2 md:mr-3';
   const shellAlign = isPublishMode && fieldMultiline ? 'items-start' : 'items-center';
+  const showPrimaryAction = Boolean(onPrimaryAction) && showComposerToggle;
+
+  const handleFieldKeyDown = (e: KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    if (!onPrimaryAction || e.key !== 'Enter') return;
+    if (isPublishMode && e.shiftKey) return;
+    e.preventDefault();
+    if (!primaryActionDisabled && !primaryActionLoading) onPrimaryAction();
+  };
+
+  const primaryLabel =
+    primaryActionLabel ||
+    (composerMode === 'publish' ? (primaryActionLoading ? '…' : 'Publicar') : 'Buscar');
 
   const modeToggle = showComposerToggle ? (
     <ComposerModeToggle
@@ -274,6 +295,7 @@ export default function Buscador({
                   value={value}
                   onChange={(e) => onChange(e.target.value)}
                   onInput={adjustTextareaHeight}
+                  onKeyDown={handleFieldKeyDown}
                   className="brand-search-input brand-search-textarea w-full border-none outline-none bg-transparent resize-none overflow-y-auto text-[16px] py-1 leading-normal max-h-[220px]"
                 />
               </motion.div>
@@ -288,6 +310,7 @@ export default function Buscador({
                 placeholder={placeholder}
                 value={value}
                 onChange={(e) => onChange(e.target.value)}
+                onKeyDown={handleFieldKeyDown}
                 className={`brand-search-input flex-1 min-w-0 w-full border-none outline-none bg-transparent truncate h-full ${
                   minimal ? 'text-sm py-0' : 'text-[16px] py-1'
                 }`}
@@ -354,12 +377,43 @@ export default function Buscador({
               disabled={isAnalyzingImage || isListening || composerMode === 'publish'}
               className={`${actionBtnClass} text-[var(--text-secondary)] hover:text-[var(--brand-yellow)] hover:bg-[rgba(var(--brand-yellow-rgb),0.12)] ${
                 isAnalyzingImage ? 'animate-pulse text-[var(--brand-yellow)]' : ''
-              } ${composerMode === 'publish' ? 'opacity-40 pointer-events-none' : ''}`}
+              } ${composerMode === 'publish' ? 'hidden' : ''}`}
               title="Búsqueda visual (foto)"
               aria-label="Búsqueda visual con foto"
             >
               <IconGoogleLens size={iconSize} />
             </button>
+
+            {showPrimaryAction && (
+              <motion.button
+                type="button"
+                layout
+                onClick={onPrimaryAction}
+                disabled={primaryActionDisabled || primaryActionLoading}
+                whileTap={{ scale: 0.94 }}
+                className={`flex items-center justify-center gap-1 rounded-full font-bold text-[11px] md:text-xs shrink-0 transition-all disabled:opacity-45 disabled:pointer-events-none h-8 md:h-9 px-2.5 md:px-3.5 ml-0.5 ${
+                  isPublishMode
+                    ? 'bg-[var(--brand-yellow)] text-[#1c1608] shadow-[0_2px_10px_rgba(var(--brand-yellow-rgb),0.45)] hover:brightness-105'
+                    : 'bg-[var(--brand-blue)] text-white shadow-[0_2px_10px_rgba(var(--brand-primary-rgb),0.35)] hover:brightness-105'
+                }`}
+                title={primaryLabel}
+                aria-label={primaryLabel}
+              >
+                {primaryActionLoading ? (
+                  <span className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                ) : isPublishMode ? (
+                  <>
+                    <IconMegaphone size={14} color="currentColor" />
+                    <span className="hidden sm:inline">{primaryLabel}</span>
+                  </>
+                ) : (
+                  <>
+                    <IconSearch size={14} color="currentColor" />
+                    <span className="hidden sm:inline">{primaryLabel}</span>
+                  </>
+                )}
+              </motion.button>
+            )}
           </motion.div>
           )}
           </div>

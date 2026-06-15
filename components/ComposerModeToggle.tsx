@@ -103,7 +103,7 @@ export default function ComposerModeToggle({ mode, onChange, className = '' }: C
         <motion.span
           animate={{
             scale: mode === 'publish' ? 1.08 : 1,
-            color: mode === 'publish' ? '#b8860b' : 'var(--text-tertiary)',
+            color: mode === 'publish' ? 'var(--brand-yellow)' : 'var(--text-tertiary)',
           }}
           transition={spring}
           className="flex items-center gap-1"

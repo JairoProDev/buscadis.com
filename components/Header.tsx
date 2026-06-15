@@ -335,6 +335,7 @@ export default function Header({
       className="brand-header-sheen"
       style={{
         borderBottom: '1px solid var(--border-color)',
+        borderRadius: '0 0 25px 25px',
         height: '72px',
         position: 'sticky',
         top: 0,

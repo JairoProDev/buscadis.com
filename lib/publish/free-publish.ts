@@ -1,6 +1,7 @@
 import { Adiso, Categoria, Ubicacion } from '@/types';
 import { createAdisoInSupabase } from '@/lib/supabase';
 import { normalizeContactoForApi, resolveUbicacionForPublish } from '@/lib/publish-helpers';
+import { removePhonesFromText } from '@/lib/phone';
 import {
   FREE_TIER_LIMITS,
   featuresForTier,
@@ -33,7 +34,7 @@ export async function publishFreeAdiso(input: FreePublishInput): Promise<Adiso> 
   const err = validateFreePublishInput(input);
   if (err) throw new Error(err);
 
-  const { titulo, descripcion } = heuristicSplitAdText(input.text);
+  const { titulo, descripcion } = heuristicSplitAdText(removePhonesFromText(input.text));
   const categoria = (input.categoria || inferCategoryFromText(input.text)) as Categoria;
   const now = new Date();
   const features = featuresForTier('free');

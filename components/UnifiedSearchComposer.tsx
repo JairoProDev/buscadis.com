@@ -8,6 +8,13 @@ import { useUI } from '@/contexts/UIContext';
 import { Categoria } from '@/types';
 import { FREE_TIER_LIMITS } from '@/lib/publish/tiers';
 import InterestPreviewPanel from './publish/InterestPreviewPanel';
+import {
+  extractPrimaryPhone,
+  findPhoneMatches,
+  maskPhonesInText,
+  PHONE_MASK,
+  removePhonesFromText,
+} from '@/lib/phone';
 
 type PublishTierChoice = 'free' | 'pro';
 
@@ -46,14 +53,34 @@ export default function UnifiedSearchComposer({
   const [publishTier, setPublishTier] = useState<PublishTierChoice>('free');
   const [intent, setIntent] = useState<'search' | 'publish' | null>(null);
   const [draft, setDraft] = useState<DraftListingData | null>(null);
-  const [contacto, setContacto] = useState('');
   const [publishing, setPublishing] = useState(false);
+  const detectedPhoneRef = useRef<string | null>(null);
   const timerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const lastCheckedRef = useRef('');
 
   useEffect(() => {
-    if (profile?.telefono) setContacto(profile.telefono);
+    if (profile?.telefono) {
+      detectedPhoneRef.current = extractPrimaryPhone('', profile.telefono);
+    }
   }, [profile?.telefono]);
+
+  const handleComposerChange = (next: string) => {
+    if (composerMode !== 'publish') {
+      onChange(next);
+      return;
+    }
+
+    const matches = findPhoneMatches(next);
+    if (matches.length > 0) {
+      detectedPhoneRef.current = matches[matches.length - 1].normalized;
+    } else if (!next.includes(PHONE_MASK)) {
+      detectedPhoneRef.current = profile?.telefono
+        ? extractPrimaryPhone('', profile.telefono)
+        : null;
+    }
+
+    onChange(maskPhonesInText(next));
+  };
 
   useEffect(() => {
     if (composerMode !== 'publish' || publishTier !== 'pro') {
@@ -65,7 +92,7 @@ export default function UnifiedSearchComposer({
     }
 
     if (timerRef.current) clearTimeout(timerRef.current);
-    const trimmed = value.trim();
+    const trimmed = removePhonesFromText(value).trim();
     if (trimmed.length < MIN_AI_LENGTH) {
       setIntent(null);
       setDraft(null);
@@ -101,21 +128,28 @@ export default function UnifiedSearchComposer({
     };
   }, [value, composerMode, publishTier, onCategoryDetected]);
 
+  const resolveContacto = () =>
+    detectedPhoneRef.current || extractPrimaryPhone(value, profile?.telefono);
+
   const handlePublishFree = async () => {
     if (!user?.id) {
       onNotify?.('Inicia sesión para publicar.', 'info');
       openAuthModal();
       return;
     }
-    const text = value.trim();
+
+    const text = removePhonesFromText(value).trim();
     if (!text) {
       onNotify?.('Escribe tu anuncio primero.', 'error');
       return;
     }
-    if (!contacto.trim()) {
-      onNotify?.('Agrega tu número de WhatsApp.', 'error');
+
+    const contacto = resolveContacto();
+    if (!contacto) {
+      onNotify?.('Incluye tu WhatsApp en el texto o configúralo en tu perfil.', 'error');
       return;
     }
+
     setPublishing(true);
     try {
       const res = await fetch('/api/adisos/publish/free', {
@@ -124,12 +158,15 @@ export default function UnifiedSearchComposer({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${session?.access_token}`,
         },
-        body: JSON.stringify({ text, contacto: contacto.trim() }),
+        body: JSON.stringify({ text, contacto }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Error');
       onNotify?.('¡Anuncio publicado gratis por 24h!', 'success');
       onChange('');
+      detectedPhoneRef.current = profile?.telefono
+        ? extractPrimaryPhone('', profile.telefono)
+        : null;
     } catch (e) {
       onNotify?.(e instanceof Error ? e.message : 'No se pudo publicar', 'error');
     } finally {
@@ -145,14 +182,38 @@ export default function UnifiedSearchComposer({
     window.location.href = `/publicar?titulo=${encodeURIComponent(data.titulo)}&descripcion=${encodeURIComponent(data.descripcion)}&categoria=${data.categoria}`;
   };
 
-  const charCount = value.length;
+  const handlePrimaryAction = () => {
+    if (composerMode === 'publish') {
+      if (publishTier === 'free') {
+        void handlePublishFree();
+        return;
+      }
+      if (draft && intent === 'publish') {
+        void handlePublishPro(draft);
+      } else {
+        onNotify?.('Sigue escribiendo para que la IA arme tu anuncio.', 'info');
+      }
+      return;
+    }
+
+    onNotify?.(value.trim() ? `Buscando: "${value.trim()}"` : 'Escribe qué buscas', value.trim() ? 'success' : 'info');
+  };
+
   const freeLimit = FREE_TIER_LIMITS.maxDescChars + FREE_TIER_LIMITS.maxTitleChars;
+  const publishText = removePhonesFromText(value).trim();
+  const hasContact = Boolean(resolveContacto());
+  const primaryDisabled =
+    composerMode === 'publish'
+      ? publishTier === 'free'
+        ? !publishText || publishing
+        : !draft || intent !== 'publish'
+      : false;
 
   return (
     <div>
       <Buscador
         value={value}
-        onChange={onChange}
+        onChange={handleComposerChange}
         compact={compact}
         composerMode={composerMode}
         onComposerModeChange={setComposerMode}
@@ -162,11 +223,23 @@ export default function UnifiedSearchComposer({
         filtersVisible={filtersVisible}
         onToggleFilters={onToggleFilters}
         activeFiltersCount={activeFiltersCount}
+        onPrimaryAction={handlePrimaryAction}
+        primaryActionDisabled={primaryDisabled}
+        primaryActionLoading={publishing}
+        primaryActionLabel={
+          composerMode === 'publish'
+            ? publishTier === 'free'
+              ? publishing
+                ? 'Publicando…'
+                : 'Publicar'
+              : 'Continuar'
+            : 'Buscar'
+        }
       />
 
       {composerMode === 'publish' && !compact && (
         <div className="mt-3 space-y-3 md:max-w-2xl md:mx-auto">
-          <div className="flex gap-2 justify-center flex-wrap">
+          <div className="flex gap-2 justify-center flex-wrap items-center">
             <button
               type="button"
               onClick={() => setPublishTier('free')}
@@ -183,7 +256,7 @@ export default function UnifiedSearchComposer({
               onClick={() => setPublishTier('pro')}
               className={`text-xs px-3 py-1.5 rounded-full border font-medium transition-colors ${
                 publishTier === 'pro'
-                  ? 'border-[var(--brand-yellow)] bg-[rgba(var(--brand-yellow-rgb),0.15)] text-[#b8860b]'
+                  ? 'border-[var(--brand-yellow)] bg-[rgba(var(--brand-yellow-rgb),0.15)] text-[var(--brand-yellow)]'
                   : 'border-[var(--border-color)] text-[var(--text-secondary)] hover:border-[var(--brand-yellow)]/50'
               }`}
             >
@@ -192,26 +265,10 @@ export default function UnifiedSearchComposer({
           </div>
 
           {publishTier === 'free' && (
-            <div className="rounded-xl border border-[var(--border-color)] p-3 bg-[var(--bg-secondary)] space-y-2">
-              <input
-                type="tel"
-                value={contacto}
-                onChange={(e) => setContacto(e.target.value)}
-                placeholder="Tu WhatsApp"
-                className="w-full rounded-lg border border-[var(--border-color)] px-3 py-2 text-sm bg-[var(--bg-primary)]"
-              />
-              <p className="text-[10px] text-[var(--text-tertiary)] m-0">
-                {charCount}/{freeLimit} caracteres · 1 foto · sin IA · atención manual
-              </p>
-              <button
-                type="button"
-                disabled={publishing || !value.trim()}
-                onClick={() => void handlePublishFree()}
-                className="w-full py-2.5 rounded-xl bg-[var(--brand-blue)] text-white text-sm font-bold disabled:opacity-50"
-              >
-                {publishing ? 'Publicando…' : 'Publicar gratis'}
-              </button>
-            </div>
+            <p className="text-center text-[10px] text-[var(--text-tertiary)] m-0">
+              {publishText.length}/{freeLimit} caracteres · 1 foto · sin IA
+              {hasContact ? ' · WhatsApp detectado' : ' · incluye tu WhatsApp en el texto'}
+            </p>
           )}
 
           {publishTier === 'pro' && intent === 'publish' && draft && (
@@ -232,7 +289,7 @@ export default function UnifiedSearchComposer({
             </>
           )}
 
-          {publishTier === 'pro' && intent === 'search' && value.trim().length >= MIN_AI_LENGTH && (
+          {publishTier === 'pro' && intent === 'search' && publishText.length >= MIN_AI_LENGTH && (
             <p className="text-center text-xs text-[var(--text-tertiary)]">
               Sigue escribiendo como un anuncio para que la IA lo arme.
             </p>
