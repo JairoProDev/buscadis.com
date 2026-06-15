@@ -10,11 +10,14 @@ import {
   FaSun,
 } from 'react-icons/fa';
 import UserMenu from './UserMenu';
+import HeaderIconButton from './HeaderIconButton';
 import NotificationsPopover from './NotificationsPopover';
 import MessagesPopover from './MessagesPopover';
 import { useUI } from '@/contexts/UIContext';
 import { useTranslation } from '@/hooks/useTranslation';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
+import { useConversations } from '@/hooks/useConversations';
+import { useNotifications } from '@/hooks/useNotifications';
 import { SeccionSidebar } from './SidebarDesktop';
 import {
   IconMap,
@@ -40,23 +43,6 @@ interface HeaderProps {
 
 const LOGO_FONT = '"Plus Jakarta Sans", "Avenir Next", "Segoe UI", sans-serif';
 
-function iconBtnStyle(active: boolean, compact = false): React.CSSProperties {
-  const size = compact ? 36 : 40;
-  return {
-    width: `${size}px`,
-    height: `${size}px`,
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: '50%',
-    background: active ? 'var(--hover-bg)' : 'var(--bg-tertiary)',
-    color: active ? 'var(--brand-blue)' : 'var(--text-secondary)',
-    border: '1px solid var(--border-color)',
-    cursor: 'pointer',
-    flexShrink: 0,
-  };
-}
-
 export default function Header({
   onChangelogClick,
   onToggleLeftSidebar,
@@ -74,6 +60,8 @@ export default function Header({
   const [themeMode, setThemeMode] = useState<'light' | 'dark' | 'auto'>('auto');
   const { user } = useAuth();
   const { openChat } = useUI();
+  const { unreadCount: unreadMessages } = useConversations();
+  const { unreadCount: unreadNotifications } = useNotifications();
   const isAuthenticated = !!user;
 
   const categoriaLabel =
@@ -234,57 +222,52 @@ export default function Header({
   ] as const;
 
   const actionButtons = (
-    <>
-      <button
-        type="button"
+    <div className="flex items-center gap-0.5">
+      <HeaderIconButton
         onClick={toggleTheme}
-        style={iconBtnStyle(false, !isDesktop)}
-        className="hover:bg-[var(--hover-bg)] hover:text-[var(--brand-blue)] transition-colors"
         title={themeMode === 'dark' ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}
         aria-label={themeMode === 'dark' ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}
       >
-        {themeMode === 'dark' ? <FaSun size={16} /> : <FaMoon size={16} />}
-      </button>
+        {themeMode === 'dark' ? <FaSun size={17} /> : <FaMoon size={17} />}
+      </HeaderIconButton>
 
       {isAuthenticated && (
         <>
           {onChangelogClick && isDesktop && (
-            <button
-              type="button"
+            <HeaderIconButton
               onClick={onChangelogClick}
-              style={iconBtnStyle(false, !isDesktop)}
-              className="hover:bg-[var(--hover-bg)] hover:text-[var(--brand-blue)] transition-colors"
               title={t('header.progress')}
+              aria-label={t('header.progress')}
             >
               <FaChartLine size={16} />
-            </button>
+            </HeaderIconButton>
           )}
 
           <div className="relative">
-            <button
-              type="button"
-              onClick={() => setActivePopover(activePopover === 'notifications' ? null : 'notifications')}
-              style={iconBtnStyle(activePopover === 'notifications', !isDesktop)}
-              className="hover:bg-[var(--hover-bg)] hover:text-[var(--brand-blue)] transition-colors"
+            <HeaderIconButton
+              onClick={() =>
+                setActivePopover(activePopover === 'notifications' ? null : 'notifications')
+              }
+              active={activePopover === 'notifications'}
+              badge={unreadNotifications}
               aria-label="Notificaciones"
             >
               <FaBell size={16} />
-            </button>
+            </HeaderIconButton>
             {activePopover === 'notifications' && (
               <NotificationsPopover onClose={() => setActivePopover(null)} />
             )}
           </div>
 
           <div className="relative">
-            <button
-              type="button"
+            <HeaderIconButton
               onClick={() => setActivePopover(activePopover === 'messages' ? null : 'messages')}
-              style={iconBtnStyle(activePopover === 'messages', !isDesktop)}
-              className="hover:bg-[var(--hover-bg)] hover:text-[var(--brand-blue)] transition-colors"
+              active={activePopover === 'messages'}
+              badge={unreadMessages}
               aria-label="Mensajes"
             >
               <FaFacebookMessenger size={16} />
-            </button>
+            </HeaderIconButton>
             {activePopover === 'messages' && (
               <MessagesPopover
                 onClose={() => setActivePopover(null)}
@@ -297,7 +280,7 @@ export default function Header({
           </div>
         </>
       )}
-    </>
+    </div>
   );
 
   return (
@@ -411,16 +394,16 @@ export default function Header({
 
       {/* RIGHT: acciones + usuario */}
       <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'flex-end',
-          gap: isDesktop ? '8px' : '6px',
-          justifySelf: 'end',
-          minWidth: 0,
-        }}
+        className="flex min-w-0 items-center justify-end justify-self-end"
+        style={{ gap: isDesktop ? '4px' : '2px' }}
       >
         {actionButtons}
+        {isAuthenticated && (
+          <span
+            className="mx-1 hidden h-6 w-px shrink-0 bg-[var(--border-color)] sm:block"
+            aria-hidden
+          />
+        )}
         <UserMenu onProgressClick={onChangelogClick} onSidebarToggle={onToggleLeftSidebar} />
       </div>
     </header>

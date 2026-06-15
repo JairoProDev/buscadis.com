@@ -1,13 +1,12 @@
 'use client';
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, Suspense } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { useUser } from '@/hooks/useUser';
-import { useConversations } from '@/hooks/useConversations';
-import { useNotifications } from '@/hooks/useNotifications';
+import { useHeaderIdentity, HeaderRoleTone } from '@/hooks/useHeaderIdentity';
 import AuthModal from './AuthModal';
-import { IconStore } from './Icons';
+import { IconStore, IconChevronDown } from './Icons';
 import { FaChartLine } from 'react-icons/fa';
 import { useTranslation } from '@/hooks/useTranslation';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
@@ -19,16 +18,26 @@ interface UserMenuProps {
   onSidebarToggle?: () => void;
 }
 
-export default function UserMenu({ onProgressClick, onSidebarToggle }: UserMenuProps) {
+const ROLE_TONE_CLASS: Record<HeaderRoleTone, string> = {
+  business: 'text-[var(--brand-yellow)]',
+  publisher: 'text-[var(--brand-blue)]',
+  verified: 'text-emerald-600 dark:text-emerald-400',
+  admin: 'text-violet-600 dark:text-violet-400',
+  default: 'text-[var(--text-secondary)]',
+};
+
+function UserMenuFallback() {
+  return <div className="h-9 w-9 shrink-0 rounded-full bg-[var(--hover-bg)] animate-pulse" />;
+}
+
+function UserMenuContent({ onProgressClick }: UserMenuProps) {
   const router = useRouter();
   const { user, signOut } = useAuth();
-  const { profile, isAnunciante, isVerificado } = useUser();
-  const { unreadCount: unreadMessages } = useConversations();
-  const { unreadCount: unreadNotifications } = useNotifications();
+  const { isAnunciante, isVerificado } = useUser();
+  const identity = useHeaderIdentity();
   const { t } = useTranslation();
   const isDesktop = useMediaQuery('(min-width: 768px)');
   const [mostrarMenu, setMostrarMenu] = useState(false);
-  const [mostrarAuthModal, setMostrarAuthModal] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -57,280 +66,117 @@ export default function UserMenu({ onProgressClick, onSidebarToggle }: UserMenuP
     setMostrarMenu(false);
   };
 
-  const nombreCompleto = profile
-    ? `${profile.nombre || ''} ${profile.apellido || ''}`.trim() || profile.email || 'Usuario'
-    : user?.email || 'Usuario';
-
-  const iniciales = nombreCompleto
-    .split(' ')
-    .map((n) => n[0])
-    .join('')
-    .toUpperCase()
-    .substring(0, 2);
-
-  if (!user) {
-    return (
-      <>
-        <button
-          onClick={() => setMostrarAuthModal(true)}
-          style={{
-            backgroundColor: 'var(--brand-blue)',
-            color: '#fff',
-            padding: '0.5rem 1.25rem',
-            borderRadius: '0.5rem',
-            fontWeight: 600,
-            boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
-            border: 'none',
-            cursor: 'pointer',
-            fontSize: '0.875rem',
-          }}
-          className="hover:opacity-90 transition-opacity"
-        >
-          Ingresar
-        </button>
-        <AuthModal abierto={mostrarAuthModal} onCerrar={() => setMostrarAuthModal(false)} />
-      </>
-    );
-  }
+  const roleClass = ROLE_TONE_CLASS[identity.roleTone];
 
   return (
-    <div style={{ position: 'relative' }} ref={menuRef}>
+    <div className="relative" ref={menuRef}>
       <button
+        type="button"
         onClick={() => setMostrarMenu(!mostrarMenu)}
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: isDesktop ? '0.75rem' : '0',
-          padding: isDesktop ? '4px' : '2px',
-          paddingRight: isDesktop ? '12px' : '2px',
-          border: '1px solid var(--border-color)',
-          borderRadius: '50px',
-          cursor: 'pointer',
-          backgroundColor: mostrarMenu ? 'var(--bg-secondary)' : 'var(--bg-primary)',
-          transition: 'all 0.2s ease',
-          position: 'relative',
-        }}
-        aria-label="Menú de usuario"
-        className="hover:shadow-sm"
+        aria-expanded={mostrarMenu}
+        aria-haspopup="menu"
+        aria-label={`Menú de ${identity.displayName}`}
+        className={`flex max-w-[200px] items-center gap-2 rounded-xl px-1 py-1 transition-colors duration-150 sm:max-w-[220px] ${
+          mostrarMenu
+            ? 'bg-[var(--hover-bg)]'
+            : 'bg-transparent hover:bg-[var(--hover-bg)]'
+        }`}
       >
-        {(unreadMessages > 0 || unreadNotifications > 0) && (
-          <span
-            style={{
-              position: 'absolute',
-              top: 0,
-              right: 0,
-              width: 10,
-              height: 10,
-              borderRadius: '50%',
-              backgroundColor: 'var(--brand-blue)',
-              border: '2px solid var(--bg-primary)',
-            }}
-          />
-        )}
-        <div
-          style={{
-            width: '32px',
-            height: '32px',
-            borderRadius: '50%',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: '0.8rem',
-            fontWeight: 700,
-            color: 'var(--text-primary)',
-            backgroundColor: profile?.avatar_url ? 'transparent' : 'var(--brand-blue-light)',
-            border: '1px solid var(--border-color)',
-            overflow: 'hidden',
-          }}
-        >
-          {profile?.avatar_url ? (
+        {/* Avatar — sin borde ni contenedor extra */}
+        <div className="relative h-9 w-9 shrink-0 overflow-hidden rounded-full bg-[rgba(var(--brand-primary-rgb),0.12)]">
+          {identity.avatarUrl ? (
             <img
-              src={profile.avatar_url}
-              alt={nombreCompleto}
-              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+              src={identity.avatarUrl}
+              alt=""
+              className="h-full w-full object-cover"
             />
           ) : (
-            <span>{iniciales}</span>
+            <span className="flex h-full w-full items-center justify-center text-xs font-bold text-[var(--brand-blue)]">
+              {identity.initials}
+            </span>
+          )}
+          {identity.isBusinessMode && (
+            <span
+              className="absolute -bottom-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-[var(--brand-yellow)] text-[8px]"
+              title="Modo negocio"
+            >
+              🏪
+            </span>
           )}
         </div>
 
-        {isDesktop && (
-          <div
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '4px',
-              padding: '0 4px',
-            }}
-          >
-            <span
-              style={{
-                width: '16px',
-                height: '2px',
-                backgroundColor: 'var(--text-secondary)',
-                borderRadius: '2px',
-              }}
-            />
-            <span
-              style={{
-                width: '16px',
-                height: '2px',
-                backgroundColor: 'var(--text-secondary)',
-                borderRadius: '2px',
-              }}
-            />
-            <span
-              style={{
-                width: '16px',
-                height: '2px',
-                backgroundColor: 'var(--text-secondary)',
-                borderRadius: '2px',
-              }}
-            />
-          </div>
-        )}
+        {/* Nombre + rol — visible desde sm */}
+        <div className="hidden min-w-0 flex-1 text-left sm:block">
+          <p className="truncate text-[13px] font-semibold leading-tight text-[var(--text-primary)]">
+            {identity.displayName}
+          </p>
+          <p className={`truncate text-[10px] font-medium leading-tight ${roleClass}`}>
+            {identity.roleLabel}
+          </p>
+        </div>
+
+        <IconChevronDown
+          size={12}
+          className={`shrink-0 text-[var(--text-tertiary)] transition-transform duration-200 ${
+            mostrarMenu ? 'rotate-180' : ''
+          }`}
+        />
       </button>
 
       {mostrarMenu && (
         <div
-          style={{
-            position: 'absolute',
-            top: 'calc(100% + 0.75rem)',
-            right: 0,
-            backgroundColor: 'var(--bg-primary)',
-            border: '1px solid var(--border-color)',
-            borderRadius: '16px',
-            boxShadow: '0 10px 40px rgba(0, 0, 0, 0.1)',
-            minWidth: '260px',
-            zIndex: 1000,
-            overflow: 'hidden',
-            animation: 'slideDown 0.2s ease-out',
-          }}
+          role="menu"
+          className="absolute right-0 top-[calc(100%+0.5rem)] z-[1001] min-w-[260px] overflow-hidden rounded-2xl border border-[var(--border-color)] bg-[var(--bg-primary)] shadow-[0_12px_40px_rgba(0,0,0,0.12)] animate-in fade-in slide-in-from-top-1 duration-150"
         >
-          <style
-            dangerouslySetInnerHTML={{
-              __html: `
-            @keyframes slideDown {
-              from { opacity: 0; transform: translateY(-10px); }
-              to { opacity: 1; transform: translateY(0); }
-            }
-          `,
-            }}
-          />
-
-          <div
-            style={{
-              padding: '1.25rem',
-              borderBottom: '1px solid var(--border-color)',
-              background: 'var(--bg-secondary)',
-            }}
-          >
+          {/* Header del dropdown — mismo lenguaje visual */}
+          <div className="border-b border-[var(--border-color)] bg-[var(--bg-secondary)] px-4 py-3">
             <button
               type="button"
               onClick={() => goTo()}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '1rem',
-                width: '100%',
-                background: 'none',
-                border: 'none',
-                cursor: 'pointer',
-                textAlign: 'left',
-                padding: 0,
-              }}
+              className="flex w-full items-center gap-3 text-left"
             >
-              <div
-                style={{
-                  width: '48px',
-                  height: '48px',
-                  borderRadius: '50%',
-                  overflow: 'hidden',
-                  border: '2px solid var(--bg-primary)',
-                  boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-                }}
-              >
-                {profile?.avatar_url ? (
-                  <img
-                    src={profile.avatar_url}
-                    alt={nombreCompleto}
-                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                  />
+              <div className="h-11 w-11 shrink-0 overflow-hidden rounded-full bg-[rgba(var(--brand-primary-rgb),0.12)]">
+                {identity.avatarUrl ? (
+                  <img src={identity.avatarUrl} alt="" className="h-full w-full object-cover" />
                 ) : (
-                  <div
-                    style={{
-                      width: '100%',
-                      height: '100%',
-                      background: 'var(--brand-blue-light)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontWeight: 'bold',
-                    }}
-                  >
-                    {iniciales}
-                  </div>
+                  <span className="flex h-full w-full items-center justify-center text-sm font-bold text-[var(--brand-blue)]">
+                    {identity.initials}
+                  </span>
                 )}
               </div>
-              <div style={{ flex: 1, overflow: 'hidden' }}>
-                <div
-                  style={{
-                    fontSize: '0.925rem',
-                    fontWeight: 700,
-                    color: 'var(--text-primary)',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap',
-                  }}
-                >
-                  {nombreCompleto}
-                </div>
-                <div
-                  style={{
-                    fontSize: '0.75rem',
-                    color: 'var(--text-secondary)',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap',
-                  }}
-                >
-                  Ver mi perfil →
-                </div>
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm font-bold text-[var(--text-primary)]">
+                  {identity.displayName}
+                </p>
+                <p className={`truncate text-xs font-medium ${roleClass}`}>
+                  {identity.roleLabel}
+                </p>
+                <p className="mt-0.5 truncate text-[11px] text-[var(--text-secondary)]">
+                  {user?.email}
+                </p>
               </div>
             </button>
-            <div style={{ display: 'flex', gap: '8px', marginTop: '0.5rem' }}>
+
+            <div className="mt-2 flex flex-wrap gap-1.5">
               {isVerificado && (
-                <span
-                  style={{
-                    fontSize: '0.7rem',
-                    color: '#fff',
-                    backgroundColor: '#22c55e',
-                    padding: '2px 8px',
-                    borderRadius: '10px',
-                    fontWeight: 600,
-                  }}
-                >
-                  Verificado
+                <span className="rounded-full bg-emerald-500/15 px-2 py-0.5 text-[10px] font-semibold text-emerald-700 dark:text-emerald-400">
+                  ✓ Verificado
                 </span>
               )}
-              {isAnunciante && (
-                <span
-                  style={{
-                    fontSize: '0.7rem',
-                    color: '#fff',
-                    backgroundColor: 'var(--brand-blue)',
-                    padding: '2px 8px',
-                    borderRadius: '10px',
-                    fontWeight: 600,
-                  }}
-                >
+              {isAnunciante && !identity.isBusinessMode && (
+                <span className="rounded-full bg-[rgba(var(--brand-primary-rgb),0.15)] px-2 py-0.5 text-[10px] font-semibold text-[var(--brand-blue)]">
                   Anunciante
+                </span>
+              )}
+              {identity.isBusinessMode && (
+                <span className="rounded-full bg-[rgba(var(--brand-yellow-rgb),0.2)] px-2 py-0.5 text-[10px] font-semibold text-[var(--text-primary)]">
+                  Modo negocio
                 </span>
               )}
             </div>
           </div>
 
-          <div style={{ padding: '0.5rem' }}>
+          <div className="p-1.5">
             <MenuItem
               icon={<IconStore size={18} />}
               label="Mi Negocio"
@@ -340,24 +186,22 @@ export default function UserMenu({ onProgressClick, onSidebarToggle }: UserMenuP
               }}
             />
             <MenuItem
-              icon={<span style={{ fontSize: '1.1rem' }}>💬</span>}
+              icon={<span className="text-base">👤</span>}
+              label="Mi perfil"
+              onClick={() => goTo()}
+            />
+            <MenuItem
+              icon={<span className="text-base">💬</span>}
               label="Mensajes"
-              badge={unreadMessages}
               onClick={() => goTo('mensajes')}
             />
             <MenuItem
-              icon={<span style={{ fontSize: '1.1rem' }}>🔔</span>}
-              label="Notificaciones"
-              badge={unreadNotifications}
-              onClick={() => goTo('inicio')}
-            />
-            <MenuItem
-              icon={<span style={{ fontSize: '1.1rem' }}>♥</span>}
+              icon={<span className="text-base">♥</span>}
               label="Guardados"
               onClick={() => goTo('guardados')}
             />
             <MenuItem
-              icon={<span style={{ fontSize: '1.1rem' }}>⚙️</span>}
+              icon={<span className="text-base">⚙️</span>}
               label="Ajustes"
               onClick={() => goTo('ajustes')}
             />
@@ -372,36 +216,23 @@ export default function UserMenu({ onProgressClick, onSidebarToggle }: UserMenuP
               />
             )}
 
-            <div
-              style={{ height: '1px', backgroundColor: 'var(--border-color)', margin: '0.5rem 0' }}
-            />
+            <div className="my-1 h-px bg-[var(--border-color)]" />
 
-            <div style={{ padding: '0.5rem 0.75rem' }}>
-              <div
-                style={{
-                  fontSize: '0.7rem',
-                  fontWeight: 700,
-                  color: 'var(--text-tertiary)',
-                  textTransform: 'uppercase',
-                  marginBottom: '0.5rem',
-                  letterSpacing: '0.05em',
-                }}
-              >
-                Configuración
-              </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <div className="px-3 py-2">
+              <p className="mb-2 text-[10px] font-bold uppercase tracking-wide text-[var(--text-tertiary)]">
+                Preferencias
+              </p>
+              <div className="flex flex-col gap-2">
                 <LanguageSelector />
                 <ThemeToggle />
               </div>
             </div>
 
-            <div
-              style={{ height: '1px', backgroundColor: 'var(--border-color)', margin: '0.5rem 0' }}
-            />
+            <div className="my-1 h-px bg-[var(--border-color)]" />
 
             <MenuItem
-              icon={<span style={{ fontSize: '1.1rem' }}>🚪</span>}
-              label="Cerrar Sesión"
+              icon={<span className="text-base">🚪</span>}
+              label="Cerrar sesión"
               onClick={handleSignOut}
               danger
             />
@@ -412,84 +243,58 @@ export default function UserMenu({ onProgressClick, onSidebarToggle }: UserMenuP
   );
 }
 
+export default function UserMenu(props: UserMenuProps) {
+  const [mostrarAuthModal, setMostrarAuthModal] = useState(false);
+  const { user } = useAuth();
+
+  if (!user) {
+    return (
+      <>
+        <button
+          type="button"
+          onClick={() => setMostrarAuthModal(true)}
+          className="rounded-lg bg-[var(--brand-blue)] px-4 py-2 text-sm font-semibold text-white transition-opacity hover:opacity-90"
+        >
+          Ingresar
+        </button>
+        <AuthModal abierto={mostrarAuthModal} onCerrar={() => setMostrarAuthModal(false)} />
+      </>
+    );
+  }
+
+  return (
+    <Suspense fallback={<UserMenuFallback />}>
+      <UserMenuContent {...props} />
+    </Suspense>
+  );
+}
+
 function MenuItem({
   icon,
   label,
   onClick,
   danger,
-  badge,
-  visible = true,
 }: {
   icon: React.ReactNode;
   label: string;
   onClick: () => void;
   danger?: boolean;
-  badge?: number;
-  visible?: boolean;
 }) {
-  if (!visible) return null;
   return (
     <button
+      type="button"
+      role="menuitem"
       onClick={onClick}
-      style={{
-        width: '100%',
-        padding: '0.75rem 1rem',
-        textAlign: 'left',
-        background: 'none',
-        border: 'none',
-        color: danger ? '#ef4444' : 'var(--text-primary)',
-        cursor: 'pointer',
-        fontSize: '0.9rem',
-        fontWeight: 500,
-        borderRadius: '10px',
-        display: 'flex',
-        alignItems: 'center',
-        gap: '12px',
-        transition: 'all 0.2s',
-      }}
-      onMouseEnter={(e) => {
-        e.currentTarget.style.backgroundColor = danger
-          ? 'rgba(239, 68, 68, 0.05)'
-          : 'var(--hover-bg)';
-        if (!danger) e.currentTarget.style.transform = 'translateX(4px)';
-      }}
-      onMouseLeave={(e) => {
-        e.currentTarget.style.backgroundColor = 'transparent';
-        e.currentTarget.style.transform = 'translateX(0)';
-      }}
+      className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-medium transition-colors ${
+        danger
+          ? 'text-red-500 hover:bg-red-500/5'
+          : 'text-[var(--text-primary)] hover:bg-[var(--hover-bg)]'
+      }`}
     >
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          width: '24px',
-          height: '24px',
-          color: danger ? '#ef4444' : 'var(--text-secondary)',
-        }}
-      >
+      <span className="flex h-6 w-6 shrink-0 items-center justify-center text-[var(--text-secondary)]">
         {icon}
-      </div>
-      <span style={{ flex: 1 }}>{label}</span>
-      {badge != null && badge > 0 && (
-        <span
-          style={{
-            minWidth: 18,
-            height: 18,
-            borderRadius: 9,
-            backgroundColor: 'var(--brand-blue)',
-            color: '#fff',
-            fontSize: '10px',
-            fontWeight: 700,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '0 4px',
-          }}
-        >
-          {badge > 99 ? '99+' : badge}
-        </span>
-      )}
+      </span>
+      {label}
     </button>
   );
 }
