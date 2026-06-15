@@ -420,6 +420,54 @@ html.dark .brand-search-shell {
   border-color: var(--border-color);
 }
 
+/* Alternador Buscar / Publicar */
+.composer-mode-track {
+  isolation: isolate;
+}
+
+.composer-mode-pill {
+  will-change: transform, width;
+}
+
+.brand-search-glow.composer-mode-publish {
+  background: conic-gradient(
+    from var(--search-glow-angle, 0deg),
+    var(--brand-yellow),
+    var(--brand-blue),
+    var(--brand-yellow)
+  );
+}
+
+.brand-search-shell.composer-mode-publish {
+  transition:
+    box-shadow 0.45s cubic-bezier(0.34, 1.2, 0.64, 1),
+    border-color 0.35s ease;
+}
+
+.composer-field-wrap {
+  transition: min-height 0.28s cubic-bezier(0.34, 1.2, 0.64, 1);
+}
+
+.brand-search-textarea {
+  field-sizing: content;
+  transition: height 0.2s cubic-bezier(0.34, 1.2, 0.64, 1);
+}
+
+@supports not (field-sizing: content) {
+  .brand-search-textarea {
+    overflow: hidden;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .composer-mode-pill,
+  .brand-search-shell.composer-mode-publish,
+  .composer-field-wrap,
+  .brand-search-textarea {
+    transition: none !important;
+  }
+}
+
 /* Borde animado celeste/amarillo que rodea el buscador principal */
 @property --search-glow-angle {
   syntax: '<angle>';

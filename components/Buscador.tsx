@@ -4,10 +4,12 @@ import { useRef, useState, useEffect, useCallback } from 'react';
 import { FaSearch } from 'react-icons/fa';
 import { useTranslation } from '@/hooks/useTranslation';
 import { useSpeechRecognition } from '@/hooks/useSpeechRecognition';
-import { IconMicrophone, IconGoogleLens, IconFilterFunnel, IconSearch, IconMegaphone } from './Icons';
+import { IconMicrophone, IconGoogleLens, IconFilterFunnel } from './Icons';
+import ComposerModeToggle, { type ComposerMode } from './ComposerModeToggle';
+import { AnimatePresence, motion } from 'framer-motion';
 import { Categoria } from '@/types';
 
-export type ComposerMode = 'search' | 'publish';
+export type { ComposerMode };
 
 interface BuscadorProps {
   value: string;
@@ -58,21 +60,51 @@ export default function Buscador({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const singleLineHeightRef = useRef<number>(0);
+  const [fieldMultiline, setFieldMultiline] = useState(false);
 
   const showComposerToggle = Boolean(onComposerModeChange) && !minimal;
   const isPublishMode = showComposerToggle && composerMode === 'publish';
 
+  const measureSingleLineHeight = useCallback(() => {
+    const el = textareaRef.current;
+    if (!el) return 0;
+    const prev = el.value;
+    el.value = '';
+    el.style.height = 'auto';
+    const h = el.scrollHeight;
+    el.value = prev;
+    singleLineHeightRef.current = h;
+    return h;
+  }, []);
+
   const adjustTextareaHeight = useCallback(() => {
     const el = textareaRef.current;
     if (!el) return;
-    el.style.height = 'auto';
+
+    const singleLine =
+      singleLineHeightRef.current || measureSingleLineHeight() || 24;
+
+    el.style.height = `${singleLine}px`;
+    const contentHeight = el.scrollHeight;
     const maxPx = 220;
-    el.style.height = `${Math.min(el.scrollHeight, maxPx)}px`;
-  }, []);
+    const next = Math.min(Math.max(contentHeight, singleLine), maxPx);
+
+    el.style.height = `${next}px`;
+    setFieldMultiline(next > singleLine + 2);
+  }, [measureSingleLineHeight]);
 
   useEffect(() => {
-    if (isPublishMode) adjustTextareaHeight();
-  }, [value, isPublishMode, adjustTextareaHeight]);
+    if (!isPublishMode) {
+      setFieldMultiline(false);
+      return;
+    }
+    const id = requestAnimationFrame(() => {
+      measureSingleLineHeight();
+      adjustTextareaHeight();
+    });
+    return () => cancelAnimationFrame(id);
+  }, [isPublishMode, value, adjustTextareaHeight, measureSingleLineHeight]);
 
   const defaultPlaceholder =
     composerMode === 'publish'
@@ -167,49 +199,17 @@ export default function Buscador({
     ? 'px-2.5 py-1'
     : isCompact
       ? 'px-3 py-2 md:px-4 md:py-2.5'
-      : 'px-3 py-2 md:px-6 md:py-3.5';
+      : 'px-3 py-2 md:px-4 md:py-3';
   const iconSize = minimal ? 16 : isCompact ? 18 : 20;
   const searchIconClass = minimal ? 'w-4 h-4 mr-2' : 'w-5 h-5 mr-2 md:mr-3';
+  const shellAlign = isPublishMode && fieldMultiline ? 'items-start' : 'items-center';
 
   const modeToggle = showComposerToggle ? (
-    <div
-      role="tablist"
-      aria-label="Buscar o publicar"
-      className="flex shrink-0 rounded-xl p-0.5 gap-0.5 bg-[var(--bg-secondary)] border border-[var(--border-color)] mr-2 md:mr-3"
-    >
-      <button
-        type="button"
-        role="tab"
-        aria-selected={composerMode === 'search'}
-        aria-label="Buscar"
-        title="Buscar"
-        onClick={() => onComposerModeChange?.('search')}
-        className={`flex items-center justify-center gap-1 rounded-lg font-semibold transition-all min-h-[32px] min-w-[32px] md:min-w-0 md:px-2.5 md:py-1.5 text-xs ${
-          composerMode === 'search'
-            ? 'bg-[var(--brand-blue)] text-white shadow-sm'
-            : 'text-[var(--text-secondary)] hover:text-[var(--brand-blue)] hover:bg-[var(--hover-bg)]'
-        }`}
-      >
-        <IconSearch size={14} color="currentColor" />
-        <span className="hidden md:inline">Buscar</span>
-      </button>
-      <button
-        type="button"
-        role="tab"
-        aria-selected={composerMode === 'publish'}
-        aria-label="Publicar"
-        title="Publicar"
-        onClick={() => onComposerModeChange?.('publish')}
-        className={`flex items-center justify-center gap-1 rounded-lg font-semibold transition-all min-h-[32px] min-w-[32px] md:min-w-0 md:px-2.5 md:py-1.5 text-xs ${
-          composerMode === 'publish'
-            ? 'bg-[var(--brand-yellow)] text-[#1a1a1a] shadow-sm'
-            : 'text-[var(--text-secondary)] hover:text-[#b8860b] hover:bg-[rgba(var(--brand-yellow-rgb),0.12)]'
-        }`}
-      >
-        <IconMegaphone size={14} color="currentColor" />
-        <span className="hidden md:inline">Publicar</span>
-      </button>
-    </div>
+    <ComposerModeToggle
+      mode={composerMode}
+      onChange={(m) => onComposerModeChange?.(m)}
+      className={isPublishMode && fieldMultiline ? 'self-center' : ''}
+    />
   ) : null;
 
   return (
@@ -235,11 +235,16 @@ export default function Buscador({
       />
 
       <div className={`relative group z-30 ${minimal ? 'w-full' : 'md:mx-auto md:max-w-2xl'}`}>
-        <div className={`brand-search-glow relative ${radiusClass} ${minimal ? 'p-[1px]' : 'p-[2px]'}`}>
+        <div
+          className={`brand-search-glow relative ${radiusClass} ${minimal ? 'p-[1px]' : 'p-[2px]'} ${
+            isPublishMode ? 'composer-mode-publish' : ''
+          }`}
+        >
           <div
             className={`
-              brand-search-shell relative flex ${isPublishMode ? 'items-start' : 'items-center'} ${radiusClass} ${shellPadding}
+              brand-search-shell relative flex ${shellAlign} ${radiusClass} ${shellPadding}
               transition-all duration-300 motion-reduce:transition-none
+              ${isPublishMode ? 'composer-mode-publish' : ''}
               ${minimal ? '' : 'hover:-translate-y-0.5 motion-reduce:hover:translate-y-0'}
               focus-within:ring-2 focus-within:ring-[var(--brand-blue)]/35 dark:focus-within:ring-[var(--brand-blue)]/50
               focus-within:shadow-[0_8px_24px_rgba(var(--brand-primary-rgb),0.18)]
@@ -247,35 +252,58 @@ export default function Buscador({
           >
           {modeToggle}
 
+          <div className="composer-field-wrap flex-1 min-w-0 flex items-center">
           {!showComposerToggle && (
-            <FaSearch className={`${searchIconClass} text-[var(--brand-blue)] flex-shrink-0 transition-transform group-focus-within:scale-110 ${isPublishMode ? 'mt-2' : ''}`} />
+            <FaSearch className={`${searchIconClass} text-[var(--brand-blue)] flex-shrink-0 transition-transform group-focus-within:scale-110`} />
           )}
 
-          {isPublishMode ? (
-            <textarea
-              ref={textareaRef}
-              rows={2}
-              placeholder={placeholder}
-              value={value}
-              onChange={(e) => onChange(e.target.value)}
-              onInput={adjustTextareaHeight}
-              className="brand-search-input flex-1 min-w-0 border-none outline-none bg-transparent resize-none overflow-y-auto text-[16px] py-1 leading-relaxed min-h-[2.75rem] max-h-[220px]"
-              style={{ height: 'auto' }}
-            />
-          ) : (
-            <input
-              type="search"
-              placeholder={placeholder}
-              value={value}
-              onChange={(e) => onChange(e.target.value)}
-              className={`brand-search-input flex-1 min-w-0 border-none outline-none bg-transparent truncate h-full ${
-                minimal ? 'text-sm py-0' : 'text-[16px] py-1'
-              }`}
-            />
-          )}
+          <AnimatePresence mode="wait" initial={false}>
+            {isPublishMode ? (
+              <motion.div
+                key="publish-field"
+                className="flex-1 min-w-0 w-full"
+                initial={{ opacity: 0, y: 5 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -5 }}
+                transition={{ duration: 0.24, ease: [0.34, 1.2, 0.64, 1] }}
+              >
+                <textarea
+                  ref={textareaRef}
+                  rows={1}
+                  placeholder={placeholder}
+                  value={value}
+                  onChange={(e) => onChange(e.target.value)}
+                  onInput={adjustTextareaHeight}
+                  className="brand-search-input brand-search-textarea w-full border-none outline-none bg-transparent resize-none overflow-y-auto text-[16px] py-1 leading-normal max-h-[220px]"
+                />
+              </motion.div>
+            ) : (
+              <motion.input
+                key="search-field"
+                type="search"
+                initial={{ opacity: 0, y: 5 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -5 }}
+                transition={{ duration: 0.24, ease: [0.34, 1.2, 0.64, 1] }}
+                placeholder={placeholder}
+                value={value}
+                onChange={(e) => onChange(e.target.value)}
+                className={`brand-search-input flex-1 min-w-0 w-full border-none outline-none bg-transparent truncate h-full ${
+                  minimal ? 'text-sm py-0' : 'text-[16px] py-1'
+                }`}
+              />
+            )}
+          </AnimatePresence>
+          </div>
 
           {!minimal && (
-          <div className={`brand-search-divider flex items-center shrink-0 gap-0 ml-1 pl-1 border-l md:gap-0.5 md:ml-2 md:pl-2 ${isPublishMode ? 'self-start mt-1' : ''}`}>
+          <motion.div
+            layout
+            className={`brand-search-divider flex items-center shrink-0 gap-0 ml-1 pl-1 border-l md:gap-0.5 md:ml-2 md:pl-2 ${
+              isPublishMode && fieldMultiline ? 'self-start mt-1' : ''
+            }`}
+            transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+          >
             {showFilterToggle && onToggleFilters && composerMode === 'search' && (
               <button
                 type="button"
@@ -332,7 +360,7 @@ export default function Buscador({
             >
               <IconGoogleLens size={iconSize} />
             </button>
-          </div>
+          </motion.div>
           )}
           </div>
         </div>
