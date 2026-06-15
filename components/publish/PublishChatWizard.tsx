@@ -1,10 +1,20 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { FaPencilAlt, FaPaperPlane } from 'react-icons/fa';
-import { IconAdis } from '@/components/Icons';
+import { AnimatePresence } from 'framer-motion';
 import PublishTierModal from './PublishTierModal';
-import PublishImagePreview from './PublishImagePreview';
+import {
+  calcProgress,
+  PublishCategoryGrid,
+  PublishChatBubble,
+  PublishChatComposer,
+  PublishChatHeader,
+  PublishChatSummary,
+  PublishChatTyping,
+  PublishPhotoOptions,
+  PublishPriceOptions,
+  type ChatMessageView,
+} from './PublishChatUI';
 import { usePublishActions } from '@/hooks/usePublishActions';
 import { useAuth } from '@/hooks/useAuth';
 import { Categoria } from '@/types';
@@ -344,166 +354,89 @@ export default function PublishChatWizard({
     currentStep !== 'done' &&
     (currentStep === 'categoria' || currentStep === 'precio' || currentStep === 'foto');
 
-  const chatMaxH = compact ? 'max-h-[calc(100vh-220px)]' : 'max-h-[min(520px,55vh)]';
+  const progress = calcProgress(currentStep);
+
+  const inputPlaceholder =
+    currentStep === 'titulo'
+      ? 'Ej: iPad Air M2 256 GB'
+      : currentStep === 'contacto'
+        ? 'Ej: 987 654 321'
+        : 'Escribe tu respuesta…';
 
   return (
     <div className={`flex flex-col ${compact ? 'h-full min-h-0' : ''}`}>
       <div
-        className={`flex flex-col rounded-2xl border border-[var(--border-color)] bg-[var(--bg-primary)] overflow-hidden shadow-sm ${compact ? 'flex-1 min-h-0' : ''}`}
+        className={`flex flex-col rounded-2xl overflow-hidden shadow-[var(--shadow-lg)] ring-1 ring-black/[0.05] bg-[var(--bg-secondary)] ${compact ? 'flex-1 min-h-0' : ''}`}
       >
-        <div className="flex items-center gap-2 px-4 py-3 border-b border-[var(--border-color)] bg-[var(--bg-secondary)]">
-          <span className="w-8 h-8 rounded-xl bg-[rgba(var(--brand-yellow-rgb),0.15)] flex items-center justify-center">
-            <IconAdis size={16} color="var(--brand-yellow)" />
-          </span>
-          <div>
-            <p className="m-0 text-sm font-bold text-[var(--text-primary)]">ADIS</p>
-            <p className="m-0 text-[10px] text-[var(--text-tertiary)]">
-              {typing ? 'Escribiendo…' : currentStep === 'done' ? 'Listo para publicar' : 'Asistente de publicación'}
-            </p>
-          </div>
-        </div>
+        <PublishChatHeader
+          compact={compact}
+          typing={typing}
+          currentStep={currentStep}
+          progress={progress}
+        />
 
-        <div ref={scrollRef} className={`flex-1 overflow-y-auto px-3 py-3 space-y-3 ${chatMaxH}`}>
-          {messages.map((msg) => (
-            <div
-              key={msg.id}
-              className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
-            >
-              <div
-                className={`group relative max-w-[85%] rounded-2xl px-3 py-2 text-sm ${
-                  msg.role === 'user'
-                    ? 'bg-[var(--brand-blue)] text-white rounded-br-md'
-                    : 'bg-[var(--bg-secondary)] text-[var(--text-primary)] rounded-bl-md border border-[var(--border-color)]'
-                }`}
-              >
-                {editingId === msg.id ? (
-                  <div className="flex flex-col gap-2 min-w-[180px]">
-                    <input
-                      value={input}
-                      onChange={(e) => setInput(e.target.value)}
-                      className="w-full rounded-lg px-2 py-1 text-sm text-[var(--text-primary)] bg-[var(--bg-primary)] border border-[var(--border-color)]"
-                      autoFocus
-                    />
-                    <div className="flex gap-2">
-                      <button
-                        type="button"
-                        onClick={() => void saveEdit(msg)}
-                        className="flex-1 py-1 rounded-lg bg-white/20 text-xs font-semibold"
-                      >
-                        Guardar
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setEditingId(null)}
-                        className="flex-1 py-1 rounded-lg bg-black/10 text-xs"
-                      >
-                        Cancelar
-                      </button>
-                    </div>
-                  </div>
-                ) : (
-                  <>
-                    <p className="m-0 whitespace-pre-wrap break-words">{msg.content}</p>
-                    {msg.imageUrl && (
-                      <PublishImagePreview url={msg.imageUrl} onRemove={() => {}} size="sm" />
-                    )}
-                    {msg.role === 'user' && msg.step && editingId !== msg.id && (
-                      <button
-                        type="button"
-                        onClick={() => startEdit(msg)}
-                        className="absolute -left-2 -top-2 w-6 h-6 rounded-full bg-[var(--bg-primary)] border border-[var(--border-color)] text-[var(--text-tertiary)] opacity-0 group-hover:opacity-100 flex items-center justify-center shadow-sm transition-opacity"
-                        aria-label="Editar"
-                      >
-                        <FaPencilAlt size={10} />
-                      </button>
-                    )}
-                  </>
-                )}
-              </div>
-            </div>
-          ))}
+        <div
+          ref={scrollRef}
+          className={`flex-1 overflow-y-auto overflow-x-hidden px-3 py-3 space-y-3 scroll-smooth ${
+            compact ? 'min-h-0 max-h-none' : 'max-h-[min(520px,55vh)]'
+          }`}
+          style={{
+            background:
+              'linear-gradient(180deg, var(--bg-secondary) 0%, rgba(var(--brand-primary-rgb),0.03) 50%, var(--bg-secondary) 100%)',
+          }}
+        >
+          <AnimatePresence initial={false}>
+            {messages.map((msg) => (
+              <PublishChatBubble
+                key={msg.id}
+                msg={msg as ChatMessageView}
+                compact={compact}
+                editing={editingId === msg.id}
+                editInput={input}
+                onEditInputChange={setInput}
+                onStartEdit={() => startEdit(msg)}
+                onSaveEdit={() => void saveEdit(msg)}
+                onCancelEdit={() => setEditingId(null)}
+              />
+            ))}
+          </AnimatePresence>
 
-          {typing && (
-            <div className="flex justify-start">
-              <div className="rounded-2xl rounded-bl-md px-4 py-3 bg-[var(--bg-secondary)] border border-[var(--border-color)]">
-                <span className="inline-flex gap-1">
-                  <span className="w-2 h-2 rounded-full bg-[var(--text-tertiary)] animate-bounce [animation-delay:0ms]" />
-                  <span className="w-2 h-2 rounded-full bg-[var(--text-tertiary)] animate-bounce [animation-delay:150ms]" />
-                  <span className="w-2 h-2 rounded-full bg-[var(--text-tertiary)] animate-bounce [animation-delay:300ms]" />
-                </span>
-              </div>
-            </div>
-          )}
+          {typing && <PublishChatTyping compact={compact} />}
 
           {currentStep === 'done' && (
-            <div className="rounded-xl border border-[var(--border-color)] p-3 bg-[var(--bg-secondary)] text-sm space-y-2">
-              <p className="m-0 font-bold text-[var(--text-primary)]">{draft.titulo || 'Sin título'}</p>
-              <p className="m-0 text-xs text-[var(--text-secondary)] line-clamp-3">{draft.descripcion}</p>
-              <div className="flex flex-wrap gap-1.5 text-[10px]">
-                <span className="px-2 py-0.5 rounded-full bg-[rgba(var(--brand-primary-rgb),0.1)] text-[var(--brand-blue)]">
-                  {CATEGORIA_OPTIONS.find((c) => c.value === draft.categoria)?.label}
-                </span>
-                {draft.ubicacion && (
-                  <span className="px-2 py-0.5 rounded-full bg-[var(--bg-primary)] text-[var(--text-tertiary)]">
-                    📍 {draft.ubicacion}
-                  </span>
-                )}
-              </div>
-              {(draft.imageUrl || publishImageUrl) && (
-                <PublishImagePreview
-                  url={draft.imageUrl || publishImageUrl!}
-                  onRemove={() => {
-                    setDraft((d) => ({ ...d, imageUrl: undefined }));
-                    setPublishImageUrl(null);
-                  }}
-                  size="sm"
-                />
-              )}
-              <button
-                type="button"
-                onClick={() => setTierModalOpen(true)}
-                className="w-full py-2.5 rounded-xl bg-[var(--brand-yellow)] text-[#1c1608] font-bold text-sm shadow-[0_2px_10px_rgba(var(--brand-yellow-rgb),0.35)]"
-              >
-                Publicar aviso
-              </button>
-            </div>
+            <PublishChatSummary
+              compact={compact}
+              draft={draft}
+              imageUrl={draft.imageUrl || publishImageUrl}
+              onRemoveImage={() => {
+                setDraft((d) => ({ ...d, imageUrl: undefined }));
+                setPublishImageUrl(null);
+              }}
+              onPublish={() => setTierModalOpen(true)}
+            />
           )}
         </div>
 
         {currentStep !== 'done' && !typing && (
-          <div className="border-t border-[var(--border-color)] p-3 space-y-2 bg-[var(--bg-primary)]">
+          <div
+            className={`shrink-0 border-t border-black/[0.04] bg-[var(--bg-primary)]/90 backdrop-blur-sm space-y-2.5 ${compact ? 'p-2.5' : 'p-3.5'}`}
+          >
             {showOptions && currentStep === 'categoria' && (
-              <div className="flex flex-wrap gap-1.5">
-                {CATEGORIA_OPTIONS.map((opt) => (
-                  <button
-                    key={opt.value}
-                    type="button"
-                    onClick={() => handleOption(opt.value)}
-                    className="px-2.5 py-1.5 rounded-full text-xs font-semibold border border-[var(--border-color)] bg-[var(--bg-secondary)] hover:border-[var(--brand-blue)] hover:text-[var(--brand-blue)] transition-colors"
-                  >
-                    {opt.emoji} {opt.label}
-                  </button>
-                ))}
-              </div>
+              <PublishCategoryGrid compact={compact} onSelect={handleOption} />
             )}
 
             {showOptions && currentStep === 'precio' && (
-              <div className="flex flex-wrap gap-1.5">
-                {PRECIO_OPTIONS.map((opt) => (
-                  <button
-                    key={opt.value}
-                    type="button"
-                    onClick={() => handleOption(opt.value)}
-                    className="px-2.5 py-1.5 rounded-full text-xs font-semibold border border-[var(--border-color)] bg-[var(--bg-secondary)] hover:border-[var(--brand-blue)] transition-colors"
-                  >
-                    {opt.label}
-                  </button>
-                ))}
-              </div>
+              <PublishPriceOptions
+                compact={compact}
+                input={input}
+                onInputChange={setInput}
+                onSelect={handleOption}
+                onConfirmAmount={() => input.trim() && handleOption(input.trim())}
+              />
             )}
 
             {showOptions && currentStep === 'foto' && (
-              <div className="flex flex-wrap gap-1.5 items-center">
+              <>
                 <input
                   ref={fileRef}
                   type="file"
@@ -519,76 +452,23 @@ export default function PublishChatWizard({
                     e.target.value = '';
                   }}
                 />
-                <button
-                  type="button"
-                  disabled={uploadingImage}
-                  onClick={() => fileRef.current?.click()}
-                  className="px-3 py-1.5 rounded-full text-xs font-semibold border border-[var(--brand-blue)] text-[var(--brand-blue)]"
-                >
-                  {uploadingImage ? 'Subiendo…' : '📷 Adjuntar foto'}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleOption('skip')}
-                  className="px-3 py-1.5 rounded-full text-xs font-semibold border border-[var(--border-color)] text-[var(--text-secondary)]"
-                >
-                  Continuar sin foto
-                </button>
-              </div>
+                <PublishPhotoOptions
+                  compact={compact}
+                  uploading={uploadingImage}
+                  onPickFile={() => fileRef.current?.click()}
+                  onSkip={() => handleOption('skip')}
+                />
+              </>
             )}
 
             {!showOptions && (
-              <div className="flex gap-2 items-end">
-                <textarea
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' && !e.shiftKey) {
-                      e.preventDefault();
-                      handleSend();
-                    }
-                  }}
-                  rows={compact ? 1 : 2}
-                  placeholder={
-                    currentStep === 'titulo'
-                      ? 'Ej: Casa de 2 pisos en venta'
-                      : currentStep === 'contacto'
-                        ? 'Ej: 987 654 321'
-                        : 'Escribe tu respuesta…'
-                  }
-                  className="flex-1 resize-none rounded-xl border border-[var(--border-color)] px-3 py-2 text-sm bg-[var(--bg-secondary)] text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-[rgba(var(--brand-primary-rgb),0.3)]"
-                />
-                <button
-                  type="button"
-                  onClick={handleSend}
-                  disabled={!input.trim()}
-                  className="shrink-0 w-10 h-10 rounded-xl bg-[var(--brand-blue)] text-white flex items-center justify-center disabled:opacity-40"
-                  aria-label="Enviar"
-                >
-                  <FaPaperPlane size={14} />
-                </button>
-              </div>
-            )}
-
-            {showOptions && currentStep === 'precio' && (
-              <div className="flex gap-2 items-end pt-1">
-                <input
-                  type="text"
-                  inputMode="decimal"
-                  value={input}
-                  onChange={(e) => setInput(e.target.value.replace(/[^\d.,]/g, ''))}
-                  placeholder="O escribe un monto (ej: 1500)"
-                  className="flex-1 rounded-xl border border-[var(--border-color)] px-3 py-2 text-sm bg-[var(--bg-secondary)]"
-                />
-                <button
-                  type="button"
-                  onClick={() => input.trim() && handleOption(input.trim())}
-                  disabled={!input.trim()}
-                  className="shrink-0 px-3 py-2 rounded-xl bg-[var(--brand-blue)] text-white text-xs font-bold disabled:opacity-40"
-                >
-                  OK
-                </button>
-              </div>
+              <PublishChatComposer
+                compact={compact}
+                input={input}
+                placeholder={inputPlaceholder}
+                onChange={setInput}
+                onSend={handleSend}
+              />
             )}
           </div>
         )}
