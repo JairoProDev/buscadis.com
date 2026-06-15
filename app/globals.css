@@ -332,7 +332,29 @@ a {
   -webkit-backdrop-filter: blur(10px);
 }
 
-/* Franjas horizontales (categorías, toolbars) */
+/* Íconos de categoría — mesh intenso por tile, sin banda contenedora */
+.brand-category-tile {
+  background-color: color-mix(in srgb, var(--bg-primary) 72%, transparent);
+  background-image: linear-gradient(
+    145deg,
+    rgba(var(--brand-primary-rgb), 0.18) 0%,
+    rgba(var(--brand-yellow-rgb), 0.22) 52%,
+    rgba(var(--brand-primary-rgb), 0.12) 100%
+  );
+}
+
+.dark-mode .brand-category-tile,
+html.dark .brand-category-tile {
+  background-color: color-mix(in srgb, var(--bg-primary) 65%, transparent);
+  background-image: linear-gradient(
+    145deg,
+    rgba(var(--brand-primary-rgb), 0.22) 0%,
+    rgba(var(--brand-yellow-rgb), 0.14) 55%,
+    rgba(var(--brand-primary-rgb), 0.16) 100%
+  );
+}
+
+/* Franjas horizontales (toolbars) — sin usar en filas de categorías */
 .brand-mesh-strip {
   background-image: linear-gradient(
     90deg,

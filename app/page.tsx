@@ -870,7 +870,7 @@ function HomeContent() {
             )}
             <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
             <div
-              className="no-scrollbar brand-mesh-strip"
+              className="no-scrollbar"
               style={{
                 display: 'flex',
                 justifyContent:isDesktop ? 'center' : 'flex-start',
@@ -933,7 +933,8 @@ function HomeContent() {
                   }}
                   className="group"
                 >
-                  <div style={{
+                  <div
+                    style={{
                     width: isDesktop ? '52px' : '44px',
                     height: isDesktop ? '52px' : '44px',
                     display: 'flex',
@@ -944,7 +945,7 @@ function HomeContent() {
                     border: categoriaFiltro === id
                       ? '2px solid var(--brand-yellow)'
                       : '2px solid rgba(var(--brand-yellow-rgb), 0.65)',
-                    backgroundColor: categoriaFiltro === id ? 'var(--brand-blue)' : 'var(--bg-primary)',
+                    backgroundColor: categoriaFiltro === id ? 'var(--brand-blue)' : undefined,
                     color: categoriaFiltro === id ? 'white' : 'var(--text-secondary)',
                     boxShadow: categoriaFiltro === id
                       ? '0 10px 20px -5px rgba(var(--brand-primary-rgb), 0.35), 0 0 0 1px rgba(var(--brand-yellow-rgb), 0.35)'
@@ -953,7 +954,7 @@ function HomeContent() {
                     position: 'relative',
                     overflow: 'hidden'
                   }}
-                    className="group-hover:shadow-lg group-hover:-translate-y-1"
+                    className={`group-hover:shadow-lg group-hover:-translate-y-1${categoriaFiltro !== id ? ' brand-category-tile' : ''}`}
                   >
                     <Icon size={isDesktop ? 26 : 22} color={categoriaFiltro === id ? 'white' : undefined} />
                   </div>

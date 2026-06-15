@@ -385,7 +385,7 @@ export default function Header({
                       justifyContent: 'center',
                       width: '40px',
                       height: '40px',
-                      borderRadius: '50%',
+                      borderRadius: '12px',
                       background: isActive ? publishCta.backgroundActive : publishCta.background,
                       boxShadow: isActive ? publishCta.shadowActive : publishCta.shadow,
                       transform: isHovered ? 'scale(1.06)' : 'scale(1)',
