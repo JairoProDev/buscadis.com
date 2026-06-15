@@ -36,7 +36,7 @@ export default function UserStoryCard({
         height,
         borderRadius: STORY_RAIL.radius,
       }}
-      aria-label={`Historia de ${name}${group.hasUnseen ? ', sin ver' : ''}`}
+      aria-label={`Historia de ${name}, ${group.stories.length} publicación${group.stories.length === 1 ? '' : 'es'}${group.hasUnseen ? ', sin ver' : ''}`}
     >
       {/* Preview a pantalla completa */}
       <div className="absolute inset-0 bg-[var(--bg-tertiary)]">
@@ -79,10 +79,22 @@ export default function UserStoryCard({
         </div>
       </div>
 
+      {/* Contador de historias (estilo IG cuando hay varias) */}
+      {group.stories.length > 1 && (
+        <span
+          className="pointer-events-none absolute right-2 top-2 z-[1] flex h-5 min-w-[20px] items-center justify-center rounded-md bg-black/55 px-1.5 text-[10px] font-bold text-white backdrop-blur-sm"
+          aria-hidden
+        >
+          {group.stories.length}
+        </span>
+      )}
+
       {/* Indicador de video */}
       {story.media_type === 'video' && (
         <span
-          className="pointer-events-none absolute right-2 top-2 rounded-md bg-black/50 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-white"
+          className={`pointer-events-none absolute rounded-md bg-black/50 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-white ${
+            group.stories.length > 1 ? 'right-2 top-8' : 'right-2 top-2'
+          }`}
           aria-hidden
         >
           ▶
