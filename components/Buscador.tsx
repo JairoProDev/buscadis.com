@@ -4,7 +4,7 @@ import { useRef, useState, useEffect, useCallback, type KeyboardEvent } from 're
 import { FaSearch } from 'react-icons/fa';
 import { useTranslation } from '@/hooks/useTranslation';
 import { useSpeechRecognition } from '@/hooks/useSpeechRecognition';
-import { IconMicrophone, IconGoogleLens, IconFilterFunnel, IconSearch, IconMegaphone } from './Icons';
+import { IconMicrophone, IconGoogleLens, IconFilterFunnel, IconSearch, IconMegaphone, IconImage } from './Icons';
 import ComposerModeToggle, { type ComposerMode } from './ComposerModeToggle';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Categoria } from '@/types';
@@ -33,6 +33,10 @@ interface BuscadorProps {
   primaryActionDisabled?: boolean;
   primaryActionLoading?: boolean;
   primaryActionLabel?: string;
+  /** Adjuntar foto al publicar (modo publish) */
+  onPublishImageSelected?: (file: File) => void;
+  publishImageAttached?: boolean;
+  publishImageUploading?: boolean;
 }
 
 function readFileAsDataUrl(file: File): Promise<string> {
@@ -62,12 +66,16 @@ export default function Buscador({
   primaryActionDisabled = false,
   primaryActionLoading = false,
   primaryActionLabel,
+  onPublishImageSelected,
+  publishImageAttached = false,
+  publishImageUploading = false,
 }: BuscadorProps) {
   const { t } = useTranslation();
   const { isListening, isSupported, start: startVoice, stop: stopVoice } = useSpeechRecognition('es-PE');
   const [isAnalyzingImage, setIsAnalyzingImage] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
+  const publishImageInputRef = useRef<HTMLInputElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const singleLineHeightRef = useRef<number>(0);
   const [fieldMultiline, setFieldMultiline] = useState(false);
@@ -117,7 +125,7 @@ export default function Buscador({
 
   const defaultPlaceholder =
     composerMode === 'publish'
-      ? 'Cuéntanos qué vendes, alquilas o buscas…'
+      ? 'Publica ofertas y oportunidades…'
       : t('search.placeholder') || 'Buscar ofertas y oportunidades…';
   const placeholder = placeholderProp || defaultPlaceholder;
 
@@ -211,7 +219,8 @@ export default function Buscador({
       : 'px-3 py-2 md:px-4 md:py-3';
   const iconSize = minimal ? 16 : isCompact ? 18 : 20;
   const searchIconClass = minimal ? 'w-4 h-4 mr-2' : 'w-5 h-5 mr-2 md:mr-3';
-  const shellAlign = isPublishMode && fieldMultiline ? 'items-start' : 'items-center';
+  const shellAlign = fieldMultiline && isPublishMode ? 'items-start' : 'items-center';
+  const fieldMinH = 'min-h-[36px] md:min-h-[40px]';
   const showPrimaryAction = Boolean(onPrimaryAction) && showComposerToggle;
 
   const handleFieldKeyDown = (e: KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -255,6 +264,18 @@ export default function Buscador({
         onChange={(e) => handleImageSelected(e.target.files?.[0])}
       />
 
+      <input
+        ref={publishImageInputRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={(e) => {
+          const file = e.target.files?.[0];
+          if (file && onPublishImageSelected) onPublishImageSelected(file);
+          if (publishImageInputRef.current) publishImageInputRef.current.value = '';
+        }}
+      />
+
       <div className={`relative group z-30 ${minimal ? 'w-full' : 'md:mx-auto md:max-w-2xl'}`}>
         <div
           className={`brand-search-glow relative ${radiusClass} ${minimal ? 'p-[1px]' : 'p-[2px]'} ${
@@ -273,7 +294,7 @@ export default function Buscador({
           >
           {modeToggle}
 
-          <div className="composer-field-wrap flex-1 min-w-0 flex items-center">
+          <div className={`composer-field-wrap flex-1 min-w-0 flex items-center ${fieldMinH}`}>
           {!showComposerToggle && (
             <FaSearch className={`${searchIconClass} text-[var(--brand-blue)] flex-shrink-0 transition-transform group-focus-within:scale-110`} />
           )}
@@ -296,7 +317,9 @@ export default function Buscador({
                   onChange={(e) => onChange(e.target.value)}
                   onInput={adjustTextareaHeight}
                   onKeyDown={handleFieldKeyDown}
-                  className="brand-search-input brand-search-textarea w-full border-none outline-none bg-transparent resize-none overflow-y-auto text-[16px] py-1 leading-normal max-h-[220px]"
+                  className={`brand-search-input brand-search-textarea w-full border-none outline-none bg-transparent resize-none overflow-y-auto text-[16px] leading-[36px] md:leading-[40px] max-h-[220px] ${
+                    fieldMultiline ? 'py-1' : 'py-0 h-9 md:h-10'
+                  }`}
                 />
               </motion.div>
             ) : (
@@ -311,8 +334,8 @@ export default function Buscador({
                 value={value}
                 onChange={(e) => onChange(e.target.value)}
                 onKeyDown={handleFieldKeyDown}
-                className={`brand-search-input flex-1 min-w-0 w-full border-none outline-none bg-transparent truncate h-full ${
-                  minimal ? 'text-sm py-0' : 'text-[16px] py-1'
+                className={`brand-search-input flex-1 min-w-0 w-full border-none outline-none bg-transparent truncate ${fieldMinH} h-9 md:h-10 ${
+                  minimal ? 'text-sm py-0' : 'text-[16px] py-0'
                 }`}
               />
             )}
@@ -350,7 +373,7 @@ export default function Buscador({
             <button
               type="button"
               onClick={handleVoiceSearch}
-              disabled={isAnalyzingImage}
+              disabled={isAnalyzingImage || publishImageUploading}
               className={`${actionBtnClass} ${
                 isListening
                   ? 'text-red-500 bg-red-500/10 animate-pulse'
@@ -363,26 +386,45 @@ export default function Buscador({
               <IconMicrophone size={iconSize} />
             </button>
 
-            <button
-              type="button"
-              onClick={() => {
-                if (composerMode === 'publish') return;
-                const isMobile = typeof window !== 'undefined' && window.matchMedia('(max-width: 767px)').matches;
-                if (isMobile && cameraInputRef.current) {
-                  cameraInputRef.current.click();
-                } else if (fileInputRef.current) {
-                  fileInputRef.current.click();
-                }
-              }}
-              disabled={isAnalyzingImage || isListening || composerMode === 'publish'}
-              className={`${actionBtnClass} text-[var(--text-secondary)] hover:text-[var(--brand-yellow)] hover:bg-[rgba(var(--brand-yellow-rgb),0.12)] ${
-                isAnalyzingImage ? 'animate-pulse text-[var(--brand-yellow)]' : ''
-              } ${composerMode === 'publish' ? 'hidden' : ''}`}
-              title="Búsqueda visual (foto)"
-              aria-label="Búsqueda visual con foto"
-            >
-              <IconGoogleLens size={iconSize} />
-            </button>
+            {isPublishMode && onPublishImageSelected ? (
+              <button
+                type="button"
+                onClick={() => publishImageInputRef.current?.click()}
+                disabled={publishImageUploading || isListening}
+                className={`${actionBtnClass} relative ${
+                  publishImageAttached
+                    ? 'text-[var(--brand-blue)] bg-[rgba(var(--brand-primary-rgb),0.12)]'
+                    : 'text-[var(--text-secondary)] hover:text-[var(--brand-blue)] hover:bg-[var(--hover-bg)]'
+                } ${publishImageUploading ? 'animate-pulse' : ''}`}
+                title={publishImageAttached ? 'Foto adjunta · tocar para cambiar' : 'Adjuntar foto'}
+                aria-label="Adjuntar foto al anuncio"
+              >
+                <IconImage size={iconSize} />
+                {publishImageAttached && (
+                  <span className="absolute top-1 right-1 w-1.5 h-1.5 bg-[var(--brand-blue)] border border-[var(--search-bg,var(--bg-primary))] rounded-full" />
+                )}
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => {
+                  const isMobile = typeof window !== 'undefined' && window.matchMedia('(max-width: 767px)').matches;
+                  if (isMobile && cameraInputRef.current) {
+                    cameraInputRef.current.click();
+                  } else if (fileInputRef.current) {
+                    fileInputRef.current.click();
+                  }
+                }}
+                disabled={isAnalyzingImage || isListening}
+                className={`${actionBtnClass} text-[var(--text-secondary)] hover:text-[var(--brand-yellow)] hover:bg-[rgba(var(--brand-yellow-rgb),0.12)] ${
+                  isAnalyzingImage ? 'animate-pulse text-[var(--brand-yellow)]' : ''
+                }`}
+                title="Búsqueda visual (foto)"
+                aria-label="Búsqueda visual con foto"
+              >
+                <IconGoogleLens size={iconSize} />
+              </button>
+            )}
 
             {showPrimaryAction && (
               <motion.button

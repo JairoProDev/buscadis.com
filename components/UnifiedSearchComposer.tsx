@@ -2,12 +2,10 @@
 
 import { useEffect, useRef, useState } from 'react';
 import Buscador, { ComposerMode } from './Buscador';
-import { DraftListingCard, DraftListingData } from './ai/DraftListingCard';
+import PublishTierModal from './publish/PublishTierModal';
 import { useAuth } from '@/hooks/useAuth';
 import { useUI } from '@/contexts/UIContext';
 import { Categoria } from '@/types';
-import { FREE_TIER_LIMITS } from '@/lib/publish/tiers';
-import InterestPreviewPanel from './publish/InterestPreviewPanel';
 import {
   extractPrimaryPhone,
   findPhoneMatches,
@@ -15,8 +13,6 @@ import {
   PHONE_MASK,
   removePhonesFromText,
 } from '@/lib/phone';
-
-type PublishTierChoice = 'free' | 'pro';
 
 interface UnifiedSearchComposerProps {
   value: string;
@@ -28,12 +24,8 @@ interface UnifiedSearchComposerProps {
   filtersVisible?: boolean;
   onToggleFilters?: () => void;
   activeFiltersCount?: number;
-  /** Modo inicial al montar (p. ej. en /publicar) */
   initialMode?: ComposerMode;
 }
-
-const MIN_AI_LENGTH = 12;
-const DEBOUNCE_MS = 700;
 
 export default function UnifiedSearchComposer({
   value,
@@ -50,13 +42,12 @@ export default function UnifiedSearchComposer({
   const { user, profile, session } = useAuth();
   const { openAuthModal } = useUI();
   const [composerMode, setComposerMode] = useState<ComposerMode>(initialMode);
-  const [publishTier, setPublishTier] = useState<PublishTierChoice>('free');
-  const [intent, setIntent] = useState<'search' | 'publish' | null>(null);
-  const [draft, setDraft] = useState<DraftListingData | null>(null);
+  const [tierModalOpen, setTierModalOpen] = useState(false);
   const [publishing, setPublishing] = useState(false);
+  const [loadingTier, setLoadingTier] = useState<'free' | 'pro' | null>(null);
+  const [publishImageUrl, setPublishImageUrl] = useState<string | null>(null);
+  const [uploadingImage, setUploadingImage] = useState(false);
   const detectedPhoneRef = useRef<string | null>(null);
-  const timerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
-  const lastCheckedRef = useRef('');
 
   useEffect(() => {
     if (profile?.telefono) {
@@ -82,65 +73,43 @@ export default function UnifiedSearchComposer({
     onChange(maskPhonesInText(next));
   };
 
-  useEffect(() => {
-    if (composerMode !== 'publish' || publishTier !== 'pro') {
-      if (composerMode === 'search') {
-        setIntent(null);
-        setDraft(null);
-      }
-      return;
-    }
-
-    if (timerRef.current) clearTimeout(timerRef.current);
-    const trimmed = removePhonesFromText(value).trim();
-    if (trimmed.length < MIN_AI_LENGTH) {
-      setIntent(null);
-      setDraft(null);
-      return;
-    }
-
-    timerRef.current = setTimeout(async () => {
-      if (trimmed === lastCheckedRef.current) return;
-      lastCheckedRef.current = trimmed;
-      try {
-        const res = await fetch('/api/ai/quick-compose', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ text: trimmed }),
-        });
-        const data = await res.json();
-        if (data.intent === 'publish' && data.draft) {
-          setIntent('publish');
-          setDraft({ ...data.draft, imageUrl: '' });
-          onCategoryDetected?.(data.draft.categoria);
-        } else {
-          setIntent('search');
-          setDraft(null);
-        }
-      } catch {
-        setIntent(null);
-        setDraft(null);
-      }
-    }, DEBOUNCE_MS);
-
-    return () => {
-      if (timerRef.current) clearTimeout(timerRef.current);
-    };
-  }, [value, composerMode, publishTier, onCategoryDetected]);
-
   const resolveContacto = () =>
     detectedPhoneRef.current || extractPrimaryPhone(value, profile?.telefono);
+
+  const publishText = removePhonesFromText(value).trim();
+  const hasText = publishText.length > 0;
+  const searchHasText = value.trim().length > 0;
+
+  const handlePublishImage = async (file: File) => {
+    if (!file.type.startsWith('image/')) {
+      onNotify?.('Selecciona una imagen (JPG, PNG, WebP).', 'error');
+      return;
+    }
+    if (file.size > 8 * 1024 * 1024) {
+      onNotify?.('La imagen es muy grande. Máximo 8 MB.', 'error');
+      return;
+    }
+
+    setUploadingImage(true);
+    try {
+      const form = new FormData();
+      form.append('image', file);
+      const res = await fetch('/api/upload-image', { method: 'POST', body: form });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Error al subir');
+      setPublishImageUrl(data.url);
+      onNotify?.('Foto adjunta', 'success');
+    } catch (e) {
+      onNotify?.(e instanceof Error ? e.message : 'No se pudo subir la foto', 'error');
+    } finally {
+      setUploadingImage(false);
+    }
+  };
 
   const handlePublishFree = async () => {
     if (!user?.id) {
       onNotify?.('Inicia sesión para publicar.', 'info');
       openAuthModal();
-      return;
-    }
-
-    const text = removePhonesFromText(value).trim();
-    if (!text) {
-      onNotify?.('Escribe tu anuncio primero.', 'error');
       return;
     }
 
@@ -151,6 +120,7 @@ export default function UnifiedSearchComposer({
     }
 
     setPublishing(true);
+    setLoadingTier('free');
     try {
       const res = await fetch('/api/adisos/publish/free', {
         method: 'POST',
@@ -158,12 +128,18 @@ export default function UnifiedSearchComposer({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${session?.access_token}`,
         },
-        body: JSON.stringify({ text, contacto }),
+        body: JSON.stringify({
+          text: publishText,
+          contacto,
+          imageUrl: publishImageUrl || undefined,
+        }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Error');
       onNotify?.('¡Anuncio publicado gratis por 24h!', 'success');
       onChange('');
+      setPublishImageUrl(null);
+      setTierModalOpen(false);
       detectedPhoneRef.current = profile?.telefono
         ? extractPrimaryPhone('', profile.telefono)
         : null;
@@ -171,43 +147,67 @@ export default function UnifiedSearchComposer({
       onNotify?.(e instanceof Error ? e.message : 'No se pudo publicar', 'error');
     } finally {
       setPublishing(false);
+      setLoadingTier(null);
     }
   };
 
-  const handlePublishPro = async (data: DraftListingData) => {
+  const handlePublishPro = async () => {
     if (!user?.id) {
       openAuthModal();
       return;
     }
-    window.location.href = `/publicar?titulo=${encodeURIComponent(data.titulo)}&descripcion=${encodeURIComponent(data.descripcion)}&categoria=${data.categoria}`;
+
+    setLoadingTier('pro');
+    try {
+      const res = await fetch('/api/ai/quick-compose', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: publishText }),
+      });
+      const data = await res.json();
+      setTierModalOpen(false);
+
+      if (data.draft) {
+        onCategoryDetected?.(data.draft.categoria);
+        const params = new URLSearchParams({
+          titulo: data.draft.titulo,
+          descripcion: data.draft.descripcion,
+          categoria: data.draft.categoria,
+        });
+        if (publishImageUrl) params.set('imagen', publishImageUrl);
+        window.location.href = `/publicar?${params.toString()}`;
+        return;
+      }
+
+      window.location.href = `/publicar?descripcion=${encodeURIComponent(publishText)}`;
+    } catch {
+      onNotify?.('No se pudo preparar el anuncio con IA.', 'error');
+    } finally {
+      setLoadingTier(null);
+    }
   };
 
   const handlePrimaryAction = () => {
     if (composerMode === 'publish') {
-      if (publishTier === 'free') {
-        void handlePublishFree();
+      if (!hasText) {
+        onNotify?.('Escribe tu anuncio primero.', 'info');
         return;
       }
-      if (draft && intent === 'publish') {
-        void handlePublishPro(draft);
-      } else {
-        onNotify?.('Sigue escribiendo para que la IA arme tu anuncio.', 'info');
-      }
+      setTierModalOpen(true);
       return;
     }
 
-    onNotify?.(value.trim() ? `Buscando: "${value.trim()}"` : 'Escribe qué buscas', value.trim() ? 'success' : 'info');
+    if (!searchHasText) {
+      onNotify?.('Escribe qué buscas', 'info');
+      return;
+    }
+    onNotify?.(`Buscando: "${value.trim()}"`, 'success');
   };
 
-  const freeLimit = FREE_TIER_LIMITS.maxDescChars + FREE_TIER_LIMITS.maxTitleChars;
-  const publishText = removePhonesFromText(value).trim();
-  const hasContact = Boolean(resolveContacto());
   const primaryDisabled =
     composerMode === 'publish'
-      ? publishTier === 'free'
-        ? !publishText || publishing
-        : !draft || intent !== 'publish'
-      : false;
+      ? !hasText || publishing || uploadingImage
+      : !searchHasText;
 
   return (
     <div>
@@ -216,7 +216,12 @@ export default function UnifiedSearchComposer({
         onChange={handleComposerChange}
         compact={compact}
         composerMode={composerMode}
-        onComposerModeChange={setComposerMode}
+        onComposerModeChange={(mode) => {
+          setComposerMode(mode);
+          if (mode === 'search') {
+            setPublishImageUrl(null);
+          }
+        }}
         onCategoryDetected={onCategoryDetected}
         onNotify={onNotify}
         showFilterToggle={showFilterToggle && composerMode === 'search'}
@@ -228,74 +233,24 @@ export default function UnifiedSearchComposer({
         primaryActionLoading={publishing}
         primaryActionLabel={
           composerMode === 'publish'
-            ? publishTier === 'free'
-              ? publishing
-                ? 'Publicando…'
-                : 'Publicar'
-              : 'Continuar'
+            ? publishing
+              ? 'Publicando…'
+              : 'Publicar'
             : 'Buscar'
         }
+        onPublishImageSelected={composerMode === 'publish' ? handlePublishImage : undefined}
+        publishImageAttached={Boolean(publishImageUrl)}
+        publishImageUploading={uploadingImage}
       />
 
-      {composerMode === 'publish' && !compact && (
-        <div className="mt-3 space-y-3 md:max-w-2xl md:mx-auto">
-          <div className="flex gap-2 justify-center flex-wrap items-center">
-            <button
-              type="button"
-              onClick={() => setPublishTier('free')}
-              className={`text-xs px-3 py-1.5 rounded-full border font-medium transition-colors ${
-                publishTier === 'free'
-                  ? 'border-[var(--brand-blue)] bg-[rgba(var(--brand-primary-rgb),0.1)] text-[var(--brand-blue)]'
-                  : 'border-[var(--border-color)] text-[var(--text-secondary)] hover:border-[var(--brand-blue)]/40'
-              }`}
-            >
-              Gratis · 24h
-            </button>
-            <button
-              type="button"
-              onClick={() => setPublishTier('pro')}
-              className={`text-xs px-3 py-1.5 rounded-full border font-medium transition-colors ${
-                publishTier === 'pro'
-                  ? 'border-[var(--brand-yellow)] bg-[rgba(var(--brand-yellow-rgb),0.15)] text-[var(--brand-yellow)]'
-                  : 'border-[var(--border-color)] text-[var(--text-secondary)] hover:border-[var(--brand-yellow)]/50'
-              }`}
-            >
-              Con IA · más alcance
-            </button>
-          </div>
-
-          {publishTier === 'free' && (
-            <p className="text-center text-[10px] text-[var(--text-tertiary)] m-0">
-              {publishText.length}/{freeLimit} caracteres · 1 foto · sin IA
-              {hasContact ? ' · WhatsApp detectado' : ' · incluye tu WhatsApp en el texto'}
-            </p>
-          )}
-
-          {publishTier === 'pro' && intent === 'publish' && draft && (
-            <>
-              <InterestPreviewPanel
-                categoria={draft.categoria}
-                titulo={draft.titulo}
-                descripcion={draft.descripcion}
-              />
-              <DraftListingCard
-                data={draft}
-                onPublish={handlePublishPro}
-                onCancel={() => {
-                  setDraft(null);
-                  setIntent(null);
-                }}
-              />
-            </>
-          )}
-
-          {publishTier === 'pro' && intent === 'search' && publishText.length >= MIN_AI_LENGTH && (
-            <p className="text-center text-xs text-[var(--text-tertiary)]">
-              Sigue escribiendo como un anuncio para que la IA lo arme.
-            </p>
-          )}
-        </div>
-      )}
+      <PublishTierModal
+        open={tierModalOpen}
+        onClose={() => !publishing && setTierModalOpen(false)}
+        onChooseFree={() => void handlePublishFree()}
+        onChoosePro={() => void handlePublishPro()}
+        loading={publishing || loadingTier !== null}
+        loadingTier={loadingTier}
+      />
     </div>
   );
 }
