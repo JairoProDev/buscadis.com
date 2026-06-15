@@ -125,28 +125,25 @@ export default function Header({
 
   return (
     <header style={{
-      backgroundColor: 'var(--glass-bg)',
-      backdropFilter: 'blur(20px) saturate(180%)',
-      WebkitBackdropFilter: 'blur(20px) saturate(180%)',
-      boxShadow: '0 4px 15px -10px rgba(0,0,0,0.1)',
+      backgroundColor: 'var(--bg-primary)',
+      borderBottom: '1px solid var(--border-color)',
       height: '72px',
       position: 'sticky',
       top: 0,
       zIndex: 1000,
       display: 'flex',
       alignItems: 'center',
-      padding: '0 1.5rem',
+      padding: isDesktop ? '0 1.5rem' : '0 0.75rem',
+      gap: isDesktop ? 0 : '8px',
       transform: headerVisible ? 'translateY(0)' : 'translateY(-100%)',
-      transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+      transition: 'transform 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
     }}>
-      {/* LEFT: Logo + Location */}
+      {/* LEFT: Logo (+ ubicación en desktop) */}
       <div style={{
         display: 'flex',
         alignItems: 'center',
-        minWidth: isDesktop ? '340px' : 0,
-        flex: isDesktop ? 'none' : 1,
+        flexShrink: 0,
         gap: '12px',
-        overflow: 'hidden',
       }}>
 
 
@@ -177,11 +174,9 @@ export default function Header({
               flexShrink: 0,
             }}>
             <div style={{
-              height: isDesktop ? '42px' : '40px',
+              height: isDesktop ? '42px' : '36px',
               display: 'flex',
               alignItems: 'center',
-              justifyContent: 'center',
-              overflow: 'hidden',
               flexShrink: 0,
             }}>
               <img
@@ -191,7 +186,6 @@ export default function Header({
                   height: '100%',
                   width: 'auto',
                   objectFit: 'contain',
-                  filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))'
                 }}
                 onError={(e) => {
                   e.currentTarget.style.display = 'none';
@@ -201,7 +195,7 @@ export default function Header({
                     span.className = 'logo-fallback';
                     span.innerText = 'Buscadis';
                     span.style.fontWeight = '800';
-                    span.style.fontSize = isDesktop ? '1.28rem' : '1.12rem';
+                    span.style.fontSize = isDesktop ? '1.28rem' : '1rem';
                     span.style.color = 'var(--brand-blue)';
                     span.style.letterSpacing = '0.01em';
                     span.style.fontFamily = '"Plus Jakarta Sans", "Avenir Next", "Segoe UI", sans-serif';
@@ -209,10 +203,10 @@ export default function Header({
                   }
                 }}
               />
+              {isDesktop && (
               <span
-                className="hidden min-[380px]:inline"
                 style={{
-                  fontSize: isDesktop ? '1.72rem' : '1.16rem',
+                  fontSize: '1.72rem',
                   fontWeight: 800,
                   color: 'var(--brand-blue)',
                   letterSpacing: '0.01em',
@@ -220,11 +214,11 @@ export default function Header({
                   lineHeight: 1,
                   fontFamily: '"Plus Jakarta Sans", "Avenir Next", "Segoe UI", sans-serif',
                   whiteSpace: 'nowrap',
-                  flexShrink: 0,
                 }}
               >
                 Buscadis
               </span>
+              )}
             </div>
           </a>
 
@@ -389,7 +383,8 @@ export default function Header({
       </div>
 
       {/* RIGHT: Actions */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', minWidth: isDesktop ? '280px' : 'auto', gap: '8px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', flex: 1, gap: isDesktop ? '8px' : '6px', minWidth: 0 }}>
+        {isDesktop && (
         <button
           onClick={toggleTheme}
           style={{
@@ -399,21 +394,21 @@ export default function Header({
             alignItems: 'center',
             justifyContent: 'center',
             borderRadius: '50%',
-            background: 'var(--bg-secondary)',
-            color: 'var(--text-primary)',
-            border: 'none',
+            background: 'var(--bg-tertiary)',
+            color: 'var(--text-secondary)',
+            border: '1px solid var(--border-color)',
             cursor: 'pointer'
           }}
-          className="hover:bg-gray-200 dark:hover:bg-zinc-700 transition-colors hover:text-[var(--brand-blue)]"
+          className="hover:bg-[var(--hover-bg)] transition-colors hover:text-[var(--brand-blue)]"
           title={themeMode === 'dark' ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}
           aria-label={themeMode === 'dark' ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}
         >
           {themeMode === 'dark' ? <FaSun size={16} /> : <FaMoon size={16} />}
         </button>
+        )}
 
-        {isAuthenticated && ( // Only show these actions if logged in
+        {isAuthenticated && (
           <>
-            {/* Helper Action: Changelog */}
             {onChangelogClick && isDesktop && (
               <button
                 onClick={onChangelogClick}
@@ -436,6 +431,8 @@ export default function Header({
               </button>
             )}
 
+            {isDesktop && (
+            <>
             {/* Notifications */}
             <div className="relative">
               <button
@@ -491,6 +488,8 @@ export default function Header({
                 />
               )}
             </div>
+            </>
+            )}
           </>
         )}
 

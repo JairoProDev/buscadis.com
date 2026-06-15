@@ -13,8 +13,7 @@ import { IconClose, IconStore } from './Icons';
 import { FaChartLine } from 'react-icons/fa';
 import { useRouter } from 'next/navigation';
 import { useTranslation } from '@/hooks/useTranslation';
-import ThemeToggle from './ThemeToggle';
-import LanguageSelector from './LanguageSelector';
+import { useMediaQuery } from '@/hooks/useMediaQuery';
 
 interface UserMenuProps {
   onProgressClick?: () => void;
@@ -26,6 +25,7 @@ export default function UserMenu({ onProgressClick, onSidebarToggle }: UserMenuP
   const { user, signOut, refreshProfile } = useAuth();
   const { profile, isAnunciante, isVerificado } = useUser();
   const { t } = useTranslation();
+  const isDesktop = useMediaQuery('(min-width: 768px)');
   const [mostrarMenu, setMostrarMenu] = useState(false);
   const [mostrarAuthModal, setMostrarAuthModal] = useState(false);
   const [mostrarFavoritos, setMostrarFavoritos] = useState(false);
@@ -96,28 +96,21 @@ export default function UserMenu({ onProgressClick, onSidebarToggle }: UserMenuP
   return (
     <div style={{ position: 'relative' }} ref={menuRef}>
       <button
-        onClick={() => {
-          if (onSidebarToggle) {
-            onSidebarToggle();
-          } else {
-            setMostrarMenu(!mostrarMenu);
-          }
-        }}
+        onClick={() => setMostrarMenu(!mostrarMenu)}
         style={{
           display: 'flex',
           alignItems: 'center',
-          gap: '0.75rem',
-          padding: '4px',
-          paddingRight: '12px',
+          gap: isDesktop ? '0.75rem' : '0',
+          padding: isDesktop ? '4px' : '2px',
+          paddingRight: isDesktop ? '12px' : '2px',
           border: '1px solid var(--border-color)',
           borderRadius: '50px',
           cursor: 'pointer',
           backgroundColor: mostrarMenu ? 'var(--bg-secondary)' : 'var(--bg-primary)',
           transition: 'all 0.2s ease',
-          boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
         }}
         aria-label="Menú de usuario"
-        className="hover:shadow-md"
+        className="hover:shadow-sm"
       >
         {/* Avatar */}
         <div style={{
@@ -149,17 +142,19 @@ export default function UserMenu({ onProgressClick, onSidebarToggle }: UserMenuP
           )}
         </div>
 
-        {/* Hamburger Icon for Menu */}
+        {/* Hamburger — solo desktop; en móvil basta el avatar */}
+        {isDesktop && (
         <div style={{
           display: 'flex',
           flexDirection: 'column',
           gap: '4px',
           padding: '0 4px'
         }}>
-          <span style={{ width: '16px', height: '2px', backgroundColor: 'var(--text-primary)', borderRadius: '2px' }}></span>
-          <span style={{ width: '16px', height: '2px', backgroundColor: 'var(--text-primary)', borderRadius: '2px' }}></span>
-          <span style={{ width: '16px', height: '2px', backgroundColor: 'var(--text-primary)', borderRadius: '2px' }}></span>
+          <span style={{ width: '16px', height: '2px', backgroundColor: 'var(--text-secondary)', borderRadius: '2px' }} />
+          <span style={{ width: '16px', height: '2px', backgroundColor: 'var(--text-secondary)', borderRadius: '2px' }} />
+          <span style={{ width: '16px', height: '2px', backgroundColor: 'var(--text-secondary)', borderRadius: '2px' }} />
         </div>
+        )}
       </button>
 
       {mostrarMenu && (
