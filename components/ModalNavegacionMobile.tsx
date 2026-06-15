@@ -19,6 +19,7 @@ import ModalAdiso from './ModalAdiso';
 import MapaInteractivo from './MapaInteractivo';
 import FormularioPublicar from './FormularioPublicar';
 import AdisosGratuitos from './AdisosGratuitos';
+import ChatbotIANew from './ChatbotIANew';
 import { IconSparkles } from './Icons';
 
 interface ModalNavegacionMobileProps {
@@ -378,10 +379,13 @@ export default function ModalNavegacionMobile({
                   <AdisosGratuitos todosLosAdisos={todosLosAdisos} />
                 )}
                 {seccionInicial === 'chatbot' && (
-                  <div style={{ padding: '2rem', textAlign: 'center' }}>
-                    <IconSparkles size={48} color="var(--brand-blue)" />
-                    <h3>Asistente IA</h3>
-                    <p>El asistente está listo para ayudarte.</p>
+                  <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0, height: '100%' }}>
+                    <ChatbotIANew
+                      onPublicar={onPublicar}
+                      onError={onError}
+                      onSuccess={onSuccess}
+                      onMinimize={onCerrar}
+                    />
                   </div>
                 )}
               </div>

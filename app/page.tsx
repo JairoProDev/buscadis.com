@@ -153,11 +153,29 @@ function HomeContent() {
     if (seccionUrl) {
       if (isDesktop) {
         setSeccionDesktopActiva(seccionUrl);
+        if (seccionUrl !== 'adiso') {
+          setIsSidebarMinimizado(false);
+        }
       } else {
         setSeccionMobileActiva(seccionUrl);
       }
     }
   }, [seccionUrl, isDesktop]);
+
+  const handleDesktopSeccionChange = useCallback(
+    (seccion: SeccionSidebar) => {
+      setSeccionDesktopActiva(seccion);
+      setIsSidebarMinimizado(false);
+      const params = new URLSearchParams(searchParams.toString());
+      if (seccion === 'adiso') {
+        params.delete('seccion');
+      } else {
+        params.set('seccion', seccion);
+      }
+      router.replace(`/?${params.toString()}`, { scroll: false });
+    },
+    [router, searchParams]
+  );
   const [vista, setVista] = useState<'grid' | 'list' | 'feed'>('grid');
   const [browseScrolled, setBrowseScrolled] = useState(false);
   const [filterSidebarCollapsed, setFilterSidebarCollapsed] = useState(true);
@@ -195,10 +213,10 @@ function HomeContent() {
   }, [categoriaFiltro]);
 
   useEffect(() => {
-    if (isDesktop && seccionDesktopActiva === 'adiso' && !adisoAbierto && !adisoId) {
+    if (isDesktop && seccionDesktopActiva === 'adiso' && !adisoAbierto && !adisoId && !seccionUrl) {
       setIsSidebarMinimizado(true);
     }
-  }, [isDesktop, seccionDesktopActiva, adisoAbierto, adisoId]);
+  }, [isDesktop, seccionDesktopActiva, adisoAbierto, adisoId, seccionUrl]);
 
   // Detectar cambios en el estado de conexión
   useEffect(() => {
@@ -534,6 +552,7 @@ function HomeContent() {
     const indice = adisosFiltrados.findIndex(a => a.id === adiso.id);
     setIndiceAdisoActual(indice >= 0 ? indice : 0);
     setAdisoAbierto(adiso);
+    setSeccionDesktopActiva('adiso');
 
     // Expandir sidebar automáticamente en desktop
     if (isDesktop) {
@@ -813,11 +832,9 @@ function HomeContent() {
             onUbicacionClick={() => setMostrarFiltroUbicacion(true)}
             seccionActiva={seccionDesktopActiva}
             onSeccionChange={(seccion) => {
-              setSeccionDesktopActiva(seccion);
-              if (seccion !== 'adiso') {
+              handleDesktopSeccionChange(seccion);
+              if (seccion === 'adiso' && !adisoAbierto) {
                 setIsSidebarMinimizado(false);
-              } else if (!adisoAbierto) {
-                setIsSidebarMinimizado(true);
               }
             }}
           />
@@ -1306,6 +1323,7 @@ function HomeContent() {
                 onError={(msg) => error(msg)}
                 onSuccess={(msg) => success(msg)}
                 seccionActiva={seccionDesktopActiva}
+                onSeccionChange={handleDesktopSeccionChange}
                 minimizado={isSidebarMinimizado}
                 onMinimizadoChange={setIsSidebarMinimizado}
                 todosLosAdisos={adisosFiltrados}
