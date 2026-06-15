@@ -4,11 +4,13 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "predev": "npm run db:migrate",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "db:push": "supabase db push --linked --yes",
-    "db:migrations": "supabase migration list --linked"
+    "db:push": "npx supabase db push --linked --yes",
+    "db:migrations": "npx supabase migration list --linked",
+    "db:migrate": "node scripts/supabase-migrate.mjs"
   },
   "dependencies": {
     "@ai-sdk/openai": "^1.0.8",
