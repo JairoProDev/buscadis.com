@@ -368,41 +368,42 @@ export default function Header({
                   aria-current={isActive ? 'page' : undefined}
                   style={{
                     height: '100%',
-                    padding: '0 16px',
-                    position: 'relative',
+                    padding: '0 10px',
                     display: 'flex',
-                    flexDirection: 'column',
                     alignItems: 'center',
                     justifyContent: 'center',
                     textDecoration: 'none',
-                    gap: '2px',
                   }}
                 >
                   <span
                     style={{
                       display: 'flex',
+                      flexDirection: 'column',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      width: '40px',
-                      height: '40px',
-                      borderRadius: '12px',
+                      gap: '2px',
+                      width: '56px',
+                      height: '56px',
+                      boxSizing: 'border-box',
+                      borderRadius: '14px',
                       background: isActive ? publishCta.backgroundActive : publishCta.background,
                       boxShadow: isActive ? publishCta.shadowActive : publishCta.shadow,
-                      transform: isHovered ? 'scale(1.06)' : 'scale(1)',
+                      transform: isHovered ? 'scale(1.05)' : 'scale(1)',
                       transition: 'transform 0.2s ease, box-shadow 0.2s ease',
                     }}
                   >
-                    <IconMegaphone size={20} color={publishCta.iconColor} />
-                  </span>
-                  <span
-                    style={{
-                      fontSize: '11px',
-                      fontWeight: 700,
-                      color: publishCta.labelColor,
-                      opacity: isActive || isHovered ? 1 : 0.92,
-                    }}
-                  >
-                    {item.label}
+                    <IconMegaphone size={18} color={publishCta.iconColor} />
+                    <span
+                      style={{
+                        fontSize: '9px',
+                        fontWeight: 700,
+                        color: publishCta.labelColor,
+                        lineHeight: 1,
+                        letterSpacing: '0.01em',
+                      }}
+                    >
+                      {item.label}
+                    </span>
                   </span>
                 </Link>
               );
