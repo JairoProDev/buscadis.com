@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { useSearchParams } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { useUser } from '@/hooks/useUser';
 import {
@@ -74,9 +73,11 @@ function SettingsSection({
 const inputClass =
   'w-full rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)] px-3 py-2.5 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] focus:border-[var(--brand-blue)] focus:outline-none focus:ring-2 focus:ring-[rgba(var(--brand-primary-rgb),0.15)]';
 
-export default function ProfileSettingsTab() {
-  const searchParams = useSearchParams();
-  const focusSection = searchParams.get('section');
+export default function ProfileSettingsTab({
+  focusSection,
+}: {
+  focusSection?: string | null;
+}) {
   const { user, refreshProfile } = useAuth();
   const { profile } = useUser();
 
@@ -135,10 +136,12 @@ export default function ProfileSettingsTab() {
   useEffect(() => {
     if (!focusSection) return;
     const ref = sectionRefs[focusSection];
-  const timer = window.setTimeout(() => {
+    const timer = window.setTimeout(() => {
       ref?.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }, 150);
+    }, 200);
     return () => window.clearTimeout(timer);
+    // sectionRefs es estable por diseño
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [focusSection]);
 
   const completion = computeProfileCompletion(

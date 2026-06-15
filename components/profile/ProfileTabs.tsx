@@ -1,5 +1,17 @@
 'use client';
 
+import type { ComponentType } from 'react';
+import {
+  IconHome,
+  IconHeart,
+  IconClock,
+  IconMessages,
+  IconEyeOff,
+  IconMegaphone,
+  IconStore,
+  IconSettings,
+} from '@/components/Icons';
+
 export type ProfileTabId =
   | 'inicio'
   | 'guardados'
@@ -10,15 +22,23 @@ export type ProfileTabId =
   | 'negocios'
   | 'ajustes';
 
-export const PROFILE_TABS: { id: ProfileTabId; label: string; publisherOnly?: boolean; businessOnly?: boolean }[] = [
-  { id: 'inicio', label: 'Inicio' },
-  { id: 'guardados', label: 'Guardados' },
-  { id: 'historial', label: 'Historial' },
-  { id: 'mensajes', label: 'Mensajes' },
-  { id: 'ocultos', label: 'Ocultos' },
-  { id: 'publicar', label: 'Publicar', publisherOnly: true },
-  { id: 'negocios', label: 'Negocios', businessOnly: true },
-  { id: 'ajustes', label: 'Ajustes' },
+type TabIcon = ComponentType<{ size?: number; color?: string; className?: string }>;
+
+export const PROFILE_TABS: {
+  id: ProfileTabId;
+  label: string;
+  Icon: TabIcon;
+  publisherOnly?: boolean;
+  businessOnly?: boolean;
+}[] = [
+  { id: 'inicio', label: 'Inicio', Icon: IconHome },
+  { id: 'guardados', label: 'Guardados', Icon: IconHeart },
+  { id: 'historial', label: 'Historial', Icon: IconClock },
+  { id: 'mensajes', label: 'Mensajes', Icon: IconMessages },
+  { id: 'ocultos', label: 'Ocultos', Icon: IconEyeOff },
+  { id: 'publicar', label: 'Publicar', Icon: IconMegaphone, publisherOnly: true },
+  { id: 'negocios', label: 'Negocios', Icon: IconStore, businessOnly: true },
+  { id: 'ajustes', label: 'Ajustes', Icon: IconSettings },
 ];
 
 interface ProfileTabsProps {
@@ -43,25 +63,29 @@ export default function ProfileTabs({
   });
 
   return (
-    <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1 -mx-1 px-1">
+    <div className="-mx-1 flex gap-1.5 overflow-x-auto px-1 pb-1 no-scrollbar">
       {visible.map((tab) => {
         const selected = active === tab.id;
         const badge = badges?.[tab.id];
+        const TabIcon = tab.Icon;
+        const iconColor = selected ? 'white' : 'var(--text-secondary)';
+
         return (
           <button
             key={tab.id}
             type="button"
             onClick={() => onChange(tab.id)}
-            className={`relative flex-shrink-0 rounded-full px-4 py-2 text-sm font-medium transition-colors ${
+            className={`relative flex shrink-0 items-center gap-1.5 rounded-full px-3 py-2 text-sm font-medium transition-colors sm:px-4 ${
               selected
                 ? 'bg-[var(--brand-blue)] text-white shadow-sm'
                 : 'bg-[var(--bg-secondary)] text-[var(--text-secondary)] hover:bg-[var(--hover-bg)]'
             }`}
           >
-            {tab.label}
+            <TabIcon size={14} color={iconColor} className="shrink-0" />
+            <span className="whitespace-nowrap">{tab.label}</span>
             {badge != null && badge > 0 && (
               <span
-                className={`ml-1.5 inline-flex min-w-[18px] items-center justify-center rounded-full px-1 text-[10px] font-bold ${
+                className={`inline-flex min-w-[18px] items-center justify-center rounded-full px-1 text-[10px] font-bold ${
                   selected ? 'bg-white/25 text-white' : 'bg-[var(--brand-blue)] text-white'
                 }`}
               >

@@ -7,6 +7,7 @@ import NavbarMobile from '@/components/NavbarMobile';
 import LeftSidebar from '@/components/LeftSidebar';
 import { useNavigation } from '@/contexts/NavigationContext';
 import ProfileHubShell from '@/components/profile/ProfileHubShell';
+import ProfileHubSkeleton from '@/components/profile/ProfileHubSkeleton';
 import { ProfileTabId } from '@/components/profile/ProfileTabs';
 
 const VALID_TABS: ProfileTabId[] = [
@@ -26,8 +27,15 @@ function PerfilContent() {
   const initialTab =
     tabParam && VALID_TABS.includes(tabParam) ? tabParam : 'inicio';
   const highlight = searchParams.get('highlight');
+  const focusSection = searchParams.get('section');
 
-  return <ProfileHubShell initialTab={initialTab} highlightId={highlight} />;
+  return (
+    <ProfileHubShell
+      initialTab={initialTab}
+      highlightId={highlight}
+      focusSection={focusSection}
+    />
+  );
 }
 
 export default function PerfilPage() {
@@ -46,7 +54,7 @@ export default function PerfilPage() {
       />
 
       <main className="container mx-auto flex-1 px-4 py-6 max-w-3xl">
-        <Suspense fallback={<div className="skeleton-shimmer h-64 rounded-2xl" />}>
+        <Suspense fallback={<ProfileHubSkeleton />}>
           <PerfilContent />
         </Suspense>
       </main>

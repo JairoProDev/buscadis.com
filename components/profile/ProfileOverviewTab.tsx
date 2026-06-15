@@ -1,6 +1,7 @@
 'use client';
 
 import { ProfileDashboardStats } from '@/lib/profile/server';
+import { ProfileCompletionResult, ProfileTask } from '@/lib/profile-completion';
 import {
   IconHeart,
   IconMessages,
@@ -10,15 +11,23 @@ import {
   IconChevronRight,
 } from '@/components/Icons';
 import { ProfileTabId } from './ProfileTabs';
+import ProfileCompletionCard from './ProfileCompletionCard';
 
 interface ProfileOverviewTabProps {
   stats: ProfileDashboardStats | null;
   onNavigate: (tab: ProfileTabId) => void;
+  completion?: ProfileCompletionResult | null;
+  onCompletionTask?: (task: ProfileTask) => void;
 }
 
 const ICON_BOX = 'flex h-11 w-11 shrink-0 items-center justify-center rounded-xl';
 
-export default function ProfileOverviewTab({ stats, onNavigate }: ProfileOverviewTabProps) {
+export default function ProfileOverviewTab({
+  stats,
+  onNavigate,
+  completion,
+  onCompletionTask,
+}: ProfileOverviewTabProps) {
   const cards = [
     {
       title: 'Guardados',
@@ -70,6 +79,10 @@ export default function ProfileOverviewTab({ stats, onNavigate }: ProfileOvervie
 
   return (
     <div className="space-y-5">
+      {completion && completion.percent < 100 && onCompletionTask && (
+        <ProfileCompletionCard completion={completion} onTaskClick={onCompletionTask} />
+      )}
+
       <p className="text-sm leading-relaxed text-[var(--text-secondary)]">
         Tu espacio para guardar, contactar y publicar en Buscadis.
       </p>

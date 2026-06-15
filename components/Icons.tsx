@@ -61,6 +61,7 @@ export const IconUser = (p: IconProps) => <FaUser size={getSize(p)} color={p.col
 export const IconSettings = (p: IconProps) => <FaCog size={getSize(p)} color={p.color || 'currentColor'} className={p.className} onClick={p.onClick} />;
 export const IconSignOut = (p: IconProps) => <FaSignOutAlt size={getSize(p)} color={p.color || 'currentColor'} className={p.className} onClick={p.onClick} />;
 export const IconExplore = (p: IconProps) => <FaCompass size={getSize(p)} color={p.color || 'currentColor'} className={p.className} onClick={p.onClick} />;
+export const IconHome = (p: IconProps) => <FaHome size={getSize(p)} color={p.color || 'currentColor'} className={p.className} onClick={p.onClick} />;
 export const IconMessages = (p: IconProps) => <FaComments size={getSize(p)} color={p.color || 'currentColor'} className={p.className} onClick={p.onClick} />;
 export const IconOwner = (p: IconProps) => <FaUserTie size={getSize(p)} color={p.color || 'currentColor'} className={p.className} onClick={p.onClick} />;
 export const IconBusinessAdmin = (p: IconProps) => <FaUserCog size={getSize(p)} color={p.color || 'currentColor'} className={p.className} onClick={p.onClick} />;

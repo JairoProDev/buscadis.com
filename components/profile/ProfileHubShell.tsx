@@ -23,6 +23,7 @@ import ProfileSettingsTab from './ProfileSettingsTab';
 import ProfilePublisherTab from './ProfilePublisherTab';
 import ProfileBusinessesTab from './ProfileBusinessesTab';
 import ProfileCompletionCard from './ProfileCompletionCard';
+import ProfileHubSkeleton from './ProfileHubSkeleton';
 import ModeIndicator from './ModeIndicator';
 import {
   IconVerified,
@@ -34,24 +35,40 @@ import {
 interface ProfileHubShellProps {
   initialTab?: ProfileTabId;
   highlightId?: string | null;
+  focusSection?: string | null;
 }
 
-export default function ProfileHubShell({ initialTab = 'inicio', highlightId }: ProfileHubShellProps) {
+export default function ProfileHubShell({
+  initialTab = 'inicio',
+  highlightId,
+  focusSection,
+}: ProfileHubShellProps) {
   const router = useRouter();
-  const { user, signOut, session } = useAuth();
+  const { user, signOut, session, loading: authLoading } = useAuth();
   const { profile, isAnunciante, isVerificado } = useUser();
   const { openAuthModal } = useUI();
 
+  const [mounted, setMounted] = useState(false);
   const [tab, setTab] = useState<ProfileTabId>(initialTab);
+  const [settingsFocus, setSettingsFocus] = useState<string | null>(focusSection ?? null);
   const [stats, setStats] = useState<ProfileDashboardStats | null>(null);
   const [loadingStats, setLoadingStats] = useState(true);
 
   useEffect(() => {
+    if (focusSection) setSettingsFocus(focusSection);
+  }, [focusSection]);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!mounted || authLoading) return;
     if (!user) {
       openAuthModal();
       router.push('/');
     }
-  }, [user, openAuthModal, router]);
+  }, [user, authLoading, mounted, openAuthModal, router]);
 
   useEffect(() => {
     if (!session?.access_token) return;
@@ -66,22 +83,34 @@ export default function ProfileHubShell({ initialTab = 'inicio', highlightId }: 
   }, [session?.access_token]);
 
   useEffect(() => {
+    if (!mounted) return;
     if (highlightId) setTab('publicar');
-  }, [highlightId]);
+    else setTab(initialTab);
+  }, [highlightId, initialTab, mounted]);
 
   useEffect(() => {
+    if (!mounted) return;
     const url = new URL(window.location.href);
     url.searchParams.set('tab', tab);
     window.history.replaceState(null, '', url.pathname + url.search);
-  }, [tab]);
+  }, [tab, mounted]);
 
-  const handleCompletionTask = useCallback((task: ProfileTask) => {
-    setTab('ajustes');
-    const url = new URL(window.location.href);
-    url.searchParams.set('tab', 'ajustes');
-    url.searchParams.set('section', task.section);
-    window.history.replaceState(null, '', url.pathname + url.search);
-  }, []);
+  const handleCompletionTask = useCallback(
+    (task: ProfileTask) => {
+      setTab('ajustes');
+      setSettingsFocus(task.section);
+      if (!mounted) return;
+      const url = new URL(window.location.href);
+      url.searchParams.set('tab', 'ajustes');
+      url.searchParams.set('section', task.section);
+      window.history.replaceState(null, '', url.pathname + url.search);
+    },
+    [mounted]
+  );
+
+  if (!mounted || authLoading) {
+    return <ProfileHubSkeleton />;
+  }
 
   if (!user) {
     return (
@@ -234,6 +263,8 @@ export default function ProfileHubShell({ initialTab = 'inicio', highlightId }: 
           <ProfileOverviewTab
             stats={stats}
             onNavigate={setTab}
+            completion={completion}
+            onCompletionTask={handleCompletionTask}
           />
         )}
         {tab === 'guardados' && <ProfileFavoritesTab />}
@@ -244,7 +275,7 @@ export default function ProfileHubShell({ initialTab = 'inicio', highlightId }: 
           <ProfilePublisherTab token={session?.access_token} highlightId={highlightId} />
         )}
         {tab === 'negocios' && showBusinesses && <ProfileBusinessesTab />}
-        {tab === 'ajustes' && <ProfileSettingsTab />}
+        {tab === 'ajustes' && <ProfileSettingsTab focusSection={settingsFocus} />}
       </div>
     </div>
   );
