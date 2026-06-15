@@ -1,11 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { getUserFromRouteRequest } from '@/lib/supabase-route-auth';
+import { findConversationBetween } from '@/lib/profile/server';
 import { supabaseAdmin } from '@/lib/supabase-admin';
 
 const bodySchema = z.object({
   recipientId: z.string().uuid(),
   storyId: z.string().uuid().optional(),
+  adisoId: z.string().optional(),
   initialMessage: z.string().max(500).optional(),
 });
 
@@ -21,7 +23,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Datos inválidos' }, { status: 400 });
     }
 
-    const { recipientId, storyId, initialMessage } = parsed.data;
+    const { recipientId, storyId, adisoId, initialMessage } = parsed.data;
 
     if (recipientId === user.id) {
       return NextResponse.json({ error: 'No puedes chatear contigo mismo' }, { status: 400 });
@@ -29,12 +31,7 @@ export async function POST(request: NextRequest) {
 
     const participants = [user.id, recipientId].sort();
 
-    const { data: existing } = await supabaseAdmin
-      .from('conversations')
-      .select('id')
-      .contains('participants', participants)
-      .maybeSingle();
-
+    const existing = await findConversationBetween(user.id, recipientId);
     let conversationId = existing?.id as string | undefined;
 
     if (!conversationId) {
@@ -43,6 +40,7 @@ export async function POST(request: NextRequest) {
         .insert({
           participants,
           story_id: storyId || null,
+          adiso_id: adisoId || null,
           last_message: initialMessage || null,
           last_message_at: initialMessage ? new Date().toISOString() : undefined,
         })
@@ -53,11 +51,13 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: 'No se pudo crear la conversación' }, { status: 500 });
       }
       conversationId = created.id;
-    } else if (storyId) {
-      await supabaseAdmin
-        .from('conversations')
-        .update({ story_id: storyId })
-        .eq('id', conversationId);
+    } else {
+      const updates: Record<string, unknown> = {};
+      if (storyId) updates.story_id = storyId;
+      if (adisoId) updates.adiso_id = adisoId;
+      if (Object.keys(updates).length > 0) {
+        await supabaseAdmin.from('conversations').update(updates).eq('id', conversationId);
+      }
     }
 
     if (initialMessage) {

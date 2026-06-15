@@ -1,17 +1,14 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { useUser } from '@/hooks/useUser';
+import { useConversations } from '@/hooks/useConversations';
+import { useNotifications } from '@/hooks/useNotifications';
 import AuthModal from './AuthModal';
-import FavoritosList from './FavoritosList';
-import HiddenAdsList from './HiddenAdsList';
-import LocationPrompt from './LocationPrompt';
-import ConvertirAnunciante from './ConvertirAnunciante';
-import UserProfile from './UserProfile';
-import { IconClose, IconStore } from './Icons';
+import { IconStore } from './Icons';
 import { FaChartLine } from 'react-icons/fa';
-import { useRouter } from 'next/navigation';
 import { useTranslation } from '@/hooks/useTranslation';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
 import ThemeToggle from './ThemeToggle';
@@ -24,20 +21,16 @@ interface UserMenuProps {
 
 export default function UserMenu({ onProgressClick, onSidebarToggle }: UserMenuProps) {
   const router = useRouter();
-  const { user, signOut, refreshProfile } = useAuth();
+  const { user, signOut } = useAuth();
   const { profile, isAnunciante, isVerificado } = useUser();
+  const { unreadCount: unreadMessages } = useConversations();
+  const { unreadCount: unreadNotifications } = useNotifications();
   const { t } = useTranslation();
   const isDesktop = useMediaQuery('(min-width: 768px)');
   const [mostrarMenu, setMostrarMenu] = useState(false);
   const [mostrarAuthModal, setMostrarAuthModal] = useState(false);
-  const [mostrarFavoritos, setMostrarFavoritos] = useState(false);
-  const [mostrarOcultos, setMostrarOcultos] = useState(false);
-  const [mostrarLocationPrompt, setMostrarLocationPrompt] = useState(false);
-  const [mostrarConvertirAnunciante, setMostrarConvertirAnunciante] = useState(false);
-  const [mostrarPerfil, setMostrarPerfil] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
-  // Cerrar menú al hacer click fuera
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
@@ -54,6 +47,11 @@ export default function UserMenu({ onProgressClick, onSidebarToggle }: UserMenuP
     };
   }, [mostrarMenu]);
 
+  const goTo = (tab?: string) => {
+    setMostrarMenu(false);
+    router.push(tab ? `/perfil?tab=${tab}` : '/perfil');
+  };
+
   const handleSignOut = async () => {
     await signOut();
     setMostrarMenu(false);
@@ -65,7 +63,7 @@ export default function UserMenu({ onProgressClick, onSidebarToggle }: UserMenuP
 
   const iniciales = nombreCompleto
     .split(' ')
-    .map(n => n[0])
+    .map((n) => n[0])
     .join('')
     .toUpperCase()
     .substring(0, 2);
@@ -84,7 +82,7 @@ export default function UserMenu({ onProgressClick, onSidebarToggle }: UserMenuP
             boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
             border: 'none',
             cursor: 'pointer',
-            fontSize: '0.875rem'
+            fontSize: '0.875rem',
           }}
           className="hover:opacity-90 transition-opacity"
         >
@@ -110,52 +108,86 @@ export default function UserMenu({ onProgressClick, onSidebarToggle }: UserMenuP
           cursor: 'pointer',
           backgroundColor: mostrarMenu ? 'var(--bg-secondary)' : 'var(--bg-primary)',
           transition: 'all 0.2s ease',
+          position: 'relative',
         }}
         aria-label="Menú de usuario"
         className="hover:shadow-sm"
       >
-        {/* Avatar */}
-        <div style={{
-          width: '32px',
-          height: '32px',
-          borderRadius: '50%',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          fontSize: '0.8rem',
-          fontWeight: 700,
-          color: 'var(--text-primary)',
-          backgroundColor: profile?.avatar_url ? 'transparent' : 'var(--brand-blue-light)',
-          border: '1px solid var(--border-color)',
-          overflow: 'hidden'
-        }}>
+        {(unreadMessages > 0 || unreadNotifications > 0) && (
+          <span
+            style={{
+              position: 'absolute',
+              top: 0,
+              right: 0,
+              width: 10,
+              height: 10,
+              borderRadius: '50%',
+              backgroundColor: 'var(--brand-blue)',
+              border: '2px solid var(--bg-primary)',
+            }}
+          />
+        )}
+        <div
+          style={{
+            width: '32px',
+            height: '32px',
+            borderRadius: '50%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: '0.8rem',
+            fontWeight: 700,
+            color: 'var(--text-primary)',
+            backgroundColor: profile?.avatar_url ? 'transparent' : 'var(--brand-blue-light)',
+            border: '1px solid var(--border-color)',
+            overflow: 'hidden',
+          }}
+        >
           {profile?.avatar_url ? (
             <img
               src={profile.avatar_url}
               alt={nombreCompleto}
-              style={{
-                width: '100%',
-                height: '100%',
-                objectFit: 'cover'
-              }}
+              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
             />
           ) : (
             <span>{iniciales}</span>
           )}
         </div>
 
-        {/* Hamburger — solo desktop; en móvil basta el avatar */}
         {isDesktop && (
-        <div style={{
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '4px',
-          padding: '0 4px'
-        }}>
-          <span style={{ width: '16px', height: '2px', backgroundColor: 'var(--text-secondary)', borderRadius: '2px' }} />
-          <span style={{ width: '16px', height: '2px', backgroundColor: 'var(--text-secondary)', borderRadius: '2px' }} />
-          <span style={{ width: '16px', height: '2px', backgroundColor: 'var(--text-secondary)', borderRadius: '2px' }} />
-        </div>
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '4px',
+              padding: '0 4px',
+            }}
+          >
+            <span
+              style={{
+                width: '16px',
+                height: '2px',
+                backgroundColor: 'var(--text-secondary)',
+                borderRadius: '2px',
+              }}
+            />
+            <span
+              style={{
+                width: '16px',
+                height: '2px',
+                backgroundColor: 'var(--text-secondary)',
+                borderRadius: '2px',
+              }}
+            />
+            <span
+              style={{
+                width: '16px',
+                height: '2px',
+                backgroundColor: 'var(--text-secondary)',
+                borderRadius: '2px',
+              }}
+            />
+          </div>
         )}
       </button>
 
@@ -172,99 +204,189 @@ export default function UserMenu({ onProgressClick, onSidebarToggle }: UserMenuP
             minWidth: '260px',
             zIndex: 1000,
             overflow: 'hidden',
-            animation: 'slideDown 0.2s ease-out'
+            animation: 'slideDown 0.2s ease-out',
           }}
         >
-          <style dangerouslySetInnerHTML={{
-            __html: `
+          <style
+            dangerouslySetInnerHTML={{
+              __html: `
             @keyframes slideDown {
               from { opacity: 0; transform: translateY(-10px); }
               to { opacity: 1; transform: translateY(0); }
             }
-          `}} />
+          `,
+            }}
+          />
 
-          {/* User Info Header */}
-          <div style={{ padding: '1.25rem', borderBottom: '1px solid var(--border-color)', background: 'var(--bg-secondary)' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '0.5rem' }}>
-              <div style={{
-                width: '48px',
-                height: '48px',
-                borderRadius: '50%',
-                overflow: 'hidden',
-                border: '2px solid var(--bg-primary)',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
-              }}>
+          <div
+            style={{
+              padding: '1.25rem',
+              borderBottom: '1px solid var(--border-color)',
+              background: 'var(--bg-secondary)',
+            }}
+          >
+            <button
+              type="button"
+              onClick={() => goTo()}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '1rem',
+                width: '100%',
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+                textAlign: 'left',
+                padding: 0,
+              }}
+            >
+              <div
+                style={{
+                  width: '48px',
+                  height: '48px',
+                  borderRadius: '50%',
+                  overflow: 'hidden',
+                  border: '2px solid var(--bg-primary)',
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                }}
+              >
                 {profile?.avatar_url ? (
-                  <img src={profile.avatar_url} alt={nombreCompleto} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  <img
+                    src={profile.avatar_url}
+                    alt={nombreCompleto}
+                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                  />
                 ) : (
-                  <div style={{ width: '100%', height: '100%', background: 'var(--brand-blue-light)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold' }}>{iniciales}</div>
+                  <div
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      background: 'var(--brand-blue-light)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontWeight: 'bold',
+                    }}
+                  >
+                    {iniciales}
+                  </div>
                 )}
               </div>
               <div style={{ flex: 1, overflow: 'hidden' }}>
-                <div style={{ fontSize: '0.925rem', fontWeight: 700, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                <div
+                  style={{
+                    fontSize: '0.925rem',
+                    fontWeight: 700,
+                    color: 'var(--text-primary)',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
                   {nombreCompleto}
                 </div>
-                <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                  {user.email}
+                <div
+                  style={{
+                    fontSize: '0.75rem',
+                    color: 'var(--text-secondary)',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  Ver mi perfil →
                 </div>
               </div>
-            </div>
-            <div style={{ display: 'flex', gap: '8px' }}>
+            </button>
+            <div style={{ display: 'flex', gap: '8px', marginTop: '0.5rem' }}>
               {isVerificado && (
-                <span style={{ fontSize: '0.7rem', color: '#fff', backgroundColor: '#22c55e', padding: '2px 8px', borderRadius: '10px', fontWeight: 600 }}>
+                <span
+                  style={{
+                    fontSize: '0.7rem',
+                    color: '#fff',
+                    backgroundColor: '#22c55e',
+                    padding: '2px 8px',
+                    borderRadius: '10px',
+                    fontWeight: 600,
+                  }}
+                >
                   Verificado
                 </span>
               )}
               {isAnunciante && (
-                <span style={{ fontSize: '0.7rem', color: '#fff', backgroundColor: 'var(--brand-blue)', padding: '2px 8px', borderRadius: '10px', fontWeight: 600 }}>
+                <span
+                  style={{
+                    fontSize: '0.7rem',
+                    color: '#fff',
+                    backgroundColor: 'var(--brand-blue)',
+                    padding: '2px 8px',
+                    borderRadius: '10px',
+                    fontWeight: 600,
+                  }}
+                >
                   Anunciante
                 </span>
               )}
             </div>
           </div>
 
-          {/* Menu Options */}
           <div style={{ padding: '0.5rem' }}>
             <MenuItem
               icon={<IconStore size={18} />}
               label="Mi Negocio"
-              onClick={() => { setMostrarMenu(false); router.push('/mi-negocio'); }}
+              onClick={() => {
+                setMostrarMenu(false);
+                router.push('/mi-negocio');
+              }}
             />
             <MenuItem
-              icon={<span style={{ fontSize: '1.1rem' }}>👤</span>}
-              label="Mi Perfil"
-              onClick={() => { setMostrarMenu(false); setMostrarPerfil(true); }}
+              icon={<span style={{ fontSize: '1.1rem' }}>💬</span>}
+              label="Mensajes"
+              badge={unreadMessages}
+              onClick={() => goTo('mensajes')}
             />
             <MenuItem
-              icon={<span style={{ fontSize: '1.1rem' }}>⭐</span>}
-              label="Favoritos"
-              onClick={() => { setMostrarMenu(false); setMostrarFavoritos(true); }}
+              icon={<span style={{ fontSize: '1.1rem' }}>🔔</span>}
+              label="Notificaciones"
+              badge={unreadNotifications}
+              onClick={() => goTo('inicio')}
             />
             <MenuItem
-              icon={<span style={{ fontSize: '1.1rem' }}>🚫</span>}
-              label="Anuncios Ocultos"
-              onClick={() => { setMostrarMenu(false); setMostrarOcultos(true); }}
+              icon={<span style={{ fontSize: '1.1rem' }}>♥</span>}
+              label="Guardados"
+              onClick={() => goTo('guardados')}
+            />
+            <MenuItem
+              icon={<span style={{ fontSize: '1.1rem' }}>⚙️</span>}
+              label="Ajustes"
+              onClick={() => goTo('ajustes')}
             />
             {onProgressClick && (
               <MenuItem
                 icon={<FaChartLine size={16} />}
                 label={t('header.progress')}
-                onClick={() => { setMostrarMenu(false); onProgressClick(); }}
+                onClick={() => {
+                  setMostrarMenu(false);
+                  onProgressClick();
+                }}
               />
             )}
 
-            <div style={{ height: '1px', backgroundColor: 'var(--border-color)', margin: '0.5rem 0' }} />
-
-            <MenuItem
-              icon={<span style={{ fontSize: '1.1rem' }}>📢</span>}
-              label="Convertirse en Anunciante"
-              onClick={() => { setMostrarMenu(false); setMostrarConvertirAnunciante(true); }}
-              visible={!isAnunciante}
+            <div
+              style={{ height: '1px', backgroundColor: 'var(--border-color)', margin: '0.5rem 0' }}
             />
 
-            {/* Desktop Settings embedded */}
             <div style={{ padding: '0.5rem 0.75rem' }}>
-              <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--text-tertiary)', textTransform: 'uppercase', marginBottom: '0.5rem', letterSpacing: '0.05em' }}>
+              <div
+                style={{
+                  fontSize: '0.7rem',
+                  fontWeight: 700,
+                  color: 'var(--text-tertiary)',
+                  textTransform: 'uppercase',
+                  marginBottom: '0.5rem',
+                  letterSpacing: '0.05em',
+                }}
+              >
                 Configuración
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
@@ -273,7 +395,9 @@ export default function UserMenu({ onProgressClick, onSidebarToggle }: UserMenuP
               </div>
             </div>
 
-            <div style={{ height: '1px', backgroundColor: 'var(--border-color)', margin: '0.5rem 0' }} />
+            <div
+              style={{ height: '1px', backgroundColor: 'var(--border-color)', margin: '0.5rem 0' }}
+            />
 
             <MenuItem
               icon={<span style={{ fontSize: '1.1rem' }}>🚪</span>}
@@ -284,27 +408,25 @@ export default function UserMenu({ onProgressClick, onSidebarToggle }: UserMenuP
           </div>
         </div>
       )}
-      <FavoritosList abierto={mostrarFavoritos} onCerrar={() => setMostrarFavoritos(false)} />
-      <HiddenAdsList abierto={mostrarOcultos} onCerrar={() => setMostrarOcultos(false)} />
-      <LocationPrompt
-        abierto={mostrarLocationPrompt}
-        onCerrar={() => setMostrarLocationPrompt(false)}
-        onAceptar={() => refreshProfile()}
-      />
-      <ConvertirAnunciante
-        abierto={mostrarConvertirAnunciante}
-        onCerrar={() => setMostrarConvertirAnunciante(false)}
-        onExito={() => { }}
-      />
-      <UserProfile
-        abierto={mostrarPerfil}
-        onCerrar={() => setMostrarPerfil(false)}
-      />
     </div>
   );
 }
 
-function MenuItem({ icon, label, onClick, danger, visible = true }: { icon: React.ReactNode, label: string, onClick: () => void, danger?: boolean, visible?: boolean }) {
+function MenuItem({
+  icon,
+  label,
+  onClick,
+  danger,
+  badge,
+  visible = true,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  onClick: () => void;
+  danger?: boolean;
+  badge?: number;
+  visible?: boolean;
+}) {
   if (!visible) return null;
   return (
     <button
@@ -326,7 +448,9 @@ function MenuItem({ icon, label, onClick, danger, visible = true }: { icon: Reac
         transition: 'all 0.2s',
       }}
       onMouseEnter={(e) => {
-        e.currentTarget.style.backgroundColor = danger ? 'rgba(239, 68, 68, 0.05)' : 'var(--hover-bg)';
+        e.currentTarget.style.backgroundColor = danger
+          ? 'rgba(239, 68, 68, 0.05)'
+          : 'var(--hover-bg)';
         if (!danger) e.currentTarget.style.transform = 'translateX(4px)';
       }}
       onMouseLeave={(e) => {
@@ -334,17 +458,38 @@ function MenuItem({ icon, label, onClick, danger, visible = true }: { icon: Reac
         e.currentTarget.style.transform = 'translateX(0)';
       }}
     >
-      <div style={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        width: '24px',
-        height: '24px',
-        color: danger ? '#ef4444' : 'var(--text-secondary)'
-      }}>
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          width: '24px',
+          height: '24px',
+          color: danger ? '#ef4444' : 'var(--text-secondary)',
+        }}
+      >
         {icon}
       </div>
-      {label}
+      <span style={{ flex: 1 }}>{label}</span>
+      {badge != null && badge > 0 && (
+        <span
+          style={{
+            minWidth: 18,
+            height: 18,
+            borderRadius: 9,
+            backgroundColor: 'var(--brand-blue)',
+            color: '#fff',
+            fontSize: '10px',
+            fontWeight: 700,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '0 4px',
+          }}
+        >
+          {badge > 99 ? '99+' : badge}
+        </span>
+      )}
     </button>
   );
 }

@@ -8,6 +8,8 @@ import { getWhatsAppUrl, copiarLink, compartirNativo } from '@/lib/utils';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
 import { isMyAdiso } from '@/lib/storage';
 import { useAuth } from '@/hooks/useAuth';
+import { useUI } from '@/contexts/UIContext';
+import { trackViewHistory } from '@/lib/profile/view-history-client';
 import { registrarVisualizacion, registrarClick, registrarContacto } from '@/lib/analytics';
 import { useAdInteraction } from '@/hooks/useAdInteraction';
 import { getCategoriaThemeTokens } from '@/lib/categoria-theme';
@@ -34,7 +36,8 @@ import {
   IconComunidad,
   IconEdit,
   IconTrash,
-  IconExternalLink
+  IconExternalLink,
+  IconSend,
 } from './Icons';
 import { Categoria, UbicacionDetallada } from '@/types';
 import { getAdisoUrl } from '@/lib/url';
@@ -108,8 +111,10 @@ export default function ModalAdiso({
   const modalRef = useRef<HTMLDivElement>(null);
   const isDesktop = useMediaQuery('(min-width: 768px)');
   const esMiAdiso = isMyAdiso(adiso.id);
-  const { user } = useAuth();
+  const { user, session } = useAuth();
+  const { openAuthModal, openChat } = useUI();
   const { isFavorite, toggleFav } = useAdInteraction(adiso);
+  const [enviandoMensaje, setEnviandoMensaje] = useState(false);
   const categoryAccent = getCategoriaThemeTokens(adiso.categoria).accent;
 
   const minSwipeDistance = 50;
@@ -149,9 +154,10 @@ export default function ModalAdiso({
   useEffect(() => {
     // Backend
     registrarVisualizacion(user?.id, adiso.id);
+    trackViewHistory({ adisoId: adiso.id, source: 'direct' }, session?.access_token);
     // Optimistic UI: Incrementamos 1 sobre el valor base
     setVistasLocales(prev => prev + 1);
-  }, [user?.id, adiso.id]);
+  }, [user?.id, adiso.id, session?.access_token]);
 
 
   const getCategoriaTheme = (categoria: Categoria) => {
@@ -331,6 +337,38 @@ Ref: ${adiso.edicionNumero || adiso.id}`;
     }
   };
 
+  const sellerUserId = adiso.user_id || adiso.usuario_id || adiso.vendedor?.id;
+
+  const handleMensajeBuscadis = async () => {
+    if (!sellerUserId || esMiAdiso) return;
+    if (!user) {
+      openAuthModal();
+      return;
+    }
+    setEnviandoMensaje(true);
+    try {
+      const res = await fetch('/api/conversations', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${session?.access_token}`,
+        },
+        body: JSON.stringify({
+          recipientId: sellerUserId,
+          adisoId: adiso.id,
+          initialMessage: `Hola, me interesa: ${adiso.titulo}`,
+        }),
+      });
+      const data = (await res.json()) as { conversationId?: string };
+      if (data.conversationId) {
+        registrarContacto(user.id, adiso.id, adiso.categoria);
+        openChat(data.conversationId);
+      }
+    } finally {
+      setEnviandoMensaje(false);
+    }
+  };
+
   const handleEditar = () => {
     if (onEditar) {
       onEditar(adiso);
@@ -435,6 +473,8 @@ Ref: ${adiso.edicionNumero || adiso.id}`;
   );
 
   // Botón Principal de Contacto - Reutilizable
+  const canMessageInApp = !!sellerUserId && !esMiAdiso;
+
   const ContactButton = ({ fullWidth = false }) => {
     // Lógica para determinar el botón de contacto
     const contactosMultiples = adiso.contactosMultiples && adiso.contactosMultiples.length > 0
@@ -466,61 +506,73 @@ Ref: ${adiso.edicionNumero || adiso.id}`;
       textTransform: 'none'
     };
 
+    const waButton = (onClick: () => void, label: string, accent?: string) => (
+      <button
+        onClick={onClick}
+        className="hover:-translate-y-1 hover:brightness-110 active:scale-[0.98]"
+        style={{
+          ...baseButtonStyle,
+          width: fullWidth && canMessageInApp ? '100%' : baseButtonStyle.width,
+          flex: fullWidth && canMessageInApp ? 1 : undefined,
+          backgroundColor: accent || '#22c55e',
+          backgroundImage: accent
+            ? `linear-gradient(135deg, ${accent} 0%, ${accent}dd 100%)`
+            : 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)',
+          boxShadow: '0 10px 25px -5px rgba(34, 197, 94, 0.35)',
+        }}
+      >
+        <IconWhatsApp size={22} /> {label}
+      </button>
+    );
+
+    const buscadisButton = (
+      <button
+        type="button"
+        onClick={() => void handleMensajeBuscadis()}
+        disabled={enviandoMensaje}
+        className="hover:-translate-y-1 hover:brightness-110 active:scale-[0.98]"
+        style={{
+          ...baseButtonStyle,
+          width: fullWidth ? '100%' : baseButtonStyle.width,
+          flex: fullWidth ? 1 : undefined,
+          backgroundColor: 'var(--brand-blue)',
+          backgroundImage: 'linear-gradient(135deg, var(--brand-blue) 0%, #2563eb 100%)',
+          boxShadow: '0 10px 25px -5px rgba(var(--brand-primary-rgb), 0.35)',
+          opacity: enviandoMensaje ? 0.7 : 1,
+        }}
+      >
+        <IconSend size={20} />
+        {enviandoMensaje ? 'Abriendo…' : 'Mensaje en Buscadis'}
+      </button>
+    );
+
+    const wrap = (primary: React.ReactNode) =>
+      canMessageInApp ? (
+        <div style={{ display: 'flex', gap: '0.75rem', width: fullWidth ? '100%' : 'auto', flexDirection: fullWidth ? 'column' : 'row' }}>
+          {primary}
+          {buscadisButton}
+        </div>
+      ) : (
+        primary
+      );
+
     if (estaCaducado || esHistorico) {
-      return (
-        <button
-          onClick={() => handleContactar()}
-          className="hover:-translate-y-1 hover:brightness-110 active:scale-[0.98]"
-          style={{
-            ...baseButtonStyle,
-            backgroundColor: 'var(--brand-blue)',
-            backgroundImage: 'linear-gradient(135deg, var(--brand-blue) 0%, #2563eb 100%)'
-          }}
-        >
-          <IconWhatsApp size={22} /> {ctaLabel}
-        </button>
-      )
+      return wrap(waButton(() => handleContactar(), ctaLabel, 'var(--brand-blue)'));
     }
 
     if (contactosMultiples && contactosMultiples.length > 1) {
       const contactoPrincipal = contactosMultiples[0];
       const isWA = contactoPrincipal.tipo === 'whatsapp';
-      return (
-        <button
-          onClick={() => handleContactar(contactoPrincipal.valor)}
-          className="hover:-translate-y-1 hover:brightness-110 active:scale-[0.98]"
-          style={{
-            ...baseButtonStyle,
-            backgroundColor: isWA ? '#22c55e' : '#3b82f6',
-            backgroundImage: isWA
-              ? 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)'
-              : 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
-            boxShadow: isWA
-              ? '0 10px 25px -5px rgba(34, 197, 94, 0.4)'
-              : '0 10px 25px -5px rgba(59, 130, 246, 0.4)'
-          }}
-        >
-          {isWA ? <IconWhatsApp size={22} /> : '✉️'}
-          {contactoPrincipal.etiqueta || 'Contactar ahora'}
-        </button>
+      return wrap(
+        waButton(
+          () => handleContactar(contactoPrincipal.valor),
+          contactoPrincipal.etiqueta || 'Contactar ahora',
+          isWA ? '#22c55e' : '#3b82f6'
+        )
       );
     }
 
-    return (
-      <button
-        onClick={() => handleContactar()}
-        className="hover:-translate-y-1 hover:brightness-110 active:scale-[0.98]"
-        style={{
-          ...baseButtonStyle,
-          backgroundColor: categoryAccent,
-          backgroundImage: `linear-gradient(135deg, ${categoryAccent} 0%, ${categoryAccent}dd 100%)`,
-          boxShadow: `0 10px 25px -5px ${categoryAccent}66`,
-        }}
-      >
-        <IconWhatsApp size={22} />
-        {ctaLabel}
-      </button>
-    );
+    return wrap(waButton(() => handleContactar(), ctaLabel, categoryAccent));
   };
 
   const galleryNavBtnStyle: React.CSSProperties = {

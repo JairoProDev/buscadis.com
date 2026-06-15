@@ -41,9 +41,8 @@ export default function PublicarPage() {
                     <div className="bg-white dark:bg-zinc-800 rounded-2xl shadow-sm border border-gray-100 dark:border-zinc-700 p-6 md:p-8">
                         <FormularioPublicar
                             esPaginaCompleta={true}
-                            onPublicar={(adiso) => {
-                                success('¡Anuncio publicado! Redirigiendo…');
-                                router.push(`/?adiso=${adiso.id}`);
+                            onPublicar={() => {
+                                success('¡Anuncio publicado!');
                             }}
                             onError={(msg) => error(msg)}
                             onSuccess={(msg) => success(msg)}

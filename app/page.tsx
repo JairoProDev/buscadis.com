@@ -15,6 +15,7 @@ import { useDebounce } from '@/hooks/useDebounce';
 import { useInfiniteScroll } from '@/hooks/useInfiniteScroll';
 import { getBusquedaUrl } from '@/lib/utils';
 import { useAuth } from '@/hooks/useAuth';
+import { trackViewHistory } from '@/lib/profile/view-history-client';
 import { useUser } from '@/hooks/useUser';
 import { UbicacionDetallada } from '@/types';
 import { useNavigation } from '@/contexts/NavigationContext';
@@ -108,7 +109,7 @@ function getBrowseCountLabel(
 function HomeContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { user } = useAuth();
+  const { user, session } = useAuth();
   const { profile } = useUser();
   const adisoId = searchParams.get('adiso');
   const categoriaUrl = searchParams.get('categoria') as Categoria | null;
@@ -529,6 +530,7 @@ function HomeContent() {
   const { registrarOpener, desregistrarOpener } = useNavigation();
 
   const handleAbrirAdiso = useCallback((adiso: Adiso) => {
+    trackViewHistory({ adisoId: adiso.id, source: 'feed' }, session?.access_token);
     const indice = adisosFiltrados.findIndex(a => a.id === adiso.id);
     setIndiceAdisoActual(indice >= 0 ? indice : 0);
     setAdisoAbierto(adiso);
@@ -549,7 +551,7 @@ function HomeContent() {
     const params = new URLSearchParams(searchParams.toString());
     params.set('adiso', adiso.id);
     router.replace(`/?${params.toString()}`, { scroll: false });
-  }, [adisosFiltrados, isDesktop, router, searchParams]);
+  }, [adisosFiltrados, isDesktop, router, searchParams, session?.access_token]);
 
   // Registrar el manejador de apertura para componentes globales (como el Chatbot)
   useEffect(() => {

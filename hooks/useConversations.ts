@@ -1,107 +1,118 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from './useAuth';
-import { Conversation, Message } from '@/types';
+import { Conversation } from '@/types';
+
+async function fetchUnreadForConversations(
+  userId: string,
+  conversationIds: string[]
+): Promise<Map<string, number>> {
+  const map = new Map<string, number>();
+  if (!supabase || conversationIds.length === 0) return map;
+
+  const { data } = await supabase
+    .from('messages')
+    .select('conversation_id')
+    .in('conversation_id', conversationIds)
+    .eq('read', false)
+    .neq('sender_id', userId);
+
+  (data || []).forEach((row: { conversation_id: string }) => {
+    map.set(row.conversation_id, (map.get(row.conversation_id) || 0) + 1);
+  });
+  return map;
+}
 
 export function useConversations() {
-    const { user } = useAuth();
-    const [conversations, setConversations] = useState<Conversation[]>([]);
-    const [unreadCount, setUnreadCount] = useState(0);
-    const [loading, setLoading] = useState(true);
+  const { user, session } = useAuth();
+  const [conversations, setConversations] = useState<Conversation[]>([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [loading, setLoading] = useState(true);
 
-    // Initial fetch of conversations
-    useEffect(() => {
-        if (!user) return;
+  const fetchConversations = useCallback(async () => {
+    const db = supabase;
+    if (!user || !db) return;
+    setLoading(true);
 
-        const fetchConversations = async () => {
-            if (!supabase) return;
-            setLoading(true);
+    const { data, error } = await db
+      .from('conversations')
+      .select('id, participants, last_message, last_message_at, updated_at, created_at')
+      .contains('participants', [user.id])
+      .order('updated_at', { ascending: false });
 
-            // Fetch conversations where user is a participant
-            const { data, error } = await supabase
-                .from('conversations')
-                .select(`
-          id,
-          participants,
-          last_message,
-          last_message_at,
-          updated_at,
-          created_at,
-          unread_count:messages(count)
-        `)
-                .contains('participants', [user.id])
-                .order('updated_at', { ascending: false });
+    if (error) {
+      console.error('Error fetching conversations:', error);
+      setLoading(false);
+      return;
+    }
 
-            if (error) {
-                console.error('Error fetching conversations:', error);
-            } else {
-                // Need to fetch other participant details manually since we store IDs in array
-                // Or we could join with profiles/users table if we had a many-to-many table. 
-                // With array, we need a second query or a function.
-                // For now, let's fetch user profiles for the OTHER participant.
+    const ids = (data || []).map((c) => c.id);
+    const unreadMap = await fetchUnreadForConversations(user.id, ids);
 
-                const enhancedConversations = await Promise.all(data.map(async (conv: any) => {
-                    const otherUserId = conv.participants.find((id: string) => id !== user.id);
-                    let otherUser = null;
+    const enhanced = await Promise.all(
+      (data || []).map(async (conv) => {
+        const otherUserId = conv.participants.find((id: string) => id !== user.id);
+        let otherUser = null;
 
-                    if (otherUserId && supabase) {
-                        const { data: userData } = await supabase
-                            .from('profiles') // Assuming profiles table exists, otherwise users
-                            .select('id, email, nombre, avatar_url')
-                            .eq('id', otherUserId)
-                            .single();
-                        otherUser = userData;
-                    }
+        if (otherUserId) {
+          const { data: userData } = await db
+            .from('profiles')
+            .select('id, email, nombre, avatar_url')
+            .eq('id', otherUserId)
+            .maybeSingle();
+          otherUser = userData;
+        }
 
-                    return {
-                        ...conv,
-                        other_user: otherUser,
-                        unread_count: conv.unread_count?.[0]?.count || 0 // This count needs filtering by read=false and sender!=me
-                    };
-                }));
+        return {
+          ...conv,
+          other_user: otherUser,
+          unread_count: unreadMap.get(conv.id) || 0,
+        } as Conversation;
+      })
+    );
 
-                setConversations(enhancedConversations);
+    setConversations(enhanced);
+    setUnreadCount(Array.from(unreadMap.values()).reduce((a, b) => a + b, 0));
+    setLoading(false);
+  }, [user]);
 
-                // Caluclate total unread
-                // Note: The count aggregation above is simplistic. 
-                // Real unread count per conversation requires: count of messages where conversation_id=X AND read=false AND sender_id!=me
-                // Providing accurate unread counts in list view is computationally expensive without a materialized view or specific counters.
-                // We will implement a simpler unread check for now or fetch actual unread messages count.
-            }
-            setLoading(false);
-        };
+  useEffect(() => {
+    if (!user) {
+      setConversations([]);
+      setUnreadCount(0);
+      setLoading(false);
+      return;
+    }
 
-        fetchConversations();
+    fetchConversations();
 
-        if (!supabase) return;
+    if (!supabase) return;
+    const db = supabase;
 
-        // Realtime Subscription to Conversations (new messages update the conversation row)
-        const channel = supabase
-            .channel('public:conversations')
-            .on(
-                'postgres_changes',
-                {
-                    event: '*', // INSERT, UPDATE
-                    schema: 'public',
-                    table: 'conversations',
-                    filter: `participants=cs.{${user.id}}`, // 'cs' means contains
-                },
-                (payload) => {
-                    // Reload conversations on update to get latest message and generic info
-                    // Optimizing this would require merging payload into state
-                    fetchConversations();
-                }
-            )
-            .subscribe();
+    const channel = db
+      .channel(`conversations:${user.id}`)
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'conversations', filter: `participants=cs.{${user.id}}` },
+        () => fetchConversations()
+      )
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'messages' },
+        () => fetchConversations()
+      )
+      .subscribe();
 
-        return () => {
-            supabase?.removeChannel(channel);
-        };
-    }, [user]);
-
-    return {
-        conversations,
-        unreadCount,
-        loading,
+    return () => {
+      db.removeChannel(channel);
     };
+  }, [user, fetchConversations]);
+
+  return {
+    conversations,
+    unreadCount,
+    loading,
+    refetch: fetchConversations,
+    session,
+  };
 }

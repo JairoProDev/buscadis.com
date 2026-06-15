@@ -1,11 +1,15 @@
 'use client';
 
 import React, { useState, FormEvent, useRef, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { Adiso, AdisoFormData, Categoria, TamañoPaquete, PAQUETES, PaqueteInfo } from '@/types';
 import { saveAdiso } from '@/lib/storage';
 import { LIMITS, formatPhoneNumber, validatePhoneNumber, generarIdUnico } from '@/lib/utils';
 import { normalizeContactoForApi, resolveUbicacionForPublish } from '@/lib/publish-helpers';
 import { useAuth } from '@/hooks/useAuth';
+import { useUser } from '@/hooks/useUser';
+import { useUI } from '@/contexts/UIContext';
+import VerificationGateModal from '@/components/profile/VerificationGateModal';
 import {
   IconEmpleos,
   IconInmuebles,
@@ -87,6 +91,7 @@ const getCategoriaIcon = (categoria: Categoria): React.ComponentType<{ size?: nu
 
 const PASOS_TOTALES = 6;
 const PASOS_TOTALES_GRATUITO = 4; // Sin paquete ni imágenes
+const PUBLISH_DRAFT_KEY = 'publish_draft_v1';
 
 export default function FormularioPublicar({
   onPublicar,
@@ -116,7 +121,31 @@ export default function FormularioPublicar({
   const [errors, setErrors] = useState<Partial<Record<keyof AdisoFormData, string>>>({});
   const fileInputRef = useRef<HTMLInputElement>(null);
   const dragImagenesCounterRef = useRef(0);
+  const pendingPublishRef = useRef(false);
+  const router = useRouter();
   const { user } = useAuth();
+  const { isVerificado } = useUser();
+  const { openAuthModal } = useUI();
+  const [showVerificationGate, setShowVerificationGate] = useState(false);
+
+  useEffect(() => {
+    try {
+      const raw = sessionStorage.getItem(PUBLISH_DRAFT_KEY);
+      if (!raw) return;
+      const saved = JSON.parse(raw) as { formData?: AdisoFormData; pasoActual?: Paso };
+      if (saved.formData) setFormData(saved.formData);
+      if (saved.pasoActual) setPasoActual(saved.pasoActual);
+    } catch {
+      // ignore corrupt draft
+    }
+  }, []);
+
+  useEffect(() => {
+    sessionStorage.setItem(
+      PUBLISH_DRAFT_KEY,
+      JSON.stringify({ formData, pasoActual })
+    );
+  }, [formData, pasoActual]);
 
   const reportPublishError = (message: string) => {
     setPublishError(message);
@@ -359,16 +388,7 @@ export default function FormularioPublicar({
     return urls;
   };
 
-  const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault();
-
-    if (enviando) return;
-
-    if (!validarPaso(6)) {
-      reportPublishError('Por favor completa todos los campos requeridos');
-      return;
-    }
-
+  const commitPublish = async () => {
     setPublishError(null);
     setEnviando(true);
 
@@ -411,8 +431,10 @@ export default function FormularioPublicar({
       };
 
       const adisoGuardado = await saveAdiso(nuevoAdiso);
+      sessionStorage.removeItem(PUBLISH_DRAFT_KEY);
       onPublicar(adisoGuardado);
       onSuccess?.('¡Adiso publicado con éxito!');
+      router.push(`/perfil?tab=publicar&highlight=${adisoGuardado.id}`);
     } catch (error: unknown) {
       console.error('Error al publicar:', error);
       const err = error as { message?: string };
@@ -427,6 +449,43 @@ export default function FormularioPublicar({
       setEnviando(false);
     }
   };
+
+  const handleSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+
+    if (enviando) return;
+
+    if (!validarPaso(6)) {
+      reportPublishError('Por favor completa todos los campos requeridos');
+      return;
+    }
+
+    if (!user) {
+      pendingPublishRef.current = true;
+      openAuthModal();
+      return;
+    }
+
+    if (!isVerificado) {
+      setShowVerificationGate(true);
+      return;
+    }
+
+    await commitPublish();
+  };
+
+  useEffect(() => {
+    if (user && pendingPublishRef.current) {
+      pendingPublishRef.current = false;
+      if (!isVerificado) {
+        setShowVerificationGate(true);
+      } else {
+        void commitPublish();
+      }
+    }
+    // commitPublish intentionally omitted — stable publish closure
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, isVerificado]);
 
   // Renderizar barra de progreso
   const renderProgreso = () => (
@@ -1580,33 +1639,43 @@ export default function FormularioPublicar({
   // Mode: Page, Sidebar, or No Close handler -> Render inline (not modal)
   if (esPaginaCompleta || dentroSidebar || !onCerrar) {
     return (
-      <div
-        className={esPaginaCompleta ? "formulario-publicar-page" : "formulario-publicar-inline"}
-        style={{
-          backgroundColor: 'transparent',
-          padding: dentroSidebar ? '1.5rem' : '0',
-          width: '100%',
-          height: '100%',
-          overflowY: 'visible'
-        }}
-      >
-        <h2 style={{
-          fontSize: '1.5rem',
-          fontWeight: 700,
-          color: 'var(--text-primary)',
-          marginBottom: '1.5rem',
-          display: dentroSidebar ? 'block' : 'none' // Hide default title on full page if header already has it, or keep it?
-        }}>
-          {tituloCustom ? tituloCustom : (modoGratuito ? 'Publicar adiso gratuito' : 'Publicar adiso')}
-        </h2>
-        {/* On full page, we might want the title visible. keeping it block for now */}
+      <>
+        <div
+          className={esPaginaCompleta ? "formulario-publicar-page" : "formulario-publicar-inline"}
+          style={{
+            backgroundColor: 'transparent',
+            padding: dentroSidebar ? '1.5rem' : '0',
+            width: '100%',
+            height: '100%',
+            overflowY: 'visible'
+          }}
+        >
+          <h2 style={{
+            fontSize: '1.5rem',
+            fontWeight: 700,
+            color: 'var(--text-primary)',
+            marginBottom: '1.5rem',
+            display: dentroSidebar ? 'block' : 'none'
+          }}>
+            {tituloCustom ? tituloCustom : (modoGratuito ? 'Publicar adiso gratuito' : 'Publicar adiso')}
+          </h2>
 
-        {renderForm()}
-      </div>
+          {renderForm()}
+        </div>
+        <VerificationGateModal
+          abierto={showVerificationGate}
+          onCerrar={() => setShowVerificationGate(false)}
+          onContinuar={() => {
+            setShowVerificationGate(false);
+            void commitPublish();
+          }}
+        />
+      </>
     );
   }
 
   return (
+    <>
     <div
       style={{
         position: 'fixed',
@@ -1673,5 +1742,14 @@ export default function FormularioPublicar({
         {renderForm()}
       </div>
     </div>
+    <VerificationGateModal
+      abierto={showVerificationGate}
+      onCerrar={() => setShowVerificationGate(false)}
+      onContinuar={() => {
+        setShowVerificationGate(false);
+        void commitPublish();
+      }}
+    />
+    </>
   );
 }

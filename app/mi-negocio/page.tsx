@@ -11,7 +11,7 @@ import React, { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
-import { getBusinessCatalog } from '@/lib/business';
+import { getBusinessCatalog, listBusinessProfilesForUser } from '@/lib/business';
 import { type BusinessMemberRole, type BusinessWithRole } from '@/lib/business-access';
 
 import { publishBusinessViaAPI, saveBusinessViaAPI, createBusinessViaAPI } from '@/lib/business-api';
@@ -136,6 +136,10 @@ function BusinessBuilderPageContent() {
         try {
             setProfileLoading(true);
 
+            const memberships = await listBusinessProfilesForUser(user.id);
+            setBusinessOptions(memberships);
+
+            const businessParam = searchParams.get('business');
             const forceNew = searchParams.get('new') === '1';
             if (forceNew) {
                 setMemberRole(null);
@@ -163,6 +167,48 @@ function BusinessBuilderPageContent() {
                 setIsFirstTime(true);
                 setChatbotMinimized(false);
                 setProfile((prev) => ({ ...prev, user_id: user.id }));
+                setProfileLoading(false);
+                return;
+            }
+
+            const selectedMembership =
+                businessParam
+                    ? memberships.find((m) => m.profile.id === businessParam)
+                    : memberships[0];
+
+            if (selectedMembership?.profile) {
+                const existingProfile = selectedMembership.profile;
+                setMemberRole(selectedMembership.role);
+                setProfile(existingProfile);
+                lastSavedProfileStr.current = JSON.stringify(existingProfile);
+                setIsFirstTime(false);
+                setChatbotMinimized(true);
+
+                if (existingProfile.slug && !businessParam) {
+                    router.push(`/${existingProfile.slug}?edit=true`);
+                    return;
+                }
+
+                if (existingProfile.id) {
+                    const products = await getBusinessCatalog(existingProfile.id);
+                    setCatalogProducts(products);
+                    const mappedAdisos: Adiso[] = products.map(p => ({
+                        id: p.id,
+                        titulo: p.title || '',
+                        descripcion: p.description || '',
+                        precio: p.price,
+                        imagenesUrls: Array.isArray(p.images) ? p.images.map((img: any) => typeof img === 'string' ? img : img.url) : [],
+                        imagenUrl: Array.isArray(p.images) && p.images.length > 0 ? (typeof p.images[0] === 'string' ? p.images[0] : p.images[0].url) : '',
+                        slug: p.id,
+                        categoria: (p.category as any) || 'productos',
+                        user_id: user.id,
+                        contacto: existingProfile.contact_phone || '',
+                        ubicacion: existingProfile.contact_address || '',
+                        fechaPublicacion: p.created_at ? new Date(p.created_at).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+                        horaPublicacion: p.created_at ? new Date(p.created_at).toLocaleTimeString() : new Date().toLocaleTimeString()
+                    }));
+                    setAdisos(mappedAdisos);
+                }
                 setProfileLoading(false);
                 return;
             }

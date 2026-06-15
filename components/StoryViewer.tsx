@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '@/hooks/useAuth';
+import { trackViewHistory } from '@/lib/profile/view-history-client';
 import { useUI } from '@/contexts/UIContext';
 import { useFavoritos } from '@/contexts/FavoritosContext';
 import { StoryGroup, STORY_TIERS, Adiso } from '@/types';
@@ -142,6 +143,10 @@ export default function StoryViewer({ groups, initialGroupIndex, onClose }: Stor
     markStorySeen(story.id);
     if (user?.id) registerStoryView(story.id, user.id);
     recordStoryInteraction(story.id, 'view', session?.access_token);
+    trackViewHistory({ storyId: story.id, source: 'story' }, session?.access_token);
+    if (story.adiso_id) {
+      trackViewHistory({ adisoId: story.adiso_id, source: 'story' }, session?.access_token);
+    }
     setSheetOpen(false);
     setReplyText('');
     setFavorited(story.adiso_id ? isFavorite(story.adiso_id) : false);
