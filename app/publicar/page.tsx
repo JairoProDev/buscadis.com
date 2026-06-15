@@ -22,12 +22,18 @@ const ChatbotIANew = dynamic(() => import('@/components/ChatbotIANew'), {
   ssr: false,
 });
 
+const UnifiedSearchComposer = dynamic(() => import('@/components/UnifiedSearchComposer'), {
+  ssr: false,
+});
+
 function PublicarHubContent() {
   const searchParams = useSearchParams();
   const { setSidebarExpanded } = useNavigation();
   const { toasts, removeToast, success, error } = useToast();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [draftHint, setDraftHint] = useState<Partial<DraftListingData> | null>(null);
+  const [composerText, setComposerText] = useState('');
+  const [showAdvanced, setShowAdvanced] = useState(false);
 
   useEffect(() => {
     setSidebarExpanded(false);
@@ -39,11 +45,14 @@ function PublicarHubContent() {
     const categoria = searchParams.get('categoria');
     const text = searchParams.get('text');
     if (titulo || text) {
-      setDraftHint({
+      const hint = {
         titulo: titulo || text?.slice(0, 60) || '',
         descripcion: descripcion || text || '',
         categoria: (categoria as DraftListingData['categoria']) || 'productos',
-      });
+      };
+      setDraftHint(hint);
+      setComposerText(descripcion || text || titulo || '');
+      setShowAdvanced(true);
     }
   }, [searchParams]);
 
@@ -70,47 +79,71 @@ function PublicarHubContent() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-zinc-900 flex flex-col pb-16 md:pb-0">
+    <div className="min-h-screen bg-[var(--bg-secondary)] flex flex-col pb-16 md:pb-0">
       <Header onToggleLeftSidebar={() => setSidebarOpen(true)} seccionActiva="publicar" />
       <main className="flex-1 w-full">
-        <div className="container mx-auto px-4 py-6 max-w-6xl">
-          <h1 className="text-2xl md:text-3xl font-bold text-center mb-2">Publicar con ADIS</h1>
-          <p className="text-center text-sm text-[var(--text-secondary)] mb-6 max-w-xl mx-auto">
-            Chatea con la IA a la izquierda, revisa y publica con todas las opciones a la derecha.
+        <div className="container mx-auto px-4 py-5 md:py-8 max-w-3xl">
+          <h1 className="text-xl md:text-2xl font-bold text-center mb-1 text-[var(--text-primary)]">
+            Publica tu aviso
+          </h1>
+          <p className="text-center text-sm text-[var(--text-secondary)] mb-5">
+            Escribe aquí o usa el asistente avanzado más abajo.
           </p>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 min-h-[70vh]">
-            <section className="rounded-2xl border border-[var(--border-color)] bg-[var(--bg-primary)] overflow-hidden flex flex-col min-h-[420px]">
-              <div className="px-4 py-3 border-b border-[var(--border-color)] font-semibold text-sm">
-                ADIS — asistente de publicación
-              </div>
-              <div className="flex-1 min-h-0">
-                <ChatbotIANew
-                  onPublicar={() => success('Borrador listo — completa en el panel derecho')}
+          <UnifiedSearchComposer
+            value={composerText}
+            onChange={setComposerText}
+            initialMode="publish"
+            onNotify={(msg, type) => {
+              if (type === 'error') error(msg);
+              else if (type === 'success') success(msg);
+            }}
+          />
+
+          <div className="mt-6 text-center">
+            <button
+              type="button"
+              onClick={() => setShowAdvanced((v) => !v)}
+              className="text-sm font-medium text-[var(--brand-blue)] hover:underline"
+            >
+              {showAdvanced ? 'Ocultar opciones avanzadas' : 'Opciones avanzadas: IA, paquetes y flyer'}
+            </button>
+          </div>
+
+          {showAdvanced && (
+            <div className="mt-4 grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <section className="rounded-2xl border border-[var(--border-color)] bg-[var(--bg-primary)] overflow-hidden flex flex-col min-h-[360px] order-2 lg:order-1">
+                <div className="px-4 py-3 border-b border-[var(--border-color)] font-semibold text-sm">
+                  ADIS — asistente
+                </div>
+                <div className="flex-1 min-h-[300px] max-h-[50vh] lg:max-h-none overflow-hidden">
+                  <ChatbotIANew
+                    onPublicar={() => success('Borrador listo en el panel derecho')}
+                    onError={(msg) => error(msg)}
+                    onSuccess={(msg) => success(msg)}
+                  />
+                </div>
+              </section>
+
+              <section className="rounded-2xl border border-[var(--border-color)] bg-[var(--bg-primary)] p-4 md:p-5 overflow-y-auto order-1 lg:order-2">
+                {draftHint && (
+                  <div className="mb-4 p-3 rounded-xl bg-[rgba(var(--brand-primary-rgb),0.08)] text-sm">
+                    <p className="font-semibold m-0 mb-1">Borrador cargado</p>
+                    <p className="m-0 text-[var(--text-secondary)]">{draftHint.titulo}</p>
+                  </div>
+                )}
+                <FormularioPublicar
+                  esPaginaCompleta
+                  onPublicar={(adiso) => {
+                    success('¡Anuncio publicado!');
+                    if (adiso?.id) void handleFlyer(adiso.id);
+                  }}
                   onError={(msg) => error(msg)}
                   onSuccess={(msg) => success(msg)}
                 />
-              </div>
-            </section>
-
-            <section className="rounded-2xl border border-[var(--border-color)] bg-[var(--bg-primary)] p-4 md:p-6 overflow-y-auto">
-              {draftHint && (
-                <div className="mb-4 p-3 rounded-xl bg-[rgba(var(--brand-primary-rgb),0.08)] text-sm">
-                  <p className="font-semibold m-0 mb-1">Borrador desde el buscador</p>
-                  <p className="m-0 text-[var(--text-secondary)]">{draftHint.titulo}</p>
-                </div>
-              )}
-              <FormularioPublicar
-                esPaginaCompleta
-                onPublicar={(adiso) => {
-                  success('¡Anuncio publicado!');
-                  if (adiso?.id) void handleFlyer(adiso.id);
-                }}
-                onError={(msg) => error(msg)}
-                onSuccess={(msg) => success(msg)}
-              />
-            </section>
-          </div>
+              </section>
+            </div>
+          )}
         </div>
       </main>
       <LeftSidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />

@@ -1,16 +1,14 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import Buscador from './Buscador';
+import Buscador, { ComposerMode } from './Buscador';
 import { DraftListingCard, DraftListingData } from './ai/DraftListingCard';
 import { useAuth } from '@/hooks/useAuth';
 import { useUI } from '@/contexts/UIContext';
 import { Categoria } from '@/types';
-import { IconSearch, IconMegaphone } from './Icons';
 import { FREE_TIER_LIMITS } from '@/lib/publish/tiers';
 import InterestPreviewPanel from './publish/InterestPreviewPanel';
 
-type ComposerMode = 'search' | 'publish';
 type PublishTierChoice = 'free' | 'pro';
 
 interface UnifiedSearchComposerProps {
@@ -23,6 +21,8 @@ interface UnifiedSearchComposerProps {
   filtersVisible?: boolean;
   onToggleFilters?: () => void;
   activeFiltersCount?: number;
+  /** Modo inicial al montar (p. ej. en /publicar) */
+  initialMode?: ComposerMode;
 }
 
 const MIN_AI_LENGTH = 12;
@@ -38,10 +38,11 @@ export default function UnifiedSearchComposer({
   filtersVisible,
   onToggleFilters,
   activeFiltersCount,
+  initialMode = 'search',
 }: UnifiedSearchComposerProps) {
   const { user, profile, session } = useAuth();
   const { openAuthModal } = useUI();
-  const [composerMode, setComposerMode] = useState<ComposerMode>('search');
+  const [composerMode, setComposerMode] = useState<ComposerMode>(initialMode);
   const [publishTier, setPublishTier] = useState<PublishTierChoice>('free');
   const [intent, setIntent] = useState<'search' | 'publish' | null>(null);
   const [draft, setDraft] = useState<DraftListingData | null>(null);
@@ -149,55 +150,30 @@ export default function UnifiedSearchComposer({
 
   return (
     <div>
-      {!compact && (
-        <div className="flex justify-center gap-1 mb-2 p-1 rounded-full bg-[var(--bg-secondary)] border border-[var(--border-color)] max-w-md mx-auto">
-          <button
-            type="button"
-            onClick={() => setComposerMode('search')}
-            className={`flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-full text-xs font-semibold transition-colors ${
-              composerMode === 'search'
-                ? 'bg-[var(--brand-blue)] text-white'
-                : 'text-[var(--text-secondary)]'
-            }`}
-          >
-            <IconSearch size={14} /> Buscar
-          </button>
-          <button
-            type="button"
-            onClick={() => setComposerMode('publish')}
-            className={`flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-full text-xs font-semibold transition-colors ${
-              composerMode === 'publish'
-                ? 'bg-[var(--brand-yellow)] text-[#1a1a1a]'
-                : 'text-[var(--text-secondary)]'
-            }`}
-          >
-            <IconMegaphone size={14} /> Publicar
-          </button>
-        </div>
-      )}
-
       <Buscador
         value={value}
         onChange={onChange}
         compact={compact}
+        composerMode={composerMode}
+        onComposerModeChange={setComposerMode}
         onCategoryDetected={onCategoryDetected}
         onNotify={onNotify}
-        showFilterToggle={showFilterToggle}
+        showFilterToggle={showFilterToggle && composerMode === 'search'}
         filtersVisible={filtersVisible}
         onToggleFilters={onToggleFilters}
         activeFiltersCount={activeFiltersCount}
       />
 
       {composerMode === 'publish' && !compact && (
-        <div className="mt-3 space-y-3">
-          <div className="flex gap-2 justify-center">
+        <div className="mt-3 space-y-3 md:max-w-2xl md:mx-auto">
+          <div className="flex gap-2 justify-center flex-wrap">
             <button
               type="button"
               onClick={() => setPublishTier('free')}
-              className={`text-xs px-3 py-1.5 rounded-full border font-medium ${
+              className={`text-xs px-3 py-1.5 rounded-full border font-medium transition-colors ${
                 publishTier === 'free'
                   ? 'border-[var(--brand-blue)] bg-[rgba(var(--brand-primary-rgb),0.1)] text-[var(--brand-blue)]'
-                  : 'border-[var(--border-color)] text-[var(--text-secondary)]'
+                  : 'border-[var(--border-color)] text-[var(--text-secondary)] hover:border-[var(--brand-blue)]/40'
               }`}
             >
               Gratis · 24h
@@ -205,10 +181,10 @@ export default function UnifiedSearchComposer({
             <button
               type="button"
               onClick={() => setPublishTier('pro')}
-              className={`text-xs px-3 py-1.5 rounded-full border font-medium ${
+              className={`text-xs px-3 py-1.5 rounded-full border font-medium transition-colors ${
                 publishTier === 'pro'
                   ? 'border-[var(--brand-yellow)] bg-[rgba(var(--brand-yellow-rgb),0.15)] text-[#b8860b]'
-                  : 'border-[var(--border-color)] text-[var(--text-secondary)]'
+                  : 'border-[var(--border-color)] text-[var(--text-secondary)] hover:border-[var(--brand-yellow)]/50'
               }`}
             >
               Con IA · más alcance
@@ -261,14 +237,6 @@ export default function UnifiedSearchComposer({
               Sigue escribiendo como un anuncio para que la IA lo arme.
             </p>
           )}
-        </div>
-      )}
-
-      {composerMode === 'search' && intent && !compact && (
-        <div className="flex items-center justify-center mt-2">
-          <span className="inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1 rounded-full bg-[rgba(var(--brand-primary-rgb),0.1)] text-[var(--brand-blue)]">
-            <IconSearch size={12} /> Buscando en Buscadis
-          </span>
         </div>
       )}
     </div>
