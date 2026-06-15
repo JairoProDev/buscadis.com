@@ -368,7 +368,7 @@ export default function Header({
                   aria-current={isActive ? 'page' : undefined}
                   style={{
                     height: '100%',
-                    padding: '0 10px',
+                    padding: '0 8px',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -381,10 +381,11 @@ export default function Header({
                       flexDirection: 'column',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      gap: '2px',
-                      width: '56px',
-                      height: '56px',
+                      gap: '1px',
                       boxSizing: 'border-box',
+                      padding: '2px',
+                      height: 'calc(100% - 6px)',
+                      aspectRatio: '1',
                       borderRadius: '14px',
                       background: isActive ? publishCta.backgroundActive : publishCta.background,
                       boxShadow: isActive ? publishCta.shadowActive : publishCta.shadow,
@@ -392,14 +393,15 @@ export default function Header({
                       transition: 'transform 0.2s ease, box-shadow 0.2s ease',
                     }}
                   >
-                    <IconMegaphone size={18} color={publishCta.iconColor} />
+                    <IconMegaphone size={30} color={publishCta.iconColor} />
                     <span
                       style={{
-                        fontSize: '9px',
-                        fontWeight: 700,
+                        fontSize: '14px',
+                        fontWeight: 600,
                         color: publishCta.labelColor,
                         lineHeight: 1,
-                        letterSpacing: '0.01em',
+                        letterSpacing: '-0.02em',
+                        whiteSpace: 'nowrap',
                       }}
                     >
                       {item.label}
