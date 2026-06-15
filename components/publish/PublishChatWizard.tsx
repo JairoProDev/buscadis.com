@@ -50,7 +50,7 @@ function delay(ms: number) {
 function formatAnswer(step: PublishChatStepId, value: string, draft: PublishChatDraft): string {
   if (step === 'categoria') {
     const opt = CATEGORIA_OPTIONS.find((c) => c.value === value);
-    return opt ? `${opt.emoji} ${opt.label}` : value;
+    return opt ? opt.label : value;
   }
   if (step === 'precio') {
     if (value === 'skip') return 'Sin precio';
@@ -250,7 +250,7 @@ export default function PublishChatWizard({
       setTyping(true);
       await delay(400);
       setTyping(false);
-      addUser(`${catLabel?.emoji ?? ''} ${catLabel?.label ?? cat}`, 'categoria');
+      addUser(catLabel?.label ?? cat, 'categoria');
       await delay(350);
       addUser(nextDraft.titulo, 'titulo');
       await delay(350);

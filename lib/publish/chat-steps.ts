@@ -19,15 +19,15 @@ export interface PublishChatDraft {
   imageUrl?: string;
 }
 
-export const CATEGORIA_OPTIONS: { value: Categoria; label: string; emoji: string }[] = [
-  { value: 'productos', label: 'Productos', emoji: '📦' },
-  { value: 'inmuebles', label: 'Inmuebles', emoji: '🏠' },
-  { value: 'vehiculos', label: 'Vehículos', emoji: '🚗' },
-  { value: 'empleos', label: 'Empleos', emoji: '💼' },
-  { value: 'servicios', label: 'Servicios', emoji: '🔧' },
-  { value: 'eventos', label: 'Eventos', emoji: '📅' },
-  { value: 'negocios', label: 'Negocios', emoji: '🏪' },
-  { value: 'comunidad', label: 'Comunidad', emoji: '👥' },
+export const CATEGORIA_OPTIONS: { value: Categoria; label: string }[] = [
+  { value: 'empleos', label: 'Empleos' },
+  { value: 'inmuebles', label: 'Inmuebles' },
+  { value: 'vehiculos', label: 'Vehículos' },
+  { value: 'servicios', label: 'Servicios' },
+  { value: 'productos', label: 'Productos' },
+  { value: 'eventos', label: 'Eventos' },
+  { value: 'negocios', label: 'Negocios' },
+  { value: 'comunidad', label: 'Comunidad' },
 ];
 
 export const PRECIO_OPTIONS = [

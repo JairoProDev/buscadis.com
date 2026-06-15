@@ -9,9 +9,11 @@ interface ComposerModeToggleProps {
   mode: ComposerMode;
   onChange: (mode: ComposerMode) => void;
   className?: string;
+  /** Solo íconos (panel lateral / espacio reducido) */
+  iconsOnly?: boolean;
 }
 
-export default function ComposerModeToggle({ mode, onChange, className = '' }: ComposerModeToggleProps) {
+export default function ComposerModeToggle({ mode, onChange, className = '', iconsOnly = false }: ComposerModeToggleProps) {
   const trackRef = useRef<HTMLDivElement>(null);
   const searchRef = useRef<HTMLButtonElement>(null);
   const publishRef = useRef<HTMLButtonElement>(null);
@@ -48,7 +50,9 @@ export default function ComposerModeToggle({ mode, onChange, className = '' }: C
       ref={trackRef}
       role="tablist"
       aria-label="Buscar o publicar"
-      className={`composer-mode-track relative flex shrink-0 items-center rounded-full bg-[var(--bg-tertiary)] p-0.5 mr-2.5 md:mr-3 ${className}`}
+      className={`composer-mode-track relative flex shrink-0 items-center rounded-full bg-[var(--bg-tertiary)] p-0.5 ${
+        iconsOnly ? 'mr-1.5' : 'mr-2.5 md:mr-3'
+      } ${className}`}
     >
       <motion.div
         className="composer-mode-pill absolute top-0.5 bottom-0.5 rounded-full pointer-events-none"
@@ -73,7 +77,9 @@ export default function ComposerModeToggle({ mode, onChange, className = '' }: C
         aria-label="Buscar"
         title="Buscar"
         onClick={() => onChange('search')}
-        className="relative z-[1] flex items-center justify-center gap-1 rounded-full font-semibold text-[11px] md:text-xs h-8 md:h-9 min-w-[36px] md:min-w-0 md:px-3"
+        className={`relative z-[1] flex items-center justify-center rounded-full font-semibold ${
+          iconsOnly ? 'w-7 h-7' : 'gap-1 text-[11px] md:text-xs h-8 md:h-9 min-w-[36px] md:min-w-0 md:px-3'
+        }`}
         whileTap={{ scale: 0.94 }}
       >
         <motion.span
@@ -84,8 +90,8 @@ export default function ComposerModeToggle({ mode, onChange, className = '' }: C
           transition={spring}
           className="flex items-center gap-1"
         >
-          <IconSearch size={14} color="currentColor" />
-          <span className="hidden md:inline">Buscar</span>
+          <IconSearch size={iconsOnly ? 13 : 14} color="currentColor" />
+          {!iconsOnly && <span className="hidden md:inline">Buscar</span>}
         </motion.span>
       </motion.button>
 
@@ -97,7 +103,9 @@ export default function ComposerModeToggle({ mode, onChange, className = '' }: C
         aria-label="Publicar"
         title="Publicar"
         onClick={() => onChange('publish')}
-        className="relative z-[1] flex items-center justify-center gap-1 rounded-full font-semibold text-[11px] md:text-xs h-8 md:h-9 min-w-[36px] md:min-w-0 md:px-3"
+        className={`relative z-[1] flex items-center justify-center rounded-full font-semibold ${
+          iconsOnly ? 'w-7 h-7' : 'gap-1 text-[11px] md:text-xs h-8 md:h-9 min-w-[36px] md:min-w-0 md:px-3'
+        }`}
         whileTap={{ scale: 0.94 }}
       >
         <motion.span
@@ -108,8 +116,8 @@ export default function ComposerModeToggle({ mode, onChange, className = '' }: C
           transition={spring}
           className="flex items-center gap-1"
         >
-          <IconMegaphone size={14} color="currentColor" />
-          <span className="hidden md:inline">Publicar</span>
+          <IconMegaphone size={iconsOnly ? 13 : 14} color="currentColor" />
+          {!iconsOnly && <span className="hidden md:inline">Publicar</span>}
         </motion.span>
       </motion.button>
     </div>

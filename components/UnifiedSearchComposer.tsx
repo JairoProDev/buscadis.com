@@ -22,6 +22,8 @@ interface UnifiedSearchComposerProps {
   /** modal = tier modal on publish; chat = feed into PublishChatWizard */
   publishBehavior?: 'modal' | 'chat';
   onPublishToChat?: (payload: { text: string; imageUrl: string | null }) => void;
+  /** Barra plana para panel lateral (sin borde animado ni forma de píldora) */
+  flat?: boolean;
 }
 
 export default function UnifiedSearchComposer({
@@ -37,6 +39,7 @@ export default function UnifiedSearchComposer({
   initialMode = 'search',
   publishBehavior = 'modal',
   onPublishToChat,
+  flat = false,
 }: UnifiedSearchComposerProps) {
   const [composerMode, setComposerMode] = useState<ComposerMode>(initialMode);
   const [tierModalOpen, setTierModalOpen] = useState(false);
@@ -113,6 +116,7 @@ export default function UnifiedSearchComposer({
         value={value}
         onChange={handleComposerChange}
         compact={compact}
+        flat={flat}
         composerMode={composerMode}
         onComposerModeChange={(mode) => {
           setComposerMode(mode);

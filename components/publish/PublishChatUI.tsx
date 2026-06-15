@@ -4,8 +4,9 @@ import { motion } from 'framer-motion';
 import { FaPencilAlt, FaPaperPlane, FaCheck } from 'react-icons/fa';
 import { IconAdis } from '@/components/Icons';
 import PublishImagePreview from './PublishImagePreview';
+import { getCategoriaIcon, PUBLISH_CATEGORIAS } from '@/lib/categoria-icons';
+import { getCategoriaThemeTokens } from '@/lib/categoria-theme';
 import {
-  CATEGORIA_OPTIONS,
   PRECIO_OPTIONS,
   PublishChatDraft,
   PublishChatStepId,
@@ -243,23 +244,33 @@ export function PublishCategoryGrid({
   onSelect: (value: string) => void;
 }) {
   return (
-    <div className={`grid gap-1.5 ${compact ? 'grid-cols-2' : 'grid-cols-2 sm:grid-cols-4'}`}>
-      {CATEGORIA_OPTIONS.map((opt, i) => (
-        <motion.button
-          key={opt.value}
-          type="button"
-          initial={{ opacity: 0, y: 6 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: i * 0.04 }}
-          onClick={() => onSelect(opt.value)}
-          className={`group flex items-center gap-2 rounded-xl text-left transition-all hover:scale-[1.02] active:scale-[0.98] ring-1 ring-black/[0.05] bg-[var(--bg-primary)] hover:ring-[rgba(var(--brand-primary-rgb),0.35)] hover:shadow-md ${compact ? 'px-2 py-2' : 'px-3 py-2.5'}`}
-        >
-          <span className={`${compact ? 'text-base' : 'text-lg'} leading-none`}>{opt.emoji}</span>
-          <span className={`font-semibold text-[var(--text-primary)] ${compact ? 'text-[11px]' : 'text-xs'}`}>
-            {opt.label}
-          </span>
-        </motion.button>
-      ))}
+    <div className={`grid gap-2 ${compact ? 'grid-cols-4' : 'grid-cols-4 sm:grid-cols-4'}`}>
+      {PUBLISH_CATEGORIAS.map((opt, i) => {
+        const Icon = getCategoriaIcon(opt.value);
+        const accent = getCategoriaThemeTokens(opt.value).accent;
+        return (
+          <motion.button
+            key={opt.value}
+            type="button"
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: i * 0.03 }}
+            onClick={() => onSelect(opt.value)}
+            className="group flex flex-col items-center gap-1 rounded-xl p-1 transition-transform hover:scale-[1.03] active:scale-[0.97]"
+          >
+            <span
+              className={`flex items-center justify-center rounded-xl border-2 border-[rgba(var(--brand-yellow-rgb),0.55)] bg-[var(--bg-primary)] shadow-sm transition-all group-hover:border-[var(--brand-yellow)] group-hover:shadow-md ${compact ? 'w-9 h-9' : 'w-11 h-11'}`}
+            >
+              <Icon size={compact ? 16 : 20} color={accent} />
+            </span>
+            <span
+              className={`font-semibold text-center leading-tight text-[var(--text-secondary)] group-hover:text-[var(--brand-blue)] ${compact ? 'text-[9px]' : 'text-[10px]'}`}
+            >
+              {opt.label}
+            </span>
+          </motion.button>
+        );
+      })}
     </div>
   );
 }
@@ -409,7 +420,9 @@ export function PublishChatSummary({
   onRemoveImage: () => void;
   onPublish: () => void;
 }) {
-  const cat = CATEGORIA_OPTIONS.find((c) => c.value === draft.categoria);
+  const cat = PUBLISH_CATEGORIAS.find((c) => c.value === draft.categoria);
+  const CatIcon = getCategoriaIcon(draft.categoria);
+  const catAccent = getCategoriaThemeTokens(draft.categoria).accent;
 
   return (
     <motion.div
@@ -437,7 +450,8 @@ export function PublishChatSummary({
         </div>
         <div className="flex flex-wrap gap-1.5">
           <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-[rgba(var(--brand-primary-rgb),0.1)] text-[var(--brand-blue)]">
-            {cat?.emoji} {cat?.label}
+            <CatIcon size={10} color={catAccent} />
+            {cat?.label}
           </span>
           {draft.ubicacion && (
             <span className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-[var(--bg-tertiary)] text-[var(--text-secondary)]">

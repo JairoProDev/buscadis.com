@@ -37,6 +37,8 @@ interface BuscadorProps {
   onPublishImageSelected?: (file: File) => void;
   publishImageAttached?: boolean;
   publishImageUploading?: boolean;
+  /** Barra plana sin borde animado (panel lateral) */
+  flat?: boolean;
 }
 
 function readFileAsDataUrl(file: File): Promise<string> {
@@ -69,6 +71,7 @@ export default function Buscador({
   onPublishImageSelected,
   publishImageAttached = false,
   publishImageUploading = false,
+  flat = false,
 }: BuscadorProps) {
   const { t } = useTranslation();
   const { isListening, isSupported, start: startVoice, stop: stopVoice } = useSpeechRecognition('es-PE');
@@ -125,7 +128,9 @@ export default function Buscador({
 
   const defaultPlaceholder =
     composerMode === 'publish'
-      ? 'Publica ofertas y oportunidades…'
+      ? flat
+        ? 'Describe tu aviso…'
+        : 'Publica ofertas y oportunidades…'
       : t('search.placeholder') || 'Buscar ofertas y oportunidades…';
   const placeholder = placeholderProp || defaultPlaceholder;
 
@@ -208,19 +213,22 @@ export default function Buscador({
   };
 
   const isCompact = compact && !minimal;
-  const actionBtnClass =
-    'flex items-center justify-center rounded-full transition-all disabled:opacity-50 disabled:pointer-events-none w-8 h-8 md:w-10 md:h-10 shrink-0';
+  const actionBtnClass = flat
+    ? 'flex items-center justify-center rounded-lg transition-all disabled:opacity-50 disabled:pointer-events-none w-7 h-7 shrink-0'
+    : 'flex items-center justify-center rounded-full transition-all disabled:opacity-50 disabled:pointer-events-none w-8 h-8 md:w-10 md:h-10 shrink-0';
 
-  const radiusClass = minimal ? 'rounded-xl' : isCompact ? 'rounded-full' : 'rounded-2xl';
+  const radiusClass = flat || minimal ? 'rounded-xl' : isCompact ? 'rounded-xl' : 'rounded-2xl';
   const shellPadding = minimal
     ? 'px-2.5 py-1'
-    : isCompact
-      ? 'px-3 py-2 md:px-4 md:py-2.5'
-      : 'px-3 py-2 md:px-4 md:py-3';
-  const iconSize = minimal ? 16 : isCompact ? 18 : 20;
+    : flat
+      ? 'px-2 py-1'
+      : isCompact
+        ? 'px-3 py-2'
+        : 'px-3 py-2 md:px-4 md:py-3';
+  const iconSize = minimal ? 16 : flat ? 14 : isCompact ? 18 : 20;
   const searchIconClass = minimal ? 'w-4 h-4 mr-2' : 'w-5 h-5 mr-2 md:mr-3';
-  const shellAlign = fieldMultiline && isPublishMode ? 'items-start' : 'items-center';
-  const fieldMinH = 'min-h-[36px] md:min-h-[40px]';
+  const shellAlign = flat ? 'items-center' : fieldMultiline && isPublishMode ? 'items-start' : 'items-center';
+  const fieldMinH = flat ? 'h-8' : 'min-h-[36px] md:min-h-[40px]';
   const showPrimaryAction = Boolean(onPrimaryAction) && showComposerToggle;
 
   const handleFieldKeyDown = (e: KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -238,14 +246,222 @@ export default function Buscador({
     <ComposerModeToggle
       mode={composerMode}
       onChange={(m) => onComposerModeChange?.(m)}
-      className={isPublishMode && fieldMultiline ? 'self-center' : ''}
+      iconsOnly={flat}
+      className={isPublishMode && fieldMultiline && !flat ? 'self-center' : ''}
     />
   ) : null;
+
+  const flatFieldClass =
+    'brand-search-input w-full min-w-0 flex-1 border-none outline-none bg-transparent truncate text-sm h-8 leading-8 py-0';
+
+  const shellInner = (
+    <>
+      {modeToggle}
+
+      <div className={`composer-field-wrap flex-1 min-w-0 flex items-center overflow-hidden ${fieldMinH}`}>
+        {!showComposerToggle && (
+          <FaSearch className={`${searchIconClass} text-[var(--brand-blue)] flex-shrink-0 transition-transform group-focus-within:scale-110`} />
+        )}
+
+        <AnimatePresence mode="wait" initial={false}>
+          {isPublishMode ? (
+            flat ? (
+              <motion.input
+                key="publish-field-flat"
+                type="text"
+                initial={{ opacity: 0, y: 5 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -5 }}
+                transition={{ duration: 0.24, ease: [0.34, 1.2, 0.64, 1] }}
+                placeholder={placeholder}
+                value={value}
+                onChange={(e) => onChange(e.target.value)}
+                onKeyDown={handleFieldKeyDown}
+                className={flatFieldClass}
+              />
+            ) : (
+              <motion.div
+                key="publish-field"
+                className="flex-1 min-w-0 w-full"
+                initial={{ opacity: 0, y: 5 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -5 }}
+                transition={{ duration: 0.24, ease: [0.34, 1.2, 0.64, 1] }}
+              >
+                <textarea
+                  ref={textareaRef}
+                  rows={1}
+                  placeholder={placeholder}
+                  value={value}
+                  onChange={(e) => onChange(e.target.value)}
+                  onInput={adjustTextareaHeight}
+                  onKeyDown={handleFieldKeyDown}
+                  className={`brand-search-input brand-search-textarea w-full border-none outline-none bg-transparent resize-none overflow-y-auto max-h-[220px] text-[16px] leading-[36px] md:leading-[40px] ${
+                    fieldMultiline ? 'py-1' : 'py-0 h-9 md:h-10'
+                  }`}
+                />
+              </motion.div>
+            )
+          ) : (
+            <motion.input
+              key="search-field"
+              type="search"
+              initial={{ opacity: 0, y: 5 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -5 }}
+              transition={{ duration: 0.24, ease: [0.34, 1.2, 0.64, 1] }}
+              placeholder={placeholder}
+              value={value}
+              onChange={(e) => onChange(e.target.value)}
+              onKeyDown={handleFieldKeyDown}
+              className={`brand-search-input flex-1 min-w-0 w-full border-none outline-none bg-transparent truncate ${fieldMinH} ${
+                minimal || flat ? 'text-sm py-0' : 'text-[16px] py-0 h-9 md:h-10'
+              }`}
+            />
+          )}
+        </AnimatePresence>
+      </div>
+
+      {!minimal && (
+        <motion.div
+          layout
+          className={`brand-search-divider flex items-center shrink-0 gap-0 border-l ${
+            flat ? 'ml-1 pl-1 gap-0' : 'ml-1 pl-1 md:gap-0.5 md:ml-2 md:pl-2'
+          } ${isPublishMode && fieldMultiline && !flat ? 'self-start mt-1' : ''}`}
+          transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+        >
+          {showFilterToggle && onToggleFilters && composerMode === 'search' && (
+            <button
+              type="button"
+              onClick={onToggleFilters}
+              className={`${actionBtnClass} relative ${
+                filtersVisible
+                  ? 'text-[var(--brand-blue)] bg-[var(--hover-bg)]'
+                  : 'text-[var(--text-secondary)] hover:text-[var(--brand-blue)] hover:bg-[var(--hover-bg)]'
+              }`}
+              title={filtersVisible ? 'Ocultar filtros' : 'Mostrar filtros'}
+              aria-label={filtersVisible ? 'Ocultar filtros' : 'Mostrar filtros'}
+              aria-pressed={filtersVisible}
+            >
+              <IconFilterFunnel size={iconSize} />
+              {activeFiltersCount > 0 && (
+                <span className="absolute top-1 right-1 w-1.5 h-1.5 bg-[var(--brand-blue)] border border-[var(--search-bg,var(--bg-primary))] rounded-full" />
+              )}
+            </button>
+          )}
+
+          <button
+            type="button"
+            onClick={handleVoiceSearch}
+            disabled={isAnalyzingImage || publishImageUploading}
+            className={`${actionBtnClass} ${
+              isListening
+                ? 'text-red-500 bg-red-500/10 animate-pulse'
+                : 'text-[var(--brand-blue)]/80 hover:text-[var(--brand-blue)] hover:bg-[var(--hover-bg)]'
+            }`}
+            title={isListening ? 'Escuchando… (tocar para detener)' : 'Búsqueda por voz'}
+            aria-label={isListening ? 'Detener búsqueda por voz' : 'Búsqueda por voz'}
+            aria-pressed={isListening}
+          >
+            <IconMicrophone size={iconSize} />
+          </button>
+
+          {isPublishMode && onPublishImageSelected ? (
+            <button
+              type="button"
+              onClick={() => publishImageInputRef.current?.click()}
+              disabled={publishImageUploading || isListening}
+              className={`${actionBtnClass} relative ${
+                publishImageAttached
+                  ? 'text-[var(--brand-blue)] bg-[rgba(var(--brand-primary-rgb),0.12)]'
+                  : 'text-[var(--text-secondary)] hover:text-[var(--brand-blue)] hover:bg-[var(--hover-bg)]'
+              } ${publishImageUploading ? 'animate-pulse' : ''}`}
+              title={publishImageAttached ? 'Foto adjunta · tocar para cambiar' : 'Adjuntar foto'}
+              aria-label="Adjuntar foto al anuncio"
+            >
+              <IconImage size={iconSize} />
+              {publishImageAttached && (
+                <span className="absolute top-1 right-1 w-1.5 h-1.5 bg-[var(--brand-blue)] border border-[var(--search-bg,var(--bg-primary))] rounded-full" />
+              )}
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={() => {
+                const isMobile = typeof window !== 'undefined' && window.matchMedia('(max-width: 767px)').matches;
+                if (isMobile && cameraInputRef.current) {
+                  cameraInputRef.current.click();
+                } else if (fileInputRef.current) {
+                  fileInputRef.current.click();
+                }
+              }}
+              disabled={isAnalyzingImage || isListening}
+              className={`${actionBtnClass} text-[var(--text-secondary)] hover:text-[var(--brand-yellow)] hover:bg-[rgba(var(--brand-yellow-rgb),0.12)] ${
+                isAnalyzingImage ? 'animate-pulse text-[var(--brand-yellow)]' : ''
+              }`}
+              title="Búsqueda visual (foto)"
+              aria-label="Búsqueda visual con foto"
+            >
+              <IconGoogleLens size={iconSize} />
+            </button>
+          )}
+
+          {showPrimaryAction && (
+            <motion.button
+              type="button"
+              layout
+              onClick={onPrimaryAction}
+              disabled={primaryActionDisabled || primaryActionLoading}
+              whileTap={{ scale: 0.94 }}
+              className={`flex items-center justify-center font-bold shrink-0 transition-all disabled:opacity-45 disabled:pointer-events-none ml-0.5 ${
+                flat
+                  ? 'rounded-lg w-7 h-7'
+                  : 'rounded-full gap-1 h-8 md:h-9 px-2.5 md:px-3.5 text-[11px] md:text-xs'
+              } ${
+                isPublishMode
+                  ? 'bg-[var(--brand-yellow)] text-[#1c1608] shadow-[0_2px_10px_rgba(var(--brand-yellow-rgb),0.45)] hover:brightness-105'
+                  : 'bg-[var(--brand-blue)] text-white shadow-[0_2px_10px_rgba(var(--brand-primary-rgb),0.35)] hover:brightness-105'
+              }`}
+              title={primaryLabel}
+              aria-label={primaryLabel}
+            >
+              {primaryActionLoading ? (
+                <span className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+              ) : isPublishMode ? (
+                flat ? (
+                  <IconMegaphone size={13} color="currentColor" />
+                ) : (
+                  <>
+                    <IconMegaphone size={14} color="currentColor" />
+                    <span className="hidden sm:inline">{primaryLabel}</span>
+                  </>
+                )
+              ) : flat ? (
+                <IconSearch size={13} color="currentColor" />
+              ) : (
+                <>
+                  <IconSearch size={14} color="currentColor" />
+                  <span className="hidden sm:inline">{primaryLabel}</span>
+                </>
+              )}
+            </motion.button>
+          )}
+        </motion.div>
+      )}
+    </>
+  );
+
+  const shellClassName = `
+    brand-search-shell relative flex flex-nowrap ${shellAlign} ${radiusClass} ${shellPadding}
+    transition-all duration-300 motion-reduce:transition-none
+    ${isPublishMode ? 'composer-mode-publish' : ''}
+    ${flat ? 'gap-0.5' : ''}
+  `;
 
   return (
     <div
       className={`transition-all duration-300 ${
-        minimal ? '' : `-mx-4 px-4 ${isCompact ? 'py-1' : 'py-2'} md:mx-0 md:px-0`
+        minimal || flat ? '' : `-mx-4 px-4 ${isCompact ? 'py-1' : 'py-2'} md:mx-0 md:px-0`
       }`}
     >
       <input
@@ -276,190 +492,28 @@ export default function Buscador({
         }}
       />
 
-      <div className={`relative group z-30 ${minimal ? 'w-full' : 'md:mx-auto md:max-w-2xl'}`}>
-        <div
-          className={`brand-search-glow relative ${radiusClass} ${minimal ? 'p-[1px]' : 'p-[2px]'} ${
-            isPublishMode ? 'composer-mode-publish' : ''
-          }`}
-        >
+      <div className={`relative group z-30 ${minimal || flat ? 'w-full' : 'md:mx-auto md:max-w-2xl'}`}>
+        {flat ? (
           <div
-            className={`
-              brand-search-shell relative flex ${shellAlign} ${radiusClass} ${shellPadding}
-              transition-all duration-300 motion-reduce:transition-none
-              ${isPublishMode ? 'composer-mode-publish' : ''}
-              ${minimal ? '' : 'hover:-translate-y-0.5 motion-reduce:hover:translate-y-0'}
-              focus-within:ring-2 focus-within:ring-[var(--brand-blue)]/35 dark:focus-within:ring-[var(--brand-blue)]/50
-              focus-within:shadow-[0_8px_24px_rgba(var(--brand-primary-rgb),0.18)]
-            `}
-          >
-          {modeToggle}
-
-          <div className={`composer-field-wrap flex-1 min-w-0 flex items-center ${fieldMinH}`}>
-          {!showComposerToggle && (
-            <FaSearch className={`${searchIconClass} text-[var(--brand-blue)] flex-shrink-0 transition-transform group-focus-within:scale-110`} />
-          )}
-
-          <AnimatePresence mode="wait" initial={false}>
-            {isPublishMode ? (
-              <motion.div
-                key="publish-field"
-                className="flex-1 min-w-0 w-full"
-                initial={{ opacity: 0, y: 5 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -5 }}
-                transition={{ duration: 0.24, ease: [0.34, 1.2, 0.64, 1] }}
-              >
-                <textarea
-                  ref={textareaRef}
-                  rows={1}
-                  placeholder={placeholder}
-                  value={value}
-                  onChange={(e) => onChange(e.target.value)}
-                  onInput={adjustTextareaHeight}
-                  onKeyDown={handleFieldKeyDown}
-                  className={`brand-search-input brand-search-textarea w-full border-none outline-none bg-transparent resize-none overflow-y-auto text-[16px] leading-[36px] md:leading-[40px] max-h-[220px] ${
-                    fieldMultiline ? 'py-1' : 'py-0 h-9 md:h-10'
-                  }`}
-                />
-              </motion.div>
-            ) : (
-              <motion.input
-                key="search-field"
-                type="search"
-                initial={{ opacity: 0, y: 5 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -5 }}
-                transition={{ duration: 0.24, ease: [0.34, 1.2, 0.64, 1] }}
-                placeholder={placeholder}
-                value={value}
-                onChange={(e) => onChange(e.target.value)}
-                onKeyDown={handleFieldKeyDown}
-                className={`brand-search-input flex-1 min-w-0 w-full border-none outline-none bg-transparent truncate ${fieldMinH} h-9 md:h-10 ${
-                  minimal ? 'text-sm py-0' : 'text-[16px] py-0'
-                }`}
-              />
-            )}
-          </AnimatePresence>
-          </div>
-
-          {!minimal && (
-          <motion.div
-            layout
-            className={`brand-search-divider flex items-center shrink-0 gap-0 ml-1 pl-1 border-l md:gap-0.5 md:ml-2 md:pl-2 ${
-              isPublishMode && fieldMultiline ? 'self-start mt-1' : ''
+            className={`${shellClassName} ring-1 ring-black/[0.06] focus-within:ring-2 focus-within:ring-[var(--brand-blue)]/35 ${
+              isPublishMode ? 'ring-[rgba(var(--brand-yellow-rgb),0.35)]' : ''
             }`}
-            transition={{ type: 'spring', stiffness: 400, damping: 30 }}
           >
-            {showFilterToggle && onToggleFilters && composerMode === 'search' && (
-              <button
-                type="button"
-                onClick={onToggleFilters}
-                className={`${actionBtnClass} relative ${
-                  filtersVisible
-                    ? 'text-[var(--brand-blue)] bg-[var(--hover-bg)]'
-                    : 'text-[var(--text-secondary)] hover:text-[var(--brand-blue)] hover:bg-[var(--hover-bg)]'
-                }`}
-                title={filtersVisible ? 'Ocultar filtros' : 'Mostrar filtros'}
-                aria-label={filtersVisible ? 'Ocultar filtros' : 'Mostrar filtros'}
-                aria-pressed={filtersVisible}
-              >
-                <IconFilterFunnel size={iconSize} />
-                {activeFiltersCount > 0 && (
-                  <span className="absolute top-1 right-1 w-1.5 h-1.5 bg-[var(--brand-blue)] border border-[var(--search-bg,var(--bg-primary))] rounded-full" />
-                )}
-              </button>
-            )}
-
-            <button
-              type="button"
-              onClick={handleVoiceSearch}
-              disabled={isAnalyzingImage || publishImageUploading}
-              className={`${actionBtnClass} ${
-                isListening
-                  ? 'text-red-500 bg-red-500/10 animate-pulse'
-                  : 'text-[var(--brand-blue)]/80 hover:text-[var(--brand-blue)] hover:bg-[var(--hover-bg)]'
-              }`}
-              title={isListening ? 'Escuchando… (tocar para detener)' : 'Búsqueda por voz'}
-              aria-label={isListening ? 'Detener búsqueda por voz' : 'Búsqueda por voz'}
-              aria-pressed={isListening}
-            >
-              <IconMicrophone size={iconSize} />
-            </button>
-
-            {isPublishMode && onPublishImageSelected ? (
-              <button
-                type="button"
-                onClick={() => publishImageInputRef.current?.click()}
-                disabled={publishImageUploading || isListening}
-                className={`${actionBtnClass} relative ${
-                  publishImageAttached
-                    ? 'text-[var(--brand-blue)] bg-[rgba(var(--brand-primary-rgb),0.12)]'
-                    : 'text-[var(--text-secondary)] hover:text-[var(--brand-blue)] hover:bg-[var(--hover-bg)]'
-                } ${publishImageUploading ? 'animate-pulse' : ''}`}
-                title={publishImageAttached ? 'Foto adjunta · tocar para cambiar' : 'Adjuntar foto'}
-                aria-label="Adjuntar foto al anuncio"
-              >
-                <IconImage size={iconSize} />
-                {publishImageAttached && (
-                  <span className="absolute top-1 right-1 w-1.5 h-1.5 bg-[var(--brand-blue)] border border-[var(--search-bg,var(--bg-primary))] rounded-full" />
-                )}
-              </button>
-            ) : (
-              <button
-                type="button"
-                onClick={() => {
-                  const isMobile = typeof window !== 'undefined' && window.matchMedia('(max-width: 767px)').matches;
-                  if (isMobile && cameraInputRef.current) {
-                    cameraInputRef.current.click();
-                  } else if (fileInputRef.current) {
-                    fileInputRef.current.click();
-                  }
-                }}
-                disabled={isAnalyzingImage || isListening}
-                className={`${actionBtnClass} text-[var(--text-secondary)] hover:text-[var(--brand-yellow)] hover:bg-[rgba(var(--brand-yellow-rgb),0.12)] ${
-                  isAnalyzingImage ? 'animate-pulse text-[var(--brand-yellow)]' : ''
-                }`}
-                title="Búsqueda visual (foto)"
-                aria-label="Búsqueda visual con foto"
-              >
-                <IconGoogleLens size={iconSize} />
-              </button>
-            )}
-
-            {showPrimaryAction && (
-              <motion.button
-                type="button"
-                layout
-                onClick={onPrimaryAction}
-                disabled={primaryActionDisabled || primaryActionLoading}
-                whileTap={{ scale: 0.94 }}
-                className={`flex items-center justify-center gap-1 rounded-full font-bold text-[11px] md:text-xs shrink-0 transition-all disabled:opacity-45 disabled:pointer-events-none h-8 md:h-9 px-2.5 md:px-3.5 ml-0.5 ${
-                  isPublishMode
-                    ? 'bg-[var(--brand-yellow)] text-[#1c1608] shadow-[0_2px_10px_rgba(var(--brand-yellow-rgb),0.45)] hover:brightness-105'
-                    : 'bg-[var(--brand-blue)] text-white shadow-[0_2px_10px_rgba(var(--brand-primary-rgb),0.35)] hover:brightness-105'
-                }`}
-                title={primaryLabel}
-                aria-label={primaryLabel}
-              >
-                {primaryActionLoading ? (
-                  <span className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
-                ) : isPublishMode ? (
-                  <>
-                    <IconMegaphone size={14} color="currentColor" />
-                    <span className="hidden sm:inline">{primaryLabel}</span>
-                  </>
-                ) : (
-                  <>
-                    <IconSearch size={14} color="currentColor" />
-                    <span className="hidden sm:inline">{primaryLabel}</span>
-                  </>
-                )}
-              </motion.button>
-            )}
-          </motion.div>
-          )}
+            {shellInner}
           </div>
-        </div>
+        ) : (
+          <div
+            className={`brand-search-glow relative ${radiusClass} ${minimal ? 'p-[1px]' : 'p-[2px]'} ${
+              isPublishMode ? 'composer-mode-publish' : ''
+            }`}
+          >
+            <div
+              className={`${shellClassName} ${minimal ? '' : 'hover:-translate-y-0.5 motion-reduce:hover:translate-y-0'} focus-within:ring-2 focus-within:ring-[var(--brand-blue)]/35 dark:focus-within:ring-[var(--brand-blue)]/50 focus-within:shadow-[0_8px_24px_rgba(var(--brand-primary-rgb),0.18)]`}
+            >
+              {shellInner}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
