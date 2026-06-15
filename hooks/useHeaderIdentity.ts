@@ -6,16 +6,24 @@ import { useAuth } from './useAuth';
 import { useUser } from './useUser';
 import { listBusinessProfilesForUser } from '@/lib/business';
 import type { BusinessMemberRole } from '@/lib/business-access';
-
-export type HeaderRoleTone = 'business' | 'publisher' | 'verified' | 'default' | 'admin';
+import {
+  buildModeDisplay,
+  formatModeSubtitle,
+  ModeDisplay,
+  resolveUserMode,
+  UserMode,
+} from '@/lib/user-modes';
 
 export interface HeaderIdentity {
   displayName: string;
   avatarUrl?: string | null;
-  roleLabel: string;
-  roleTone: HeaderRoleTone;
-  isBusinessMode: boolean;
   initials: string;
+  isBusinessMode: boolean;
+  isVerificado: boolean;
+  mode: UserMode;
+  modeDisplay: ModeDisplay;
+  /** Subtítulo bajo el nombre: "Explorador" | "Anunciante" | "Negocio · Dueño" */
+  modeSubtitle: string;
 }
 
 function buildInitials(name: string): string {
@@ -26,28 +34,6 @@ function buildInitials(name: string): string {
     .join('')
     .toUpperCase()
     .slice(0, 2);
-}
-
-function roleLabelForUser(
-  rol: string | undefined,
-  isAnunciante: boolean,
-  isVerificado: boolean
-): { label: string; tone: HeaderRoleTone } {
-  if (rol === 'admin') return { label: 'Administrador', tone: 'admin' };
-  if (isVerificado && isAnunciante) return { label: 'Anunciante verificado', tone: 'verified' };
-  if (isVerificado) return { label: 'Cuenta verificada', tone: 'verified' };
-  if (isAnunciante) return { label: 'Anunciante', tone: 'publisher' };
-  return { label: 'Explorador', tone: 'default' };
-}
-
-function roleLabelForBusiness(role: BusinessMemberRole): string {
-  const map: Record<BusinessMemberRole, string> = {
-    owner: 'Dueño del negocio',
-    admin: 'Admin del negocio',
-    editor: 'Editor',
-    viewer: 'Colaborador',
-  };
-  return map[role] || 'Mi negocio';
 }
 
 export function useHeaderIdentity(): HeaderIdentity {
@@ -89,25 +75,31 @@ export function useHeaderIdentity(): HeaderIdentity {
       ? `${profile.nombre} ${profile.apellido}`.trim()
       : profile?.nombre || user?.email?.split('@')[0] || 'Usuario';
 
-  const userRole = roleLabelForUser(profile?.rol, isAnunciante, isVerificado);
+  const mode = resolveUserMode(isBusinessRoute && !!businessName, isAnunciante);
+  const modeDisplay = buildModeDisplay(mode, businessRole);
+  const modeSubtitle = formatModeSubtitle(modeDisplay);
 
   if (isBusinessRoute && businessName) {
     return {
       displayName: businessName,
       avatarUrl: businessLogo || profile?.avatar_url,
-      roleLabel: businessRole ? roleLabelForBusiness(businessRole) : 'Modo negocio',
-      roleTone: 'business',
-      isBusinessMode: true,
       initials: buildInitials(businessName),
+      isBusinessMode: true,
+      isVerificado: !!isVerificado,
+      mode,
+      modeDisplay,
+      modeSubtitle,
     };
   }
 
   return {
     displayName: userName,
     avatarUrl: profile?.avatar_url,
-    roleLabel: userRole.label,
-    roleTone: userRole.tone,
-    isBusinessMode: false,
     initials: buildInitials(userName),
+    isBusinessMode: false,
+    isVerificado: !!isVerificado,
+    mode,
+    modeDisplay,
+    modeSubtitle,
   };
 }

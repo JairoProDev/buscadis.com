@@ -3,11 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import {
-  FaBell,
-  FaFacebookMessenger,
   FaChartLine,
-  FaMoon,
-  FaSun,
 } from 'react-icons/fa';
 import UserMenu from './UserMenu';
 import HeaderIconButton from './HeaderIconButton';
@@ -26,6 +22,10 @@ import {
   IconRobot,
   IconSearch,
   IconChevronDown,
+  IconBell,
+  IconMoon,
+  IconSun,
+  IconMessages,
 } from './Icons';
 import { useAuth } from '@/hooks/useAuth';
 import { Categoria } from '@/types';
@@ -225,10 +225,15 @@ export default function Header({
     <div className="flex items-center gap-0.5">
       <HeaderIconButton
         onClick={toggleTheme}
+        accent="neutral"
         title={themeMode === 'dark' ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}
         aria-label={themeMode === 'dark' ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}
       >
-        {themeMode === 'dark' ? <FaSun size={17} /> : <FaMoon size={17} />}
+        {themeMode === 'dark' ? (
+          <IconSun size={17} color="var(--brand-yellow)" />
+        ) : (
+          <IconMoon size={17} color="var(--brand-blue)" />
+        )}
       </HeaderIconButton>
 
       {isAuthenticated && (
@@ -236,10 +241,11 @@ export default function Header({
           {onChangelogClick && isDesktop && (
             <HeaderIconButton
               onClick={onChangelogClick}
+              accent="blue"
               title={t('header.progress')}
               aria-label={t('header.progress')}
             >
-              <FaChartLine size={16} />
+              <FaChartLine size={16} color="var(--brand-blue)" />
             </HeaderIconButton>
           )}
 
@@ -249,10 +255,19 @@ export default function Header({
                 setActivePopover(activePopover === 'notifications' ? null : 'notifications')
               }
               active={activePopover === 'notifications'}
+              accent="blue"
               badge={unreadNotifications}
+              badgeAccent="blue"
               aria-label="Notificaciones"
             >
-              <FaBell size={16} />
+              <IconBell
+                size={16}
+                color={
+                  activePopover === 'notifications'
+                    ? 'var(--brand-blue)'
+                    : 'var(--text-secondary)'
+                }
+              />
             </HeaderIconButton>
             {activePopover === 'notifications' && (
               <NotificationsPopover onClose={() => setActivePopover(null)} />
@@ -263,10 +278,19 @@ export default function Header({
             <HeaderIconButton
               onClick={() => setActivePopover(activePopover === 'messages' ? null : 'messages')}
               active={activePopover === 'messages'}
+              accent="yellow"
               badge={unreadMessages}
+              badgeAccent="yellow"
               aria-label="Mensajes"
             >
-              <FaFacebookMessenger size={16} />
+              <IconMessages
+                size={17}
+                color={
+                  activePopover === 'messages'
+                    ? 'var(--brand-yellow)'
+                    : 'var(--text-secondary)'
+                }
+              />
             </HeaderIconButton>
             {activePopover === 'messages' && (
               <MessagesPopover

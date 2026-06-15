@@ -1,7 +1,8 @@
 import React from 'react';
+import Link from 'next/link';
 import { useNotifications } from '@/hooks/useNotifications';
-import { FaBell, FaCheck, FaInfoCircle, FaHeart, FaCommentAlt, FaBullhorn } from 'react-icons/fa';
-import { Notification, NotificationType } from '@/types';
+import { IconBell, IconHeart, IconMessages, IconCheck, IconMegaphone } from '@/components/Icons';
+import { NotificationType } from '@/types';
 import { formatTimeAgo } from '@/utils/date';
 
 interface NotificationsPopoverProps {
@@ -11,82 +12,106 @@ interface NotificationsPopoverProps {
 export default function NotificationsPopover({ onClose }: NotificationsPopoverProps) {
     const { notifications, unreadCount, loading, markAsRead, markAllAsRead } = useNotifications();
 
-    // Handle click outside (optional, usually handled by parent or overlay)
-
     const getIcon = (type: NotificationType) => {
         switch (type) {
-            case 'like': return <FaHeart className="text-red-500" />;
-            case 'message': return <FaCommentAlt className="text-blue-500" />;
-            case 'ad_approved': return <FaCheck className="text-green-500" />;
-            case 'ad_rejected': return <FaInfoCircle className="text-red-500" />;
+            case 'like':
+                return <IconHeart size={14} color="#ef4444" />;
+            case 'message':
+                return <IconMessages size={14} color="var(--brand-yellow)" />;
+            case 'ad_approved':
+                return <IconCheck size={14} color="#22c55e" />;
+            case 'ad_rejected':
+                return <IconBell size={14} color="#ef4444" />;
             case 'system':
-            default: return <FaBullhorn className="text-yellow-500" />;
+            default:
+                return <IconMegaphone size={14} color="var(--brand-yellow)" />;
+        }
+    };
+
+    const getIconBg = (type: NotificationType) => {
+        switch (type) {
+            case 'like':
+                return 'bg-red-500/10';
+            case 'message':
+                return 'bg-[rgba(var(--brand-yellow-rgb),0.15)]';
+            case 'ad_approved':
+                return 'bg-emerald-500/10';
+            default:
+                return 'bg-[rgba(var(--brand-primary-rgb),0.1)]';
         }
     };
 
     if (loading && notifications.length === 0) {
         return (
-            <div className="absolute top-full right-0 mt-2 w-80 bg-white dark:bg-zinc-800 rounded-xl shadow-2xl border border-gray-100 dark:border-zinc-700 p-4 z-50 animate-fade-in-down">
+            <div className="absolute top-full right-0 z-50 mt-2 w-80 rounded-2xl border border-[var(--border-color)] bg-[var(--bg-primary)] p-4 shadow-[0_16px_48px_rgba(15,23,42,0.12)]">
                 <div className="flex justify-center py-4">
-                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500"></div>
+                    <div className="h-6 w-6 animate-spin rounded-full border-2 border-[var(--brand-blue)] border-t-transparent" />
                 </div>
             </div>
         );
     }
 
     return (
-        <div className="absolute top-full right-0 mt-2 w-80 sm:w-96 bg-white dark:bg-zinc-800 rounded-xl shadow-2xl border border-gray-100 dark:border-zinc-700 overflow-hidden z-50 animate-fade-in-down flex flex-col max-h-[80vh]">
-            {/* Header */}
-            <div className="p-4 border-b border-gray-100 dark:border-zinc-700 flex justify-between items-center bg-gray-50/50 dark:bg-zinc-800/50 backdrop-blur-sm">
-                <h3 className="font-bold text-gray-900 dark:text-white">Notificaciones</h3>
+        <div className="absolute top-full right-0 z-50 mt-2 flex max-h-[80vh] w-80 flex-col overflow-hidden rounded-2xl border border-[var(--border-color)] bg-[var(--bg-primary)] shadow-[0_16px_48px_rgba(15,23,42,0.12)] sm:w-96">
+            <div className="flex items-center justify-between border-b border-[var(--border-color)] bg-[var(--bg-secondary)] px-4 py-3">
+                <h3 className="flex items-center gap-2 text-sm font-bold text-[var(--text-primary)]">
+                    <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-[rgba(var(--brand-primary-rgb),0.12)]">
+                        <IconBell size={14} color="var(--brand-blue)" />
+                    </span>
+                    Notificaciones
+                </h3>
                 {unreadCount > 0 && (
                     <button
+                        type="button"
                         onClick={() => markAllAsRead()}
-                        className="text-xs text-blue-600 dark:text-blue-400 hover:underline font-medium"
+                        className="text-xs font-semibold text-[var(--brand-blue)] hover:underline"
                     >
                         Marcar todo leído
                     </button>
                 )}
             </div>
 
-            {/* List */}
-            <div className="overflow-y-auto flex-1">
+            <div className="flex-1 overflow-y-auto">
                 {notifications.length === 0 ? (
-                    <div className="p-8 text-center text-gray-500 dark:text-gray-400">
-                        <div className="flex justify-center mb-3">
-                            <FaBell size={32} className="opacity-20" />
+                    <div className="px-6 py-10 text-center">
+                        <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-[rgba(var(--brand-primary-rgb),0.1)]">
+                            <IconBell size={24} color="var(--brand-blue)" />
                         </div>
-                        <p className="text-sm">No tienes notificaciones nuevas</p>
+                        <p className="text-sm text-[var(--text-secondary)]">No tienes notificaciones nuevas</p>
                     </div>
                 ) : (
-                    <div className="divide-y divide-gray-50 dark:divide-zinc-700/50">
+                    <div className="divide-y divide-[var(--border-color)]">
                         {notifications.map((notification) => (
                             <div
                                 key={notification.id}
-                                className={`p-4 hover:bg-gray-50 dark:hover:bg-zinc-700/50 transition-colors cursor-pointer relative group ${!notification.read ? 'bg-blue-50/50 dark:bg-blue-900/10' : ''}`}
+                                className={`cursor-pointer px-4 py-3 transition-colors hover:bg-[var(--hover-bg)] ${
+                                    !notification.read ? 'bg-[rgba(var(--brand-primary-rgb),0.06)]' : ''
+                                }`}
                                 onClick={() => markAsRead(notification.id)}
                             >
                                 <div className="flex gap-3">
-                                    <div className="mt-1 flex-shrink-0">
-                                        <div className={`w-8 h-8 rounded-full flex items-center justify-center bg-white dark:bg-zinc-700 shadow-sm border border-gray-100 dark:border-zinc-600`}>
-                                            {getIcon(notification.type)}
-                                        </div>
+                                    <div
+                                        className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl ${getIconBg(notification.type)}`}
+                                    >
+                                        {getIcon(notification.type)}
                                     </div>
-                                    <div className="flex-1 min-w-0">
-                                        <p className={`text-sm text-gray-900 dark:text-gray-100 ${!notification.read ? 'font-semibold' : 'font-medium'}`}>
+                                    <div className="min-w-0 flex-1">
+                                        <p
+                                            className={`text-sm text-[var(--text-primary)] ${
+                                                !notification.read ? 'font-semibold' : 'font-medium'
+                                            }`}
+                                        >
                                             {notification.title}
                                         </p>
-                                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 line-clamp-2">
+                                        <p className="mt-0.5 line-clamp-2 text-xs text-[var(--text-secondary)]">
                                             {notification.message}
                                         </p>
-                                        <p className="text-[10px] text-gray-400 mt-1.5 font-medium">
+                                        <p className="mt-1.5 text-[10px] font-medium text-[var(--text-tertiary)]">
                                             {formatTimeAgo(notification.created_at)}
                                         </p>
                                     </div>
                                     {!notification.read && (
-                                        <div className="flex-shrink-0 self-center">
-                                            <div className="w-2 h-2 rounded-full bg-blue-500"></div>
-                                        </div>
+                                        <div className="mt-2 h-2 w-2 shrink-0 rounded-full bg-[var(--brand-blue)]" />
                                     )}
                                 </div>
                             </div>
@@ -95,11 +120,14 @@ export default function NotificationsPopover({ onClose }: NotificationsPopoverPr
                 )}
             </div>
 
-            {/* Footer */}
-            <div className="p-2 border-t border-gray-100 dark:border-zinc-700 bg-gray-50 dark:bg-zinc-800">
-                <button className="w-full py-2 text-xs font-medium text-center text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+            <div className="border-t border-[var(--border-color)] bg-[var(--bg-secondary)] p-2">
+                <Link
+                    href="/perfil?tab=inicio"
+                    onClick={onClose}
+                    className="block w-full rounded-lg py-2 text-center text-xs font-semibold text-[var(--brand-blue)] transition-colors hover:bg-[var(--hover-bg)]"
+                >
                     Ver todas las notificaciones
-                </button>
+                </Link>
             </div>
         </div>
     );
