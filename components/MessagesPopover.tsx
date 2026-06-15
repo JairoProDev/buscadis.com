@@ -15,7 +15,7 @@ export default function MessagesPopover({ onClose, onOpenConversation }: Message
 
     if (loading && conversations.length === 0) {
         return (
-        <div className="absolute top-full right-0 z-50 mt-2 w-80 animate-fade-in-down rounded-2xl border border-[var(--border-color)] bg-[var(--bg-primary)] p-4 shadow-[0_16px_48px_rgba(15,23,42,0.12)]">
+        <div className="w-full animate-fade-in-down rounded-2xl border border-[var(--border-color)] bg-[var(--bg-primary)] p-4 shadow-[0_16px_48px_rgba(15,23,42,0.12)]">
             <div className="flex justify-center py-4">
                 <div className="h-6 w-6 animate-spin rounded-full border-2 border-[var(--brand-blue)] border-t-transparent" />
             </div>
@@ -24,7 +24,7 @@ export default function MessagesPopover({ onClose, onOpenConversation }: Message
     }
 
     return (
-        <div className="absolute top-full right-0 z-50 mt-2 flex max-h-[80vh] w-80 flex-col overflow-hidden rounded-2xl border border-[var(--border-color)] bg-[var(--bg-primary)] shadow-[0_16px_48px_rgba(15,23,42,0.12)] sm:w-96">
+        <div className="flex w-full flex-col overflow-hidden rounded-2xl border border-[var(--border-color)] bg-[var(--bg-primary)] shadow-[0_16px_48px_rgba(15,23,42,0.12)]">
             <div className="flex items-center justify-between border-b border-[var(--border-color)] bg-[var(--bg-secondary)] px-4 py-3">
                 <h3 className="flex items-center gap-2 text-sm font-bold text-[var(--text-primary)]">
                     <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-[rgba(var(--brand-yellow-rgb),0.18)]">

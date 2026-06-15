@@ -96,9 +96,45 @@ export async function updateProfile(userId: string, updates: Partial<Profile>): 
   return data as Profile;
 }
 
-/**
- * Obtiene las preferencias de un usuario
- */
+export interface UserSocialLinks {
+  instagram?: string;
+  facebook?: string;
+  tiktok?: string;
+  whatsapp?: string;
+}
+
+export async function uploadProfileAvatar(file: File, userId: string): Promise<string | null> {
+  if (!supabase) return null;
+
+  try {
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${userId}/avatar-${Date.now()}.${fileExt}`;
+    const bucketName = 'catalog-images';
+
+    const { error: uploadError } = await supabase.storage
+      .from(bucketName)
+      .upload(fileName, file, { cacheControl: '3600', upsert: false });
+
+    if (uploadError) {
+      console.error('Error uploading avatar:', uploadError);
+      return null;
+    }
+
+    const { data } = supabase.storage.from(bucketName).getPublicUrl(fileName);
+    return data.publicUrl;
+  } catch (e) {
+    console.error('Exception uploading avatar:', e);
+    return null;
+  }
+}
+
+export async function updateUserSocialLinks(social: UserSocialLinks): Promise<void> {
+  if (!supabase) throw new Error('Supabase no está configurado');
+
+  const { error } = await supabase.auth.updateUser({ data: { social } });
+  if (error) throw error;
+}
+
 export async function getUserPreferences(userId: string): Promise<UserPreferences | null> {
   if (!supabase) {
     throw new Error('Supabase no está configurado');

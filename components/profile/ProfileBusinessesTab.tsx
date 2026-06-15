@@ -5,6 +5,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { listBusinessProfilesForUser } from '@/lib/business';
 import { BusinessWithRole } from '@/lib/business-access';
 import ProfileEmptyState from './ProfileEmptyState';
+import { IconStore } from '@/components/Icons';
 import Link from 'next/link';
 
 export default function ProfileBusinessesTab() {
@@ -24,7 +25,7 @@ export default function ProfileBusinessesTab() {
   if (businesses.length === 0) {
     return (
       <ProfileEmptyState
-        icon="🏪"
+        icon={<IconStore size={24} color="var(--brand-yellow)" />}
         title="Sin negocios aún"
         description="Crea tu página de negocio con catálogo, horarios y contacto."
         actionLabel="Crear negocio"

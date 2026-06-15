@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { Adiso } from '@/types';
 import GrillaAdisos from '@/components/GrillaAdisos';
 import ProfileEmptyState from './ProfileEmptyState';
+import { IconMegaphone } from '@/components/Icons';
 
 interface ProfileMyAdisosGridProps {
   token?: string;
@@ -33,7 +34,7 @@ export default function ProfileMyAdisosGrid({ token, highlightId }: ProfileMyAdi
   if (adisos.length === 0) {
     return (
       <ProfileEmptyState
-        icon="📢"
+        icon={<IconMegaphone size={24} color="var(--brand-yellow)" />}
         title="Aún no has publicado"
         description="Publica tu primer aviso y llega a miles de personas en tu ciudad."
         actionLabel="Publicar ahora"

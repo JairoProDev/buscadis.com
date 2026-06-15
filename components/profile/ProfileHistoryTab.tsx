@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { Adiso } from '@/types';
 import ProfileEmptyState from './ProfileEmptyState';
+import { IconEye } from '@/components/Icons';
 import { getCategoriaLabel } from '@/lib/adiso-display';
 
 interface HistoryRow {
@@ -30,7 +31,7 @@ export default function ProfileHistoryTab({ token }: { token?: string }) {
   if (history.length === 0) {
     return (
       <ProfileEmptyState
-        icon="👁"
+        icon={<IconEye size={24} color="var(--brand-blue)" />}
         title="Sin historial"
         description="Los avisos que abras aparecerán aquí para que los retomes fácilmente."
         actionLabel="Buscar ofertas"

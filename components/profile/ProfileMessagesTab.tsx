@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useConversations } from '@/hooks/useConversations';
 import { useUI } from '@/contexts/UIContext';
 import ProfileEmptyState from './ProfileEmptyState';
+import { IconMessages } from '@/components/Icons';
 import ChatWindow from '@/components/ChatWindow';
 
 export default function ProfileMessagesTab() {
@@ -16,7 +17,7 @@ export default function ProfileMessagesTab() {
   if (conversations.length === 0) {
     return (
       <ProfileEmptyState
-        icon="💬"
+        icon={<IconMessages size={24} color="var(--brand-yellow)" />}
         title="Sin conversaciones"
         description="Contacta a un vendedor desde un aviso o una historia para iniciar un chat aquí."
         actionLabel="Explorar avisos"

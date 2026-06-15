@@ -6,6 +6,7 @@ import { getAdisosOcultos } from '@/lib/interactions';
 import { Adiso } from '@/types';
 import GrillaAdisos from '@/components/GrillaAdisos';
 import ProfileEmptyState from './ProfileEmptyState';
+import { IconEyeOff } from '@/components/Icons';
 
 export default function ProfileHiddenTab() {
   const { user } = useAuth();
@@ -24,7 +25,7 @@ export default function ProfileHiddenTab() {
   if (adisos.length === 0) {
     return (
       <ProfileEmptyState
-        icon="🙈"
+        icon={<IconEyeOff size={24} color="var(--text-secondary)" />}
         title="No tienes avisos ocultos"
         description="Cuando ocultes un anuncio que no te interesa, aparecerá aquí para restaurarlo."
         actionLabel="Ir al inicio"

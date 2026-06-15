@@ -9,6 +9,7 @@ import UserMenu from './UserMenu';
 import HeaderIconButton from './HeaderIconButton';
 import NotificationsPopover from './NotificationsPopover';
 import MessagesPopover from './MessagesPopover';
+import HeaderPopoverPanel from './HeaderPopoverPanel';
 import { useUI } from '@/contexts/UIContext';
 import { useTranslation } from '@/hooks/useTranslation';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
@@ -55,6 +56,8 @@ export default function Header({
   const isDesktop = useMediaQuery('(min-width: 768px)');
   const [headerVisible, setHeaderVisible] = useState(true);
   const lastScrollY = useRef(0);
+  const notificationsAnchorRef = useRef<HTMLDivElement>(null);
+  const messagesAnchorRef = useRef<HTMLDivElement>(null);
   const [activePopover, setActivePopover] = useState<'notifications' | 'messages' | null>(null);
   const [hoveredItem, setHoveredItem] = useState<SeccionSidebar | null>(null);
   const [themeMode, setThemeMode] = useState<'light' | 'dark' | 'auto'>('auto');
@@ -249,7 +252,7 @@ export default function Header({
             </HeaderIconButton>
           )}
 
-          <div className="relative">
+          <div ref={notificationsAnchorRef}>
             <HeaderIconButton
               onClick={() =>
                 setActivePopover(activePopover === 'notifications' ? null : 'notifications')
@@ -269,12 +272,16 @@ export default function Header({
                 }
               />
             </HeaderIconButton>
-            {activePopover === 'notifications' && (
-              <NotificationsPopover onClose={() => setActivePopover(null)} />
-            )}
           </div>
+          <HeaderPopoverPanel
+            open={activePopover === 'notifications'}
+            anchorRef={notificationsAnchorRef}
+            onClose={() => setActivePopover(null)}
+          >
+            <NotificationsPopover onClose={() => setActivePopover(null)} />
+          </HeaderPopoverPanel>
 
-          <div className="relative">
+          <div ref={messagesAnchorRef}>
             <HeaderIconButton
               onClick={() => setActivePopover(activePopover === 'messages' ? null : 'messages')}
               active={activePopover === 'messages'}
@@ -292,16 +299,20 @@ export default function Header({
                 }
               />
             </HeaderIconButton>
-            {activePopover === 'messages' && (
-              <MessagesPopover
-                onClose={() => setActivePopover(null)}
-                onOpenConversation={(id) => {
-                  setActivePopover(null);
-                  openChat(id);
-                }}
-              />
-            )}
           </div>
+          <HeaderPopoverPanel
+            open={activePopover === 'messages'}
+            anchorRef={messagesAnchorRef}
+            onClose={() => setActivePopover(null)}
+          >
+            <MessagesPopover
+              onClose={() => setActivePopover(null)}
+              onOpenConversation={(id) => {
+                setActivePopover(null);
+                openChat(id);
+              }}
+            />
+          </HeaderPopoverPanel>
         </>
       )}
     </div>

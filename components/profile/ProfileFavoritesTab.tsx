@@ -6,6 +6,7 @@ import { getAdisoById } from '@/lib/storage';
 import { Adiso } from '@/types';
 import GrillaAdisos from '@/components/GrillaAdisos';
 import ProfileEmptyState from './ProfileEmptyState';
+import { IconHeart } from '@/components/Icons';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/hooks/useAuth';
 
@@ -55,7 +56,7 @@ export default function ProfileFavoritesTab() {
   if (adisos.length === 0) {
     return (
       <ProfileEmptyState
-        icon="♥"
+        icon={<IconHeart size={24} color="#ef4444" />}
         title="Sin guardados aún"
         description="Marca con corazón los avisos que te interesen para encontrarlos aquí."
         actionLabel="Explorar ofertas"
