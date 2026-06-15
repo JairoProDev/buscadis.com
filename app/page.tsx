@@ -953,8 +953,8 @@ function HomeContent() {
             <div
               className="no-scrollbar"
               style={{
-                overflowX: 'auto',
-                padding: '0 1rem 0.5rem',
+                overflowX: 'visible',
+                padding: isDesktop ? '0 1rem 0.375rem' : '0 0.75rem 0.25rem',
               }}
             >
               <StoriesBar />
