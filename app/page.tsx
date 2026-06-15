@@ -807,6 +807,7 @@ function HomeContent() {
           <Header
             onToggleLeftSidebar={() => setIsLeftSidebarOpen(!isLeftSidebarOpen)}
             ubicacion={browseFilters.ubicacion?.distrito || browseFilters.ubicacion?.departamento || 'Perú'}
+            categoria={categoriaFiltro}
             onUbicacionClick={() => setMostrarFiltroUbicacion(true)}
             seccionActiva={seccionDesktopActiva}
             onSeccionChange={(seccion) => {
@@ -853,11 +854,11 @@ function HomeContent() {
               className="no-scrollbar"
               style={{
                 display: 'flex',
-                justifyContent: isDesktop ? 'center' : 'flex-start',
+                justifyContent:isDesktop ? 'center' : 'flex-start',
                 overflowX: 'auto',
                 overflowY: 'hidden',
-                gap: isDesktop ? '1.5rem' : '1rem',
-                padding: '1.25rem 1rem 0.75rem',
+                gap: isDesktop ? '1.125rem' : '0.5rem',
+                padding: isDesktop ? '0.875rem 1rem 0.5rem' : '0.625rem 0.75rem 0.375rem',
                 scrollbarWidth: 'none',
                 msOverflowStyle: 'none',
                 WebkitOverflowScrolling: 'touch',
@@ -899,13 +900,13 @@ function HomeContent() {
                     display: 'flex',
                     flexDirection: 'column',
                     alignItems: 'center',
-                    gap: '0.5rem',
+                    gap: isDesktop ? '0.45rem' : '0.3rem',
                     background: 'none',
                     border: 'none',
                     cursor: 'pointer',
-                    minWidth: '80px',
+                    minWidth: isDesktop ? '76px' : '62px',
                     flexShrink: 0,
-                    padding: '4px',
+                    padding: '2px',
                     borderRadius: '12px',
                     opacity: categoriaFiltro === id ? 1 : 0.8,
                     transform: categoriaFiltro === id ? 'scale(1.05)' : 'scale(1)',
@@ -914,12 +915,12 @@ function HomeContent() {
                   className="group"
                 >
                   <div style={{
-                    width: '48px',
-                    height: '48px',
+                    width: isDesktop ? '52px' : '44px',
+                    height: isDesktop ? '52px' : '44px',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    borderRadius: '16px',
+                    borderRadius: isDesktop ? '16px' : '14px',
                     boxSizing: 'border-box',
                     border: categoriaFiltro === id
                       ? '2px solid var(--brand-yellow)'
@@ -935,10 +936,10 @@ function HomeContent() {
                   }}
                     className="group-hover:shadow-lg group-hover:-translate-y-1"
                   >
-                    <Icon size={24} color={categoriaFiltro === id ? 'white' : undefined} />
+                    <Icon size={isDesktop ? 26 : 22} color={categoriaFiltro === id ? 'white' : undefined} />
                   </div>
                   <span style={{
-                    fontSize: '0.75rem',
+                    fontSize: isDesktop ? '0.8125rem' : '0.6875rem',
                     fontWeight: categoriaFiltro === id ? 700 : 500,
                     textAlign: 'center',
                     whiteSpace: 'nowrap',
