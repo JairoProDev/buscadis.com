@@ -831,6 +831,13 @@ export default function FormularioPublicar({
                 }
               }
             }}
+            onPaste={(e) => {
+              e.preventDefault();
+              const pasted = e.clipboardData.getData('text');
+              const next = (formData.descripcion + pasted).slice(0, LIMITS.DESCRIPCION_MAX);
+              setFormData({ ...formData, descripcion: next });
+              if (errors.descripcion) setErrors({ ...errors, descripcion: undefined });
+            }}
             required
             placeholder="Describe tu anuncio con detalles importantes..."
             rows={5}
