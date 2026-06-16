@@ -49,6 +49,11 @@ const nextConfig = {
         destination: '/:slug*',
         permanent: true,
       },
+      {
+        source: '/feed',
+        destination: '/deals',
+        permanent: true,
+      },
     ];
   },
   async rewrites() {

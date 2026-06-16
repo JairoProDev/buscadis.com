@@ -21,7 +21,7 @@ export interface PlatformCommand {
 
 export const PLATFORM_COMMANDS: PlatformCommand[] = [
   { id: 'nav-home', label: 'Ir al inicio', keywords: ['inicio', 'home', 'marketplace'], kind: 'navigate', href: '/', group: 'Páginas' },
-  { id: 'nav-deals', label: 'Deals — promos y ofertas', keywords: ['deals', 'feed', 'shorts', 'reels', 'promos', 'ofertas', 'videos'], kind: 'navigate', href: '/feed', group: 'Páginas' },
+  { id: 'nav-deals', label: 'Deals — promos y ofertas', keywords: ['deals', 'feed', 'shorts', 'reels', 'promos', 'ofertas', 'videos'], kind: 'navigate', href: '/deals', group: 'Páginas' },
   { id: 'nav-publicar', label: 'Publicar aviso', keywords: ['publicar', 'vender', 'ofrecer'], kind: 'navigate', href: '/publicar', group: 'Páginas' },
   { id: 'nav-perfil', label: 'Mi perfil', keywords: ['perfil', 'cuenta', 'usuario'], kind: 'navigate', href: '/perfil', group: 'Páginas' },
   { id: 'nav-favoritos', label: 'Favoritos guardados', keywords: ['favoritos', 'guardados', 'corazón'], kind: 'navigate', href: '/favoritos', group: 'Páginas' },

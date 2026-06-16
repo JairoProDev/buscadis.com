@@ -22,6 +22,11 @@
     "search": "Search",
     "map": "Map"
   },
+  "deals": {
+    "tabForYou": "For You",
+    "tabNearby": "Nearby",
+    "tabFollowing": "Following"
+  },
   "search": {
     "placeholder": "Search offers and opportunities...",
     "label": "Search ads"

@@ -13,7 +13,7 @@ export function isMercadoPagoConfigured(): boolean {
   return Boolean(process.env.MERCADOPAGO_ACCESS_TOKEN?.trim());
 }
 
-export type MercadoPagoCheckoutKind = 'adiso' | 'story' | 'package';
+export type MercadoPagoCheckoutKind = 'adiso' | 'story' | 'package' | 'deal';
 
 export async function createMercadoPagoPreference(params: {
   orderId: string;
@@ -28,13 +28,21 @@ export async function createMercadoPagoPreference(params: {
   const appUrl = (process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000').replace(/\/$/, '');
   const kind = params.kind || 'adiso';
   const notificationUrl =
-    kind === 'story'
+    kind === 'deal'
+      ? `${appUrl}/api/deals/promote/webhook`
+      : kind === 'story'
       ? `${appUrl}/api/stories/promote/webhook`
       : kind === 'package'
         ? `${appUrl}/api/adisos/package/webhook`
         : `${appUrl}/api/adisos/promote/webhook`;
   const typeQuery =
-    kind === 'story' ? '&type=story' : kind === 'package' ? '&type=package' : '';
+    kind === 'deal'
+      ? '&type=deal'
+      : kind === 'story'
+        ? '&type=story'
+        : kind === 'package'
+          ? '&type=package'
+          : '';
 
   const body: Record<string, unknown> = {
     items: [

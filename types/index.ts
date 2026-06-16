@@ -176,6 +176,130 @@ export interface StoryGroup {
   relevanceScore?: number;
 }
 
+// ============================================
+// DEALS (vertical commerce feed)
+// ============================================
+
+export type DealMediaType = 'image' | 'video';
+export type DealPromotionTier = StoryPromotionTier;
+export type DealClipStatus = 'active' | 'archived' | 'draft' | 'hidden';
+export type DealClipSource = 'manual' | 'adiso_auto' | 'ugc_challenge' | 'seed';
+export type DealCtaType = 'adiso' | 'whatsapp' | 'url' | 'chat';
+export type DealFeedTab = 'for_you' | 'nearby' | 'following';
+export type DealInteractionType =
+  | 'view'
+  | 'like'
+  | 'unlike'
+  | 'save'
+  | 'unsave'
+  | 'share'
+  | 'cta_click'
+  | 'whatsapp_click'
+  | 'chat_open'
+  | 'not_interested'
+  | 'report';
+
+export interface DealClip {
+  id: string;
+  author_user_id: string;
+  business_profile_id?: string;
+  adiso_id?: string;
+  media_url: string;
+  media_type: DealMediaType;
+  poster_url?: string;
+  duration_sec?: number;
+  aspect_ratio?: string;
+  title: string;
+  caption?: string;
+  categoria?: Categoria;
+  hashtags?: string[];
+  price_display?: number;
+  price_original?: number;
+  currency: string;
+  discount_pct?: number;
+  deal_expires_at?: string;
+  stock_hint?: string;
+  cta_type: DealCtaType;
+  cta_url?: string;
+  status: DealClipStatus;
+  promotion_tier: DealPromotionTier;
+  visible_until?: string;
+  source: DealClipSource;
+  view_count: number;
+  like_count: number;
+  save_count: number;
+  share_count: number;
+  cta_click_count: number;
+  report_count: number;
+  created_at: string;
+  updated_at: string;
+  challenge_id?: string;
+  author?: {
+    id: string;
+    nombre: string;
+    avatarUrl?: string;
+    handle?: string;
+    isVerified?: boolean;
+  };
+  business?: {
+    id: string;
+    name: string;
+    slug?: string;
+    logoUrl?: string;
+  };
+  /** Client-side flags */
+  liked?: boolean;
+  saved?: boolean;
+  following?: boolean;
+  relevanceScore?: number;
+}
+
+export interface DealClipComment {
+  id: string;
+  clip_id: string;
+  user_id: string;
+  parent_id?: string;
+  body: string;
+  created_at: string;
+  author?: { nombre: string; avatarUrl?: string };
+}
+
+export interface DealClipMetrics {
+  views: number;
+  likes: number;
+  saves: number;
+  shares: number;
+  cta_clicks: number;
+  whatsapp_clicks: number;
+}
+
+export interface DealChallenge {
+  id: string;
+  slug: string;
+  title: string;
+  description?: string;
+  hashtag: string;
+  starts_at: string;
+  ends_at?: string;
+  is_active: boolean;
+}
+
+export interface DealLiveSession {
+  id: string;
+  host_user_id: string;
+  business_profile_id?: string;
+  title: string;
+  stream_url?: string;
+  embed_url?: string;
+  status: 'scheduled' | 'live' | 'ended';
+  started_at?: string;
+  ended_at?: string;
+  viewer_count: number;
+  pinned_adiso_ids?: string[];
+}
+
+export const DEAL_TIERS: Record<DealPromotionTier, StoryTierInfo> = STORY_TIERS;
+
 export type AdisoPromotionTier = 'gratis' | 'destacada' | 'premium';
 
 export interface AdisoPromotionTierInfo {

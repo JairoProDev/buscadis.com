@@ -11,7 +11,8 @@
     "db:push": "npx supabase db push --linked --yes",
     "db:migrations": "npx supabase migration list --linked",
     "db:migrate": "node scripts/supabase-migrate.mjs",
-    "search:sync-typesense": "node scripts/sync-typesense.mjs"
+    "search:sync-typesense": "node scripts/sync-typesense.mjs",
+    "deals:seed": "node scripts/seed-deal-clips.mjs"
   },
   "dependencies": {
     "@ai-sdk/openai": "^1.0.8",

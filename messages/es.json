@@ -22,6 +22,11 @@
     "search": "Buscar",
     "map": "Mapa"
   },
+  "deals": {
+    "tabForYou": "Para ti",
+    "tabNearby": "Cerca",
+    "tabFollowing": "Siguiendo"
+  },
   "search": {
     "placeholder": "Buscar ofertas y oportunidades...",
     "label": "Buscar adisos"

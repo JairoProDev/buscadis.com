@@ -1,5 +1,5 @@
 import { supabaseAdmin } from '@/lib/supabase-admin';
-import { ADISO_IMAGES_BUCKET_FALLBACKS } from '@/lib/storage-buckets';
+import { uploadMediaServer as uploadSharedMedia } from '@/lib/media/upload';
 import {
   Story,
   StoryMediaType,
@@ -44,35 +44,8 @@ export async function uploadStoryMediaServer(
   file: File,
   userId: string
 ): Promise<{ url: string; mediaType: StoryMediaType }> {
-  const mediaType: StoryMediaType = file.type.startsWith('video/') ? 'video' : 'image';
-  const ext = file.name.split('.').pop() || (mediaType === 'video' ? 'mp4' : 'jpg');
-  const fileName = `${userId}/stories/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
-  const buffer = Buffer.from(await file.arrayBuffer());
-
-  let lastError: string | undefined;
-
-  for (const bucketName of ADISO_IMAGES_BUCKET_FALLBACKS) {
-    const { error } = await supabaseAdmin.storage
-      .from(bucketName)
-      .upload(fileName, buffer, {
-        contentType: file.type || (mediaType === 'video' ? 'video/mp4' : 'image/jpeg'),
-        cacheControl: '3600',
-        upsert: false,
-      });
-
-    if (!error) {
-      const { data } = supabaseAdmin.storage.from(bucketName).getPublicUrl(fileName);
-      return { url: data.publicUrl, mediaType };
-    }
-
-    lastError = error.message;
-    const bucketMissing =
-      error.message?.toLowerCase().includes('bucket') ||
-      error.message?.toLowerCase().includes('not found');
-    if (!bucketMissing) break;
-  }
-
-  throw new Error(lastError || 'No se pudo subir el archivo al storage');
+  const result = await uploadSharedMedia(file, userId, 'stories');
+  return { url: result.url, mediaType: result.mediaType };
 }
 
 export interface CreateStoryParams {
