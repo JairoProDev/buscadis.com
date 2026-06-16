@@ -154,19 +154,18 @@ export async function buscarMejorada(analisis: AnalisisBusqueda, limite: number 
 }
 
 export function generarRespuestaBusqueda(resultados: Adiso[], analisis: AnalisisBusqueda): string {
+    const term =
+        analisis.terminos[0] ||
+        (analisis.categoria ? analisis.categoria : 'tu búsqueda');
+
     if (resultados.length === 0) {
-        return 'No encontré resultados exactos. Intenta usar términos más generales o navega con los botones.';
+        return `No encontré avisos claros para «${term}». Si me das zona o presupuesto, puedo afinar la búsqueda.`;
     }
 
-    const top = resultados[0];
-    let msg = `Encontré ${resultados.length} aviso${resultados.length !== 1 ? 's' : ''}`;
-
-    if (analisis.terminos.length > 0) {
-        msg += ` relacionados con "${analisis.terminos[0]}"`;
-    } else if (analisis.categoria) {
-        msg += ` en categoría ${analisis.categoria}`;
+    const shown = Math.min(resultados.length, 3);
+    if (resultados.length === 1) {
+        return `Encontré 1 aviso que encaja con «${term}». Te lo resumo para que decidas rápido:`;
     }
 
-    msg += '.';
-    return msg;
+    return `Revisé ${resultados.length} avisos sobre «${term}». Te destaco las ${shown} mejores opciones según relevancia y calidad del anuncio:`;
 }

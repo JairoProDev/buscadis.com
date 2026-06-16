@@ -7,14 +7,15 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { Adiso } from '@/types';
-import { FaPaperPlane, FaSpinner, FaSearch, FaImage, FaMapMarkerAlt, FaTag, FaRobot, FaUser, FaRegCopy, FaExpand, FaCompress } from 'react-icons/fa';
+import { FaPaperPlane, FaSpinner, FaSearch, FaImage, FaMapMarkerAlt, FaTag, FaRobot, FaUser } from 'react-icons/fa';
 import { AiOutlineClear } from 'react-icons/ai';
 import { nanoid } from 'nanoid';
 import { useNavigation } from '@/contexts/NavigationContext';
 import { useAuth } from '@/hooks/useAuth';
-import Image from 'next/image';
 import { AIChatResponse } from '@/lib/ai/contracts';
 import { routeChatMessage } from '@/lib/chat/ChatIntentRouter';
+import { buildSearchIntroMessage } from '@/lib/chat/search-picks';
+import ChatSearchPicks from '@/components/chat/ChatSearchPicks';
 
 interface Mensaje {
   id: string;
@@ -22,6 +23,7 @@ interface Mensaje {
   contenido: string;
   timestamp: Date;
   resultados?: Adiso[];
+  searchQuery?: string;
   component?: React.ReactNode;
 }
 
@@ -94,14 +96,21 @@ export default function ChatbotIANew({ onPublicar, onError, onSuccess, onMinimiz
     scrollToBottom();
   }, [mensajes]);
 
-  const agregarMensaje = (tipo: 'usuario' | 'asistente', contenido: string, resultados?: Adiso[], component?: React.ReactNode) => {
+  const agregarMensaje = (
+    tipo: 'usuario' | 'asistente',
+    contenido: string,
+    resultados?: Adiso[],
+    component?: React.ReactNode,
+    searchQuery?: string,
+  ) => {
     const nuevoMensaje: Mensaje = {
       id: nanoid(),
       tipo,
       contenido,
       timestamp: new Date(),
       resultados,
-      component
+      searchQuery,
+      component,
     };
     setMensajes(prev => {
       const updated = [...prev, nuevoMensaje];
@@ -171,10 +180,10 @@ export default function ChatbotIANew({ onPublicar, onError, onSuccess, onMinimiz
         const items = (data.adisos ?? []) as Adiso[];
         agregarMensaje(
           'asistente',
-          items.length > 0
-            ? `Encontré ${items.length} avisos relacionados con «${route.searchQuery}»:`
-            : `No encontré avisos para «${route.searchQuery}». Prueba con otras palabras.`,
+          buildSearchIntroMessage(items.length, route.searchQuery),
           items,
+          undefined,
+          route.searchQuery,
         );
         setImageUrl('');
         return;
@@ -187,7 +196,13 @@ export default function ChatbotIANew({ onPublicar, onError, onSuccess, onMinimiz
       const data = await callUnifiedChat(texto);
 
       if (data.payload?.type === 'search_results') {
-        agregarMensaje('asistente', data.text, data.payload.items);
+        agregarMensaje(
+          'asistente',
+          data.text || buildSearchIntroMessage(data.payload.items.length, texto),
+          data.payload.items,
+          undefined,
+          texto,
+        );
       } else if (data.payload?.type === 'publish_draft') {
         const draft = data.payload.draft;
         const savedDraftId = await persistDraft(data.sessionId, {
@@ -212,7 +227,13 @@ export default function ChatbotIANew({ onPublicar, onError, onSuccess, onMinimiz
           .join('\n');
         agregarMensaje('asistente', draftText);
       } else if (data.payload?.type === 'recommendations') {
-        agregarMensaje('asistente', data.text, data.payload.items);
+        agregarMensaje(
+          'asistente',
+          data.text,
+          data.payload.items,
+          undefined,
+          texto,
+        );
       } else {
         agregarMensaje('asistente', data.text);
       }
@@ -278,66 +299,16 @@ export default function ChatbotIANew({ onPublicar, onError, onSuccess, onMinimiz
     );
   };
 
-  const renderResults = (resultados: Adiso[]) => {
-    // Usar Grid para resultados
-    return (
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4 w-full">
-        {resultados.map(adiso => (
-          <div
-            key={adiso.id}
-            onClick={() => abrirAdiso(adiso.id)} // This hook might need to check if on desktop/mobile context
-            className="group relative bg-white dark:bg-zinc-800 border border-gray-100 dark:border-zinc-700 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all cursor-pointer flex flex-col md:flex-row h-auto md:h-32"
-          >
-            {/* Image Section */}
-            <div className="md:w-32 h-32 md:h-full relative bg-gray-100 dark:bg-zinc-900 shrink-0">
-              {adiso.imagenesUrls && adiso.imagenesUrls.length > 0 ? (
-                <Image
-                  src={adiso.imagenesUrls[0]}
-                  alt={adiso.titulo}
-                  fill
-                  className="object-cover group-hover:scale-105 transition-transform duration-500"
-                />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center text-gray-300 dark:text-zinc-600">
-                  <FaImage size={24} />
-                </div>
-              )}
-              <div className="absolute top-2 left-2 px-2 py-0.5 bg-black/50 backdrop-blur-sm rounded-full text-[10px] font-medium text-white flex items-center gap-1">
-                <FaTag size={8} />
-                {adiso.categoria || 'Varios'}
-              </div>
-            </div>
-
-            {/* Content Section */}
-            <div className="p-3 flex flex-col justify-between flex-1 min-w-0">
-              <div>
-                <h4 className="font-semibold text-gray-900 dark:text-white text-sm line-clamp-2 mb-1 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-                  {adiso.titulo}
-                </h4>
-                <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-2">
-                  {adiso.descripcion || 'Sin descripción disponible.'}
-                </p>
-              </div>
-
-              <div className="mt-2 flex items-center justify-between">
-                <span className="font-bold text-gray-900 dark:text-white text-sm">
-                  {adiso.precio && adiso.precio > 0
-                    ? `S/ ${adiso.precio.toLocaleString('es-PE')}`
-                    : <span className="text-green-600 dark:text-green-400">Gratis / A tratar</span>}
-                </span>
-                {adiso.ubicacion && (
-                  <div className="flex items-center gap-1 text-[10px] text-gray-400 dark:text-gray-500 truncate max-w-[100px]">
-                    <FaMapMarkerAlt size={8} />
-                    <span className="truncate">{typeof adiso.ubicacion === 'string' ? adiso.ubicacion : 'Cusco'}</span>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-    );
-  };
+  const renderResults = (resultados: Adiso[], searchQuery?: string) => (
+    <ChatSearchPicks
+      items={resultados}
+      query={searchQuery}
+      onOpen={(adiso) => abrirAdiso(adiso.id)}
+      onRefine={(text) => {
+        if (!procesando) void procesarMensaje(text);
+      }}
+    />
+  );
 
   return (
     <div className="flex flex-col h-full bg-white dark:bg-zinc-900 font-sans">
@@ -421,7 +392,7 @@ export default function ChatbotIANew({ onPublicar, onError, onSuccess, onMinimiz
                   </div>
                 )}
 
-                <div className={`flex flex-col max-w-[85%] md:max-w-[75%]`}>
+                <div className={`flex flex-col ${msg.resultados?.length ? 'max-w-full w-full' : 'max-w-[85%] md:max-w-[75%]'}`}>
                   <div
                     className={`px-5 py-3.5 rounded-2xl shadow-sm ${msg.tipo === 'usuario'
                       ? 'bg-blue-600 text-white rounded-tr-sm'
@@ -433,8 +404,8 @@ export default function ChatbotIANew({ onPublicar, onError, onSuccess, onMinimiz
 
                   {/* Results attached to message */}
                   {msg.resultados && msg.resultados.length > 0 && (
-                    <div className="mt-3 animate-in fade-in slide-in-from-bottom-2 duration-500">
-                      {renderResults(msg.resultados)}
+                    <div className="mt-2 w-full animate-in fade-in slide-in-from-bottom-2 duration-500">
+                      {renderResults(msg.resultados, msg.searchQuery)}
                     </div>
                   )}
                 </div>
