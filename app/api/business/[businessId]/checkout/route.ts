@@ -15,12 +15,13 @@ const bodySchema = z.object({
   ).min(1),
 });
 
+/** businessId is the public business slug for this route */
 export async function POST(
   req: NextRequest,
-  { params }: { params: Promise<{ slug: string }> }
+  { params }: { params: Promise<{ businessId: string }> }
 ) {
-  const { slug } = await params;
-  const profile = await getBusinessProfileBySlug(decodeURIComponent(slug));
+  const { businessId } = await params;
+  const profile = await getBusinessProfileBySlug(decodeURIComponent(businessId));
   if (!profile) {
     return NextResponse.json({ error: 'Negocio no encontrado' }, { status: 404 });
   }

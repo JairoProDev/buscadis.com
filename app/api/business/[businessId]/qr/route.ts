@@ -3,13 +3,13 @@ import QRCode from 'qrcode';
 import { getBusinessProfileBySlug } from '@/lib/business';
 import { getBusinessCanonicalUrl } from '@/lib/business/public-utils';
 
+/** businessId is the public business slug for this route */
 export async function GET(
   req: NextRequest,
-  { params }: { params: Promise<{ slug: string }> }
+  { params }: { params: Promise<{ businessId: string }> }
 ) {
-  const { slug } = await params;
-  const decoded = decodeURIComponent(slug);
-  const profile = await getBusinessProfileBySlug(decoded);
+  const { businessId } = await params;
+  const profile = await getBusinessProfileBySlug(decodeURIComponent(businessId));
   if (!profile) {
     return NextResponse.json({ error: 'Negocio no encontrado' }, { status: 404 });
   }

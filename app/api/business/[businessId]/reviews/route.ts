@@ -9,12 +9,13 @@ const reviewSchema = z.object({
   text: z.string().max(1000).optional(),
 });
 
+/** businessId is the public business slug for this route */
 export async function GET(
   _req: NextRequest,
-  { params }: { params: Promise<{ slug: string }> }
+  { params }: { params: Promise<{ businessId: string }> }
 ) {
-  const { slug } = await params;
-  const profile = await getBusinessProfileBySlug(decodeURIComponent(slug));
+  const { businessId } = await params;
+  const profile = await getBusinessProfileBySlug(decodeURIComponent(businessId));
   if (!profile) {
     return NextResponse.json({ error: 'Negocio no encontrado' }, { status: 404 });
   }
@@ -52,15 +53,15 @@ export async function GET(
 
 export async function POST(
   req: NextRequest,
-  { params }: { params: Promise<{ slug: string }> }
+  { params }: { params: Promise<{ businessId: string }> }
 ) {
   const user = await getUserFromRouteRequest(req);
   if (!user?.id) {
     return NextResponse.json({ error: 'Inicia sesión para reseñar' }, { status: 401 });
   }
 
-  const { slug } = await params;
-  const profile = await getBusinessProfileBySlug(decodeURIComponent(slug));
+  const { businessId } = await params;
+  const profile = await getBusinessProfileBySlug(decodeURIComponent(businessId));
   if (!profile) {
     return NextResponse.json({ error: 'Negocio no encontrado' }, { status: 404 });
   }
