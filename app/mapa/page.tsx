@@ -11,9 +11,12 @@ import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation'; // Correct import for App Router
 
 const MapaInteractivo = dynamic(() => import('@/components/MapaInteractivo'), {
-    loading: () => <div className="h-full w-full flex items-center justify-center bg-gray-100">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-    </div>,
+    loading: () => (
+        <div className="flex h-full w-full flex-col items-center justify-center gap-3 bg-[var(--bg-secondary)]">
+            <div className="h-9 w-9 animate-spin rounded-full border-2 border-[var(--border-color)] border-t-[var(--brand-blue)]" />
+            <p className="text-xs font-medium text-[var(--text-tertiary)]">Cargando mapa…</p>
+        </div>
+    ),
     ssr: false,
 });
 
