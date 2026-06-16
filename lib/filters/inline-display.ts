@@ -42,6 +42,33 @@ export function getInlineFilterButtons(
 ): InlineFilterButton[] {
   const buttons: InlineFilterButton[] = [];
 
+  const u = filters.ubicacion;
+  const ubicLabel = u?.distrito || u?.provincia || u?.departamento;
+  buttons.push({
+    id: 'ubicacion',
+    label: 'Ubicación',
+    activeLabel: ubicLabel,
+    isActive: Boolean(ubicLabel),
+    type: 'ubicacion',
+  });
+
+  if (categoria !== 'todos') {
+    const catDefs = getFiltersForCategory(categoria).filter((d) => d.requiresCategory && d.type === 'chips' && d.options);
+    for (const def of catDefs) {
+      const raw = filters.facets[def.id];
+      const val = typeof raw === 'string' ? raw : (Array.isArray(raw) ? raw[0] : undefined);
+      const opt = val ? def.options!.find((o) => o.value === val) : undefined;
+      buttons.push({
+        id: def.id,
+        label: def.label,
+        activeLabel: opt?.label,
+        isActive: Boolean(val),
+        type: 'chips',
+        facetId: def.id,
+      });
+    }
+  }
+
   const hasPrecio = (filters.precioMin != null && filters.precioMin > 0)
     || (filters.precioMax != null && filters.precioMax > 0);
   let precioLabel: string | undefined;
@@ -60,24 +87,6 @@ export function getInlineFilterButtons(
     type: 'precio',
   });
 
-  // Filtros de categoría (chips) primero: hacen evidente el cambio de categoría
-  if (categoria !== 'todos') {
-    const catDefs = getFiltersForCategory(categoria).filter((d) => d.requiresCategory && d.type === 'chips' && d.options);
-    for (const def of catDefs) {
-      const raw = filters.facets[def.id];
-      const val = typeof raw === 'string' ? raw : (Array.isArray(raw) ? raw[0] : undefined);
-      const opt = val ? def.options!.find((o) => o.value === val) : undefined;
-      buttons.push({
-        id: def.id,
-        label: def.label,
-        activeLabel: opt?.label,
-        isActive: Boolean(val),
-        type: 'chips',
-        facetId: def.id,
-      });
-    }
-  }
-
   buttons.push({
     id: 'publicadoEn',
     label: 'Fecha',
@@ -86,22 +95,11 @@ export function getInlineFilterButtons(
     type: 'select',
   });
 
-  const u = filters.ubicacion;
-  const ubicLabel = u?.distrito || u?.provincia || u?.departamento;
-  buttons.push({
-    id: 'ubicacion',
-    label: 'Ubicación',
-    activeLabel: ubicLabel,
-    isActive: Boolean(ubicLabel),
-    type: 'ubicacion',
-  });
-
-  // Panel unificado: fotos, precio publicado, verificado, destacado y toggles de categoría
   const quickCount = countQuickFilters(categoria, filters);
   buttons.push({
     id: 'panel',
-    label: 'Filtros',
-    activeLabel: quickCount > 0 ? `Filtros · ${quickCount}` : undefined,
+    label: 'Más filtros',
+    activeLabel: quickCount > 0 ? `${quickCount} activos` : undefined,
     isActive: quickCount > 0,
     type: 'panel',
   });

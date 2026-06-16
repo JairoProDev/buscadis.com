@@ -1,11 +1,22 @@
 'use client';
 
 import React from 'react';
-import { Categoria } from '@/types';
+import { Adiso, Categoria } from '@/types';
 import { BrowseFilterState, FilterDefinition } from '@/lib/filters/types';
 import { getFiltersForCategory } from '@/lib/filters/definitions';
 import { countFacetOption } from '@/lib/filters/apply';
-import { Adiso } from '@/types';
+import { getCategoriaLabel } from '@/lib/categoria-icons';
+import {
+  IconCalendar,
+  IconChevronRight,
+  IconImage,
+  IconLocation,
+  IconMedal,
+  IconShield,
+  IconTag,
+  IconUserCheck,
+} from '@/components/Icons';
+import FilterSectionCard from './FilterSectionCard';
 import { TriStateSegment, ToggleCheck, FilterSelect } from './FilterUI';
 
 interface FilterControlFieldsProps {
@@ -20,27 +31,14 @@ interface FilterControlFieldsProps {
   compact?: boolean;
 }
 
-const UNIVERSAL_GROUPS = ['General', 'Confianza', 'Ubicación'];
+const PRICE_PRESETS = [
+  { label: 'Hasta S/ 500', min: undefined, max: 500 },
+  { label: 'S/ 500 – 1.5k', min: 500, max: 1500 },
+  { label: 'Más de S/ 1.5k', min: 1500, max: undefined },
+] as const;
 
-function groupFilters(defs: FilterDefinition[]): Record<string, FilterDefinition[]> {
-  const groups: Record<string, FilterDefinition[]> = {};
-  defs.forEach((d) => {
-    const g = d.group ?? 'General';
-    if (!groups[g]) groups[g] = [];
-    groups[g].push(d);
-  });
-  return groups;
-}
-
-/** Ordena grupos: filtros específicos de la categoría primero, luego generales */
-function orderGroups(groups: Record<string, FilterDefinition[]>): [string, FilterDefinition[]][] {
-  const entries = Object.entries(groups);
-  return entries.sort(([a], [b]) => {
-    const aUniversal = UNIVERSAL_GROUPS.includes(a);
-    const bUniversal = UNIVERSAL_GROUPS.includes(b);
-    if (aUniversal === bUniversal) return 0;
-    return aUniversal ? 1 : -1;
-  });
+function sectionActive(...flags: boolean[]): boolean {
+  return flags.some(Boolean);
 }
 
 export default function FilterControlFields({
@@ -52,10 +50,19 @@ export default function FilterControlFields({
   userLat,
   userLng,
   onOpenUbicacion,
-  compact,
 }: FilterControlFieldsProps) {
-  const defs = getFiltersForCategory(categoria);
-  const groups = orderGroups(groupFilters(defs));
+  const categoryDefs = getFiltersForCategory(categoria).filter((d) => d.requiresCategory);
+  const chipDefs = categoryDefs.filter((d) => d.type === 'chips' && d.options);
+  const toggleDefs = categoryDefs.filter((d) => d.type === 'toggle');
+
+  const u = filters.ubicacion;
+  const ubicLabel = u?.distrito || u?.provincia || u?.departamento || 'Elegir distrito o ciudad';
+  const hasUbi = Boolean(u?.distrito || u?.provincia || u?.departamento);
+  const hasPrecio =
+    (filters.precioMin != null && filters.precioMin > 0) ||
+    (filters.precioMax != null && filters.precioMax > 0);
+
+  let step = 1;
 
   const setFacet = (id: string, value: string | string[] | boolean | undefined) => {
     const facets = { ...filters.facets };
@@ -67,205 +74,231 @@ export default function FilterControlFields({
     onChange({ ...filters, facets });
   };
 
-  const toggleChip = (id: string, value: string, multi = false) => {
+  const toggleChip = (id: string, value: string) => {
     const current = filters.facets[id];
-    if (multi) {
-      const arr = Array.isArray(current) ? [...current] : current ? [String(current)] : [];
-      const idx = arr.indexOf(value);
-      if (idx >= 0) arr.splice(idx, 1);
-      setFacet(id, arr.length ? arr : undefined);
-    } else {
-      setFacet(id, current === value ? undefined : value);
-    }
+    setFacet(id, current === value ? undefined : value);
   };
 
-  const labelClass = compact ? 'text-xs font-semibold text-[var(--text-secondary)] mb-1.5 block' : 'text-sm font-semibold text-[var(--text-primary)] mb-2 block';
+  const renderChipGroup = (def: FilterDefinition) => {
+    const current = filters.facets[def.id];
+    return (
+      <div key={def.id}>
+        <span className="mb-1.5 block text-[11px] font-medium text-[var(--text-secondary)]">{def.label}</span>
+        <div className="flex flex-wrap gap-1.5">
+          {def.options!.map((opt) => {
+            const selected = current === opt.value;
+            const count =
+              categoria !== 'todos'
+                ? countFacetOption(adisos, categoria, busqueda, filters, def.id, opt.value, userLat, userLng)
+                : undefined;
+            const disabled = count === 0;
+            return (
+              <button
+                key={opt.value}
+                type="button"
+                disabled={disabled}
+                onClick={() => toggleChip(def.id, opt.value)}
+                className={`rounded-full px-2.5 py-1 text-[11px] font-semibold transition-all ${
+                  selected
+                    ? 'bg-[var(--brand-blue)] text-white'
+                    : disabled
+                      ? 'cursor-not-allowed opacity-40 bg-[var(--bg-tertiary)] text-[var(--text-tertiary)]'
+                      : 'bg-[var(--bg-tertiary)] text-[var(--text-primary)] hover:bg-[var(--hover-bg)]'
+                }`}
+              >
+                {opt.label}
+                {count != null && count > 0 && <span className="ml-1 opacity-70">({count})</span>}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    );
+  };
 
   return (
-    <div className={compact ? 'space-y-4' : 'space-y-5'}>
-      {groups.map(([groupName, groupDefs]) => {
-        const isCategoryGroup = !UNIVERSAL_GROUPS.includes(groupName);
-        return (
-          <section
-            key={groupName}
-            className={isCategoryGroup ? 'rounded-2xl bg-[var(--hover-bg)] p-3 -mx-1' : undefined}
-          >
-            {!compact && (
-              <h3 className={`text-[11px] font-bold uppercase tracking-wide mb-3 ${
-                isCategoryGroup ? 'text-[var(--brand-blue)]' : 'text-[var(--text-tertiary)]'
-              }`}>
-                {groupName}
-              </h3>
-            )}
-            <div className={compact ? 'space-y-3' : 'space-y-4'}>
-              {groupDefs.map((def) => {
-                if (def.type === 'price-range') {
-                  const hasMin = filters.precioMin != null && filters.precioMin > 0;
-                  const hasMax = filters.precioMax != null && filters.precioMax > 0;
-                  return (
-                    <div key={def.id}>
-                      <label className={`${labelClass} ${hasMin || hasMax ? 'text-[var(--brand-blue)] font-bold' : ''}`}>
-                        {def.label}
-                      </label>
-                      <div className="flex items-center gap-2">
-                        <input
-                          type="number"
-                          min={0}
-                          placeholder="Mín"
-                          value={filters.precioMin ?? ''}
-                          onChange={(e) => {
-                            const v = e.target.value ? Number(e.target.value) : undefined;
-                            onChange({ ...filters, precioMin: v && v > 0 ? v : undefined });
-                          }}
-                          className={`flex-1 min-w-0 px-3 py-2 rounded-xl text-[var(--text-primary)] text-sm transition-all ${
-                            hasMin
-                              ? 'bg-[var(--hover-bg)] text-[var(--brand-blue)] font-semibold shadow-sm'
-                              : 'bg-[var(--bg-tertiary)]'
-                          }`}
-                        />
-                        <span className="text-[var(--text-tertiary)]">—</span>
-                        <input
-                          type="number"
-                          min={0}
-                          placeholder="Máx"
-                          value={filters.precioMax ?? ''}
-                          onChange={(e) => {
-                            const v = e.target.value ? Number(e.target.value) : undefined;
-                            onChange({ ...filters, precioMax: v && v > 0 ? v : undefined });
-                          }}
-                          className={`flex-1 min-w-0 px-3 py-2 rounded-xl text-[var(--text-primary)] text-sm transition-all ${
-                            hasMax
-                              ? 'bg-[var(--hover-bg)] text-[var(--brand-blue)] font-semibold shadow-sm'
-                              : 'bg-[var(--bg-tertiary)]'
-                          }`}
-                        />
-                      </div>
-                    </div>
-                  );
+    <div className="space-y-3">
+      {/* 1. Ubicación */}
+      <FilterSectionCard
+        step={step++}
+        title="Dónde"
+        icon={<IconLocation size={14} />}
+        active={hasUbi}
+      >
+        <button
+          type="button"
+          onClick={onOpenUbicacion}
+          className={`flex w-full items-center justify-between gap-2 rounded-xl px-3 py-2.5 text-left text-xs transition-all ${
+            hasUbi
+              ? 'bg-[rgba(var(--brand-primary-rgb),0.08)] font-semibold text-[var(--brand-blue)]'
+              : 'bg-[var(--bg-tertiary)] text-[var(--text-primary)] hover:bg-[var(--hover-bg)]'
+          }`}
+        >
+          <span className="truncate">{ubicLabel}</span>
+          <IconChevronRight size={10} className="shrink-0 opacity-50" />
+        </button>
+        <p className="m-0 text-[10px] leading-relaxed text-[var(--text-tertiary)]">
+          Empieza por zona para ver avisos cerca de ti.
+        </p>
+      </FilterSectionCard>
+
+      {/* 2. Detalles de categoría */}
+      {categoria !== 'todos' && (chipDefs.length > 0 || toggleDefs.length > 0) && (
+        <FilterSectionCard
+          step={step++}
+          title={`Qué tipo de ${getCategoriaLabel(categoria).toLowerCase()}`}
+          icon={<IconTag size={14} />}
+          active={chipDefs.some((d) => filters.facets[d.id]) || toggleDefs.some((d) => filters.facets[d.id] === true)}
+        >
+          <div className="space-y-2.5">
+            {chipDefs.map(renderChipGroup)}
+            {toggleDefs.map((def) => (
+              <ToggleCheck
+                key={def.id}
+                label={def.label}
+                checked={filters.facets[def.id] === true}
+                onToggle={() => setFacet(def.id, filters.facets[def.id] === true ? undefined : true)}
+              />
+            ))}
+          </div>
+        </FilterSectionCard>
+      )}
+
+      {categoria === 'todos' && (
+        <div className="rounded-xl border border-dashed border-[var(--border-color)] px-3 py-2.5 text-[10px] leading-relaxed text-[var(--text-tertiary)]">
+          Elige una categoría arriba para ver filtros específicos (tipo de inmueble, modalidad de empleo, etc.).
+        </div>
+      )}
+
+      {/* 3. Presupuesto */}
+      <FilterSectionCard
+        step={step++}
+        title="Presupuesto"
+        icon={<IconTag size={14} />}
+        active={sectionActive(hasPrecio, filters.soloConPrecio !== undefined)}
+      >
+        <div className="flex items-center gap-2">
+          <input
+            type="number"
+            min={0}
+            placeholder="Mín S/"
+            value={filters.precioMin ?? ''}
+            onChange={(e) => {
+              const v = e.target.value ? Number(e.target.value) : undefined;
+              onChange({ ...filters, precioMin: v && v > 0 ? v : undefined });
+            }}
+            className={`min-w-0 flex-1 rounded-xl px-2.5 py-2 text-xs text-[var(--text-primary)] transition-all ${
+              filters.precioMin ? 'bg-[rgba(var(--brand-primary-rgb),0.08)] font-semibold text-[var(--brand-blue)]' : 'bg-[var(--bg-tertiary)]'
+            }`}
+          />
+          <span className="text-[var(--text-tertiary)]">—</span>
+          <input
+            type="number"
+            min={0}
+            placeholder="Máx S/"
+            value={filters.precioMax ?? ''}
+            onChange={(e) => {
+              const v = e.target.value ? Number(e.target.value) : undefined;
+              onChange({ ...filters, precioMax: v && v > 0 ? v : undefined });
+            }}
+            className={`min-w-0 flex-1 rounded-xl px-2.5 py-2 text-xs text-[var(--text-primary)] transition-all ${
+              filters.precioMax ? 'bg-[rgba(var(--brand-primary-rgb),0.08)] font-semibold text-[var(--brand-blue)]' : 'bg-[var(--bg-tertiary)]'
+            }`}
+          />
+        </div>
+        <div className="flex flex-wrap gap-1.5">
+          {PRICE_PRESETS.map((preset) => {
+            const active =
+              filters.precioMin === preset.min && filters.precioMax === preset.max;
+            return (
+              <button
+                key={preset.label}
+                type="button"
+                onClick={() =>
+                  onChange({
+                    ...filters,
+                    precioMin: preset.min,
+                    precioMax: preset.max,
+                  })
                 }
+                className={`rounded-full px-2.5 py-1 text-[10px] font-semibold transition-all ${
+                  active
+                    ? 'bg-[var(--brand-blue)] text-white'
+                    : 'bg-[var(--bg-tertiary)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
+                }`}
+              >
+                {preset.label}
+              </button>
+            );
+          })}
+        </div>
+        <TriStateSegment
+          compact
+          label="Precio indicado en el aviso"
+          value={filters.soloConPrecio}
+          onChange={(v) => onChange({ ...filters, soloConPrecio: v })}
+          labels={['Todos', 'Con precio', 'Sin precio']}
+        />
+      </FilterSectionCard>
 
-                if (def.type === 'tri-toggle') {
-                  const value = filters[def.id as keyof BrowseFilterState] as boolean | undefined;
-                  const labels = (def.options
-                    ? ['Todos', def.options[0]?.label ?? 'Con', def.options[1]?.label ?? 'Sin']
-                    : ['Todos', 'Con', 'Sin']) as [string, string, string];
-                  return (
-                    <TriStateSegment
-                      key={def.id}
-                      label={def.label}
-                      value={value}
-                      onChange={(v) => onChange({ ...filters, [def.id]: v })}
-                      labels={labels}
-                    />
-                  );
-                }
+      {/* 4. Calidad del aviso */}
+      <FilterSectionCard
+        step={step++}
+        title="Calidad del aviso"
+        icon={<IconImage size={14} />}
+        active={sectionActive(filters.conFotos !== undefined)}
+      >
+        <TriStateSegment
+          compact
+          label="Fotos"
+          value={filters.conFotos}
+          onChange={(v) => onChange({ ...filters, conFotos: v })}
+          labels={['Todos', 'Con fotos', 'Sin fotos']}
+        />
+        <p className="m-0 text-[10px] text-[var(--text-tertiary)]">
+          Los avisos con fotos suelen ser más confiables.
+        </p>
+      </FilterSectionCard>
 
-                if (def.type === 'toggle') {
-                  const isFacetToggle = Boolean(def.requiresCategory);
-                  const checked = isFacetToggle
-                    ? filters.facets[def.id] === true
-                    : Boolean(filters[def.id as keyof BrowseFilterState]);
+      {/* 5. Confianza */}
+      <FilterSectionCard
+        step={step++}
+        title="Confianza"
+        icon={<IconShield size={14} />}
+        active={sectionActive(Boolean(filters.verificado), Boolean(filters.destacado))}
+      >
+        <ToggleCheck
+          label="Anunciante verificado"
+          checked={Boolean(filters.verificado)}
+          onToggle={() => onChange({ ...filters, verificado: filters.verificado ? undefined : true })}
+          icon={<IconUserCheck size={12} />}
+        />
+        <ToggleCheck
+          label="Solo destacados"
+          checked={Boolean(filters.destacado)}
+          onToggle={() => onChange({ ...filters, destacado: filters.destacado ? undefined : true })}
+          icon={<IconMedal size={12} />}
+        />
+      </FilterSectionCard>
 
-                  return (
-                    <ToggleCheck
-                      key={def.id}
-                      label={def.label}
-                      checked={checked}
-                      onToggle={() => {
-                        if (isFacetToggle) {
-                          setFacet(def.id, checked ? undefined : true);
-                        } else {
-                          const key = def.id as keyof BrowseFilterState;
-                          onChange({ ...filters, [key]: checked ? undefined : true });
-                        }
-                      }}
-                    />
-                  );
-                }
-
-                if (def.type === 'select' && def.options) {
-                  const hasSelect = Boolean(filters.publicadoEn);
-                  return (
-                    <div key={def.id}>
-                      <label className={`${labelClass} ${hasSelect ? 'text-[var(--brand-blue)] font-bold' : ''}`}>{def.label}</label>
-                      <FilterSelect
-                        value={filters.publicadoEn}
-                        placeholder="Cualquier fecha"
-                        options={def.options}
-                        onChange={(v) => onChange({ ...filters, publicadoEn: v as BrowseFilterState['publicadoEn'] })}
-                      />
-                    </div>
-                  );
-                }
-
-                if (def.type === 'ubicacion') {
-                  const u = filters.ubicacion;
-                  const hasUbi = Boolean(u?.distrito || u?.provincia || u?.departamento);
-                  const label = u?.distrito || u?.provincia || u?.departamento || 'Elegir ubicación';
-                  return (
-                    <div key={def.id}>
-                      <label className={`${labelClass} ${hasUbi ? 'text-[var(--brand-blue)] font-bold' : ''}`}>{def.label}</label>
-                      <button
-                        type="button"
-                        onClick={onOpenUbicacion}
-                        className={`w-full px-3 py-2.5 rounded-xl text-left text-sm transition-all ${
-                          hasUbi
-                            ? 'bg-[var(--hover-bg)] text-[var(--brand-blue)] font-semibold shadow-sm'
-                            : 'bg-[var(--bg-tertiary)] text-[var(--text-primary)] hover:bg-[var(--hover-bg)]'
-                        }`}
-                      >
-                        {label}
-                      </button>
-                    </div>
-                  );
-                }
-
-                if (def.type === 'chips' && def.options) {
-                  const current = filters.facets[def.id];
-                  return (
-                    <div key={def.id}>
-                      <label className={labelClass}>{def.label}</label>
-                      <div className="flex flex-wrap gap-2">
-                        {def.options.map((opt) => {
-                          const selected = Array.isArray(current)
-                            ? current.includes(opt.value)
-                            : current === opt.value;
-                          const count = categoria !== 'todos'
-                            ? countFacetOption(adisos, categoria, busqueda, filters, def.id, opt.value, userLat, userLng)
-                            : undefined;
-                          const disabled = count === 0;
-                          return (
-                            <button
-                              key={opt.value}
-                              type="button"
-                              disabled={disabled}
-                              onClick={() => toggleChip(def.id, opt.value, false)}
-                              className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all min-h-[36px] ${
-                                selected
-                                  ? 'bg-[var(--brand-blue)] text-white'
-                                  : disabled
-                                    ? 'opacity-40 cursor-not-allowed bg-[var(--bg-tertiary)] text-[var(--text-tertiary)]'
-                                    : 'bg-[var(--bg-tertiary)] text-[var(--text-primary)] hover:bg-[var(--hover-bg)]'
-                              }`}
-                            >
-                              {opt.label}
-                              {count != null && count > 0 && (
-                                <span className="ml-1 opacity-75">({count})</span>
-                              )}
-                            </button>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  );
-                }
-
-                return null;
-              })}
-            </div>
-          </section>
-        );
-      })}
+      {/* 6. Recientes */}
+      <FilterSectionCard
+        step={step++}
+        title="Publicación reciente"
+        icon={<IconCalendar size={14} />}
+        active={Boolean(filters.publicadoEn)}
+      >
+        <FilterSelect
+          value={filters.publicadoEn}
+          placeholder="Cualquier fecha"
+          options={[
+            { value: '24h', label: 'Últimas 24 horas' },
+            { value: '7d', label: 'Última semana' },
+            { value: '30d', label: 'Último mes' },
+          ]}
+          onChange={(v) => onChange({ ...filters, publicadoEn: v as BrowseFilterState['publicadoEn'] })}
+        />
+      </FilterSectionCard>
     </div>
   );
 }

@@ -4,6 +4,41 @@ import React, { useEffect, useRef, useState } from 'react';
 import { IconCheck, IconChevronDown } from '@/components/Icons';
 
 /**
+ * Chips de 3 estados compactos (todos / sí / no).
+ */
+export function OptionChips({
+  value,
+  onChange,
+  options,
+}: {
+  value: boolean | undefined;
+  onChange: (next: boolean | undefined) => void;
+  options: { value: boolean | undefined; label: string }[];
+}) {
+  return (
+    <div className="flex flex-wrap gap-1.5">
+      {options.map((opt) => {
+        const selected = opt.value === value;
+        return (
+          <button
+            key={opt.label}
+            type="button"
+            onClick={() => onChange(opt.value)}
+            className={`rounded-full px-2.5 py-1 text-[11px] font-semibold transition-all ${
+              selected
+                ? 'bg-[var(--brand-blue)] text-white shadow-sm'
+                : 'bg-[var(--bg-tertiary)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
+            }`}
+          >
+            {opt.label}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+/**
  * Fila de selector de 3 estados: indiferente / sí / no.
  * Usado para filtros que admiten "todos", "con X" o "sin X".
  */
@@ -12,17 +47,28 @@ export function TriStateSegment({
   value,
   onChange,
   labels = ['Todos', 'Con', 'Sin'],
+  compact,
 }: {
   label: string;
   value: boolean | undefined;
   onChange: (next: boolean | undefined) => void;
   labels?: [string, string, string];
+  compact?: boolean;
 }) {
   const options: { value: boolean | undefined; label: string }[] = [
     { value: undefined, label: labels[0] },
     { value: true, label: labels[1] },
     { value: false, label: labels[2] },
   ];
+
+  if (compact) {
+    return (
+      <div>
+        <span className="mb-1.5 block text-[11px] font-medium text-[var(--text-secondary)]">{label}</span>
+        <OptionChips value={value} onChange={onChange} options={options} />
+      </div>
+    );
+  }
 
   return (
     <div>
@@ -58,27 +104,34 @@ export function ToggleCheck({
   label,
   checked,
   onToggle,
+  icon,
 }: {
   label: string;
   checked: boolean;
   onToggle: () => void;
+  icon?: React.ReactNode;
 }) {
   return (
     <button
       type="button"
       onClick={onToggle}
-      className="w-full flex items-center gap-2.5 px-2 py-2 rounded-xl text-left transition-colors hover:bg-[var(--hover-bg)] min-h-[40px]"
+      className="w-full flex items-center gap-2.5 px-1.5 py-1.5 rounded-xl text-left transition-colors hover:bg-[var(--hover-bg)] min-h-[36px]"
     >
+      {icon && (
+        <span className={`flex-shrink-0 ${checked ? 'text-[var(--brand-blue)]' : 'text-[var(--text-tertiary)]'}`}>
+          {icon}
+        </span>
+      )}
       <span
-        className={`flex-shrink-0 w-[18px] h-[18px] rounded-md flex items-center justify-center transition-all ${
+        className={`flex-shrink-0 w-[16px] h-[16px] rounded-md flex items-center justify-center transition-all ${
           checked
             ? 'bg-[var(--brand-blue)]'
             : 'bg-[var(--bg-tertiary)] border border-[var(--border-color)]'
         }`}
       >
-        {checked && <IconCheck size={10} color="white" />}
+        {checked && <IconCheck size={9} color="white" />}
       </span>
-      <span className={`text-sm transition-colors ${checked ? 'text-[var(--brand-blue)] font-semibold' : 'text-[var(--text-primary)]'}`}>
+      <span className={`text-xs transition-colors ${checked ? 'text-[var(--brand-blue)] font-semibold' : 'text-[var(--text-primary)]'}`}>
         {label}
       </span>
     </button>

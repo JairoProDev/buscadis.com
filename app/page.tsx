@@ -1214,14 +1214,26 @@ function HomeContent() {
                       animation: 'slideIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards',
                     }}
                   >
-                    <div className="flex items-center justify-between p-4 border-b border-[var(--border-color)] bg-[var(--bg-secondary)]">
-                      <h2 className="text-base font-bold text-[var(--text-primary)]">Filtros</h2>
-                      <button
-                        onClick={() => setIsMobileFiltersOpen(false)}
-                        className="p-1.5 rounded-lg hover:bg-[var(--hover-bg)] text-[var(--text-secondary)] transition-colors"
-                      >
-                        <IconClose size={20} />
-                      </button>
+                    <div className="flex items-center justify-between gap-2 p-4 border-b border-[var(--border-color)] bg-[var(--bg-secondary)]">
+                      <div>
+                        <h2 className="text-base font-bold text-[var(--text-primary)]">Refinar búsqueda</h2>
+                        <p className="m-0 mt-0.5 text-[10px] text-[var(--text-tertiary)]">Dónde → Tipo → Presupuesto → Calidad</p>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <button
+                          type="button"
+                          onClick={() => setBrowseFilters({ facets: {} })}
+                          className="px-2 py-1 text-[10px] font-semibold text-[var(--text-tertiary)] hover:text-[var(--brand-blue)]"
+                        >
+                          Limpiar
+                        </button>
+                        <button
+                          onClick={() => setIsMobileFiltersOpen(false)}
+                          className="p-1.5 rounded-lg hover:bg-[var(--hover-bg)] text-[var(--text-secondary)] transition-colors"
+                        >
+                          <IconClose size={20} />
+                        </button>
+                      </div>
                     </div>
                     <div className="flex-1 p-4 overflow-y-auto no-scrollbar">
                       <FilterControlFields
