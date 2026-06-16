@@ -14,6 +14,7 @@ import { deleteCatalogProduct } from '@/lib/business';
 import { useCatalogPDF } from '@/hooks/useCatalogPDF';
 import { useNetworkStatus } from '@/hooks/useNetworkStatus';
 import { getProductWhatsappUrl } from '@/lib/business/public-utils';
+import { getAdisoUrl } from '@/lib/url';
 import type { CartItem } from '@/lib/business/cart';
 
 interface BusinessCatalogTabProps {
@@ -25,6 +26,7 @@ interface BusinessCatalogTabProps {
     onEditPart?: (part: string) => void;
     addItem: (item: Omit<CartItem, 'qty'>, qty?: number) => void;
     defaultViewMode?: 'grid' | 'list' | 'feed';
+    showPinnedCarousel?: boolean;
     visible?: boolean;
     onFilteredAdisosChange?: (adisos: Adiso[]) => void;
 }
@@ -38,6 +40,7 @@ export default function BusinessCatalogTab({
     onEditPart,
     addItem,
     defaultViewMode = 'grid',
+    showPinnedCarousel = false,
     visible = true,
     onFilteredAdisosChange,
 }: BusinessCatalogTabProps) {
@@ -49,6 +52,12 @@ export default function BusinessCatalogTab({
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
     const [viewMode, setViewMode] = useState<'grid' | 'list' | 'feed'>(defaultViewMode);
+
+    useEffect(() => {
+        if (typeof window !== 'undefined' && window.matchMedia('(max-width: 767px)').matches && defaultViewMode === 'grid') {
+            setViewMode('feed');
+        }
+    }, [defaultViewMode]);
     const [filteredAdisos, setFilteredAdisos] = useState(adisos);
     const [visibleCount, setVisibleCount] = useState(24);
     const [confirmDeleteAdiso, setConfirmDeleteAdiso] = useState<Adiso | null>(null);
@@ -170,6 +179,34 @@ export default function BusinessCatalogTab({
                                 </button>
                             )}
                         </div>
+
+                        {showPinnedCarousel && filteredAdisos.length > 0 && (
+                            <div className="flex gap-3 overflow-x-auto no-scrollbar pb-1">
+                                {filteredAdisos
+                                    .filter((a) => a.imagenUrl || a.imagenesUrls?.[0])
+                                    .slice(0, 10)
+                                    .map((adiso) => (
+                                        <button
+                                            key={adiso.id}
+                                            type="button"
+                                            onClick={() => router.push(getAdisoUrl(adiso))}
+                                            className="shrink-0 w-28 rounded-[var(--bp-radius)] overflow-hidden border border-[var(--bp-border)] bg-[var(--bp-surface)] active:scale-[0.98] transition-transform"
+                                        >
+                                            <div className="aspect-square bg-[var(--bg-secondary)]">
+                                                <img
+                                                    src={adiso.imagenesUrls?.[0] || adiso.imagenUrl || ''}
+                                                    alt={adiso.titulo}
+                                                    className="w-full h-full object-cover"
+                                                    loading="lazy"
+                                                />
+                                            </div>
+                                            <p className="text-[10px] font-bold p-1.5 truncate text-[var(--bp-text)]">
+                                                {adiso.titulo}
+                                            </p>
+                                        </button>
+                                    ))}
+                            </div>
+                        )}
 
                         {/* Row 2: Count + View Mode Toggles */}
                         <div className="flex items-center justify-between gap-3">
@@ -313,7 +350,7 @@ export default function BusinessCatalogTab({
                                                 )}
                                             </div>
 
-                                            <div className="relative w-full aspect-square bg-slate-50 overflow-hidden cursor-pointer" onClick={() => router.push(`/adiso/${(adiso as any).slug || adiso.id}`)}>
+                                            <div className="relative w-full aspect-square bg-slate-50 overflow-hidden cursor-pointer" onClick={() => router.push(getAdisoUrl(adiso))}>
                                                 {adiso.imagenUrl || adiso.imagenesUrls?.[0] ? (
                                                     <img
                                                         src={adiso.imagenesUrls?.[0] || adiso.imagenUrl || ''}
@@ -334,7 +371,7 @@ export default function BusinessCatalogTab({
                                             </div>
 
                                             <div className="p-4 flex flex-col gap-1">
-                                                <h3 className="font-bold text-base text-slate-900 leading-tight cursor-pointer" onClick={() => router.push(`/adiso/${(adiso as any).slug || adiso.id}`)}>
+                                                <h3 className="font-bold text-base text-slate-900 leading-tight cursor-pointer" onClick={() => router.push(getAdisoUrl(adiso))}>
                                                     {adiso.titulo}
                                                 </h3>
                                                 {adiso.descripcion && (
@@ -357,7 +394,7 @@ export default function BusinessCatalogTab({
                                     ) : viewMode === 'grid' ? (
                                         <button
                                             key={adiso.id}
-                                            onClick={() => router.push(`/adiso/${(adiso as any).slug || adiso.id}`)}
+                                            onClick={() => router.push(getAdisoUrl(adiso))}
                                             className="group relative bg-white rounded-2xl overflow-hidden border border-slate-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 text-left flex flex-col"
                                         >
                                             <div className="relative w-full bg-slate-50 overflow-hidden" style={{ aspectRatio: '4/3' }}>
@@ -455,7 +492,7 @@ export default function BusinessCatalogTab({
                                         <div
                                             key={adiso.id}
                                             className="bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all flex gap-3 items-start relative group cursor-pointer p-3"
-                                            onClick={() => router.push(`/adiso/${(adiso as any).slug || adiso.id}`)}
+                                            onClick={() => router.push(getAdisoUrl(adiso))}
                                         >
                                             <div className="w-20 h-20 flex-shrink-0 bg-slate-50 rounded-xl overflow-hidden">
                                                 {adiso.imagenUrl || adiso.imagenesUrls?.[0] ? (

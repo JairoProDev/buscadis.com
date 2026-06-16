@@ -4,11 +4,14 @@ import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { supabase } from '@/lib/supabase';
 import { BusinessProfile } from '@/types/business';
 import BusinessPublicView from '@/components/business/BusinessPublicView';
+import BusinessProfileEditorLayout, {
+  EditorCloseButton,
+  EditorViewToggle,
+} from '@/components/business/editor/BusinessProfileEditorLayout';
 import { useAuth } from '@/hooks/useAuth';
 import { EditorSteps } from '../../mi-negocio/components/EditorSteps';
 import { cn } from '@/lib/utils';
 
-import ChatbotGuide from '@/components/business/ChatbotGuide';
 import { ProductEditor } from '@/components/business/ProductEditor';
 import SimpleCatalogAdd from '@/components/business/SimpleCatalogAdd';
 
@@ -20,7 +23,7 @@ import { type BusinessWithRole } from '@/lib/business-access';
 import BusinessSwitcher from '@/components/business/BusinessSwitcher';
 import { saveBusinessViaAPI, publishBusinessViaAPI } from '@/lib/business-api';
 import { useDebounce } from '@/hooks/useDebounce';
-import { IconCheck, IconEdit, IconEye, IconX } from '@/components/Icons';
+import { IconCheck, IconEdit } from '@/components/Icons';
 
 export default function PublicBusinessPage({
     params,
@@ -48,9 +51,6 @@ export default function PublicBusinessPage({
     // Modals state
     const [showProductModal, setShowProductModal] = useState(false);
     const [showAddProductModal, setShowAddProductModal] = useState(false);
-
-    // Chatbot State
-    const [chatbotMinimized, setChatbotMinimized] = useState(true);
 
     // Auto-open editor if requested
     useEffect(() => {
@@ -214,7 +214,7 @@ export default function PublicBusinessPage({
 
     useEffect(() => {
         if (business?.id && isOnline) {
-            trackEvent('page_view', business.id);
+            trackEvent('profile_view', business.id);
         }
     }, [business?.id, isOnline, trackEvent]);
 
@@ -226,6 +226,19 @@ export default function PublicBusinessPage({
         setShowProductModal(false);
         setEditingProduct(null);
     };
+
+    const handleEditPart = useCallback((part: string) => {
+        setIsEditing(true);
+        if (part === 'logo' || part === 'visual') setActiveStep(1);
+        else if (part === 'add-product' || part === 'catalog') {
+            setActiveStep(2);
+            if (part === 'add-product') setShowAddProductModal(true);
+        } else if (part === 'contact' || part === 'general') setActiveStep(3);
+        else if (part === 'hours') setActiveStep(4);
+        else if (part === 'social') setActiveStep(5);
+        else if (part === 'marketing') setActiveStep(6);
+        else if (part === 'identity') setActiveStep(0);
+    }, []);
 
     // ─── LOADING STATE ────────────────────────────────────
     if (loading) {
@@ -274,19 +287,15 @@ export default function PublicBusinessPage({
     const editableProfile = localProfile || business;
 
     return (
-        <div className="min-h-screen bg-slate-50 relative flex flex-col overflow-x-hidden">
-
-            {/* ─── TOP BAR (only for owner in edit mode) ─────────────────────── */}
-            {canEdit && isEditing && (
+        <>
+        <BusinessProfileEditorLayout
+            isEditing={isEditing}
+            canEdit={canEdit}
+            onCloseEditor={() => setIsEditing(false)}
+            onOpenEditor={() => setIsEditing(true)}
+            editorTopBar={
                 <div className="sticky top-0 z-[70] bg-white border-b border-slate-200 shadow-sm h-14 flex items-center px-4 gap-3">
-                    {/* Left: close + title */}
-                    <button
-                        onClick={() => setIsEditing(false)}
-                        className="p-2 hover:bg-slate-100 rounded-full transition-colors"
-                        title="Cerrar editor"
-                    >
-                        <IconX size={18} color="var(--text-secondary, #64748b)" />
-                    </button>
+                    <EditorCloseButton onClick={() => setIsEditing(false)} />
                     <div className="flex flex-col min-w-0 flex-1">
                         <span className="font-bold text-sm text-slate-800 leading-tight">Editar Página</span>
                         <div className="flex items-center gap-1.5">
@@ -314,174 +323,102 @@ export default function PublicBusinessPage({
                             </div>
                         )}
                     </div>
-
                     <div className="ml-auto flex items-center gap-2">
-                        {/* View/Edit toggle */}
-                        <div className="flex bg-slate-100 p-1 rounded-lg border border-slate-200 shadow-inner">
-                            <button
-                                onClick={() => setIsEditing(false)}
-                                className="px-2 py-1 rounded-md text-xs font-bold transition-all flex items-center gap-1 text-slate-500 hover:text-slate-700"
-                            >
-                                <IconEye size={13} />
-                                <span>Ver</span>
-                            </button>
-                            <button
-                                className="px-2 py-1 rounded-md text-xs font-bold transition-all flex items-center gap-1 bg-white shadow-sm text-blue-600"
-                            >
-                                <IconEdit size={13} />
-                                <span>Editar</span>
-                            </button>
-                        </div>
-
-                        {/* Publish button */}
+                        <EditorViewToggle
+                            isEditing={isEditing}
+                            onEdit={() => setIsEditing(true)}
+                            onPreview={() => setIsEditing(false)}
+                        />
                         <button
                             onClick={handlePublish}
                             disabled={saving}
                             className={cn(
-                                "px-4 py-1.5 rounded-lg font-bold text-white text-sm flex items-center gap-2 transition-all hover:shadow-md disabled:opacity-50",
-                                editableProfile.is_published ? "bg-emerald-500 hover:bg-emerald-600" : "bg-[var(--brand-blue,#53acc5)] hover:brightness-110"
+                                'px-4 py-1.5 rounded-lg font-bold text-white text-sm flex items-center gap-2 transition-all hover:shadow-md disabled:opacity-50',
+                                editableProfile.is_published ? 'bg-emerald-500 hover:bg-emerald-600' : 'bg-[var(--brand-blue,#53acc5)] hover:brightness-110'
                             )}
                         >
                             {editableProfile.is_published ? '✓ Publicado' : 'Publicar'}
                         </button>
                     </div>
                 </div>
-            )}
-
-            {/* ─── STATUS BANNERS ────────────────────────────────────────────── */}
-            {!isOnline && fromCache && (
-                <div className="fixed top-0 left-0 right-0 z-[200] bg-amber-500 text-white text-center text-sm py-2 px-4 font-medium animate-in slide-in-from-top duration-300">
-                    📴 Sin conexión — mostrando datos guardados
-                    {isStale && <span className="ml-2 text-amber-100 text-xs">(pueden no estar actualizados)</span>}
-                </div>
-            )}
-            {justCameOnline && (
-                <div className="fixed top-0 left-0 right-0 z-[200] bg-green-500 text-white text-center text-sm py-2 px-4 font-medium animate-in slide-in-from-top duration-300">
-                    ✅ Conexión restaurada — actualizando datos...
-                </div>
-            )}
-            {revalidating && isOnline && (
-                <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-[200] bg-slate-800/90 text-white text-xs py-1.5 px-4 rounded-full backdrop-blur-sm flex items-center gap-2">
-                    <div className="w-3 h-3 border-2 border-white/40 border-t-white rounded-full animate-spin" />
-                    Actualizando...
-                </div>
-            )}
-
-            {/* ─── LAYOUT: sidebar + content ────────────────────────────────── */}
-            <div className="flex flex-1 relative">
-
-                {/* EDITOR SIDEBAR */}
-                <div className={cn(
-                    "fixed inset-y-0 left-0 z-[60] w-full md:w-[450px] bg-white shadow-2xl transform transition-transform duration-300 ease-in-out border-r border-slate-200",
-                    canEdit && isEditing ? "translate-x-0" : "-translate-x-full"
-                )}
-                    style={{ top: canEdit && isEditing ? '3.5rem' : '0' }}
-                >
-                    {isEditing && canEdit && (
-                        <EditorSteps
-                            profile={editableProfile as any}
-                            setProfile={(p: any) => {
-                                if (typeof p === 'function') {
-                                    setLocalProfile(prev => prev ? (p as any)(prev) : prev);
-                                } else {
-                                    setLocalProfile(p);
-                                }
-                            }}
-                            saving={saving}
-                            catalogProducts={catalogProducts}
-                            activeStep={activeStep}
-                            setActiveStep={setActiveStep}
-                            onAddProduct={() => setShowAddProductModal(true)}
-                            editingProduct={editingProduct}
-                            setEditingProduct={(product: any) => {
-                                setEditingProduct(product);
-                                setShowProductModal(true);
-                            }}
-                            onRefreshCatalog={() => business?.id && reloadCatalog(business.id)}
-                            onToggleView={() => setIsEditing(false)}
-                            isPublished={!!editableProfile.is_published}
-                            onPublish={handlePublish}
-                        />
+            }
+            sidebar={
+                <EditorSteps
+                    profile={editableProfile as any}
+                    setProfile={(p: any) => {
+                        if (typeof p === 'function') {
+                            setLocalProfile((prev) => (prev ? (p as any)(prev) : prev));
+                        } else {
+                            setLocalProfile(p);
+                        }
+                    }}
+                    saving={saving}
+                    catalogProducts={catalogProducts}
+                    activeStep={activeStep}
+                    setActiveStep={setActiveStep}
+                    onAddProduct={() => setShowAddProductModal(true)}
+                    editingProduct={editingProduct}
+                    setEditingProduct={(product: any) => {
+                        setEditingProduct(product);
+                        setShowProductModal(true);
+                    }}
+                    onRefreshCatalog={() => business?.id && reloadCatalog(business.id)}
+                    onToggleView={() => setIsEditing(false)}
+                    isPublished={!!editableProfile.is_published}
+                    onPublish={handlePublish}
+                />
+            }
+            preview={
+                <>
+                    {!isOnline && fromCache && (
+                        <div className="fixed top-0 left-0 right-0 z-[200] bg-amber-500 text-white text-center text-sm py-2 px-4 font-medium">
+                            📴 Sin conexión — mostrando datos guardados
+                        </div>
                     )}
-                </div>
-
-                {/* MAIN CONTENT */}
-                <div className={cn(
-                    "flex-1 min-w-0 transition-all duration-300",
-                    canEdit && isEditing ? "md:ml-[450px]" : ""
-                )}>
+                    {revalidating && isOnline && (
+                        <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-[200] bg-slate-800/90 text-white text-xs py-1.5 px-4 rounded-full flex items-center gap-2">
+                            <div className="w-3 h-3 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+                            Actualizando...
+                        </div>
+                    )}
                     <BusinessPublicView
                         profile={editableProfile as any}
                         adisos={adisos}
+                        catalogProducts={catalogProducts}
+                        viewMode={isEditing ? 'editor' : 'storefront'}
                         editMode={canEdit && isEditing}
-                        onEditPart={(part) => {
-                            setIsEditing(true);
-                            if (part === 'logo' || part === 'visual') setActiveStep(1);
-                            if (part === 'add-product') {
-                                setActiveStep(2);
-                                setShowAddProductModal(true);
-                            }
-                        }}
+                        onEditPart={handleEditPart}
                         onEditProduct={(productAdiso) => {
                             setIsEditing(true);
                             setActiveStep(2);
-                            const fullProduct = catalogProducts.find(p => p.id === productAdiso.id);
+                            const fullProduct = catalogProducts.find((p) => p.id === productAdiso.id);
                             setEditingProduct(fullProduct || productAdiso);
                             setShowProductModal(true);
                         }}
-                        chatbotMinimized={chatbotMinimized}
-                        onToggleChatbot={() => setChatbotMinimized(!chatbotMinimized)}
                     />
-
-                    {/* "Editar página" floating button for owner (when not editing) */}
-                    {canEdit && !isEditing && (
-                        <div className="fixed bottom-6 left-4 right-4 z-50 flex flex-col items-end gap-2 sm:left-auto sm:right-6 sm:items-end">
-                            {businessOptions.length > 0 && business?.id && (
-                                <div className="bg-white/95 backdrop-blur-sm border border-slate-200 rounded-xl px-3 py-2 shadow-lg max-w-full">
-                                    <BusinessSwitcher
-                                        businesses={businessOptions}
-                                        currentBusinessId={business.id}
-                                        compact
-                                    />
-                                </div>
-                            )}
-                            <button
-                                onClick={() => setIsEditing(true)}
-                                className="flex items-center gap-2 px-4 py-2.5 bg-slate-800 text-white rounded-full shadow-xl font-bold text-sm hover:bg-slate-700 transition-all hover:scale-105 active:scale-95"
-                            >
-                                <IconEdit size={16} />
-                                Editar página
-                            </button>
+                </>
+            }
+            floatingActions={
+                <div className="fixed bottom-24 left-4 right-4 z-50 flex flex-col items-end gap-2 sm:left-auto sm:right-6 md:bottom-6">
+                    {businessOptions.length > 0 && business?.id && (
+                        <div className="bg-white/95 backdrop-blur-sm border border-slate-200 rounded-xl px-3 py-2 shadow-lg max-w-full">
+                            <BusinessSwitcher
+                                businesses={businessOptions}
+                                currentBusinessId={business.id}
+                                compact
+                            />
                         </div>
                     )}
-
-                    {/* CHATBOT GUIDE */}
-                    {canEdit && (
-                        <>
-                            <ChatbotGuide
-                                profile={editableProfile as any}
-                                onUpdate={(field, value) =>
-                                    setLocalProfile(prev => prev ? { ...prev, [field]: value } : prev)
-                                }
-                                onComplete={() => setChatbotMinimized(true)}
-                                isMinimized={chatbotMinimized}
-                                onToggleMinimize={() => setChatbotMinimized(!chatbotMinimized)}
-                                hideTriggerButton={true}
-                            />
-                        </>
-                    )}
+                    <button
+                        onClick={() => setIsEditing(true)}
+                        className="flex items-center gap-2 px-4 py-2.5 bg-slate-800 text-white rounded-full shadow-xl font-bold text-sm hover:bg-slate-700 transition-all active:scale-95"
+                    >
+                        <IconEdit size={16} />
+                        Editar página
+                    </button>
                 </div>
-            </div>
-
-            {/* Overlay for mobile when editing */}
-            {isOwner && isEditing && (
-                <div
-                    className="fixed inset-0 bg-black/20 z-40 md:hidden backdrop-blur-sm"
-                    onClick={() => setIsEditing(false)}
-                />
-            )}
-
-            {/* Product Edit Modal */}
+            }
+        />
             {(showProductModal || editingProduct) && user && business?.id && (
                 <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-300">
                     <div className="w-full max-w-2xl max-h-[90vh] overflow-y-auto">
@@ -518,6 +455,6 @@ export default function PublicBusinessPage({
                     </div>
                 </div>
             )}
-        </div>
+        </>
     );
 }

@@ -14,6 +14,7 @@ import { EditorHeader } from './EditorHeader';
 import SimpleCatalogAdd from '@/components/business/SimpleCatalogAdd';
 import { ProductEditor } from '@/components/business/ProductEditor';
 import ProfileCompletenessChecklist from '@/components/business/builder/ProfileCompletenessChecklist';
+import ProfileAnalyticsWidget from '@/components/business/editor/ProfileAnalyticsWidget';
 import ProfileBuilderModes from '@/components/business/builder/ProfileBuilderModes';
 import FilterSectionCard from '@/components/filters/FilterSectionCard';
 import { IconArrowLeft } from '@/components/Icons';
@@ -153,6 +154,18 @@ export function EditorSteps({
         }
     };
 
+    const handleChecklistNavigate = (itemId: string) => {
+        const map: Record<string, number> = {
+            logo: 1,
+            products: 2,
+            whatsapp: 3,
+            hours: 4,
+            description: 0,
+            deal: 6,
+        };
+        if (map[itemId] !== undefined) setActiveStep(map[itemId]);
+    };
+
     const currentStep = STEPS[activeStep];
     const StepIcon = currentStep.icon;
 
@@ -207,7 +220,9 @@ export function EditorSteps({
                     <ProfileCompletenessChecklist
                         profile={profile}
                         productCount={catalogProducts.length}
+                        onNavigate={handleChecklistNavigate}
                     />
+                    <ProfileAnalyticsWidget businessProfileId={profile.id} />
                     <FilterSectionCard
                         sectionId="template-theme"
                         step={1}
@@ -522,9 +537,9 @@ export function EditorSteps({
                                         {activeStep === 3 && (
                                             <div className="space-y-4">
                                                 {[
-                                                    { label: 'Teléfono / WhatsApp', icon: IconPhone, field: 'contact_phone', ph: '987 654 321' },
-                                                    { label: 'Dirección', icon: IconMapMarkerAlt, field: 'contact_address', ph: 'Av. Las Flores 123' },
-                                                    { label: 'Email', icon: IconEnvelope, field: 'contact_email', ph: 'hola@negocio.com' }
+                                                    { label: 'WhatsApp', icon: IconPhone, field: 'contact_whatsapp' as const, ph: '51987654321' },
+                                                    { label: 'Dirección', icon: IconMapMarkerAlt, field: 'contact_address' as const, ph: 'Av. Las Flores 123' },
+                                                    { label: 'Email', icon: IconEnvelope, field: 'contact_email' as const, ph: 'hola@negocio.com' }
                                                 ].map(f => (
                                                     <div key={f.field}>
                                                         <label className="text-xs font-bold text-slate-700 mb-1 flex items-center gap-1">
@@ -533,7 +548,14 @@ export function EditorSteps({
                                                         <input
                                                             type="text"
                                                             value={(profile as any)[f.field] || ''}
-                                                            onChange={e => setProfile({ ...profile, [f.field]: e.target.value })}
+                                                            onChange={e => {
+                                                                const value = e.target.value;
+                                                                if (f.field === 'contact_whatsapp') {
+                                                                    setProfile({ ...profile, contact_whatsapp: value, contact_phone: value });
+                                                                } else {
+                                                                    setProfile({ ...profile, [f.field]: value });
+                                                                }
+                                                            }}
                                                             className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm font-medium focus:border-blue-500 outline-none transition-colors"
                                                             placeholder={f.ph}
                                                         />

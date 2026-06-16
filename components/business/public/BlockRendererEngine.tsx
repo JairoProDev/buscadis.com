@@ -1,10 +1,11 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import type { BlockRenderContext } from '@/lib/business/blocks/types';
-import { getVisibleBlocks } from '@/lib/business/blocks/normalize';
+import { getVisibleBlocks, getDefaultTabId } from '@/lib/business/blocks/normalize';
 import { renderProfileBlock } from '@/lib/business/blocks/registry';
 import { getTemplateById } from '@/lib/business/templates/registry';
+import type { CtaPlacement } from '@/lib/business/templates/registry';
 import BusinessTabShell from '@/components/business/public/shells/BusinessTabShell';
 import BusinessScrollShell from '@/components/business/public/shells/BusinessScrollShell';
 
@@ -17,6 +18,7 @@ interface BlockRendererEngineProps {
   onShare?: () => void;
   onOpenCart?: () => void;
   onEditPart?: (part: string) => void;
+  ctaPlacement?: CtaPlacement;
 }
 
 export default function BlockRendererEngine({
@@ -28,18 +30,31 @@ export default function BlockRendererEngine({
   onShare,
   onOpenCart,
   onEditPart,
+  ctaPlacement = 'sticky_bar',
 }: BlockRendererEngineProps) {
-  const [internalTab, setInternalTab] = useState('catalogo');
+  const template = getTemplateById(ctx.profile.template_id || 'modern_tabs');
+  const visibleBlocks = useMemo(() => getVisibleBlocks(ctx.blocks), [ctx.blocks]);
+  const defaultTab = useMemo(() => getDefaultTabId(ctx.blocks), [ctx.blocks]);
+
+  const [internalTab, setInternalTab] = useState(defaultTab);
   const activeTab = controlledTab ?? internalTab;
   const setActiveTab = onTabChange ?? setInternalTab;
 
-  const template = getTemplateById(ctx.profile.template_id || 'modern_tabs');
-  const visibleBlocks = useMemo(
-    () => getVisibleBlocks(ctx.blocks),
-    [ctx.blocks]
-  );
+  useEffect(() => {
+    if (!controlledTab) {
+      setInternalTab((prev) => {
+        const tabs = visibleBlocks
+          .filter((b) => !['hero', 'highlights', 'cta'].includes(b.type))
+          .map((b) => getDefaultTabId([b]))
+          .filter(Boolean);
+        if (tabs.includes(prev)) return prev;
+        return defaultTab;
+      });
+    }
+  }, [defaultTab, controlledTab, visibleBlocks]);
 
   const heroVariant = template.heroVariant;
+  const hideStickyCta = ctaPlacement === 'floating' || ctx.hideMobileActionBar;
 
   if (template.paradigm === 'scroll') {
     return (
@@ -47,7 +62,7 @@ export default function BlockRendererEngine({
         blocks={visibleBlocks}
         ctx={ctx}
         heroVariant={heroVariant}
-        renderBlock={(block) => renderProfileBlock(block, ctx, heroVariant)}
+        renderBlock={(block) => renderProfileBlock(block, ctx, heroVariant, { hideStickyCta })}
         isOwner={isOwner}
         cartCount={cartCount}
         onShare={onShare}
@@ -65,7 +80,7 @@ export default function BlockRendererEngine({
       activeTab={activeTab}
       onTabChange={setActiveTab}
       adisosCount={ctx.adisos.length}
-      renderBlock={(block) => renderProfileBlock(block, ctx, heroVariant)}
+      renderBlock={(block) => renderProfileBlock(block, ctx, heroVariant, { hideStickyCta })}
       isOwner={isOwner}
       cartCount={cartCount}
       onShare={onShare}

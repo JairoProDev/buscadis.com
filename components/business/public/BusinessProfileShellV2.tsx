@@ -1,41 +1,53 @@
 'use client';
 
-import React, { useState, useEffect, useMemo } from 'react';
-import { BusinessProfile } from '@/types/business';
-import { Adiso } from '@/types';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { cn } from '@/lib/utils';
-import { IconWhatsapp, IconPlus, IconSparkles } from '@/components/Icons';
+import { IconPlus } from '@/components/Icons';
 import { useAuth } from '@/hooks/useAuth';
-import Header from '@/components/Header';
-import NavbarMobile from '@/components/NavbarMobile';
+import { useToast } from '@/hooks/useToast';
 import { useBusinessCart } from '@/hooks/useBusinessCart';
 import BusinessShareTools from '@/components/business/public/BusinessShareTools';
 import BusinessCartDrawer from '@/components/business/public/BusinessCartDrawer';
 import BusinessJsonLd from '@/components/business/public/BusinessJsonLd';
 import BlockRendererEngine from '@/components/business/public/BlockRendererEngine';
-import { getWhatsappUrl, businessThemeStyle, businessThemeClassName } from '@/lib/business/public-utils';
+import CommerceDock from '@/components/business/public/CommerceDock';
+import StorefrontChrome from '@/components/business/public/StorefrontChrome';
+import BuscadisDiscovery from '@/components/business/public/BuscadisDiscovery';
+import { businessThemeStyle, businessThemeClassName } from '@/lib/business/public-utils';
 import { normalizeProfileBlocks } from '@/lib/business/blocks/normalize';
 import { getTemplateById } from '@/lib/business/templates/registry';
 import type { BlockRenderContext } from '@/lib/business/blocks/types';
 import { PrintableCatalog } from '@/components/business/public/BusinessCatalogTab';
 import type { BusinessProfileShellProps } from './BusinessProfileShell.types';
+import type { BusinessReviewAggregate } from '@/types/business';
+import { trackProfileEvent } from '@/lib/business/analytics/track-profile-event';
 
 export default function BusinessProfileShellV2({
   profile,
   adisos = [],
   catalogProducts = [],
+  reviewAggregate: reviewAggregateProp,
+  viewMode: viewModeProp,
   isPreview = false,
   onEditPart,
   editMode = false,
   onEditProduct,
-  chatbotMinimized = true,
-  onToggleChatbot,
+  onTrackEvent,
 }: BusinessProfileShellProps) {
   const { user } = useAuth();
+  const { success: toastSuccess } = useToast();
   const [mounted, setMounted] = useState(false);
   const [printAdisos, setPrintAdisos] = useState(adisos);
-  const [showNav, setShowNav] = useState(true);
-  const [lastScrollY, setLastScrollY] = useState(0);
+  const [reviewAggregate, setReviewAggregate] = useState<BusinessReviewAggregate | null>(
+    reviewAggregateProp ?? null
+  );
+  const [showOwnerTools, setShowOwnerTools] = useState(false);
+  const [engaged, setEngaged] = useState(false);
+
+  const viewMode = viewModeProp ?? (isPreview ? 'preview' : editMode ? 'editor' : 'storefront');
+  const isStorefront = viewMode === 'storefront';
+  const isEditor = viewMode === 'editor';
+  const isPreviewMode = viewMode === 'preview';
 
   const { items: cartItems, count: cartCount, open: cartOpen, setOpen: setCartOpen, addItem, updateQty, removeItem } =
     useBusinessCart(profile?.id);
@@ -47,25 +59,58 @@ export default function BusinessProfileShellV2({
   }, [adisos]);
 
   useEffect(() => {
-    if (isPreview) return;
-    const handleScroll = () => {
-      const y = window.scrollY;
-      setShowNav(!(y > lastScrollY && y > 100));
-      setLastScrollY(y);
+    if (reviewAggregateProp) setReviewAggregate(reviewAggregateProp);
+  }, [reviewAggregateProp]);
+
+  useEffect(() => {
+    if (!profile?.slug || reviewAggregateProp) return;
+    let cancelled = false;
+    fetch(`/api/business/${encodeURIComponent(profile.slug)}/reviews`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (!cancelled && data?.aggregate && profile?.id) {
+          setReviewAggregate({
+            business_profile_id: profile.id,
+            avg_rating: data.aggregate.avg_rating ?? 0,
+            review_count: data.aggregate.review_count ?? 0,
+          });
+        }
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
     };
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, [lastScrollY, isPreview]);
+  }, [profile?.slug, reviewAggregateProp]);
+
+  useEffect(() => {
+    if (!isStorefront || typeof window === 'undefined') return;
+    const onScroll = () => {
+      const pct = window.scrollY / (document.documentElement.scrollHeight - window.innerHeight);
+      if (pct > 0.6) setEngaged(true);
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, [isStorefront]);
 
   const isOwner = Boolean(mounted && user?.id && profile?.user_id && user.id === profile.user_id);
-  const showEditControls = Boolean(isOwner && editMode);
-  const showChrome = !isPreview;
+  const showEditControls = Boolean(isOwner && isEditor);
+  const showMarketplaceChrome = false;
+  const showCommerceDock = (isStorefront || isEditor) && !isPreviewMode;
+  const dockBottomPad = showCommerceDock ? 'pb-24' : '';
 
   const templateId = profile?.template_id || 'modern_tabs';
   const template = getTemplateById(templateId);
   const blocks = useMemo(
     () => normalizeProfileBlocks(profile?.profile_blocks, templateId),
     [profile?.profile_blocks, templateId]
+  );
+
+  const track = useCallback(
+    (event: Parameters<typeof trackProfileEvent>[1]) => {
+      if (profile?.id) trackProfileEvent(profile.id, event);
+      onTrackEvent?.(event);
+    },
+    [profile?.id, onTrackEvent]
   );
 
   const blockCtx: BlockRenderContext = useMemo(
@@ -75,126 +120,141 @@ export default function BusinessProfileShellV2({
       catalogProducts,
       blocks,
       showEditControls,
-      isPreview,
+      isPreview: isPreviewMode,
       onEditPart,
       onEditProduct,
       addItem,
+      reviewAggregate,
+      viewMode,
+      hideMobileActionBar: showCommerceDock,
       defaultCatalogView:
         template.catalogPresentation === 'list'
           ? 'list'
-          : template.catalogPresentation === 'feed'
+          : template.catalogPresentation === 'feed' || template.catalogPresentation === 'pinned_carousel'
             ? 'feed'
             : 'grid',
     }),
-    [profile, adisos, catalogProducts, blocks, showEditControls, isPreview, onEditPart, onEditProduct, addItem, template.catalogPresentation]
+    [
+      profile,
+      adisos,
+      catalogProducts,
+      blocks,
+      showEditControls,
+      isPreviewMode,
+      onEditPart,
+      onEditProduct,
+      addItem,
+      reviewAggregate,
+      viewMode,
+      showCommerceDock,
+      template.catalogPresentation,
+    ]
   );
 
   const handleShare = async () => {
     if (!profile) return;
+    track('share_click');
+    const shareUrl = typeof window !== 'undefined' ? window.location.href : '';
+    const shareText = `Mira la tienda de ${profile.name || 'este negocio'} en Buscadis`;
     if (typeof navigator !== 'undefined' && navigator.share) {
       try {
         await navigator.share({
           title: profile.name || 'Negocio',
-          text: profile.description || 'Mira este negocio',
-          url: window.location.href,
+          text: shareText,
+          url: shareUrl,
         });
       } catch {
         /* cancelled */
       }
-    } else {
-      navigator.clipboard.writeText(window.location.href);
-      alert('Enlace copiado');
+    } else if (typeof navigator !== 'undefined') {
+      await navigator.clipboard.writeText(shareUrl);
+      toastSuccess('Enlace copiado');
     }
   };
 
+  const handleWhatsappClick = () => {
+    track('whatsapp_click');
+    setEngaged(true);
+  };
+
   if (!profile) {
-    return <div className="min-h-[50vh] flex items-center justify-center text-slate-400">Cargando perfil...</div>;
+    return (
+      <div className="min-h-[50vh] flex items-center justify-center text-[var(--bp-text-muted)]">
+        Cargando perfil...
+      </div>
+    );
   }
 
   return (
     <div
-      id={isPreview ? undefined : 'printable-content'}
+      id={isPreviewMode ? undefined : 'printable-content'}
       className={cn(
         'bg-[var(--bg-secondary)] text-[var(--text-primary)]',
-        isPreview ? 'min-h-0 relative isolate' : 'min-h-screen',
+        isPreviewMode ? 'min-h-0 relative isolate' : 'min-h-screen',
+        dockBottomPad,
         businessThemeClassName(profile),
         profile.font_family === 'mono' ? 'font-mono' : ''
       )}
       style={businessThemeStyle(profile)}
     >
-      {showChrome && <BusinessJsonLd profile={profile} products={adisos.slice(0, 5)} />}
-
-      {showChrome && (
-        <div
-          className={cn(
-            'fixed top-0 left-0 right-0 z-50 transition-transform duration-300 print:hidden',
-            showNav ? 'translate-y-0' : '-translate-y-full'
-          )}
-        >
-          <Header
-            onToggleLeftSidebar={() => {}}
-            ubicacion="Perú"
-            onUbicacionClick={() => {}}
-            seccionActiva="negocio"
-            onSeccionChange={() => {}}
-          />
-        </div>
+      {!isPreviewMode && (
+        <BusinessJsonLd profile={profile} products={adisos.slice(0, 5)} aggregate={reviewAggregate} />
       )}
+
+      {isStorefront && <StorefrontChrome businessName={profile.name} />}
 
       <BlockRendererEngine
         ctx={blockCtx}
-        isOwner={showChrome ? isOwner : false}
+        isOwner={isOwner && isEditor}
         cartCount={cartCount}
         onShare={handleShare}
         onOpenCart={() => setCartOpen(true)}
         onEditPart={onEditPart}
+        ctaPlacement={template.ctaPlacement}
       />
 
-      {showChrome && (
-        <div
-          className={cn(
-            'fixed right-6 z-50 flex flex-col gap-3 print:hidden transition-all duration-500',
-            showNav ? 'bottom-32' : 'bottom-6'
-          )}
-        >
-          {isOwner ? (
-            <>
-              {chatbotMinimized && onToggleChatbot && (
-                <button
-                  type="button"
-                  onClick={onToggleChatbot}
-                  className="w-14 h-14 bg-[var(--bg-primary)] text-[var(--brand-color)] border-2 border-[var(--brand-color)] rounded-full shadow-lg flex items-center justify-center"
-                  title="Asistente IA"
-                >
-                  <IconSparkles size={24} />
-                </button>
-              )}
-              <button
-                type="button"
-                onClick={() => onEditPart?.('add-product')}
-                className="w-14 h-14 bg-[var(--brand-color)] text-white rounded-full shadow-2xl flex items-center justify-center"
-                title="Agregar producto"
-              >
-                <IconPlus size={28} />
-              </button>
-            </>
-          ) : (
-            profile.contact_whatsapp && (
-              <a
-                href={getWhatsappUrl(profile.contact_whatsapp, profile.name || 'Negocio')}
-                target="_blank"
-                rel="noreferrer"
-                className="w-14 h-14 bg-green-500 text-white rounded-full shadow-2xl flex items-center justify-center"
-              >
-                <IconWhatsapp size={28} />
-              </a>
-            )
-          )}
+      {showCommerceDock && (
+        <CommerceDock
+          profile={profile}
+          cartCount={cartCount}
+          onOpenCart={() => setCartOpen(true)}
+          onShare={handleShare}
+          onWhatsappClick={handleWhatsappClick}
+        />
+      )}
+
+      {isEditor && isOwner && (
+        <div className="fixed right-4 bottom-28 z-[95] flex flex-col gap-2 print:hidden md:bottom-6">
+          <button
+            type="button"
+            onClick={() => onEditPart?.('add-product')}
+            className="w-12 h-12 bg-[var(--brand-color)] text-white rounded-full shadow-xl flex items-center justify-center active:scale-95 transition-transform"
+            title="Agregar producto"
+          >
+            <IconPlus size={24} />
+          </button>
         </div>
       )}
 
-      {showChrome && (
-        <BusinessShareTools slug={profile.slug || ''} businessName={profile.name || 'Negocio'} onShare={handleShare} />
+      {isEditor && isOwner && (
+        <>
+          <button
+            type="button"
+            onClick={() => setShowOwnerTools((v) => !v)}
+            className="fixed left-4 bottom-28 z-[95] md:bottom-6 px-3 py-2 rounded-full bg-[var(--bp-surface)] border border-[var(--bp-border)] text-xs font-bold shadow-lg print:hidden"
+          >
+            {showOwnerTools ? 'Cerrar' : 'Herramientas'}
+          </button>
+          {showOwnerTools && (
+            <div className="fixed inset-x-4 bottom-40 z-[95] md:inset-x-auto md:left-4 md:max-w-sm print:hidden">
+              <BusinessShareTools
+                slug={profile.slug || ''}
+                businessName={profile.name || 'Negocio'}
+                onShare={handleShare}
+              />
+            </div>
+          )}
+        </>
       )}
 
       <BusinessCartDrawer
@@ -208,30 +268,20 @@ export default function BusinessProfileShellV2({
         slug={profile.slug || ''}
       />
 
-      {showChrome && (
-        <div className="py-8 text-center text-xs text-[var(--text-tertiary)] print:hidden">
-          <p>
-            Hecho con <span className="font-bold text-[var(--brand-color)]">Buscadis Store</span>
-          </p>
-        </div>
+      {isStorefront && (
+        <BuscadisDiscovery
+          businessSlug={profile.slug || ''}
+          businessName={profile.name || 'Negocio'}
+          engaged={engaged}
+          onDiscoveryClick={() => track('discovery_cta_click')}
+        />
       )}
 
-      {showChrome && (
+      {!isPreviewMode && !showMarketplaceChrome && (
         <div className="printable-catalog hidden w-full bg-white p-8">
           <div className="max-w-4xl mx-auto">
             <PrintableCatalog profile={profile} adisos={printAdisos} />
           </div>
-        </div>
-      )}
-
-      {showChrome && (
-        <div
-          className={cn(
-            'fixed bottom-0 left-0 right-0 z-40 transition-transform duration-500 md:hidden print:hidden',
-            showNav ? 'translate-y-0' : 'translate-y-full'
-          )}
-        >
-          <NavbarMobile seccionActiva={null} onCambiarSeccion={() => {}} tieneAdisoAbierto={false} />
         </div>
       )}
     </div>

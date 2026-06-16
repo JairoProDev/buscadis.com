@@ -9,12 +9,14 @@ interface ProfileCompletenessChecklistProps {
   profile: Partial<BusinessProfile>;
   productCount: number;
   dealCount?: number;
+  onNavigate?: (itemId: string) => void;
 }
 
 export default function ProfileCompletenessChecklist({
   profile,
   productCount,
   dealCount = 0,
+  onNavigate,
 }: ProfileCompletenessChecklistProps) {
   const { items, complete, score } = getProfileChecklist(profile, productCount, dealCount);
 
@@ -33,16 +35,25 @@ export default function ProfileCompletenessChecklist({
       </div>
       <ul className="space-y-2">
         {items.map((item) => (
-          <li key={item.id} className="flex items-center gap-2 text-sm">
-            <span
+          <li key={item.id}>
+            <button
+              type="button"
+              onClick={() => onNavigate?.(item.id)}
               className={cn(
-                'w-5 h-5 rounded-full flex items-center justify-center',
-                item.done ? 'bg-green-500 text-white' : 'bg-slate-100 text-slate-300'
+                'flex items-center gap-2 text-sm w-full text-left rounded-lg px-1 py-0.5 transition-colors',
+                onNavigate && 'hover:bg-slate-50'
               )}
             >
-              {item.done && <IconCheck size={12} />}
-            </span>
-            <span className={item.done ? 'text-slate-700' : 'text-slate-400'}>{item.label}</span>
+              <span
+                className={cn(
+                  'w-5 h-5 rounded-full flex items-center justify-center shrink-0',
+                  item.done ? 'bg-green-500 text-white' : 'bg-slate-100 text-slate-300'
+                )}
+              >
+                {item.done && <IconCheck size={12} />}
+              </span>
+              <span className={item.done ? 'text-slate-700' : 'text-slate-400'}>{item.label}</span>
+            </button>
           </li>
         ))}
       </ul>

@@ -74,3 +74,17 @@ export function blockTypeToTabId(type: ProfileBlockType): string | null {
   };
   return map[type] ?? null;
 }
+
+/** First visible tab for tabs paradigm default selection */
+export function getDefaultTabId(blocks: ProfileBlock[]): string {
+  const visible = getVisibleBlocks(blocks);
+  const contentBlocks = visible.filter((b) => !['hero', 'highlights', 'cta'].includes(b.type));
+  const tabs = Array.from(
+    new Set(
+      contentBlocks
+        .map((b) => blockTypeToTabId(b.type))
+        .filter((t): t is string => Boolean(t))
+    )
+  );
+  return tabs[0] || 'catalogo';
+}

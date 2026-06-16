@@ -18,7 +18,7 @@ import BusinessActionBar from '@/components/business/public/BusinessActionBar';
 const TAB_META: Record<string, { label: string; icon: ReactNode }> = {
   catalogo: { label: 'Catálogo', icon: <IconStore size={18} /> },
   inicio: { label: 'Información', icon: <IconMapMarkerAlt size={18} /> },
-  feed: { label: 'Deals', icon: <IconHeart size={18} /> },
+  feed: { label: 'Ofertas', icon: <IconHeart size={18} /> },
   resenas: { label: 'Reseñas', icon: <IconStar size={18} /> },
 };
 
@@ -63,9 +63,10 @@ export default function BusinessTabShell({
     )
   );
 
-  const blocksForTab = contentBlocks.filter(
-    (b) => blockTypeToTabId(b.type) === activeTab
-  );
+  const blocksByTab = tabs.reduce<Record<string, ProfileBlock[]>>((acc, tabId) => {
+    acc[tabId] = contentBlocks.filter((b) => blockTypeToTabId(b.type) === tabId);
+    return acc;
+  }, {});
 
   return (
     <>
@@ -75,11 +76,11 @@ export default function BusinessTabShell({
           profile={ctx.profile}
           showEditControls={ctx.showEditControls}
           onEditPart={ctx.onEditPart}
+          reviewAggregate={ctx.reviewAggregate}
           embedded={ctx.isPreview}
         />
       )}
-      {highlightsBlock?.visible &&
-        renderBlock(highlightsBlock)}
+      {highlightsBlock?.visible && renderBlock(highlightsBlock)}
       <BusinessActionBar
         profile={ctx.profile}
         isOwner={isOwner}
@@ -87,11 +88,15 @@ export default function BusinessTabShell({
         onShare={onShare || (() => {})}
         onOpenCart={onOpenCart}
         onEditPart={onEditPart || ctx.onEditPart}
+        hideMobile={ctx.hideMobileActionBar}
       />
       <div className="bg-[var(--bg-primary)] pb-2 shadow-sm relative z-10">
-        <div className="mt-8 border-t border-[var(--border-subtle)] bg-[var(--bg-primary)] sticky top-0 z-40 shadow-sm backdrop-blur-md print:hidden">
+        <div
+          className="border-t border-[var(--border-subtle)] bg-[var(--bg-primary)]/95 sticky z-40 shadow-sm backdrop-blur-md print:hidden"
+          style={{ top: 'max(env(safe-area-inset-top, 0px), 0px)' }}
+        >
           <div className="max-w-6xl mx-auto px-4">
-            <div className="flex items-center gap-8 overflow-x-auto no-scrollbar">
+            <div className="flex items-center gap-6 overflow-x-auto no-scrollbar">
               {tabs.map((tabId) => {
                 const meta = TAB_META[tabId] || { label: tabId, icon: null };
                 return (
@@ -100,7 +105,7 @@ export default function BusinessTabShell({
                     type="button"
                     onClick={() => onTabChange(tabId)}
                     className={cn(
-                      'flex items-center gap-2 py-4 px-2 font-bold text-sm whitespace-nowrap border-b-2 transition-all',
+                      'flex items-center gap-2 py-3.5 px-1 font-bold text-sm whitespace-nowrap border-b-2 transition-all active:scale-[0.98]',
                       activeTab === tabId
                         ? 'text-[var(--brand-color)] border-[var(--brand-color)]'
                         : 'text-[var(--text-tertiary)] border-transparent'
@@ -120,8 +125,12 @@ export default function BusinessTabShell({
           </div>
         </div>
       </div>
-      <div className="max-w-6xl mx-auto px-4 py-8 min-h-[50vh]">
-        {blocksForTab.map((b) => renderBlock(b))}
+      <div className="max-w-6xl mx-auto px-4 py-6 min-h-[40vh]">
+        {tabs.map((tabId) => (
+          <div key={tabId} className={cn(activeTab !== tabId && 'hidden')} aria-hidden={activeTab !== tabId}>
+            {blocksByTab[tabId]?.map((b) => renderBlock(b))}
+          </div>
+        ))}
       </div>
       {blocks
         .filter((b) => b.type === 'cta')

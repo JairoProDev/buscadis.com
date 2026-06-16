@@ -60,6 +60,19 @@ export default function TemplateGallery({
             {p === 'all' ? 'Todos' : p === 'tabs' ? 'Pestañas' : 'Scroll'}
           </button>
         ))}
+        {(['all', 'ferreteria', 'restaurante', 'belleza', 'servicios'] as const).map((ind) => (
+          <button
+            key={ind}
+            type="button"
+            onClick={() => setIndustryFilter(ind)}
+            className={cn(
+              'px-3 py-1 rounded-full text-xs font-bold capitalize',
+              industryFilter === ind ? 'bg-slate-800 text-white' : 'bg-slate-100 text-slate-600'
+            )}
+          >
+            {ind === 'all' ? 'Industria' : ind}
+          </button>
+        ))}
         {canUndo && onUndo && (
           <button
             type="button"

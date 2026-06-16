@@ -3,15 +3,18 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { DealClip } from '@/types';
+import type { Adiso } from '@/types';
 import { IconHeart } from '@/components/Icons';
 import Link from 'next/link';
+import { getAdisoUrl } from '@/lib/url';
 
 interface BusinessDealsTabProps {
   slug: string;
   businessName: string;
+  adisos?: Adiso[];
 }
 
-export default function BusinessDealsTab({ slug, businessName }: BusinessDealsTabProps) {
+export default function BusinessDealsTab({ slug, businessName, adisos = [] }: BusinessDealsTabProps) {
   const [clips, setClips] = useState<DealClip[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -31,9 +34,20 @@ export default function BusinessDealsTab({ slug, businessName }: BusinessDealsTa
     };
   }, [slug]);
 
+  const resolveDealHref = (clip: DealClip): string => {
+    if (clip.cta_url) return clip.cta_url;
+    if (clip.adiso_id) {
+      const adiso = adisos.find((a) => a.id === clip.adiso_id);
+      if (adiso) return getAdisoUrl(adiso);
+    }
+    return '/deals';
+  };
+
   if (loading) {
     return (
-      <div className="py-16 text-center text-slate-400 text-sm">Cargando deals…</div>
+      <div className="py-16 text-center text-[var(--bp-text-muted)] text-sm animate-pulse">
+        Cargando ofertas…
+      </div>
     );
   }
 
@@ -44,12 +58,12 @@ export default function BusinessDealsTab({ slug, businessName }: BusinessDealsTa
         animate={{ opacity: 1, y: 0 }}
         className="max-w-2xl mx-auto"
       >
-        <div className="bg-white p-8 rounded-3xl text-center shadow-sm border border-slate-100">
+        <div className="bg-[var(--bp-surface)] p-8 rounded-[var(--bp-radius)] text-center shadow-sm border border-[var(--bp-border)]">
           <div className="w-20 h-20 bg-gradient-to-tr from-pink-500 to-orange-500 rounded-full flex items-center justify-center mx-auto mb-6 text-white shadow-lg">
             <IconHeart size={32} />
           </div>
-          <h3 className="font-bold text-2xl mb-3">Sin deals aún</h3>
-          <p className="text-slate-500 max-w-md mx-auto">
+          <h3 className="font-bold text-2xl mb-3 text-[var(--bp-text)]">Sin ofertas aún</h3>
+          <p className="text-[var(--bp-text-muted)] max-w-md mx-auto">
             {businessName} aún no publicó ofertas flash. Vuelve pronto o explora el catálogo.
           </p>
         </div>
@@ -66,7 +80,7 @@ export default function BusinessDealsTab({ slug, businessName }: BusinessDealsTa
       {clips.map((clip) => (
         <article
           key={clip.id}
-          className="bg-white rounded-3xl overflow-hidden border border-slate-100 shadow-sm"
+          className="bg-[var(--bp-surface)] rounded-[var(--bp-radius)] overflow-hidden border border-[var(--bp-border)] shadow-sm"
         >
           <div className="aspect-[9/16] max-h-[480px] bg-black relative">
             {clip.media_type === 'video' ? (
@@ -88,19 +102,19 @@ export default function BusinessDealsTab({ slug, businessName }: BusinessDealsTa
             )}
           </div>
           <div className="p-5">
-            <h3 className="font-bold text-lg text-slate-900">{clip.title}</h3>
-            {clip.caption && <p className="text-sm text-slate-500 mt-1">{clip.caption}</p>}
+            <h3 className="font-bold text-lg text-[var(--bp-text)]">{clip.title}</h3>
+            {clip.caption && <p className="text-sm text-[var(--bp-text-muted)] mt-1">{clip.caption}</p>}
             <div className="flex items-center justify-between mt-4">
               {clip.price_display != null && (
                 <div className="flex items-baseline gap-2">
-                  <span className="text-xl font-black text-slate-900">S/ {clip.price_display}</span>
+                  <span className="text-xl font-black text-[var(--bp-text)]">S/ {clip.price_display}</span>
                   {clip.price_original != null && (
-                    <span className="text-sm text-slate-400 line-through">S/ {clip.price_original}</span>
+                    <span className="text-sm text-[var(--bp-text-muted)] line-through">S/ {clip.price_original}</span>
                   )}
                 </div>
               )}
               <Link
-                href={clip.adiso_id ? `/adiso/${clip.adiso_id}` : '/deals'}
+                href={resolveDealHref(clip)}
                 className="text-sm font-bold text-[var(--brand-color)]"
               >
                 Ver oferta →

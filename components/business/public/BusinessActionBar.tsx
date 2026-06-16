@@ -8,6 +8,7 @@ import {
 } from '@/components/Icons';
 import type { BusinessProfile } from '@/types/business';
 import { getWhatsappUrl } from '@/lib/business/public-utils';
+import { cn } from '@/lib/utils';
 
 interface BusinessActionBarProps {
   profile: Partial<BusinessProfile>;
@@ -16,6 +17,7 @@ interface BusinessActionBarProps {
   onShare: () => void;
   onOpenCart?: () => void;
   onEditPart?: (part: string) => void;
+  hideMobile?: boolean;
 }
 
 export default function BusinessActionBar({
@@ -25,6 +27,7 @@ export default function BusinessActionBar({
   onShare,
   onOpenCart,
   onEditPart,
+  hideMobile = false,
 }: BusinessActionBarProps) {
   return (
     <div className="max-w-6xl mx-auto px-4 md:px-8 md:ml-[220px] -mt-2 mb-4">
@@ -74,7 +77,7 @@ export default function BusinessActionBar({
         )}
       </div>
 
-      <div className="md:hidden grid grid-cols-5 gap-2 mt-4">
+      <div className={cn('md:hidden grid grid-cols-5 gap-2 mt-4', hideMobile && 'hidden')}>
         {profile.contact_whatsapp && (
           <a
             href={getWhatsappUrl(profile.contact_whatsapp, profile.name || 'Negocio')}

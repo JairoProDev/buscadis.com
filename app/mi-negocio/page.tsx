@@ -578,11 +578,13 @@ function BusinessBuilderPageContent() {
                             <BusinessPublicView
                                 profile={profile}
                                 isPreview
-                                editMode={true} // Always show edit controls, let them trigger the editor
+                                viewMode="preview"
+                                editMode
                                 onUpdate={handleChatbotUpdate}
                                 onEditPart={handleEditPart}
                                 onEditProduct={handleEditProduct}
                                 adisos={adisos}
+                                catalogProducts={catalogProducts}
                             />
                         </div>
                     </div>

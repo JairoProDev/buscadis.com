@@ -23,19 +23,21 @@ import { DEFAULT_PROFILE_BLOCKS, PROFILE_THEME_PRESETS } from '@/lib/business/pr
 import TemplateGallery from './TemplateGallery';
 import BlockInspector from './BlockInspector';
 import CustomBlocksEditor from './CustomBlocksEditor';
-import BusinessProfileChatEditor from './BusinessProfileChatEditor';
+import UnifiedAssistant from '@/components/business/editor/UnifiedAssistant';
 import { cn } from '@/lib/utils';
 import { trackBlockReordered, trackThemeChanged, trackBuilderModeChanged } from '@/lib/business/profile-analytics';
 import { BLOCK_LABELS } from './BlockInspector';
 import { IconEye } from '@/components/Icons';
 
-type BuilderMode = 'form' | 'chat' | 'visual';
+type BuilderMode = 'design' | 'assist';
 
 interface ProfileBuilderModesProps {
   profile: Partial<BusinessProfile>;
   onUpdate: (patch: Partial<BusinessProfile>) => void;
   adisos?: import('@/types').Adiso[];
   recommendedTemplateId?: string;
+  selectedBlockId?: string | null;
+  onSelectBlock?: (id: string | null) => void;
 }
 
 function SortableBlockRow({
@@ -51,6 +53,7 @@ function SortableBlockRow({
 }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: block.id,
+    disabled: block.type === 'hero',
   });
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -68,15 +71,19 @@ function SortableBlockRow({
         selected
           ? 'border-[var(--brand-color)] bg-[var(--brand-color)]/5 shadow-sm'
           : 'border-slate-200 bg-white hover:border-slate-300',
-        isDragging && 'shadow-lg ring-2 ring-[var(--brand-color)]/20'
+        isDragging && 'shadow-lg ring-2 ring-[var(--brand-color)]/20',
+        block.type === 'hero' && 'opacity-80'
       )}
     >
       <button
         type="button"
-        className="shrink-0 p-1 text-slate-400 hover:text-slate-600 cursor-grab active:cursor-grabbing touch-none"
+        className={cn(
+          'shrink-0 p-1 text-slate-400 hover:text-slate-600 touch-none',
+          block.type === 'hero' ? 'cursor-not-allowed opacity-40' : 'cursor-grab active:cursor-grabbing'
+        )}
         aria-label="Reordenar"
-        {...attributes}
-        {...listeners}
+        disabled={block.type === 'hero'}
+        {...(block.type === 'hero' ? {} : { ...attributes, ...listeners })}
       >
         ⠿
       </button>
@@ -84,7 +91,9 @@ function SortableBlockRow({
         <span className="font-semibold text-slate-800 block truncate">
           {BLOCK_LABELS[block.type] || block.type}
         </span>
-        <span className="text-[10px] text-slate-400 capitalize">{block.type}</span>
+        {block.type === 'hero' && (
+          <span className="text-[10px] text-amber-600">Siempre primero</span>
+        )}
       </button>
       <button
         type="button"
@@ -105,11 +114,16 @@ export default function ProfileBuilderModes({
   onUpdate,
   adisos: _adisos = [],
   recommendedTemplateId,
+  selectedBlockId: controlledBlockId,
+  onSelectBlock,
 }: ProfileBuilderModesProps) {
-  const [mode, setMode] = useState<BuilderMode>('form');
-  const [selectedBlockId, setSelectedBlockId] = useState<string | null>(null);
+  const [mode, setMode] = useState<BuilderMode>('design');
+  const [internalBlockId, setInternalBlockId] = useState<string | null>(null);
   const [visualPanel, setVisualPanel] = useState<'blocks' | 'links'>('blocks');
   const undoSnapshot = useRef<Partial<BusinessProfile> | null>(null);
+
+  const selectedBlockId = controlledBlockId ?? internalBlockId;
+  const setSelectedBlockId = onSelectBlock ?? setInternalBlockId;
 
   const blocks = profile.profile_blocks?.length ? profile.profile_blocks : DEFAULT_PROFILE_BLOCKS;
   const selectedBlock = blocks.find((b) => b.id === selectedBlockId) || null;
@@ -146,8 +160,7 @@ export default function ProfileBuilderModes({
     const oldIndex = blocks.findIndex((b) => b.id === active.id);
     const newIndex = blocks.findIndex((b) => b.id === over.id);
     if (oldIndex < 0 || newIndex < 0) return;
-    const heroIdx = blocks.findIndex((b) => b.type === 'hero');
-    if (blocks[oldIndex].type === 'hero' && newIndex !== heroIdx) return;
+    if (blocks[oldIndex].type === 'hero') return;
     undoSnapshot.current = { profile_blocks: blocks };
     const next = arrayMove(blocks, oldIndex, newIndex);
     onUpdate({ profile_blocks: next });
@@ -182,7 +195,7 @@ export default function ProfileBuilderModes({
   return (
     <div className="space-y-3">
       <div className="flex gap-1.5 p-1 bg-slate-100 rounded-xl">
-        {(['form', 'chat', 'visual'] as BuilderMode[]).map((m) => (
+        {(['design', 'assist'] as BuilderMode[]).map((m) => (
           <button
             key={m}
             type="button"
@@ -194,13 +207,13 @@ export default function ProfileBuilderModes({
                 : 'text-slate-500 hover:text-slate-700'
             )}
           >
-            {m === 'form' ? 'Plantillas' : m === 'chat' ? 'Chat IA' : 'Visual'}
+            {m === 'design' ? 'Diseño' : 'Asistente'}
           </button>
         ))}
       </div>
 
-      {mode === 'form' && (
-        <>
+      {mode === 'design' && (
+        <div className="space-y-4">
           <TemplateGallery
             profile={profile}
             onUpdate={onUpdate}
@@ -232,20 +245,10 @@ export default function ProfileBuilderModes({
               ))}
             </div>
           </div>
-        </>
-      )}
 
-      {mode === 'chat' && (
-        <BusinessProfileChatEditor profile={profile} onUpdate={onUpdate} />
-      )}
-
-      {mode === 'visual' && (
-        <div className="space-y-4">
           <div className="flex items-start gap-2 rounded-xl bg-blue-50 border border-blue-100 px-3 py-2.5 text-xs text-blue-800">
             <IconEye size={16} className="shrink-0 mt-0.5 text-blue-500" />
-            <p>
-              Arrastra bloques para reordenar. La vista previa en vivo está en el panel derecho — los cambios se aplican al instante.
-            </p>
+            <p>Así verán tus clientes en el celular — los cambios se aplican al instante en la vista previa.</p>
           </div>
 
           <div className="flex gap-1 p-0.5 bg-slate-100 rounded-lg">
@@ -266,54 +269,36 @@ export default function ProfileBuilderModes({
 
           {visualPanel === 'blocks' && (
             <>
-              <div>
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wide mb-2">
-                  Orden de secciones
-                </p>
-                <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-                  <SortableContext items={blocks.map((b) => b.id)} strategy={verticalListSortingStrategy}>
-                    <div className="space-y-1.5 max-h-[220px] overflow-y-auto pr-0.5 custom-scrollbar">
-                      {blocks.map((block) => (
-                        <SortableBlockRow
-                          key={block.id}
-                          block={block}
-                          selected={selectedBlockId === block.id}
-                          onSelect={() => setSelectedBlockId(block.id)}
-                          onToggle={() => toggleBlock(block.id)}
-                        />
-                      ))}
-                    </div>
-                  </SortableContext>
-                </DndContext>
-              </div>
+              <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+                <SortableContext items={blocks.map((b) => b.id)} strategy={verticalListSortingStrategy}>
+                  <div className="space-y-1.5 max-h-[280px] overflow-y-auto pr-0.5">
+                    {blocks.map((block) => (
+                      <SortableBlockRow
+                        key={block.id}
+                        block={block}
+                        selected={selectedBlockId === block.id}
+                        onSelect={() => setSelectedBlockId(block.id)}
+                        onToggle={() => toggleBlock(block.id)}
+                      />
+                    ))}
+                  </div>
+                </SortableContext>
+              </DndContext>
 
-              <div>
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wide mb-2">
-                  Agregar bloque
-                </p>
-                <div className="flex flex-wrap gap-1.5">
-                  {paletteTypes.map((t) => (
-                    <button
-                      key={t}
-                      type="button"
-                      onClick={() => addBlockFromPalette(t)}
-                      className="text-xs font-semibold px-2.5 py-1.5 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors"
-                    >
-                      + {BLOCK_LABELS[t]}
-                    </button>
-                  ))}
-                </div>
+              <div className="flex flex-wrap gap-1.5">
+                {paletteTypes.map((t) => (
+                  <button
+                    key={t}
+                    type="button"
+                    onClick={() => addBlockFromPalette(t)}
+                    className="text-xs font-semibold px-2.5 py-1.5 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200"
+                  >
+                    + {BLOCK_LABELS[t]}
+                  </button>
+                ))}
               </div>
 
               <div className="rounded-xl border border-slate-200 bg-slate-50/80 p-3">
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wide mb-2">
-                  Inspector
-                  {selectedBlock && (
-                    <span className="text-slate-600 normal-case font-semibold ml-1">
-                      — {BLOCK_LABELS[selectedBlock.type]}
-                    </span>
-                  )}
-                </p>
                 <BlockInspector block={selectedBlock} onUpdateConfig={updateBlockConfig} />
               </div>
             </>
@@ -326,6 +311,10 @@ export default function ProfileBuilderModes({
             />
           )}
         </div>
+      )}
+
+      {mode === 'assist' && (
+        <UnifiedAssistant profile={profile} onUpdate={onUpdate} embedded />
       )}
     </div>
   );

@@ -14,13 +14,15 @@ import {
 } from '@/components/Icons';
 import { cn } from '@/lib/utils';
 import { getWhatsappUrl } from '@/lib/business/public-utils';
+import { getAdisoUrl } from '@/lib/url';
 
 interface BusinessInfoTabProps {
   profile: Partial<BusinessProfile>;
   adisos: Adiso[];
+  showCustomLinks?: boolean;
 }
 
-export default function BusinessInfoTab({ profile, adisos }: BusinessInfoTabProps) {
+export default function BusinessInfoTab({ profile, adisos, showCustomLinks = true }: BusinessInfoTabProps) {
   const hasSocials = profile.social_links && profile.social_links.length > 0;
 
   return (
@@ -131,7 +133,7 @@ export default function BusinessInfoTab({ profile, adisos }: BusinessInfoTabProp
           </div>
         </div>
 
-        {profile.custom_blocks && profile.custom_blocks.length > 0 && (
+        {showCustomLinks && profile.custom_blocks && profile.custom_blocks.length > 0 && (
           <BusinessCustomBlocks blocks={profile.custom_blocks} />
         )}
 
@@ -159,7 +161,7 @@ export default function BusinessInfoTab({ profile, adisos }: BusinessInfoTabProp
                   <BentoCard
                     adiso={adiso}
                     icon={<IconStore size={12} />}
-                    onClick={() => window.open(`/adiso/${(adiso as { slug?: string }).slug || adiso.id}`, '_blank')}
+                    onClick={() => window.open(getAdisoUrl(adiso), '_blank')}
                   />
                 </div>
               ))}
