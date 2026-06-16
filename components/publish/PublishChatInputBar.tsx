@@ -1,6 +1,7 @@
 'use client';
 
-import Buscador from '@/components/Buscador';
+import { useRef } from 'react';
+import PublishChatInput from './PublishChatInput';
 import PublishImagePreview from './PublishImagePreview';
 
 interface PublishChatInputBarProps {
@@ -17,7 +18,6 @@ interface PublishChatInputBarProps {
   onRemoveImage?: () => void;
 }
 
-/** Input inferior del chat — mismo shell que el buscador principal */
 export default function PublishChatInputBar({
   value,
   onChange,
@@ -31,7 +31,7 @@ export default function PublishChatInputBar({
   publishImageUploading = false,
   onRemoveImage,
 }: PublishChatInputBarProps) {
-  const hasText = value.trim().length > 0;
+  const fileRef = useRef<HTMLInputElement>(null);
 
   return (
     <div
@@ -39,27 +39,34 @@ export default function PublishChatInputBar({
         compact ? 'px-2 py-2' : 'px-3 py-3'
       }`}
     >
+      <input
+        ref={fileRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={(e) => {
+          const file = e.target.files?.[0];
+          if (file && onPublishImage) onPublishImage(file);
+          e.target.value = '';
+        }}
+      />
       {publishImageUrl && onRemoveImage && (
         <div className="mb-2 flex items-center gap-2 px-0.5">
           <PublishImagePreview url={publishImageUrl} onRemove={onRemoveImage} size="sm" />
           <span className="text-[10px] text-[var(--text-tertiary)]">Foto adjunta</span>
         </div>
       )}
-      <Buscador
+      <PublishChatInput
         value={value}
         onChange={onChange}
+        onSend={onSend}
         compact={compact}
-        flat={false}
-        composerMode="publish"
+        disabled={disabled}
+        sending={sending}
         placeholder={placeholder}
-        onPrimaryAction={onSend}
-        primaryActionDisabled={disabled || !hasText}
-        primaryActionLoading={sending}
-        primaryActionLabel={sending ? '…' : compact ? 'Enviar' : 'Enviar'}
-        primaryIconOnly={compact}
-        onPublishImageSelected={onPublishImage}
-        publishImageAttached={Boolean(publishImageUrl)}
-        publishImageUploading={publishImageUploading}
+        onAttachImage={onPublishImage ? () => fileRef.current?.click() : undefined}
+        imageAttached={Boolean(publishImageUrl)}
+        imageUploading={publishImageUploading}
       />
     </div>
   );

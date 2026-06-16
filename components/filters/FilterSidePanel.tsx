@@ -4,7 +4,7 @@ import React from 'react';
 import { Adiso, Categoria } from '@/types';
 import { BrowseFilterState } from '@/lib/filters/types';
 import FilterControlFields from './FilterControlFields';
-import Buscador from '@/components/Buscador';
+import PlatformCommandPalette from '@/components/search/PlatformCommandPalette';
 import { IconChevronLeft, IconFilterFunnel } from '@/components/Icons';
 
 interface FilterSidePanelProps {
@@ -12,11 +12,10 @@ interface FilterSidePanelProps {
   filters: BrowseFilterState;
   onChange: (next: BrowseFilterState) => void;
   adisos: Adiso[];
-  busqueda: string;
-  searchValue: string;
-  onBusquedaChange: (value: string) => void;
-  onCategoryDetected?: (categoria: Categoria) => void;
-  onNotify?: (message: string, type?: 'info' | 'error' | 'success') => void;
+  /** Debounced committed search query — used only for facet counts when search is active */
+  committedQuery?: string;
+  onCategorySelect?: (categoria: Categoria) => void;
+  onPlatformAction?: (actionId: string) => void;
   collapsed: boolean;
   onToggleCollapse: () => void;
   onOpenUbicacion?: () => void;
@@ -44,11 +43,9 @@ export default function FilterSidePanel({
   filters,
   onChange,
   adisos,
-  busqueda,
-  searchValue,
-  onBusquedaChange,
-  onCategoryDetected,
-  onNotify,
+  committedQuery = '',
+  onCategorySelect,
+  onPlatformAction,
   collapsed,
   onToggleCollapse,
   onOpenUbicacion,
@@ -93,21 +90,19 @@ export default function FilterSidePanel({
         </button>
       </div>
       <div className="px-4 pb-4">
-        <div className="mb-3">
-          <Buscador
-            value={searchValue}
-            onChange={onBusquedaChange}
-            minimal
-            onCategoryDetected={onCategoryDetected}
-            onNotify={onNotify}
-          />
-        </div>
+        <PlatformCommandPalette
+          onSelectCategory={onCategorySelect}
+          onAction={(actionId) => {
+            if (actionId === 'open_ubicacion') onOpenUbicacion?.();
+            onPlatformAction?.(actionId);
+          }}
+        />
         <FilterControlFields
           categoria={categoria}
           filters={filters}
           onChange={onChange}
           adisos={adisos}
-          busqueda={busqueda}
+          busqueda={committedQuery}
           userLat={userLat}
           userLng={userLng}
           onOpenUbicacion={onOpenUbicacion}

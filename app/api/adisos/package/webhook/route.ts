@@ -76,6 +76,9 @@ export async function POST(request: NextRequest) {
       )
     );
 
+    const { onAdisoSearchIndexUpdate } = await import('@/lib/search/post-create');
+    onAdisoSearchIndexUpdate(adiso);
+
     await updatePackageOrderAdiso(orderId, adiso.id);
     await supabaseAdmin
       .from('adiso_package_orders')

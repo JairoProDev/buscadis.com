@@ -11,7 +11,6 @@ import { getAdisos, getAdisoById, saveAdiso, getAdisosCache } from '@/lib/storag
 import { getAdisosFromSupabase } from '@/lib/supabase';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
 import { useToast } from '@/hooks/useToast';
-import { useDebounce } from '@/hooks/useDebounce';
 import { useInfiniteScroll } from '@/hooks/useInfiniteScroll';
 import { getBusquedaUrl } from '@/lib/utils';
 import { useAuth } from '@/hooks/useAuth';
@@ -53,7 +52,7 @@ import {
   FilterLayoutMode,
 } from '@/lib/filters';
 import { countActiveFilters } from '@/lib/filters/types';
-import UnifiedSearchComposer from '@/components/UnifiedSearchComposer';
+import MarketplaceSearchComposer from '@/components/search/MarketplaceSearchComposer';
 import StoriesBar from '@/components/StoriesBar';
 import BrowseFilters from '@/components/filters/BrowseFilters';
 import FilterSidePanel from '@/components/filters/FilterSidePanel';
@@ -138,7 +137,10 @@ function HomeContent() {
   const [adisos, setAdisos] = useState<Adiso[]>([]);
   const [adisosFiltrados, setAdisosFiltrados] = useState<Adiso[]>([]);
   const [busqueda, setBusqueda] = useState(buscarUrl);
-  const busquedaDebounced = useDebounce(busqueda, 300);
+  const [committedQuery, setCommittedQuery] = useState(buscarUrl);
+  const [searchResults, setSearchResults] = useState<Adiso[] | null>(null);
+  const [searchLoading, setSearchLoading] = useState(false);
+  const initialSearchDone = useRef(false);
   const [categoriaFiltro, setCategoriaFiltro] = useState<Categoria | 'todos'>(categoriaUrl && ['empleos', 'inmuebles', 'vehiculos', 'servicios', 'productos', 'eventos', 'negocios', 'comunidad'].includes(categoriaUrl) ? categoriaUrl : 'todos');
   const [ordenamiento, setOrdenamiento] = useState<TipoOrdenamiento>('recientes');
   const [interestProfile, setInterestProfile] = useState<UserInterestProfile | null>(null);
@@ -451,6 +453,74 @@ function HomeContent() {
     getInteraccionesUsuario(user.id, 'not_interested').then(setHiddenAdIds);
   }, [user?.id]);
 
+  const handleSearchSubmit = useCallback(async (query: string) => {
+    const q = query.trim();
+    if (!q) {
+      setCommittedQuery('');
+      setSearchResults(null);
+      setHayMasAdisos(true);
+      return;
+    }
+
+    setSearchLoading(true);
+    setCommittedQuery(q);
+    setFiltrando(true);
+
+    try {
+      const res = await fetch('/api/search', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          query: q,
+          category: categoriaFiltro !== 'todos' ? categoriaFiltro : undefined,
+          location:
+            browseFilters.ubicacion?.distrito ??
+            browseFilters.ubicacion?.departamento ??
+            undefined,
+          userId: user?.id,
+          maxResults: 60,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Error de búsqueda');
+
+      const results = (data.adisos ?? []) as Adiso[];
+      setSearchResults(results);
+      setHayMasAdisos(false);
+      setVisibleCount(ITEMS_POR_PAGINA);
+      registrarBusqueda(user?.id, q, results.length);
+
+      if (results.length === 0) {
+        void persistDemandIntent({
+          queryText: q,
+          categoria: categoriaFiltro !== 'todos' ? categoriaFiltro : data.normalized?.category,
+          facets: browseFilters.facets as Record<string, unknown>,
+          ubicacion: browseFilters.ubicacion as Record<string, unknown> | undefined,
+          source: 'empty_search',
+          userId: user?.id,
+        });
+      }
+
+      setAdisos((prev) => {
+        const map = new Map(prev.map((a) => [a.id, a]));
+        results.forEach((a) => map.set(a.id, a));
+        return Array.from(map.values());
+      });
+    } catch {
+      error('No pudimos completar la búsqueda');
+      setSearchResults([]);
+    } finally {
+      setSearchLoading(false);
+      setFiltrando(false);
+    }
+  }, [browseFilters, categoriaFiltro, error, user?.id]);
+
+  useEffect(() => {
+    if (initialSearchDone.current || !buscarUrl || cargando) return;
+    initialSearchDone.current = true;
+    void handleSearchSubmit(buscarUrl);
+  }, [buscarUrl, cargando, handleSearchSubmit]);
+
   // Filtrado y ordenamiento (sistema unificado)
   useEffect(() => {
     if (adisos.length === 0) {
@@ -458,10 +528,12 @@ function HomeContent() {
       return;
     }
 
+    const baseAdisos = searchResults !== null ? searchResults : adisos;
+
     const filtrados = applyBrowseFilters({
-      adisos,
+      adisos: baseAdisos,
       categoria: categoriaFiltro,
-      busqueda: busquedaDebounced,
+      busqueda: '',
       filters: browseFilters,
       ordenamiento,
       userLat: profile?.latitud,
@@ -470,22 +542,8 @@ function HomeContent() {
       hiddenAdIds,
     });
 
-    if (busquedaDebounced.trim()) {
-      registrarBusqueda(user?.id, busquedaDebounced.trim(), filtrados.length);
-      if (filtrados.length === 0) {
-        void persistDemandIntent({
-          queryText: busquedaDebounced.trim(),
-          categoria: categoriaFiltro !== 'todos' ? categoriaFiltro : undefined,
-          facets: browseFilters.facets as Record<string, unknown>,
-          ubicacion: browseFilters.ubicacion as Record<string, unknown> | undefined,
-          source: 'empty_search',
-          userId: user?.id,
-        });
-      }
-    }
-
     setAdisosFiltrados(filtrados);
-  }, [busquedaDebounced, categoriaFiltro, ordenamiento, adisos, browseFilters, profile?.latitud, profile?.longitud, user?.id, interestProfile, hiddenAdIds]);
+  }, [committedQuery, searchResults, categoriaFiltro, ordenamiento, adisos, browseFilters, profile?.latitud, profile?.longitud, interestProfile, hiddenAdIds]);
 
   // Breve skeleton al cambiar filtros (no en carga inicial)
   useEffect(() => {
@@ -493,7 +551,7 @@ function HomeContent() {
     setFiltrando(true);
     const t = window.setTimeout(() => setFiltrando(false), 280);
     return () => window.clearTimeout(t);
-  }, [busquedaDebounced, categoriaFiltro, browseFilters, ordenamiento, cargando]);
+  }, [committedQuery, categoriaFiltro, browseFilters, ordenamiento, cargando]);
 
   // Sin resultados filtrados: no seguir pidiendo más páginas a la API
   useEffect(() => {
@@ -511,7 +569,7 @@ function HomeContent() {
     setPaginaActual(1);
     // El scroll infinito (hook useInfiniteScroll) se encargará de cargar más
     // automáticamente si el sentinel queda visible después del filtrado inicial.
-  }, [busquedaDebounced, categoriaFiltro, browseFilters]);
+  }, [committedQuery, categoriaFiltro, browseFilters]);
 
   useEffect(() => {
     if (categoriaFiltro !== 'todos') {
@@ -551,8 +609,8 @@ function HomeContent() {
     if (categoriaFiltro !== 'todos') {
       params.set('categoria', categoriaFiltro);
     }
-    if (busquedaDebounced.trim()) {
-      params.set('buscar', busquedaDebounced.trim());
+    if (committedQuery.trim()) {
+      params.set('buscar', committedQuery.trim());
     }
     if (adisoId) {
       params.set('adiso', adisoId);
@@ -567,7 +625,7 @@ function HomeContent() {
     if (newQuery !== currentQuery) {
       router.replace(newQuery ? `/?${newQuery}` : '/', { scroll: false });
     }
-  }, [busquedaDebounced, categoriaFiltro, browseFilters, adisoId, router, searchParams]);
+  }, [committedQuery, categoriaFiltro, browseFilters, adisoId, router, searchParams]);
 
   const handlePublicar = (nuevoAdiso: Adiso) => {
     // Optimistic update: mostrar inmediatamente
@@ -635,6 +693,23 @@ function HomeContent() {
     params.set('adiso', adiso.id);
     router.replace(`/?${params.toString()}`, { scroll: false });
   }, [adisosFiltrados, isDesktop, router, searchParams, session?.access_token]);
+
+  const handleAbrirAdisoById = useCallback(
+    (id: string) => {
+      const local =
+        adisos.find((a) => a.id === id) ??
+        searchResults?.find((a) => a.id === id) ??
+        adisosFiltrados.find((a) => a.id === id);
+      if (local) {
+        handleAbrirAdiso(local);
+        return;
+      }
+      const params = new URLSearchParams(searchParams.toString());
+      params.set('adiso', id);
+      router.replace(`/?${params.toString()}`, { scroll: false });
+    },
+    [adisos, searchResults, adisosFiltrados, handleAbrirAdiso, router, searchParams],
+  );
 
   // Registrar el manejador de apertura para componentes globales (como el Chatbot)
   useEffect(() => {
@@ -725,6 +800,7 @@ function HomeContent() {
   // Función optimizada para cargar más anuncios (scroll infinito)
   const cargarMasAdisos = useCallback(async () => {
     if (cargandoMas) return;
+    if (searchResults !== null) return;
     if (adisosFiltrados.length === 0) return;
 
     // Caso 1: Todavía hay anuncios en memoria que no se están mostrando (Client-side)
@@ -749,13 +825,10 @@ function HomeContent() {
 
       // Si tenemos filtros activos, el offset de la consulta debe ser coherente
       // con lo que ya hemos cargado para esos filtros si la API ahora soporta filtrado.
-      if (categoriaFiltro !== 'todos' || busquedaDebounced) {
-        // Si estamos filtrando de verdad en el servidor ahora, 
-        // el offset debería ser cuántos de "estos" ya tenemos.
+      if (categoriaFiltro !== 'todos' || committedQuery) {
         offsetActual = adisos.filter(a => {
           const matchCat = categoriaFiltro === 'todos' || a.categoria === categoriaFiltro;
-          const matchBus = !busquedaDebounced || a.titulo.toLowerCase().includes(busquedaDebounced.toLowerCase());
-          return matchCat && matchBus;
+          return matchCat;
         }).length;
       }
 
@@ -764,7 +837,7 @@ function HomeContent() {
         offset: offsetActual,
         soloActivos: false,
         categoria: categoriaFiltro,
-        busqueda: busquedaDebounced
+        busqueda: committedQuery
       });
 
       if (nuevosAdisos.length > 0) {
@@ -798,7 +871,7 @@ function HomeContent() {
     } finally {
       setCargandoMas(false);
     }
-  }, [cargandoMas, hayMasAdisos, adisos, paginaActual, visibleCount, adisosFiltrados.length, busquedaDebounced, categoriaFiltro]);
+  }, [cargandoMas, hayMasAdisos, adisos, paginaActual, visibleCount, adisosFiltrados.length, committedQuery, categoriaFiltro, searchResults]);
 
   // Usar hook profesional para infinite scroll
   const { sentinelRef } = useInfiniteScroll({
@@ -914,19 +987,20 @@ function HomeContent() {
                 filters={browseFilters}
                 onChange={setBrowseFilters}
                 adisos={adisos}
-                busqueda={busquedaDebounced}
-                searchValue={busqueda}
-                onBusquedaChange={setBusqueda}
-                onCategoryDetected={(categoria) => {
+                committedQuery={committedQuery}
+                onCategorySelect={(categoria) => {
                   setCategoriaFiltro(categoria);
                   const params = new URLSearchParams(searchParams.toString());
                   params.set('categoria', categoria);
                   router.replace(`/?${params.toString()}`, { scroll: false });
                 }}
-                onNotify={(message, type) => {
-                  if (type === 'error') error(message);
-                  else if (type === 'success') success(message);
-                  else success(message);
+                onPlatformAction={(actionId) => {
+                  if (actionId === 'clear_filters') {
+                    setBrowseFilters({ facets: {} });
+                  }
+                  if (actionId === 'collapse_filters') {
+                    setFilterSidebarCollapsed(true);
+                  }
                 }}
                 collapsed={filterSidebarCollapsed}
                 onToggleCollapse={() => setFilterSidebarCollapsed((c) => !c)}
@@ -1063,9 +1137,12 @@ function HomeContent() {
                     transition: 'padding 0.3s ease',
                   }}
                 >
-                  <UnifiedSearchComposer
+                  <MarketplaceSearchComposer
                     value={busqueda}
                     onChange={setBusqueda}
+                    onSearchSubmit={handleSearchSubmit}
+                    onOpenAdiso={handleAbrirAdisoById}
+                    searchLoading={searchLoading}
                     compact={browseScrolled}
                     showFilterToggle
                     filtersVisible={inlineFiltersVisible}
@@ -1089,7 +1166,7 @@ function HomeContent() {
                   filters={browseFilters}
                   onChange={setBrowseFilters}
                   adisos={adisos}
-                  busqueda={busquedaDebounced}
+                  busqueda={committedQuery}
                   isDesktop={isDesktop}
                   visible={inlineFiltersVisible}
                   userLat={profile?.latitud}
@@ -1152,7 +1229,7 @@ function HomeContent() {
                         filters={browseFilters}
                         onChange={setBrowseFilters}
                         adisos={adisos}
-                        busqueda={busquedaDebounced}
+                        busqueda={committedQuery}
                         userLat={profile?.latitud}
                         userLng={profile?.longitud}
                         onOpenUbicacion={() => {
@@ -1374,7 +1451,7 @@ function HomeContent() {
                           browseFilters.ubicacion?.distrito ||
                           browseFilters.ubicacion?.provincia
                         ? 'location'
-                        : busquedaDebounced.trim()
+                        : committedQuery.trim()
                           ? 'search'
                           : categoriaFiltro !== 'todos'
                             ? 'category'
@@ -1382,7 +1459,7 @@ function HomeContent() {
                               ? 'filtered'
                               : 'global'
                   }
-                  busqueda={busquedaDebounced}
+                  busqueda={committedQuery}
                   categoria={categoriaFiltro}
                   ubicacion={browseFilters.ubicacion}
                   activeFilterCount={countActiveFilters(browseFilters, categoriaFiltro)}
@@ -1394,6 +1471,9 @@ function HomeContent() {
                     });
                     setBrowseFilters({ facets: {} });
                     setBusqueda('');
+                    setCommittedQuery('');
+                    setSearchResults(null);
+                    setHayMasAdisos(true);
                     setCategoriaFiltro('todos');
                   }}
                   onChangeLocation={() => setMostrarFiltroUbicacion(true)}

@@ -1,70 +1,41 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { buscarEnTOON, buscarMultiplesTerminos } from '@/lib/busqueda-toon';
-import { rateLimit, getClientIP } from '@/lib/rate-limit';
 
+/** @deprecated Use POST /api/search instead */
 export async function POST(request: NextRequest) {
   try {
-    const ip = getClientIP(request);
-    const limited = rateLimit(`chatbot-buscar-${ip}`, {
-      windowMs: 60 * 1000,
-      maxRequests: 45,
-    });
-    if (!limited.allowed) {
-      return NextResponse.json(
-        { error: 'Demasiadas búsquedas. Intenta en un momento.' },
-        { status: 429 }
-      );
+    const body = await request.json();
+    const consulta = body.consulta ?? body.terminos?.[0];
+    if (!consulta) {
+      return NextResponse.json({ error: 'Se requiere consulta' }, { status: 400 });
     }
 
-    const body = await request.json();
-    const { consulta, limite = 10, terminos } = body;
-    
-    if (!consulta && !terminos) {
-      return NextResponse.json(
-        { error: 'Se requiere "consulta" o "terminos"' },
-        { status: 400 }
-      );
+    const origin = request.nextUrl.origin;
+    const res = await fetch(`${origin}/api/search`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ query: String(consulta), maxResults: body.limite ?? 10 }),
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      return NextResponse.json({ error: data.error ?? 'Error al buscar' }, { status: res.status });
     }
-    
-    let resultados;
-    
-    if (terminos && Array.isArray(terminos)) {
-      resultados = await buscarMultiplesTerminos(terminos, limite);
-    } else {
-      resultados = await buscarEnTOON(consulta, limite);
-    }
-    
+
     return NextResponse.json({
       success: true,
-      resultados: resultados.map(adiso => ({
+      deprecated: true,
+      resultados: (data.adisos ?? []).map((adiso: { id: string; titulo: string; categoria: string; descripcion?: string; ubicacion?: unknown; fechaPublicacion?: string; estaActivo?: boolean }) => ({
         id: adiso.id,
         titulo: adiso.titulo,
         categoria: adiso.categoria,
-        descripcion: adiso.descripcion?.substring(0, 200), // Limitar para respuesta
-        ubicacion: typeof adiso.ubicacion === 'string' 
-          ? adiso.ubicacion 
-          : `${adiso.ubicacion.distrito}, ${adiso.ubicacion.provincia}`,
+        descripcion: adiso.descripcion?.substring(0, 200),
+        ubicacion: adiso.ubicacion,
         fechaPublicacion: adiso.fechaPublicacion,
-        estaActivo: adiso.estaActivo
+        estaActivo: adiso.estaActivo,
       })),
-      total: resultados.length
+      total: data.count ?? 0,
     });
-  } catch (error: any) {
-    console.error('Error en chatbot/buscar:', error);
-    return NextResponse.json(
-      { error: 'Error al buscar anuncios' },
-      { status: 500 }
-    );
+  } catch (error) {
+    console.error('Error en chatbot/buscar (deprecated):', error);
+    return NextResponse.json({ error: 'Error al buscar anuncios' }, { status: 500 });
   }
 }
-
-
-
-
-
-
-
-
-
-
-

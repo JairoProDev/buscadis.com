@@ -41,6 +41,8 @@ interface BuscadorProps {
   publishImageUploading?: boolean;
   /** Barra plana sin borde animado (panel lateral) */
   flat?: boolean;
+  /** Colapsar toggle Buscar/Publicar a solo íconos (p. ej. mientras escribe) */
+  forceModeToggleIconsOnly?: boolean;
 }
 
 function readFileAsDataUrl(file: File): Promise<string> {
@@ -75,6 +77,7 @@ export default function Buscador({
   publishImageUploading = false,
   flat = false,
   primaryIconOnly = false,
+  forceModeToggleIconsOnly = false,
 }: BuscadorProps) {
   const { t } = useTranslation();
   const { isListening, isSupported, start: startVoice, stop: stopVoice } = useSpeechRecognition('es-PE');
@@ -248,7 +251,7 @@ export default function Buscador({
     <ComposerModeToggle
       mode={composerMode}
       onChange={(m) => onComposerModeChange?.(m)}
-      iconsOnly={flat}
+      iconsOnly={flat || forceModeToggleIconsOnly}
       className={isPublishMode && fieldMultiline && !flat ? 'self-center' : ''}
     />
   ) : null;

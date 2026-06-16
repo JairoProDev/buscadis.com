@@ -27,6 +27,7 @@ import {
   resolveCategoriaFromText,
   STEP_ORDER,
 } from '@/lib/publish/chat-steps';
+import { evaluatePublishInput } from '@/lib/publish/PublishCoachEngine';
 
 type ChatRole = 'assistant' | 'user';
 
@@ -108,6 +109,7 @@ export default function PublishChatWizard({
   const [tierModalOpen, setTierModalOpen] = useState(false);
   const [started, setStarted] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const stepAttemptsRef = useRef<Record<string, number>>({});
   const fileRef = useRef<HTMLInputElement>(null);
   const initRef = useRef(false);
 
@@ -292,6 +294,26 @@ export default function PublishChatWizard({
   const handleSend = () => {
     if (typing || currentStep === 'done' || !input.trim()) return;
     const text = input.trim();
+
+    const coach = evaluatePublishInput(
+      currentStep,
+      text,
+      stepAttemptsRef.current[currentStep] ?? 0,
+    );
+    stepAttemptsRef.current[currentStep] = (stepAttemptsRef.current[currentStep] ?? 0) + 1;
+
+    if (coach.intent === 'off_topic' && coach.message) {
+      addBot(coach.message);
+      setInput('');
+      scrollBottom();
+      return;
+    }
+
+    if (coach.intent === 'help_request' && coach.message) {
+      addBot(coach.message);
+    } else if (coach.message && coach.intent === 'needs_ai' && !coach.escalateToAI) {
+      addBot(coach.message);
+    }
 
     if (currentStep === 'categoria') {
       const matched = CATEGORIA_OPTIONS.find(

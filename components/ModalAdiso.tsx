@@ -364,7 +364,7 @@ Ref: ${adiso.edicionNumero || adiso.id}`;
     }
 
     setContactosLocales((prev) => prev + 1);
-    registrarContacto(user?.id, adiso.id, adiso.categoria, contact.kind === 'email' ? 'email' : 'whatsapp');
+    registrarContacto(user?.id, adiso.id, adiso.categoria, 'whatsapp');
 
     if (contact.kind === 'email') {
       window.location.href = `mailto:${contact.valor}?subject=${encodeURIComponent(`Interesado en: ${adiso.titulo}`)}`;

@@ -81,6 +81,9 @@ export async function POST(request: NextRequest) {
         )
       );
 
+      const { onAdisoSearchIndexUpdate } = await import('@/lib/search/post-create');
+      onAdisoSearchIndexUpdate(adiso);
+
       const order = await createPackageOrder({
         userId: user.id,
         packageTier: tier,

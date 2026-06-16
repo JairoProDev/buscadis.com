@@ -247,6 +247,9 @@ export async function POST(request: NextRequest) {
 
     const adisoCreado = await createAdisoInSupabase(nuevoAdiso);
 
+    const { onAdisoSearchIndexUpdate } = await import('@/lib/search/post-create');
+    onAdisoSearchIndexUpdate(adisoCreado);
+
     if (nuevoAdiso.user_id || nuevoAdiso.usuario_id) {
       const ownerId = (nuevoAdiso.user_id || nuevoAdiso.usuario_id) as string;
       const { createStoryFromAdiso } = await import('@/lib/stories/adiso-sync');

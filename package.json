@@ -10,7 +10,8 @@
     "lint": "next lint",
     "db:push": "npx supabase db push --linked --yes",
     "db:migrations": "npx supabase migration list --linked",
-    "db:migrate": "node scripts/supabase-migrate.mjs"
+    "db:migrate": "node scripts/supabase-migrate.mjs",
+    "search:sync-typesense": "node scripts/sync-typesense.mjs"
   },
   "dependencies": {
     "@ai-sdk/openai": "^1.0.8",

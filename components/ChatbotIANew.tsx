@@ -14,6 +14,7 @@ import { useNavigation } from '@/contexts/NavigationContext';
 import { useAuth } from '@/hooks/useAuth';
 import Image from 'next/image';
 import { AIChatResponse } from '@/lib/ai/contracts';
+import { routeChatMessage } from '@/lib/chat/ChatIntentRouter';
 
 interface Mensaje {
   id: string;
@@ -157,9 +158,28 @@ export default function ChatbotIANew({ onPublicar, onError, onSuccess, onMinimiz
     setProcesando(true);
     agregarMensaje('usuario', imageUrl ? '[Imagen] ' + texto : texto);
 
-
-
     try {
+      const route = routeChatMessage(texto, Boolean(imageUrl));
+
+      if (route.intent === 'search' && route.searchQuery && !route.useAI) {
+        const res = await fetch('/api/search', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ query: route.searchQuery, maxResults: 8 }),
+        });
+        const data = await res.json();
+        const items = (data.adisos ?? []) as Adiso[];
+        agregarMensaje(
+          'asistente',
+          items.length > 0
+            ? `Encontré ${items.length} avisos relacionados con «${route.searchQuery}»:`
+            : `No encontré avisos para «${route.searchQuery}». Prueba con otras palabras.`,
+          items,
+        );
+        setImageUrl('');
+        return;
+      }
+
       if (!useUnifiedChat) {
         agregarMensaje('asistente', 'El chat unificado está desactivado en este entorno.');
         return;
