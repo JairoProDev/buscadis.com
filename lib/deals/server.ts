@@ -189,6 +189,30 @@ async function enrichClips(rows: Record<string, unknown>[]): Promise<DealClip[]>
   });
 }
 
+export async function getDealClipsByBusinessSlugServer(
+  slug: string,
+  limit = 20
+): Promise<DealClip[]> {
+  const { data: biz } = await supabaseAdmin
+    .from('business_profiles')
+    .select('id')
+    .eq('slug', slug)
+    .maybeSingle();
+
+  if (!biz?.id) return [];
+
+  const { data, error } = await supabaseAdmin
+    .from('deal_clips')
+    .select('*')
+    .eq('business_profile_id', biz.id)
+    .eq('status', 'active')
+    .order('created_at', { ascending: false })
+    .limit(limit);
+
+  if (error || !data) return [];
+  return enrichClips(data as Record<string, unknown>[]);
+}
+
 export async function getActiveDealClipsServer(params?: {
   limit?: number;
   cursor?: string;

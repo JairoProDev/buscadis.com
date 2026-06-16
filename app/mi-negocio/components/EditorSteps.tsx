@@ -13,6 +13,8 @@ import { Adiso } from '@/types';
 import { EditorHeader } from './EditorHeader';
 import SimpleCatalogAdd from '@/components/business/SimpleCatalogAdd';
 import { ProductEditor } from '@/components/business/ProductEditor';
+import ProfileCompletenessChecklist from '@/components/business/builder/ProfileCompletenessChecklist';
+import ProfileBuilderModes from '@/components/business/builder/ProfileBuilderModes';
 import { IconArrowLeft } from '@/components/Icons';
 
 // Icons mapping for steps
@@ -175,6 +177,16 @@ export function EditorSteps({
             </div>
 
             <div className="flex-1 overflow-y-auto custom-scrollbar p-0">
+                <div className="p-4 space-y-4 border-b border-slate-100 bg-slate-50">
+                    <ProfileCompletenessChecklist
+                        profile={profile}
+                        productCount={catalogProducts.length}
+                    />
+                    <ProfileBuilderModes
+                        profile={profile}
+                        onUpdate={(patch) => setProfile({ ...profile, ...patch })}
+                    />
+                </div>
                 {/* Menu List */}
                 <div className="flex flex-col divide-y divide-slate-50">
                     {STEPS.map((step, index) => {
@@ -571,15 +583,48 @@ export function EditorSteps({
 
                                         {/* Step 6: Marketing */}
                                         {activeStep === 6 && (
-                                            <div className="bg-purple-50 p-4 rounded-xl border border-purple-100">
+                                            <div className="bg-purple-50 p-4 rounded-xl border border-purple-100 space-y-3">
                                                 <label className="block">
                                                     <span className="text-xs font-bold text-purple-800 mb-2 block">Mensaje Destacado (Sticky Bar)</span>
                                                     <input
                                                         type="text"
+                                                        value={profile.announcement_text || ''}
+                                                        onChange={(e) => setProfile({
+                                                            ...profile,
+                                                            announcement_text: e.target.value,
+                                                            announcement_active: true,
+                                                        })}
                                                         placeholder="Ej. ¡20% de descuento en tu primera compra!"
-                                                        className="w-full px-3 py-2 rounded-lg border-purple-200 text-sm focus:ring-2 focus:ring-purple-200 outline-none"
+                                                        className="w-full px-3 py-2 rounded-lg border border-purple-200 text-sm focus:ring-2 focus:ring-purple-200 outline-none"
                                                     />
                                                 </label>
+                                                <label className="flex items-center gap-2 text-sm text-purple-900">
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={profile.announcement_active !== false}
+                                                        onChange={(e) => setProfile({
+                                                            ...profile,
+                                                            announcement_active: e.target.checked,
+                                                        })}
+                                                    />
+                                                    Mostrar barra de anuncio en el perfil público
+                                                </label>
+                                                <div className="pt-3 border-t border-purple-100 space-y-3">
+                                                    <p className="text-xs font-bold text-purple-800">SEO</p>
+                                                    <input
+                                                        type="text"
+                                                        value={profile.meta_title || ''}
+                                                        onChange={(e) => setProfile({ ...profile, meta_title: e.target.value })}
+                                                        placeholder="Título SEO (opcional)"
+                                                        className="w-full px-3 py-2 rounded-lg border border-purple-200 text-sm outline-none"
+                                                    />
+                                                    <textarea
+                                                        value={profile.meta_description || ''}
+                                                        onChange={(e) => setProfile({ ...profile, meta_description: e.target.value })}
+                                                        placeholder="Descripción SEO (opcional)"
+                                                        className="w-full px-3 py-2 rounded-lg border border-purple-200 text-sm outline-none min-h-[80px]"
+                                                    />
+                                                </div>
                                             </div>
                                         )}
 

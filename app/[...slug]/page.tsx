@@ -8,7 +8,11 @@ import { Categoria, Adiso } from '@/types';
 import PublicBusinessPage from '@/app/negocio/[slug]/page';
 import { createClient } from '@supabase/supabase-js';
 
+import { buildBusinessMetadata } from '@/lib/business/seo';
+
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://buscadis.com';
+
+export const revalidate = 3600;
 
 interface PageProps {
     params: Promise<{
@@ -29,14 +33,28 @@ export async function generateMetadata(props: PageProps): Promise<Metadata> {
         const targetSlug = decodeURIComponent(slug[0]);
         const supabaseAdmin = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
         try {
-            const { data } = await supabaseAdmin.from('business_profiles').select('name, description, logo_url, banner_url').eq('slug', targetSlug).single();
+            const { data } = await supabaseAdmin.from('business_profiles').select('name, description, logo_url, banner_url, slug, meta_title, meta_description, og_image_url').eq('slug', targetSlug).single();
             if (data) {
-                const title = `${data.name} | Buscadis`;
-                const description = data.description || `Página oficial de ${data.name} en Buscadis`;
-                const imageUrl = data.logo_url || data.banner_url || `${siteUrl}/og-image.jpg`;
+                const meta = buildBusinessMetadata(data);
                 return {
-                    title, description,
-                    openGraph: { title, description, url: `${siteUrl}/${targetSlug}`, images: [{ url: imageUrl }] }
+                    title: meta.title,
+                    description: meta.description,
+                    alternates: { canonical: meta.url },
+                    openGraph: {
+                        title: meta.title,
+                        description: meta.description,
+                        url: meta.url,
+                        images: [{ url: meta.imageUrl, width: 1200, height: 630 }],
+                        siteName: 'Buscadis',
+                        locale: 'es_PE',
+                        type: 'website',
+                    },
+                    twitter: {
+                        card: 'summary_large_image',
+                        title: meta.title,
+                        description: meta.description,
+                        images: [meta.imageUrl],
+                    },
                 };
             }
         } catch (e) {

@@ -13,7 +13,7 @@ export function isMercadoPagoConfigured(): boolean {
   return Boolean(process.env.MERCADOPAGO_ACCESS_TOKEN?.trim());
 }
 
-export type MercadoPagoCheckoutKind = 'adiso' | 'story' | 'package' | 'deal';
+export type MercadoPagoCheckoutKind = 'adiso' | 'story' | 'package' | 'deal' | 'catalog_order';
 
 export async function createMercadoPagoPreference(params: {
   orderId: string;
@@ -28,7 +28,9 @@ export async function createMercadoPagoPreference(params: {
   const appUrl = (process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000').replace(/\/$/, '');
   const kind = params.kind || 'adiso';
   const notificationUrl =
-    kind === 'deal'
+    kind === 'catalog_order'
+      ? `${appUrl}/api/business/checkout/webhook`
+      : kind === 'deal'
       ? `${appUrl}/api/deals/promote/webhook`
       : kind === 'story'
       ? `${appUrl}/api/stories/promote/webhook`
@@ -36,13 +38,28 @@ export async function createMercadoPagoPreference(params: {
         ? `${appUrl}/api/adisos/package/webhook`
         : `${appUrl}/api/adisos/promote/webhook`;
   const typeQuery =
-    kind === 'deal'
+    kind === 'catalog_order'
+      ? '&type=catalog_order'
+      : kind === 'deal'
       ? '&type=deal'
       : kind === 'story'
         ? '&type=story'
         : kind === 'package'
           ? '&type=package'
           : '';
+
+  const successUrl =
+    kind === 'catalog_order'
+      ? `${appUrl}/checkout/exito?order=${params.orderId}${typeQuery}`
+      : `${appUrl}/promocionar/exito?order=${params.orderId}${typeQuery}`;
+  const failureUrl =
+    kind === 'catalog_order'
+      ? `${appUrl}/checkout/error?order=${params.orderId}${typeQuery}`
+      : `${appUrl}/promocionar/error?order=${params.orderId}${typeQuery}`;
+  const pendingUrl =
+    kind === 'catalog_order'
+      ? `${appUrl}/checkout/pendiente?order=${params.orderId}${typeQuery}`
+      : `${appUrl}/promocionar/pendiente?order=${params.orderId}${typeQuery}`;
 
   const body: Record<string, unknown> = {
     items: [
@@ -56,9 +73,9 @@ export async function createMercadoPagoPreference(params: {
     ],
     external_reference: params.orderId,
     back_urls: {
-      success: `${appUrl}/promocionar/exito?order=${params.orderId}${typeQuery}`,
-      failure: `${appUrl}/promocionar/error?order=${params.orderId}${typeQuery}`,
-      pending: `${appUrl}/promocionar/pendiente?order=${params.orderId}${typeQuery}`,
+      success: successUrl,
+      failure: failureUrl,
+      pending: pendingUrl,
     },
     auto_return: 'approved',
     notification_url: notificationUrl,

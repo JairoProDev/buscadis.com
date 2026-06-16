@@ -23,6 +23,45 @@ export interface CustomBlock {
     size?: 'small' | 'medium' | 'large' | 'full'; // For Bento grid
 }
 
+export type ProfileBlockType =
+    | 'hero'
+    | 'highlights'
+    | 'catalog'
+    | 'deals'
+    | 'links'
+    | 'reviews'
+    | 'map'
+    | 'cta'
+    | 'text'
+    | 'embed';
+
+export interface ProfileBlock {
+    id: string;
+    type: ProfileBlockType;
+    visible: boolean;
+    config: Record<string, unknown>;
+}
+
+export type ProfileThemePreset = 'executive' | 'minimal' | 'organic' | 'cyberpunk';
+
+export interface BusinessReview {
+    id: string;
+    business_profile_id: string;
+    user_id: string;
+    rating: number;
+    text?: string;
+    verified_purchase?: boolean;
+    created_at: string;
+    updated_at?: string;
+}
+
+export interface BusinessReviewAggregate {
+    business_profile_id: string;
+    avg_rating: number;
+    review_count: number;
+    updated_at?: string;
+}
+
 export interface BusinessProfile {
     id: string;
     /** Creator / legacy primary account; team access is in business_members */
@@ -48,6 +87,12 @@ export interface BusinessProfile {
     business_hours: BusinessHours;
     social_links: SocialLink[];
     custom_blocks: CustomBlock[];
+    profile_blocks?: ProfileBlock[];
+
+    // SEO
+    meta_title?: string;
+    meta_description?: string;
+    og_image_url?: string;
 
     // New features fields
     announcement_text?: string;

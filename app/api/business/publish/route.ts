@@ -9,6 +9,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { sanitizeBusinessProfilePayload } from '@/lib/business';
+import { revalidateTag } from 'next/cache';
+import { BUSINESS_CACHE_TAG } from '@/lib/business/seo';
 
 const supabaseAdmin = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -137,6 +139,10 @@ export async function POST(req: NextRequest) {
         if (updateError) {
             console.error('Error updating business profile:', updateError);
             return NextResponse.json({ error: updateError.message }, { status: 500 });
+        }
+
+        if (updated?.slug) {
+            revalidateTag(BUSINESS_CACHE_TAG(updated.slug));
         }
 
         return NextResponse.json({ success: true, profile: updated });

@@ -10,6 +10,7 @@ interface DealPublishWizardProps {
   open: boolean;
   onClose: () => void;
   defaultAdisoId?: string;
+  businessProfileId?: string;
 }
 
 type Step = 'media' | 'link' | 'copy' | 'boost';
@@ -18,6 +19,7 @@ export default function DealPublishWizard({
   open,
   onClose,
   defaultAdisoId = '',
+  businessProfileId = '',
 }: DealPublishWizardProps) {
   const { session } = useAuth();
   const token = session?.access_token;
@@ -87,6 +89,7 @@ export default function DealPublishWizard({
       fd.append('tier', tier);
       if (priceDisplay) fd.append('priceDisplay', priceDisplay);
       if (priceOriginal) fd.append('priceOriginal', priceOriginal);
+      if (businessProfileId) fd.append('businessProfileId', businessProfileId);
 
       const res = await fetch('/api/deals', {
         method: 'POST',

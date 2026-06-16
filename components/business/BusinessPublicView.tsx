@@ -6,38 +6,30 @@ import { BusinessProfile } from '@/types/business';
 import { Adiso } from '@/types';
 import { cn } from '@/lib/utils';
 import {
-    IconStore, IconMapMarkerAlt, IconWhatsapp, IconEnvelope,
-    IconInstagram, IconFacebook, IconTiktok,
-    IconVerified, IconShareAlt, IconGlobe, IconPhone, IconClock, IconChevronDown,
-    IconLinkedin, IconYoutube, IconSearch, IconArrowRight, IconHeart,
+    IconStore, IconMapMarkerAlt, IconWhatsapp,
+    IconShareAlt, IconSearch, IconHeart,
     IconFileAlt, IconEdit, IconPlus, IconBox, IconCheck, IconX, IconTrash,
-    IconGrid, IconList, IconFeed, IconFilter, IconChevronLeft, IconSparkles
+    IconGrid, IconList, IconFeed, IconSparkles
 } from '@/components/Icons';
-import BentoCard from '@/components/BentoCard';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
 import { useAuth } from '@/hooks/useAuth';
 import Header from '@/components/Header';
 import NavbarMobile from '@/components/NavbarMobile';
 import { deleteCatalogProduct } from '@/lib/business';
 import { useCatalogPDF } from '@/hooks/useCatalogPDF';
 import { useNetworkStatus } from '@/hooks/useNetworkStatus';
-
-// Helper for Social Icons
-const getSocialIcon = (url: string) => {
-    if (url.includes('facebook')) return <IconFacebook size={20} />;
-    if (url.includes('instagram')) return <IconInstagram size={20} />;
-    if (url.includes('tiktok')) return <IconTiktok size={20} />;
-    if (url.includes('linkedin')) return <IconLinkedin size={20} />;
-    if (url.includes('youtube')) return <IconYoutube size={20} />;
-    return <IconGlobe size={20} />;
-};
-
-// WhatsApp Message
-const getWhatsappUrl = (phone: string, businessName: string) => {
-    const text = `Hola, vi su perfil de ${businessName} en Publicadis Business y me gustaría más información.`;
-    return `https://wa.me/${phone}?text=${encodeURIComponent(text)}`;
-};
+import { useBusinessCart } from '@/hooks/useBusinessCart';
+import BusinessHero from '@/components/business/public/BusinessHero';
+import BusinessActionBar from '@/components/business/public/BusinessActionBar';
+import BusinessHighlights from '@/components/business/public/BusinessHighlights';
+import BusinessInfoTab from '@/components/business/public/BusinessInfoTab';
+import BusinessDealsTab from '@/components/business/public/BusinessDealsTab';
+import BusinessReviewsTab from '@/components/business/public/BusinessReviewsTab';
+import BusinessShareTools from '@/components/business/public/BusinessShareTools';
+import BusinessCartDrawer from '@/components/business/public/BusinessCartDrawer';
+import BusinessJsonLd from '@/components/business/public/BusinessJsonLd';
+import { getWhatsappUrl, getProductWhatsappUrl, businessThemeStyle } from '@/lib/business/public-utils';
+import { IconStar } from '@/components/Icons';
 
 interface BusinessPublicViewProps {
     profile: Partial<BusinessProfile> | null;
@@ -69,11 +61,12 @@ export default function BusinessPublicView({
 }: BusinessPublicViewProps) {
     const { user } = useAuth();
     const router = useRouter();
-    const [activeTab, setActiveTab] = useState<'inicio' | 'catalogo' | 'feed'>('catalogo');
-    const [isHeaderCompact, setIsHeaderCompact] = useState(false);
+    const [activeTab, setActiveTab] = useState<'inicio' | 'catalogo' | 'feed' | 'resenas'>('catalogo');
 
     // Safeguard against null profile - REMOVED to avoid hook error
     // if (!profile) ... moved to after hooks
+
+    const { items: cartItems, count: cartCount, open: cartOpen, setOpen: setCartOpen, addItem, updateQty, removeItem } = useBusinessCart(profile?.id);
 
     // Catalog State & Filters
     const [searchQuery, setSearchQuery] = useState('');
@@ -241,32 +234,14 @@ export default function BusinessPublicView({
         }
     };
 
-    // Derived State
-    const hasSocials = profile?.social_links && profile.social_links.length > 0;
-    const hasLocation = !!profile?.contact_address;
-    const isOpen = true; // TODO: Calculate from business_hours
+    // Derived State — catalog filters use adisos directly
 
     // Scroll Handler for Sticky Header
     useEffect(() => {
-        const handleScroll = () => {
-            setIsHeaderCompact(window.scrollY > 150);
-        };
-        // Only add listener if not in preview mode or if we handle scroll container
         if (!isPreview) {
-            window.addEventListener('scroll', handleScroll);
-            return () => window.removeEventListener('scroll', handleScroll);
+            // reserved for future compact header behavior
         }
     }, [isPreview]);
-
-    const containerVariants = {
-        hidden: { opacity: 0 },
-        visible: { opacity: 1, transition: { staggerChildren: 0.1 } }
-    };
-
-    const itemVariants = {
-        hidden: { y: 20, opacity: 0 },
-        visible: { y: 0, opacity: 1 }
-    };
 
     if (!profile) {
         return <div className="min-h-[50vh] flex items-center justify-center text-slate-400">Cargando perfil...</div>;
@@ -280,24 +255,14 @@ export default function BusinessPublicView({
                 profile.font_family === 'serif' ? 'font-serif' :
                     profile.font_family === 'mono' ? 'font-mono' : 'font-sans'
             )}
-            style={{
-                '--brand-color': profile.theme_color || '#3c6997',
-                '--bg-primary': '#ffffff',
-                '--bg-secondary': '#f8fafc',
-                '--bg-tertiary': '#e2e8f0',
-                '--text-primary': '#0f172a',
-                '--text-secondary': '#475569',
-                '--text-tertiary': '#94a3b8',
-                '--border-color': '#e2e8f0',
-                '--border-subtle': '#f1f5f9',
-            } as React.CSSProperties}
+            style={businessThemeStyle(profile)}
         >
-            {/* --- Sticky Announcement Bar --- */}
-            {profile.announcement_active !== false && profile.announcement_text && (
-                <div className="bg-yellow-300 text-yellow-900 text-center text-xs md:text-sm font-bold py-2 px-4 sticky top-0 z-50 animate-fade-in-down shadow-sm print:hidden">
-                    📢 {profile.announcement_text}
-                </div>
-            )}
+            <BusinessJsonLd profile={profile} products={adisos.slice(0, 5)} />
+            <BusinessHighlights
+                announcementText={profile.announcement_text}
+                announcementActive={profile.announcement_active}
+                customBlocks={profile.custom_blocks}
+            />
 
             {/* --- HEADER (Scroll Aware) --- */}
             <div className={cn(
@@ -314,161 +279,21 @@ export default function BusinessPublicView({
                 />
             </div>
 
-            {/* --- HERO SECTION & PROFILE HEADER --- */}
-            <div className="bg-white pb-2 shadow-sm relative z-10 pt-16"> {/* Added pt-16 for fixed header */}
-                {/* Banner Wrapper - Maximized width but contained like Facebook */}
-                <div className="w-full max-w-[1100px] mx-auto relative group h-[200px] md:h-[350px] overflow-hidden bg-slate-100 md:rounded-b-xl shadow-sm">
-                    {profile.banner_url ? (
-                        <img
-                            src={profile.banner_url}
-                            alt="Portada"
-                            className="w-full h-full object-cover object-center transition-transform duration-700 group-hover:scale-105"
-                        />
-                    ) : (
-                        <div className="w-full h-full bg-gradient-to-r from-[var(--brand-color)] to-slate-800 opacity-90" />
-                    )}
-                    {/* Owner Banner Edit */}
-                    {showEditControls && (
-                        <button
-                            onClick={() => onEditPart?.('visual')}
-                            className="absolute top-4 right-4 bg-black/40 hover:bg-black/60 backdrop-blur-md text-white p-2 rounded-full transition-all opacity-0 group-hover:opacity-100"
-                        >
-                            <IconEdit size={18} />
-                        </button>
-                    )}
-                </div>
+            <BusinessHero
+                profile={profile}
+                showEditControls={Boolean(showEditControls)}
+                onEditPart={onEditPart}
+            />
+            <BusinessActionBar
+                profile={profile}
+                isOwner={Boolean(isOwner)}
+                cartCount={cartCount}
+                onShare={handleShare}
+                onOpenCart={() => setCartOpen(true)}
+                onEditPart={onEditPart}
+            />
 
-                {/* Profile Info Bar - Refactored for Mobile */}
-                <div className="max-w-6xl mx-auto px-4 md:px-8">
-
-                    {/* Row 1: Logo + Name (Side by side on mobile) */}
-                    <div className="flex flex-row items-end md:items-start gap-4 -mt-12 md:-mt-24 relative z-20 mb-4">
-                        {/* Logo */}
-                        <motion.div
-                            initial={{ scale: 0.9, opacity: 0 }}
-                            animate={{ scale: 1, opacity: 1 }}
-                            className="shrink-0"
-                        >
-                            <div className="w-24 h-24 md:w-48 md:h-48 rounded-full border-4 md:border-[6px] border-white bg-white shadow-xl overflow-hidden relative group/logo">
-                                {profile.logo_url ? (
-                                    <img src={profile.logo_url} alt="Logo" className="w-full h-full object-cover" />
-                                ) : (
-                                    <div className="w-full h-full bg-slate-100 flex items-center justify-center text-3xl md:text-5xl font-bold text-slate-300">
-                                        {profile.name?.substring(0, 1) || 'N'}
-                                    </div>
-                                )}
-                                {showEditControls && (
-                                    <button
-                                        onClick={() => onEditPart?.('logo')}
-                                        className="absolute inset-0 bg-black/30 opacity-0 group-hover/logo:opacity-100 flex items-center justify-center text-white transition-opacity"
-                                    >
-                                        <IconEdit size={24} />
-                                    </button>
-                                )}
-                            </div>
-                            {/* Verified Badge */}
-                            <div className="absolute bottom-1 right-1 md:bottom-3 md:right-3 bg-blue-500 text-white p-1 rounded-full border-2 border-white shadow-sm" title="Verificado">
-                                <IconVerified size={12} className="md:w-5 md:h-5" />
-                            </div>
-                        </motion.div>
-
-                        {/* Name (Beside logo on mobile) */}
-                        <div className="flex-1 pb-1 md:pt-28 md:pb-0 min-w-0">
-                            <motion.h1
-                                className="text-2xl md:text-5xl font-black text-slate-900 tracking-tight leading-tight line-clamp-2 md:line-clamp-none"
-                            >
-                                {profile.name || 'Mi Negocio'}
-                            </motion.h1>
-                            {/* Category or Slug - Optional context */}
-                            <p className="text-xs md:text-base text-slate-400 font-medium truncate">@{profile.slug}</p>
-                        </div>
-                    </div>
-
-                    {/* Row 2: Description, Stats, Actions */}
-                    <div className="flex flex-col md:flex-row gap-6 md:ml-[220px]"> {/* Offset desktop logo */}
-                        <div className="flex-1">
-                            <p className="text-slate-600 text-sm md:text-lg font-medium leading-relaxed mb-3">
-                                {profile.description || 'Bienvenido a nuestra tienda oficial.'}
-                            </p>
-
-                            {/* Quick Stats / Meta */}
-                            <div className="flex flex-wrap items-center gap-4 text-sm text-slate-500">
-                                {profile.contact_address && (
-                                    <span className="flex items-center gap-1"><IconMapMarkerAlt size={14} /> {profile.contact_address}</span>
-                                )}
-                                <span className="flex items-center gap-1 text-green-600 bg-green-50 px-2 py-0.5 rounded-full"><span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" /> Abierto ahora</span>
-                            </div>
-                        </div>
-
-                        {/* Desktop Actions */}
-                        <div className="hidden md:flex items-center gap-3">
-                            {profile.contact_whatsapp && (
-                                <a
-                                    href={getWhatsappUrl(profile.contact_whatsapp, profile.name || 'Negocio')}
-                                    target="_blank"
-                                    rel="noreferrer"
-                                    className="bg-[var(--brand-color)] hover:brightness-110 text-white px-6 py-3 rounded-xl font-bold shadow-lg shadow-[var(--brand-color)]/30 hover:-translate-y-1 transition-all flex items-center gap-2 print:hidden"
-                                >
-                                    <IconWhatsapp size={20} /> Contáctanos
-                                </a>
-                            )}
-                            <button
-                                onClick={handleShare}
-                                className="bg-slate-100 hover:bg-slate-200 text-slate-700 p-3 rounded-xl transition-colors print:hidden"
-                                title="Compartir"
-                            >
-                                <IconShareAlt size={20} />
-                            </button>
-
-                            {/* Edit Button - Desktop */}
-                            {isOwner && (
-                                <button
-                                    onClick={() => onEditPart?.('general')}
-                                    className="bg-slate-100 hover:bg-slate-200 text-slate-800 px-4 py-3 rounded-xl font-bold transition-all flex items-center gap-2 print:hidden"
-                                >
-                                    <IconEdit size={18} />
-                                    <span className="text-sm">Editar página</span>
-                                </button>
-                            )}
-                        </div>
-                    </div>
-
-                    {/* Mobile Actions - Stacked/Grid */}
-                    <div className="md:hidden grid grid-cols-5 gap-2 mt-6">
-                        {/* WhatsApp - Takes most space */}
-                        {profile.contact_whatsapp && (
-                            <a
-                                href={getWhatsappUrl(profile.contact_whatsapp, profile.name || 'Negocio')}
-                                target="_blank"
-                                rel="noreferrer"
-                                className="col-span-3 bg-[var(--brand-color)] text-white h-12 rounded-xl font-bold shadow-lg shadow-[var(--brand-color)]/20 flex items-center justify-center gap-2 text-sm active:scale-[0.98] transition-transform"
-                            >
-                                <IconWhatsapp size={18} /> Contáctanos
-                            </a>
-                        )}
-
-                        {/* Share Button */}
-                        <button
-                            onClick={handleShare}
-                            className="col-span-1 bg-slate-100 text-slate-700 h-12 rounded-xl flex items-center justify-center active:bg-slate-200 transition-colors"
-                        >
-                            <IconShareAlt size={20} />
-                        </button>
-
-                        {/* Edit Button - Mobile (Only Owner) */}
-                        {isOwner && (
-                            <button
-                                onClick={() => onEditPart?.('general')}
-                                className="col-span-1 bg-slate-200 text-slate-800 h-12 rounded-xl flex items-center justify-center active:bg-slate-300 transition-colors"
-                            >
-                                <IconEdit size={20} className="text-slate-700" />
-                            </button>
-                        )}
-                    </div>
-                </div>
-
-
-
+            <div className="bg-white pb-2 shadow-sm relative z-10">
                 {/* --- NAVIGATION TABS --- */}
                 <div className="mt-8 border-t border-slate-100 bg-white sticky top-0 z-40 shadow-sm backdrop-blur-md bg-white/90 supports-[backdrop-filter]:bg-white/80 print:hidden">
                     <div className="max-w-6xl mx-auto px-4">
@@ -476,7 +301,8 @@ export default function BusinessPublicView({
                             {[
                                 { id: 'catalogo', label: 'Catálogo', icon: <IconStore size={18} />, count: adisos.length },
                                 { id: 'inicio', label: 'Información', icon: <IconMapMarkerAlt size={18} /> },
-                                { id: 'feed', label: 'Novedades', icon: <IconHeart size={18} /> }
+                                { id: 'feed', label: 'Deals', icon: <IconHeart size={18} /> },
+                                { id: 'resenas', label: 'Reseñas', icon: <IconStar size={18} /> },
                             ].map(tab => (
                                 <button
                                     key={tab.id}
@@ -507,130 +333,8 @@ export default function BusinessPublicView({
             < div className="max-w-6xl mx-auto px-4 py-8 min-h-[50vh]" >
                 <AnimatePresence mode="wait">
 
-                    {/* INICIO TAB */}
                     {activeTab === 'inicio' && (
-                        <motion.div
-                            key="inicio"
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -10 }}
-                            className="grid grid-cols-1 lg:grid-cols-3 gap-8"
-                        >
-                            {/* Left Column: Quick Actions & Links */}
-                            <div className="lg:col-span-1 space-y-6">
-                                {/* Bio Card */}
-                                <div className="bg-[var(--bg-primary)] p-6 rounded-3xl shadow-sm border border-[var(--border-subtle)]">
-                                    <h3 className="font-bold text-lg mb-4">Sobre Nosotros</h3>
-                                    <p className="text-[var(--text-secondary)] text-sm leading-relaxed mb-6">
-                                        {profile.description || 'Sin descripción disponible.'}
-                                    </p>
-
-                                    {/* Socials */}
-                                    {hasSocials && (
-                                        <div className="flex gap-4 flex-wrap">
-                                            {profile.social_links?.map((link, idx) => (
-                                                <a key={idx} href={link.url} target="_blank" rel="noopener noreferrer" className="bg-[var(--bg-secondary)] p-3 rounded-full hover:bg-[var(--brand-color)] hover:text-white transition-all text-[var(--text-secondary)]">
-                                                    {getSocialIcon(link.url)}
-                                                </a>
-                                            ))}
-                                        </div>
-                                    )}
-                                </div>
-
-                                {/* Contact Card (Mobile Only mainly) */}
-                                <div className="bg-[var(--brand-color)] text-white p-6 rounded-3xl shadow-lg relative overflow-hidden">
-                                    <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2" />
-                                    <h3 className="font-bold text-lg mb-4 relative z-10">Contáctanos</h3>
-                                    <div className="space-y-4 relative z-10">
-                                        {profile.contact_whatsapp && (
-                                            <a href={getWhatsappUrl(profile.contact_whatsapp, profile.name || 'Negocio')} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 bg-white/20 p-3 rounded-xl hover:bg-white/30 transition-colors">
-                                                <IconWhatsapp size={20} />
-                                                <span className="font-medium">Chatear por WhatsApp</span>
-                                            </a>
-                                        )}
-                                        {profile.contact_phone && (
-                                            <a href={`tel:${profile.contact_phone}`} className="flex items-center gap-3 bg-white/20 p-3 rounded-xl hover:bg-white/30 transition-colors">
-                                                <IconPhone size={20} />
-                                                <span className="font-medium">Llamar Ahora</span>
-                                            </a>
-                                        )}
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Right Column: Featured Content / Bento Grid */}
-                            <div className="lg:col-span-2">
-                                <div className="bg-[var(--bg-primary)] p-6 rounded-3xl shadow-sm border border-[var(--border-subtle)] mb-8">
-                                    <h3 className="font-bold text-lg mb-4 flex items-center gap-2">
-                                        <IconMapMarkerAlt className="text-[var(--brand-color)]" /> Ubicación y Contacto
-                                    </h3>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                        <div>
-                                            <p className="text-[var(--text-secondary)] mb-4">{profile.contact_address || 'Dirección no especificada'}</p>
-                                            <div className="w-full h-48 bg-[var(--bg-secondary)] rounded-xl overflow-hidden border border-[var(--border-color)]">
-                                                <iframe
-                                                    width="100%"
-                                                    height="100%"
-                                                    frameBorder="0"
-                                                    scrolling="no"
-                                                    marginHeight={0}
-                                                    marginWidth={0}
-                                                    src={`https://maps.google.com/maps?q=${encodeURIComponent(profile.contact_address || 'peru')}&t=&z=13&ie=UTF8&iwloc=&output=embed`}
-                                                ></iframe>
-                                            </div>
-                                        </div>
-                                        <div className="space-y-4">
-                                            <h4 className="font-bold text-sm text-[var(--text-secondary)] uppercase tracking-wider">Horarios</h4>
-                                            <div className="space-y-2">
-                                                {Object.entries(profile.business_hours || {}).length > 0 ? (
-                                                    Object.entries(profile.business_hours || {}).map(([day, hours]) => (
-                                                        <div key={day} className="flex justify-between text-sm py-1 border-b border-[var(--border-subtle)] last:border-0 lowercase">
-                                                            <span className="font-medium capitalize">{day}</span>
-                                                            <span className={hours.closed ? "text-red-500 font-medium" : "text-[var(--text-secondary)]"}>
-                                                                {hours.closed ? 'Cerrado' : `${hours.open} - ${hours.close}`}
-                                                            </span>
-                                                        </div>
-                                                    ))
-                                                ) : (
-                                                    <p className="text-sm text-[var(--text-tertiary)] italic">Consulte horarios directamente.</p>
-                                                )}
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <h3 className="font-bold text-xl mb-6">Destacados</h3>
-                                {adisos.length > 0 ? (
-                                    <div className={cn(
-                                        "grid gap-4",
-                                        profile.layout_style === 'minimal' ? "grid-cols-1" :
-                                            profile.layout_style === 'bento' ? "grid-cols-1 sm:grid-cols-2 md:grid-cols-3" : // Bento-ish via columns
-                                                "grid-cols-1 sm:grid-cols-2" // Standard
-                                    )}>
-                                        {adisos.slice(0, 4).map((adiso, idx) => (
-                                            <div key={adiso.id} className={cn(
-                                                "transform hover:scale-[1.02] transition-transform",
-                                                profile.layout_style === 'bento' && idx === 0 ? "md:col-span-2 md:row-span-2" : ""
-                                            )}>
-                                                <BentoCard
-                                                    adiso={adiso}
-                                                    icon={<IconStore size={12} />}
-                                                    onClick={() => window.open(`/adiso/${(adiso as any).slug || adiso.id}`, '_blank')}
-                                                />
-                                            </div>
-                                        ))}
-                                    </div>
-                                ) : (
-                                    <div className="bg-[var(--bg-primary)] rounded-3xl p-12 text-center border border-[var(--border-subtle)] border-dashed">
-                                        <div className="w-16 h-16 bg-[var(--bg-secondary)] rounded-full flex items-center justify-center mx-auto mb-4 text-[var(--text-tertiary)]">
-                                            <IconStore size={32} />
-                                        </div>
-                                        <h4 className="font-bold text-[var(--text-secondary)]">El catálogo está vacío</h4>
-                                        <p className="text-sm text-[var(--text-tertiary)]">Pronto verás los productos destacados aquí.</p>
-                                    </div>
-                                )}
-                            </div>
-                        </motion.div>
+                        <BusinessInfoTab profile={profile} adisos={adisos} />
                     )}
 
                     {/* CATALOGO TAB */}
@@ -925,22 +629,38 @@ export default function BusinessPublicView({
                                                                 {adiso.descripcion.replace('Precio:', '').trim()}
                                                             </p>
                                                         )}
-                                                        <div className="flex items-center justify-between mt-1 pt-2 border-t border-slate-50">
+                                                        <div className="flex items-center justify-between mt-1 pt-2 border-t border-slate-50 gap-2">
                                                             <span className="font-black text-base text-slate-900">
                                                                 {adiso.precio ? `S/ ${adiso.precio}` : <span className="text-sm font-semibold text-slate-400">Consultar</span>}
                                                             </span>
-                                                            {profile.contact_whatsapp && (
-                                                                <a
-                                                                    href={`https://wa.me/${profile.contact_whatsapp}?text=${encodeURIComponent(`Hola! Me interesa: ${adiso.titulo}`)}`}
-                                                                    target="_blank"
-                                                                    rel="noreferrer"
-                                                                    onClick={(e) => e.stopPropagation()}
-                                                                    className="text-[10px] font-bold px-2 py-1 bg-green-50 text-green-700 rounded-lg hover:bg-green-100 transition-colors flex items-center gap-1"
+                                                            <div className="flex items-center gap-1">
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={(e) => {
+                                                                        e.stopPropagation();
+                                                                        addItem({
+                                                                            productId: adiso.id,
+                                                                            title: adiso.titulo,
+                                                                            price: adiso.precio,
+                                                                            imageUrl: adiso.imagenesUrls?.[0] || adiso.imagenUrl,
+                                                                        });
+                                                                    }}
+                                                                    className="text-[10px] font-bold px-2 py-1 bg-[var(--brand-color)]/10 text-[var(--brand-color)] rounded-lg hover:bg-[var(--brand-color)] hover:text-white transition-colors"
                                                                 >
-                                                                    <IconWhatsapp size={11} />
-                                                                    Pedir
-                                                                </a>
-                                                            )}
+                                                                    + Carrito
+                                                                </button>
+                                                                {profile.contact_whatsapp && (
+                                                                    <a
+                                                                        href={getProductWhatsappUrl(profile.contact_whatsapp, profile.name || 'Negocio', adiso)}
+                                                                        target="_blank"
+                                                                        rel="noreferrer"
+                                                                        onClick={(e) => e.stopPropagation()}
+                                                                        className="text-[10px] font-bold px-2 py-1 bg-green-50 text-green-700 rounded-lg hover:bg-green-100 transition-colors flex items-center gap-1"
+                                                                    >
+                                                                        <IconWhatsapp size={11} />
+                                                                    </a>
+                                                                )}
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 </button>
@@ -1031,32 +751,12 @@ export default function BusinessPublicView({
                         </motion.div>
                     )}
 
-                    {/* FEED TAB */}
-                    {activeTab === 'feed' && (
-                        <motion.div
-                            key="feed"
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -10 }}
-                            className="max-w-2xl mx-auto space-y-6"
-                        >
-                            <div className="bg-[var(--bg-primary)] p-8 rounded-3xl text-center shadow-sm border border-[var(--border-subtle)]">
-                                <div className="w-20 h-20 bg-gradient-to-tr from-pink-500 to-orange-500 rounded-full flex items-center justify-center mx-auto mb-6 text-white shadow-lg">
-                                    <IconHeart size={32} />
-                                </div>
-                                <h3 className="font-bold text-2xl mb-3">Publicaciones Sociales</h3>
-                                <p className="text-[var(--text-secondary)] mb-8 max-w-md mx-auto">
-                                    Aquí podrás ver las últimas novedades, ofertas flash y contenido exclusivo de {profile.name}.
-                                </p>
-                                <div className="inline-flex items-center gap-2 bg-[var(--bg-secondary)] px-4 py-2 rounded-full text-sm font-medium text-[var(--text-secondary)]">
-                                    <span className="relative flex h-3 w-3">
-                                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[var(--brand-color)] opacity-75"></span>
-                                        <span className="relative inline-flex rounded-full h-3 w-3 bg-[var(--brand-color)]"></span>
-                                    </span>
-                                    Próximamente
-                                </div>
-                            </div>
-                        </motion.div>
+                    {activeTab === 'feed' && profile.slug && (
+                        <BusinessDealsTab slug={profile.slug} businessName={profile.name || 'Negocio'} />
+                    )}
+
+                    {activeTab === 'resenas' && profile.slug && (
+                        <BusinessReviewsTab slug={profile.slug} />
                     )}
 
                     {/* INFO TAB (FUSED INTO INICIO) */}
@@ -1111,6 +811,23 @@ export default function BusinessPublicView({
                         )
                     )}
             </div >
+
+            <BusinessShareTools
+                slug={profile.slug || ''}
+                businessName={profile.name || 'Negocio'}
+                onShare={handleShare}
+            />
+
+            <BusinessCartDrawer
+                open={cartOpen}
+                onClose={() => setCartOpen(false)}
+                items={cartItems}
+                businessName={profile.name || 'Negocio'}
+                whatsapp={profile.contact_whatsapp}
+                onUpdateQty={updateQty}
+                onRemove={removeItem}
+                slug={profile.slug || ''}
+            />
 
             {/* Branding Footer */}
             <div className="py-8 text-center text-xs text-[var(--text-tertiary)] print:hidden" >

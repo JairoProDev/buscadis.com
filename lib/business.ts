@@ -9,7 +9,12 @@ const VALID_BUSINESS_COLUMNS = [
     'logo_url', 'banner_url', 'tagline', 'theme_color', 'theme_mode',
     'layout_style', 'contact_email', 'contact_phone', 'contact_whatsapp',
     'contact_address', 'contact_maps_url', 'business_hours', 'social_links',
-    'custom_blocks', 'is_published', 'view_count', 'created_at', 'updated_at'
+    'custom_blocks', 'profile_blocks',
+    'meta_title', 'meta_description', 'og_image_url',
+    'announcement_text', 'announcement_active', 'is_verified',
+    'pixel_facebook', 'pixel_tiktok', 'is_vacation_mode', 'custom_domain',
+    'show_contact_form', 'favicon_url', 'font_family',
+    'is_published', 'view_count', 'created_at', 'updated_at',
 ];
 
 export function sanitizeBusinessProfilePayload(profile: any) {
