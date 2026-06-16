@@ -80,6 +80,7 @@ export function countActiveFilters(
   if (state.verificado) n++;
   if (state.destacado) n++;
   if (state.ubicacion?.distrito || state.ubicacion?.departamento || state.ubicacion?.provincia || state.ubicacion?.countryCode) n++;
+  if (state.ubicacion?.radioKm && state.ubicacion.radioKm !== 5) n++;
 
   const defs = Object.keys(state.facets);
   for (const key of defs) {

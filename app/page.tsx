@@ -4,7 +4,7 @@
 export const dynamic = 'force-dynamic';
 export const fetchCache = 'force-no-store';
 
-import { Suspense, useState, useEffect, useRef, useCallback } from 'react';
+import { Suspense, useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Adiso, Categoria } from '@/types';
 import { getAdisos, getAdisoById, saveAdiso, getAdisosCache } from '@/lib/storage';
@@ -57,6 +57,9 @@ import StoriesBar from '@/components/StoriesBar';
 import BrowseFilters from '@/components/filters/BrowseFilters';
 import FilterSidePanel from '@/components/filters/FilterSidePanel';
 import FilterControlFields from '@/components/filters/FilterControlFields';
+import FilterSortPanel from '@/components/filters/FilterSortPanel';
+import FilterPanelFooter from '@/components/filters/FilterPanelFooter';
+import { buildFilterInsight } from '@/lib/filters/panel-meta';
 import Ordenamiento, { TipoOrdenamiento } from '@/components/Ordenamiento';
 import FiltroUbicacion from '@/components/FiltroUbicacion';
 import GrillaAdisos from '@/components/GrillaAdisos';
@@ -204,6 +207,10 @@ function HomeContent() {
   const { toasts, removeToast, success, error } = useToast();
   const marketplacePulse = getMarketplacePulse(adisosFiltrados);
   const activeFiltersCount = countActiveFilters(browseFilters, categoriaFiltro);
+  const browseTotalPool = useMemo(() => {
+    if (categoriaFiltro === 'todos') return adisos.length;
+    return adisos.filter((a) => a.categoria === categoriaFiltro).length;
+  }, [adisos, categoriaFiltro]);
   const [isOnlineState, setIsOnlineState] = useState(() => {
     if (typeof window !== 'undefined') {
       return navigator.onLine;
@@ -988,26 +995,23 @@ function HomeContent() {
                 onChange={setBrowseFilters}
                 adisos={adisos}
                 committedQuery={committedQuery}
-                onCategorySelect={(categoria) => {
-                  setCategoriaFiltro(categoria);
-                  const params = new URLSearchParams(searchParams.toString());
-                  params.set('categoria', categoria);
-                  router.replace(`/?${params.toString()}`, { scroll: false });
-                }}
-                onPlatformAction={(actionId) => {
-                  if (actionId === 'clear_filters') {
-                    setBrowseFilters({ facets: {} });
-                  }
-                  if (actionId === 'collapse_filters') {
-                    setFilterSidebarCollapsed(true);
-                  }
-                }}
                 collapsed={filterSidebarCollapsed}
                 onToggleCollapse={() => setFilterSidebarCollapsed((c) => !c)}
                 onOpenUbicacion={() => setMostrarFiltroUbicacion(true)}
                 userLat={profile?.latitud}
                 userLng={profile?.longitud}
                 resultCount={adisosFiltrados.length}
+                totalPool={browseTotalPool}
+                ordenamiento={ordenamiento}
+                onSortChange={(v) => {
+                  setOrdenamiento(v);
+                  trackEvent('filter.applied', {
+                    entityType: 'filter',
+                    entityId: 'sort',
+                    payload: { sort: v },
+                    userId: user?.id,
+                  });
+                }}
               />
             )}
             <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
@@ -1235,7 +1239,8 @@ function HomeContent() {
                         </button>
                       </div>
                     </div>
-                    <div className="flex-1 p-4 overflow-y-auto no-scrollbar">
+                    <div className="flex-1 space-y-3 overflow-y-auto no-scrollbar p-4">
+                      <FilterSortPanel value={ordenamiento} onChange={setOrdenamiento} />
                       <FilterControlFields
                         categoria={categoriaFiltro}
                         filters={browseFilters}
@@ -1248,19 +1253,23 @@ function HomeContent() {
                           setMostrarFiltroUbicacion(true);
                           setIsMobileFiltersOpen(false);
                         }}
-                        compact={false}
                       />
                     </div>
-                    <div className="p-4 border-t border-[var(--border-color)] bg-[var(--bg-secondary)] flex items-center justify-between gap-3">
-                      <span className="text-xs font-semibold text-[var(--text-secondary)]">
-                        {adisosFiltrados.length} resultados
-                      </span>
-                      <button
-                        onClick={() => setIsMobileFiltersOpen(false)}
-                        className="px-4 py-2 bg-[var(--brand-blue)] text-white text-xs font-bold rounded-xl hover:opacity-90 active:scale-95 transition-all"
-                      >
-                        Ver resultados
-                      </button>
+                    <div className="border-t border-[var(--border-color)]">
+                      <FilterPanelFooter
+                        resultCount={adisosFiltrados.length}
+                        totalPool={browseTotalPool}
+                        insight={buildFilterInsight(browseFilters, categoriaFiltro, adisosFiltrados.length, browseTotalPool)}
+                      />
+                      <div className="px-4 pb-4">
+                        <button
+                          type="button"
+                          onClick={() => setIsMobileFiltersOpen(false)}
+                          className="w-full rounded-xl bg-[var(--brand-blue)] py-2.5 text-xs font-bold text-white hover:opacity-90 active:scale-95 transition-all"
+                        >
+                          Ver {adisosFiltrados.length} resultado{adisosFiltrados.length === 1 ? '' : 's'}
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>

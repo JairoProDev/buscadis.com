@@ -20,7 +20,10 @@ export function getActiveFilterChips(
 
   const u = filters.ubicacion;
   const ubiLabel = u?.distrito || u?.provincia || u?.departamento;
-  if (ubiLabel) chips.push({ id: 'ubicacion', label: ubiLabel });
+  if (ubiLabel) {
+    const radio = u?.radioKm && u.radioKm !== 5 ? ` · ${u.radioKm} km` : '';
+    chips.push({ id: 'ubicacion', label: `${ubiLabel}${radio}` });
+  }
 
   if (filters.precioMin && filters.precioMax) {
     chips.push({ id: 'precio', label: `S/ ${filters.precioMin} – ${filters.precioMax}` });

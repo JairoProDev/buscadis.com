@@ -17,6 +17,8 @@ import {
   IconUserCheck,
 } from '@/components/Icons';
 import FilterSectionCard from './FilterSectionCard';
+import FilterRadiusControl from './FilterRadiusControl';
+import FilterQuickPresets from './FilterQuickPresets';
 import { TriStateSegment, ToggleCheck, FilterSelect } from './FilterUI';
 
 interface FilterControlFieldsProps {
@@ -29,6 +31,7 @@ interface FilterControlFieldsProps {
   userLng?: number;
   onOpenUbicacion?: () => void;
   compact?: boolean;
+  showQuickPresets?: boolean;
 }
 
 const PRICE_PRESETS = [
@@ -50,6 +53,7 @@ export default function FilterControlFields({
   userLat,
   userLng,
   onOpenUbicacion,
+  showQuickPresets = true,
 }: FilterControlFieldsProps) {
   const categoryDefs = getFiltersForCategory(categoria).filter((d) => d.requiresCategory);
   const chipDefs = categoryDefs.filter((d) => d.type === 'chips' && d.options);
@@ -61,6 +65,9 @@ export default function FilterControlFields({
   const hasPrecio =
     (filters.precioMin != null && filters.precioMin > 0) ||
     (filters.precioMax != null && filters.precioMax > 0);
+  const hasCatFacets =
+    chipDefs.some((d) => filters.facets[d.id]) ||
+    toggleDefs.some((d) => filters.facets[d.id] === true);
 
   let step = 1;
 
@@ -100,7 +107,7 @@ export default function FilterControlFields({
                 onClick={() => toggleChip(def.id, opt.value)}
                 className={`rounded-full px-2.5 py-1 text-[11px] font-semibold transition-all ${
                   selected
-                    ? 'bg-[var(--brand-blue)] text-white'
+                    ? 'bg-[var(--brand-blue)] text-white shadow-sm'
                     : disabled
                       ? 'cursor-not-allowed opacity-40 bg-[var(--bg-tertiary)] text-[var(--text-tertiary)]'
                       : 'bg-[var(--bg-tertiary)] text-[var(--text-primary)] hover:bg-[var(--hover-bg)]'
@@ -118,12 +125,18 @@ export default function FilterControlFields({
 
   return (
     <div className="space-y-3">
-      {/* 1. Ubicación */}
+      {showQuickPresets && (
+        <FilterQuickPresets categoria={categoria} filters={filters} onChange={onChange} />
+      )}
+
       <FilterSectionCard
+        sectionId="ubicacion"
         step={step++}
         title="Dónde"
+        subtitle={hasUbi ? ubicLabel : 'Zona o ciudad'}
         icon={<IconLocation size={14} />}
         active={hasUbi}
+        completed={hasUbi}
       >
         <button
           type="button"
@@ -137,18 +150,25 @@ export default function FilterControlFields({
           <span className="truncate">{ubicLabel}</span>
           <IconChevronRight size={10} className="shrink-0 opacity-50" />
         </button>
+        <FilterRadiusControl
+          filters={filters}
+          onChange={onChange}
+          enabled={hasUbi && userLat != null && userLng != null}
+        />
         <p className="m-0 text-[10px] leading-relaxed text-[var(--text-tertiary)]">
           Empieza por zona para ver avisos cerca de ti.
         </p>
       </FilterSectionCard>
 
-      {/* 2. Detalles de categoría */}
       {categoria !== 'todos' && (chipDefs.length > 0 || toggleDefs.length > 0) && (
         <FilterSectionCard
+          sectionId="tipo"
           step={step++}
           title={`Qué tipo de ${getCategoriaLabel(categoria).toLowerCase()}`}
+          subtitle="Operación, modalidad, condición…"
           icon={<IconTag size={14} />}
-          active={chipDefs.some((d) => filters.facets[d.id]) || toggleDefs.some((d) => filters.facets[d.id] === true)}
+          active={hasCatFacets}
+          completed={hasCatFacets}
         >
           <div className="space-y-2.5">
             {chipDefs.map(renderChipGroup)}
@@ -166,16 +186,18 @@ export default function FilterControlFields({
 
       {categoria === 'todos' && (
         <div className="rounded-xl border border-dashed border-[var(--border-color)] px-3 py-2.5 text-[10px] leading-relaxed text-[var(--text-tertiary)]">
-          Elige una categoría arriba para ver filtros específicos (tipo de inmueble, modalidad de empleo, etc.).
+          Elige una categoría arriba para desbloquear filtros específicos.
         </div>
       )}
 
-      {/* 3. Presupuesto */}
       <FilterSectionCard
+        sectionId="presupuesto"
         step={step++}
         title="Presupuesto"
+        subtitle="Rango y precio publicado"
         icon={<IconTag size={14} />}
         active={sectionActive(hasPrecio, filters.soloConPrecio !== undefined)}
+        completed={sectionActive(hasPrecio, filters.soloConPrecio !== undefined)}
       >
         <div className="flex items-center gap-2">
           <input
@@ -187,7 +209,7 @@ export default function FilterControlFields({
               const v = e.target.value ? Number(e.target.value) : undefined;
               onChange({ ...filters, precioMin: v && v > 0 ? v : undefined });
             }}
-            className={`min-w-0 flex-1 rounded-xl px-2.5 py-2 text-xs text-[var(--text-primary)] transition-all ${
+            className={`min-w-0 flex-1 rounded-xl px-2.5 py-2 text-xs text-[var(--text-primary)] transition-all outline-none focus:ring-1 focus:ring-[var(--brand-blue)] ${
               filters.precioMin ? 'bg-[rgba(var(--brand-primary-rgb),0.08)] font-semibold text-[var(--brand-blue)]' : 'bg-[var(--bg-tertiary)]'
             }`}
           />
@@ -201,15 +223,14 @@ export default function FilterControlFields({
               const v = e.target.value ? Number(e.target.value) : undefined;
               onChange({ ...filters, precioMax: v && v > 0 ? v : undefined });
             }}
-            className={`min-w-0 flex-1 rounded-xl px-2.5 py-2 text-xs text-[var(--text-primary)] transition-all ${
+            className={`min-w-0 flex-1 rounded-xl px-2.5 py-2 text-xs text-[var(--text-primary)] transition-all outline-none focus:ring-1 focus:ring-[var(--brand-blue)] ${
               filters.precioMax ? 'bg-[rgba(var(--brand-primary-rgb),0.08)] font-semibold text-[var(--brand-blue)]' : 'bg-[var(--bg-tertiary)]'
             }`}
           />
         </div>
         <div className="flex flex-wrap gap-1.5">
           {PRICE_PRESETS.map((preset) => {
-            const active =
-              filters.precioMin === preset.min && filters.precioMax === preset.max;
+            const active = filters.precioMin === preset.min && filters.precioMax === preset.max;
             return (
               <button
                 key={preset.label}
@@ -241,12 +262,14 @@ export default function FilterControlFields({
         />
       </FilterSectionCard>
 
-      {/* 4. Calidad del aviso */}
       <FilterSectionCard
+        sectionId="calidad"
         step={step++}
         title="Calidad del aviso"
+        subtitle="Fotos y presentación"
         icon={<IconImage size={14} />}
-        active={sectionActive(filters.conFotos !== undefined)}
+        active={filters.conFotos !== undefined}
+        completed={filters.conFotos === true}
       >
         <TriStateSegment
           compact
@@ -255,17 +278,16 @@ export default function FilterControlFields({
           onChange={(v) => onChange({ ...filters, conFotos: v })}
           labels={['Todos', 'Con fotos', 'Sin fotos']}
         />
-        <p className="m-0 text-[10px] text-[var(--text-tertiary)]">
-          Los avisos con fotos suelen ser más confiables.
-        </p>
       </FilterSectionCard>
 
-      {/* 5. Confianza */}
       <FilterSectionCard
+        sectionId="confianza"
         step={step++}
         title="Confianza"
+        subtitle="Vendedores y visibilidad"
         icon={<IconShield size={14} />}
         active={sectionActive(Boolean(filters.verificado), Boolean(filters.destacado))}
+        completed={sectionActive(Boolean(filters.verificado), Boolean(filters.destacado))}
       >
         <ToggleCheck
           label="Anunciante verificado"
@@ -281,12 +303,14 @@ export default function FilterControlFields({
         />
       </FilterSectionCard>
 
-      {/* 6. Recientes */}
       <FilterSectionCard
+        sectionId="fecha"
         step={step++}
         title="Publicación reciente"
+        subtitle="Antigüedad del aviso"
         icon={<IconCalendar size={14} />}
         active={Boolean(filters.publicadoEn)}
+        completed={Boolean(filters.publicadoEn)}
       >
         <FilterSelect
           value={filters.publicadoEn}
