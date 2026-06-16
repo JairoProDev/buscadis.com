@@ -19,11 +19,12 @@ export async function GET(
     return NextResponse.json({ error: 'Negocio no encontrado' }, { status: 404 });
   }
 
-  const [{ data: reviews }, { data: aggregate }] = await Promise.all([
+  const [{ data: rawReviews }, { data: aggregate }] = await Promise.all([
     supabaseAdmin
       .from('business_reviews')
-      .select('id, rating, text, verified_purchase, created_at, user_id')
+      .select('id, rating, text, comment, verified_purchase, is_verified, created_at, user_id, customer_name')
       .eq('business_profile_id', profile.id)
+      .or('is_visible.is.null,is_visible.eq.true')
       .order('created_at', { ascending: false })
       .limit(50),
     supabaseAdmin
@@ -33,8 +34,18 @@ export async function GET(
       .maybeSingle(),
   ]);
 
+  const reviews = (rawReviews || []).map((r) => ({
+    id: r.id,
+    rating: r.rating,
+    text: r.text || r.comment || undefined,
+    verified_purchase: r.verified_purchase ?? r.is_verified ?? false,
+    created_at: r.created_at,
+    user_id: r.user_id,
+    customer_name: r.customer_name,
+  }));
+
   return NextResponse.json({
-    reviews: reviews || [],
+    reviews,
     aggregate: aggregate || { avg_rating: 0, review_count: 0 },
   });
 }
@@ -67,7 +78,9 @@ export async function POST(
         user_id: user.id,
         rating: parsed.data.rating,
         text: parsed.data.text || null,
+        comment: parsed.data.text || null,
         updated_at: new Date().toISOString(),
+        is_visible: true,
       },
       { onConflict: 'business_profile_id,user_id' }
     )
