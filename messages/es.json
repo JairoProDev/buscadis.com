@@ -15,6 +15,13 @@
     "title": "buscadis.com",
     "progress": "Nuestro Progreso"
   },
+  "nav": {
+    "home": "Inicio",
+    "deals": "Deals",
+    "publish": "Publicar",
+    "search": "Buscar",
+    "map": "Mapa"
+  },
   "search": {
     "placeholder": "Buscar ofertas y oportunidades...",
     "label": "Buscar adisos"

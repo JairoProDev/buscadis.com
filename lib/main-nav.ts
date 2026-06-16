@@ -8,24 +8,25 @@ import {
 } from '@/components/Icons';
 import type { SeccionSidebar } from '@/components/SidebarDesktop';
 
-export type MainNavId = 'inicio' | 'feed' | 'publicar' | 'chatbot' | 'mapa';
+export type MainNavId = 'inicio' | 'deals' | 'publicar' | 'chatbot' | 'mapa';
 
 export interface MainNavItem {
   id: MainNavId;
   icon: ComponentType<{ size?: number; color?: string }>;
-  label: string;
+  /** Clave i18n bajo `nav.*` */
+  labelKey: string;
   href: string;
   /** Sección del panel lateral en home (/) */
   sidebarId?: SeccionSidebar;
 }
 
-/** Orden: Inicio → Feed → Publicar → Buscar (IA) → Mapa */
+/** Orden: Inicio → Deals → Publicar → Buscar (IA) → Mapa */
 export const MAIN_NAV_ITEMS: readonly MainNavItem[] = [
-  { id: 'inicio', icon: IconHome, label: 'Inicio', href: '/', sidebarId: 'adiso' },
-  { id: 'feed', icon: IconShorts, label: 'Feed', href: '/feed' },
-  { id: 'publicar', icon: IconMegaphone, label: 'Publicar', href: '/publicar', sidebarId: 'publicar' },
-  { id: 'chatbot', icon: IconSearch, label: 'Buscar', href: '/chat', sidebarId: 'chatbot' },
-  { id: 'mapa', icon: IconMap, label: 'Mapa', href: '/mapa', sidebarId: 'mapa' },
+  { id: 'inicio', icon: IconHome, labelKey: 'nav.home', href: '/', sidebarId: 'adiso' },
+  { id: 'deals', icon: IconShorts, labelKey: 'nav.deals', href: '/feed' },
+  { id: 'publicar', icon: IconMegaphone, labelKey: 'nav.publish', href: '/publicar', sidebarId: 'publicar' },
+  { id: 'chatbot', icon: IconSearch, labelKey: 'nav.search', href: '/chat', sidebarId: 'chatbot' },
+  { id: 'mapa', icon: IconMap, labelKey: 'nav.map', href: '/mapa', sidebarId: 'mapa' },
 ] as const;
 
 export function isMainNavActive(pathname: string, href: string): boolean {

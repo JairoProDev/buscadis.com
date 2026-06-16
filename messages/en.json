@@ -15,6 +15,13 @@
     "title": "buscadis.com",
     "progress": "Our Progress"
   },
+  "nav": {
+    "home": "Home",
+    "deals": "Deals",
+    "publish": "Publish",
+    "search": "Search",
+    "map": "Map"
+  },
   "search": {
     "placeholder": "Search offers and opportunities...",
     "label": "Search ads"

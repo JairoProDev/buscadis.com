@@ -402,7 +402,7 @@ export default function Header({
                         whiteSpace: 'nowrap',
                       }}
                     >
-                      {item.label}
+                      {t(item.labelKey)}
                     </span>
                   </span>
                 </Link>
@@ -451,7 +451,7 @@ export default function Header({
                     opacity: isActive || isHovered ? 1 : 0.85,
                   }}
                 >
-                  {item.label}
+                  {t(item.labelKey)}
                 </span>
                 <span
                   style={{

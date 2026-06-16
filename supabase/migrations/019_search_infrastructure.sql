@@ -72,7 +72,7 @@ AS $$
     a.ubicacion,
     a.fecha_publicacion,
     a.hora_publicacion,
-    a.imagenes_urls,
+    a.imagenes_urls::jsonb,
     GREATEST(
       similarity(a.titulo, search_text),
       similarity(coalesce(a.descripcion, ''), search_text) * 0.6

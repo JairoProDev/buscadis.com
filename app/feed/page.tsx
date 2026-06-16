@@ -24,7 +24,7 @@ export default function FeedPage() {
         }}
       >
         <h1 style={{ fontSize: '1.5rem', fontWeight: 800, marginBottom: '0.5rem' }}>
-          Feed — promos, ofertas y oportunidades
+          Deals — promos, ofertas y oportunidades
         </h1>
         <p style={{ color: 'var(--text-secondary)', marginBottom: '1rem', lineHeight: 1.6 }}>
           Aquí vivirá tu red social comercial: shorts de promociones, reels de ofertas, lives de

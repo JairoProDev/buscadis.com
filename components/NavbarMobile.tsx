@@ -7,6 +7,7 @@ import { SeccionSidebar } from './SidebarDesktop';
 import { IconMegaphone } from './Icons';
 import { MAIN_NAV_ITEMS, isMainNavActive } from '@/lib/main-nav';
 import { publishCta } from '@/lib/publish-cta-styles';
+import { useTranslation } from '@/hooks/useTranslation';
 
 interface NavbarMobileProps {
   seccionActiva: SeccionSidebar | null;
@@ -21,6 +22,7 @@ export default function NavbarMobile({
 }: NavbarMobileProps) {
   const pathname = usePathname();
   const router = useRouter();
+  const { t } = useTranslation();
   const [mounted, setMounted] = React.useState(false);
   const isDesktop = useMediaQuery('(min-width: 768px)');
   const [navVisible, setNavVisible] = React.useState(true);
@@ -162,7 +164,7 @@ export default function NavbarMobile({
                     letterSpacing: '0.01em',
                   }}
                 >
-                  {seccion.label}
+                  {t(seccion.labelKey)}
                 </span>
               </button>
             );
@@ -173,7 +175,7 @@ export default function NavbarMobile({
               key={seccion.id}
               type="button"
               onClick={handleClick}
-              aria-label={seccion.label}
+              aria-label={t(seccion.labelKey)}
               aria-current={estaActiva ? 'page' : undefined}
               style={{
                 flex: 1,
@@ -219,7 +221,7 @@ export default function NavbarMobile({
                   />
                 )}
               </span>
-              <span>{seccion.label}</span>
+              <span>{t(seccion.labelKey)}</span>
               {estaActiva && (
                 <span
                   style={{
