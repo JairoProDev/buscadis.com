@@ -2,6 +2,7 @@ import type { BusinessProfile } from '@/types/business';
 import type { Adiso } from '@/types';
 import type { BusinessReviewAggregate } from '@/types/business';
 import { getBusinessCanonicalUrl } from './public-utils';
+import { getDefaultOgImageUrl } from '@/lib/seo/og-image';
 
 export function buildBusinessMetadata(profile: {
   name: string;
@@ -20,7 +21,7 @@ export function buildBusinessMetadata(profile: {
     profile.description ||
     `Página oficial de ${profile.name} en Buscadis`;
   const imageUrl =
-    profile.og_image_url || profile.logo_url || profile.banner_url || `${siteUrl}/og-image.jpg`;
+    profile.og_image_url || profile.logo_url || profile.banner_url || getDefaultOgImageUrl();
   const url = `${siteUrl}/${profile.slug}`;
 
   return { title, description, imageUrl, url };

@@ -12,8 +12,13 @@ import { FavoritosProvider } from '@/contexts/FavoritosContext';
 import OfflineIndicator from '@/components/pwa/OfflineIndicator';
 import InstallPrompt from '@/components/pwa/InstallPrompt';
 import SessionTracker from '@/components/SessionTracker';
+import {
+  buildDefaultOgImageMeta,
+  buildDefaultTwitterImageMeta,
+  getSiteUrl,
+} from '@/lib/seo/og-image';
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://buscadis.com';
+const siteUrl = getSiteUrl();
 
 export const metadata: Metadata = {
   title: {
@@ -34,22 +39,17 @@ export const metadata: Metadata = {
     locale: 'es_PE',
     url: siteUrl,
     siteName: 'Buscadis',
-    title: 'Buscadis - Adisos Clasificados',
-    description: 'Publica y encuentra adisos clasificados en Perú',
-    images: [
-      {
-        url: `${siteUrl}/og-image.jpg`,
-        width: 1200,
-        height: 630,
-        alt: 'Buscadis - Adisos Clasificados',
-      },
-    ],
+    title: 'Buscadis — Encuentra ofertas y oportunidades',
+    description:
+      'Empleos, inmuebles, vehículos, servicios, productos, eventos y negocios. Rápido, fácil y gratis.',
+    images: buildDefaultOgImageMeta(),
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Buscadis - Adisos Clasificados',
-    description: 'Publica y encuentra adisos clasificados en Perú',
-    images: [`${siteUrl}/og-image.jpg`],
+    title: 'Buscadis — Encuentra ofertas y oportunidades',
+    description:
+      'Empleos, inmuebles, vehículos, servicios, productos, eventos y negocios. Rápido, fácil y gratis.',
+    images: buildDefaultTwitterImageMeta(),
   },
   robots: {
     index: true,

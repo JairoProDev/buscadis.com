@@ -9,8 +9,9 @@ import PublicBusinessPage from '@/app/negocio/[slug]/page';
 import { createClient } from '@supabase/supabase-js';
 
 import { buildBusinessMetadata } from '@/lib/business/seo';
+import { resolveAdisoOgImage, withDefaultShareImage } from '@/lib/seo/og-image';
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://buscadis.com';
+const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL || 'https://buscadis.com').replace(/\/$/, '');
 
 export const revalidate = 3600;
 
@@ -78,7 +79,7 @@ export async function generateMetadata(props: PageProps): Promise<Metadata> {
                 ? `${adiso.descripcion.substring(0, 160)}...`
                 : `Anuncio de ${adiso.categoria}: ${adiso.titulo}`;
             const url = `${siteUrl}/${ubicacion}/${categoria}/${adSlug}`;
-            const imageUrl = adiso.imagenesUrls?.[0] || adiso.imagenUrl || `${siteUrl}/og-image.jpg`;
+            const imageUrl = resolveAdisoOgImage(adiso);
 
             return {
                 title,
@@ -109,23 +110,43 @@ export async function generateMetadata(props: PageProps): Promise<Metadata> {
             if (!adiso) return { title: 'Adiso no encontrado' };
 
             const title = `${adiso.titulo} - ${adiso.categoria} | Buscadis`;
+            const description = adiso.descripcion
+                ? `${adiso.descripcion.substring(0, 160)}...`
+                : `Anuncio de ${adiso.categoria}: ${adiso.titulo}`;
             const url = `${siteUrl}/${categoria}/${id}`;
-            const imageUrl = adiso.imagenesUrls?.[0] || adiso.imagenUrl || `${siteUrl}/og-image.jpg`;
+            const imageUrl = resolveAdisoOgImage(adiso);
 
             return {
                 title,
-                // ... minimal metadata for legacy
+                description,
                 alternates: { canonical: url },
                 openGraph: {
                     title,
+                    description,
                     url,
-                    images: [{ url: imageUrl }]
-                }
+                    siteName: 'Buscadis',
+                    images: [{ url: imageUrl, width: 1200, height: 630, alt: adiso.titulo }],
+                    locale: 'es_PE',
+                    type: 'article',
+                },
+                twitter: {
+                    card: 'summary_large_image',
+                    title,
+                    description,
+                    images: [imageUrl],
+                },
             };
         } catch (e) { return { title: 'Error' }; }
     }
 
-    return { title: 'Buscadis' };
+    return {
+        title: 'Buscadis',
+        ...withDefaultShareImage({
+            title: 'Buscadis — Encuentra ofertas y oportunidades',
+            description: 'Empleos, inmuebles, vehículos, servicios y más en Perú.',
+            url: siteUrl,
+        }),
+    };
 }
 
 export default async function Page(props: PageProps) {

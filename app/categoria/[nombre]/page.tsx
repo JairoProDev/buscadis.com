@@ -3,8 +3,9 @@ import { notFound } from 'next/navigation';
 import { Categoria } from '@/types';
 import { getAdisosFromSupabase } from '@/lib/supabase';
 import CategoriaPageContent from './CategoriaPageContent';
+import { withDefaultShareImage, getSiteUrl } from '@/lib/seo/og-image';
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://buscadis.com';
+const siteUrl = getSiteUrl();
 
 interface CategoriaPageProps {
   params: Promise<{
@@ -55,18 +56,11 @@ export async function generateMetadata({ params }: CategoriaPageProps): Promise<
     alternates: {
       canonical: `${siteUrl}/categoria/${nombre}`,
     },
-    openGraph: {
+    ...withDefaultShareImage({
       title: `${label} - Buscadis`,
       description,
       url: `${siteUrl}/categoria/${nombre}`,
-      siteName: 'Buscadis',
-      type: 'website',
-    },
-    twitter: {
-      card: 'summary',
-      title: `${label} - Buscadis`,
-      description,
-    },
+    }),
   };
 }
 
