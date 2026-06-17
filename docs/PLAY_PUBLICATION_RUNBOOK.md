@@ -1,5 +1,9 @@
 # Play Store Publication Runbook (Buscadis)
 
+## Mobile app repo
+Native client (Expo WebView shell): `~/proyectos/sdk/buscadis-mobile`  
+Step-by-step checklist: `buscadis-mobile/PLAY_STORE_READY.md`
+
 ## Goal
 Ship Android app release safely with policy-compliant metadata and operational readiness.
 

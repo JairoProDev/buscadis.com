@@ -53,7 +53,11 @@ export default function HelpCenterPage() {
                 <div className="mb-12 rounded-2xl border border-gray-200 bg-white p-5 dark:border-zinc-700 dark:bg-zinc-800">
                     <h3 className="text-lg font-bold text-gray-900 dark:text-white">Privacidad y eliminacion de cuenta</h3>
                     <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-                        Si quieres solicitar eliminar tu cuenta o algunos datos personales, usa este formulario oficial.
+                        Si quieres solicitar eliminar tu cuenta o algunos datos personales, consulta nuestra{' '}
+                        <Link href="/privacidad" className="font-semibold text-blue-700 underline">
+                            política de privacidad
+                        </Link>{' '}
+                        o usa el formulario oficial:
                     </p>
                     <Link
                         href="/account-deletion"
