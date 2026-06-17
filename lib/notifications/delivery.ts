@@ -23,7 +23,7 @@ async function sendExpoPush(
     body: body.slice(0, 2000),
     data,
     sound: 'default' as const,
-    channelId: 'opportunities',
+    channelId: 'general',
   }));
 
   try {

@@ -7,6 +7,11 @@ import { Profile } from '@/types';
 import { getProfile } from '@/lib/user';
 import { onAuthStateChange, getCurrentUser, getSession } from '@/lib/auth';
 import { cacheGet, cacheSet, cacheRemove, CacheKeys, CACHE_TTL } from '@/lib/offline-cache';
+import {
+  isBuscadisNativeApp,
+  linkPushTokenToSession,
+  unlinkPushTokenFromSession,
+} from '@/lib/mobile-app-bridge';
 
 interface AuthContextType {
   user: User | null;
@@ -92,6 +97,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
         // Cargar perfil actualizado en background
         loadProfile(sessionUser.id);
+        if (isBuscadisNativeApp()) {
+          void linkPushTokenToSession(sessionUser.id);
+        }
       } else {
         // Sin sesión activa: limpiar caché de auth
         cacheRemove(CacheKeys.authSession());
@@ -113,12 +121,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(sessionUser);
         cacheSet(CacheKeys.authSession(), sessionUser, CACHE_TTL.AUTH_SESSION);
         loadProfile(sessionUser.id);
+        if (isBuscadisNativeApp()) {
+          void linkPushTokenToSession(sessionUser.id);
+        }
       } else {
         // Logout: limpiar caché
         if (user?.id) cacheRemove(CacheKeys.userProfile(user.id));
         cacheRemove(CacheKeys.authSession());
         setUser(null);
         setProfile(null);
+        if (isBuscadisNativeApp()) {
+          void unlinkPushTokenFromSession();
+        }
       }
     });
 
@@ -137,6 +151,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const { signOut: signOutFn } = await import('@/lib/auth');
     await signOutFn();
+    if (isBuscadisNativeApp()) {
+      await unlinkPushTokenFromSession();
+    }
     setUser(null);
     setSession(null);
     setProfile(null);

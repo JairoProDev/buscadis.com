@@ -30,8 +30,10 @@ Ship Android app release safely with policy-compliant metadata and operational r
 - `MOBILE_PUSH_ADMIN_SECRET`
 - `EXPO_ACCESS_TOKEN`
 - `ANDROID_APP_PACKAGE_NAME`
-- `ANDROID_APP_LINKS_SHA256`
+- `ANDROID_APP_LINKS_SHA256` (comma-separated if multiple Play signing fingerprints)
 - `ADMIN_API_KEY` (recommended to protect admin APIs)
+
+Health check (after deploy): `GET /api/mobile-health` with header `X-Admin-Api-Key` or `Authorization: Bearer <MOBILE_PUSH_ADMIN_SECRET>`.
 
 ## 4) EAS
 - Ensure `MOBILE_INGEST_SECRET` exists in EAS `production`.

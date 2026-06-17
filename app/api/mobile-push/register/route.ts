@@ -12,6 +12,14 @@ function checkIngestSecret(request: NextRequest): boolean {
   return request.headers.get('x-mobile-ingest-secret') === secret;
 }
 
+async function isAuthorized(request: NextRequest): Promise<boolean> {
+  if (checkIngestSecret(request)) {
+    return true;
+  }
+  const authUser = await getUserFromRouteRequest(request);
+  return Boolean(authUser?.id);
+}
+
 function isValidExpoPushToken(token: string): boolean {
   return (
     token.startsWith(EXPO_TOKEN_PREFIX) &&
@@ -21,7 +29,7 @@ function isValidExpoPushToken(token: string): boolean {
 }
 
 export async function POST(request: NextRequest) {
-  if (!checkIngestSecret(request)) {
+  if (!(await isAuthorized(request))) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
@@ -38,10 +46,13 @@ export async function POST(request: NextRequest) {
       typeof body.appVersion === 'string' ? body.appVersion.slice(0, 64) : null;
 
     const authUser = await getUserFromRouteRequest(request);
-    const userId =
-      authUser?.id ||
-      (typeof body.userId === 'string' ? body.userId.trim() : null) ||
-      null;
+    const explicitUserId =
+      body.userId === null
+        ? null
+        : typeof body.userId === 'string'
+          ? body.userId.trim()
+          : null;
+    const userId = authUser?.id || explicitUserId || null;
 
     const { error } = await supabaseAdmin.from('expo_push_tokens').upsert(
       {
