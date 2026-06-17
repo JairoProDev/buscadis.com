@@ -134,18 +134,121 @@ export function pickSocialBadge(adiso: Adiso): SocialBadge | null {
 
 export function formatPrecioDisplay(adiso: Adiso): string | null {
   if (adiso.precio && typeof adiso.precio === 'number' && adiso.precio > 0) {
-    return `S/ ${adiso.precio.toLocaleString('es-PE')}`;
+    const suffix = adiso.categoria === 'empleos' ? '/mes' : '';
+    return `S/ ${adiso.precio.toLocaleString('es-PE')}${suffix}`;
   }
   if (adiso.tipoPrecio === 'a_convenir') return 'A convenir';
   return null;
 }
 
-/** Cards públicos: no mostrar precio (fomentar clic + chat). */
-export function shouldShowPriceOnCard(_adiso?: Adiso): boolean {
-  return false;
+function getPublishedDate(adiso: Pick<Adiso, 'fechaPublicacion' | 'horaPublicacion'>): Date | null {
+  if (!adiso.fechaPublicacion) return null;
+  const iso = adiso.horaPublicacion
+    ? `${adiso.fechaPublicacion}T${adiso.horaPublicacion}`
+    : adiso.fechaPublicacion;
+  const date = new Date(iso);
+  return Number.isNaN(date.getTime()) ? null : date;
 }
 
-export function shouldShowLocationOnCard(_adiso?: Adiso): boolean {
+/** Tiempo relativo legible para cards (ej. "Hace 2 h", "Ayer") */
+export function formatRelativePublishedAt(
+  adiso: Pick<Adiso, 'fechaPublicacion' | 'horaPublicacion'>,
+): string | null {
+  const date = getPublishedDate(adiso);
+  if (!date) return null;
+
+  const diffMs = Date.now() - date.getTime();
+  if (diffMs < 0) return null;
+
+  const minutes = Math.floor(diffMs / 60_000);
+  if (minutes < 1) return 'Ahora';
+  if (minutes < 60) return `Hace ${minutes} min`;
+
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `Hace ${hours} h`;
+
+  const days = Math.floor(hours / 24);
+  if (days === 1) return 'Ayer';
+  if (days < 7) return `Hace ${days} días`;
+
+  const weeks = Math.floor(days / 7);
+  if (weeks < 5) return `Hace ${weeks} sem`;
+
+  return date.toLocaleDateString('es-PE', { day: 'numeric', month: 'short' });
+}
+
+/** Parsea sueldo desde descripción de avisos importados/seed */
+export function parseJobSalaryFromText(text: string): number | null {
+  const patterns = [
+    /sueldo\s+base:?\s*S\/\s*([\d,.]+)/i,
+    /desde\s+S\/\s*([\d,.]+)/i,
+    /S\/\s*([\d,.]+)\s*(?:\+|mensual|\/mes|mes)/i,
+  ];
+  for (const re of patterns) {
+    const m = text.match(re);
+    if (m?.[1]) {
+      const n = parseInt(m[1].replace(/[,.]/g, ''), 10);
+      if (!Number.isNaN(n) && n > 0) return n;
+    }
+  }
+  return null;
+}
+
+export function getJobSalaryLabel(adiso: Adiso): string | null {
+  if (adiso.categoria !== 'empleos') return null;
+  if (adiso.precio && adiso.precio > 0) {
+    return `Desde S/ ${adiso.precio.toLocaleString('es-PE')}/mes`;
+  }
+  const parsed = parseJobSalaryFromText(adiso.descripcion || '');
+  if (parsed) return `Desde S/ ${parsed.toLocaleString('es-PE')}/mes`;
+  return null;
+}
+
+export interface AdisoCardMetaRow {
+  location?: string;
+  salary?: string;
+  relativeTime?: string;
+  price?: string;
+}
+
+/** Metadatos compactos bajo el título del card según categoría */
+export function getAdisoCardMetaRow(adiso: Adiso): AdisoCardMetaRow {
+  const relativeTime = formatRelativePublishedAt(adiso) ?? undefined;
+  const location =
+    shouldShowLocationOnCard(adiso) ? formatUbicacionCorta(adiso.ubicacion) : undefined;
+
+  if (adiso.categoria === 'empleos') {
+    return {
+      location: location || undefined,
+      salary: getJobSalaryLabel(adiso) ?? undefined,
+      relativeTime,
+    };
+  }
+
+  if (adiso.categoria === 'inmuebles' || adiso.categoria === 'vehiculos') {
+    const price = formatPrecioDisplay(adiso);
+    return {
+      location: location || undefined,
+      price: price ?? undefined,
+      relativeTime,
+    };
+  }
+
+  return { relativeTime };
+}
+
+/** Precio en overlay de imagen para inmuebles/vehículos/productos con precio */
+export function shouldShowPriceOnCard(adiso?: Adiso): boolean {
+  if (!adiso) return false;
+  if (adiso.categoria === 'empleos') return false;
+  return Boolean(adiso.precio && adiso.precio > 0);
+}
+
+export function shouldShowLocationOnCard(adiso?: Adiso): boolean {
+  if (!adiso) return false;
+  if (adiso.categoria === 'empleos' || adiso.categoria === 'inmuebles') {
+    return Boolean(formatUbicacionCorta(adiso.ubicacion));
+  }
   return false;
 }
 

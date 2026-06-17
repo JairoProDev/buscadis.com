@@ -101,7 +101,7 @@ export default function RootLayout({
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
         <link rel="manifest" href="/site.webmanifest" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <meta name="theme-color" content="#3c6997" />
+        <meta name="theme-color" content="#ffffff" />
         <script
           dangerouslySetInnerHTML={{
             __html: `
@@ -109,16 +109,24 @@ export default function RootLayout({
                 try {
                   const theme = localStorage.getItem('theme') || 'auto';
                   const root = document.documentElement;
+                  const meta = document.querySelector('meta[name="theme-color"]');
+                  const setColor = function(dark) {
+                    if (meta) meta.setAttribute('content', dark ? '#13171d' : '#ffffff');
+                  };
                   if (theme === 'dark') {
                     root.classList.add('dark-mode', 'dark');
+                    setColor(true);
                   } else if (theme === 'light') {
                     root.classList.add('light-mode', 'light');
+                    setColor(false);
                   } else {
                     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
                     if (prefersDark) {
                       root.classList.add('dark-mode', 'dark');
+                      setColor(true);
                     } else {
                       root.classList.add('light-mode', 'light');
+                      setColor(false);
                     }
                   }
                 } catch (e) {}

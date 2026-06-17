@@ -28,6 +28,8 @@ interface MarketplaceSearchComposerProps {
   initialMode?: ComposerMode;
   publishBehavior?: 'modal' | 'chat';
   onPublishToChat?: (payload: { text: string; imageUrl: string | null }) => void;
+  /** En home browse: solo buscar (Publicar vive en nav/sidebar) */
+  searchOnly?: boolean;
 }
 
 export default function MarketplaceSearchComposer({
@@ -46,6 +48,7 @@ export default function MarketplaceSearchComposer({
   initialMode = 'search',
   publishBehavior = 'modal',
   onPublishToChat,
+  searchOnly = false,
 }: MarketplaceSearchComposerProps) {
   const [composerMode, setComposerMode] = useState<ComposerMode>(initialMode);
   const [tierModalOpen, setTierModalOpen] = useState(false);
@@ -199,11 +202,16 @@ export default function MarketplaceSearchComposer({
           value={value}
           onChange={handleComposerChange}
           compact={compact}
-          composerMode={composerMode}
-          onComposerModeChange={(mode) => {
-            setComposerMode(mode);
-            if (mode === 'search') setPublishImageUrl(null);
-          }}
+          searchOnly={searchOnly}
+          composerMode={searchOnly ? 'search' : composerMode}
+          onComposerModeChange={
+            searchOnly
+              ? undefined
+              : (mode) => {
+                  setComposerMode(mode);
+                  if (mode === 'search') setPublishImageUrl(null);
+                }
+          }
           onCategoryDetected={onCategoryDetected}
           onNotify={onNotify}
           showFilterToggle={showFilterToggle && composerMode === 'search'}

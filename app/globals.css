@@ -551,10 +551,23 @@ html.dark .brand-search-shell {
 
 .dark-mode .brand-search-glow,
 html.dark .brand-search-glow {
-  background: conic-gradient(from var(--search-glow-angle, 0deg),
-      rgba(var(--brand-primary-rgb), 0.55),
-      rgba(var(--brand-yellow-rgb), 0.4),
-      rgba(var(--brand-primary-rgb), 0.55));
+  background: linear-gradient(
+    135deg,
+    rgba(var(--brand-primary-rgb), 0.32),
+    rgba(255, 255, 255, 0.06),
+    rgba(var(--brand-yellow-rgb), 0.22)
+  );
+  animation: none;
+}
+
+.dark-mode .brand-search-glow.composer-mode-publish,
+html.dark .brand-search-glow.composer-mode-publish {
+  background: linear-gradient(
+    135deg,
+    rgba(var(--brand-yellow-rgb), 0.38),
+    rgba(var(--brand-primary-rgb), 0.28),
+    rgba(var(--brand-yellow-rgb), 0.32)
+  );
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -663,4 +676,52 @@ html.dark .brand-pill-glass {
 .no-scrollbar {
   -ms-overflow-style: none !important;  /* IE and Edge */
   scrollbar-width: none !important;  /* Firefox */
+}
+
+/* Scrollbars temáticos (paneles con scroll visible) */
+:root {
+  --scrollbar-thumb: rgba(15, 23, 42, 0.18);
+  --scrollbar-track: transparent;
+}
+
+.dark-mode,
+html.dark {
+  --scrollbar-thumb: rgba(237, 241, 245, 0.14);
+}
+
+:not(.no-scrollbar) {
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+}
+
+:not(.no-scrollbar)::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+:not(.no-scrollbar)::-webkit-scrollbar-track {
+  background: var(--scrollbar-track);
+}
+
+:not(.no-scrollbar)::-webkit-scrollbar-thumb {
+  background-color: var(--scrollbar-thumb);
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+
+:not(.no-scrollbar)::-webkit-scrollbar-thumb:hover {
+  background-color: color-mix(in srgb, var(--scrollbar-thumb) 80%, var(--brand-blue));
+}
+
+/* Transición suave al cambiar tema */
+html.theme-transitioning,
+html.theme-transitioning * {
+  transition:
+    background-color 0.28s ease,
+    color 0.2s ease,
+    border-color 0.28s ease,
+    box-shadow 0.28s ease,
+    fill 0.2s ease,
+    stroke 0.2s ease !important;
 }

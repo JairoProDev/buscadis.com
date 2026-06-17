@@ -28,8 +28,9 @@ import {
     shouldShowLocationOnCard,
     getCardDescriptionSnippet,
     formatUbicacionCorta,
-    sanitizeAdisoDescripcion,
     toDisplayTitle,
+    getAdisoCardMetaRow,
+    getJobSalaryLabel,
 } from '@/lib/adiso-display';
 import { pickCardSignal } from '@/lib/social-proof';
 import AdisoPublisherStrip from '@/components/AdisoPublisherStrip';
@@ -87,6 +88,8 @@ const AdisoCard = forwardRef<HTMLDivElement, AdisoCardProps>(
         const displayDescription = getCardDescriptionSnippet(adiso.descripcion);
         const locationShort = shouldShowLocationOnCard(adiso) ? formatUbicacionCorta(adiso.ubicacion) : '';
         const priceLabel = shouldShowPriceOnCard(adiso) ? formatPrecioDisplay(adiso) : null;
+        const salaryLabel = adiso.categoria === 'empleos' ? getJobSalaryLabel(adiso) : null;
+        const cardMeta = getAdisoCardMetaRow(adiso);
         const cardSignal = pickCardSignal(adiso);
         const sellerName = getSellerDisplayName(adiso);
 
@@ -249,7 +252,7 @@ const AdisoCard = forwardRef<HTMLDivElement, AdisoCardProps>(
                         </span>
                     )}
 
-                    {vista !== 'feed' && (locationShort || priceLabel) && (
+                    {vista !== 'feed' && (locationShort || priceLabel || salaryLabel) && (
                         <div className="absolute bottom-2 left-2 right-2 flex justify-between items-end gap-2 z-10 pointer-events-none">
                             {locationShort ? (
                                 <span className="inline-flex items-center gap-1 max-w-[70%] px-2 py-0.5 rounded-full text-xs font-medium bg-black/55 text-white truncate">
@@ -259,7 +262,7 @@ const AdisoCard = forwardRef<HTMLDivElement, AdisoCardProps>(
                             ) : (
                                 <span className="flex-1" />
                             )}
-                            {priceLabel && (
+                            {(priceLabel || salaryLabel) && (
                                 <span
                                     className={`flex-shrink-0 ml-auto inline-flex px-2 py-0.5 rounded-full text-sm font-bold shadow-sm ${
                                         imagenUrl
@@ -267,9 +270,22 @@ const AdisoCard = forwardRef<HTMLDivElement, AdisoCardProps>(
                                             : 'bg-black/55 text-white'
                                     }`}
                                 >
-                                    {priceLabel}
+                                    {priceLabel || salaryLabel}
                                 </span>
                             )}
+                        </div>
+                    )}
+
+                    {vista === 'grid' && (
+                        <div
+                            className="absolute inset-0 z-20 hidden md:flex flex-col justify-end opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity duration-200 pointer-events-none motion-reduce:transition-none"
+                            aria-hidden
+                        >
+                            <div className="bg-gradient-to-t from-black/70 via-black/25 to-transparent p-3 pt-8">
+                                <span className="text-xs font-semibold text-white drop-shadow-sm">
+                                    Ver detalle →
+                                </span>
+                            </div>
                         </div>
                     )}
 
@@ -300,6 +316,28 @@ const AdisoCard = forwardRef<HTMLDivElement, AdisoCardProps>(
                     >
                         {displayTitle}
                     </h3>
+
+                    {vista !== 'feed' && (cardMeta.salary || cardMeta.location || cardMeta.price || cardMeta.relativeTime) && (
+                        <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 mb-1.5 min-h-[16px]">
+                            {cardMeta.salary && (
+                                <span className="text-[11px] font-bold text-[var(--brand-blue)]">{cardMeta.salary}</span>
+                            )}
+                            {cardMeta.price && !cardMeta.salary && (
+                                <span className="text-[11px] font-bold text-[var(--brand-blue)]">{cardMeta.price}</span>
+                            )}
+                            {cardMeta.location && (
+                                <span className="inline-flex items-center gap-0.5 text-[11px] text-[var(--text-secondary)] truncate max-w-full">
+                                    <IconLocation size={10} className="flex-shrink-0 opacity-70" />
+                                    <span className="truncate">{cardMeta.location}</span>
+                                </span>
+                            )}
+                            {cardMeta.relativeTime && (
+                                <span className="text-[11px] text-[var(--text-tertiary)] ml-auto shrink-0">
+                                    {cardMeta.relativeTime}
+                                </span>
+                            )}
+                        </div>
+                    )}
 
                     {displayDescription && (
                         <p

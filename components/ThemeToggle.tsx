@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useRef } from 'react';
 import { FaSun, FaMoon, FaDesktop } from 'react-icons/fa';
+import { withThemeTransition } from '@/lib/theme-meta';
 
 const themeOptions = [
   { value: 'light' as const, label: 'Claro', icon: FaSun },
@@ -78,7 +79,7 @@ export default function ThemeToggle() {
   const handleThemeChange = (newTheme: 'light' | 'dark' | 'auto') => {
     setTheme(newTheme);
     localStorage.setItem('theme', newTheme);
-    applyTheme(newTheme);
+    withThemeTransition(() => applyTheme(newTheme));
     setIsOpen(false);
   };
 

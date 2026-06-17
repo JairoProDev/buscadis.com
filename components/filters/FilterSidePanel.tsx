@@ -180,7 +180,9 @@ export default function FilterSidePanel({
       </div>
 
       <div className="no-scrollbar flex-1 overflow-y-auto px-3 py-3 space-y-3">
-        <FilterSortPanel value={ordenamiento} onChange={onSortChange} />
+        <div className="xl:hidden">
+          <FilterSortPanel value={ordenamiento} onChange={onSortChange} />
+        </div>
 
         <FilterControlFields
           categoria={categoria}

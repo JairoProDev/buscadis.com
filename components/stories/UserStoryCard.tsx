@@ -2,6 +2,7 @@
 
 import { Story, StoryGroup } from '@/types';
 import { STORY_RAIL, ringClassFor } from './story-rail-styles';
+import { resolveStoryPublisherName } from '@/lib/stories/display-name';
 
 interface UserStoryCardProps {
   group: StoryGroup;
@@ -23,7 +24,7 @@ export default function UserStoryCard({
   onClick,
 }: UserStoryCardProps) {
   const story = previewStory(group);
-  const name = group.vendedor?.nombre || 'Usuario';
+  const name = resolveStoryPublisherName(group);
   const ring = ringClassFor(group.topTier, group.hasUnseen);
 
   return (
@@ -38,7 +39,6 @@ export default function UserStoryCard({
       }}
       aria-label={`Historia de ${name}, ${group.stories.length} publicación${group.stories.length === 1 ? '' : 'es'}${group.hasUnseen ? ', sin ver' : ''}`}
     >
-      {/* Preview a pantalla completa */}
       <div className="absolute inset-0 bg-[var(--bg-tertiary)]">
         {story.media_type === 'video' ? (
           <video
@@ -53,13 +53,11 @@ export default function UserStoryCard({
         )}
       </div>
 
-      {/* Degradado para legibilidad */}
       <div
         className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/45 via-black/5 to-black/70"
         aria-hidden
       />
 
-      {/* Avatar con anillo de estado */}
       <div
         className={`absolute left-2 top-2 rounded-full p-[2.5px] ${ring} ${
           group.hasUnseen ? 'shadow-[0_0_0_1px_rgba(255,255,255,0.35)]' : ''
@@ -72,14 +70,13 @@ export default function UserStoryCard({
           {group.vendedor?.avatarUrl ? (
             <img src={group.vendedor.avatarUrl} alt="" className="h-full w-full object-cover" />
           ) : (
-            <span className="flex h-full w-full items-center justify-center text-xs font-bold text-[var(--text-secondary)]">
+            <span className="flex h-full w-full items-center justify-center text-xs font-bold text-white/90">
               {name.charAt(0).toUpperCase()}
             </span>
           )}
         </div>
       </div>
 
-      {/* Contador de historias (estilo IG cuando hay varias) */}
       {group.stories.length > 1 && (
         <span
           className="pointer-events-none absolute right-2 top-2 z-[1] flex h-5 min-w-[20px] items-center justify-center rounded-md bg-black/55 px-1.5 text-[10px] font-bold text-white backdrop-blur-sm"
@@ -89,7 +86,6 @@ export default function UserStoryCard({
         </span>
       )}
 
-      {/* Indicador de video */}
       {story.media_type === 'video' && (
         <span
           className={`pointer-events-none absolute rounded-md bg-black/50 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-white ${
@@ -101,7 +97,6 @@ export default function UserStoryCard({
         </span>
       )}
 
-      {/* Nombre */}
       <div className="absolute bottom-0 left-0 right-0 px-2 pb-2 pt-6">
         <span className="block truncate text-[11px] font-semibold leading-tight text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
           {name}

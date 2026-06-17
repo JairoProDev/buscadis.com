@@ -4,13 +4,26 @@ import React, { useState, useRef, useEffect } from 'react';
 import { IconSort, IconSortDown, IconSortUp, IconChevronDown } from './Icons';
 import { useTranslation } from '@/hooks/useTranslation';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
+import { BROWSE_SORT_OPTIONS, type TipoOrdenamiento } from '@/lib/filters/sort-options';
 
-export type TipoOrdenamiento = 'recientes' | 'antiguos' | 'titulo-asc' | 'titulo-desc' | 'precio-asc' | 'precio-desc';
+export type { TipoOrdenamiento };
 
 interface OrdenamientoProps {
   valor: TipoOrdenamiento;
   onChange: (valor: TipoOrdenamiento) => void;
 }
+
+const SORT_ICONS: Record<
+  TipoOrdenamiento,
+  React.ComponentType<{ size?: number; color?: string; className?: string }>
+> = {
+  recientes: IconSortDown,
+  antiguos: IconSortUp,
+  'titulo-asc': IconSort,
+  'titulo-desc': IconSort,
+  'precio-asc': IconSortUp,
+  'precio-desc': IconSortDown,
+};
 
 export default function Ordenamiento({ valor, onChange }: OrdenamientoProps) {
   const { t } = useTranslation();
@@ -23,18 +36,11 @@ export default function Ordenamiento({ valor, onChange }: OrdenamientoProps) {
     setMounted(true);
   }, []);
 
-  const opcionesOrdenamiento: Array<{
-    valor: TipoOrdenamiento;
-    labelKey: string;
-    icon: React.ComponentType<{ size?: number; color?: string; className?: string }>;
-  }> = [
-    { valor: 'recientes', labelKey: 'sort.recent', icon: IconSortDown },
-    { valor: 'antiguos', labelKey: 'sort.oldest', icon: IconSortUp },
-    { valor: 'titulo-asc', labelKey: 'sort.titleAsc', icon: IconSort },
-    { valor: 'titulo-desc', labelKey: 'sort.titleDesc', icon: IconSort },
-    { valor: 'precio-asc', labelKey: 'sort.priceAsc', icon: IconSortUp },
-    { valor: 'precio-desc', labelKey: 'sort.priceDesc', icon: IconSortDown },
-  ];
+  const opcionesOrdenamiento = BROWSE_SORT_OPTIONS.map((opt) => ({
+    valor: opt.value,
+    labelKey: opt.labelKey,
+    icon: SORT_ICONS[opt.value],
+  }));
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {

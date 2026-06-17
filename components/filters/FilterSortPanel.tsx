@@ -3,19 +3,18 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { TipoOrdenamiento } from '@/components/Ordenamiento';
-import { IconChevronDown, IconSortDown, IconSortUp } from '@/components/Icons';
+import { IconChevronDown, IconSortDown, IconSortUp, IconSort } from '@/components/Icons';
 import { useFilterSectionCollapse } from './useFilterSectionCollapse';
+import { PANEL_SORT_OPTIONS } from '@/lib/filters/sort-options';
 
-const SORT_OPTIONS: {
-  value: TipoOrdenamiento;
-  label: string;
-  icon: React.ReactNode;
-}[] = [
-  { value: 'recientes', label: 'Más recientes', icon: <IconSortDown size={11} /> },
-  { value: 'precio-asc', label: 'Menor precio', icon: <IconSortUp size={11} /> },
-  { value: 'precio-desc', label: 'Mayor precio', icon: <IconSortDown size={11} /> },
-  { value: 'antiguos', label: 'Más antiguos', icon: <IconSortUp size={11} /> },
-];
+const SORT_ICONS: Record<TipoOrdenamiento, React.ReactNode> = {
+  recientes: <IconSortDown size={11} />,
+  antiguos: <IconSortUp size={11} />,
+  'titulo-asc': <IconSort size={11} />,
+  'titulo-desc': <IconSort size={11} />,
+  'precio-asc': <IconSortUp size={11} />,
+  'precio-desc': <IconSortDown size={11} />,
+};
 
 interface FilterSortPanelProps {
   value: TipoOrdenamiento;
@@ -24,7 +23,7 @@ interface FilterSortPanelProps {
 
 export default function FilterSortPanel({ value, onChange }: FilterSortPanelProps) {
   const { open, toggle } = useFilterSectionCollapse('ordenar', false);
-  const current = SORT_OPTIONS.find((o) => o.value === value) ?? SORT_OPTIONS[0];
+  const current = PANEL_SORT_OPTIONS.find((o) => o.value === value) ?? PANEL_SORT_OPTIONS[0];
 
   return (
     <section className="rounded-2xl border border-[var(--border-color)] bg-[var(--bg-primary)]/80 p-3">
@@ -58,7 +57,7 @@ export default function FilterSortPanel({ value, onChange }: FilterSortPanelProp
             className="overflow-hidden"
           >
             <div className="grid grid-cols-2 gap-1.5 pt-2.5">
-              {SORT_OPTIONS.map((opt) => {
+              {PANEL_SORT_OPTIONS.map((opt) => {
                 const selected = value === opt.value;
                 return (
                   <button
@@ -71,7 +70,9 @@ export default function FilterSortPanel({ value, onChange }: FilterSortPanelProp
                         : 'bg-[var(--bg-tertiary)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
                     }`}
                   >
-                    <span className={selected ? 'text-white' : 'text-[var(--brand-blue)]'}>{opt.icon}</span>
+                    <span className={selected ? 'text-white' : 'text-[var(--brand-blue)]'}>
+                      {SORT_ICONS[opt.value]}
+                    </span>
                     <span className="truncate">{opt.label}</span>
                   </button>
                 );

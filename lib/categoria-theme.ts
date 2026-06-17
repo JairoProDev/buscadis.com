@@ -16,27 +16,27 @@ export const CATEGORIA_THEME: Record<Categoria, CategoriaThemeTokens> = {
   inmuebles: {
     accent: '#059669',
     placeholderBg: '#ecfdf5',
-    placeholderBgDark: '#1f3330',
+    placeholderBgDark: '#283038',
   },
   vehiculos: {
     accent: '#0284c7',
     placeholderBg: '#f0f9ff',
-    placeholderBgDark: '#1a2d3d',
+    placeholderBgDark: '#283038',
   },
   servicios: {
     accent: '#d97706',
     placeholderBg: '#fffbeb',
-    placeholderBgDark: '#3d2e1a',
+    placeholderBgDark: '#283038',
   },
   productos: {
     accent: '#e11d48',
     placeholderBg: '#fff1f2',
-    placeholderBgDark: '#3d1f2a',
+    placeholderBgDark: '#283038',
   },
   eventos: {
     accent: '#7c3aed',
     placeholderBg: '#f5f3ff',
-    placeholderBgDark: '#2a2240',
+    placeholderBgDark: '#283038',
   },
   negocios: {
     accent: '#475569',
@@ -46,7 +46,7 @@ export const CATEGORIA_THEME: Record<Categoria, CategoriaThemeTokens> = {
   comunidad: {
     accent: '#0891b2',
     placeholderBg: '#ecfeff',
-    placeholderBgDark: '#1a3338',
+    placeholderBgDark: '#283038',
   },
 };
 

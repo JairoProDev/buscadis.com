@@ -196,11 +196,16 @@ export function getMarketplacePulse(adisos: Adiso[]): string | null {
   const viewsTotal = activos.reduce((acc, adiso) => acc + (adiso.vistas || 0), 0);
   const withActivity = activos.filter((adiso) => getViewSignal(adiso) !== null).length;
 
-  if (withActivity === 0) {
+  if (withActivity < 2) {
     return null;
   }
 
-  return `${withActivity} anuncios con actividad · ${formatCompactNumber(viewsTotal)} vistas en total`;
+  const label =
+    withActivity === 1
+      ? '1 anuncio con actividad'
+      : `${withActivity} anuncios con actividad`;
+
+  return `${label} · ${formatCompactNumber(viewsTotal)} vistas`;
 }
 
 export function cardSignalClassName(tone: CardSignal['tone']): string {

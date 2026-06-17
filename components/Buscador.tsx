@@ -43,6 +43,8 @@ interface BuscadorProps {
   flat?: boolean;
   /** Colapsar toggle Buscar/Publicar a solo íconos (p. ej. mientras escribe) */
   forceModeToggleIconsOnly?: boolean;
+  /** Solo búsqueda: oculta alternador y modo publicar (evita CTA duplicado con nav) */
+  searchOnly?: boolean;
 }
 
 function readFileAsDataUrl(file: File): Promise<string> {
@@ -78,6 +80,7 @@ export default function Buscador({
   flat = false,
   primaryIconOnly = false,
   forceModeToggleIconsOnly = false,
+  searchOnly = false,
 }: BuscadorProps) {
   const { t } = useTranslation();
   const { isListening, isSupported, start: startVoice, stop: stopVoice } = useSpeechRecognition('es-PE');
@@ -89,7 +92,7 @@ export default function Buscador({
   const singleLineHeightRef = useRef<number>(0);
   const [fieldMultiline, setFieldMultiline] = useState(false);
 
-  const showComposerToggle = Boolean(onComposerModeChange) && !minimal;
+  const showComposerToggle = Boolean(onComposerModeChange) && !minimal && !searchOnly;
   const isPublishMode = showComposerToggle && composerMode === 'publish';
 
   const measureSingleLineHeight = useCallback(() => {
@@ -233,7 +236,7 @@ export default function Buscador({
   const searchIconClass = minimal ? 'w-4 h-4 mr-2' : 'w-5 h-5 mr-2 md:mr-3';
   const shellAlign = flat ? 'items-center' : fieldMultiline && isPublishMode ? 'items-start' : 'items-center';
   const fieldMinH = flat ? 'h-8' : 'min-h-[36px] md:min-h-[40px]';
-  const showPrimaryAction = Boolean(onPrimaryAction) && showComposerToggle;
+  const showPrimaryAction = Boolean(onPrimaryAction) && (showComposerToggle || searchOnly);
 
   const handleFieldKeyDown = (e: KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     if (!onPrimaryAction || e.key !== 'Enter') return;

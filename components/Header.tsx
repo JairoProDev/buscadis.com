@@ -19,6 +19,7 @@ import { useNotifications } from '@/hooks/useNotifications';
 import { SeccionSidebar } from './SidebarDesktop';
 import { MAIN_NAV_ITEMS, isMainNavActive, type MainNavId } from '@/lib/main-nav';
 import { publishCta } from '@/lib/publish-cta-styles';
+import { withThemeTransition } from '@/lib/theme-meta';
 import CountryFlag from '@/components/location/CountryFlag';
 import {
   IconChevronDown,
@@ -132,7 +133,7 @@ export default function Header({
     const next = themeMode === 'dark' ? 'light' : 'dark';
     setThemeMode(next);
     localStorage.setItem('theme', next);
-    applyTheme(next);
+    withThemeTransition(() => applyTheme(next));
   };
 
   const brandBlock = (

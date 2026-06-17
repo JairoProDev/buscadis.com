@@ -1148,6 +1148,7 @@ function HomeContent() {
                     onOpenAdiso={handleAbrirAdisoById}
                     searchLoading={searchLoading}
                     compact={browseScrolled}
+                    searchOnly
                     showFilterToggle
                     filtersVisible={inlineFiltersVisible}
                     onToggleFilters={() => setInlineFiltersVisible((v) => !v)}
