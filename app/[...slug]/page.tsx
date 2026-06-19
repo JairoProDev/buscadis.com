@@ -9,7 +9,8 @@ import PublicBusinessPage from '@/app/negocio/[slug]/page';
 import { createClient } from '@supabase/supabase-js';
 
 import { buildBusinessMetadata } from '@/lib/business/seo';
-import { resolveAdisoOgImage, withDefaultShareImage } from '@/lib/seo/og-image';
+import { buildAdisoMetadata } from '@/lib/seo/adiso-metadata';
+import { withDefaultShareImage } from '@/lib/seo/og-image';
 
 const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL || 'https://buscadis.com').replace(/\/$/, '');
 
@@ -62,7 +63,7 @@ export async function generateMetadata(props: PageProps): Promise<Metadata> {
             // Ignore error, fallback to default
         }
     } else if (slug.length === 3) {
-        const [ubicacion, categoria, adSlug] = slug;
+        const [, , adSlug] = slug;
         const id = getIdFromSlug(adSlug);
         if (!id) return { title: 'Adiso no encontrado' };
 
@@ -74,24 +75,7 @@ export async function generateMetadata(props: PageProps): Promise<Metadata> {
 
             if (!adiso) return { title: 'Adiso no encontrado' };
 
-            const title = `${adiso.titulo} en ${ubicacion} | Buscadis`;
-            const description = adiso.descripcion
-                ? `${adiso.descripcion.substring(0, 160)}...`
-                : `Anuncio de ${adiso.categoria}: ${adiso.titulo}`;
-            const url = `${siteUrl}/${ubicacion}/${categoria}/${adSlug}`;
-            const imageUrl = resolveAdisoOgImage(adiso);
-
-            return {
-                title,
-                description,
-                alternates: { canonical: url },
-                openGraph: {
-                    title, description, url, siteName: 'Buscadis',
-                    images: [{ url: imageUrl, width: 1200, height: 630, alt: adiso.titulo }],
-                    locale: 'es_PE', type: 'article'
-                },
-                twitter: { card: 'summary_large_image', title, description, images: [imageUrl] }
-            };
+            return buildAdisoMetadata(adiso);
         } catch (e) { return { title: 'Error' }; }
 
     } else if (slug.length === 2) {
@@ -109,33 +93,7 @@ export async function generateMetadata(props: PageProps): Promise<Metadata> {
 
             if (!adiso) return { title: 'Adiso no encontrado' };
 
-            const title = `${adiso.titulo} - ${adiso.categoria} | Buscadis`;
-            const description = adiso.descripcion
-                ? `${adiso.descripcion.substring(0, 160)}...`
-                : `Anuncio de ${adiso.categoria}: ${adiso.titulo}`;
-            const url = `${siteUrl}/${categoria}/${id}`;
-            const imageUrl = resolveAdisoOgImage(adiso);
-
-            return {
-                title,
-                description,
-                alternates: { canonical: url },
-                openGraph: {
-                    title,
-                    description,
-                    url,
-                    siteName: 'Buscadis',
-                    images: [{ url: imageUrl, width: 1200, height: 630, alt: adiso.titulo }],
-                    locale: 'es_PE',
-                    type: 'article',
-                },
-                twitter: {
-                    card: 'summary_large_image',
-                    title,
-                    description,
-                    images: [imageUrl],
-                },
-            };
+            return buildAdisoMetadata(adiso);
         } catch (e) { return { title: 'Error' }; }
     }
 

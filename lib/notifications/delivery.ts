@@ -1,5 +1,25 @@
 import { supabaseAdmin } from '@/lib/supabase-admin';
 import { getWhatsAppUrl } from '@/lib/utils';
+import { getAdisoByIdFromSupabase } from '@/lib/supabase';
+import { getBusinessProductAsAdiso } from '@/lib/business';
+import { getAdisoAbsoluteUrl } from '@/lib/url';
+import { getSiteUrl } from '@/lib/seo/og-image';
+
+async function resolveAdisoLink(adisoId: string): Promise<string> {
+  const siteUrl = getSiteUrl();
+  try {
+    let adiso = await getAdisoByIdFromSupabase(adisoId);
+    if (!adiso) {
+      adiso = await getBusinessProductAsAdiso(adisoId);
+    }
+    if (adiso) {
+      return getAdisoAbsoluteUrl(adiso);
+    }
+  } catch {
+    // fallback below
+  }
+  return `${siteUrl}/?adiso=${adisoId}`;
+}
 
 async function sendExpoPush(
   tokens: string[],
@@ -110,7 +130,7 @@ export async function sendOpportunityWhatsApp(
   const phone = (profile?.telefono as string | undefined)?.replace(/\D/g, '');
   if (!phone || phone.length < 9) return false;
 
-  const appUrl = (process.env.NEXT_PUBLIC_APP_URL || 'https://buscadis.com').replace(/\/$/, '');
+  const adisoLink = await resolveAdisoLink(adisoId);
   const waUrl = getWhatsAppUrl(
     phone,
     title,
@@ -122,7 +142,7 @@ export async function sendOpportunityWhatsApp(
     user_id: userId,
     type: 'system',
     title: `${title} (WhatsApp)`,
-    message: `${body}\nAbrir: ${appUrl}/?adiso=${adisoId}`,
+    message: `${body}\nAbrir: ${adisoLink}`,
     data: { adiso_id: adisoId, whatsapp_url: waUrl, channel: 'whatsapp' },
   });
 
@@ -136,7 +156,7 @@ async function sendEmailTo(
   adisoId: string,
   apiKey: string
 ): Promise<boolean> {
-  const appUrl = (process.env.NEXT_PUBLIC_APP_URL || 'https://buscadis.com').replace(/\/$/, '');
+  const adisoLink = await resolveAdisoLink(adisoId);
   try {
     const res = await fetch('https://api.resend.com/emails', {
       method: 'POST',
@@ -148,7 +168,7 @@ async function sendEmailTo(
         from: process.env.RESEND_FROM_EMAIL || 'oportunidades@buscadis.com',
         to: [to],
         subject: title,
-        text: `${body}\n\nVer oportunidad: ${appUrl}/?adiso=${adisoId}`,
+        text: `${body}\n\nVer oportunidad: ${adisoLink}`,
       }),
     });
     return res.ok;
@@ -171,11 +191,13 @@ export async function deliverOpportunityToUser(params: {
     campaign_id: params.campaignId,
   };
 
+  const adisoLink = await resolveAdisoLink(params.adisoId);
+
   const { error: notifErr } = await supabaseAdmin.from('notifications').insert({
     user_id: params.userId,
     type: 'system',
     title: params.title,
-    message: `${params.body} Ver anuncio: /?adiso=${params.adisoId}`,
+    message: `${params.body} Ver anuncio: ${adisoLink}`,
     data,
   });
 

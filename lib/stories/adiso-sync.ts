@@ -1,6 +1,7 @@
 import { Adiso, StoryObjective, StoryPromotionTier } from '@/types';
 import { createStoryServer } from '@/lib/stories/server';
 import { adisoTierToStoryTier } from '@/lib/stories/config';
+import { getAdisoAbsoluteUrl } from '@/lib/url';
 
 function pickAdisoMedia(adiso: Adiso): { url: string; mediaType: 'image' | 'video' } | null {
   const imageUrl = adiso.imagenesUrls?.[0] || adiso.imagenUrl;
@@ -30,8 +31,7 @@ export async function createStoryFromAdiso(
   if (!media) return;
 
   const tier = options?.promotionTier ?? adisoTierToStoryTier(adiso.promotionTier);
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://buscadis.com';
-  const ctaUrl = `${siteUrl}/?adiso=${adiso.id}`;
+  const ctaUrl = getAdisoAbsoluteUrl(adiso);
 
   try {
     await createStoryServer(userId, {

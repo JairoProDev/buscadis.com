@@ -353,7 +353,7 @@ export default function AdisoPageContent({ adiso }: AdisoPageContentProps) {
                                     </div>
 
                                     <a
-                                        href={getWhatsAppUrl(adiso.contacto, adiso.titulo, adiso.categoria, adiso.id)}
+                                        href={getWhatsAppUrl(adiso.contacto, adiso.titulo, adiso)}
                                         target="_blank"
                                         rel="noopener noreferrer"
                                         style={{

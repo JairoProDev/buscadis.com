@@ -270,7 +270,7 @@ export default function ModalAdiso({
 
   const handleCopiarLink = async () => {
     try {
-      await copiarLink(adiso.categoria, adiso.id);
+      await copiarLink(adiso);
       setCopiado(true);
       setTimeout(() => setCopiado(false), 2000);
     } catch (error) {
@@ -279,7 +279,7 @@ export default function ModalAdiso({
   };
 
   const handleCompartir = async () => {
-    await compartirNativo(adiso.categoria, adiso.id, adiso.titulo);
+    await compartirNativo(adiso);
   };
 
   const handleContactar = async (contactoEspecifico?: string) => {
@@ -336,15 +336,15 @@ Ref: ${adiso.edicionNumero || adiso.id}`;
       // Si es un contacto específico de contactosMultiples, verificar tipo
       const contactoObj = adiso.contactosMultiples?.find(c => c.valor === contactoEspecifico);
       if (contactoObj?.tipo === 'whatsapp' || contactoObj?.tipo === 'telefono') {
-        window.open(getWhatsAppUrl(contactoAUsar, adiso.titulo, adiso.categoria, adiso.id), '_blank');
+        window.open(getWhatsAppUrl(contactoAUsar, adiso.titulo, adiso), '_blank');
       } else if (contactoObj?.tipo === 'email') {
         window.location.href = `mailto:${contactoAUsar}?subject=Interesado en: ${encodeURIComponent(adiso.titulo)}`;
       } else {
         // Por defecto, intentar WhatsApp
-        window.open(getWhatsAppUrl(contactoAUsar, adiso.titulo, adiso.categoria, adiso.id), '_blank');
+        window.open(getWhatsAppUrl(contactoAUsar, adiso.titulo, adiso), '_blank');
       }
     } else {
-      window.open(getWhatsAppUrl(contactoAUsar, adiso.titulo, adiso.categoria, adiso.id), '_blank');
+      window.open(getWhatsAppUrl(contactoAUsar, adiso.titulo, adiso), '_blank');
     }
   };
 
@@ -379,7 +379,7 @@ Ref: ${adiso.edicionNumero || adiso.id}`;
       return;
     }
 
-    window.open(getWhatsAppUrl(contact.valor, adiso.titulo, adiso.categoria, adiso.id), '_blank');
+    window.open(getWhatsAppUrl(contact.valor, adiso.titulo, adiso), '_blank');
   };
 
   const sellerUserId = adiso.user_id || adiso.usuario_id || adiso.vendedor?.id;

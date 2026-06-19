@@ -1,4 +1,5 @@
 import { Adiso } from '@/types';
+import { getSiteUrl } from '@/lib/seo/og-image';
 
 // Helper to normalize strings for URLs
 const normalizeString = (str: string): string => {
@@ -31,4 +32,9 @@ export const getAdisoUrl = (adiso: Adiso): string => {
     const adSlug = createAdisoSlug(adiso);
 
     return `/${locationSlug}/${categorySlug}/${adSlug}`;
+};
+
+/** URL absoluta del adiso para compartir (WhatsApp, email, push, etc.) */
+export const getAdisoAbsoluteUrl = (adiso: Adiso): string => {
+    return `${getSiteUrl()}${getAdisoUrl(adiso)}`;
 };

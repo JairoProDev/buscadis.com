@@ -1,5 +1,7 @@
 import { nanoid } from 'nanoid';
-import { Categoria } from '@/types';
+import { Adiso, Categoria } from '@/types';
+import { getAdisoAbsoluteUrl } from '@/lib/url';
+import { getSiteUrl } from '@/lib/seo/og-image';
 import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
@@ -23,41 +25,67 @@ export const formatFecha = (fecha: string, hora: string): string => {
   });
 };
 
-// Generar URL de adiso con categoría
-export const getAdisoUrl = (categoria: string, id: string): string => {
-  return `${typeof window !== 'undefined' ? window.location.origin : ''}/${categoria}/${id}`;
-};
+/** URL para compartir: SEO si hay objeto Adiso; legacy /{categoria}/{id} si solo hay id */
+export function resolveAdisoShareUrl(
+  adisoOrCategoria: Adiso | string,
+  id?: string
+): string {
+  if (typeof adisoOrCategoria === 'string' && id) {
+    const origin =
+      typeof window !== 'undefined' ? window.location.origin : getSiteUrl();
+    return `${origin}/${adisoOrCategoria}/${id}`;
+  }
+  return getAdisoAbsoluteUrl(adisoOrCategoria as Adiso);
+}
 
-export const getWhatsAppUrl = (contacto: string, titulo: string, categoria: string, id: string): string => {
-  const url = getAdisoUrl(categoria, id);
+export const getWhatsAppUrl = (
+  contacto: string,
+  titulo: string,
+  adisoOrCategoria: Adiso | string,
+  id?: string
+): string => {
+  const url = resolveAdisoShareUrl(adisoOrCategoria, id);
+  const categoria =
+    typeof adisoOrCategoria === 'string'
+      ? adisoOrCategoria
+      : adisoOrCategoria.categoria;
   const mensajeBase = `Hola, vi tu adiso de ${categoria} "${titulo}" en ${url} y me interesa. ¿Podrías brindarme más información, por favor?`;
   const mensaje = encodeURIComponent(mensajeBase);
-  const numero = contacto.replace(/\D/g, ''); // Solo números
+  const numero = contacto.replace(/\D/g, '');
   return `https://wa.me/${numero}?text=${mensaje}`;
 };
 
-export const copiarLink = (categoria: string, id: string): Promise<void> => {
-  const url = getAdisoUrl(categoria, id);
+export const copiarLink = (adisoOrCategoria: Adiso | string, id?: string): Promise<void> => {
+  const url = resolveAdisoShareUrl(adisoOrCategoria, id);
   return navigator.clipboard.writeText(url);
 };
 
-export const compartirNativo = async (categoria: string, id: string, titulo: string): Promise<void> => {
-  const url = getAdisoUrl(categoria, id);
+export const compartirNativo = async (
+  adisoOrCategoria: Adiso | string,
+  idOrTitulo?: string,
+  titulo?: string
+): Promise<void> => {
+  const url = resolveAdisoShareUrl(
+    adisoOrCategoria,
+    typeof adisoOrCategoria === 'string' ? idOrTitulo : undefined
+  );
+  const shareTitle =
+    typeof adisoOrCategoria === 'string'
+      ? (titulo ?? 'Adiso en Buscadis')
+      : adisoOrCategoria.titulo;
 
   if (navigator.share) {
     try {
       await navigator.share({
-        title: titulo,
-        text: `Mira este adiso: ${titulo}`,
-        url: url
+        title: shareTitle,
+        text: `Mira este adiso: ${shareTitle}`,
+        url,
       });
     } catch (err) {
-      // Usuario canceló o error
       console.log('Error al compartir:', err);
     }
   } else {
-    // Fallback: copiar al portapapeles
-    await copiarLink(categoria, id);
+    await copiarLink(adisoOrCategoria, idOrTitulo);
   }
 };
 

@@ -268,7 +268,7 @@ export default function StoryViewer({ groups, initialGroupIndex, onClose }: Stor
     if (!linkedAdiso?.contacto || !story) return;
     await recordStoryInteraction(story.id, 'whatsapp_click', session?.access_token);
     window.open(
-      getWhatsAppUrl(linkedAdiso.contacto, linkedAdiso.titulo, linkedAdiso.categoria, linkedAdiso.id),
+      getWhatsAppUrl(linkedAdiso.contacto, linkedAdiso.titulo, linkedAdiso),
       '_blank'
     );
   };

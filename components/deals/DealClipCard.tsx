@@ -132,7 +132,7 @@ export default function DealClipCard({
     const adiso = await getAdisoById(clip.adiso_id);
     if (!adiso?.contacto) return;
     await interactDealClip(clip.id, 'whatsapp_click', { token });
-    window.open(getWhatsAppUrl(adiso.contacto, clip.title, adiso.categoria, adiso.id), '_blank');
+    window.open(getWhatsAppUrl(adiso.contacto, clip.title, adiso), '_blank');
   };
 
   const handleFollow = async () => {
