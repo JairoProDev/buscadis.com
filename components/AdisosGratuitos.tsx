@@ -161,14 +161,16 @@ export default function AdisosGratuitos({ onPublicarGratuito, todosLosAdisos = [
       const url = getWhatsAppUrl(
         adisoUnificado.adiso.contacto,
         adisoUnificado.adiso.titulo,
-        adisoUnificado.adiso
+        adisoUnificado.adiso.categoria,
+        adisoUnificado.adiso.id
       );
       window.open(url, '_blank');
     } else {
       const url = getWhatsAppUrl(
         adisoUnificado.adiso.contacto,
         adisoUnificado.adiso.titulo,
-        adisoUnificado.adiso
+        adisoUnificado.adiso.categoria,
+        adisoUnificado.adiso.id
       );
       window.open(url, '_blank');
     }

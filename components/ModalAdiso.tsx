@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useState, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import Image from 'next/image';
 import { motion, AnimatePresence, PanInfo } from 'framer-motion';
 import { Adiso, AdisoPromotionTier } from '@/types';
@@ -90,6 +91,95 @@ function getSellerDisplayName(adiso: Adiso): string | null {
   if (!rawName) return null;
   if (rawName.toLowerCase() === 'anunciante') return null;
   return rawName;
+}
+
+function ImageLightbox({
+  url,
+  onClose,
+}: {
+  url: string;
+  onClose: () => void;
+}) {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, []);
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [onClose]);
+
+  if (!mounted || typeof document === 'undefined') return null;
+
+  return createPortal(
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-label="Imagen ampliada"
+      style={{
+        position: 'fixed',
+        inset: 0,
+        zIndex: 10000,
+        backgroundColor: 'rgba(0,0,0,0.96)',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: '1.5rem',
+        backdropFilter: 'blur(8px)',
+      }}
+      onClick={onClose}
+    >
+      <button
+        type="button"
+        onClick={onClose}
+        aria-label="Cerrar imagen"
+        style={{
+          position: 'fixed',
+          top: '1.25rem',
+          right: '1.25rem',
+          color: 'white',
+          background: 'rgba(255,255,255,0.15)',
+          border: 'none',
+          width: '48px',
+          height: '48px',
+          borderRadius: '50%',
+          cursor: 'pointer',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 10001,
+        }}
+      >
+        <IconClose size={24} />
+      </button>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={url}
+        alt="Imagen del adiso"
+        onClick={(e) => e.stopPropagation()}
+        style={{
+          maxWidth: 'min(96vw, 1200px)',
+          maxHeight: '92vh',
+          width: 'auto',
+          height: 'auto',
+          objectFit: 'contain',
+          borderRadius: '8px',
+          boxShadow: '0 24px 60px rgba(0,0,0,0.45)',
+        }}
+      />
+    </div>,
+    document.body
+  );
 }
 
 export default function ModalAdiso({
@@ -506,29 +596,41 @@ Ref: ${adiso.edicionNumero || adiso.id}`;
           : '#25D366';
 
   const ContactFooter = () => {
-    if (esMiAdiso || esPropietario) return null;
-
-    const showInApp = canMessageInApp;
+    const isOwnerView = esMiAdiso || esPropietario;
+    const showInApp = canMessageInApp && !isOwnerView;
     const showExternal = Boolean(externalContact);
 
-    if (!showInApp && !showExternal) return null;
+    if (!showInApp && !showExternal && !isOwnerView) return null;
+    if (isOwnerView && !showExternal && !canMessageInApp) return null;
+
+    const previewInApp = isOwnerView && canMessageInApp;
+    const previewExternal = isOwnerView && showExternal;
 
     return (
-      <div className="flex shrink-0 gap-2 border-t border-[var(--border-color)] bg-[var(--bg-primary)] p-3 shadow-[var(--shadow-up)]">
-        {showInApp ? (
+      <div className="flex shrink-0 flex-col border-t border-[var(--border-color)] bg-[var(--bg-primary)] shadow-[var(--shadow-up)]">
+        {isOwnerView && (previewInApp || previewExternal) && (
+          <p className="px-3 pt-2 text-center text-[0.7rem] font-medium text-[var(--text-tertiary)]">
+            Vista previa — así contactan los interesados
+          </p>
+        )}
+        <div
+          className={`flex gap-2 p-3${isOwnerView ? ' pointer-events-none opacity-90' : ''}`}
+        >
+        {(showInApp || previewInApp) ? (
           <button
             type="button"
             onClick={() => void handleMensajeBuscadis()}
-            disabled={enviandoMensaje}
+            disabled={enviandoMensaje || previewInApp}
             className="flex min-w-0 flex-1 items-center justify-center gap-2 rounded-xl bg-[var(--brand-blue)] px-4 py-3.5 text-sm font-bold text-white transition-transform hover:brightness-105 active:scale-[0.98] disabled:opacity-70"
           >
             <IconSend size={18} />
             <span className="truncate">{enviandoMensaje ? 'Abriendo chat…' : inAppCtaLabel}</span>
           </button>
-        ) : showExternal && externalContact ? (
+        ) : (showExternal || previewExternal) && externalContact ? (
           <button
             type="button"
             onClick={() => void handleExternalContact(externalContact)}
+            disabled={previewExternal}
             className="flex min-w-0 flex-1 items-center justify-center gap-2 rounded-xl px-4 py-3.5 text-sm font-bold text-white transition-transform hover:brightness-105 active:scale-[0.98]"
             style={{
               backgroundColor: externalBtnAccent,
@@ -540,10 +642,11 @@ Ref: ${adiso.edicionNumero || adiso.id}`;
           </button>
         ) : null}
 
-        {showInApp && showExternal && externalContact && (
+        {(showInApp || previewInApp) && (showExternal || previewExternal) && externalContact && (
           <button
             type="button"
             onClick={() => void handleExternalContact(externalContact)}
+            disabled={previewExternal}
             aria-label={externalContact.ariaLabel}
             title={externalContact.ariaLabel}
             className="flex h-[52px] w-[52px] shrink-0 items-center justify-center rounded-xl border border-[var(--border-color)] text-white transition-transform hover:brightness-105 active:scale-[0.98]"
@@ -552,6 +655,7 @@ Ref: ${adiso.edicionNumero || adiso.id}`;
             <ExternalContactIcon channel={externalContact} />
           </button>
         )}
+        </div>
       </div>
     );
   };
@@ -590,18 +694,39 @@ Ref: ${adiso.edicionNumero || adiso.id}`;
             style={{
               position: 'relative',
               width: '100%',
-              height: '280px',
               borderRadius: '16px',
               overflow: 'hidden',
               cursor: 'zoom-in',
+              backgroundColor: 'var(--bg-secondary)',
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              ...(dentroSidebar
+                ? { minHeight: '200px', maxHeight: 'min(58vh, 560px)' }
+                : { height: '280px' }),
             }}
           >
-            <Image
-              src={imagenesGaleria[galleryIndex]}
-              alt={displayTitle}
-              fill
-              style={{ objectFit: 'cover' }}
-            />
+            {dentroSidebar ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={imagenesGaleria[galleryIndex]}
+                alt={displayTitle}
+                style={{
+                  width: '100%',
+                  height: 'auto',
+                  maxHeight: 'min(58vh, 560px)',
+                  objectFit: 'contain',
+                  display: 'block',
+                }}
+              />
+            ) : (
+              <Image
+                src={imagenesGaleria[galleryIndex]}
+                alt={displayTitle}
+                fill
+                style={{ objectFit: 'contain' }}
+              />
+            )}
           </div>
           {imagenesGaleria.length > 1 && (
             <div style={{ display: 'flex', gap: '8px', marginTop: '10px', alignItems: 'center', justifyContent: 'center' }}>
@@ -845,12 +970,7 @@ Ref: ${adiso.edicionNumero || adiso.id}`;
 
         {/* Image Viewer Component (Standalone) */}
         {imagenAmpliada && (
-          <div style={{ position: 'fixed', inset: 0, zIndex: 3000, backgroundColor: 'black', display: 'flex', justifyContent: 'center', alignItems: 'center' }} onClick={() => setImagenAmpliada(null)}>
-            <button onClick={() => setImagenAmpliada(null)} style={{ position: 'absolute', top: '20px', right: '20px', color: 'white', background: 'none', border: 'none', zIndex: 3001 }}>
-              <IconClose size={32} />
-            </button>
-            <img src={imagenAmpliada.url} alt="Full screen" style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} />
-          </div>
+          <ImageLightbox url={imagenAmpliada.url} onClose={() => setImagenAmpliada(null)} />
         )}
 
         {mostrarPromocionar && (
@@ -925,12 +1045,7 @@ Ref: ${adiso.edicionNumero || adiso.id}`;
 
       {/* Image Viewer Global */}
       {imagenAmpliada && (
-        <div style={{ position: 'fixed', inset: 0, zIndex: 3000, backgroundColor: 'rgba(0,0,0,0.95)', display: 'flex', justifyContent: 'center', alignItems: 'center', backdropFilter: 'blur(10px)' }} onClick={() => setImagenAmpliada(null)}>
-          <button onClick={() => setImagenAmpliada(null)} style={{ position: 'absolute', top: '2rem', right: '2rem', color: 'white', background: 'rgba(255,255,255,0.2)', border: 'none', width: '48px', height: '48px', borderRadius: '50%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <IconClose size={24} />
-          </button>
-          <img src={imagenAmpliada.url} alt="Full screen" style={{ maxWidth: '90%', maxHeight: '90%', objectFit: 'contain', borderRadius: '8px', boxShadow: '0 20px 50px rgba(0,0,0,0.5)' }} />
-        </div>
+        <ImageLightbox url={imagenAmpliada.url} onClose={() => setImagenAmpliada(null)} />
       )}
 
       {mostrarPromocionar && (
