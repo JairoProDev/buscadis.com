@@ -10,6 +10,7 @@ import { Adiso, Categoria } from '@/types';
 import { getAdisos, getAdisoById, saveAdiso, getAdisosCache } from '@/lib/storage';
 import { getAdisosFromSupabase } from '@/lib/supabase';
 import { getCatalogProductsAsAdisos } from '@/lib/business';
+import { compareRecientesFeed } from '@/lib/feed/ranking';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
 import { useToast } from '@/hooks/useToast';
 import { useInfiniteScroll } from '@/hooks/useInfiniteScroll';
@@ -130,12 +131,7 @@ async function getMarketplaceFeed(options: {
   const mergedMap = new Map<string, Adiso>();
   [...adisosBase, ...catalogAdisos].forEach((item) => mergedMap.set(item.id, item));
 
-  return Array.from(mergedMap.values()).sort((a, b) => {
-    const rankA = a.promotionRank || 0;
-    const rankB = b.promotionRank || 0;
-    if (rankA !== rankB) return rankB - rankA;
-    return new Date(b.fechaPublicacion).getTime() - new Date(a.fechaPublicacion).getTime();
-  });
+  return Array.from(mergedMap.values()).sort((a, b) => compareRecientesFeed(a, b));
 }
 
 function getBrowseCountLabel(

@@ -2,7 +2,8 @@ import { Adiso, UbicacionDetallada } from '@/types';
 import { TipoOrdenamiento } from '@/components/Ordenamiento';
 import { BrowseFilterState } from './types';
 import { adisoMatchesFacets, adisoPublicadoDentroDe, adisoTieneImagen } from './matchers';
-import { personalizationFreshnessBoostMs, personalizeAdisos } from '@/lib/ai/personalization';
+import { personalizeAdisos } from '@/lib/ai/personalization';
+import { compareRecientesFeed } from '@/lib/feed/ranking';
 import type { UserInterestProfile } from '@/lib/interactions';
 import { getCountryByCode, DEFAULT_COUNTRY_CODE } from '@/lib/geo/countries-data';
 
@@ -192,15 +193,8 @@ export function applyBrowseFilters({
 
   const sorted = [...filtrados].sort((a, b) => {
     switch (ordenamiento) {
-    case 'recientes': {
-      const ra = a.promotionRank ?? 0;
-      const rb = b.promotionRank ?? 0;
-      if (ra !== rb) return rb - ra;
-      const fa = parsearFecha(a.fechaPublicacion, a.horaPublicacion) + personalizationFreshnessBoostMs(a, interestProfile);
-      const fb = parsearFecha(b.fechaPublicacion, b.horaPublicacion) + personalizationFreshnessBoostMs(b, interestProfile);
-      const c = fb - fa;
-      return c !== 0 ? c : a.id.localeCompare(b.id);
-    }
+    case 'recientes':
+      return compareRecientesFeed(a, b, interestProfile);
     case 'antiguos': {
       const fa = parsearFecha(a.fechaPublicacion, a.horaPublicacion);
       const fb = parsearFecha(b.fechaPublicacion, b.horaPublicacion);

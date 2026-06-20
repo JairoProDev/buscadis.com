@@ -1,6 +1,7 @@
 import { Adiso } from '@/types';
 import type { UserInterestProfile } from '@/lib/interactions';
 import { personalizationFreshnessBoostMs } from '@/lib/ai/personalization';
+import { getFeedVisualBoostMs } from '@/lib/feed/ranking';
 
 export interface ScoredAdiso {
   adiso: Adiso;
@@ -69,8 +70,9 @@ export function rerankSearchResults(
       const categoryMatch =
         inferredCategory && item.adiso.categoria === inferredCategory ? 0.1 : 0;
       const recencyPersonal = personalizationFreshnessBoostMs(item.adiso, interestProfile ?? null) / 1e12;
+      const visualBoost = getFeedVisualBoostMs(item.adiso) / 1e12;
 
-      const finalScore = base + fresh + interest + promo + categoryMatch + recencyPersonal;
+      const finalScore = base + fresh + interest + promo + categoryMatch + recencyPersonal + visualBoost;
       return { ...item, rerank_score: finalScore, score: finalScore };
     })
     .sort((a, b) => (b.rerank_score ?? 0) - (a.rerank_score ?? 0));

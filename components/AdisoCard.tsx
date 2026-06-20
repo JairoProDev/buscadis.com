@@ -64,14 +64,14 @@ function getSellerDisplayName(adiso: Adiso): string | null {
     return rawName;
 }
 
-function getMediaAspectClass(tamaño: string, vista: string, isCatalogProduct = false): string {
+function getMediaAspectClass(tamaño: string, vista: string, isCatalogProduct = false, hasImage = false): string {
     if (vista === 'list') {
         return isCatalogProduct
             ? 'w-[112px] h-[112px] shrink-0'
             : 'w-[96px] h-[96px] md:w-[96px] md:h-[96px]';
     }
     if (isCatalogProduct) return 'w-full aspect-square';
-    if (tamaño === 'miniatura') return 'w-full h-[72px]';
+    if (tamaño === 'miniatura' && !hasImage) return 'w-full h-[72px]';
     if (tamaño === 'gigante' || tamaño === 'grande') return 'w-full aspect-video';
     if (vista === 'feed') return 'w-full aspect-square';
     return 'w-full aspect-[4/3]';
@@ -221,7 +221,7 @@ const AdisoCard = forwardRef<HTMLDivElement, AdisoCardProps>(
                 <div
                     className={`
                         relative flex-shrink-0 overflow-hidden
-                        ${getMediaAspectClass(tamaño, vista, isCatalogProduct)}
+                        ${getMediaAspectClass(tamaño, vista, isCatalogProduct, Boolean(imagenUrl))}
                     `}
                     style={{
                         backgroundColor: isCatalogProduct && imagenUrl
