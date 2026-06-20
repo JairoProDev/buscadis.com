@@ -64,8 +64,13 @@ function getSellerDisplayName(adiso: Adiso): string | null {
     return rawName;
 }
 
-function getMediaAspectClass(tamaño: string, vista: string): string {
-    if (vista === 'list') return 'w-[96px] h-[96px] md:w-[96px] md:h-[96px]';
+function getMediaAspectClass(tamaño: string, vista: string, isCatalogProduct = false): string {
+    if (vista === 'list') {
+        return isCatalogProduct
+            ? 'w-[112px] h-[112px] shrink-0'
+            : 'w-[96px] h-[96px] md:w-[96px] md:h-[96px]';
+    }
+    if (isCatalogProduct) return 'w-full aspect-square';
     if (tamaño === 'miniatura') return 'w-full h-[72px]';
     if (tamaño === 'gigante' || tamaño === 'grande') return 'w-full aspect-video';
     if (vista === 'feed') return 'w-full aspect-square';
@@ -92,6 +97,7 @@ const AdisoCard = forwardRef<HTMLDivElement, AdisoCardProps>(
         const cardMeta = getAdisoCardMetaRow(adiso);
         const cardSignal = pickCardSignal(adiso);
         const sellerName = getSellerDisplayName(adiso);
+        const isCatalogProduct = adiso.privateData?.source === 'catalog_product';
 
         const gridColumnSpan = paquete.columnas;
         const gridRowSpan = paquete.filas;
@@ -215,9 +221,13 @@ const AdisoCard = forwardRef<HTMLDivElement, AdisoCardProps>(
                 <div
                     className={`
                         relative flex-shrink-0 overflow-hidden
-                        ${getMediaAspectClass(tamaño, vista)}
+                        ${getMediaAspectClass(tamaño, vista, isCatalogProduct)}
                     `}
-                    style={{ backgroundColor: placeholderBg }}
+                    style={{
+                        backgroundColor: isCatalogProduct && imagenUrl
+                            ? 'var(--bg-secondary)'
+                            : placeholderBg,
+                    }}
                 >
                     {imagenUrl ? (
                         <>
@@ -226,10 +236,12 @@ const AdisoCard = forwardRef<HTMLDivElement, AdisoCardProps>(
                                 alt={displayTitle}
                                 fill
                                 sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
-                                className="object-cover motion-reduce:transition-none"
+                                className={`${isCatalogProduct ? 'object-contain p-1.5' : 'object-cover'} motion-reduce:transition-none`}
                                 loading="lazy"
                             />
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/35 via-transparent to-transparent pointer-events-none" />
+                            {!isCatalogProduct && (
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/35 via-transparent to-transparent pointer-events-none" />
+                            )}
                         </>
                     ) : (
                         <div
@@ -305,6 +317,11 @@ const AdisoCard = forwardRef<HTMLDivElement, AdisoCardProps>(
                             }`}
                         >
                             {adiso.promotionTier === 'premium' ? '👑 Premium' : '⭐ Destacado'}
+                        </span>
+                    )}
+                    {isCatalogProduct && (
+                        <span className="inline-flex items-center gap-1 self-start mb-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide bg-[rgba(var(--brand-primary-rgb),0.12)] text-[var(--brand-blue)]">
+                            🏪 Producto de catálogo
                         </span>
                     )}
                     <h3

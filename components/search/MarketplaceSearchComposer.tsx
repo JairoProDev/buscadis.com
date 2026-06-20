@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useMemo, useRef, type KeyboardEvent } from 'react';
+import { useState, useCallback, useMemo, useRef, useEffect, type KeyboardEvent } from 'react';
 import Buscador, { ComposerMode } from '@/components/Buscador';
 import PublishTierModal from '@/components/publish/PublishTierModal';
 import PublishImagePreview from '@/components/publish/PublishImagePreview';
@@ -54,6 +54,7 @@ export default function MarketplaceSearchComposer({
   const [tierModalOpen, setTierModalOpen] = useState(false);
   const [toggleExpanded, setToggleExpanded] = useState(false);
   const [activeSuggestIndex, setActiveSuggestIndex] = useState(-1);
+  const [suggestionsOpen, setSuggestionsOpen] = useState(false);
   const wrapperRef = useRef<HTMLDivElement>(null);
 
   const isSearchMode = composerMode === 'search';
@@ -81,9 +82,41 @@ export default function MarketplaceSearchComposer({
     publishProRedirect,
   } = usePublishActions(onNotify);
 
+  const closeSuggestions = useCallback(() => {
+    setSuggestionsOpen(false);
+    setActiveSuggestIndex(-1);
+  }, []);
+
+  const openSuggestions = useCallback(() => {
+    if (composerMode === 'search' && value.trim().length >= 2) {
+      setSuggestionsOpen(true);
+    }
+  }, [composerMode, value]);
+
+  useEffect(() => {
+    const onPointerDown = (event: MouseEvent | TouchEvent) => {
+      const target = event.target as Node | null;
+      if (!wrapperRef.current || !target) return;
+      if (!wrapperRef.current.contains(target)) {
+        closeSuggestions();
+      }
+    };
+    document.addEventListener('mousedown', onPointerDown);
+    document.addEventListener('touchstart', onPointerDown);
+    return () => {
+      document.removeEventListener('mousedown', onPointerDown);
+      document.removeEventListener('touchstart', onPointerDown);
+    };
+  }, [closeSuggestions]);
+
   const handleComposerChange = (next: string) => {
     setActiveSuggestIndex(-1);
     if (composerMode !== 'publish') {
+      if (next.trim().length >= 2) {
+        setSuggestionsOpen(true);
+      } else {
+        closeSuggestions();
+      }
       onChange(next);
       return;
     }
@@ -101,9 +134,10 @@ export default function MarketplaceSearchComposer({
       onNotify?.('Escribe qué buscas', 'info');
       return;
     }
+    closeSuggestions();
     await onSearchSubmit(q);
     trackSearchEvent('search.submit', { query: q });
-  }, [value, onSearchSubmit, onNotify]);
+  }, [value, onSearchSubmit, onNotify, closeSuggestions]);
 
   const handlePublishFree = async () => {
     const ok = await publishFree(publishText, undefined, undefined, publishImageUrl || undefined);
@@ -145,11 +179,11 @@ export default function MarketplaceSearchComposer({
         onChange(item.adiso.titulo);
         void handleSearchSubmit();
       }
-      setActiveSuggestIndex(-1);
+      closeSuggestions();
       return;
     }
     onChange(item.query);
-    setActiveSuggestIndex(-1);
+    closeSuggestions();
   };
 
   const handleKeyDown = (e: KeyboardEvent) => {
@@ -182,7 +216,7 @@ export default function MarketplaceSearchComposer({
       return;
     }
     if (e.key === 'Escape') {
-      setActiveSuggestIndex(-1);
+      closeSuggestions();
     }
   };
 
@@ -196,7 +230,10 @@ export default function MarketplaceSearchComposer({
       <div
         onMouseEnter={() => isTyping && setToggleExpanded(true)}
         onMouseLeave={() => setToggleExpanded(false)}
-        onFocus={() => isTyping && setToggleExpanded(true)}
+        onFocus={() => {
+          if (isTyping) setToggleExpanded(true);
+          openSuggestions();
+        }}
       >
         <Buscador
           value={value}
@@ -244,14 +281,23 @@ export default function MarketplaceSearchComposer({
         queries={suggestions.queries}
         activeIndex={activeSuggestIndex}
         onSelectAdiso={(adiso) => {
+          closeSuggestions();
           if (onOpenAdiso) onOpenAdiso(adiso.id);
           else {
             onChange(adiso.titulo);
             void handleSearchSubmit();
           }
         }}
-        onSelectQuery={(q) => onChange(q)}
-        visible={isSearchMode && isTyping && (suggestions.adisos.length > 0 || suggestions.queries.length > 0)}
+        onSelectQuery={(q) => {
+          onChange(q);
+          closeSuggestions();
+        }}
+        visible={
+          suggestionsOpen &&
+          isSearchMode &&
+          isTyping &&
+          (suggestions.adisos.length > 0 || suggestions.queries.length > 0)
+        }
       />
 
       {composerMode === 'publish' && publishImageUrl && (

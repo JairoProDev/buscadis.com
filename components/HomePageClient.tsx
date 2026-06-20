@@ -240,6 +240,17 @@ function HomeContent() {
   const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
   const [isSidebarMinimizado, setIsSidebarMinimizado] = useState(true);
   const { toasts, removeToast, success, error } = useToast();
+  const resetSearch = useCallback(() => {
+    setBusqueda('');
+    setCommittedQuery('');
+    setSearchResults(null);
+    setHayMasAdisos(true);
+    setVisibleCount(ITEMS_POR_PAGINA);
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete('buscar');
+    router.replace(params.toString() ? `/?${params.toString()}` : '/', { scroll: false });
+  }, [router, searchParams]);
+
   const marketplacePulse = getMarketplacePulse(adisosFiltrados);
   const activeFiltersCount = countActiveFilters(browseFilters, categoriaFiltro);
   const browseTotalPool = useMemo(() => {
@@ -498,9 +509,7 @@ function HomeContent() {
   const handleSearchSubmit = useCallback(async (query: string) => {
     const q = query.trim();
     if (!q) {
-      setCommittedQuery('');
-      setSearchResults(null);
-      setHayMasAdisos(true);
+      resetSearch();
       return;
     }
 
@@ -526,7 +535,16 @@ function HomeContent() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Error de búsqueda');
 
-      const results = (data.adisos ?? []) as Adiso[];
+      const apiResults = (data.adisos ?? []) as Adiso[];
+      const catalogResults = await getCatalogProductsAsAdisos({
+        limit: 60,
+        offset: 0,
+        categoria: categoriaFiltro !== 'todos' ? categoriaFiltro : undefined,
+        busqueda: q,
+      });
+      const merged = new Map<string, Adiso>();
+      [...apiResults, ...catalogResults].forEach((item) => merged.set(item.id, item));
+      const results = Array.from(merged.values());
       setSearchResults(results);
       setHayMasAdisos(false);
       setVisibleCount(ITEMS_POR_PAGINA);
@@ -555,7 +573,14 @@ function HomeContent() {
       setSearchLoading(false);
       setFiltrando(false);
     }
-  }, [browseFilters, categoriaFiltro, error, user?.id]);
+  }, [browseFilters, categoriaFiltro, error, user?.id, resetSearch]);
+
+  useEffect(() => {
+    // Si el usuario borra el texto manualmente, quitar también el estado de búsqueda aplicada
+    if (!busqueda.trim() && committedQuery) {
+      resetSearch();
+    }
+  }, [busqueda, committedQuery, resetSearch]);
 
   useEffect(() => {
     if (initialSearchDone.current || !buscarUrl || cargando) return;
@@ -1200,6 +1225,18 @@ function HomeContent() {
                       else success(message);
                     }}
                   />
+                  {committedQuery && (
+                    <button
+                      type="button"
+                      onClick={resetSearch}
+                      className="mt-2 inline-flex items-center gap-1 rounded-full border border-[var(--border-color)] bg-[var(--bg-primary)] px-3 py-1 text-xs font-semibold text-[var(--text-secondary)] hover:text-[var(--brand-blue)]"
+                      title="Quitar búsqueda y volver al feed completo"
+                      aria-label="Quitar búsqueda"
+                    >
+                      <IconClose size={12} />
+                      Quitar búsqueda: {committedQuery}
+                    </button>
+                  )}
                 </div>
                 <BrowseFilters
                   categoria={categoriaFiltro}

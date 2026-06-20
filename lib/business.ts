@@ -350,6 +350,11 @@ function catalogProductToAdiso(product: any): Adiso {
         esHistorico: false,
         user_id: product.user_id || business?.user_id || undefined,
         usuario_id: product.user_id || business?.user_id || undefined,
+        privateData: {
+            ...(product.ai_metadata || {}),
+            source: 'catalog_product',
+            business_profile_id: product.business_profile_id,
+        },
         vendedor: {
             id: business?.id || product.user_id || product.id,
             nombre: business?.name || 'Negocio',
