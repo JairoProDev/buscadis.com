@@ -499,8 +499,6 @@
     object-fit: cover;
     transition: transform 0.6s cubic-bezier(0.25,0.46,0.45,0.94);
   }
-  .product-img img.crop-naranja { object-position: 32% center; }
-  .product-img img.crop-aguaymanto { object-position: 52% center; }
   .product-overlay {
     position: absolute;
     inset: 0;
@@ -680,8 +678,15 @@
   .flavor-tag.orange { border-color: rgba(220,120,50,0.4); }
   .flavor-tag.orange:hover, .flavor-tag.orange.active { background: #E07832; border-color: #E07832; color: white; }
   .flavor-tag.yellow { border-color: rgba(212,160,23,0.4); }
+  .flavor-tag.yellow:hover, .flavor-tag.yellow.active { background: #D4A017; border-color: #D4A017; color: var(--oscuro); }
   .flavor-tag.purple { border-color: rgba(130,90,180,0.4); }
   .flavor-tag.purple:hover, .flavor-tag.purple.active { background: #8A5AB4; border-color: #8A5AB4; color: white; }
+  .flavor-tag.mango { border-color: rgba(230,140,40,0.4); }
+  .flavor-tag.mango:hover, .flavor-tag.mango.active { background: #E68C28; border-color: #E68C28; color: white; }
+  .flavor-tag.pina { border-color: rgba(200,170,30,0.4); }
+  .flavor-tag.pina:hover, .flavor-tag.pina.active { background: #C8AA1E; border-color: #C8AA1E; color: var(--oscuro); }
+  .flavor-tag.pistachos { border-color: rgba(120,150,70,0.4); }
+  .flavor-tag.pistachos:hover, .flavor-tag.pistachos.active { background: #789646; border-color: #789646; color: white; }
 
   /* PROCESO */
   .proceso {
@@ -1169,7 +1174,7 @@
     </div>
     <div class="stat-card">
       <div class="stat-icon">🏔️</div>
-      <div class="stat-number">4</div>
+      <div class="stat-number">7</div>
       <div class="stat-label">Sabores de chocolate</div>
     </div>
   </div>
@@ -1211,7 +1216,7 @@
 
     <div class="product-card" data-category="chocolate" id="producto-naranja">
       <div class="product-img">
-        <img src="images/producto-chocolate-coleccion.jpg" alt="Chocolate Dark Naranja 70% Cacao Chuncho — Villa Chaco" class="crop-naranja" width="1195" height="896" loading="lazy" decoding="async">
+        <img src="images/producto-chocolate-naranja.jpeg" alt="Chocolate Dark Naranja 70% Cacao Chuncho — Villa Chaco" width="1200" height="1600" loading="lazy" decoding="async">
         <div class="product-overlay">
           <a href="https://wa.me/51910174533?text=Hola%2C%20quiero%20pedir%20Chocolate%20Dark%20Naranja%20(70%25%20Cacao%2C%2050g)" class="product-overlay-btn wa" target="_blank" rel="noopener">Pedir por WhatsApp</a>
         </div>
@@ -1226,7 +1231,7 @@
 
     <div class="product-card" data-category="chocolate" id="producto-aguaymanto">
       <div class="product-img">
-        <img src="images/producto-chocolate-coleccion.jpg" alt="Chocolate Dark Aguaymanto 70% Cacao Chuncho — Villa Chaco" class="crop-aguaymanto" width="1195" height="896" loading="lazy" decoding="async">
+        <img src="images/producto-chocolate-aguaymanto.jpeg" alt="Chocolate Dark Aguaymanto 70% Cacao Chuncho — Villa Chaco" width="1200" height="1600" loading="lazy" decoding="async">
         <div class="product-overlay">
           <a href="https://wa.me/51910174533?text=Hola%2C%20quiero%20pedir%20Chocolate%20Dark%20Aguaymanto%20(70%25%20Cacao%2C%2050g)" class="product-overlay-btn wa" target="_blank" rel="noopener">Pedir por WhatsApp</a>
         </div>
@@ -1249,6 +1254,51 @@
       <div class="product-info">
         <div class="product-category">Chocolate Dark</div>
         <div class="product-name">Arándanos<br>Blueberries</div>
+        <div class="product-detail">70% Cacao · 50g · La Convención, Cusco</div>
+        <div class="product-price">Consultar <span>precio</span></div>
+      </div>
+    </div>
+
+    <div class="product-card" data-category="chocolate" id="producto-mango">
+      <div class="product-img">
+        <img src="images/producto-chocolate-mango.jpeg" alt="Chocolate Dark Mango 70% Cacao Chuncho — Villa Chaco" width="1200" height="1600" loading="lazy" decoding="async">
+        <div class="product-overlay">
+          <a href="https://wa.me/51910174533?text=Hola%2C%20quiero%20pedir%20Chocolate%20Dark%20Mango%20(70%25%20Cacao%2C%2050g)" class="product-overlay-btn wa" target="_blank" rel="noopener">Pedir por WhatsApp</a>
+        </div>
+      </div>
+      <div class="product-info">
+        <div class="product-category">Chocolate Dark</div>
+        <div class="product-name">Mango<br>Mango</div>
+        <div class="product-detail">70% Cacao · 50g · La Convención, Cusco</div>
+        <div class="product-price">Consultar <span>precio</span></div>
+      </div>
+    </div>
+
+    <div class="product-card" data-category="chocolate" id="producto-pina">
+      <div class="product-img">
+        <img src="images/producto-chocolate-pina.jpeg" alt="Chocolate Dark Piña 70% Cacao Chuncho — Villa Chaco" width="1200" height="1600" loading="lazy" decoding="async">
+        <div class="product-overlay">
+          <a href="https://wa.me/51910174533?text=Hola%2C%20quiero%20pedir%20Chocolate%20Dark%20Pi%C3%B1a%20(70%25%20Cacao%2C%2050g)" class="product-overlay-btn wa" target="_blank" rel="noopener">Pedir por WhatsApp</a>
+        </div>
+      </div>
+      <div class="product-info">
+        <div class="product-category">Chocolate Dark</div>
+        <div class="product-name">Piña<br>Pineapple</div>
+        <div class="product-detail">70% Cacao · 50g · La Convención, Cusco</div>
+        <div class="product-price">Consultar <span>precio</span></div>
+      </div>
+    </div>
+
+    <div class="product-card" data-category="chocolate" id="producto-pistachos">
+      <div class="product-img">
+        <img src="images/producto-chocolate-pistachos.jpeg" alt="Chocolate Dark Pistachos 70% Cacao Chuncho — Villa Chaco" width="1600" height="1200" loading="lazy" decoding="async">
+        <div class="product-overlay">
+          <a href="https://wa.me/51910174533?text=Hola%2C%20quiero%20pedir%20Chocolate%20Dark%20Pistachos%20(70%25%20Cacao%2C%2050g)" class="product-overlay-btn wa" target="_blank" rel="noopener">Pedir por WhatsApp</a>
+        </div>
+      </div>
+      <div class="product-info">
+        <div class="product-category">Chocolate Dark</div>
+        <div class="product-name">Pistachos<br>Pistachio</div>
         <div class="product-detail">70% Cacao · 50g · La Convención, Cusco</div>
         <div class="product-price">Consultar <span>precio</span></div>
       </div>
@@ -1354,7 +1404,7 @@
 
 <section class="featured">
   <div class="featured-visual">
-    <img src="images/featured-chocolate-coleccion.jpg" alt="Colección Chocolate Bean to Bar — 4 sabores Villa Chaco" width="1195" height="896" loading="lazy" decoding="async">
+    <img src="images/featured-chocolate-coleccion.jpg" alt="Colección Chocolate Bean to Bar — 7 sabores Villa Chaco" width="1195" height="896" loading="lazy" decoding="async">
   </div>
   <div class="featured-content">
     <div class="section-label">Estrella de la Colección</div>
@@ -1362,7 +1412,7 @@
       Chocolate Dark<br>
       <em>Bean to Bar</em>
     </h2>
-    <p>Elaborado desde el grano hasta la barra con cacao Chuncho 70% de La Convención. Cuatro sabores únicos que fusionan el poder del cacao andino con frutas peruanas seleccionadas.</p>
+    <p>Elaborado desde el grano hasta la barra con cacao Chuncho 70% de La Convención. Siete sabores únicos que fusionan el poder del cacao andino con frutas y frutos secos peruanos seleccionados.</p>
     <div class="featured-specs">
       <div class="spec">
         <div class="spec-value">70%</div>
@@ -1373,7 +1423,7 @@
         <div class="spec-label">Peso neto</div>
       </div>
       <div class="spec">
-        <div class="spec-value">4</div>
+        <div class="spec-value">7</div>
         <div class="spec-label">Sabores</div>
       </div>
     </div>
@@ -1382,6 +1432,9 @@
       <div class="flavor-tag orange">🍊 Naranja</div>
       <div class="flavor-tag yellow">🍈 Aguaymanto</div>
       <div class="flavor-tag purple">🫐 Arándanos</div>
+      <div class="flavor-tag mango">🥭 Mango</div>
+      <div class="flavor-tag pina">🍍 Piña</div>
+      <div class="flavor-tag pistachos">🌿 Pistachos</div>
     </div>
     <a href="https://wa.me/51910174533?text=Hola%2C%20quiero%20pedir%20la%20colecci%C3%B3n%20Chocolate%20Bean%20to%20Bar" class="btn-secondary btn-secondary-light" style="width: fit-content;" target="_blank" rel="noopener">Pedir colección →</a>
   </div>
@@ -1547,7 +1600,10 @@
     pink: 'producto-chocolate-fresa',
     orange: 'producto-naranja',
     yellow: 'producto-aguaymanto',
-    purple: 'producto-arandanos'
+    purple: 'producto-arandanos',
+    mango: 'producto-mango',
+    pina: 'producto-pina',
+    pistachos: 'producto-pistachos'
   };
   document.querySelectorAll('.flavor-tag').forEach(tag => {
     tag.addEventListener('click', function() {
