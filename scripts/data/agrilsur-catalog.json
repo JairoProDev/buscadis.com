@@ -1,0 +1,19 @@
+{
+  "business": {
+    "slug": "agrilsur",
+    "name": "AGRIL SUR Destilería Ancestral",
+    "tagline": "Tradición y sabor en cada gota",
+    "description": "Destilería ancestral en San Jerónimo, Cusco. Bebidas espirituosas elaboradas con ingredientes autóctonos, métodos artesanales y estándares modernos de calidad. Anís cusqueño, muña, maca y macerados amazónicos.",
+    "contact_whatsapp": "+51947182046",
+    "contact_phone": "+51947182046",
+    "contact_email": "agrilsurcusco@gmail.com",
+    "contact_address": "Sector Collana s/n, San Jerónimo, Cusco, Perú",
+    "theme_color": "#C9A227",
+    "template_id": "modern_tabs",
+    "site_tier": "both",
+    "publicadis_site_url": "https://publicadis.com/p/agrilsur",
+    "publicadis_external_url": "https://agrilsur.vercel.app",
+    "banner_file": "Portada.PNG",
+    "logo_file": "Perfil.png"
+  }
+}

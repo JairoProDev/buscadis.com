@@ -295,8 +295,9 @@ Preview → Publicar
 - [x] Redirect `buscadis.com/villachaco` → `publicadis.com/p/villachaco` (salvo `VILLACHACO_SERVE_ON_BUSCADIS=true`)
 - [x] Link "Sitio web" en perfil Buscadis → Publicadis (`lib/business/publicadis.ts`)
 - [x] Link "Perfil Buscadis" en sitio Villa Chaco (nav + footer)
-- [ ] Deploy PublicAdis-nextjs a `publicadis.com` (Vercel)
-- [ ] Verificar DNS `publicadis.com` apuntando al proyecto PublicAdis-nextjs
+- [x] Deploy PublicAdis-nextjs a `publicadis.com` (Vercel) — 2026-06-22
+- [x] Seed AGRIL SUR: `buscadis.com/p/agrilsur` (19 productos) + proxy Publicadis → agrilsur.vercel.app
+- [x] Deploy buscadis.com con redirect `/villachaco` y enlaces Publicadis en perfil — 2026-06-22
 
 ### Fase 2 — Semanas 3-4
 
