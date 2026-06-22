@@ -9,8 +9,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { Adiso, Categoria } from '@/types';
 import { getAdisos, getAdisoById, saveAdiso, getAdisosCache } from '@/lib/storage';
 import { getAdisosFromSupabase } from '@/lib/supabase';
-import { getCatalogProductsAsAdisos } from '@/lib/business';
-import { compareRecientesFeed } from '@/lib/feed/ranking';
+import { getMarketplaceFeed, getCatalogProductsAsAdisos } from '@/lib/business';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
 import { useToast } from '@/hooks/useToast';
 import { useInfiniteScroll } from '@/hooks/useInfiniteScroll';
@@ -104,35 +103,6 @@ import { getCountryByCode, DEFAULT_COUNTRY_CODE } from '@/lib/geo/countries-data
 import BrowseEmptyState from '@/components/BrowseEmptyState';
 import ParaTiSection from '@/components/home/ParaTiSection';
 const TEST_REGEX = /toyota test|test adiso|test anuncio/i;
-
-async function getMarketplaceFeed(options: {
-  limit: number;
-  offset: number;
-  soloActivos?: boolean;
-  categoria?: string;
-  busqueda?: string;
-}): Promise<Adiso[]> {
-  const adisoLimit = Math.max(10, Math.ceil(options.limit * 0.7));
-  const catalogLimit = Math.max(6, options.limit - adisoLimit);
-
-  const [adisosBase, catalogAdisos] = await Promise.all([
-    getAdisosFromSupabase({
-      ...options,
-      limit: adisoLimit,
-    }),
-    getCatalogProductsAsAdisos({
-      limit: catalogLimit,
-      offset: options.offset,
-      categoria: options.categoria,
-      busqueda: options.busqueda,
-    }),
-  ]);
-
-  const mergedMap = new Map<string, Adiso>();
-  [...adisosBase, ...catalogAdisos].forEach((item) => mergedMap.set(item.id, item));
-
-  return Array.from(mergedMap.values()).sort((a, b) => compareRecientesFeed(a, b));
-}
 
 function getBrowseCountLabel(
   categoria: Categoria | 'todos',
@@ -272,6 +242,7 @@ function HomeContent() {
   }, [adisos]);
 
   const prevCategoriaRef = useRef(categoriaFiltro);
+  const categoriaFeedLoadedRef = useRef(false);
   // Al cambiar categoría manualmente, limpiar facetas específicas (conservar precio, ubicación, etc.)
   useEffect(() => {
     if (prevCategoriaRef.current !== categoriaFiltro) {
@@ -279,6 +250,44 @@ function HomeContent() {
       prevCategoriaRef.current = categoriaFiltro;
     }
   }, [categoriaFiltro]);
+
+  // Recargar feed al cambiar categoría (p. ej. Productos → catálogo de negocios primero)
+  useEffect(() => {
+    if (!cargadoInicialmente.current) return;
+    if (committedQuery) return;
+
+    let cancelled = false;
+    const loadCategoryFeed = async () => {
+      setFiltrando(true);
+      try {
+        const items = await getMarketplaceFeed({
+          limit: ITEMS_POR_PAGINA,
+          offset: 0,
+          soloActivos: false,
+          categoria: categoriaFiltro !== 'todos' ? categoriaFiltro : undefined,
+        });
+        if (cancelled) return;
+        const filtered = items.filter((a) => !TEST_REGEX.test(a.titulo || ''));
+        setAdisos(filtered);
+        setHayMasAdisos(filtered.length === ITEMS_POR_PAGINA);
+        setPaginaActual(1);
+      } catch (e) {
+        console.error('[HomePage] category feed:', e);
+      } finally {
+        if (!cancelled) setFiltrando(false);
+      }
+    };
+
+    if (!categoriaFeedLoadedRef.current) {
+      categoriaFeedLoadedRef.current = true;
+      if (categoriaFiltro === 'todos') return;
+    }
+
+    void loadCategoryFeed();
+    return () => {
+      cancelled = true;
+    };
+  }, [categoriaFiltro, committedQuery]);
 
   // Detectar cambios en el estado de conexión
   useEffect(() => {
@@ -365,7 +374,8 @@ function HomeContent() {
         let adisosDesdeAPI = await getMarketplaceFeed({
           limit: ITEMS_POR_PAGINA,
           offset: 0,
-          soloActivos: false // Mostrar todos, incluyendo históricos
+          soloActivos: false, // Mostrar todos, incluyendo históricos
+          categoria: categoriaUrl || undefined,
         });
 
         // Filtrar también los resultados de la API

@@ -58,6 +58,7 @@ interface CatalogSeedFile {
     publicadis_site_url: string;
     logo_file?: string;
     banner_file?: string;
+    og_image_file?: string;
     meta_title?: string;
     meta_description?: string;
     pending_owner_email?: string;
@@ -171,11 +172,15 @@ async function main() {
 
   let logoUrl: string | undefined;
   let bannerUrl: string | undefined;
+  let ogImageUrl: string | undefined;
   if (seed.business.logo_file && businessId) {
     logoUrl = await uploadCatalogImage(businessId, seed.business.logo_file, 'brand', dryRun);
   }
   if (seed.business.banner_file && businessId) {
     bannerUrl = await uploadCatalogImage(businessId, seed.business.banner_file, 'brand', dryRun);
+  }
+  if (seed.business.og_image_file && businessId) {
+    ogImageUrl = await uploadCatalogImage(businessId, seed.business.og_image_file, 'brand', dryRun);
   }
 
   const profilePayload: Record<string, unknown> = {
@@ -191,6 +196,7 @@ async function main() {
     template_id: seed.business.template_id,
     logo_url: logoUrl,
     banner_url: bannerUrl,
+    og_image_url: ogImageUrl || bannerUrl,
     meta_title: seed.business.meta_title,
     meta_description: seed.business.meta_description,
     is_published: true,

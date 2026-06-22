@@ -1,8 +1,9 @@
-import { supabase } from './supabase';
+import { supabase, getAdisosFromSupabase } from './supabase';
 import type { Adiso, Categoria } from '@/types';
 import { BusinessProfile } from '@/types/business';
 import type { BusinessMemberRole, BusinessWithRole } from './business-access';
 import { normalizeBusinessProfile } from '@/lib/business/normalize-profile';
+import { compareRecientesFeed, isCatalogProduct } from '@/lib/feed/ranking';
 
 export const BUSINESS_TABLE = 'business_profiles';
 
@@ -357,6 +358,7 @@ function catalogProductToAdiso(product: any): Adiso {
             ...(product.ai_metadata || {}),
             source: 'catalog_product',
             business_profile_id: product.business_profile_id,
+            business_slug: business?.slug,
         },
         vendedor: {
             id: business?.id || product.user_id || product.id,
@@ -366,6 +368,12 @@ function catalogProductToAdiso(product: any): Adiso {
             nivelVerificacion: business?.is_verified ? 'negocio' : 'basico',
         },
     };
+}
+
+function catalogMarketplaceCategory(categoria?: string): boolean {
+    if (!categoria || categoria === 'todos') return true;
+    // Catálogo de negocios siempre es "productos" en el marketplace
+    return categoria === 'productos';
 }
 
 export async function getCatalogProductsAsAdisos(options?: {
@@ -397,8 +405,13 @@ export async function getCatalogProductsAsAdisos(options?: {
             `)
             .eq('status', 'published');
 
-        if (options?.categoria && options.categoria !== 'todos') {
-            query = query.ilike('category', `%${options.categoria}%`);
+        const marketplaceCategoria = options?.categoria;
+        if (
+            marketplaceCategoria &&
+            marketplaceCategoria !== 'todos' &&
+            !catalogMarketplaceCategory(marketplaceCategoria)
+        ) {
+            query = query.ilike('category', `%${marketplaceCategoria}%`);
         }
 
         if (options?.busqueda) {
@@ -408,7 +421,7 @@ export async function getCatalogProductsAsAdisos(options?: {
             }
         }
 
-        query = query.order('created_at', { ascending: false });
+        query = query.order('updated_at', { ascending: false });
 
         if (options?.limit) {
             const from = options.offset || 0;
@@ -435,6 +448,51 @@ export async function getCatalogProductsAsAdisos(options?: {
         console.error('Error mapping catalog products to adisos:', error);
         return [];
     }
+}
+
+/** Feed unificado: avisos + catálogo de negocios para el marketplace. */
+export async function getMarketplaceFeed(options: {
+    limit: number;
+    offset: number;
+    soloActivos?: boolean;
+    categoria?: string;
+    busqueda?: string;
+}): Promise<Adiso[]> {
+    const productosTab = options.categoria === 'productos';
+    const adisoLimit = productosTab
+        ? Math.max(4, Math.ceil(options.limit * 0.25))
+        : Math.max(10, Math.ceil(options.limit * 0.7));
+    const catalogLimit = Math.max(productosTab ? 12 : 6, options.limit - adisoLimit);
+
+    const [adisosBase, catalogAdisos] = await Promise.all([
+        getAdisosFromSupabase({
+            ...options,
+            limit: adisoLimit,
+            categoria: productosTab ? undefined : options.categoria,
+        }),
+        getCatalogProductsAsAdisos({
+            limit: catalogLimit,
+            offset: options.offset,
+            categoria: options.categoria,
+            busqueda: options.busqueda,
+        }),
+    ]);
+
+    const mergedMap = new Map<string, Adiso>();
+    [...adisosBase, ...catalogAdisos].forEach((item) => mergedMap.set(item.id, item));
+
+    const merged = Array.from(mergedMap.values());
+
+    if (productosTab) {
+        return merged.sort((a, b) => {
+            const aCatalog = isCatalogProduct(a) ? 1 : 0;
+            const bCatalog = isCatalogProduct(b) ? 1 : 0;
+            if (aCatalog !== bCatalog) return bCatalog - aCatalog;
+            return compareRecientesFeed(a, b);
+        });
+    }
+
+    return merged.sort((a, b) => compareRecientesFeed(a, b));
 }
 
 // Helper to get extension from mime type

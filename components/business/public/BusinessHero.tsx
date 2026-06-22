@@ -70,7 +70,16 @@ export default function BusinessHero({
               )}
             >
               {profile.logo_url ? (
-                <img src={profile.logo_url} alt="Logo" className="w-full h-full object-cover" />
+                <img
+                  src={profile.logo_url}
+                  alt="Logo"
+                  className={cn(
+                    'w-full h-full',
+                    profile.logo_url.toLowerCase().includes('.svg')
+                      ? 'object-contain p-2 bg-white'
+                      : 'object-cover'
+                  )}
+                />
               ) : (
                 <div className="w-full h-full bg-[var(--bg-secondary)] flex items-center justify-center text-3xl md:text-5xl font-bold text-[var(--bp-text-muted)]">
                   {profile.name?.substring(0, 1) || 'N'}

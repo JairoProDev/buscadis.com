@@ -12,7 +12,8 @@
     "site_tier": "both",
     "publicadis_site_url": "https://publicadis.com/p/villachaco",
     "logo_file": "logo-villa-chaco.svg",
-    "banner_file": "catalog-chocolate-dark-fresa-70cacao-50g.jpg",
+    "banner_file": "hero-chocolates-bean-to-bar.jpg",
+    "og_image_file": "featured-chocolate-coleccion.jpg",
     "meta_title": "Villa Chaco Productos | Chocolate bean to bar — Quillabamba, Cusco",
     "meta_description": "Chocolate 70% cacao chuncho, miel gourmet, café de especialidad y derivados de cacao. Productos artesanales desde La Convención, Cusco.",
     "pending_owner_email": ""
@@ -191,6 +192,100 @@
       ],
       "sort_order": 10,
       "is_featured": true
+    },
+    {
+      "sku": "VC-MIEL-500",
+      "title": "Miel de Abeja Gourmet 500g",
+      "description": "Miel de abeja pura y natural de La Convención, Cusco. Presentación gourmet 500g (17.64 oz).",
+      "category": "Miel",
+      "tags": ["miel", "gourmet", "abeja", "natural", "cusco", "quillabamba"],
+      "brand": "Villa Chaco",
+      "attributes": {
+        "weight": "500g",
+        "volume": "17.64 oz",
+        "origin": "La Convención, Cusco, Perú",
+        "type": "Miel de abeja pura"
+      },
+      "images": [
+        { "file": "producto-miel-gourmet.jpg", "is_primary": true, "alt": "Miel de Abeja Gourmet 500g — Villa Chaco" },
+        { "file": "hero-miel-gourmet.jpg", "is_primary": false, "alt": "Miel gourmet Villa Chaco" }
+      ],
+      "sort_order": 11,
+      "is_featured": true
+    },
+    {
+      "sku": "VC-NIBS-CACAO",
+      "title": "Nibs de Cacao Chuncho",
+      "description": "Nibs de cacao chuncho de Echarate, La Convención, Cusco. Superfood andino para repostería y snacks.",
+      "category": "Cacao",
+      "tags": ["cacao", "nibs", "chuncho", "superfood", "cusco"],
+      "brand": "Villa Chaco",
+      "attributes": {
+        "origin": "Echarate, La Convención, Cusco",
+        "cacao_type": "Chuncho",
+        "process": "Tostado y partido"
+      },
+      "images": [
+        { "file": "producto-nibs-cacao.jpg", "is_primary": true, "alt": "Nibs de Cacao Chuncho — Villa Chaco" }
+      ],
+      "sort_order": 12,
+      "is_featured": false
+    },
+    {
+      "sku": "VC-PASTA-CACAO-200",
+      "title": "Pasta Pura de Cacao Chuncho 200g",
+      "description": "Pasta pura de cacao chuncho 200g. 100% chuncho, sin aditivos. Ideal para bebidas y repostería artesanal.",
+      "category": "Cacao",
+      "tags": ["cacao", "pasta", "chuncho", "bean-to-bar", "cusco"],
+      "brand": "Villa Chaco",
+      "attributes": {
+        "weight": "200g",
+        "origin": "La Convención, Cusco, Perú",
+        "cacao_type": "Chuncho",
+        "additives": "Sin aditivos"
+      },
+      "images": [
+        { "file": "producto-pasta-cacao.jpg", "is_primary": true, "alt": "Pasta Pura de Cacao Chuncho 200g — Villa Chaco" }
+      ],
+      "sort_order": 13,
+      "is_featured": false
+    },
+    {
+      "sku": "VC-CACAO-POLVO-200",
+      "title": "Cacao en Polvo 100% Natural 200g",
+      "description": "Cacao en polvo 100% natural, sin azúcar ni gluten. Derivado del cacao chuncho de La Convención, Cusco.",
+      "category": "Cacao",
+      "tags": ["cacao", "polvo", "sin-gluten", "natural", "cusco"],
+      "brand": "Villa Chaco",
+      "attributes": {
+        "weight": "200g",
+        "origin": "La Convención, Cusco, Perú",
+        "sugar": "Sin azúcar",
+        "gluten": "Sin gluten"
+      },
+      "images": [
+        { "file": "producto-cacao-polvo.jpg", "is_primary": true, "alt": "Cacao en Polvo 100% Natural 200g — Villa Chaco" }
+      ],
+      "sort_order": 14,
+      "is_featured": false
+    },
+    {
+      "sku": "VC-COCTEL-CACAO",
+      "title": "Cóctel de Cacao Artesanal",
+      "description": "Bebida especial de licor artesanal con cacao chuncho. Propuesta única de Villa Chaco desde La Convención, Cusco.",
+      "category": "Bebidas",
+      "tags": ["coctel", "cacao", "licor", "artesanal", "cusco"],
+      "brand": "Villa Chaco",
+      "attributes": {
+        "origin": "La Convención, Cusco, Perú",
+        "base": "Cacao chuncho",
+        "type": "Bebida especial"
+      },
+      "images": [
+        { "file": "producto-coctel-cacao.jpg", "is_primary": true, "alt": "Cóctel de Cacao artesanal — Villa Chaco" }
+      ],
+      "sort_order": 15,
+      "is_featured": false
     }
   ]
 }
