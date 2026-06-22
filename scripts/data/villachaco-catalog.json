@@ -1,0 +1,190 @@
+{
+  "business": {
+    "slug": "villachaco",
+    "name": "Villa Chaco Productos",
+    "tagline": "Sabores que nacen de la tierra",
+    "description": "Chocolate bean to bar 70% cacao chuncho, miel gourmet, café de especialidad y derivados de cacao desde Quillabamba, La Convención, Cusco.",
+    "contact_whatsapp": "+51910174533",
+    "contact_address": "Echarate, La Convención, Cusco, Perú",
+    "theme_color": "#B31E24",
+    "template_id": "modern_tabs",
+    "site_tier": "buscadis_profile",
+    "publicadis_site_url": "https://publicadis.com/p/villachaco"
+  },
+  "products": [
+    {
+      "sku": "VC-CHOC-FRESA-50",
+      "title": "Chocolate Dark Fresa 70% Cacao",
+      "description": "Chocolate dark bean to bar con 70% de cacao chuncho seleccionado de La Convención, Cusco. Infusionado con fresa peruana. Intenso, frutal y auténtico.",
+      "category": "Chocolate",
+      "tags": ["chocolate", "bean-to-bar", "70%-cacao", "fresa", "cusco", "chuncho"],
+      "brand": "Villa Chaco",
+      "attributes": {
+        "cacao_percentage": "70%",
+        "weight": "50g",
+        "origin": "La Convención, Cusco, Perú",
+        "process": "Bean to Bar",
+        "flavor_es": "Fresa",
+        "flavor_en": "Strawberry"
+      },
+      "images": [
+        { "file": "catalog-chocolate-dark-fresa-70cacao-50g.jpg", "is_primary": true, "alt": "Chocolate Dark Fresa 70% Cacao Chuncho — Villa Chaco" },
+        { "file": "producto-chocolate-fresa.jpg", "is_primary": false, "alt": "Empaque Chocolate Dark Fresa 70% — Villa Chaco" }
+      ],
+      "sort_order": 1,
+      "is_featured": true
+    },
+    {
+      "sku": "VC-CHOC-NARANJA-50",
+      "title": "Chocolate Dark Naranja 70% Cacao",
+      "description": "Chocolate dark bean to bar con 70% cacao chuncho y notas cítricas de naranja. Ingredientes naturales de La Convención, Cusco.",
+      "category": "Chocolate",
+      "tags": ["chocolate", "bean-to-bar", "70%-cacao", "naranja", "cusco", "chuncho"],
+      "brand": "Villa Chaco",
+      "attributes": {
+        "cacao_percentage": "70%",
+        "weight": "50g",
+        "origin": "La Convención, Cusco, Perú",
+        "process": "Bean to Bar",
+        "flavor_es": "Naranja",
+        "flavor_en": "Orange"
+      },
+      "images": [
+        { "file": "catalog-chocolate-dark-naranja-70cacao-50g.jpg", "is_primary": true, "alt": "Chocolate Dark Naranja 70% Cacao Chuncho — Villa Chaco" },
+        { "file": "producto-chocolate-naranja.jpeg", "is_primary": false, "alt": "Empaque Chocolate Dark Naranja 70% — Villa Chaco" }
+      ],
+      "sort_order": 2,
+      "is_featured": true
+    },
+    {
+      "sku": "VC-CHOC-AGUAYMANTO-50",
+      "title": "Chocolate Dark Aguaymanto 70% Cacao",
+      "description": "Chocolate dark bean to bar con aguaymanto andino. 70% cacao chuncho de La Convención. Sabor frutal auténtico del Perú.",
+      "category": "Chocolate",
+      "tags": ["chocolate", "bean-to-bar", "70%-cacao", "aguaymanto", "goldenberry", "cusco"],
+      "brand": "Villa Chaco",
+      "attributes": {
+        "cacao_percentage": "70%",
+        "weight": "50g",
+        "origin": "La Convención, Cusco, Perú",
+        "process": "Bean to Bar",
+        "flavor_es": "Aguaymanto",
+        "flavor_en": "Goldenberry"
+      },
+      "images": [
+        { "file": "catalog-chocolate-dark-aguaymanto-70cacao-50g.jpg", "is_primary": true, "alt": "Chocolate Dark Aguaymanto 70% Cacao Chuncho — Villa Chaco" },
+        { "file": "producto-chocolate-aguaymanto.jpeg", "is_primary": false, "alt": "Empaque Chocolate Dark Aguaymanto 70% — Villa Chaco" }
+      ],
+      "sort_order": 3,
+      "is_featured": true
+    },
+    {
+      "sku": "VC-CHOC-ARANDANOS-50",
+      "title": "Chocolate Dark Arándanos 70% Cacao",
+      "description": "Chocolate dark bean to bar con arándanos. 70% cacao chuncho de La Convención, Cusco.",
+      "category": "Chocolate",
+      "tags": ["chocolate", "bean-to-bar", "70%-cacao", "arandanos", "blueberries", "cusco"],
+      "brand": "Villa Chaco",
+      "attributes": {
+        "cacao_percentage": "70%",
+        "weight": "50g",
+        "origin": "La Convención, Cusco, Perú",
+        "process": "Bean to Bar",
+        "flavor_es": "Arándanos",
+        "flavor_en": "Blueberries"
+      },
+      "images": [
+        { "file": "producto-chocolate-arandanos.jpg", "is_primary": true, "alt": "Chocolate Dark Arándanos 70% Cacao Chuncho — Villa Chaco" }
+      ],
+      "sort_order": 4,
+      "is_featured": false
+    },
+    {
+      "sku": "VC-CHOC-MANGO-50",
+      "title": "Chocolate Dark Mango 70% Cacao",
+      "description": "Chocolate dark bean to bar con mango tropical. 70% cacao chuncho de La Convención. Intenso, frutal y auténtico.",
+      "category": "Chocolate",
+      "tags": ["chocolate", "bean-to-bar", "70%-cacao", "mango", "cusco", "chuncho"],
+      "brand": "Villa Chaco",
+      "attributes": {
+        "cacao_percentage": "70%",
+        "weight": "50g",
+        "origin": "La Convención, Cusco, Perú",
+        "process": "Bean to Bar",
+        "flavor_es": "Mango",
+        "flavor_en": "Mango"
+      },
+      "images": [
+        { "file": "catalog-chocolate-dark-mango-70cacao-50g.jpg", "is_primary": true, "alt": "Chocolate Dark Mango 70% Cacao Chuncho — Villa Chaco" },
+        { "file": "producto-chocolate-mango.jpeg", "is_primary": false, "alt": "Empaque Chocolate Dark Mango 70% — Villa Chaco" }
+      ],
+      "sort_order": 5,
+      "is_featured": true
+    },
+    {
+      "sku": "VC-CHOC-PINA-50",
+      "title": "Chocolate Dark Piña 70% Cacao",
+      "description": "Chocolate dark bean to bar con piña. 70% cacao chuncho de La Convención. Sabor tropical intenso y auténtico.",
+      "category": "Chocolate",
+      "tags": ["chocolate", "bean-to-bar", "70%-cacao", "pina", "pineapple", "cusco"],
+      "brand": "Villa Chaco",
+      "attributes": {
+        "cacao_percentage": "70%",
+        "weight": "50g",
+        "origin": "La Convención, Cusco, Perú",
+        "process": "Bean to Bar",
+        "flavor_es": "Piña",
+        "flavor_en": "Pineapple"
+      },
+      "images": [
+        { "file": "catalog-chocolate-dark-pina-70cacao-50g.jpg", "is_primary": true, "alt": "Chocolate Dark Piña 70% Cacao Chuncho — Villa Chaco" },
+        { "file": "producto-chocolate-pina.jpeg", "is_primary": false, "alt": "Empaque Chocolate Dark Piña 70% — Villa Chaco" }
+      ],
+      "sort_order": 6,
+      "is_featured": true
+    },
+    {
+      "sku": "VC-CHOC-PISTACHOS-50",
+      "title": "Chocolate Bitter Pistachos 70% Cacao",
+      "description": "Chocolate bitter bean to bar con pistachos. 70% cacao chuncho. Elaboración artesanal con ingredientes naturales.",
+      "category": "Chocolate",
+      "tags": ["chocolate", "bean-to-bar", "70%-cacao", "pistachos", "pistachio", "cusco"],
+      "brand": "Villa Chaco",
+      "attributes": {
+        "cacao_percentage": "70%",
+        "weight": "50g",
+        "origin": "La Convención, Cusco, Perú",
+        "process": "Bean to Bar",
+        "flavor_es": "Pistachos",
+        "flavor_en": "Pistachio"
+      },
+      "images": [
+        { "file": "catalog-chocolate-dark-pistachos-70cacao-50g.jpg", "is_primary": true, "alt": "Chocolate Dark Pistachos 70% Cacao Chuncho — Villa Chaco" },
+        { "file": "producto-chocolate-pistachos.jpeg", "is_primary": false, "alt": "Empaque Chocolate Dark Pistachos 70% — Villa Chaco" }
+      ],
+      "sort_order": 7,
+      "is_featured": true
+    },
+    {
+      "sku": "VC-CAFE-TOSTADO-250",
+      "title": "Café Gourmet Tostado Molido 250g",
+      "description": "Café gourmet tostado y molido de la Finca Santiago del Valle de Chaco. Origen Quillabamba, La Convención, Cusco.",
+      "category": "Café",
+      "tags": ["cafe", "gourmet", "tostado", "molido", "cusco", "quillabamba", "specialty"],
+      "brand": "Villa Chaco",
+      "attributes": {
+        "weight": "250g",
+        "origin": "Finca Santiago, Valle de Chaco",
+        "region": "La Convención, Cusco, Perú",
+        "type": "Tostado molido",
+        "roast": "Gourmet"
+      },
+      "images": [
+        { "file": "catalog-cafe-gourmet-tostado-molido-250g.jpg", "is_primary": true, "alt": "Café Gourmet Tostado Molido Villa Chaco — Finca Santiago" },
+        { "file": "producto-cafe-tostado.jpeg", "is_primary": false, "alt": "Empaque Café Gourmet Tostado Molido 250g — Villa Chaco" }
+      ],
+      "sort_order": 10,
+      "is_featured": true
+    }
+  ]
+}

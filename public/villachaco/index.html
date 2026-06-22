@@ -497,8 +497,32 @@
     width: 100%;
     height: 100%;
     object-fit: cover;
-    transition: transform 0.6s cubic-bezier(0.25,0.46,0.45,0.94);
+    transition: transform 0.6s cubic-bezier(0.25,0.46,0.45,0.94), opacity 0.45s ease;
   }
+  .product-img.has-gallery .product-img-secondary {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+  }
+  .product-card:hover .product-img.has-gallery .product-img-primary { opacity: 0; }
+  .product-card:hover .product-img.has-gallery .product-img-secondary { opacity: 1; }
+  .product-img-dots {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    display: flex;
+    gap: 5px;
+    z-index: 2;
+    pointer-events: none;
+  }
+  .product-img-dots span {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.45);
+    border: 1px solid rgba(26,17,8,0.25);
+  }
+  .product-img-dots span.active { background: var(--ambar); }
   .product-overlay {
     position: absolute;
     inset: 0;
@@ -1199,8 +1223,10 @@
   <div class="products-grid">
 
     <div class="product-card" data-category="chocolate" id="producto-chocolate-fresa">
-      <div class="product-img">
-        <img src="images/producto-chocolate-fresa.jpg" alt="Chocolate Dark Fresa 70% Cacao Chuncho — Villa Chaco" width="976" height="1091" loading="lazy" decoding="async">
+      <div class="product-img has-gallery">
+        <img class="product-img-primary" src="images/catalog-chocolate-dark-fresa-70cacao-50g.jpg" alt="Chocolate Dark Fresa 70% Cacao Chuncho — Villa Chaco" width="682" height="1024" loading="lazy" decoding="async">
+        <img class="product-img-secondary" src="images/producto-chocolate-fresa.jpg" alt="Empaque Chocolate Dark Fresa 70% — Villa Chaco" width="976" height="1091" loading="lazy" decoding="async">
+        <div class="product-img-dots"><span class="active"></span><span></span></div>
         <div class="product-badge">Bean to Bar</div>
         <div class="product-overlay">
           <a href="https://wa.me/51910174533?text=Hola%2C%20quiero%20pedir%20Chocolate%20Dark%20Fresa%20(70%25%20Cacao%2C%2050g)" class="product-overlay-btn wa" target="_blank" rel="noopener">Pedir por WhatsApp</a>
@@ -1215,8 +1241,10 @@
     </div>
 
     <div class="product-card" data-category="chocolate" id="producto-naranja">
-      <div class="product-img">
-        <img src="images/producto-chocolate-naranja.jpeg" alt="Chocolate Dark Naranja 70% Cacao Chuncho — Villa Chaco" width="1200" height="1600" loading="lazy" decoding="async">
+      <div class="product-img has-gallery">
+        <img class="product-img-primary" src="images/catalog-chocolate-dark-naranja-70cacao-50g.jpg" alt="Chocolate Dark Naranja 70% Cacao Chuncho — Villa Chaco" width="682" height="1024" loading="lazy" decoding="async">
+        <img class="product-img-secondary" src="images/producto-chocolate-naranja.jpeg" alt="Empaque Chocolate Dark Naranja 70% — Villa Chaco" width="1200" height="1600" loading="lazy" decoding="async">
+        <div class="product-img-dots"><span class="active"></span><span></span></div>
         <div class="product-overlay">
           <a href="https://wa.me/51910174533?text=Hola%2C%20quiero%20pedir%20Chocolate%20Dark%20Naranja%20(70%25%20Cacao%2C%2050g)" class="product-overlay-btn wa" target="_blank" rel="noopener">Pedir por WhatsApp</a>
         </div>
@@ -1230,8 +1258,10 @@
     </div>
 
     <div class="product-card" data-category="chocolate" id="producto-aguaymanto">
-      <div class="product-img">
-        <img src="images/producto-chocolate-aguaymanto.jpeg" alt="Chocolate Dark Aguaymanto 70% Cacao Chuncho — Villa Chaco" width="1200" height="1600" loading="lazy" decoding="async">
+      <div class="product-img has-gallery">
+        <img class="product-img-primary" src="images/catalog-chocolate-dark-aguaymanto-70cacao-50g.jpg" alt="Chocolate Dark Aguaymanto 70% Cacao Chuncho — Villa Chaco" width="768" height="1024" loading="lazy" decoding="async">
+        <img class="product-img-secondary" src="images/producto-chocolate-aguaymanto.jpeg" alt="Empaque Chocolate Dark Aguaymanto 70% — Villa Chaco" width="1200" height="1600" loading="lazy" decoding="async">
+        <div class="product-img-dots"><span class="active"></span><span></span></div>
         <div class="product-overlay">
           <a href="https://wa.me/51910174533?text=Hola%2C%20quiero%20pedir%20Chocolate%20Dark%20Aguaymanto%20(70%25%20Cacao%2C%2050g)" class="product-overlay-btn wa" target="_blank" rel="noopener">Pedir por WhatsApp</a>
         </div>
@@ -1260,8 +1290,10 @@
     </div>
 
     <div class="product-card" data-category="chocolate" id="producto-mango">
-      <div class="product-img">
-        <img src="images/producto-chocolate-mango.jpeg" alt="Chocolate Dark Mango 70% Cacao Chuncho — Villa Chaco" width="1200" height="1600" loading="lazy" decoding="async">
+      <div class="product-img has-gallery">
+        <img class="product-img-primary" src="images/catalog-chocolate-dark-mango-70cacao-50g.jpg" alt="Chocolate Dark Mango 70% Cacao Chuncho — Villa Chaco" width="768" height="1024" loading="lazy" decoding="async">
+        <img class="product-img-secondary" src="images/producto-chocolate-mango.jpeg" alt="Empaque Chocolate Dark Mango 70% — Villa Chaco" width="1200" height="1600" loading="lazy" decoding="async">
+        <div class="product-img-dots"><span class="active"></span><span></span></div>
         <div class="product-overlay">
           <a href="https://wa.me/51910174533?text=Hola%2C%20quiero%20pedir%20Chocolate%20Dark%20Mango%20(70%25%20Cacao%2C%2050g)" class="product-overlay-btn wa" target="_blank" rel="noopener">Pedir por WhatsApp</a>
         </div>
@@ -1275,8 +1307,10 @@
     </div>
 
     <div class="product-card" data-category="chocolate" id="producto-pina">
-      <div class="product-img">
-        <img src="images/producto-chocolate-pina.jpeg" alt="Chocolate Dark Piña 70% Cacao Chuncho — Villa Chaco" width="1200" height="1600" loading="lazy" decoding="async">
+      <div class="product-img has-gallery">
+        <img class="product-img-primary" src="images/catalog-chocolate-dark-pina-70cacao-50g.jpg" alt="Chocolate Dark Piña 70% Cacao Chuncho — Villa Chaco" width="682" height="1024" loading="lazy" decoding="async">
+        <img class="product-img-secondary" src="images/producto-chocolate-pina.jpeg" alt="Empaque Chocolate Dark Piña 70% — Villa Chaco" width="1200" height="1600" loading="lazy" decoding="async">
+        <div class="product-img-dots"><span class="active"></span><span></span></div>
         <div class="product-overlay">
           <a href="https://wa.me/51910174533?text=Hola%2C%20quiero%20pedir%20Chocolate%20Dark%20Pi%C3%B1a%20(70%25%20Cacao%2C%2050g)" class="product-overlay-btn wa" target="_blank" rel="noopener">Pedir por WhatsApp</a>
         </div>
@@ -1290,8 +1324,10 @@
     </div>
 
     <div class="product-card" data-category="chocolate" id="producto-pistachos">
-      <div class="product-img">
-        <img src="images/producto-chocolate-pistachos.jpeg" alt="Chocolate Dark Pistachos 70% Cacao Chuncho — Villa Chaco" width="1600" height="1200" loading="lazy" decoding="async">
+      <div class="product-img has-gallery">
+        <img class="product-img-primary" src="images/catalog-chocolate-dark-pistachos-70cacao-50g.jpg" alt="Chocolate Dark Pistachos 70% Cacao Chuncho — Villa Chaco" width="768" height="1024" loading="lazy" decoding="async">
+        <img class="product-img-secondary" src="images/producto-chocolate-pistachos.jpeg" alt="Empaque Chocolate Dark Pistachos 70% — Villa Chaco" width="1600" height="1200" loading="lazy" decoding="async">
+        <div class="product-img-dots"><span class="active"></span><span></span></div>
         <div class="product-overlay">
           <a href="https://wa.me/51910174533?text=Hola%2C%20quiero%20pedir%20Chocolate%20Dark%20Pistachos%20(70%25%20Cacao%2C%2050g)" class="product-overlay-btn wa" target="_blank" rel="noopener">Pedir por WhatsApp</a>
         </div>
@@ -1367,18 +1403,20 @@
       </div>
     </div>
 
-    <div class="product-card" data-category="cafe">
-      <div class="product-img">
-        <img src="images/producto-cafe-especialidad.jpg" alt="Café de Especialidad Villa Chaco — Quillabamba" width="864" height="1184" loading="lazy" decoding="async">
-        <div class="product-badge">Specialty</div>
+    <div class="product-card" data-category="cafe" id="producto-cafe-tostado">
+      <div class="product-img has-gallery">
+        <img class="product-img-primary" src="images/catalog-cafe-gourmet-tostado-molido-250g.jpg" alt="Café Gourmet Tostado Molido Villa Chaco — Finca Santiago, Valle de Chaco" width="768" height="1024" loading="lazy" decoding="async">
+        <img class="product-img-secondary" src="images/producto-cafe-tostado.jpeg" alt="Empaque Café Gourmet Tostado Molido 250g — Villa Chaco" width="1200" height="1600" loading="lazy" decoding="async">
+        <div class="product-img-dots"><span class="active"></span><span></span></div>
+        <div class="product-badge">Gourmet</div>
         <div class="product-overlay">
-          <a href="https://wa.me/51910174533?text=Hola%2C%20quiero%20pedir%20Caf%C3%A9%20Villa%20Chaco" class="product-overlay-btn wa" target="_blank" rel="noopener">Pedir por WhatsApp</a>
+          <a href="https://wa.me/51910174533?text=Hola%2C%20quiero%20pedir%20Caf%C3%A9%20Gourmet%20Tostado%20Molido%20(250g)" class="product-overlay-btn wa" target="_blank" rel="noopener">Pedir por WhatsApp</a>
         </div>
       </div>
       <div class="product-info">
-        <div class="product-category">Café de Especialidad</div>
-        <div class="product-name">Café Villa<br>Chaco</div>
-        <div class="product-detail">Echarate · La Convención · Cusco</div>
+        <div class="product-category">Café Gourmet</div>
+        <div class="product-name">Tostado<br>Molido</div>
+        <div class="product-detail">250g · Finca Santiago · Valle de Chaco</div>
         <div class="product-price">Consultar <span>precio</span></div>
       </div>
     </div>
