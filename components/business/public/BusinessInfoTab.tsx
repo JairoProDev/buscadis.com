@@ -14,6 +14,7 @@ import {
 } from '@/components/Icons';
 import { cn } from '@/lib/utils';
 import { getWhatsappUrl } from '@/lib/business/public-utils';
+import { getPublicadisSiteUrl } from '@/lib/business/publicadis';
 import { getAdisoUrl } from '@/lib/url';
 
 interface BusinessInfoTabProps {
@@ -23,7 +24,9 @@ interface BusinessInfoTabProps {
 }
 
 export default function BusinessInfoTab({ profile, adisos, showCustomLinks = true }: BusinessInfoTabProps) {
-  const hasSocials = profile.social_links && profile.social_links.length > 0;
+  const publicadisUrl = getPublicadisSiteUrl(profile);
+  const socialArray = Array.isArray(profile.social_links) ? profile.social_links : [];
+  const hasSocials = socialArray.length > 0;
 
   return (
     <motion.div
@@ -39,7 +42,7 @@ export default function BusinessInfoTab({ profile, adisos, showCustomLinks = tru
           </p>
           {hasSocials && (
             <div className="flex gap-4 flex-wrap">
-              {profile.social_links?.map((link, idx) => (
+              {socialArray.map((link, idx) => (
                 <a
                   key={idx}
                   href={link.url}
@@ -51,6 +54,16 @@ export default function BusinessInfoTab({ profile, adisos, showCustomLinks = tru
                 </a>
               ))}
             </div>
+          )}
+          {publicadisUrl && (
+            <a
+              href={publicadisUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-[var(--brand-color)] hover:underline"
+            >
+              Ver sitio web profesional →
+            </a>
           )}
         </div>
 

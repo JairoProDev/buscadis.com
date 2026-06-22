@@ -41,7 +41,7 @@ Un negocio = **un `business_profile_id`** en base de datos. Dos presentaciones d
 
 ### Buscadis — Perfil (`site_tier: buscadis_profile`)
 
-- Banner, logo, bio corta, ubicación
+- Banner, logo, bio corta, ubicación, productos, anuncios, equipo, redes sociales, horarios, etc.
 - Botones: WhatsApp, carrito, compartir
 - Tabs: Catálogo · Ofertas · Información · Reseñas
 - Plantillas básicas: colores, tipografía, orden de bloques
@@ -289,12 +289,14 @@ Preview → Publicar
 
 ### Fase 1 — Semanas 1-2
 
-- [ ] Migración SQL: `site_tier`, `publicadis_sites`
-- [ ] Ejecutar seed Villa Chaco en producción
-- [ ] Middleware host `publicadis.com`
-- [ ] Mover `public/villachaco/` → servir en Publicadis
-- [ ] Redirect `buscadis.com/villachaco` → `publicadis.com/p/villachaco`
-- [ ] Link "Ver sitio web" en perfil Buscadis → Publicadis
+- [x] Migración SQL: `site_tier`, `publicadis_sites` (`023_publicadis_sites.sql`)
+- [x] Ejecutar seed Villa Chaco en producción (perfil + catálogo + `publicadis_sites`)
+- [x] PublicAdis: `public/villachaco/` + rewrites `/p/villachaco`
+- [x] Redirect `buscadis.com/villachaco` → `publicadis.com/p/villachaco` (salvo `VILLACHACO_SERVE_ON_BUSCADIS=true`)
+- [x] Link "Sitio web" en perfil Buscadis → Publicadis (`lib/business/publicadis.ts`)
+- [x] Link "Perfil Buscadis" en sitio Villa Chaco (nav + footer)
+- [ ] Deploy PublicAdis-nextjs a `publicadis.com` (Vercel)
+- [ ] Verificar DNS `publicadis.com` apuntando al proyecto PublicAdis-nextjs
 
 ### Fase 2 — Semanas 3-4
 

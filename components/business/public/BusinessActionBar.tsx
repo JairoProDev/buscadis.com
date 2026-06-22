@@ -8,6 +8,7 @@ import {
 } from '@/components/Icons';
 import type { BusinessProfile } from '@/types/business';
 import { getWhatsappUrl } from '@/lib/business/public-utils';
+import { getPublicadisSiteUrl } from '@/lib/business/publicadis';
 import { cn } from '@/lib/utils';
 
 interface BusinessActionBarProps {
@@ -29,6 +30,8 @@ export default function BusinessActionBar({
   onEditPart,
   hideMobile = false,
 }: BusinessActionBarProps) {
+  const publicadisUrl = getPublicadisSiteUrl(profile);
+
   return (
     <div className="max-w-6xl mx-auto px-4 md:px-8 md:ml-[220px] -mt-2 mb-4">
       <div className="hidden md:flex items-center gap-3">
@@ -40,6 +43,16 @@ export default function BusinessActionBar({
             className="bg-[var(--brand-color)] hover:brightness-110 text-white px-6 py-3 rounded-xl font-bold shadow-lg shadow-[var(--brand-color)]/30 hover:-translate-y-1 transition-all flex items-center gap-2 print:hidden"
           >
             <IconWhatsapp size={20} /> Contáctanos
+          </a>
+        )}
+        {publicadisUrl && (
+          <a
+            href={publicadisUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="bg-slate-900 hover:bg-slate-800 text-white px-5 py-3 rounded-xl font-bold transition-all flex items-center gap-2 print:hidden"
+          >
+            Sitio web
           </a>
         )}
         {onOpenCart && (
@@ -77,13 +90,26 @@ export default function BusinessActionBar({
         )}
       </div>
 
-      <div className={cn('md:hidden grid grid-cols-5 gap-2 mt-4', hideMobile && 'hidden')}>
+      <div className={cn('md:hidden grid gap-2 mt-4', hideMobile && 'hidden', publicadisUrl ? 'grid-cols-6' : 'grid-cols-5')}>
+        {publicadisUrl && (
+          <a
+            href={publicadisUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="col-span-2 bg-slate-900 text-white h-12 rounded-xl font-bold flex items-center justify-center text-xs px-2"
+          >
+            Sitio web
+          </a>
+        )}
         {profile.contact_whatsapp && (
           <a
             href={getWhatsappUrl(profile.contact_whatsapp, profile.name || 'Negocio')}
             target="_blank"
             rel="noreferrer"
-            className="col-span-2 bg-[var(--brand-color)] text-white h-12 rounded-xl font-bold shadow-lg flex items-center justify-center gap-2 text-sm"
+            className={cn(
+              'bg-[var(--brand-color)] text-white h-12 rounded-xl font-bold shadow-lg flex items-center justify-center gap-2 text-sm',
+              publicadisUrl ? 'col-span-2' : 'col-span-2'
+            )}
           >
             <IconWhatsapp size={18} /> WhatsApp
           </a>

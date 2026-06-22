@@ -147,6 +147,9 @@ async function main() {
     theme_color: seed.business.theme_color,
     template_id: seed.business.template_id,
     is_published: true,
+    site_tier: seed.business.site_tier || 'both',
+    publicadis_template_id: 'artisan-brand',
+    publicadis_published: true,
     social_links: {
       publicadis_site: seed.business.publicadis_site_url,
       site_tier: seed.business.site_tier,
@@ -244,6 +247,33 @@ async function main() {
       const { error } = await supabaseAdmin.from('catalog_products').insert(row);
       if (error) throw error;
       console.log('  ✓ creado');
+    }
+  }
+
+  const publicadisSite = {
+    business_profile_id: businessId,
+    slug: seed.business.slug,
+    template_id: 'artisan-brand',
+    static_path: '/villachaco/index.html',
+    is_published: true,
+    published_at: new Date().toISOString(),
+    config: {
+      hero_image: 'catalog-chocolate-dark-fresa-70cacao-50g.jpg',
+      buscadis_profile_url: `https://buscadis.com/p/${seed.business.slug}`,
+      canonical_url: seed.business.publicadis_site_url,
+    },
+  };
+
+  if (dryRun) {
+    console.log('[dry-run] publicadis_sites upsert:', publicadisSite);
+  } else {
+    const { error: siteError } = await supabaseAdmin
+      .from('publicadis_sites')
+      .upsert(publicadisSite, { onConflict: 'business_profile_id' });
+    if (siteError) {
+      console.warn('publicadis_sites no disponible aún (ejecuta migración 023):', siteError.message);
+    } else {
+      console.log('✓ Sitio Publicadis registrado');
     }
   }
 
