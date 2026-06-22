@@ -299,12 +299,13 @@ Preview → Publicar
 - [x] Seed AGRIL SUR: `buscadis.com/p/agrilsur` (19 productos) + proxy Publicadis → agrilsur.vercel.app
 - [x] Deploy buscadis.com con redirect `/villachaco` y enlaces Publicadis en perfil — 2026-06-22
 
-### Fase 2 — Semanas 3-4
+### Fase 2 — Agrilsur integrado (2026-06-22)
 
-- [ ] Template Publicadis base (`artisan-brand` — Villa Chaco como referencia)
-- [ ] Agrilsur: importar desde `./agrilsur` o Vercel a `publicadis_sites`
-- [ ] Quival: catálogo 510 productos 100% en DB (sin flyers estáticos)
-- [ ] Sitemap: perfiles + sitios Publicadis
+- [x] `basePath: /p/agrilsur` en `agrilsur/web` (vía `NEXT_PUBLIC_BASE_PATH`)
+- [x] Deploy `agrilsur.vercel.app/p/agrilsur` con URL canónica `publicadis.com/p/agrilsur`
+- [x] PublicAdis: **rewrite** (no redirect) hacia backend Agrilsur
+- [x] Enlace cruzado Buscadis en footer de Agrilsur
+- [ ] Migrar dominio `destileriaagrilsurcusco.com` → `publicadis.com/p/agrilsur`
 
 ### Fase 3 — Mes 2
 

@@ -2,6 +2,7 @@ import { supabase } from './supabase';
 import type { Adiso, Categoria } from '@/types';
 import { BusinessProfile } from '@/types/business';
 import type { BusinessMemberRole, BusinessWithRole } from './business-access';
+import { normalizeBusinessProfile } from '@/lib/business/normalize-profile';
 
 export const BUSINESS_TABLE = 'business_profiles';
 
@@ -16,6 +17,8 @@ const VALID_BUSINESS_COLUMNS = [
     'pixel_facebook', 'pixel_tiktok', 'is_vacation_mode', 'custom_domain',
     'show_contact_form', 'favicon_url', 'font_family',
     'is_published', 'view_count', 'created_at', 'updated_at',
+    'site_tier', 'publicadis_template_id', 'publicadis_published', 'publicadis_config',
+    'pending_owner_email',
 ];
 
 export function sanitizeBusinessProfilePayload(profile: any) {
@@ -102,7 +105,7 @@ export async function getBusinessProfileBySlug(slug: string): Promise<BusinessPr
         return null;
     }
 
-    return data as BusinessProfile;
+    return normalizeBusinessProfile(data as BusinessProfile) as BusinessProfile;
 }
 
 export async function createBusinessProfile(profile: Partial<BusinessProfile>): Promise<BusinessProfile | null> {

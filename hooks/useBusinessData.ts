@@ -21,15 +21,15 @@ import { idbGetCatalog, idbSetCatalog } from '@/lib/offline-catalog-store';
 import { idbClearCatalogPdf } from '@/lib/catalog-pdf';
 import { prefetchCatalogProductImages } from '@/lib/catalog-image-prefetch';
 import { useNetworkStatus } from './useNetworkStatus';
-import { normalizeProfileBlocks } from '@/lib/business/blocks/normalize';
+import { normalizeBusinessProfile } from '@/lib/business/normalize-profile';
 
 function enrichBusinessProfile(profile: BusinessProfile): BusinessProfile {
+  const normalized = normalizeBusinessProfile(profile);
   return {
-    ...profile,
-    template_id: profile.template_id || 'modern_tabs',
-    theme_preset: profile.theme_preset || 'executive',
-    profile_blocks: normalizeProfileBlocks(profile.profile_blocks, profile.template_id),
-  };
+    ...normalized,
+    template_id: normalized.template_id || 'modern_tabs',
+    theme_preset: normalized.theme_preset || 'executive',
+  } as BusinessProfile;
 }
 
 interface BusinessDataState {

@@ -5,7 +5,11 @@
  * Uso:
  *   npx tsx scripts/seed-villachaco-catalog.ts
  *   npx tsx scripts/seed-villachaco-catalog.ts --dry-run
+ *   npx tsx scripts/seed-villachaco-catalog.ts --owner-email dueña@ejemplo.com
  *   npx tsx scripts/seed-villachaco-catalog.ts --transfer-email dueña@ejemplo.com
+ *
+ * Si la dueña aún no tiene cuenta, --owner-email guarda pending_owner_email y
+ * al registrarse con ese correo recibe la página automáticamente.
  */
 
 import * as fs from 'fs';
@@ -45,27 +49,37 @@ interface CatalogSeedFile {
     tagline: string;
     description: string;
     contact_whatsapp: string;
+    contact_phone?: string;
+    contact_email?: string;
     contact_address: string;
     theme_color: string;
     template_id: string;
     site_tier: string;
     publicadis_site_url: string;
+    logo_file?: string;
+    banner_file?: string;
+    meta_title?: string;
+    meta_description?: string;
+    pending_owner_email?: string;
   };
   products: CatalogProductSeed[];
 }
 
 function parseArgs() {
   const args = process.argv.slice(2);
-  let transferEmail = '';
+  let ownerEmail = '';
   for (let i = 0; i < args.length; i++) {
-    if (args[i] === '--transfer-email') transferEmail = args[++i] || '';
+    if (args[i] === '--owner-email' || args[i] === '--transfer-email') {
+      ownerEmail = args[++i] || '';
+    }
   }
-  return { dryRun: args.includes('--dry-run'), transferEmail };
+  return { dryRun: args.includes('--dry-run'), ownerEmail: ownerEmail.trim().toLowerCase() };
 }
 
 async function uploadCatalogImage(
   businessId: string,
   fileName: string,
+  folder: 'products' | 'brand',
   dryRun: boolean
 ): Promise<string> {
   const localPath = path.join(IMAGES_DIR, fileName);
@@ -81,9 +95,10 @@ async function uploadCatalogImage(
 
   const { supabaseAdmin } = await import('../lib/supabase-admin');
   const buffer = fs.readFileSync(localPath);
-  const ext = path.extname(fileName).slice(1) || 'jpg';
-  const contentType = ext === 'png' ? 'image/png' : ext === 'jpeg' ? 'image/jpeg' : 'image/jpeg';
-  const storagePath = `${businessId}/products/${fileName}`;
+  const ext = path.extname(fileName).slice(1).toLowerCase();
+  const contentType =
+    ext === 'png' ? 'image/png' : ext === 'svg' ? 'image/svg+xml' : ext === 'jpeg' ? 'image/jpeg' : 'image/jpeg';
+  const storagePath = `${businessId}/${folder}/${fileName}`;
 
   const { error } = await supabaseAdmin.storage.from(CATALOG_BUCKET).upload(storagePath, buffer, {
     contentType,
@@ -114,18 +129,31 @@ async function findUserIdByEmail(email: string): Promise<string | null> {
   return null;
 }
 
+function buildSocialLinks(publicadisUrl: string) {
+  return [
+    { network: 'custom' as const, url: publicadisUrl, label: 'Sitio web Publicadis' },
+    {
+      network: 'custom' as const,
+      url: 'https://buscadis.com/p/villachaco',
+      label: 'Perfil Buscadis',
+    },
+  ];
+}
+
 async function main() {
-  const { dryRun, transferEmail } = parseArgs();
+  const { dryRun, ownerEmail } = parseArgs();
   const seed: CatalogSeedFile = JSON.parse(fs.readFileSync(DATA_PATH, 'utf-8'));
   const { supabaseAdmin } = await import('../lib/supabase-admin');
+
+  const reservedEmail = (ownerEmail || seed.business.pending_owner_email || '').trim().toLowerCase();
 
   console.log(`Villa Chaco — seed catálogo Buscadis${dryRun ? ' (dry-run)' : ''}`);
 
   let ownerUserId: string | null = null;
-  if (transferEmail) {
-    ownerUserId = await findUserIdByEmail(transferEmail);
+  if (reservedEmail) {
+    ownerUserId = await findUserIdByEmail(reservedEmail);
     if (!ownerUserId) {
-      console.warn(`Usuario no encontrado (${transferEmail}); perfil quedará sin dueño asignado.`);
+      console.log(`Usuario aún no registrado (${reservedEmail}); se guardará pending_owner_email.`);
     }
   }
 
@@ -137,29 +165,48 @@ async function main() {
 
   let businessId = existing?.id as string | undefined;
 
-  const profilePayload = {
+  if (dryRun) {
+    businessId = businessId || '00000000-0000-0000-0000-000000000001';
+  }
+
+  let logoUrl: string | undefined;
+  let bannerUrl: string | undefined;
+  if (seed.business.logo_file && businessId) {
+    logoUrl = await uploadCatalogImage(businessId, seed.business.logo_file, 'brand', dryRun);
+  }
+  if (seed.business.banner_file && businessId) {
+    bannerUrl = await uploadCatalogImage(businessId, seed.business.banner_file, 'brand', dryRun);
+  }
+
+  const profilePayload: Record<string, unknown> = {
     slug: seed.business.slug,
     name: seed.business.name,
     tagline: seed.business.tagline,
     description: seed.business.description,
     contact_whatsapp: seed.business.contact_whatsapp,
+    contact_phone: seed.business.contact_phone || seed.business.contact_whatsapp,
+    contact_email: seed.business.contact_email || null,
     contact_address: seed.business.contact_address,
     theme_color: seed.business.theme_color,
     template_id: seed.business.template_id,
+    logo_url: logoUrl,
+    banner_url: bannerUrl,
+    meta_title: seed.business.meta_title,
+    meta_description: seed.business.meta_description,
     is_published: true,
     site_tier: seed.business.site_tier || 'both',
     publicadis_template_id: 'artisan-brand',
     publicadis_published: true,
-    social_links: {
-      publicadis_site: seed.business.publicadis_site_url,
-      site_tier: seed.business.site_tier,
-    },
-    ...(ownerUserId ? { user_id: ownerUserId, created_by: ownerUserId } : {}),
+    social_links: buildSocialLinks(seed.business.publicadis_site_url),
+    ...(ownerUserId
+      ? { user_id: ownerUserId, created_by: ownerUserId, pending_owner_email: null }
+      : reservedEmail
+        ? { pending_owner_email: reservedEmail }
+        : {}),
   };
 
   if (dryRun) {
     console.log('[dry-run] business_profiles upsert:', profilePayload);
-    businessId = businessId || '00000000-0000-0000-0000-000000000001';
   } else if (businessId) {
     const { error } = await supabaseAdmin.from('business_profiles').update(profilePayload).eq('id', businessId);
     if (error) throw error;
@@ -188,7 +235,9 @@ async function main() {
       },
       { onConflict: 'business_profile_id,user_id' }
     );
-    console.log(`✓ Dueño asignado: ${transferEmail}`);
+    console.log(`✓ Dueño asignado: ${reservedEmail}`);
+  } else if (reservedEmail && !dryRun) {
+    console.log(`✓ Dueño pendiente por correo: ${reservedEmail}`);
   }
 
   for (const product of seed.products) {
@@ -196,7 +245,7 @@ async function main() {
 
     const images = [];
     for (const img of product.images) {
-      const url = await uploadCatalogImage(businessId, img.file, dryRun);
+      const url = await uploadCatalogImage(businessId, img.file, 'products', dryRun);
       images.push({
         url,
         is_primary: img.is_primary,
@@ -258,7 +307,7 @@ async function main() {
     is_published: true,
     published_at: new Date().toISOString(),
     config: {
-      hero_image: 'catalog-chocolate-dark-fresa-70cacao-50g.jpg',
+      hero_image: seed.business.banner_file || 'catalog-chocolate-dark-fresa-70cacao-50g.jpg',
       buscadis_profile_url: `https://buscadis.com/p/${seed.business.slug}`,
       canonical_url: seed.business.publicadis_site_url,
     },
@@ -271,14 +320,18 @@ async function main() {
       .from('publicadis_sites')
       .upsert(publicadisSite, { onConflict: 'business_profile_id' });
     if (siteError) {
-      console.warn('publicadis_sites no disponible aún (ejecuta migración 023):', siteError.message);
+      console.warn('publicadis_sites:', siteError.message);
     } else {
       console.log('✓ Sitio Publicadis registrado');
     }
   }
 
-  console.log('\nListo. Perfil Buscadis: /p/villachaco');
-  console.log('Sitio Publicadis (estático actual): /villachaco → migrar a publicadis.com/p/villachaco');
+  console.log('\nListo.');
+  console.log(`Perfil Buscadis: https://buscadis.com/p/${seed.business.slug}`);
+  console.log(`Sitio Publicadis: ${seed.business.publicadis_site_url}`);
+  if (reservedEmail && !ownerUserId) {
+    console.log(`Asignación pendiente: ${reservedEmail} (al crear cuenta)`);
+  }
 }
 
 main().catch((err) => {

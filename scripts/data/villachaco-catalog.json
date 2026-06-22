@@ -5,11 +5,17 @@
     "tagline": "Sabores que nacen de la tierra",
     "description": "Chocolate bean to bar 70% cacao chuncho, miel gourmet, café de especialidad y derivados de cacao desde Quillabamba, La Convención, Cusco.",
     "contact_whatsapp": "+51910174533",
+    "contact_phone": "+51910174533",
     "contact_address": "Echarate, La Convención, Cusco, Perú",
     "theme_color": "#B31E24",
     "template_id": "modern_tabs",
-    "site_tier": "buscadis_profile",
-    "publicadis_site_url": "https://publicadis.com/p/villachaco"
+    "site_tier": "both",
+    "publicadis_site_url": "https://publicadis.com/p/villachaco",
+    "logo_file": "logo-villa-chaco.svg",
+    "banner_file": "catalog-chocolate-dark-fresa-70cacao-50g.jpg",
+    "meta_title": "Villa Chaco Productos | Chocolate bean to bar — Quillabamba, Cusco",
+    "meta_description": "Chocolate 70% cacao chuncho, miel gourmet, café de especialidad y derivados de cacao. Productos artesanales desde La Convención, Cusco.",
+    "pending_owner_email": ""
   },
   "products": [
     {

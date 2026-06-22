@@ -122,6 +122,9 @@ export interface BusinessProfile {
     is_published: boolean;
     view_count: number;
 
+    /** Email reserved for automatic ownership on signup (ADIS pre-provisioned pages). */
+    pending_owner_email?: string | null;
+
     created_at: string;
     updated_at: string;
 }

@@ -3,6 +3,7 @@ import type { Adiso } from '@/types';
 import type { BusinessReviewAggregate } from '@/types/business';
 import { getBusinessCanonicalUrl } from './public-utils';
 import { getDefaultOgImageUrl } from '@/lib/seo/og-image';
+import { normalizeSocialLinks } from '@/lib/business/normalize-profile';
 
 export function buildBusinessMetadata(profile: {
   name: string;
@@ -45,7 +46,7 @@ export function buildLocalBusinessJsonLd(
     address: profile.contact_address
       ? { '@type': 'PostalAddress', streetAddress: profile.contact_address, addressCountry: 'PE' }
       : undefined,
-    sameAs: profile.social_links?.map((s) => s.url).filter(Boolean),
+    sameAs: normalizeSocialLinks(profile.social_links).map((s) => s.url).filter(Boolean),
   };
 
   if (aggregate && aggregate.review_count > 0) {

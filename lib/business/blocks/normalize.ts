@@ -28,7 +28,9 @@ export function normalizeProfileBlocks(
     ? template.defaultBlocks
     : DEFAULT_PROFILE_BLOCKS;
 
-  if (!blocks || blocks.length === 0) return defaults.map((b) => ({ ...b, config: { ...b.config } }));
+  if (!Array.isArray(blocks) || blocks.length === 0) {
+    return defaults.map((b) => ({ ...b, config: { ...b.config } }));
+  }
 
   const valid = blocks.filter(isValidBlock);
   if (valid.length === 0) return defaults.map((b) => ({ ...b, config: { ...b.config } }));

@@ -304,10 +304,10 @@ async function main() {
     is_published: true,
     published_at: new Date().toISOString(),
     config: {
-      external_app_url: seed.business.publicadis_external_url,
       buscadis_profile_url: `https://buscadis.com/p/${seed.business.slug}`,
       canonical_url: seed.business.publicadis_site_url,
-      note: 'Fase 2: migrar a basePath /p/agrilsur en monorepo',
+      app_origin: 'https://agrilsur.vercel.app',
+      base_path: '/p/agrilsur',
     },
   };
 
