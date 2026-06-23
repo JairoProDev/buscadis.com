@@ -11,6 +11,7 @@ import { createClient } from '@supabase/supabase-js';
 import { sanitizeBusinessProfilePayload } from '@/lib/business';
 import { revalidateTag } from 'next/cache';
 import { BUSINESS_CACHE_TAG } from '@/lib/business/seo';
+import { isPlatformAdminEmail, isPlatformAdminProfile } from '@/lib/platform-admin';
 
 const supabaseAdmin = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -78,7 +79,7 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: 'Negocio no encontrado' }, { status: 404 });
         }
 
-        // Check ownership: by user_id field OR by business_members
+        // Check ownership: by user_id field OR by business_members OR platform admin
         let isAuthorized = profile.user_id === user.id;
         if (!isAuthorized) {
             const { data: membership } = await supabaseAdmin
@@ -89,6 +90,18 @@ export async function POST(req: NextRequest) {
                 .eq('status', 'active')
                 .maybeSingle();
             isAuthorized = !!(membership?.role && ['owner', 'admin', 'editor'].includes(membership.role));
+        }
+        if (!isAuthorized) {
+            if (isPlatformAdminEmail(user.email)) {
+                isAuthorized = true;
+            } else {
+                const { data: adminProfile } = await supabaseAdmin
+                    .from('profiles')
+                    .select('rol, is_platform_admin')
+                    .eq('id', user.id)
+                    .maybeSingle();
+                isAuthorized = isPlatformAdminProfile(adminProfile);
+            }
         }
 
         // FALLBACK: if still not authorized, check if the user created/owns the profile

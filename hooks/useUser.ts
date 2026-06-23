@@ -1,6 +1,7 @@
 import { useAuth } from './useAuth';
 import { Profile, UserPreferences } from '@/types';
 import { getUserPreferences } from '@/lib/user';
+import { isPlatformAdminUser } from '@/lib/platform-admin';
 import { useState, useEffect } from 'react';
 
 /**
@@ -37,6 +38,7 @@ export function useUser() {
     isAuthenticated: !!user,
     isAnunciante: profile?.rol === 'anunciante' || profile?.rol === 'admin',
     isAdmin: profile?.rol === 'admin',
+    isPlatformAdmin: isPlatformAdminUser(user?.email, profile),
     isVerificado: profile?.es_verificado || false
   };
 }

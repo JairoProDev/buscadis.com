@@ -9,6 +9,7 @@ import BusinessProfileEditorLayout, {
   EditorViewToggle,
 } from '@/components/business/editor/BusinessProfileEditorLayout';
 import { useAuth } from '@/hooks/useAuth';
+import { useUser } from '@/hooks/useUser';
 import { EditorSteps } from '../../mi-negocio/components/EditorSteps';
 import { cn } from '@/lib/utils';
 
@@ -34,6 +35,7 @@ export default function PublicBusinessPage({
 }) {
     const slug = decodeURIComponent(params.slug);
     const { user } = useAuth();
+    const { profile, isPlatformAdmin } = useUser();
     const { success, error: showError } = useToast();
     const { isOnline, justCameOnline } = useNetworkStatus();
 
@@ -59,6 +61,10 @@ export default function PublicBusinessPage({
         }
     }, [searchParams]);
 
+    const [mounted, setMounted] = useState(false);
+    const [isMember, setIsMember] = useState(false);
+    const [businessOptions, setBusinessOptions] = useState<BusinessWithRole[]>([]);
+
     const {
         business,
         adisos,
@@ -69,10 +75,7 @@ export default function PublicBusinessPage({
         isStale,
         reloadCatalog,
         updateBusiness,
-    } = useBusinessData(slug, false);
-
-    const [mounted, setMounted] = useState(false);
-    const [businessOptions, setBusinessOptions] = useState<BusinessWithRole[]>([]);
+    } = useBusinessData(slug, isPlatformAdmin || isMember);
 
     useEffect(() => {
         setMounted(true);
@@ -95,9 +98,8 @@ export default function PublicBusinessPage({
     );
 
     // Secondary check via membership (handles cases where user_id differs)
-    const [isMember, setIsMember] = React.useState(false);
     useEffect(() => {
-        if (!user?.id || !business?.id || isOwner) return;
+        if (!user?.id || !business?.id || isOwner || isPlatformAdmin) return;
         supabase!.from('business_members')
             .select('role')
             .eq('user_id', user.id)
@@ -109,9 +111,9 @@ export default function PublicBusinessPage({
                     setIsMember(true);
                 }
             });
-    }, [user?.id, business?.id, isOwner]);
+    }, [user?.id, business?.id, isOwner, isPlatformAdmin]);
 
-    const canEdit = mounted && (isOwner || isMember);
+    const canEdit = mounted && (isOwner || isMember || isPlatformAdmin);
 
     // When business loads, initialize local editing profile
     useEffect(() => {
@@ -298,6 +300,11 @@ export default function PublicBusinessPage({
                     <EditorCloseButton onClick={() => setIsEditing(false)} />
                     <div className="flex flex-col min-w-0 flex-1">
                         <span className="font-bold text-sm text-slate-800 leading-tight">Editar Página</span>
+                        {isPlatformAdmin && !isOwner && !isMember && (
+                            <span className="text-[10px] font-medium text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded w-fit">
+                                Modo admin — editando perfil ajeno
+                            </span>
+                        )}
                         <div className="flex items-center gap-1.5">
                             {saving ? (
                                 <span className="text-[10px] text-slate-400 flex items-center gap-1">
