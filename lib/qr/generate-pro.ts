@@ -19,11 +19,18 @@ async function loadQrCodeStyling(): Promise<QrCodeStylingCtor> {
   return mod.default as unknown as QrCodeStylingCtor;
 }
 
-function buildStylingOptions(
+async function buildStylingOptions(
   options: GenerateProQrOptions
-): Record<string, unknown> {
+): Promise<Record<string, unknown>> {
   const { styleConfig, data, width = 512, logoUrl, skipLogo } = options;
-  const image = !skipLogo ? (logoUrl || styleConfig.logoUrl) : undefined;
+
+  let image: string | undefined;
+  if (!skipLogo) {
+    const imgUrl = logoUrl || styleConfig.logoUrl;
+    if (imgUrl) {
+      image = (await fetchLogoDataUrl(imgUrl)) || undefined;
+    }
+  }
 
   const dotsOptions: Record<string, unknown> = {
     type: styleConfig.dotType || 'rounded',
@@ -73,20 +80,12 @@ export async function generateProQrPng(options: GenerateProQrOptions): Promise<B
   const { createCanvas, loadImage } = await import('canvas');
   const { JSDOM } = await import('jsdom');
 
-  const stylingOptions = buildStylingOptions(options);
+  const stylingOptions = await buildStylingOptions(options);
   const qr = new QRCodeStyling({
     ...stylingOptions,
     jsdom: JSDOM,
     nodeCanvas: { createCanvas, loadImage },
   });
-
-  if (options.logoUrl || options.styleConfig.logoUrl) {
-    const imgUrl = options.logoUrl || options.styleConfig.logoUrl;
-    if (imgUrl) {
-      const dataUrl = await fetchLogoDataUrl(imgUrl);
-      if (dataUrl) qr.update({ image: dataUrl });
-    }
-  }
 
   const raw = await qr.getRawData('png');
   if (!raw) throw new Error('No se pudo generar el QR Pro');
@@ -101,7 +100,7 @@ export async function generateProQrSvg(options: GenerateProQrOptions): Promise<s
   const { JSDOM } = await import('jsdom');
 
   const stylingOptions = {
-    ...buildStylingOptions({ ...options, width: options.width ?? 400 }),
+    ...(await buildStylingOptions({ ...options, width: options.width ?? 400 })),
     type: 'svg',
   };
 

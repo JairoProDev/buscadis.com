@@ -87,7 +87,6 @@ export async function POST(request: NextRequest) {
       data: adisoUrl,
       themeColor: '#2563eb',
       width: 300,
-      withWatermark: false,
     });
     const qrUrl = `data:image/png;base64,${qrPng.toString('base64')}`;
 

@@ -29,9 +29,11 @@ export default function QrProfileModal({
   themeColor,
 }: QrProfileModalProps) {
   const [scanUrl, setScanUrl] = useState<string | null>(null);
+  const [refreshToken, setRefreshToken] = useState(0);
 
   useEffect(() => {
     if (!open) return;
+    setRefreshToken(Date.now());
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
     };
@@ -59,8 +61,8 @@ export default function QrProfileModal({
   }, [open, slug]);
 
   const encoded = encodeURIComponent(slug);
-  const qrPngUrl = `/api/business/${encoded}/qr?format=png`;
-  const qrPrintUrl = `/api/business/${encoded}/qr?format=png&width=1024`;
+  const qrPngUrl = `/api/business/${encoded}/qr?format=png&refresh=1&t=${refreshToken}`;
+  const qrPrintUrl = `/api/business/${encoded}/qr?format=png&width=1024&refresh=1&t=${refreshToken}`;
   const packagingKitUrl = `/api/business/${encoded}/qr-kit?template=sticker&format=svg`;
   const profileUrl = getBusinessCanonicalUrl(slug);
 
@@ -166,6 +168,7 @@ export default function QrProfileModal({
               themeColor={themeColor}
               compact
               onUpgrade={handleUpgrade}
+              refreshToken={refreshToken}
             />
           ) : (
             <div className="flex flex-col items-center gap-5">
@@ -173,7 +176,13 @@ export default function QrProfileModal({
                 Escanea con la cámara de tu celular para ver el catálogo, ofertas y contacto de{' '}
                 <span className="font-bold text-slate-800">{businessName}</span>.
               </p>
-              <QrPreview slug={slug} businessName={businessName} tier={isPro ? 'pro' : 'free'} size={220} />
+              <QrPreview
+                slug={slug}
+                businessName={businessName}
+                tier={isPro ? 'pro' : 'free'}
+                size={220}
+                refreshToken={refreshToken}
+              />
               <div className="w-full grid grid-cols-2 gap-2">
                 <a
                   href={qrPngUrl}

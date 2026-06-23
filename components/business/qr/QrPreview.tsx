@@ -10,6 +10,8 @@ interface QrPreviewProps {
   tier?: 'free' | 'pro';
   className?: string;
   size?: number;
+  /** Cambia al abrir el modal para evitar imagen cacheada en el navegador */
+  refreshToken?: number;
 }
 
 export default function QrPreview({
@@ -19,6 +21,7 @@ export default function QrPreview({
   tier = 'free',
   className,
   size = 200,
+  refreshToken = 0,
 }: QrPreviewProps) {
   const encoded = encodeURIComponent(slug);
   const [cacheKey, setCacheKey] = useState<string | null>(null);
@@ -26,25 +29,30 @@ export default function QrPreview({
 
   useEffect(() => {
     setError(false);
+    setCacheKey(null);
     void (async () => {
       try {
         const res = await fetch(`/api/business/${encoded}/qr-style`);
         if (!res.ok) {
-          setCacheKey('default');
+          setCacheKey(`fallback-${refreshToken}`);
           return;
         }
         const data = await res.json();
-        const key = data.qr?.asset_hash || data.qr?.updated_at || data.qr?.short_code || '1';
+        const key =
+          data.qr?.asset_hash ||
+          data.qr?.updated_at ||
+          data.qr?.short_code ||
+          String(refreshToken);
         setCacheKey(key);
       } catch {
-        setCacheKey('default');
+        setCacheKey(`fallback-${refreshToken}`);
       }
     })();
-  }, [encoded, slug]);
+  }, [encoded, slug, refreshToken]);
 
   const src =
     cacheKey != null
-      ? `/api/business/${encoded}/qr?format=${format}&tier=${tier}&v=${encodeURIComponent(cacheKey)}`
+      ? `/api/business/${encoded}/qr?format=${format}&tier=${tier}&refresh=1&v=${encodeURIComponent(cacheKey)}&t=${refreshToken}`
       : undefined;
 
   return (
@@ -64,6 +72,7 @@ export default function QrPreview({
       )}
       {src && !error && (
         <img
+          key={src}
           src={src}
           alt={`QR de ${businessName}`}
           width={size}

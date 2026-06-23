@@ -25,6 +25,7 @@ interface QrStudioProps {
   isPro: boolean;
   compact?: boolean;
   onUpgrade?: () => void;
+  refreshToken?: number;
 }
 
 export default function QrStudio({
@@ -34,6 +35,7 @@ export default function QrStudio({
   isPro,
   compact = false,
   onUpgrade,
+  refreshToken = 0,
 }: QrStudioProps) {
   const { session } = useAuth();
   const [tab, setTab] = useState<Tab>(isPro ? 'customize' : 'download');
@@ -148,6 +150,7 @@ export default function QrStudio({
                 businessName={businessName}
                 tier={isPro ? 'pro' : 'free'}
                 size={compact ? 160 : 220}
+                refreshToken={refreshToken}
               />
             </motion.div>
           </AnimatePresence>

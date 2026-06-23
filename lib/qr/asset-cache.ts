@@ -4,6 +4,9 @@ import type { QrCodeRecord, QrStyleConfig } from './types';
 
 export const QR_ASSETS_BUCKET = 'qr-assets';
 
+/** Incrementar al cambiar motor de generación (invalida PNG cacheados). */
+export const QR_ENGINE_VERSION = 'v6-logo-composite2';
+
 export function computeQrAssetHash(params: {
   targetUrl: string;
   logoUrl?: string | null;
@@ -13,6 +16,7 @@ export function computeQrAssetHash(params: {
   width: number;
 }): string {
   const payload = JSON.stringify({
+    engine: QR_ENGINE_VERSION,
     targetUrl: params.targetUrl,
     logoUrl: params.logoUrl || null,
     shortCode: params.shortCode,

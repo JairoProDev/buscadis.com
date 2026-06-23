@@ -5,6 +5,7 @@ import { ensureQrCodeForBusiness, getQrByBusinessId } from '@/lib/qr/service';
 import { generateFreeQrPng, generateFreeQrSvg } from '@/lib/qr/generate-free';
 import { generateProQrPng, generateProQrSvg } from '@/lib/qr/generate-pro';
 import { canUseProQr } from '@/lib/business/subscription';
+import { buildFreeStyleConfig } from '@/lib/qr/presets';
 import { validateQrContrast, validateQrDecodable } from '@/lib/qr/quality-gate';
 import {
   computeQrAssetHash,
@@ -59,6 +60,7 @@ export async function GET(
         : defaultWidth;
 
     const styleConfig = {
+      ...buildFreeStyleConfig(profile.theme_color),
       ...(qr.style_config || {}),
       dotsColor: qr.style_config?.dotsColor || profile.theme_color || '#1e293b',
     };
@@ -124,7 +126,7 @@ export async function GET(
       width,
     });
 
-    if (isCacheValid(qr, assetHash) && qr.cached_png_path) {
+    if (isCacheValid(qr, assetHash) && qr.cached_png_path && !req.nextUrl.searchParams.has('refresh')) {
       const cached = await downloadCachedQrPng(qr.cached_png_path);
       if (cached) {
         return new NextResponse(new Uint8Array(cached), {
