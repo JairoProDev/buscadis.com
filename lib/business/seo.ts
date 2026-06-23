@@ -2,9 +2,15 @@ import type { BusinessProfile } from '@/types/business';
 import type { Adiso } from '@/types';
 import type { BusinessReviewAggregate } from '@/types/business';
 import { getBusinessCanonicalUrl } from './public-utils';
-import { getDefaultOgImageUrl } from '@/lib/seo/og-image';
 import { normalizeSocialLinks } from '@/lib/business/normalize-profile';
+import {
+  buildBusinessShareDescription,
+  buildBusinessShareTitle,
+  getBusinessProfileShareUrl,
+  resolveBusinessOgImageUrl,
+} from '@/lib/seo/business-metadata';
 
+/** @deprecated Usar buildBusinessShareMetadata de @/lib/seo/business-metadata */
 export function buildBusinessMetadata(profile: {
   name: string;
   slug: string;
@@ -14,16 +20,12 @@ export function buildBusinessMetadata(profile: {
   logo_url?: string | null;
   banner_url?: string | null;
   og_image_url?: string | null;
+  tagline?: string | null;
 }) {
-  const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL || 'https://buscadis.com').replace(/\/$/, '');
-  const title = profile.meta_title || `${profile.name} | Buscadis`;
-  const description =
-    profile.meta_description ||
-    profile.description ||
-    `Página oficial de ${profile.name} en Buscadis`;
-  const imageUrl =
-    profile.og_image_url || profile.logo_url || profile.banner_url || getDefaultOgImageUrl();
-  const url = `${siteUrl}/${profile.slug}`;
+  const title = buildBusinessShareTitle(profile);
+  const description = buildBusinessShareDescription(profile);
+  const imageUrl = resolveBusinessOgImageUrl(profile);
+  const url = getBusinessProfileShareUrl(profile.slug);
 
   return { title, description, imageUrl, url };
 }

@@ -3,7 +3,8 @@ import { notFound } from 'next/navigation';
 import { Categoria } from '@/types';
 import { getAdisosFromSupabase } from '@/lib/supabase';
 import CategoriaPageContent from './CategoriaPageContent';
-import { withDefaultShareImage, getSiteUrl } from '@/lib/seo/og-image';
+import { getSiteUrl } from '@/lib/seo/og-image';
+import { buildCategoryShareMetadata } from '@/lib/seo/category-metadata';
 
 const siteUrl = getSiteUrl();
 
@@ -47,21 +48,10 @@ export async function generateMetadata({ params }: CategoriaPageProps): Promise<
   }
 
   const categoria = nombre as Categoria;
-  const label = categoriaLabels[categoria];
-  const description = categoriaDescriptions[categoria];
 
-  return {
-    title: `${label} - Buscadis`,
-    description,
-    alternates: {
-      canonical: `${siteUrl}/categoria/${nombre}`,
-    },
-    ...withDefaultShareImage({
-      title: `${label} - Buscadis`,
-      description,
-      url: `${siteUrl}/categoria/${nombre}`,
-    }),
-  };
+  return buildCategoryShareMetadata(categoria, {
+    urlPath: `/categoria/${nombre}`,
+  });
 }
 
 export default async function CategoriaPage({ params }: CategoriaPageProps) {

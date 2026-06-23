@@ -8,7 +8,7 @@ import { Categoria, Adiso } from '@/types';
 import PublicBusinessPage from '@/app/negocio/[slug]/page';
 import { createClient } from '@supabase/supabase-js';
 
-import { buildBusinessMetadata } from '@/lib/business/seo';
+import { buildBusinessShareMetadata } from '@/lib/seo/business-metadata';
 import { buildAdisoMetadata } from '@/lib/seo/adiso-metadata';
 import { withDefaultShareImage } from '@/lib/seo/og-image';
 
@@ -35,29 +35,9 @@ export async function generateMetadata(props: PageProps): Promise<Metadata> {
         const targetSlug = decodeURIComponent(slug[0]);
         const supabaseAdmin = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
         try {
-            const { data } = await supabaseAdmin.from('business_profiles').select('name, description, logo_url, banner_url, slug, meta_title, meta_description, og_image_url').eq('slug', targetSlug).single();
+            const { data } = await supabaseAdmin.from('business_profiles').select('name, description, logo_url, banner_url, slug, meta_title, meta_description, og_image_url, tagline').eq('slug', targetSlug).single();
             if (data) {
-                const meta = buildBusinessMetadata(data);
-                return {
-                    title: meta.title,
-                    description: meta.description,
-                    alternates: { canonical: meta.url },
-                    openGraph: {
-                        title: meta.title,
-                        description: meta.description,
-                        url: meta.url,
-                        images: [{ url: meta.imageUrl, width: 1200, height: 630 }],
-                        siteName: 'Buscadis',
-                        locale: 'es_PE',
-                        type: 'website',
-                    },
-                    twitter: {
-                        card: 'summary_large_image',
-                        title: meta.title,
-                        description: meta.description,
-                        images: [meta.imageUrl],
-                    },
-                };
+                return buildBusinessShareMetadata(data);
             }
         } catch (e) {
             // Ignore error, fallback to default

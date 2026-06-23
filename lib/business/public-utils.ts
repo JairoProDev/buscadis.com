@@ -7,7 +7,7 @@ import { buildBusinessThemeVars } from '@/lib/business/theme-css-vars';
 
 export function getBusinessCanonicalUrl(slug: string): string {
   const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_APP_URL || 'https://buscadis.com').replace(/\/$/, '');
-  return `${siteUrl}/${slug}`;
+  return `${siteUrl}/p/${slug}`;
 }
 
 export function getWhatsappUrl(
