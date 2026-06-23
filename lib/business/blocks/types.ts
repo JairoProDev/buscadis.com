@@ -23,4 +23,5 @@ export interface BlockRenderContext {
   onEditProduct?: (product: Adiso) => void;
   addItem: (item: CartAddItem) => void;
   defaultCatalogView?: 'grid' | 'list' | 'feed';
+  onOpenQr?: () => void;
 }

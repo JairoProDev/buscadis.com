@@ -7,6 +7,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/useToast';
 import { useBusinessCart } from '@/hooks/useBusinessCart';
 import BusinessShareTools from '@/components/business/public/BusinessShareTools';
+import QrProfileModal from '@/components/business/qr/QrProfileModal';
 import BusinessCartDrawer from '@/components/business/public/BusinessCartDrawer';
 import BusinessJsonLd from '@/components/business/public/BusinessJsonLd';
 import BlockRendererEngine from '@/components/business/public/BlockRendererEngine';
@@ -43,6 +44,7 @@ export default function BusinessProfileShellV2({
     reviewAggregateProp ?? null
   );
   const [showOwnerTools, setShowOwnerTools] = useState(false);
+  const [qrModalOpen, setQrModalOpen] = useState(false);
   const [engaged, setEngaged] = useState(false);
 
   const viewMode = viewModeProp ?? (isPreview ? 'preview' : editMode ? 'editor' : 'storefront');
@@ -134,6 +136,7 @@ export default function BusinessProfileShellV2({
           : template.catalogPresentation === 'feed' || template.catalogPresentation === 'pinned_carousel'
             ? 'feed'
             : 'grid',
+      onOpenQr: profile?.slug ? () => setQrModalOpen(true) : undefined,
     }),
     [
       profile,
@@ -211,8 +214,21 @@ export default function BusinessProfileShellV2({
         onShare={handleShare}
         onOpenCart={() => setCartOpen(true)}
         onEditPart={onEditPart}
+        onOpenQr={() => setQrModalOpen(true)}
         ctaPlacement={template.ctaPlacement}
       />
+
+      {profile.slug && (
+        <QrProfileModal
+          open={qrModalOpen}
+          onClose={() => setQrModalOpen(false)}
+          slug={profile.slug}
+          businessName={profile.name || 'Negocio'}
+          isOwner={isOwner}
+          isPro={canUseProQr(profile)}
+          themeColor={profile.theme_color}
+        />
+      )}
 
       {showCommerceDock && (
         <CommerceDock
@@ -221,6 +237,7 @@ export default function BusinessProfileShellV2({
           onOpenCart={() => setCartOpen(true)}
           onShare={handleShare}
           onWhatsappClick={handleWhatsappClick}
+          onOpenQr={() => setQrModalOpen(true)}
         />
       )}
 
@@ -239,6 +256,13 @@ export default function BusinessProfileShellV2({
 
       {isEditor && isOwner && (
         <>
+          <button
+            type="button"
+            onClick={() => setQrModalOpen(true)}
+            className="fixed left-4 bottom-40 z-[95] md:bottom-20 px-3 py-2 rounded-full bg-white border border-slate-200 text-xs font-bold shadow-lg print:hidden"
+          >
+            QR
+          </button>
           <button
             type="button"
             onClick={() => setShowOwnerTools((v) => !v)}

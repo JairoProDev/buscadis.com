@@ -45,6 +45,7 @@ export function renderProfileBlock(
           onEditPart={onEditPart}
           reviewAggregate={reviewAggregate}
           embedded={ctx.isPreview}
+          onOpenQr={ctx.onOpenQr}
         />
       );
     case 'highlights':

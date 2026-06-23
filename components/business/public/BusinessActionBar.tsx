@@ -2,6 +2,7 @@
 
 import {
   IconEdit,
+  IconQrcode,
   IconShareAlt,
   IconShoppingCart,
   IconWhatsapp,
@@ -18,6 +19,7 @@ interface BusinessActionBarProps {
   onShare: () => void;
   onOpenCart?: () => void;
   onEditPart?: (part: string) => void;
+  onOpenQr?: () => void;
   hideMobile?: boolean;
 }
 
@@ -28,6 +30,7 @@ export default function BusinessActionBar({
   onShare,
   onOpenCart,
   onEditPart,
+  onOpenQr,
   hideMobile = false,
 }: BusinessActionBarProps) {
   const publicadisUrl = getPublicadisSiteUrl(profile);
@@ -78,6 +81,16 @@ export default function BusinessActionBar({
         >
           <IconShareAlt size={20} />
         </button>
+        {onOpenQr && (
+          <button
+            type="button"
+            onClick={onOpenQr}
+            className="bg-slate-100 hover:bg-slate-200 text-slate-700 p-3 rounded-xl transition-colors print:hidden"
+            title="Código QR"
+          >
+            <IconQrcode size={20} />
+          </button>
+        )}
         {isOwner && (
           <button
             type="button"
@@ -90,13 +103,13 @@ export default function BusinessActionBar({
         )}
       </div>
 
-      <div className={cn('md:hidden grid gap-2 mt-4', hideMobile && 'hidden', publicadisUrl ? 'grid-cols-6' : 'grid-cols-5')}>
+      <div className={cn('md:hidden flex flex-wrap gap-2 mt-4', hideMobile && 'hidden')}>
         {publicadisUrl && (
           <a
             href={publicadisUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="col-span-2 bg-slate-900 text-white h-12 rounded-xl font-bold flex items-center justify-center text-xs px-2"
+            className="flex-1 min-w-[40%] bg-slate-900 text-white h-12 rounded-xl font-bold flex items-center justify-center text-xs px-2"
           >
             Sitio web
           </a>
@@ -106,10 +119,7 @@ export default function BusinessActionBar({
             href={getWhatsappUrl(profile.contact_whatsapp, profile.name || 'Negocio')}
             target="_blank"
             rel="noreferrer"
-            className={cn(
-              'bg-[var(--brand-color)] text-white h-12 rounded-xl font-bold shadow-lg flex items-center justify-center gap-2 text-sm',
-              publicadisUrl ? 'col-span-2' : 'col-span-2'
-            )}
+            className="flex-1 min-w-[40%] bg-[var(--brand-color)] text-white h-12 rounded-xl font-bold shadow-lg flex items-center justify-center gap-2 text-sm"
           >
             <IconWhatsapp size={18} /> WhatsApp
           </a>
@@ -118,7 +128,7 @@ export default function BusinessActionBar({
           <button
             type="button"
             onClick={onOpenCart}
-            className="col-span-1 bg-slate-100 text-slate-700 h-12 rounded-xl flex items-center justify-center relative"
+            className="w-12 h-12 shrink-0 bg-slate-100 text-slate-700 rounded-xl flex items-center justify-center relative"
           >
             <IconShoppingCart size={20} />
             {cartCount > 0 && (
@@ -131,15 +141,25 @@ export default function BusinessActionBar({
         <button
           type="button"
           onClick={onShare}
-          className="col-span-1 bg-slate-100 text-slate-700 h-12 rounded-xl flex items-center justify-center"
+          className="w-12 h-12 shrink-0 bg-slate-100 text-slate-700 rounded-xl flex items-center justify-center"
         >
           <IconShareAlt size={20} />
         </button>
+        {onOpenQr && (
+          <button
+            type="button"
+            onClick={onOpenQr}
+            className="w-12 h-12 shrink-0 bg-slate-100 text-slate-700 rounded-xl flex items-center justify-center"
+            title="QR"
+          >
+            <IconQrcode size={20} />
+          </button>
+        )}
         {isOwner && (
           <button
             type="button"
             onClick={() => onEditPart?.('general')}
-            className="col-span-1 bg-slate-200 text-slate-800 h-12 rounded-xl flex items-center justify-center"
+            className="w-12 h-12 shrink-0 bg-slate-200 text-slate-800 rounded-xl flex items-center justify-center"
           >
             <IconEdit size={20} />
           </button>

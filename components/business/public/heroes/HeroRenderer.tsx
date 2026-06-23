@@ -14,6 +14,7 @@ export interface HeroRendererProps {
   onEditPart?: (part: string) => void;
   reviewAggregate?: BusinessReviewAggregate | null;
   embedded?: boolean;
+  onOpenQr?: () => void;
 }
 
 export default function HeroRenderer({
@@ -23,8 +24,9 @@ export default function HeroRenderer({
   onEditPart,
   reviewAggregate,
   embedded = false,
+  onOpenQr,
 }: HeroRendererProps) {
-  const common = { profile, showEditControls, onEditPart, reviewAggregate, embedded };
+  const common = { profile, showEditControls, onEditPart, reviewAggregate, embedded, onOpenQr };
   switch (variant) {
     case 'split':
       return <HeroSplit {...common} />;

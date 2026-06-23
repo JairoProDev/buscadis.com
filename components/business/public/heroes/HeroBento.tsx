@@ -1,6 +1,7 @@
 'use client';
 
 import { IconEdit, IconVerified, IconWhatsapp } from '@/components/Icons';
+import HeroQrButton from '@/components/business/qr/HeroQrButton';
 import type { BusinessProfile, BusinessReviewAggregate } from '@/types/business';
 import { getWhatsappUrl } from '@/lib/business/public-utils';
 import { cn } from '@/lib/utils';
@@ -11,6 +12,7 @@ interface HeroBentoProps {
   onEditPart?: (part: string) => void;
   reviewAggregate?: BusinessReviewAggregate | null;
   embedded?: boolean;
+  onOpenQr?: () => void;
 }
 
 export default function HeroBento({
@@ -19,9 +21,17 @@ export default function HeroBento({
   onEditPart,
   reviewAggregate,
   embedded = false,
+  onOpenQr,
 }: HeroBentoProps) {
   return (
     <div className={cn('bg-[var(--bg-secondary)] pb-6 relative z-10', embedded ? 'pt-2' : 'pt-16')}>
+      {onOpenQr && (
+        <div className="absolute top-4 right-4 z-30 max-w-6xl mx-auto w-full px-4 flex justify-end pointer-events-none">
+          <div className="pointer-events-auto">
+            <HeroQrButton onClick={onOpenQr} />
+          </div>
+        </div>
+      )}
       <div className="max-w-6xl mx-auto px-4">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 auto-rows-[minmax(80px,auto)]">
           <div className="col-span-2 row-span-2 bg-[var(--bg-primary)] rounded-2xl p-6 shadow-sm border border-[var(--border-subtle)] flex flex-col justify-end relative group overflow-hidden">

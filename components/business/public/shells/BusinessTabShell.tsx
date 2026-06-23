@@ -35,6 +35,7 @@ interface BusinessTabShellProps {
   onShare?: () => void;
   onOpenCart?: () => void;
   onEditPart?: (part: string) => void;
+  onOpenQr?: () => void;
 }
 
 export default function BusinessTabShell({
@@ -50,6 +51,7 @@ export default function BusinessTabShell({
   onShare,
   onOpenCart,
   onEditPart,
+  onOpenQr,
 }: BusinessTabShellProps) {
   const heroBlock = blocks.find((b) => b.type === 'hero');
   const highlightsBlock = blocks.find((b) => b.type === 'highlights');
@@ -78,6 +80,7 @@ export default function BusinessTabShell({
           onEditPart={ctx.onEditPart}
           reviewAggregate={ctx.reviewAggregate}
           embedded={ctx.isPreview}
+          onOpenQr={onOpenQr || ctx.onOpenQr}
         />
       )}
       {highlightsBlock?.visible && renderBlock(highlightsBlock)}
@@ -88,6 +91,7 @@ export default function BusinessTabShell({
         onShare={onShare || (() => {})}
         onOpenCart={onOpenCart}
         onEditPart={onEditPart || ctx.onEditPart}
+        onOpenQr={onOpenQr || ctx.onOpenQr}
         hideMobile={ctx.hideMobileActionBar}
       />
       <div className="bg-[var(--bg-primary)] pb-2 shadow-sm relative z-10">

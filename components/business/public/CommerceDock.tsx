@@ -1,6 +1,7 @@
 'use client';
 
 import {
+  IconQrcode,
   IconShareAlt,
   IconShoppingCart,
   IconWhatsapp,
@@ -15,6 +16,7 @@ interface CommerceDockProps {
   onOpenCart?: () => void;
   onShare: () => void;
   onWhatsappClick?: () => void;
+  onOpenQr?: () => void;
   className?: string;
 }
 
@@ -24,6 +26,7 @@ export default function CommerceDock({
   onOpenCart,
   onShare,
   onWhatsappClick,
+  onOpenQr,
   className,
 }: CommerceDockProps) {
   const hasWhatsapp = Boolean(profile.contact_whatsapp);
@@ -74,6 +77,16 @@ export default function CommerceDock({
         >
           <IconShareAlt size={20} />
         </button>
+        {onOpenQr && (
+          <button
+            type="button"
+            onClick={onOpenQr}
+            className="h-12 w-12 shrink-0 rounded-[var(--bp-radius)] bg-[var(--bg-secondary)] text-[var(--bp-text)] flex items-center justify-center active:scale-[0.98] transition-transform"
+            aria-label="Código QR"
+          >
+            <IconQrcode size={20} />
+          </button>
+        )}
       </div>
     </div>
   );

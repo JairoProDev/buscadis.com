@@ -16,6 +16,7 @@ interface BusinessScrollShellProps {
   onShare?: () => void;
   onOpenCart?: () => void;
   onEditPart?: (part: string) => void;
+  onOpenQr?: () => void;
 }
 
 export default function BusinessScrollShell({
@@ -27,6 +28,7 @@ export default function BusinessScrollShell({
   onShare,
   onOpenCart,
   onEditPart,
+  onOpenQr,
 }: BusinessScrollShellProps) {
   const heroIdx = blocks.findIndex((b) => b.type === 'hero');
   const heroBlock = heroIdx >= 0 ? blocks[heroIdx] : null;
@@ -42,6 +44,7 @@ export default function BusinessScrollShell({
         onShare={onShare || (() => {})}
         onOpenCart={onOpenCart}
         onEditPart={onEditPart || ctx.onEditPart}
+        onOpenQr={onOpenQr || ctx.onOpenQr}
       />
       <div className="max-w-3xl mx-auto px-4 py-6 space-y-8">
         {afterHero.map((block) => (

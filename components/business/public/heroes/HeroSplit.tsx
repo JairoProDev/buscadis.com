@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { IconEdit, IconMapMarkerAlt, IconVerified } from '@/components/Icons';
+import HeroQrButton from '@/components/business/qr/HeroQrButton';
 import type { BusinessProfile, BusinessReviewAggregate } from '@/types/business';
 import { cn } from '@/lib/utils';
 import { isBusinessOpenNow } from '@/lib/business/hours';
@@ -12,6 +13,7 @@ interface HeroSplitProps {
   onEditPart?: (part: string) => void;
   reviewAggregate?: BusinessReviewAggregate | null;
   embedded?: boolean;
+  onOpenQr?: () => void;
 }
 
 export default function HeroSplit({
@@ -20,6 +22,7 @@ export default function HeroSplit({
   onEditPart,
   reviewAggregate,
   embedded = false,
+  onOpenQr,
 }: HeroSplitProps) {
   const [mounted, setMounted] = useState(false);
   const [openStatus, setOpenStatus] = useState<boolean | null>(null);
@@ -43,10 +46,15 @@ export default function HeroSplit({
               <button
                 type="button"
                 onClick={() => onEditPart?.('visual')}
-                className="absolute top-4 right-4 bg-black/40 text-white p-2 rounded-full"
+                className="absolute top-4 right-16 bg-black/40 text-white p-2 rounded-full z-20"
               >
                 <IconEdit size={18} />
               </button>
+            )}
+            {onOpenQr && (
+              <div className="absolute top-4 right-4 z-30">
+                <HeroQrButton onClick={onOpenQr} />
+              </div>
             )}
           </div>
           <div>

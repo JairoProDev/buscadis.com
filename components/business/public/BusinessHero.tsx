@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { IconEdit, IconMapMarkerAlt, IconVerified } from '@/components/Icons';
+import HeroQrButton from '@/components/business/qr/HeroQrButton';
 import type { BusinessProfile, BusinessReviewAggregate } from '@/types/business';
 import { cn } from '@/lib/utils';
 import { isBusinessOpenNow } from '@/lib/business/hours';
@@ -13,6 +14,7 @@ interface BusinessHeroProps {
   onEditPart?: (part: string) => void;
   reviewAggregate?: BusinessReviewAggregate | null;
   embedded?: boolean;
+  onOpenQr?: () => void;
 }
 
 export default function BusinessHero({
@@ -21,6 +23,7 @@ export default function BusinessHero({
   onEditPart,
   reviewAggregate,
   embedded = false,
+  onOpenQr,
 }: BusinessHeroProps) {
   const [mounted, setMounted] = useState(false);
   const [openStatus, setOpenStatus] = useState<boolean | null>(null);
@@ -51,10 +54,15 @@ export default function BusinessHero({
           <button
             type="button"
             onClick={() => onEditPart?.('visual')}
-            className="absolute top-4 right-4 bg-black/40 hover:bg-black/60 backdrop-blur-md text-white p-2 rounded-full transition-all opacity-100 md:opacity-0 md:group-hover:opacity-100"
+            className="absolute top-4 right-16 md:right-16 bg-black/40 hover:bg-black/60 backdrop-blur-md text-white p-2 rounded-full transition-all opacity-100 md:opacity-0 md:group-hover:opacity-100 z-20"
           >
             <IconEdit size={18} />
           </button>
+        )}
+        {onOpenQr && (
+          <div className="absolute top-4 right-4 z-30">
+            <HeroQrButton onClick={onOpenQr} />
+          </div>
         )}
       </div>
 

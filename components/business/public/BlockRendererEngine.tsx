@@ -18,6 +18,7 @@ interface BlockRendererEngineProps {
   onShare?: () => void;
   onOpenCart?: () => void;
   onEditPart?: (part: string) => void;
+  onOpenQr?: () => void;
   ctaPlacement?: CtaPlacement;
 }
 
@@ -30,6 +31,7 @@ export default function BlockRendererEngine({
   onShare,
   onOpenCart,
   onEditPart,
+  onOpenQr,
   ctaPlacement = 'sticky_bar',
 }: BlockRendererEngineProps) {
   const template = getTemplateById(ctx.profile.template_id || 'modern_tabs');
@@ -68,6 +70,7 @@ export default function BlockRendererEngine({
         onShare={onShare}
         onOpenCart={onOpenCart}
         onEditPart={onEditPart}
+        onOpenQr={onOpenQr}
       />
     );
   }
@@ -86,6 +89,7 @@ export default function BlockRendererEngine({
       onShare={onShare}
       onOpenCart={onOpenCart}
       onEditPart={onEditPart}
+      onOpenQr={onOpenQr}
     />
   );
 }

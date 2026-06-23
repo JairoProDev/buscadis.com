@@ -1,6 +1,7 @@
 'use client';
 
 import { IconEdit, IconVerified } from '@/components/Icons';
+import HeroQrButton from '@/components/business/qr/HeroQrButton';
 import type { BusinessProfile, BusinessReviewAggregate } from '@/types/business';
 import { cn } from '@/lib/utils';
 
@@ -10,6 +11,7 @@ interface HeroMinimalProps {
   onEditPart?: (part: string) => void;
   reviewAggregate?: BusinessReviewAggregate | null;
   embedded?: boolean;
+  onOpenQr?: () => void;
 }
 
 export default function HeroMinimal({
@@ -18,9 +20,15 @@ export default function HeroMinimal({
   onEditPart,
   reviewAggregate,
   embedded = false,
+  onOpenQr,
 }: HeroMinimalProps) {
   return (
     <div className={cn('bg-[var(--bg-primary)] pb-8 text-center relative z-10', embedded ? 'pt-4' : 'pt-20')}>
+      {onOpenQr && (
+        <div className="absolute top-4 right-4 z-30">
+          <HeroQrButton onClick={onOpenQr} />
+        </div>
+      )}
       <div className="max-w-xl mx-auto px-4">
         <div className="relative inline-block group mb-6">
           <div className="w-24 h-24 rounded-full overflow-hidden border-4 border-[var(--border-subtle)] mx-auto bg-white shadow-md">
