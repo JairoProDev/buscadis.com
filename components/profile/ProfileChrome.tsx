@@ -1,12 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import {
-  IconArrowLeft,
-  IconEllipsisV,
-  IconQrcode,
-  IconShareAlt,
-} from '@/components/Icons';
+import { IconArrowLeft, IconEdit, IconQrcode, IconShareAlt } from '@/components/Icons';
+import ProfileChromeMenu, { type ProfileMenuItem } from '@/components/profile/ProfileChromeMenu';
 import { cn } from '@/lib/utils';
 
 interface ProfileChromeProps {
@@ -14,9 +10,9 @@ interface ProfileChromeProps {
   siteLabel?: string;
   onShare?: () => void;
   onOpenQr?: () => void;
-  onOpenMenu?: () => void;
   canEdit?: boolean;
   onEdit?: () => void;
+  menuItems?: ProfileMenuItem[];
   className?: string;
 }
 
@@ -25,19 +21,16 @@ export default function ProfileChrome({
   siteLabel = 'Buscadis.com',
   onShare,
   onOpenQr,
-  onOpenMenu,
   canEdit,
   onEdit,
+  menuItems = [],
   className,
 }: ProfileChromeProps) {
   const profileUrl = `${siteLabel}/@${handle}`;
 
   return (
     <header
-      className={cn(
-        'absolute top-0 inset-x-0 z-50 print:hidden',
-        className
-      )}
+      className={cn('absolute top-0 inset-x-0 z-50 print:hidden', className)}
       style={{ paddingTop: 'max(env(safe-area-inset-top, 0px), 0.5rem)' }}
     >
       <div className="max-w-6xl mx-auto px-3 h-11 flex items-center gap-2">
@@ -61,6 +54,16 @@ export default function ProfileChrome({
         </div>
 
         <div className="flex items-center gap-1 shrink-0">
+          {canEdit && onEdit && (
+            <button
+              type="button"
+              onClick={onEdit}
+              className="h-9 w-9 flex items-center justify-center rounded-full bg-black/25 backdrop-blur-md text-white hover:bg-black/40 transition-colors"
+              aria-label="Editar página"
+            >
+              <IconEdit size={17} />
+            </button>
+          )}
           {onOpenQr && (
             <button
               type="button"
@@ -81,17 +84,7 @@ export default function ProfileChrome({
               <IconShareAlt size={16} />
             </button>
           )}
-          <button
-            type="button"
-            onClick={() => {
-              if (canEdit && onEdit) onEdit();
-              else onOpenMenu?.();
-            }}
-            className="h-9 w-9 flex items-center justify-center rounded-full bg-black/25 backdrop-blur-md text-white hover:bg-black/40 transition-colors"
-            aria-label="Más opciones"
-          >
-            <IconEllipsisV size={18} />
-          </button>
+          <ProfileChromeMenu items={menuItems} />
         </div>
       </div>
     </header>

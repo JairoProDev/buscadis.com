@@ -98,7 +98,7 @@ export default function BuscadisDiscovery({
       {showSticky && !dismissed && (
         <div
           className={cn(
-            'fixed left-4 right-4 z-[99] print:hidden md:left-auto md:right-6 md:max-w-sm',
+            'fixed left-4 right-4 z-[99] print:hidden hidden md:block md:left-auto md:right-6 md:max-w-sm',
             'bottom-[calc(5.5rem+env(safe-area-inset-bottom,0px))]'
           )}
         >

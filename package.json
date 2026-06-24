@@ -15,7 +15,9 @@
     "db:migrations": "npx supabase migration list --linked",
     "db:migrate": "node scripts/supabase-migrate.mjs",
     "search:sync-typesense": "node scripts/sync-typesense.mjs",
-    "deals:seed": "node scripts/seed-deal-clips.mjs"
+    "deals:seed": "node scripts/seed-deal-clips.mjs",
+    "seed:buscadis": "npx tsx scripts/seed-buscadis-profile.ts",
+    "demo:buscadis": "npm run seed:buscadis && npm run dev"
   },
   "dependencies": {
     "@buscadis/profile-engine": "workspace:*",

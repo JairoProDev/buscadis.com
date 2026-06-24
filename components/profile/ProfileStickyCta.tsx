@@ -1,14 +1,9 @@
 'use client';
 
-import {
-  IconEllipsisV,
-  IconQrcode,
-  IconShareAlt,
-  IconShoppingCart,
-  IconWhatsapp,
-} from '@/components/Icons';
+import { IconShareAlt, IconShoppingCart, IconWhatsapp } from '@/components/Icons';
 import type { BusinessProfile } from '@/types/business';
 import { getWhatsappUrl } from '@/lib/business/public-utils';
+import { useScrollHideBar } from '@/hooks/useScrollHideBar';
 import { cn } from '@/lib/utils';
 
 interface ProfileStickyCtaProps {
@@ -16,7 +11,6 @@ interface ProfileStickyCtaProps {
   cartCount?: number;
   onOpenCart?: () => void;
   onShare?: () => void;
-  onOpenQr?: () => void;
   onWhatsappClick?: () => void;
   className?: string;
 }
@@ -26,18 +20,19 @@ export default function ProfileStickyCta({
   cartCount = 0,
   onOpenCart,
   onShare,
-  onOpenQr,
   onWhatsappClick,
   className,
 }: ProfileStickyCtaProps) {
   const hasWhatsapp = Boolean(profile.contact_whatsapp);
+  const barVisible = useScrollHideBar(72);
 
   return (
     <div
       className={cn(
-        'fixed bottom-0 left-0 right-0 z-[100] print:hidden',
+        'fixed bottom-0 left-0 right-0 z-[100] print:hidden md:hidden',
         'border-t border-[var(--bp-border)] bg-[var(--bp-surface)]/95 backdrop-blur-lg',
-        'pb-[env(safe-area-inset-bottom,0px)] md:hidden',
+        'pb-[env(safe-area-inset-bottom,0px)] transition-transform duration-300 ease-out',
+        !barVisible && 'translate-y-full',
         className
       )}
     >
@@ -79,23 +74,6 @@ export default function ProfileStickyCta({
             <IconShareAlt size={20} />
           </button>
         )}
-        {onOpenQr && (
-          <button
-            type="button"
-            onClick={onOpenQr}
-            className="h-12 w-12 shrink-0 rounded-[var(--bp-radius)] bg-[var(--bg-secondary)] flex items-center justify-center"
-            aria-label="QR"
-          >
-            <IconQrcode size={20} />
-          </button>
-        )}
-        <button
-          type="button"
-          className="h-12 w-12 shrink-0 rounded-[var(--bp-radius)] bg-[var(--bg-secondary)] flex items-center justify-center"
-          aria-label="Menú"
-        >
-          <IconEllipsisV size={20} />
-        </button>
       </div>
     </div>
   );

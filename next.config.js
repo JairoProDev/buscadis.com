@@ -55,8 +55,8 @@ const nextConfig = {
   async redirects() {
     const redirects = [
       {
-        source: '/negocio/:slug*',
-        destination: '/:slug*',
+        source: '/negocio/:slug',
+        destination: '/@:slug',
         permanent: true,
       },
       {
@@ -84,15 +84,22 @@ const nextConfig = {
     return redirects;
   },
   async rewrites() {
+    const atProfileRewrites = {
+      beforeFiles: [
+        { source: '/@:slug', destination: '/negocio/:slug' },
+      ],
+    };
+
     if (villachacoOnBuscadis) {
       return {
         beforeFiles: [
+          ...atProfileRewrites.beforeFiles,
           { source: '/villachaco', destination: '/villachaco/index.html' },
           { source: '/villachaco/', destination: '/villachaco/index.html' },
         ],
       };
     }
-    return { beforeFiles: [] };
+    return atProfileRewrites;
   },
   transpilePackages: ['@buscadis/profile-engine', '@imgly/background-removal', 'onnxruntime-web'],
   webpack: (config, { isServer }) => {

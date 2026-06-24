@@ -12,6 +12,8 @@ import {
 } from '@/lib/profile/adapters/business-adapter';
 import { blockTypeToTabId, getDefaultTabId, getVisibleBlocks } from '@/lib/business/blocks/normalize';
 import ProfileChrome from '@/components/profile/ProfileChrome';
+import type { ProfileMenuItem } from '@/components/profile/ProfileChromeMenu';
+import { getBusinessCanonicalUrl } from '@/lib/business/public-utils';
 import ProfileHeroOverlap from '@/components/profile/ProfileHeroOverlap';
 import ProfileMetrics from '@/components/profile/ProfileMetrics';
 import ProfileIdentityRow from '@/components/profile/ProfileIdentityRow';
@@ -22,6 +24,7 @@ import ProfileStoryHighlights from '@/components/profile/ProfileStoryHighlights'
 import ProfileStickyCta from '@/components/profile/ProfileStickyCta';
 import BusinessSocialStrip from '@/components/business/public/BusinessSocialStrip';
 import BusinessOwnerBanner from '@/components/business/public/BusinessOwnerBanner';
+import { profileIsOrphan } from '@/lib/business/social-display';
 import {
   IconStore,
   IconMapMarkerAlt,
@@ -130,6 +133,48 @@ export default function ProfileWireframeShell({
   const highlightsBlock = visibleBlocks.find((b) => b.type === 'highlights');
   const showSticky = isSlotVisible(presentation.layout, 'profile_sticky_cta') && !ctx.hideMobileActionBar;
 
+  const chromeMenuItems = useMemo((): ProfileMenuItem[] => {
+    const shareUrl =
+      typeof window !== 'undefined'
+        ? window.location.href
+        : getBusinessCanonicalUrl(profile.slug || '');
+    return [
+      {
+        id: 'copy',
+        label: 'Copiar enlace',
+        onClick: () => {
+          void navigator.clipboard?.writeText(shareUrl);
+        },
+      },
+      {
+        id: 'share',
+        label: 'Compartir',
+        onClick: onShare,
+        hidden: !onShare,
+      },
+      {
+        id: 'explore',
+        label: 'Explorar marketplace',
+        href: '/?utm_source=profile_menu',
+      },
+      {
+        id: 'create',
+        label: 'Crea tu perfil gratis',
+        href: '/publicar?utm_source=profile_menu',
+      },
+      {
+        id: 'help',
+        label: 'Centro de ayuda',
+        href: '/ayuda',
+      },
+      {
+        id: 'report',
+        label: 'Reportar perfil',
+        href: '/ayuda?topic=reportar-perfil',
+      },
+    ];
+  }, [profile.slug, onShare]);
+
   const defaultBannerCta = profile.contact_whatsapp
     ? { label: 'Contactar', action: 'whatsapp' as const }
     : undefined;
@@ -147,8 +192,9 @@ export default function ProfileWireframeShell({
             handle={entity.handle}
             onShare={onShare}
             onOpenQr={onOpenQr || ctx.onOpenQr}
-            canEdit={canEdit}
+            canEdit={canEdit && !isEditor}
             onEdit={onOpenEditor}
+            menuItems={chromeMenuItems}
           />
         )}
 
@@ -161,7 +207,7 @@ export default function ProfileWireframeShell({
         )}
 
         <div className="max-w-6xl mx-auto px-4 -mt-2 relative z-10">
-          <div className="flex items-end gap-3 sm:gap-4 pl-[96px] sm:pl-[112px] min-h-[2rem]">
+          <div className="flex items-end gap-3 sm:gap-4 pl-[112px] sm:pl-[128px] min-h-[2rem]">
             {isSlotVisible(presentation.layout, 'profile_metrics') && entity.metrics && (
               <ProfileMetrics metrics={entity.metrics} className="pt-2" />
             )}
@@ -201,7 +247,7 @@ export default function ProfileWireframeShell({
             highlightsBlock?.visible && renderBlock(highlightsBlock)
           ))}
 
-        {!canEdit && (
+        {profileIsOrphan(profile) && !canEdit && (
           <BusinessOwnerBanner
             profile={profile}
             canEdit={false}
@@ -211,14 +257,6 @@ export default function ProfileWireframeShell({
             onOpenEditor={onOpenEditor}
             className="!px-4 !md:pl-4"
           />
-        )}
-
-        {canEdit && !isEditor && (
-          <div className="max-w-6xl mx-auto px-4 print:hidden">
-            <div className="rounded-xl border border-emerald-200/80 bg-emerald-50/90 px-4 py-2.5 text-sm text-emerald-900">
-              Administras este negocio — usa el menú ⋮ para editar
-            </div>
-          </div>
         )}
       </div>
 
@@ -276,7 +314,6 @@ export default function ProfileWireframeShell({
           cartCount={cartCount}
           onOpenCart={onOpenCart}
           onShare={onShare}
-          onOpenQr={onOpenQr || ctx.onOpenQr}
           onWhatsappClick={onWhatsappClick}
         />
       )}

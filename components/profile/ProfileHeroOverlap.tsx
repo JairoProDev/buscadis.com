@@ -36,7 +36,7 @@ export default function ProfileHeroOverlap({
 
   return (
     <div className={cn('relative w-full', className)}>
-      <div className="relative w-full h-[200px] sm:h-[240px] md:h-[280px] overflow-hidden bg-gradient-to-br from-[var(--brand-color)] to-slate-800">
+      <div className="relative w-full h-[200px] sm:h-[240px] md:h-[280px] overflow-hidden bg-gradient-to-br from-[var(--brand-color)] to-slate-800 border-b border-[var(--border-subtle)]">
         {hasImage && imageUrl ? (
           <img
             src={imageUrl}
@@ -63,11 +63,7 @@ export default function ProfileHeroOverlap({
           </div>
         ) : null}
 
-        <div
-          className="absolute inset-0 bg-gradient-to-t from-[var(--bg-secondary)] via-black/20 to-black/30 pointer-events-none"
-          aria-hidden
-        />
-        {banner.fadeBottom !== false && (
+        {banner.fadeBottom === true && (
           <div
             className="absolute bottom-0 inset-x-0 h-24 bg-gradient-to-t from-[var(--bg-secondary)] to-transparent pointer-events-none"
             aria-hidden
@@ -100,8 +96,8 @@ export default function ProfileHeroOverlap({
       </div>
 
       <div className="max-w-6xl mx-auto px-4 relative z-10">
-        <div className="-mt-14 sm:-mt-16 flex items-end gap-4">
-          <div className="shrink-0 w-[88px] h-[88px] sm:w-[104px] sm:h-[104px] rounded-2xl border-4 border-[var(--bg-secondary)] bg-[var(--bg-primary)] shadow-lg overflow-hidden">
+        <div className="-mt-[4.25rem] sm:-mt-[4.75rem] flex items-end gap-4">
+          <div className="shrink-0 w-[104px] h-[104px] sm:w-[120px] sm:h-[120px] rounded-2xl border-4 border-[var(--bg-secondary)] bg-[var(--bg-primary)] shadow-lg overflow-hidden">
             {entity.avatarUrl ? (
               <img
                 src={entity.avatarUrl}

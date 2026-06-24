@@ -12,16 +12,7 @@ export function middleware(req: NextRequest) {
     return NextResponse.redirect(`${canonical}${pathname}${search}`, 308);
   }
 
-  // Canonical @username URLs
-  const atMatch = pathname.match(/^\/@([^/]+)\/?$/);
-  if (atMatch) {
-    const slug = atMatch[1];
-    const url = req.nextUrl.clone();
-    url.pathname = `/negocio/${slug}`;
-    return NextResponse.rewrite(url);
-  }
-
-  // Legacy /p/slug → /@slug
+  // Legacy /p/slug → /@slug (perfiles @handle usan rewrite en next.config.js)
   const pMatch = pathname.match(/^\/p\/([^/]+)\/?$/);
   if (pMatch) {
     const slug = pMatch[1];
@@ -32,5 +23,5 @@ export function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/q/:path*', '/p/:path*', '/@:path*', '/api/business/:path*'],
+  matcher: ['/q/:path*', '/p/:path*', '/api/business/:path*'],
 };

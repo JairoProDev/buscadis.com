@@ -1,0 +1,133 @@
+{
+  "business": {
+    "slug": "buscadis",
+    "name": "Buscadis",
+    "tagline": "Marketplace LATAM",
+    "description": "Buscadis es el marketplace donde negocios y personas de Latinoamérica publican catálogos, ofertas y deals en un solo lugar. Encuentra productos locales, contacta por WhatsApp, arma tu carrito y descubre negocios verificados cerca de ti.\n\nCreamos perfiles profesionales gratis, códigos QR para tu local, catálogo digital con búsqueda inteligente y la micro-red social de Deals para que tu marca llegue más lejos.",
+    "contact_whatsapp": "51999888777",
+    "contact_phone": "51999888777",
+    "contact_email": "hola@buscadis.com",
+    "contact_address": "Av. Javier Prado Este 4200, Santiago de Surco, Lima, Perú",
+    "contact_maps_url": "https://maps.google.com/?q=Lima+Peru",
+    "theme_color": "#f97316",
+    "template_id": "modern_tabs",
+    "theme_preset": "buscadis_default",
+    "is_verified": true,
+    "meta_title": "Buscadis — Marketplace de Latinoamérica",
+    "meta_description": "Encuentra negocios, productos y ofertas cerca de ti. Crea tu perfil gratis en Buscadis.",
+    "logo_url": "/og-image.jpg",
+    "banner_url": "/hero-buscadis.jpg",
+    "og_image_url": "/og-image.jpg",
+    "pending_owner_email": "buscadiss@gmail.com",
+    "location_display_level": "city",
+    "profile_hashtags": ["marketplace", "peru", "negocios", "ofertas", "deals", "whatsapp"],
+    "metrics_config": {
+      "keys": ["views", "products", "interactions"]
+    },
+    "banner_config": {
+      "mode": "image",
+      "imageUrl": "/og-image.jpg",
+      "fadeBottom": false,
+      "cta": {
+        "label": "Crear perfil gratis",
+        "action": "link",
+        "href": "/publicar"
+      }
+    },
+    "story_highlights": [
+      {
+        "id": "hl-deals",
+        "title": "Deals",
+        "cover_url": "/og-image.jpg",
+        "link_url": "/deals"
+      },
+      {
+        "id": "hl-publicar",
+        "title": "Publicar",
+        "cover_url": "/og-image.jpg",
+        "link_url": "/publicar"
+      },
+      {
+        "id": "hl-ayuda",
+        "title": "Ayuda",
+        "cover_url": "/og-image.jpg",
+        "link_url": "/ayuda"
+      },
+      {
+        "id": "hl-gratis",
+        "title": "Es gratis",
+        "cover_url": "/og-image.jpg",
+        "link_url": "/guia"
+      }
+    ],
+    "social_instagram": "https://instagram.com/buscadis",
+    "social_facebook": "https://facebook.com/buscadis",
+    "social_tiktok": "https://tiktok.com/@buscadis",
+    "social_linkedin": "https://linkedin.com/company/buscadis",
+    "social_twitter": "https://twitter.com/buscadis",
+    "website_url": "https://buscadis.com",
+    "announcement_text": "🚀 Nuevo: perfiles con URL @tu-negocio y editor visual",
+    "announcement_active": true,
+    "business_hours": {
+      "lunes": { "open": "09:00", "close": "18:00", "closed": false },
+      "martes": { "open": "09:00", "close": "18:00", "closed": false },
+      "miercoles": { "open": "09:00", "close": "18:00", "closed": false },
+      "jueves": { "open": "09:00", "close": "18:00", "closed": false },
+      "viernes": { "open": "09:00", "close": "18:00", "closed": false },
+      "sabado": { "open": "10:00", "close": "14:00", "closed": false },
+      "domingo": { "open": "00:00", "close": "00:00", "closed": true }
+    }
+  },
+  "products": [
+    {
+      "sku": "BD-PLAN-FREE",
+      "title": "Perfil de negocio gratis",
+      "description": "Tu página profesional en buscadis.com/@tu-marca con catálogo, WhatsApp, QR y SEO incluido.",
+      "category": "servicios",
+      "tags": ["perfil", "gratis"],
+      "price": 0,
+      "sort_order": 1,
+      "is_featured": true
+    },
+    {
+      "sku": "BD-DEALS",
+      "title": "Deals — videos cortos",
+      "description": "Publica clips promocionales en la micro-red social integrada de Buscadis.",
+      "category": "servicios",
+      "tags": ["deals", "video"],
+      "price": 0,
+      "sort_order": 2,
+      "is_featured": true
+    },
+    {
+      "sku": "BD-QR-PRO",
+      "title": "QR personalizado Pro",
+      "description": "Códigos QR con tu marca para mesas, vitrinas y empaques. Escaneo directo a tu catálogo.",
+      "category": "servicios",
+      "tags": ["qr", "marketing"],
+      "price": 29.9,
+      "sort_order": 3,
+      "is_featured": false
+    },
+    {
+      "sku": "BD-CATALOG-IA",
+      "title": "Importación de catálogo con IA",
+      "description": "Sube Excel o fotos y deja que la IA organice títulos, precios y categorías.",
+      "category": "servicios",
+      "tags": ["ia", "catalogo"],
+      "price": 0,
+      "sort_order": 4,
+      "is_featured": false
+    },
+    {
+      "sku": "BD-MARKETPLACE",
+      "title": "Visibilidad en marketplace",
+      "description": "Aparece en búsquedas, categorías y recomendaciones de compradores en tu zona.",
+      "category": "servicios",
+      "tags": ["marketplace", "seo"],
+      "price": 0,
+      "sort_order": 5,
+      "is_featured": true
+    }
+  ]
+}

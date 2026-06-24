@@ -20,13 +20,13 @@ export function resolveBannerConfig(
 ): BannerConfig {
   if (banner?.mode) {
     return {
-      fadeBottom: true,
+      fadeBottom: false,
       ...banner,
       imageUrl: banner.imageUrl || entity?.bannerImageUrl,
     };
   }
   if (entity?.bannerImageUrl) {
-    return { mode: 'image', imageUrl: entity.bannerImageUrl, fadeBottom: true };
+    return { mode: 'image', imageUrl: entity.bannerImageUrl, fadeBottom: false };
   }
   if (entity?.tagline) {
     return {

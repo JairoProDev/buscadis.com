@@ -73,7 +73,10 @@ export async function generateMetadata(props: PageProps): Promise<Metadata> {
     // Format 3: /[business_slug] (Length 1)
 
     if (slug.length === 1) {
-        const targetSlug = decodeURIComponent(slug[0]);
+        let targetSlug = decodeURIComponent(slug[0]);
+        if (targetSlug.startsWith('@')) {
+            targetSlug = targetSlug.slice(1);
+        }
         if (isReservedBusinessSlug(targetSlug)) {
             notFound();
         }
@@ -145,14 +148,18 @@ export default async function Page(props: PageProps) {
 
     if (slug.length === 1) {
         // Custom static landings live in public/{slug}/ (see next.config.js rewrites)
-        if (slug[0].toLowerCase() === 'villachaco') {
+        let businessSlug = decodeURIComponent(slug[0]);
+        if (businessSlug.startsWith('@')) {
+            businessSlug = businessSlug.slice(1);
+        }
+        if (businessSlug.toLowerCase() === 'villachaco') {
             notFound();
         }
-        if (isReservedBusinessSlug(slug[0])) {
+        if (isReservedBusinessSlug(businessSlug)) {
             notFound();
         }
-        // Format 3: /[business_slug]
-        return <PublicBusinessPage params={{ slug: slug[0] }} searchParams={searchParams} />;
+        // Format 3: /[business_slug] or /@handle (fallback si middleware/rewrite no aplica)
+        return <PublicBusinessPage params={{ slug: businessSlug }} searchParams={searchParams} />;
     } else if (slug.length === 3) {
         // New SEO URL: /[ubicacion]/[categoria]/[slug]
         targetId = getIdFromSlug(slug[2]);

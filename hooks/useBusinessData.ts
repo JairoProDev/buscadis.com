@@ -265,6 +265,9 @@ export function useBusinessData(slug: string, isOwner: boolean) {
         }));
       } finally {
         revalidatingRef.current = false;
+        if (isRevalidation) {
+          setState((prev) => ({ ...prev, revalidating: false }));
+        }
       }
     },
     [fetchBusinessProfile, fetchCatalog, isOwner, slug, applyCatalogToState]
