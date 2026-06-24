@@ -30,14 +30,28 @@ async function generateClassicPng(options: GenerateQrOptions): Promise<Buffer> {
 }
 
 async function generateBrandedPng(options: GenerateQrOptions): Promise<Buffer> {
+  const { compositeLogoOnQr } = await import('./composite-logo');
   const tier = options.tier || 'free';
+  const width = options.width ?? 512;
+
+  if (options.logoUrl) {
+    const { generateProQrPng } = await import('./generate-pro');
+    const styled = await generateProQrPng({
+      data: options.data,
+      styleConfig: options.styleConfig,
+      width,
+      skipLogo: true,
+    });
+    return compositeLogoOnQr(styled, options.logoUrl, width);
+  }
+
   if (tier === 'pro') {
     const { generateProQrPng } = await import('./generate-pro');
     return generateProQrPng({
       data: options.data,
       styleConfig: options.styleConfig,
-      width: options.width,
-      logoUrl: options.logoUrl,
+      width,
+      skipLogo: true,
     });
   }
   const { generateFreeQrPng } = await import('./generate-free');
@@ -45,8 +59,7 @@ async function generateBrandedPng(options: GenerateQrOptions): Promise<Buffer> {
     data: options.data,
     themeColor: options.themeColor,
     styleConfig: { ...options.styleConfig, renderMode: 'branded' },
-    width: options.width,
-    logoUrl: options.logoUrl,
+    width,
   });
 }
 

@@ -1,8 +1,9 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { cn } from '@/lib/utils';
-import type { QrQaStatus, QrRenderMode } from '@/lib/qr/types';
+import type { QrQaStatus, QrRenderMode, QrStyleConfig } from '@/lib/qr/types';
+import { buildPreviewQuery, previewStyleFingerprint } from '@/lib/qr/preview-params';
 
 interface QrPreviewProps {
   slug: string;
@@ -11,6 +12,9 @@ interface QrPreviewProps {
   tier?: 'free' | 'pro';
   className?: string;
   size?: number;
+  /** Estilo en vivo desde QrStudio (preview sin guardar) */
+  styleConfig?: QrStyleConfig | null;
+  livePreview?: boolean;
   refreshToken?: number;
   qaStatus?: QrQaStatus | null;
   renderMode?: QrRenderMode | null;
@@ -29,51 +33,30 @@ export default function QrPreview({
   tier = 'free',
   className,
   size = 200,
+  styleConfig,
+  livePreview = false,
   refreshToken = 0,
   qaStatus,
   renderMode,
 }: QrPreviewProps) {
   const encoded = encodeURIComponent(slug);
-  const [cacheKey, setCacheKey] = useState<string | null>(null);
   const [error, setError] = useState(false);
-  const [localQa, setLocalQa] = useState<QrQaStatus | null>(qaStatus ?? null);
-  const [localMode, setLocalMode] = useState<QrRenderMode | null>(renderMode ?? null);
+  const [loadedSrc, setLoadedSrc] = useState<string | null>(null);
   const [scanMsg, setScanMsg] = useState<string | null>(null);
 
-  useEffect(() => {
-    setError(false);
-    setCacheKey(null);
-    void (async () => {
-      try {
-        const res = await fetch(`/api/business/${encoded}/qr-style`);
-        if (!res.ok) {
-          setCacheKey(`fallback-${refreshToken}`);
-          return;
-        }
-        const data = await res.json();
-        const key =
-          data.qr?.asset_hash ||
-          data.qr?.updated_at ||
-          data.qr?.short_code ||
-          String(refreshToken);
-        setCacheKey(key);
-        if (data.qr?.qa_status) setLocalQa(data.qr.qa_status);
-        if (data.qr?.render_mode) setLocalMode(data.qr.render_mode);
-      } catch {
-        setCacheKey(`fallback-${refreshToken}`);
-      }
-    })();
-  }, [encoded, slug, refreshToken]);
+  const displayMode = styleConfig?.renderMode || renderMode || 'branded';
 
-  const src =
-    cacheKey != null
-      ? `/api/business/${encoded}/qr?format=${format}&tier=${tier}&refresh=1&v=${encodeURIComponent(cacheKey)}&t=${refreshToken}`
-      : undefined;
+  const src = useMemo(() => {
+    if (livePreview && styleConfig) {
+      const q = buildPreviewQuery({ ...styleConfig, renderMode: displayMode });
+      const fp = previewStyleFingerprint(styleConfig);
+      return `/api/business/${encoded}/qr?${q}&tier=${tier}&t=${refreshToken}&fp=${encodeURIComponent(fp)}`;
+    }
+    return `/api/business/${encoded}/qr?format=${format}&tier=${tier}&refresh=1&t=${refreshToken}`;
+  }, [encoded, tier, format, livePreview, styleConfig, displayMode, refreshToken]);
 
   const tryScan = async () => {
     setScanMsg(null);
-    if (!src) return;
-
     if ('BarcodeDetector' in window) {
       try {
         const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
@@ -81,7 +64,11 @@ export default function QrPreview({
         const video = document.createElement('video');
         video.srcObject = stream;
         await video.play();
-        const detector = new (window as unknown as { BarcodeDetector: new (o: { formats: string[] }) => { detect: (s: ImageBitmapSource) => Promise<{ rawValue: string }[]> } }).BarcodeDetector({ formats: ['qr_code'] });
+        const detector = new (window as unknown as {
+          BarcodeDetector: new (o: { formats: string[] }) => {
+            detect: (s: ImageBitmapSource) => Promise<{ rawValue: string }[]>;
+          };
+        }).BarcodeDetector({ formats: ['qr_code'] });
 
         const canvas = document.createElement('canvas');
         const ctx = canvas.getContext('2d');
@@ -107,46 +94,50 @@ export default function QrPreview({
     setScanMsg('Abre la app Cámara de tu teléfono y apunta al QR en pantalla.');
   };
 
+  const showImage = loadedSrc === src || loadedSrc === null;
+
   return (
     <div className={cn('space-y-2', className)}>
       <div className="flex flex-wrap gap-2 justify-center">
-        {localMode && (
-          <span className="text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full bg-blue-100 text-blue-800">
-            {MODE_LABELS[localMode]}
-          </span>
-        )}
-        {localQa === 'degraded' && (
+        <span className="text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full bg-blue-100 text-blue-800">
+          {MODE_LABELS[displayMode]}
+        </span>
+        {qaStatus === 'degraded' && (
           <span className="text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full bg-amber-100 text-amber-800">
             Modo seguro
           </span>
         )}
-        {localQa === 'passed' && (
-          <span className="text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full bg-green-100 text-green-800">
-            Aprobado
+        {livePreview && (
+          <span className="text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">
+            Vista previa
           </span>
         )}
       </div>
       <div className="relative rounded-2xl border border-slate-200 bg-white p-4 shadow-sm min-h-[200px] flex items-center justify-center">
-        {!src && !error && (
-          <div className="w-full h-[200px] animate-pulse bg-slate-100 rounded-xl" />
+        {!showImage && !error && (
+          <div className="absolute inset-4 animate-pulse bg-slate-100 rounded-xl" />
         )}
         {error && (
           <p className="text-sm text-red-500 text-center px-4">
             No se pudo cargar el QR. Intenta de nuevo en un momento.
           </p>
         )}
-        {src && !error && (
-          <img
-            key={src}
-            src={src}
-            alt={`QR de ${businessName}`}
-            width={size}
-            height={size}
-            className="mx-auto rounded-xl"
-            style={{ width: size, height: size }}
-            onError={() => setError(true)}
-          />
-        )}
+        <img
+          src={src}
+          alt={`QR de ${businessName}`}
+          width={size}
+          height={size}
+          className={cn(
+            'mx-auto rounded-xl transition-opacity duration-150',
+            showImage ? 'opacity-100' : 'opacity-0'
+          )}
+          style={{ width: size, height: size }}
+          onLoad={() => {
+            setLoadedSrc(src);
+            setError(false);
+          }}
+          onError={() => setError(true)}
+        />
       </div>
       <button
         type="button"
@@ -156,7 +147,7 @@ export default function QrPreview({
         Probar escaneo
       </button>
       {scanMsg && <p className="text-[11px] text-slate-500 text-center">{scanMsg}</p>}
-      {localQa === 'degraded' && (
+      {qaStatus === 'degraded' && !livePreview && (
         <p className="text-[11px] text-amber-700 text-center">
           Versión optimizada para escaneo confiable.
         </p>

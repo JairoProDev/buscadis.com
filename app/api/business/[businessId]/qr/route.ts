@@ -5,6 +5,7 @@ import { ensureQrCodeForBusiness, getQrByBusinessId } from '@/lib/qr/service';
 import { generateQrPng, generateQrSvg } from '@/lib/qr/generate';
 import { canUseProQr } from '@/lib/business/subscription';
 import { buildFreeStyleConfig, resolveRenderMode } from '@/lib/qr/presets';
+import { applyPreviewStyleOverrides } from '@/lib/qr/preview-params';
 import {
   computeQrAssetHash,
   downloadCachedQrPng,
@@ -60,11 +61,16 @@ export async function GET(
         ? Math.min(widthParam, maxWidth)
         : defaultWidth;
 
-    const styleConfig = {
-      ...buildFreeStyleConfig(profile.theme_color),
-      ...(qr.style_config || {}),
-      dotsColor: qr.style_config?.dotsColor || profile.theme_color || '#1e293b',
-    };
+    const isPreview = req.nextUrl.searchParams.get('preview') === '1';
+
+    const styleConfig = applyPreviewStyleOverrides(
+      {
+        ...buildFreeStyleConfig(profile.theme_color),
+        ...(qr.style_config || {}),
+        dotsColor: qr.style_config?.dotsColor || profile.theme_color || '#1e293b',
+      },
+      req.nextUrl.searchParams
+    );
 
     const renderMode =
       modeParam && ['classic', 'branded', 'visual'].includes(modeParam)
@@ -139,7 +145,12 @@ export async function GET(
       renderMode,
     });
 
-    if (isCacheValid(qr, assetHash) && qr.cached_png_path && !req.nextUrl.searchParams.has('refresh')) {
+    if (
+      !isPreview &&
+      isCacheValid(qr, assetHash) &&
+      qr.cached_png_path &&
+      !req.nextUrl.searchParams.has('refresh')
+    ) {
       const cached = await downloadCachedQrPng(qr.cached_png_path);
       if (cached) {
         return new NextResponse(new Uint8Array(cached), {
@@ -162,7 +173,7 @@ export async function GET(
       themeColor: profile.theme_color,
       tier: usePro ? 'pro' : 'free',
       renderMode,
-      skipQa: width < 256,
+      skipQa: width < 256 || isPreview,
     });
 
     const storagePath = qrAssetStoragePath(profile.id, assetHash);

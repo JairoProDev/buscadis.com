@@ -41,7 +41,7 @@ async function buildStylingOptions(
     dotsOptions.color = styleConfig.dotsColor || '#0f172a';
   }
 
-  return {
+  const base: Record<string, unknown> = {
     width,
     height: width,
     type: 'canvas',
@@ -62,17 +62,20 @@ async function buildStylingOptions(
       type: styleConfig.cornerDotType || 'dot',
       color: styleConfig.dotsColor || '#0f172a',
     },
-    imageOptions: image
-      ? {
-          hideBackgroundDots: styleConfig.hideBackgroundDots ?? true,
-          imageSize: styleConfig.imageSize ?? 0.35,
-          margin: 4,
-          crossOrigin: 'anonymous',
-          saveAsBlob: true,
-        }
-      : undefined,
-    image,
   };
+
+  if (image) {
+    base.image = image;
+    base.imageOptions = {
+      hideBackgroundDots: styleConfig.hideBackgroundDots ?? true,
+      imageSize: styleConfig.imageSize ?? 0.35,
+      margin: 4,
+      crossOrigin: 'anonymous',
+      saveAsBlob: true,
+    };
+  }
+
+  return base;
 }
 
 export async function generateProQrPng(options: GenerateProQrOptions): Promise<Buffer> {

@@ -1,8 +1,7 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useDeferredValue, useEffect, useState } from 'react';
 import dynamic from 'next/dynamic';
-import { motion, AnimatePresence } from 'framer-motion';
 import { IconQrcode, IconSparkles } from '@/components/Icons';
 import { cn } from '@/lib/utils';
 import { QR_PRESETS } from '@/lib/qr/presets';
@@ -28,11 +27,47 @@ interface QrStudioProps {
   refreshToken?: number;
 }
 
-const RENDER_MODES: { id: QrRenderMode; label: string; desc: string; needsLogo?: boolean }[] = [
-  { id: 'classic', label: 'Clásico', desc: 'Máxima compatibilidad' },
-  { id: 'branded', label: 'Marca', desc: 'Logo en el centro' },
-  { id: 'visual', label: 'Visual', desc: 'Logo fusionado', needsLogo: true },
+const RENDER_MODES: { id: QrRenderMode; label: string; desc: string; wire: string; needsLogo?: boolean }[] = [
+  { id: 'classic', label: 'Clásico', desc: 'Cuadrados · máxima compatibilidad', wire: '▣▣▣' },
+  { id: 'branded', label: 'Marca', desc: 'Logo centrado · esquinas redondeadas', wire: '◉▣◉' },
+  { id: 'visual', label: 'Visual', desc: 'Logo fusionado · halftone', wire: '∴∵∴', needsLogo: true },
 ];
+
+function ModeWireframe({ mode }: { mode: QrRenderMode }) {
+  if (mode === 'classic') {
+    return (
+      <svg viewBox="0 0 48 48" className="w-10 h-10 text-slate-400" aria-hidden>
+        <rect x="4" y="4" width="14" height="14" fill="currentColor" />
+        <rect x="30" y="4" width="14" height="14" fill="currentColor" />
+        <rect x="4" y="30" width="14" height="14" fill="currentColor" />
+        <rect x="22" y="22" width="4" height="4" fill="currentColor" />
+        <rect x="28" y="22" width="4" height="4" fill="currentColor" />
+        <rect x="22" y="28" width="4" height="4" fill="currentColor" />
+      </svg>
+    );
+  }
+  if (mode === 'visual') {
+    return (
+      <svg viewBox="0 0 48 48" className="w-10 h-10 text-slate-400" aria-hidden>
+        <circle cx="11" cy="11" r="7" fill="currentColor" opacity="0.3" />
+        <circle cx="37" cy="11" r="7" fill="currentColor" opacity="0.3" />
+        <circle cx="11" cy="37" r="7" fill="currentColor" opacity="0.3" />
+        <circle cx="24" cy="24" r="3" fill="currentColor" />
+        <circle cx="30" cy="20" r="2" fill="currentColor" opacity="0.6" />
+        <circle cx="18" cy="28" r="2" fill="currentColor" opacity="0.8" />
+      </svg>
+    );
+  }
+  return (
+    <svg viewBox="0 0 48 48" className="w-10 h-10 text-slate-400" aria-hidden>
+      <rect x="4" y="4" width="14" height="14" rx="3" fill="currentColor" />
+      <rect x="30" y="4" width="14" height="14" rx="3" fill="currentColor" />
+      <rect x="4" y="30" width="14" height="14" rx="3" fill="currentColor" />
+      <rect x="18" y="18" width="12" height="12" rx="2" fill="white" stroke="currentColor" strokeWidth="2" />
+      <circle cx="24" cy="24" r="4" fill="currentColor" />
+    </svg>
+  );
+}
 
 export default function QrStudio({
   slug,
@@ -61,6 +96,9 @@ export default function QrStudio({
   const [saveMsg, setSaveMsg] = useState<string | null>(null);
   const [previewKey, setPreviewKey] = useState(0);
   const [qaStatus, setQaStatus] = useState<string | null>(null);
+  const [dirty, setDirty] = useState(false);
+
+  const previewStyle = useDeferredValue(styleConfig);
 
   useEffect(() => {
     void (async () => {
@@ -68,7 +106,13 @@ export default function QrStudio({
         const res = await fetch(`/api/business/${encodeURIComponent(slug)}/qr-style`);
         if (res.ok) {
           const data = await res.json();
-          if (data.qr?.style_config) setStyleConfig((c) => ({ ...c, ...data.qr.style_config }));
+          if (data.qr?.style_config) {
+            setStyleConfig((c) => ({
+              ...c,
+              ...data.qr.style_config,
+              dotsColor: data.qr.style_config.dotsColor || themeColor,
+            }));
+          }
           if (data.shortUrl) setShortUrl(data.shortUrl);
           else if (data.qr?.short_code) setShortUrl(`/q/${data.qr.short_code}`);
           if (data.hasLogo) setHasLogoRemote(true);
@@ -78,7 +122,12 @@ export default function QrStudio({
         /* */
       }
     })();
-  }, [slug]);
+  }, [slug, themeColor]);
+
+  const patchStyle = useCallback((patch: Partial<QrStyleConfig>) => {
+    setStyleConfig((c) => ({ ...c, ...patch }));
+    setDirty(true);
+  }, []);
 
   const copyShortLink = useCallback(async () => {
     if (!shortUrl) return;
@@ -109,6 +158,7 @@ export default function QrStudio({
         return;
       }
       setPreviewKey((k) => k + 1);
+      setDirty(false);
       if (data.qr?.qa_status) setQaStatus(data.qr.qa_status);
       setSaveMsg('Estilo guardado');
     } catch {
@@ -122,7 +172,14 @@ export default function QrStudio({
     const preset = QR_PRESETS.find((p) => p.id === presetId);
     if (!preset) return;
     if (preset.tier === 'pro' && !isPro) return;
-    setStyleConfig({ ...preset.config, presetId: preset.id });
+    setStyleConfig({
+      ...preset.config,
+      dotsColor: preset.config.dotsColor || styleConfig.dotsColor || themeColor,
+      backgroundColor: preset.config.backgroundColor || '#ffffff',
+      finderBrandColor: themeColor,
+      presetId: preset.id,
+    });
+    setDirty(true);
   };
 
   const logoOk = hasLogo || hasLogoRemote;
@@ -150,7 +207,7 @@ export default function QrStudio({
           <div>
             <h3 className="font-bold text-slate-900">Tu código QR</h3>
             <p className="text-xs text-slate-500">
-              {isPro ? 'Dinámico · Visual · Analítica Pro' : 'Dinámico · Clásico, marca o visual'}
+              Vista previa en vivo · guarda para descargas e impresión
             </p>
           </div>
           {isPro && (
@@ -162,27 +219,23 @@ export default function QrStudio({
       </div>
 
       <div className={cn('grid gap-6 p-5', compact ? 'grid-cols-1' : 'lg:grid-cols-2')}>
-        <div className="flex flex-col items-center gap-4">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={previewKey + JSON.stringify(styleConfig.renderMode)}
-              initial={{ opacity: 0, scale: 0.96 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.96 }}
-              transition={{ duration: 0.2 }}
-              className="w-full"
-            >
-              <QrPreviewLazy
-                slug={slug}
-                businessName={businessName}
-                tier={isPro ? 'pro' : 'free'}
-                size={compact ? 160 : 220}
-                refreshToken={refreshToken + previewKey}
-                qaStatus={qaStatus as 'passed' | 'degraded' | 'pending' | 'failed' | null}
-                renderMode={renderMode}
-              />
-            </motion.div>
-          </AnimatePresence>
+        <div className="flex flex-col items-center gap-3">
+          <QrPreviewLazy
+            slug={slug}
+            businessName={businessName}
+            tier={isPro ? 'pro' : 'free'}
+            size={compact ? 160 : 220}
+            styleConfig={previewStyle}
+            livePreview
+            refreshToken={refreshToken + previewKey}
+            qaStatus={dirty ? null : (qaStatus as 'passed' | 'degraded' | 'pending' | 'failed' | null)}
+            renderMode={renderMode}
+          />
+          {dirty && (
+            <p className="text-[11px] text-amber-700 text-center px-2">
+              Cambios sin guardar — la vista previa es orientativa hasta que pulses Guardar.
+            </p>
+          )}
           {shortUrl && (
             <button
               type="button"
@@ -203,7 +256,7 @@ export default function QrStudio({
                 type="button"
                 onClick={() => setTab(t.id)}
                 className={cn(
-                  'flex-1 min-w-[70px] px-2 py-2 rounded-lg text-xs font-bold transition-all',
+                  'flex-1 min-w-[70px] px-2 py-2 rounded-lg text-xs font-bold transition-colors',
                   tab === t.id ? 'bg-white text-blue-700 shadow-sm' : 'text-slate-500 hover:text-slate-700'
                 )}
               >
@@ -216,53 +269,53 @@ export default function QrStudio({
             <div className="space-y-4">
               <div>
                 <p className="text-xs font-bold text-slate-600 mb-2">Modo de QR</p>
-                <div className="grid grid-cols-3 gap-2">
+                <div className="grid grid-cols-1 gap-2">
                   {RENDER_MODES.map((m) => {
                     const disabled = m.needsLogo && !logoOk;
+                    const active = renderMode === m.id;
                     return (
                       <button
                         key={m.id}
                         type="button"
                         disabled={disabled}
-                        onClick={() => setStyleConfig({ ...styleConfig, renderMode: m.id })}
+                        onClick={() => patchStyle({ renderMode: m.id })}
                         className={cn(
-                          'p-2 rounded-xl border text-left transition-colors',
-                          renderMode === m.id
-                            ? 'border-blue-400 bg-blue-50'
-                            : 'border-slate-200 hover:border-slate-300',
+                          'flex items-center gap-3 p-3 rounded-xl border text-left transition-colors',
+                          active ? 'border-blue-400 bg-blue-50' : 'border-slate-200 hover:border-slate-300',
                           disabled && 'opacity-40 cursor-not-allowed'
                         )}
                       >
-                        <p className="text-xs font-bold text-slate-800">{m.label}</p>
-                        <p className="text-[10px] text-slate-500">{m.desc}</p>
+                        <ModeWireframe mode={m.id} />
+                        <div>
+                          <p className="text-xs font-bold text-slate-800">{m.label}</p>
+                          <p className="text-[10px] text-slate-500">{m.desc}</p>
+                        </div>
                       </button>
                     );
                   })}
                 </div>
-                {!logoOk && renderMode === 'visual' && (
-                  <p className="text-[11px] text-amber-700 mt-2">
-                    Sube un logo en tu perfil para usar el modo Visual.
-                  </p>
-                )}
               </div>
 
               <div>
                 <p className="text-xs font-bold text-slate-600 mb-2">Plantillas</p>
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-1 gap-2 max-h-48 overflow-y-auto pr-1">
                   {QR_PRESETS.filter((p) => isPro || p.tier === 'free').map((preset) => (
                     <button
                       key={preset.id}
                       type="button"
                       onClick={() => applyPreset(preset.id)}
                       className={cn(
-                        'p-3 rounded-xl border text-left transition-colors',
+                        'flex items-center gap-3 p-3 rounded-xl border text-left transition-colors',
                         styleConfig.presetId === preset.id
                           ? 'border-blue-400 bg-blue-50'
                           : 'border-slate-200 hover:border-blue-300'
                       )}
                     >
-                      <p className="text-xs font-bold text-slate-800">{preset.name}</p>
-                      <p className="text-[10px] text-slate-500 mt-0.5">{preset.description}</p>
+                      <ModeWireframe mode={preset.config.renderMode || 'branded'} />
+                      <div>
+                        <p className="text-xs font-bold text-slate-800">{preset.name}</p>
+                        <p className="text-[10px] text-slate-500">{preset.description}</p>
+                      </div>
                     </button>
                   ))}
                 </div>
@@ -274,41 +327,54 @@ export default function QrStudio({
                 disabled={saving}
                 className="w-full py-2.5 bg-blue-600 text-white text-sm font-bold rounded-xl disabled:opacity-50"
               >
-                {saving ? 'Guardando…' : 'Guardar estilo'}
+                {saving ? 'Guardando…' : dirty ? 'Guardar estilo' : 'Guardar estilo'}
               </button>
             </div>
           )}
 
           {tab === 'download' && (
-            <QrDownloadMenu slug={slug} isPro={isPro} shortUrl={shortUrl} />
+            <QrDownloadMenu slug={slug} isPro={isPro} shortUrl={shortUrl} renderMode={renderMode} />
           )}
 
           {tab === 'customize' && (
-            <div className="space-y-4 relative">
-              {!isPro && (
-                <div className="rounded-xl bg-amber-50 border border-amber-100 p-3 text-xs text-amber-900">
-                  Gradientes y formas avanzadas disponibles en Pro. Los colores básicos y halftone
-                  están disponibles en todos los planes.
-                </div>
-              )}
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-3">
+                <label className="block text-xs font-bold text-slate-600">
+                  Color módulos
+                  <input
+                    type="color"
+                    value={styleConfig.dotsColor || themeColor}
+                    onChange={(e) => patchStyle({ dotsColor: e.target.value })}
+                    className="mt-1 w-full h-9 rounded-lg cursor-pointer border border-slate-200"
+                  />
+                </label>
+                <label className="block text-xs font-bold text-slate-600">
+                  Fondo
+                  <input
+                    type="color"
+                    value={styleConfig.backgroundColor || '#ffffff'}
+                    onChange={(e) => patchStyle({ backgroundColor: e.target.value })}
+                    className="mt-1 w-full h-9 rounded-lg cursor-pointer border border-slate-200"
+                  />
+                </label>
+              </div>
+
               <label className="block text-xs font-bold text-slate-600">
-                Color módulos
-                <input
-                  type="color"
-                  value={styleConfig.dotsColor || themeColor}
-                  onChange={(e) => setStyleConfig({ ...styleConfig, dotsColor: e.target.value })}
-                  className="mt-1 w-full h-10 rounded-lg cursor-pointer"
-                />
+                Forma de puntos
+                <select
+                  value={styleConfig.dotType || 'rounded'}
+                  onChange={(e) =>
+                    patchStyle({ dotType: e.target.value as QrStyleConfig['dotType'] })
+                  }
+                  className="mt-1 w-full px-3 py-2 rounded-lg border border-slate-200 text-sm bg-white"
+                >
+                  <option value="square">Cuadrado</option>
+                  <option value="dots">Puntos</option>
+                  <option value="rounded">Redondeado</option>
+                  <option value="classy-rounded">Elegante</option>
+                </select>
               </label>
-              <label className="block text-xs font-bold text-slate-600">
-                Fondo
-                <input
-                  type="color"
-                  value={styleConfig.backgroundColor || '#ffffff'}
-                  onChange={(e) => setStyleConfig({ ...styleConfig, backgroundColor: e.target.value })}
-                  className="mt-1 w-full h-10 rounded-lg cursor-pointer"
-                />
-              </label>
+
               {renderMode === 'visual' && (
                 <>
                   <label className="block text-xs font-bold text-slate-600">
@@ -319,10 +385,7 @@ export default function QrStudio({
                       max={100}
                       value={Math.round((styleConfig.halftoneIntensity ?? 0.75) * 100)}
                       onChange={(e) =>
-                        setStyleConfig({
-                          ...styleConfig,
-                          halftoneIntensity: Number(e.target.value) / 100,
-                        })
+                        patchStyle({ halftoneIntensity: Number(e.target.value) / 100 })
                       }
                       className="mt-1 w-full"
                     />
@@ -334,37 +397,19 @@ export default function QrStudio({
                       min={25}
                       max={50}
                       value={Math.round((styleConfig.dotScale ?? 0.35) * 100)}
-                      onChange={(e) =>
-                        setStyleConfig({
-                          ...styleConfig,
-                          dotScale: Number(e.target.value) / 100,
-                        })
-                      }
+                      onChange={(e) => patchStyle({ dotScale: Number(e.target.value) / 100 })}
                       className="mt-1 w-full"
                     />
                   </label>
                 </>
               )}
+
               {isPro && (
-                <label className="block text-xs font-bold text-slate-600">
-                  Forma de puntos
-                  <select
-                    value={styleConfig.dotType || 'rounded'}
-                    onChange={(e) =>
-                      setStyleConfig({
-                        ...styleConfig,
-                        dotType: e.target.value as QrStyleConfig['dotType'],
-                      })
-                    }
-                    className="mt-1 w-full px-3 py-2 rounded-lg border border-slate-200 text-sm"
-                  >
-                    <option value="square">Cuadrado</option>
-                    <option value="dots">Puntos</option>
-                    <option value="rounded">Redondeado</option>
-                    <option value="classy-rounded">Elegante</option>
-                  </select>
-                </label>
+                <p className="text-[11px] text-slate-500">
+                  Pro: gradientes y plantillas avanzadas en la pestaña Estilo.
+                </p>
               )}
+
               <button
                 type="button"
                 onClick={saveStyle}
