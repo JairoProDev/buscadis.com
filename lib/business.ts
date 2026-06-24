@@ -14,10 +14,10 @@ const VALID_BUSINESS_COLUMNS = [
     'contact_address', 'contact_maps_url', 'business_hours', 'social_links',
     'custom_blocks', 'profile_blocks', 'template_id', 'theme_preset', 'template_applied_at',
     'meta_title', 'meta_description', 'og_image_url',
-    'announcement_text', 'announcement_active', 'is_verified',
+    'announcement_text', 'announcement_active',
     'pixel_facebook', 'pixel_tiktok', 'is_vacation_mode', 'custom_domain',
     'show_contact_form', 'favicon_url', 'font_family',
-    'is_published', 'view_count', 'created_at', 'updated_at',
+    'is_published', 'created_at', 'updated_at',
     'site_tier', 'publicadis_template_id', 'publicadis_published', 'publicadis_config',
     'pending_owner_email',
     'subscription_tier',
@@ -25,24 +25,41 @@ const VALID_BUSINESS_COLUMNS = [
     'story_highlights', 'profile_hashtags', 'location_display_level',
 ];
 
-export function sanitizeBusinessProfilePayload(profile: any) {
-    const payload: any = {};
+const CLIENT_STRIP_COLUMNS = new Set([
+    'is_verified',
+    'verification_tier',
+    'view_count',
+    'subscription_tier',
+    'user_id',
+    'created_by',
+]);
+
+export function sanitizeBusinessProfilePayload(
+    profile: Record<string, unknown>,
+    options?: { previousBannerUrl?: string | null }
+) {
+    const payload: Record<string, unknown> = {};
     for (const key of Object.keys(profile)) {
+        if (CLIENT_STRIP_COLUMNS.has(key)) continue;
         if (VALID_BUSINESS_COLUMNS.includes(key) && profile[key] !== undefined) {
             payload[key] = profile[key];
         }
     }
-    if (payload.banner_url) {
-        const existing = payload.banner_config && typeof payload.banner_config === 'object'
-            ? payload.banner_config
-            : profile.banner_config && typeof profile.banner_config === 'object'
-              ? profile.banner_config
-              : {};
+    const bannerUrl = payload.banner_url as string | undefined;
+    const prevUrl = options?.previousBannerUrl;
+    const bannerChanged = Boolean(bannerUrl && bannerUrl !== prevUrl);
+    if (bannerChanged && bannerUrl) {
+        const existing =
+            payload.banner_config && typeof payload.banner_config === 'object'
+                ? (payload.banner_config as Record<string, unknown>)
+                : profile.banner_config && typeof profile.banner_config === 'object'
+                  ? (profile.banner_config as Record<string, unknown>)
+                  : {};
         payload.banner_config = {
-            mode: 'image',
-            fadeBottom: false,
             ...existing,
-            imageUrl: payload.banner_url,
+            mode: existing.mode || 'image',
+            fadeBottom: existing.fadeBottom ?? false,
+            imageUrl: bannerUrl,
         };
     }
     return payload;

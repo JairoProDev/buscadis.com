@@ -1,16 +1,17 @@
 'use client';
 
 import React, { useEffect, useState, useCallback, useRef } from 'react';
-import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import { BusinessProfile } from '@/types/business';
 import BusinessPublicView from '@/components/business/BusinessPublicView';
 import BusinessProfileEditorLayout, {
     EditorCloseButton,
 } from '@/components/business/editor/BusinessProfileEditorLayout';
+import EditorChromeMenu from '@/components/business/editor/EditorChromeMenu';
 import { useAuth } from '@/hooks/useAuth';
 import { useUser } from '@/hooks/useUser';
-import { EditorSteps } from '../../mi-negocio/components/EditorSteps';
+import { EditorSteps, editPartToHub } from '../../mi-negocio/components/EditorSteps';
+import type { ProfileHubId } from '@/lib/business/profile-progress';
 import { cn } from '@/lib/utils';
 
 import { ProductEditor } from '@/components/business/ProductEditor';
@@ -21,7 +22,6 @@ import { useBusinessData } from '@/hooks/useBusinessData';
 import { useNetworkStatus } from '@/hooks/useNetworkStatus';
 import { updateBusinessProfile, listBusinessProfilesForUser } from '@/lib/business';
 import { type BusinessWithRole } from '@/lib/business-access';
-import BusinessSwitcher from '@/components/business/BusinessSwitcher';
 import { saveBusinessViaAPI, publishBusinessViaAPI } from '@/lib/business-api';
 import { useDebounce } from '@/hooks/useDebounce';
 import { IconCheck, IconEye } from '@/components/Icons';
@@ -41,7 +41,7 @@ export default function PublicBusinessPage({
 
     // Editing State
     const [isEditing, setIsEditing] = useState(false);
-    const [activeStep, setActiveStep] = useState(0);
+    const [activeHub, setActiveHub] = useState<ProfileHubId>('identity');
     const [saving, setSaving] = useState(false);
     const [lastSavedTime, setLastSavedTime] = useState<Date | null>(null);
     const [editingProduct, setEditingProduct] = useState<any>(null);
@@ -234,16 +234,11 @@ export default function PublicBusinessPage({
 
     const handleEditPart = useCallback((part: string) => {
         setIsEditing(true);
-        if (part === 'logo' || part === 'visual') setActiveStep(1);
-        else if (part === 'add-product' || part === 'catalog') {
-            setActiveStep(2);
-            if (part === 'add-product') setShowAddProductModal(true);
-        } else if (part === 'contact' || part === 'general') setActiveStep(3);
-        else if (part === 'hours') setActiveStep(4);
-        else if (part === 'social') setActiveStep(5);
-        else if (part === 'marketing') setActiveStep(6);
-        else if (part === 'qr' || part === 'qr_tools') setActiveStep(7);
-        else if (part === 'identity') setActiveStep(0);
+        setActiveHub(editPartToHub(part));
+        if (part === 'add-product') {
+            setActiveHub('content');
+            setShowAddProductModal(true);
+        }
     }, []);
 
     // ─── LOADING STATE ────────────────────────────────────
@@ -342,29 +337,21 @@ export default function PublicBusinessPage({
                         >
                             {editableProfile.is_published ? '✓ Publicado' : 'Publicar'}
                         </button>
-                    </div>
-                    {businessOptions.length > 0 && business?.id && (
-                        <div className="px-4 pb-2 border-t border-slate-100 pt-2 flex flex-wrap items-center gap-2">
-                            <BusinessSwitcher
+                        {businessOptions.length > 0 && business?.id && (
+                            <EditorChromeMenu
                                 businesses={businessOptions}
                                 currentBusinessId={business.id}
-                                compact
-                                hideActions
+                                profile={editableProfile}
+                                onCloseEditor={() => setIsEditing(false)}
+                                onPublish={handlePublish}
+                                onToggleVacation={() =>
+                                    setLocalProfile((prev) =>
+                                        prev ? { ...prev, is_vacation_mode: !prev.is_vacation_mode } : prev
+                                    )
+                                }
                             />
-                            <Link
-                                href="/mi-negocio?new=1"
-                                className="text-xs font-bold text-[var(--brand-blue,#53acc5)] hover:underline"
-                            >
-                                + Nuevo negocio
-                            </Link>
-                            <Link
-                                href={`/mi-negocio/equipo?business=${business.id}`}
-                                className="text-xs font-semibold text-slate-600 hover:text-slate-900"
-                            >
-                                Equipo
-                            </Link>
-                        </div>
-                    )}
+                        )}
+                    </div>
                 </div>
             }
             sidebar={
@@ -379,14 +366,11 @@ export default function PublicBusinessPage({
                     }}
                     saving={saving}
                     catalogProducts={catalogProducts}
-                    activeStep={activeStep}
-                    setActiveStep={setActiveStep}
+                    activeHub={activeHub}
+                    setActiveHub={setActiveHub}
                     onAddProduct={() => setShowAddProductModal(true)}
                     editingProduct={editingProduct}
-                    setEditingProduct={(product: any) => {
-                        setEditingProduct(product);
-                        setShowProductModal(true);
-                    }}
+                    setEditingProduct={setEditingProduct}
                     onRefreshCatalog={() => business?.id && reloadCatalog(business.id)}
                 />
             }
@@ -414,10 +398,9 @@ export default function PublicBusinessPage({
                         onEditPart={handleEditPart}
                         onEditProduct={(productAdiso) => {
                             setIsEditing(true);
-                            setActiveStep(2);
+                            setActiveHub('content');
                             const fullProduct = catalogProducts.find((p) => p.id === productAdiso.id);
                             setEditingProduct(fullProduct || productAdiso);
-                            setShowProductModal(true);
                         }}
                     />
                 </>

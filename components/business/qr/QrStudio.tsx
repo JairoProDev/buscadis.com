@@ -88,7 +88,7 @@ const QR_STYLES: {
 export default function QrStudio({
   slug,
   businessName,
-  themeColor = '#2563eb',
+  themeColor = '#53acc5',
   isPro,
   hasLogo = false,
   compact = false,

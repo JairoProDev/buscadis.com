@@ -14,6 +14,11 @@ const BLOCK_LABELS: Record<ProfileBlockType, string> = {
   cta: 'CTA WhatsApp',
   text: 'Texto',
   embed: 'Embed',
+  timeline: 'Experiencia',
+  portfolio: 'Proyectos',
+  case_study: 'Casos de éxito',
+  faq: 'FAQ',
+  team: 'Equipo',
 };
 
 interface BlockInspectorProps {

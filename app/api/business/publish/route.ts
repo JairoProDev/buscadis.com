@@ -42,13 +42,15 @@ export async function POST(req: NextRequest) {
             if (!updates || !updates.name) {
                 return NextResponse.json({ error: 'Nombre de negocio requerido' }, { status: 400 });
             }
-            const safePayload = sanitizeBusinessProfilePayload(updates);
+            const safePayload = sanitizeBusinessProfilePayload(updates) as Record<string, unknown>;
             // Force ownership to the authenticated user
             safePayload.user_id = user.id;
             safePayload.created_by = user.id;
             // Generate slug if missing
             if (!safePayload.slug) {
-                safePayload.slug = safePayload.name.toLowerCase().replace(/\s+/g, '-');
+                safePayload.slug = String(safePayload.name || 'negocio')
+                    .toLowerCase()
+                    .replace(/\s+/g, '-');
             }
 
             const { data: inserted, error: insertError } = await supabaseAdmin

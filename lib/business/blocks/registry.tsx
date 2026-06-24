@@ -103,14 +103,28 @@ export function renderProfileBlock(
           <BusinessInfoTab profile={profile} adisos={adisos} showCustomLinks={false} />
         </div>
       );
-    case 'text': {
-      const markdown = (block.config.markdown as string) || '';
-      if (!markdown) return null;
+    case 'text':
+    case 'timeline':
+    case 'portfolio':
+    case 'case_study':
+    case 'faq':
+    case 'team': {
+      const title = (block.config.title as string) || '';
+      const markdown =
+        (block.config.markdown as string) ||
+        (block.config.body as string) ||
+        '';
+      if (!markdown && !title) return null;
       return (
         <div key={block.id} className="max-w-2xl mx-auto px-4 py-6">
-          <div className="bg-[var(--bp-surface)] rounded-[var(--bp-radius)] p-6 border border-[var(--bp-border)] text-[var(--bp-text-muted)] text-sm leading-relaxed whitespace-pre-wrap">
-            {markdown}
-          </div>
+          {title ? (
+            <h3 className="text-lg font-bold text-[var(--text-primary)] mb-3">{title}</h3>
+          ) : null}
+          {markdown ? (
+            <div className="bg-[var(--bp-surface)] rounded-[var(--bp-radius)] p-6 border border-[var(--bp-border)] text-[var(--bp-text-muted)] text-sm leading-relaxed whitespace-pre-wrap">
+              {markdown}
+            </div>
+          ) : null}
         </div>
       );
     }

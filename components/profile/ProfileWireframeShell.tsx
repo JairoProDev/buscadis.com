@@ -32,7 +32,7 @@ import {
   IconStar,
 } from '@/components/Icons';
 import { cn } from '@/lib/utils';
-import type { ReactNode } from 'react';
+import type { CSSProperties, ReactNode } from 'react';
 
 const TAB_META: Record<string, { label: string; icon: ReactNode }> = {
   catalogo: { label: 'Catálogo', icon: <IconStore size={18} /> },
@@ -196,8 +196,22 @@ export default function ProfileWireframeShell({
     cta: presentation.banner.cta || defaultBannerCta,
   };
 
+  const bg = layout.background;
+  const pageBgStyle: CSSProperties = bg
+    ? bg.type === 'image'
+      ? {
+          backgroundImage: `url(${bg.value})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundAttachment: 'fixed',
+        }
+      : bg.type === 'gradient'
+        ? { background: bg.value }
+        : { backgroundColor: bg.value }
+    : {};
+
   return (
-    <div style={presentation.cssVars as React.CSSProperties}>
+    <div style={{ ...(presentation.cssVars as React.CSSProperties), ...pageBgStyle }}>
       <div className="relative">
         {isSlotVisible(presentation.layout, 'profile_chrome') && (
           <ProfileChrome
@@ -233,7 +247,10 @@ export default function ProfileWireframeShell({
 
       <div className="space-y-2 pb-4">
         {isSlotVisible(presentation.layout, 'profile_identity') && (
-          <ProfileIdentityRow entity={entity} />
+          <ProfileIdentityRow
+            entity={entity}
+            verificationTier={profile.verification_tier}
+          />
         )}
 
         {isSlotVisible(presentation.layout, 'profile_social_strip') && (

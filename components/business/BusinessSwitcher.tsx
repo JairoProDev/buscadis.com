@@ -22,6 +22,8 @@ interface BusinessSwitcherProps {
   compact?: boolean;
   /** Oculta enlaces Nuevo / Equipo (p. ej. barra del editor en móvil) */
   hideActions?: boolean;
+  /** Añade opción "+ Crear nuevo negocio" al final del select */
+  combobox?: boolean;
 }
 
 export default function BusinessSwitcher({
@@ -31,10 +33,15 @@ export default function BusinessSwitcher({
   className,
   compact = false,
   hideActions = false,
+  combobox = false,
 }: BusinessSwitcherProps) {
   const router = useRouter();
 
   const handleChange = (id: string) => {
+    if (id === '__new__') {
+      router.push('/mi-negocio?new=1');
+      return;
+    }
     const picked = businesses.find((b) => b.profile.id === id);
     if (!picked) return;
     if (onSelect) {
@@ -83,6 +90,9 @@ export default function BusinessSwitcher({
               {role !== 'owner' ? ` (${ROLE_LABELS[role] || role})` : ''}
             </option>
           ))}
+          {combobox && (
+            <option value="__new__">+ Crear nuevo negocio</option>
+          )}
         </select>
       </div>
 

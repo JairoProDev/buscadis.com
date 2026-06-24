@@ -89,7 +89,12 @@ export type ProfileBlockType =
     | 'map'
     | 'cta'
     | 'text'
-    | 'embed';
+    | 'embed'
+    | 'timeline'
+    | 'portfolio'
+    | 'case_study'
+    | 'faq'
+    | 'team';
 
 export interface ProfileBlock {
     id: string;
@@ -169,6 +174,8 @@ export interface BusinessProfile {
     announcement_text?: string;
     announcement_active?: boolean;
     is_verified?: boolean;
+    /** none | basic | identity | business | premium */
+    verification_tier?: 'none' | 'basic' | 'identity' | 'business' | 'premium';
     pixel_facebook?: string;
     pixel_tiktok?: string;
     is_vacation_mode?: boolean;

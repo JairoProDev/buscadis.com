@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 
 interface ProfileExpandableBioProps {
@@ -15,19 +15,27 @@ export default function ProfileExpandableBio({
   className,
 }: ProfileExpandableBioProps) {
   const [expanded, setExpanded] = useState(false);
-  if (!text?.trim()) return null;
+  const [needsExpand, setNeedsExpand] = useState(false);
+  const textRef = useRef<HTMLParagraphElement>(null);
 
-  const needsExpand = text.length > 120;
+  useEffect(() => {
+    const el = textRef.current;
+    if (!el || expanded) return;
+    setNeedsExpand(el.scrollHeight > el.clientHeight + 2);
+  }, [text, maxLines, expanded]);
+
+  if (!text?.trim()) return null;
 
   return (
     <div className={cn('max-w-6xl mx-auto px-4', className)}>
       <p
+        ref={textRef}
         className={cn(
           'text-sm text-[var(--text-secondary)] leading-relaxed m-0 whitespace-pre-line',
-          !expanded && needsExpand && `line-clamp-${maxLines}`
+          !expanded && 'line-clamp-3'
         )}
         style={
-          !expanded && needsExpand
+          !expanded
             ? {
                 display: '-webkit-box',
                 WebkitLineClamp: maxLines,
@@ -38,16 +46,31 @@ export default function ProfileExpandableBio({
         }
       >
         {text}
+        {needsExpand && !expanded && (
+          <>
+            {' '}
+            <button
+              type="button"
+              onClick={() => setExpanded(true)}
+              className="inline font-semibold text-[var(--brand-color)] hover:underline p-0 bg-transparent border-0 cursor-pointer align-baseline"
+            >
+              Ver más
+            </button>
+          </>
+        )}
+        {expanded && (
+          <>
+            {' '}
+            <button
+              type="button"
+              onClick={() => setExpanded(false)}
+              className="inline font-semibold text-[var(--brand-color)] hover:underline p-0 bg-transparent border-0 cursor-pointer align-baseline"
+            >
+              Ver menos
+            </button>
+          </>
+        )}
       </p>
-      {needsExpand && !expanded && (
-        <button
-          type="button"
-          onClick={() => setExpanded(true)}
-          className="text-sm font-semibold text-[var(--brand-color)] mt-1 hover:underline"
-        >
-          Ver más
-        </button>
-      )}
     </div>
   );
 }

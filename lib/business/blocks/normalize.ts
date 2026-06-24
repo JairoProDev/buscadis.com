@@ -4,6 +4,7 @@ import { getTemplateById } from '@/lib/business/templates/registry';
 
 const BLOCK_TYPES: ProfileBlockType[] = [
   'hero', 'highlights', 'catalog', 'deals', 'links', 'reviews', 'map', 'cta', 'text', 'embed',
+  'timeline', 'portfolio', 'case_study', 'faq', 'team',
 ];
 
 function isValidBlock(b: unknown): b is ProfileBlock {
@@ -73,6 +74,12 @@ export function blockTypeToTabId(type: ProfileBlockType): string | null {
     reviews: 'resenas',
     links: 'inicio',
     text: 'inicio',
+    timeline: 'inicio',
+    portfolio: 'inicio',
+    case_study: 'inicio',
+    faq: 'inicio',
+    team: 'inicio',
+    embed: 'inicio',
   };
   return map[type] ?? null;
 }

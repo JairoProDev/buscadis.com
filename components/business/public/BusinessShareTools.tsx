@@ -15,6 +15,8 @@ interface BusinessShareToolsProps {
   onShare: () => void;
   isPro?: boolean;
   themeColor?: string;
+  /** Sidebar editor: sin padding de página completa */
+  embedded?: boolean;
 }
 
 export default function BusinessShareTools({
@@ -22,7 +24,8 @@ export default function BusinessShareTools({
   businessName,
   onShare,
   isPro = false,
-  themeColor,
+  themeColor = '#53acc5',
+  embedded = false,
 }: BusinessShareToolsProps) {
   const encoded = encodeURIComponent(slug);
   const profileUrl =
@@ -52,14 +55,22 @@ export default function BusinessShareTools({
   };
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-8 print:hidden">
-      <div className="bg-white rounded-3xl border border-slate-100 p-6 shadow-sm space-y-6">
-        <div>
-          <h3 className="font-bold text-lg mb-1">Tarjeta digital</h3>
-          <p className="text-sm text-slate-500">
-            Comparte el perfil de {businessName} con QR dinámico, vCard o flyer.
-          </p>
-        </div>
+    <div className={embedded ? 'print:hidden' : 'max-w-6xl mx-auto px-4 py-8 print:hidden'}>
+      <div
+        className={
+          embedded
+            ? 'space-y-4'
+            : 'bg-white rounded-3xl border border-slate-100 p-6 shadow-sm space-y-6'
+        }
+      >
+        {!embedded && (
+          <div>
+            <h3 className="font-bold text-lg mb-1">Tarjeta digital</h3>
+            <p className="text-sm text-slate-500">
+              Comparte el perfil de {businessName} con QR dinámico, vCard o flyer.
+            </p>
+          </div>
+        )}
 
         <div className="flex flex-wrap gap-3">
           <button
