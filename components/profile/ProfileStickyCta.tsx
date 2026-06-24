@@ -43,10 +43,7 @@ export default function ProfileStickyCta({
             target="_blank"
             rel="noreferrer"
             onClick={onWhatsappClick}
-            className="flex-1 flex items-center justify-center gap-2 h-12 rounded-[var(--bp-radius)] text-slate-900 font-bold text-sm shadow-lg active:scale-[0.98] transition-transform"
-            style={{
-              background: 'linear-gradient(135deg, var(--brand-accent) 0%, var(--brand-color) 100%)',
-            }}
+            className="flex-1 flex items-center justify-center gap-2 h-12 rounded-[var(--bp-radius)] bg-[var(--brand-color)] text-white font-bold text-sm shadow-md active:scale-[0.98] transition-transform"
           >
             <IconWhatsapp size={20} />
             Contactar

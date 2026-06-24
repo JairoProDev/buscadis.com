@@ -32,7 +32,7 @@ export default function BusinessProfileEditorLayout({
         <div
           className={cn(
             'fixed inset-y-0 left-0 z-[60] w-full md:w-[400px] bg-white shadow-2xl transform transition-transform duration-300 ease-in-out border-r border-slate-200 overflow-y-auto',
-            canEdit && isEditing ? 'translate-x-0 top-[5.75rem] md:top-14' : '-translate-x-full'
+            canEdit && isEditing ? 'translate-x-0 top-[var(--editor-header-h,5.625rem)]' : '-translate-x-full'
           )}
         >
           {isEditing && canEdit && sidebar}

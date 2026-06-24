@@ -1,5 +1,6 @@
 'use client';
 
+import type { ReactNode } from 'react';
 import { useEffect, useRef, useState } from 'react';
 import { IconEllipsisV } from '@/components/Icons';
 import { cn } from '@/lib/utils';
@@ -17,12 +18,14 @@ interface ProfileChromeMenuProps {
   items: ProfileMenuItem[];
   className?: string;
   buttonClassName?: string;
+  header?: ReactNode;
 }
 
 export default function ProfileChromeMenu({
   items,
   className,
   buttonClassName,
+  header,
 }: ProfileChromeMenuProps) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -54,7 +57,8 @@ export default function ProfileChromeMenu({
         <IconEllipsisV size={18} />
       </button>
       {open && (
-        <div className="absolute right-0 top-full mt-2 min-w-[200px] rounded-xl border border-slate-200 bg-white shadow-xl py-1 z-[120]">
+        <div className="absolute right-0 top-full mt-2 min-w-[200px] rounded-xl border border-slate-200 bg-white shadow-xl py-1 z-[120] overflow-hidden">
+          {header}
           {visible.map((item) =>
             item.href ? (
               <a

@@ -79,7 +79,7 @@ export default function BusinessSwitcher({
           </span>
         )}
         <select
-          className="text-xs border border-slate-200 rounded-lg px-2 py-1.5 bg-white text-slate-800 max-w-[160px] sm:max-w-[200px] font-medium truncate"
+          className="text-xs border border-slate-200 rounded-lg px-2.5 py-2 bg-white text-slate-800 max-w-[140px] sm:max-w-[180px] font-medium truncate shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-300"
           value={currentBusinessId || businesses[0]?.profile.id || ''}
           onChange={(e) => handleChange(e.target.value)}
           aria-label="Seleccionar negocio"

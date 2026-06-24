@@ -236,16 +236,16 @@ export default function ProfileWireframeShell({
         )}
 
         <div className="max-w-6xl mx-auto px-4 relative z-10">
-          <div className="flex items-end gap-3 sm:gap-5 -mt-14 sm:-mt-16">
+          <div className="flex items-end gap-4 sm:gap-5 -mt-[3.25rem] sm:-mt-16 pt-1">
             <ProfileAvatar entity={entity} className="relative z-20" />
             {isSlotVisible(presentation.layout, 'profile_metrics') && entity.metrics && (
-              <ProfileMetrics metrics={entity.metrics} className="flex-1 min-w-0" />
+              <ProfileMetrics metrics={entity.metrics} className="flex-1 min-w-0 pb-0.5" />
             )}
           </div>
         </div>
       </div>
 
-      <div className="space-y-2 pb-4">
+      <div className="space-y-3 pb-4 pt-2">
         {isSlotVisible(presentation.layout, 'profile_identity') && (
           <ProfileIdentityRow
             entity={entity}
@@ -275,7 +275,10 @@ export default function ProfileWireframeShell({
 
         {isSlotVisible(presentation.layout, 'profile_story_highlights') &&
           (entity.storyHighlights?.length ? (
-            <ProfileStoryHighlights highlights={entity.storyHighlights} />
+            <ProfileStoryHighlights
+              highlights={entity.storyHighlights}
+              bannerImageUrl={entity.bannerImageUrl || profile.banner_url}
+            />
           ) : (
             highlightsBlock?.visible && renderBlock(highlightsBlock)
           ))}

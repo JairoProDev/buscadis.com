@@ -42,7 +42,7 @@ export default function IdentityHubFields({ profile, setProfile, fields }: Ident
       <label className="block">
         <FieldLabel number={2} label="Usuario (URL)" complete={done('slug')} />
         <div className="flex items-center bg-white border border-slate-200 rounded-xl focus-within:border-blue-500 overflow-hidden">
-          <span className="pl-3 pr-1 text-slate-400 text-xs font-mono shrink-0">buscadis.com/@</span>
+          <span className="pl-3 pr-0 text-slate-400 text-xs font-mono shrink-0 select-none">buscadis.com/@</span>
           <input
             type="text"
             value={profile.slug || ''}

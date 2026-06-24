@@ -58,17 +58,17 @@ export default function ProfileMetrics({ metrics, className }: ProfileMetricsPro
   return (
     <div
       className={cn(
-        'flex items-center gap-4 sm:gap-6 flex-1 min-w-0 pb-1',
+        'flex items-stretch gap-3 sm:gap-5 flex-1 min-w-0',
         className
       )}
     >
       {shown.map((m, index) => (
-        <div key={m.key} className="flex flex-col items-center min-w-[4.5rem]">
+        <div key={m.key} className="flex flex-col items-center justify-end min-w-[4rem] sm:min-w-[4.5rem]">
           <div className="flex items-center gap-1 text-[var(--text-primary)] font-bold text-sm sm:text-base">
             <MetricIcon metricKey={m.key} index={index} />
-            <span>{formatMetric(m.value)}</span>
+            <span className="tabular-nums">{formatMetric(m.value)}</span>
           </div>
-          <span className="text-[10px] sm:text-xs text-[var(--text-tertiary)] font-medium mt-0.5 text-center">
+          <span className="text-[10px] sm:text-xs text-[var(--text-tertiary)] font-medium mt-1 text-center leading-tight">
             {m.label}
           </span>
         </div>

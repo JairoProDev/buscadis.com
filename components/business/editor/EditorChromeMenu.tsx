@@ -13,6 +13,8 @@ interface EditorChromeMenuProps {
   onCloseEditor: () => void;
   onPublish: () => void;
   onToggleVacation?: () => void;
+  /** En móvil el switcher va dentro del menú para evitar saturar la barra */
+  mobile?: boolean;
 }
 
 export default function EditorChromeMenu({
@@ -22,6 +24,7 @@ export default function EditorChromeMenu({
   onCloseEditor,
   onPublish,
   onToggleVacation,
+  mobile = false,
 }: EditorChromeMenuProps) {
   const router = useRouter();
 
@@ -30,6 +33,7 @@ export default function EditorChromeMenu({
       id: 'publish',
       label: profile.is_published ? 'Despublicar página' : 'Publicar página',
       onClick: onPublish,
+      hidden: true,
     },
     {
       id: 'vacation',
@@ -62,7 +66,7 @@ export default function EditorChromeMenu({
 
   return (
     <div className="flex items-center gap-2">
-      {businesses.length > 0 && currentBusinessId && (
+      {!mobile && businesses.length > 0 && currentBusinessId && (
         <BusinessSwitcher
           businesses={businesses}
           currentBusinessId={currentBusinessId}
@@ -74,6 +78,19 @@ export default function EditorChromeMenu({
       <ProfileChromeMenu
         items={items}
         buttonClassName="h-9 w-9 rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200"
+        header={
+          mobile && businesses.length > 0 && currentBusinessId ? (
+            <div className="px-3 py-2 border-b border-slate-100">
+              <BusinessSwitcher
+                businesses={businesses}
+                currentBusinessId={currentBusinessId}
+                hideActions
+                combobox
+                className="w-full [&_select]:max-w-none [&_select]:w-full"
+              />
+            </div>
+          ) : undefined
+        }
       />
     </div>
   );

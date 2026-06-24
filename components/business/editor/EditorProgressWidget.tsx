@@ -8,14 +8,36 @@ interface EditorProgressWidgetProps {
   profile: Partial<BusinessProfile>;
   productCount?: number;
   className?: string;
+  /** Barra compacta para el header del editor */
+  compact?: boolean;
 }
 
 export default function EditorProgressWidget({
   profile,
   productCount = 0,
   className,
+  compact = false,
 }: EditorProgressWidgetProps) {
   const { score, milestoneLabel, missing } = computeProfileProgress(profile, productCount);
+
+  if (compact) {
+    return (
+      <div className={cn('min-w-0', className)} title={milestoneLabel || undefined}>
+        <div className="flex items-center justify-between gap-2 mb-1">
+          <span className="text-[10px] font-semibold text-slate-500 truncate">Perfil</span>
+          <span className="text-[10px] font-black text-[var(--brand-blue,#53acc5)] tabular-nums">
+            {score}%
+          </span>
+        </div>
+        <div className="h-1 rounded-full bg-slate-100 overflow-hidden">
+          <div
+            className="h-full rounded-full bg-[var(--brand-blue,#53acc5)] transition-all"
+            style={{ width: `${score}%` }}
+          />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={cn('rounded-xl border border-slate-200 bg-white p-3', className)}>

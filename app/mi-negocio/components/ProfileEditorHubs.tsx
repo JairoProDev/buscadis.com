@@ -4,7 +4,6 @@ import type { BusinessProfile } from '@/types/business';
 import type { Adiso } from '@/types';
 import type { ProfileHubId } from '@/lib/business/profile-progress';
 import { computeProfileProgress } from '@/lib/business/profile-progress';
-import EditorProgressWidget from '@/components/business/editor/EditorProgressWidget';
 import IdentityHubFields from '@/components/business/editor/hubs/IdentityHubFields';
 import AppearanceHubFields from '@/components/business/editor/hubs/AppearanceHubFields';
 import ContentHubFields from '@/components/business/editor/hubs/ContentHubFields';
@@ -56,12 +55,8 @@ export function ProfileEditorHubs({
   return (
     <div className="flex flex-col h-full bg-white relative">
       <div className="flex-1 overflow-y-auto custom-scrollbar">
-        <div className="p-4 border-b border-slate-100 bg-slate-50/80">
-          <EditorProgressWidget profile={profile} productCount={catalogProducts.length} />
-        </div>
-
-        <div className="flex flex-col divide-y divide-slate-50">
-          {HUBS.map((hub, index) => {
+        <div className="flex flex-col divide-y divide-slate-100">
+          {HUBS.map((hub) => {
             const isActive = activeHub === hub.id;
             const HubIcon = hub.icon;
             const score = hubScores[hub.id];
@@ -73,41 +68,37 @@ export function ProfileEditorHubs({
                   type="button"
                   onClick={() => setActiveHub(hub.id)}
                   className={cn(
-                    'w-full flex items-center gap-3 p-4 text-left transition-all hover:bg-slate-50',
+                    'w-full flex items-center gap-3 px-4 py-3.5 text-left transition-colors hover:bg-slate-50',
                     isActive ? 'bg-slate-50' : 'bg-white'
                   )}
                 >
                   <div
                     className={cn(
-                      'w-9 h-9 rounded-full flex items-center justify-center text-xs font-black shrink-0 border-2',
+                      'w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-colors',
                       hubComplete
-                        ? 'bg-emerald-500 border-emerald-500 text-white'
+                        ? 'bg-emerald-50 text-emerald-600 ring-1 ring-emerald-200'
                         : isActive
-                          ? 'bg-blue-100 border-blue-200 text-blue-700'
-                          : 'bg-slate-100 border-slate-200 text-slate-500'
+                          ? 'bg-blue-50 text-blue-600 ring-1 ring-blue-200'
+                          : 'bg-slate-100 text-slate-500'
                     )}
                   >
-                    {hubComplete ? <IconCheck size={14} /> : index + 1}
-                  </div>
-                  <div
-                    className={cn(
-                      'w-9 h-9 rounded-full flex items-center justify-center shrink-0',
-                      isActive ? 'bg-blue-100 text-blue-600' : 'bg-slate-100 text-slate-500'
-                    )}
-                  >
-                    <HubIcon size={18} />
+                    {hubComplete ? <IconCheck size={18} /> : <HubIcon size={18} />}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <h3 className={cn('font-bold text-sm', isActive ? 'text-blue-700' : 'text-slate-800')}>
-                      {hub.label}
-                    </h3>
-                    <p className="text-xs text-slate-500 truncate">{hub.subtitle}</p>
-                    <p className="text-[10px] text-slate-400 mt-0.5">{score}% completo</p>
+                    <div className="flex items-center gap-2">
+                      <h3 className={cn('font-bold text-sm truncate', isActive ? 'text-blue-700' : 'text-slate-800')}>
+                        {hub.label}
+                      </h3>
+                      <span className="text-[10px] font-semibold text-slate-400 tabular-nums shrink-0">
+                        {score}%
+                      </span>
+                    </div>
+                    <p className="text-xs text-slate-500 truncate mt-0.5">{hub.subtitle}</p>
                   </div>
                   <div
                     className={cn(
-                      'w-8 h-8 rounded-full flex items-center justify-center text-slate-400',
-                      isActive ? 'bg-blue-100 text-blue-600 rotate-90' : 'bg-slate-50'
+                      'w-7 h-7 rounded-full flex items-center justify-center text-slate-400 shrink-0',
+                      isActive && 'rotate-90 text-blue-600'
                     )}
                   >
                     <IconArrowRight size={14} />
@@ -115,7 +106,7 @@ export function ProfileEditorHubs({
                 </button>
 
                 {isActive && (
-                  <div className="p-6 bg-slate-50/50 border-y border-slate-100 animate-in slide-in-from-top-2 duration-200">
+                  <div className="px-4 pb-5 pt-1 bg-slate-50/60 border-y border-slate-100 animate-in slide-in-from-top-2 duration-200">
                     {hub.id === 'identity' && (
                       <IdentityHubFields profile={profile} setProfile={patchProfile} fields={fields} />
                     )}

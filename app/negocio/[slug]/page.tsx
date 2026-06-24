@@ -4,15 +4,12 @@ import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { supabase } from '@/lib/supabase';
 import { BusinessProfile } from '@/types/business';
 import BusinessPublicView from '@/components/business/BusinessPublicView';
-import BusinessProfileEditorLayout, {
-    EditorCloseButton,
-} from '@/components/business/editor/BusinessProfileEditorLayout';
-import EditorChromeMenu from '@/components/business/editor/EditorChromeMenu';
+import BusinessProfileEditorLayout from '@/components/business/editor/BusinessProfileEditorLayout';
+import EditorTopBar from '@/components/business/editor/EditorTopBar';
 import { useAuth } from '@/hooks/useAuth';
 import { useUser } from '@/hooks/useUser';
 import { EditorSteps, editPartToHub } from '../../mi-negocio/components/EditorSteps';
 import type { ProfileHubId } from '@/lib/business/profile-progress';
-import { cn } from '@/lib/utils';
 
 import { ProductEditor } from '@/components/business/ProductEditor';
 import SimpleCatalogAdd from '@/components/business/SimpleCatalogAdd';
@@ -24,7 +21,6 @@ import { updateBusinessProfile, listBusinessProfilesForUser } from '@/lib/busine
 import { type BusinessWithRole } from '@/lib/business-access';
 import { saveBusinessViaAPI, publishBusinessViaAPI } from '@/lib/business-api';
 import { useDebounce } from '@/hooks/useDebounce';
-import { IconCheck, IconEye } from '@/components/Icons';
 
 export default function PublicBusinessPage({
     params,
@@ -295,64 +291,25 @@ export default function PublicBusinessPage({
             onCloseEditor={() => setIsEditing(false)}
             onOpenEditor={() => setIsEditing(true)}
             editorTopBar={
-                <div className="sticky top-0 z-[70] bg-white border-b border-slate-200 shadow-sm">
-                    <div className="min-h-14 flex items-center px-4 gap-3 py-2">
-                        <EditorCloseButton onClick={() => setIsEditing(false)} />
-                        <div className="flex flex-col min-w-0 flex-1 gap-0.5">
-                            <span className="font-bold text-sm text-slate-800 leading-tight">Editar página</span>
-                            {isPlatformAdmin && !isOwner && !isMember && (
-                                <span className="text-[10px] font-medium text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded w-fit">
-                                    Modo admin
-                                </span>
-                            )}
-                            <div className="flex items-center gap-1.5 min-h-[14px]">
-                                {saving ? (
-                                    <span className="text-[10px] text-slate-500 flex items-center gap-1">
-                                        <span className="w-2 h-2 border border-slate-400 border-t-transparent rounded-full animate-spin" />
-                                        Guardando…
-                                    </span>
-                                ) : lastSavedTime ? (
-                                    <span className="text-[10px] text-emerald-600 flex items-center gap-1">
-                                        <IconCheck size={10} />
-                                        Guardado
-                                    </span>
-                                ) : null}
-                            </div>
-                        </div>
-                        <button
-                            type="button"
-                            onClick={() => setIsEditing(false)}
-                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-100 text-slate-700 text-xs font-bold hover:bg-slate-200 transition-colors shrink-0"
-                        >
-                            <IconEye size={14} />
-                            <span className="hidden sm:inline">Ver página</span>
-                        </button>
-                        <button
-                            onClick={handlePublish}
-                            disabled={saving}
-                            className={cn(
-                                'px-3 py-1.5 rounded-lg font-bold text-white text-xs flex items-center gap-1.5 transition-all disabled:opacity-50 shrink-0',
-                                editableProfile.is_published ? 'bg-emerald-500 hover:bg-emerald-600' : 'bg-[var(--brand-blue,#53acc5)] hover:brightness-110'
-                            )}
-                        >
-                            {editableProfile.is_published ? '✓ Publicado' : 'Publicar'}
-                        </button>
-                        {businessOptions.length > 0 && business?.id && (
-                            <EditorChromeMenu
-                                businesses={businessOptions}
-                                currentBusinessId={business.id}
-                                profile={editableProfile}
-                                onCloseEditor={() => setIsEditing(false)}
-                                onPublish={handlePublish}
-                                onToggleVacation={() =>
-                                    setLocalProfile((prev) =>
-                                        prev ? { ...prev, is_vacation_mode: !prev.is_vacation_mode } : prev
-                                    )
-                                }
-                            />
-                        )}
-                    </div>
-                </div>
+                <EditorTopBar
+                    saving={saving}
+                    lastSavedTime={lastSavedTime}
+                    isPlatformAdmin={isPlatformAdmin}
+                    isOwner={isOwner}
+                    isMember={isMember}
+                    editableProfile={editableProfile}
+                    catalogProductCount={catalogProducts.length}
+                    businessOptions={businessOptions}
+                    businessId={business?.id}
+                    onClose={() => setIsEditing(false)}
+                    onPreview={() => setIsEditing(false)}
+                    onPublish={handlePublish}
+                    onToggleVacation={() =>
+                        setLocalProfile((prev) =>
+                            prev ? { ...prev, is_vacation_mode: !prev.is_vacation_mode } : prev
+                        )
+                    }
+                />
             }
             sidebar={
                 <EditorSteps
