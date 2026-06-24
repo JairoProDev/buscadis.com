@@ -11,8 +11,8 @@ export interface QrPreset {
 export const QR_PRESETS: QrPreset[] = [
   {
     id: 'buscadis-classic',
-    name: 'Clásico',
-    description: 'QR estándar negro sobre blanco — máxima compatibilidad',
+    name: 'Cuadrado',
+    description: 'QR estándar — máxima compatibilidad al escanear',
     tier: 'free',
     config: {
       renderMode: 'classic',
@@ -26,8 +26,8 @@ export const QR_PRESETS: QrPreset[] = [
   },
   {
     id: 'brand-theme',
-    name: 'Marca',
-    description: 'Logo en el centro + color de tu negocio',
+    name: 'Con logo',
+    description: 'Tu logo en el centro con el color de tu marca',
     tier: 'free',
     config: {
       renderMode: 'branded',
@@ -41,8 +41,8 @@ export const QR_PRESETS: QrPreset[] = [
   },
   {
     id: 'visual-fusion',
-    name: 'Visual',
-    description: 'Logo fusionado con el código — ideal para packaging',
+    name: 'Logo integrado',
+    description: 'Tu logo forma parte del código — ideal para empaque',
     tier: 'free',
     config: {
       renderMode: 'visual',

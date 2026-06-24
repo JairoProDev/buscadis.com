@@ -21,9 +21,9 @@ interface QrPreviewProps {
 }
 
 const MODE_LABELS: Record<QrRenderMode, string> = {
-  visual: 'Visual',
-  branded: 'Marca',
-  classic: 'Clásico',
+  visual: 'Logo integrado',
+  branded: 'Con logo',
+  classic: 'Cuadrado',
 };
 
 export default function QrPreview({
