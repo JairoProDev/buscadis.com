@@ -217,13 +217,13 @@ export default function ProfileWireframeShell({
           <div className="flex items-end gap-3 sm:gap-5 -mt-14 sm:-mt-16">
             <ProfileAvatar entity={entity} className="relative z-20" />
             {isSlotVisible(presentation.layout, 'profile_metrics') && entity.metrics && (
-              <ProfileMetrics metrics={entity.metrics} className="flex-1 pb-0.5 min-w-0" />
+              <ProfileMetrics metrics={entity.metrics} className="flex-1 min-w-0" />
             )}
           </div>
         </div>
       </div>
 
-      <div className="space-y-2.5 pt-1 pb-4">
+      <div className="space-y-2 pb-4">
         {isSlotVisible(presentation.layout, 'profile_identity') && (
           <ProfileIdentityRow entity={entity} />
         )}

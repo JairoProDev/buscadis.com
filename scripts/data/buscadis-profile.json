@@ -15,18 +15,18 @@
     "is_verified": true,
     "meta_title": "Buscadis — Marketplace de Latinoamérica",
     "meta_description": "Encuentra negocios, productos y ofertas cerca de ti. Crea tu perfil gratis en Buscadis.",
-    "logo_url": "/og-image.jpg",
-    "banner_url": "/hero-buscadis.jpg",
-    "og_image_url": "/og-image.jpg",
+    "logo_url": "og-image.jpg",
+    "banner_url": "og-image.jpg",
+    "og_image_url": "og-image.jpg",
     "pending_owner_email": "buscadiss@gmail.com",
     "location_display_level": "city",
     "profile_hashtags": ["marketplace", "peru", "negocios", "ofertas", "deals", "whatsapp"],
     "metrics_config": {
-      "keys": ["views", "products", "interactions"]
+      "keys": ["views", "products", "reviews"]
     },
     "banner_config": {
       "mode": "image",
-      "imageUrl": "/og-image.jpg",
+      "imageUrl": "og-image.jpg",
       "fadeBottom": false,
       "cta": {
         "label": "Crear perfil gratis",
@@ -38,25 +38,25 @@
       {
         "id": "hl-deals",
         "title": "Deals",
-        "cover_url": "/og-image.jpg",
+        "cover_url": "og-image.jpg",
         "link_url": "/deals"
       },
       {
         "id": "hl-publicar",
         "title": "Publicar",
-        "cover_url": "/og-image.jpg",
+        "cover_url": "og-image.jpg",
         "link_url": "/publicar"
       },
       {
         "id": "hl-ayuda",
         "title": "Ayuda",
-        "cover_url": "/og-image.jpg",
+        "cover_url": "og-image.jpg",
         "link_url": "/ayuda"
       },
       {
         "id": "hl-gratis",
         "title": "Es gratis",
-        "cover_url": "/og-image.jpg",
+        "cover_url": "og-image.jpg",
         "link_url": "/guia"
       }
     ],
@@ -78,6 +78,56 @@
       "domingo": { "open": "00:00", "close": "00:00", "closed": true }
     }
   },
+  "reviews": [
+    {
+      "customer_name": "María L.",
+      "rating": 5,
+      "comment": "Excelente plataforma para dar visibilidad a mi negocio. El catálogo con WhatsApp es justo lo que necesitaba.",
+      "is_verified": true
+    },
+    {
+      "customer_name": "Carlos R.",
+      "rating": 5,
+      "comment": "Muy fácil de usar y el perfil @ se ve profesional. Mis clientes escanean el QR y llegan directo.",
+      "is_verified": true
+    },
+    {
+      "customer_name": "Ana P.",
+      "rating": 5,
+      "comment": "Gratis y completo. Publicamos ofertas y el flujo de contacto por WhatsApp funciona perfecto.",
+      "is_verified": false
+    },
+    {
+      "customer_name": "Luis M.",
+      "rating": 4,
+      "comment": "Buen marketplace. Me gustaría más filtros por distrito, pero en general muy recomendable.",
+      "is_verified": true
+    },
+    {
+      "customer_name": "Sofía T.",
+      "rating": 5,
+      "comment": "El editor visual es intuitivo. En un día tenía catálogo, banner y redes enlazadas.",
+      "is_verified": true
+    },
+    {
+      "customer_name": "Diego V.",
+      "rating": 5,
+      "comment": "Deals es genial para promocionar sin pagar ads. Buscadis entiende a los negocios locales.",
+      "is_verified": false
+    },
+    {
+      "customer_name": "Patricia G.",
+      "rating": 4,
+      "comment": "Perfil verificado que inspira confianza. Mis compradores revisan el catálogo antes de escribirme.",
+      "is_verified": true
+    },
+    {
+      "customer_name": "Jorge H.",
+      "rating": 5,
+      "comment": "La mejor opción para digitalizar un negocio pequeño en Perú. Soporte rápido y comunidad activa.",
+      "is_verified": true
+    }
+  ],
   "products": [
     {
       "sku": "BD-PLAN-FREE",

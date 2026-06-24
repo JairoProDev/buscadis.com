@@ -1,5 +1,6 @@
 /**
  * Perfil showcase de Buscadis — datos completos para demo del motor de perfiles.
+ * Sube og-image.jpg a Supabase Storage y vincula dueño + reseñas.
  *
  *   npx tsx scripts/seed-buscadis-profile.ts
  *   npx tsx scripts/seed-buscadis-profile.ts --dry-run
@@ -13,9 +14,22 @@ import { buildDefaultLayout } from '../packages/profile-engine/src/index';
 dotenv.config({ path: path.join(process.cwd(), '.env.local') });
 dotenv.config({ path: path.join(process.cwd(), '.env') });
 
+const CATALOG_BUCKET = 'catalog-images';
+const PUBLIC_DIR = path.join(process.cwd(), 'public');
 const DATA_PATH = path.join(__dirname, 'data/buscadis-profile.json');
 
-const BRAND_IMAGE = '/og-image.jpg';
+const BRAND_FILES = {
+  logo: 'og-image.jpg',
+  banner: 'og-image.jpg',
+  og: 'og-image.jpg',
+};
+
+interface SeedReview {
+  customer_name: string;
+  rating: number;
+  comment: string;
+  is_verified?: boolean;
+}
 
 interface SeedFile {
   business: Record<string, unknown> & {
@@ -42,6 +56,7 @@ interface SeedFile {
     sort_order: number;
     is_featured: boolean;
   }>;
+  reviews?: SeedReview[];
 }
 
 function parseArgs() {
@@ -62,6 +77,46 @@ async function findUserIdByEmail(email: string): Promise<string | null> {
   return null;
 }
 
+async function uploadBrandImage(
+  businessId: string,
+  fileName: string,
+  dryRun: boolean
+): Promise<string> {
+  const localPath = path.join(PUBLIC_DIR, fileName);
+  if (!fs.existsSync(localPath)) {
+    throw new Error(`Imagen no encontrada: ${localPath}`);
+  }
+
+  const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL || 'https://buscadis.com').replace(/\/$/, '');
+  const fallbackUrl = `${siteUrl}/${fileName}`;
+
+  if (dryRun) {
+    console.log(`  [dry-run] subiría ${fileName}`);
+    return fallbackUrl;
+  }
+
+  const { supabaseAdmin } = await import('../lib/supabase-admin');
+  const buffer = fs.readFileSync(localPath);
+  const ext = path.extname(fileName).slice(1).toLowerCase();
+  const contentType =
+    ext === 'png' ? 'image/png' : ext === 'webp' ? 'image/webp' : ext === 'svg' ? 'image/svg+xml' : 'image/jpeg';
+  const storagePath = `${businessId}/brand/${fileName}`;
+
+  const { error } = await supabaseAdmin.storage.from(CATALOG_BUCKET).upload(storagePath, buffer, {
+    contentType,
+    cacheControl: '31536000',
+    upsert: true,
+  });
+
+  if (error) {
+    console.warn(`  Storage upload falló (${error.message}), usando URL pública del sitio`);
+    return fallbackUrl;
+  }
+
+  const { data } = supabaseAdmin.storage.from(CATALOG_BUCKET).getPublicUrl(storagePath);
+  return data.publicUrl;
+}
+
 function buildSocialLinks(b: SeedFile['business']) {
   const links: { network: string; url: string; label?: string }[] = [];
   if (b.website_url) links.push({ network: 'custom', url: b.website_url, label: 'Sitio web' });
@@ -73,6 +128,36 @@ function buildSocialLinks(b: SeedFile['business']) {
   return links;
 }
 
+async function seedReviews(
+  businessId: string,
+  reviews: SeedReview[],
+  dryRun: boolean
+) {
+  if (!reviews.length) return;
+
+  if (dryRun) {
+    console.log(`  [dry-run] ${reviews.length} reseñas`);
+    return;
+  }
+
+  const { supabaseAdmin } = await import('../lib/supabase-admin');
+  await supabaseAdmin.from('business_reviews').delete().eq('business_profile_id', businessId);
+
+  const rows = reviews.map((r) => ({
+    business_profile_id: businessId,
+    customer_name: r.customer_name,
+    rating: r.rating,
+    comment: r.comment,
+    text: r.comment,
+    is_visible: true,
+    is_verified: r.is_verified ?? false,
+  }));
+
+  const { error } = await supabaseAdmin.from('business_reviews').insert(rows);
+  if (error) throw error;
+  console.log(`✓ ${reviews.length} reseñas cargadas`);
+}
+
 async function main() {
   const { dryRun } = parseArgs();
   const seed: SeedFile = JSON.parse(fs.readFileSync(DATA_PATH, 'utf-8'));
@@ -81,6 +166,11 @@ async function main() {
 
   const ownerEmail = (b.pending_owner_email || 'buscadiss@gmail.com').trim().toLowerCase();
   const ownerUserId = await findUserIdByEmail(ownerEmail);
+  if (ownerUserId) {
+    console.log(`✓ Dueño encontrado: ${ownerEmail}`);
+  } else {
+    console.log(`Usuario aún no registrado (${ownerEmail}); pending_owner_email activo.`);
+  }
 
   const layout = buildDefaultLayout('social_wireframe_v1');
   const profileBlocks = [
@@ -93,8 +183,31 @@ async function main() {
     { id: 'map-6', type: 'map', visible: true, config: {} },
   ];
 
-  const logoUrl = (b.logo_url as string) || BRAND_IMAGE;
-  const bannerUrl = (b.banner_url as string) || BRAND_IMAGE;
+  const { data: existing } = await supabaseAdmin
+    .from('business_profiles')
+    .select('id')
+    .eq('slug', b.slug)
+    .maybeSingle();
+
+  let businessId = existing?.id as string | undefined;
+  if (dryRun) {
+    businessId = businessId || '00000000-0000-0000-0000-000000000001';
+  }
+
+  if (!businessId) {
+    const { data, error } = await supabaseAdmin
+      .from('business_profiles')
+      .insert({ slug: b.slug, name: b.name, is_published: true })
+      .select('id')
+      .single();
+    if (error) throw error;
+    businessId = data.id;
+    console.log(`✓ Perfil creado (borrador): ${businessId}`);
+  }
+
+  const logoUrl = await uploadBrandImage(businessId, BRAND_FILES.logo, dryRun);
+  const bannerUrl = await uploadBrandImage(businessId, BRAND_FILES.banner, dryRun);
+  const ogImageUrl = await uploadBrandImage(businessId, BRAND_FILES.og, dryRun);
 
   const profilePayload: Record<string, unknown> = {
     slug: b.slug,
@@ -109,9 +222,9 @@ async function main() {
     theme_color: b.theme_color || '#f97316',
     theme_preset: b.theme_preset || 'executive',
     template_id: b.template_id || 'modern_tabs',
-    logo_url: logoUrl.startsWith('/') ? BRAND_IMAGE : logoUrl,
-    banner_url: bannerUrl.startsWith('/') ? BRAND_IMAGE : bannerUrl,
-    og_image_url: BRAND_IMAGE,
+    logo_url: logoUrl,
+    banner_url: bannerUrl,
+    og_image_url: ogImageUrl,
     meta_title: b.meta_title,
     meta_description: b.meta_description,
     is_verified: b.is_verified ?? true,
@@ -142,13 +255,14 @@ async function main() {
     profile_style: { skinId: 'buscadis_default' },
     banner_config: {
       ...(b.banner_config as object),
-      imageUrl: BRAND_IMAGE,
+      mode: 'image',
+      imageUrl: bannerUrl,
       fadeBottom: false,
     },
-    metrics_config: b.metrics_config,
+    metrics_config: b.metrics_config || { keys: ['views', 'products', 'reviews'] },
     story_highlights: (b.story_highlights || []).map((h) => ({
       ...h,
-      cover_url: h.cover_url?.startsWith('/') ? BRAND_IMAGE : h.cover_url,
+      cover_url: ogImageUrl,
     })),
     profile_hashtags: b.profile_hashtags || [],
     location_display_level: b.location_display_level || 'city',
@@ -157,30 +271,12 @@ async function main() {
       : { pending_owner_email: ownerEmail }),
   };
 
-  const { data: existing } = await supabaseAdmin
-    .from('business_profiles')
-    .select('id')
-    .eq('slug', b.slug)
-    .maybeSingle();
-
-  let businessId = existing?.id as string | undefined;
-
   if (dryRun) {
     console.log('[dry-run] business_profiles:', JSON.stringify(profilePayload, null, 2));
-    businessId = businessId || 'dry-run-id';
-  } else if (businessId) {
+  } else {
     const { error } = await supabaseAdmin.from('business_profiles').update(profilePayload).eq('id', businessId);
     if (error) throw error;
     console.log(`✓ Perfil actualizado: ${businessId}`);
-  } else {
-    const { data, error } = await supabaseAdmin
-      .from('business_profiles')
-      .insert(profilePayload)
-      .select('id')
-      .single();
-    if (error) throw error;
-    businessId = data.id;
-    console.log(`✓ Perfil creado: ${businessId}`);
   }
 
   if (!businessId || dryRun) {
@@ -194,11 +290,13 @@ async function main() {
         business_profile_id: businessId,
         user_id: ownerUserId,
         role: 'owner',
+        status: 'active',
         invited_by: ownerUserId,
         accepted_at: new Date().toISOString(),
       },
       { onConflict: 'business_profile_id,user_id' }
     );
+    console.log(`✓ Miembro owner vinculado`);
   }
 
   for (const product of seed.products) {
@@ -218,7 +316,7 @@ async function main() {
       currency: 'PEN',
       category: product.category,
       tags: product.tags,
-      images: [{ url: BRAND_IMAGE, is_primary: true, alt_text: product.title }],
+      images: [{ url: logoUrl, is_primary: true, alt_text: product.title }],
       status: 'published' as const,
       is_featured: product.is_featured,
       sort_order: product.sort_order,
@@ -233,7 +331,14 @@ async function main() {
     console.log(`  ✓ ${product.sku}`);
   }
 
+  await seedReviews(businessId, seed.reviews || [], dryRun);
+
   console.log(`\nListo → https://buscadis.com/@${b.slug}`);
+  if (ownerUserId) {
+    console.log(`Editar (logueado como ${ownerEmail}): https://buscadis.com/@${b.slug}?edit=true`);
+  } else {
+    console.log(`Regístrate con ${ownerEmail} para reclamar y editar el perfil.`);
+  }
 }
 
 main().catch((e) => {
