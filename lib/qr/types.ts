@@ -66,7 +66,8 @@ export type QrKitTemplate =
   | 'table-tent'
   | 'sticker'
   | 'poster'
-  | 'business-card';
+  | 'business-card'
+  | 'packaging';
 
 export type SubscriptionTier = 'free' | 'pro' | 'enterprise';
 

@@ -31,6 +31,11 @@ export function applyPreviewStyleOverrides(
   if (cs) next.cornerSquareType = cs as QrStyleConfig['cornerSquareType'];
   const cd = params.get('cornerDot');
   if (cd) next.cornerDotType = cd as QrStyleConfig['cornerDotType'];
+  const img = params.get('img');
+  if (img) {
+    const n = Number(img);
+    if (Number.isFinite(n)) next.imageSize = n;
+  }
   return next;
 }
 
@@ -48,6 +53,7 @@ export function buildPreviewQuery(styleConfig: QrStyleConfig): string {
   if (styleConfig.dotScale != null) p.set('ds', String(styleConfig.dotScale));
   if (styleConfig.cornerSquareType) p.set('cornerSquare', styleConfig.cornerSquareType);
   if (styleConfig.cornerDotType) p.set('cornerDot', styleConfig.cornerDotType);
+  if (styleConfig.imageSize != null) p.set('img', String(styleConfig.imageSize));
   return p.toString();
 }
 
@@ -62,5 +68,6 @@ export function previewStyleFingerprint(styleConfig: QrStyleConfig): string {
     styleConfig.presetId,
     styleConfig.cornerSquareType,
     styleConfig.cornerDotType,
+    styleConfig.imageSize,
   ].join('|');
 }

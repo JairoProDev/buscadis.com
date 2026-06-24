@@ -330,6 +330,80 @@ export default function QrStudio({
                 </select>
               </label>
 
+              {(renderMode === 'branded' || renderMode === 'visual') && logoOk && (
+                <label className="block text-xs font-bold text-slate-600">
+                  Tamaño del logo ({Math.round((styleConfig.imageSize ?? 0.26) * 100)}%)
+                  <input
+                    type="range"
+                    min={15}
+                    max={35}
+                    value={Math.round((styleConfig.imageSize ?? 0.26) * 100)}
+                    onChange={(e) =>
+                      patchStyle({ imageSize: Number(e.target.value) / 100 })
+                    }
+                    className="mt-1 w-full accent-blue-600"
+                  />
+                </label>
+              )}
+
+              {renderMode === 'branded' && (
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <p className="text-xs font-bold text-slate-600 mb-1.5">Marco de esquinas</p>
+                    <div className="flex gap-1.5">
+                      {(
+                        [
+                          ['square', '■'],
+                          ['extra-rounded', '▢'],
+                          ['dot', '●'],
+                        ] as const
+                      ).map(([id, icon]) => (
+                        <button
+                          key={id}
+                          type="button"
+                          onClick={() => patchStyle({ cornerSquareType: id })}
+                          className={cn(
+                            'flex-1 py-2 rounded-lg border text-sm font-bold transition-colors',
+                            (styleConfig.cornerSquareType || 'extra-rounded') === id
+                              ? 'border-blue-500 bg-blue-50 text-blue-800'
+                              : 'border-slate-200 bg-white text-slate-600'
+                          )}
+                          title={id}
+                        >
+                          {icon}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold text-slate-600 mb-1.5">Centro de esquinas</p>
+                    <div className="flex gap-1.5">
+                      {(
+                        [
+                          ['square', '■'],
+                          ['dot', '●'],
+                        ] as const
+                      ).map(([id, icon]) => (
+                        <button
+                          key={id}
+                          type="button"
+                          onClick={() => patchStyle({ cornerDotType: id })}
+                          className={cn(
+                            'flex-1 py-2 rounded-lg border text-sm font-bold transition-colors',
+                            (styleConfig.cornerDotType || 'dot') === id
+                              ? 'border-blue-500 bg-blue-50 text-blue-800'
+                              : 'border-slate-200 bg-white text-slate-600'
+                          )}
+                          title={id}
+                        >
+                          {icon}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {renderMode === 'visual' && (
                 <div className="space-y-3 rounded-xl bg-slate-50 border border-slate-100 p-3">
                   <label className="block text-xs font-bold text-slate-600">

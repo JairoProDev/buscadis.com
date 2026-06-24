@@ -49,7 +49,7 @@ export async function generateVisualQrPng(options: GenerateVisualQrOptions): Pro
     const logoBuf = await fetchLogoPngBuffer(options.logoUrl, Math.round(width * 0.5));
     if (logoBuf) {
       const logoImg = await loadImage(logoBuf);
-      drawLogoUnderlay(ctx, logoImg, width, intensity);
+      drawLogoUnderlay(ctx, logoImg, width, intensity, options.styleConfig.imageSize ?? 0.32);
     }
   }
 

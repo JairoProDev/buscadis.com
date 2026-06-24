@@ -42,7 +42,8 @@ async function generateBrandedPng(options: GenerateQrOptions): Promise<Buffer> {
       width,
       skipLogo: true,
     });
-    return compositeLogoOnQr(styled, options.logoUrl, width);
+    const logoRatio = options.styleConfig.imageSize ?? 0.26;
+    return compositeLogoOnQr(styled, options.logoUrl, width, logoRatio);
   }
 
   if (tier === 'pro') {

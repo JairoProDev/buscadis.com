@@ -184,17 +184,25 @@ export default function QrDownloadMenu({ slug, isPro, shortUrl, renderMode }: Qr
 
   const kits: DownloadItem[] = [
     {
+      id: 'packaging',
+      label: 'Etiqueta producto',
+      desc: 'Cuadrada premium para cajas, frascos y empaque',
+      href: `${base}/qr-kit?template=packaging&format=png`,
+      wire: 'packaging',
+      pro: true,
+    },
+    {
       id: 'flyer',
       label: 'Flyer básico',
       desc: 'Vertical con nombre y QR grande',
-      href: `${base}/qr-kit?template=flyer-basic&format=svg`,
+      href: `${base}/qr-kit?template=flyer-basic&format=png`,
       wire: 'flyer',
     },
     {
       id: 'sticker',
-      label: 'Etiqueta empaque',
-      desc: 'Cuadrado compacto para cajas y bolsas',
-      href: `${base}/qr-kit?template=sticker&format=svg`,
+      label: 'Sticker compacto',
+      desc: 'Cuadrado limpio para pegatinas y bolsas',
+      href: `${base}/qr-kit?template=sticker&format=png`,
       wire: 'sticker',
     },
     {
