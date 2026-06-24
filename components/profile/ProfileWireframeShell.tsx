@@ -14,7 +14,7 @@ import { blockTypeToTabId, getDefaultTabId, getVisibleBlocks } from '@/lib/busin
 import ProfileChrome from '@/components/profile/ProfileChrome';
 import type { ProfileMenuItem } from '@/components/profile/ProfileChromeMenu';
 import { getBusinessCanonicalUrl } from '@/lib/business/public-utils';
-import ProfileHeroOverlap from '@/components/profile/ProfileHeroOverlap';
+import ProfileHeroOverlap, { ProfileAvatar } from '@/components/profile/ProfileHeroOverlap';
 import ProfileMetrics from '@/components/profile/ProfileMetrics';
 import ProfileIdentityRow from '@/components/profile/ProfileIdentityRow';
 import ProfileExpandableBio from '@/components/profile/ProfileExpandableBio';
@@ -140,6 +140,12 @@ export default function ProfileWireframeShell({
         : getBusinessCanonicalUrl(profile.slug || '');
     return [
       {
+        id: 'edit',
+        label: 'Editar página',
+        onClick: onOpenEditor,
+        hidden: !canEdit || !onOpenEditor,
+      },
+      {
         id: 'copy',
         label: 'Copiar enlace',
         onClick: () => {
@@ -173,7 +179,7 @@ export default function ProfileWireframeShell({
         href: '/ayuda?topic=reportar-perfil',
       },
     ];
-  }, [profile.slug, onShare]);
+  }, [profile.slug, onShare, canEdit, onOpenEditor]);
 
   const defaultBannerCta = profile.contact_whatsapp
     ? { label: 'Contactar', action: 'whatsapp' as const }
@@ -203,19 +209,21 @@ export default function ProfileWireframeShell({
             entity={entity}
             banner={bannerWithCta}
             onBannerCtaClick={onWhatsappClick}
+            bannerOnly
           />
         )}
 
-        <div className="max-w-6xl mx-auto px-4 -mt-2 relative z-10">
-          <div className="flex items-end gap-3 sm:gap-4 pl-[112px] sm:pl-[128px] min-h-[2rem]">
+        <div className="max-w-6xl mx-auto px-4 relative z-10">
+          <div className="flex items-end gap-3 sm:gap-5 -mt-14 sm:-mt-16">
+            <ProfileAvatar entity={entity} className="relative z-20" />
             {isSlotVisible(presentation.layout, 'profile_metrics') && entity.metrics && (
-              <ProfileMetrics metrics={entity.metrics} className="pt-2" />
+              <ProfileMetrics metrics={entity.metrics} className="flex-1 pb-0.5 min-w-0" />
             )}
           </div>
         </div>
       </div>
 
-      <div className="space-y-3 pt-2 pb-4">
+      <div className="space-y-2.5 pt-1 pb-4">
         {isSlotVisible(presentation.layout, 'profile_identity') && (
           <ProfileIdentityRow entity={entity} />
         )}

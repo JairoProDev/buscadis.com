@@ -58,10 +58,11 @@ export default function ProfileChrome({
             <button
               type="button"
               onClick={onEdit}
-              className="h-9 w-9 flex items-center justify-center rounded-full bg-black/25 backdrop-blur-md text-white hover:bg-black/40 transition-colors"
+              className="h-9 px-2.5 sm:px-3 flex items-center gap-1.5 rounded-full bg-white/95 text-slate-900 text-xs font-bold shadow-md hover:bg-white transition-colors"
               aria-label="Editar página"
             >
-              <IconEdit size={17} />
+              <IconEdit size={15} />
+              <span>Editar</span>
             </button>
           )}
           {onOpenQr && (

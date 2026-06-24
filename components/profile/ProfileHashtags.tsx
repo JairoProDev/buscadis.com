@@ -10,24 +10,20 @@ interface ProfileHashtagsProps {
 export default function ProfileHashtags({ tags, className }: ProfileHashtagsProps) {
   if (!tags?.length) return null;
 
+  const labels = tags.map((tag) => (tag.startsWith('#') ? tag : `#${tag}`));
+
   return (
-    <div
-      className={cn(
-        'max-w-6xl mx-auto px-4 flex flex-wrap gap-2 print:hidden',
-        className
-      )}
-    >
-      {tags.map((tag) => {
-        const label = tag.startsWith('#') ? tag : `#${tag}`;
-        return (
-          <span
-            key={label}
-            className="text-xs font-semibold text-[var(--brand-color)] bg-[var(--brand-color)]/10 px-2.5 py-1 rounded-full"
-          >
+    <div className={cn('max-w-6xl mx-auto px-4 print:hidden', className)}>
+      <div className="flex items-center gap-2 overflow-x-auto no-scrollbar whitespace-nowrap text-xs font-semibold text-[var(--brand-color)]">
+        {labels.map((label, i) => (
+          <span key={label}>
             {label}
+            {i < labels.length - 1 && (
+              <span className="text-[var(--text-tertiary)] font-normal mx-0.5">·</span>
+            )}
           </span>
-        );
-      })}
+        ))}
+      </div>
     </div>
   );
 }

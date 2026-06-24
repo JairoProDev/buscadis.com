@@ -12,17 +12,54 @@ const TEXT_SIZE: Record<string, string> = {
   xl: 'text-4xl',
 };
 
+export const PROFILE_AVATAR_SIZE = {
+  mobile: 112,
+  desktop: 128,
+} as const;
+
 interface ProfileHeroOverlapProps {
   entity: ProfileEntity;
   banner: BannerConfig;
   onBannerCtaClick?: () => void;
+  /** Si true, solo renderiza el banner (avatar va en el shell junto a métricas). */
+  bannerOnly?: boolean;
   className?: string;
+}
+
+export function ProfileAvatar({
+  entity,
+  className,
+  size = 'md',
+}: {
+  entity: ProfileEntity;
+  className?: string;
+  size?: 'md' | 'lg';
+}) {
+  const dim = size === 'lg' ? 'w-[128px] h-[128px]' : 'w-[112px] h-[112px] sm:w-[128px] sm:h-[128px]';
+  return (
+    <div
+      className={cn(
+        'shrink-0 rounded-2xl border-4 border-[var(--bg-secondary)] bg-[var(--bg-primary)] shadow-lg overflow-hidden',
+        dim,
+        className
+      )}
+    >
+      {entity.avatarUrl ? (
+        <img src={entity.avatarUrl} alt={entity.displayName} className="w-full h-full object-cover" />
+      ) : (
+        <div className="w-full h-full flex items-center justify-center bg-[var(--brand-color)]/15 text-3xl font-black text-[var(--brand-color)]">
+          {entity.displayName.charAt(0).toUpperCase()}
+        </div>
+      )}
+    </div>
+  );
 }
 
 export default function ProfileHeroOverlap({
   entity,
   banner,
   onBannerCtaClick,
+  bannerOnly = false,
   className,
 }: ProfileHeroOverlapProps) {
   const hasImage = banner.mode === 'image' && Boolean(banner.imageUrl || entity.bannerImageUrl);
@@ -36,13 +73,9 @@ export default function ProfileHeroOverlap({
 
   return (
     <div className={cn('relative w-full', className)}>
-      <div className="relative w-full h-[200px] sm:h-[240px] md:h-[280px] overflow-hidden bg-gradient-to-br from-[var(--brand-color)] to-slate-800 border-b border-[var(--border-subtle)]">
+      <div className="relative w-full h-[180px] sm:h-[200px] md:h-[220px] overflow-hidden bg-gradient-to-br from-[var(--brand-color)] to-slate-800 border-b border-[var(--border-subtle)]">
         {hasImage && imageUrl ? (
-          <img
-            src={imageUrl}
-            alt=""
-            className="absolute inset-0 w-full h-full object-cover"
-          />
+          <img src={imageUrl} alt="" className="absolute inset-0 w-full h-full object-cover" />
         ) : banner.mode === 'text' && banner.text?.content ? (
           <div
             className={cn(
@@ -71,14 +104,14 @@ export default function ProfileHeroOverlap({
         )}
 
         {cta && (ctaHref || cta.action === 'cart') && (
-          <div className="absolute bottom-4 right-4 z-20">
+          <div className="absolute bottom-3 right-3 sm:bottom-4 sm:right-4 z-20">
             {ctaHref ? (
               <a
                 href={ctaHref}
                 target={cta.action === 'whatsapp' ? '_blank' : undefined}
                 rel={cta.action === 'whatsapp' ? 'noreferrer' : undefined}
                 onClick={onBannerCtaClick}
-                className="inline-flex items-center px-4 py-2 rounded-xl bg-white/95 text-slate-900 text-sm font-bold shadow-lg hover:bg-white transition-colors"
+                className="inline-flex items-center px-3 py-2 sm:px-4 rounded-xl bg-white/95 text-slate-900 text-xs sm:text-sm font-bold shadow-lg hover:bg-white transition-colors"
               >
                 {cta.label || 'Contactar'}
               </a>
@@ -86,7 +119,7 @@ export default function ProfileHeroOverlap({
               <button
                 type="button"
                 onClick={onBannerCtaClick}
-                className="inline-flex items-center px-4 py-2 rounded-xl bg-white/95 text-slate-900 text-sm font-bold shadow-lg"
+                className="inline-flex items-center px-3 py-2 rounded-xl bg-white/95 text-slate-900 text-xs sm:text-sm font-bold shadow-lg"
               >
                 {cta.label || 'Ver más'}
               </button>
@@ -95,23 +128,13 @@ export default function ProfileHeroOverlap({
         )}
       </div>
 
-      <div className="max-w-6xl mx-auto px-4 relative z-10">
-        <div className="-mt-[4.25rem] sm:-mt-[4.75rem] flex items-end gap-4">
-          <div className="shrink-0 w-[104px] h-[104px] sm:w-[120px] sm:h-[120px] rounded-2xl border-4 border-[var(--bg-secondary)] bg-[var(--bg-primary)] shadow-lg overflow-hidden">
-            {entity.avatarUrl ? (
-              <img
-                src={entity.avatarUrl}
-                alt={entity.displayName}
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center bg-[var(--brand-color)]/15 text-2xl font-black text-[var(--brand-color)]">
-                {entity.displayName.charAt(0).toUpperCase()}
-              </div>
-            )}
+      {!bannerOnly && (
+        <div className="max-w-6xl mx-auto px-4 relative z-10">
+          <div className="-mt-14 sm:-mt-16">
+            <ProfileAvatar entity={entity} />
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }
