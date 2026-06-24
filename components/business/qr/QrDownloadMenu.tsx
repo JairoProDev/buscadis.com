@@ -41,10 +41,14 @@ export default function QrDownloadMenu({ slug, isPro, shortUrl }: QrDownloadMenu
       <div className="flex flex-wrap gap-2">
         {download(`${base}/qr?format=png`, 'QR PNG')}
         {download(`${base}/qr?format=png&width=1024`, 'PNG impresión (1024px)')}
-        {isPro && download(`${base}/qr?format=png&width=2048&tier=pro`, 'PNG máxima (2048px)')}
+        {isPro && download(`${base}/qr?format=png&width=2048&tier=pro`, 'Packaging 2048px (Pro)')}
         {download(`${base}/qr?format=svg`, 'QR SVG')}
-        {isPro && download(`${base}/qr?format=pdf&tier=pro`, 'QR PDF impresión')}
+        {isPro && download(`${base}/qr?format=pdf&tier=pro`, 'Guía PDF impresión')}
       </div>
+      <p className="text-[11px] text-slate-500 leading-relaxed">
+        Mínimo 2.5 cm en impresión · deja margen blanco (quiet zone) · prueba el escaneo antes de
+        imprimir en volumen.
+      </p>
       <p className="text-xs font-bold text-slate-500 uppercase tracking-wide pt-2">Kits phygital</p>
       <div className="flex flex-wrap gap-2">
         {KITS_FREE.map((k) =>

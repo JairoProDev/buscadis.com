@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
+import type { QrQaStatus, QrRenderMode } from '@/lib/qr/types';
 
 interface QrPreviewProps {
   slug: string;
@@ -10,9 +11,16 @@ interface QrPreviewProps {
   tier?: 'free' | 'pro';
   className?: string;
   size?: number;
-  /** Cambia al abrir el modal para evitar imagen cacheada en el navegador */
   refreshToken?: number;
+  qaStatus?: QrQaStatus | null;
+  renderMode?: QrRenderMode | null;
 }
+
+const MODE_LABELS: Record<QrRenderMode, string> = {
+  visual: 'Visual',
+  branded: 'Marca',
+  classic: 'Clásico',
+};
 
 export default function QrPreview({
   slug,
@@ -22,10 +30,15 @@ export default function QrPreview({
   className,
   size = 200,
   refreshToken = 0,
+  qaStatus,
+  renderMode,
 }: QrPreviewProps) {
   const encoded = encodeURIComponent(slug);
   const [cacheKey, setCacheKey] = useState<string | null>(null);
   const [error, setError] = useState(false);
+  const [localQa, setLocalQa] = useState<QrQaStatus | null>(qaStatus ?? null);
+  const [localMode, setLocalMode] = useState<QrRenderMode | null>(renderMode ?? null);
+  const [scanMsg, setScanMsg] = useState<string | null>(null);
 
   useEffect(() => {
     setError(false);
@@ -44,6 +57,8 @@ export default function QrPreview({
           data.qr?.short_code ||
           String(refreshToken);
         setCacheKey(key);
+        if (data.qr?.qa_status) setLocalQa(data.qr.qa_status);
+        if (data.qr?.render_mode) setLocalMode(data.qr.render_mode);
       } catch {
         setCacheKey(`fallback-${refreshToken}`);
       }
@@ -55,32 +70,96 @@ export default function QrPreview({
       ? `/api/business/${encoded}/qr?format=${format}&tier=${tier}&refresh=1&v=${encodeURIComponent(cacheKey)}&t=${refreshToken}`
       : undefined;
 
+  const tryScan = async () => {
+    setScanMsg(null);
+    if (!src) return;
+
+    if ('BarcodeDetector' in window) {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+        setScanMsg('Apunta la cámara al QR en pantalla unos segundos…');
+        const video = document.createElement('video');
+        video.srcObject = stream;
+        await video.play();
+        const detector = new (window as unknown as { BarcodeDetector: new (o: { formats: string[] }) => { detect: (s: ImageBitmapSource) => Promise<{ rawValue: string }[]> } }).BarcodeDetector({ formats: ['qr_code'] });
+
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        let found = false;
+        for (let i = 0; i < 30 && !found; i++) {
+          canvas.width = video.videoWidth;
+          canvas.height = video.videoHeight;
+          ctx?.drawImage(video, 0, 0);
+          const codes = await detector.detect(canvas);
+          if (codes.length > 0) {
+            found = true;
+            setScanMsg(`✓ Escaneo OK: ${codes[0].rawValue.slice(0, 60)}…`);
+          }
+          await new Promise((r) => setTimeout(r, 200));
+        }
+        stream.getTracks().forEach((t) => t.stop());
+        if (!found) setScanMsg('No detectado. Acerca más el teléfono o sube el brillo.');
+      } catch {
+        setScanMsg('Permite acceso a la cámara o escanea con la app de Cámara del teléfono.');
+      }
+      return;
+    }
+    setScanMsg('Abre la app Cámara de tu teléfono y apunta al QR en pantalla.');
+  };
+
   return (
-    <div
-      className={cn(
-        'relative rounded-2xl border border-slate-200 bg-white p-4 shadow-sm min-h-[200px] flex items-center justify-center',
-        className
-      )}
-    >
-      {!src && !error && (
-        <div className="w-full h-[200px] animate-pulse bg-slate-100 rounded-xl" />
-      )}
-      {error && (
-        <p className="text-sm text-red-500 text-center px-4">
-          No se pudo cargar el QR. Intenta de nuevo en un momento.
+    <div className={cn('space-y-2', className)}>
+      <div className="flex flex-wrap gap-2 justify-center">
+        {localMode && (
+          <span className="text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full bg-blue-100 text-blue-800">
+            {MODE_LABELS[localMode]}
+          </span>
+        )}
+        {localQa === 'degraded' && (
+          <span className="text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full bg-amber-100 text-amber-800">
+            Modo seguro
+          </span>
+        )}
+        {localQa === 'passed' && (
+          <span className="text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full bg-green-100 text-green-800">
+            Aprobado
+          </span>
+        )}
+      </div>
+      <div className="relative rounded-2xl border border-slate-200 bg-white p-4 shadow-sm min-h-[200px] flex items-center justify-center">
+        {!src && !error && (
+          <div className="w-full h-[200px] animate-pulse bg-slate-100 rounded-xl" />
+        )}
+        {error && (
+          <p className="text-sm text-red-500 text-center px-4">
+            No se pudo cargar el QR. Intenta de nuevo en un momento.
+          </p>
+        )}
+        {src && !error && (
+          <img
+            key={src}
+            src={src}
+            alt={`QR de ${businessName}`}
+            width={size}
+            height={size}
+            className="mx-auto rounded-xl"
+            style={{ width: size, height: size }}
+            onError={() => setError(true)}
+          />
+        )}
+      </div>
+      <button
+        type="button"
+        onClick={tryScan}
+        className="w-full text-xs font-bold text-blue-600 hover:text-blue-800 py-1"
+      >
+        Probar escaneo
+      </button>
+      {scanMsg && <p className="text-[11px] text-slate-500 text-center">{scanMsg}</p>}
+      {localQa === 'degraded' && (
+        <p className="text-[11px] text-amber-700 text-center">
+          Versión optimizada para escaneo confiable.
         </p>
-      )}
-      {src && !error && (
-        <img
-          key={src}
-          src={src}
-          alt={`QR de ${businessName}`}
-          width={size}
-          height={size}
-          className="mx-auto rounded-xl"
-          style={{ width: size, height: size }}
-          onError={() => setError(true)}
-        />
       )}
     </div>
   );

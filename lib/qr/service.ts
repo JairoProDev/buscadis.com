@@ -1,7 +1,8 @@
 import { supabaseAdmin } from '@/lib/supabase-admin';
 import { createShortCode } from './short-code';
 import { buildFreeStyleConfig } from './presets';
-import type { QrCodeRecord, QrStyleConfig } from './types';
+import type { QrCodeRecord, QrRenderMode, QrStyleConfig } from './types';
+import { resolveRenderMode } from './presets';
 
 export async function getQrByShortCode(shortCode: string): Promise<QrCodeRecord | null> {
   const { data, error } = await supabaseAdmin
@@ -105,11 +106,15 @@ export async function updateQrStyle(
   const existing = await getQrByBusinessId(businessProfileId);
   if (existing) await invalidateQrAssetCache(existing.id);
 
+  const renderMode = resolveRenderMode(styleConfig, existing?.render_mode || 'branded');
+
   const { data, error } = await supabaseAdmin
     .from('qr_codes')
     .update({
       style_config: styleConfig,
       style_tier: styleTier,
+      render_mode: renderMode,
+      qa_status: 'pending',
       updated_at: new Date().toISOString(),
     })
     .eq('business_profile_id', businessProfileId)
@@ -120,6 +125,98 @@ export async function updateQrStyle(
     return null;
   }
   return data as QrCodeRecord;
+}
+
+const PROFILE_QR_FIELDS = new Set(['logo_url', 'theme_color', 'name']);
+
+/** Invalida caché QR cuando cambian datos visuales del perfil. */
+export async function invalidateQrOnProfileChange(
+  businessProfileId: string,
+  changedFields: string[]
+): Promise<void> {
+  const shouldInvalidate = changedFields.some((f) => PROFILE_QR_FIELDS.has(f));
+  if (!shouldInvalidate) return;
+
+  const qr = await getQrByBusinessId(businessProfileId);
+  if (!qr) return;
+
+  const { invalidateQrAssetCache } = await import('./asset-cache');
+  await invalidateQrAssetCache(qr.id);
+  await supabaseAdmin
+    .from('qr_codes')
+    .update({ qa_status: 'pending', updated_at: new Date().toISOString() })
+    .eq('id', qr.id);
+}
+
+export async function eagerGenerateQrPng(params: {
+  businessProfileId: string;
+  slug: string;
+  themeColor?: string;
+  logoUrl?: string | null;
+  styleTier?: 'free' | 'pro';
+}): Promise<void> {
+  try {
+    const qr = await ensureQrCodeForBusiness({
+      businessProfileId: params.businessProfileId,
+      slug: params.slug,
+      themeColor: params.themeColor,
+    });
+    if (!qr) return;
+
+    const { getQrTargetUrl } = await import('./resolve-url');
+    const { generateQrPng } = await import('./generate');
+    const { buildFreeStyleConfig } = await import('./presets');
+    const {
+      computeQrAssetHash,
+      qrAssetStoragePath,
+      uploadCachedQrPng,
+      persistQrAssetCache,
+      persistQrQaStatus,
+    } = await import('./asset-cache');
+
+    const targetUrl = getQrTargetUrl(qr.short_code);
+    const styleConfig = {
+      ...buildFreeStyleConfig(params.themeColor),
+      ...(qr.style_config || {}),
+    };
+    const renderMode = resolveRenderMode(styleConfig, qr.render_mode || 'branded');
+    const tier = params.styleTier || qr.style_tier || 'free';
+    const width = 512;
+
+    const result = await generateQrPng({
+      data: targetUrl,
+      styleConfig,
+      width,
+      logoUrl: params.logoUrl || undefined,
+      themeColor: params.themeColor,
+      tier,
+      renderMode,
+    });
+
+    const hash = computeQrAssetHash({
+      targetUrl,
+      logoUrl: params.logoUrl,
+      shortCode: qr.short_code,
+      styleConfig,
+      tier,
+      width,
+      renderMode: result.actualMode,
+    });
+
+    const storagePath = qrAssetStoragePath(params.businessProfileId, hash);
+    const uploaded = await uploadCachedQrPng(storagePath, result.png);
+    if (uploaded) {
+      await persistQrAssetCache(qr.id, hash, storagePath);
+    }
+    await persistQrQaStatus(qr.id, {
+      qa_status: result.qaStatus,
+      qa_fallback_mode: result.degraded ? result.actualMode : null,
+      render_mode: result.actualMode,
+      generation_error: null,
+    });
+  } catch (err) {
+    console.warn('[qr] eager generate:', err);
+  }
 }
 
 export function parseDeviceType(userAgent: string | null): string {

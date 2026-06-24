@@ -60,6 +60,16 @@ export async function generateFreeQrPng(options: GenerateFreeQrOptions): Promise
   const dark = config.dotsColor || options.themeColor || '#1e293b';
   const light = config.backgroundColor || '#ffffff';
 
+  if (config.renderMode === 'classic') {
+    return QRCode.toBuffer(options.data, {
+      type: 'png',
+      errorCorrectionLevel: 'H',
+      margin: 2,
+      width,
+      color: { dark, light },
+    });
+  }
+
   if (options.logoUrl) {
     let styled: Buffer | null = null;
     try {

@@ -3,9 +3,10 @@ import { getBusinessProfileBySlugAdmin } from '@/lib/qr/get-business-admin';
 import { getUserFromRouteRequest } from '@/lib/supabase-route-auth';
 import { getBusinessMemberRole } from '@/lib/business-access';
 import { canUseProQr } from '@/lib/business/subscription';
-import { ensureQrCodeForBusiness, updateQrStyle } from '@/lib/qr/service';
+import { ensureQrCodeForBusiness, updateQrStyle, eagerGenerateQrPng } from '@/lib/qr/service';
 import { validateQrContrast } from '@/lib/qr/quality-gate';
 import { getQrTargetUrl } from '@/lib/qr/resolve-url';
+import { QR_PRESETS } from '@/lib/qr/presets';
 import type { QrStyleConfig } from '@/lib/qr/types';
 
 /** businessId is slug */
@@ -27,6 +28,8 @@ export async function GET(
     qr,
     shortUrl: qr ? getQrTargetUrl(qr.short_code) : null,
     isPro: canUseProQr(profile),
+    presets: QR_PRESETS.filter((p) => canUseProQr(profile) || p.tier === 'free'),
+    hasLogo: Boolean(profile.logo_url),
   });
 }
 
@@ -75,6 +78,14 @@ export async function PUT(
   if (!updated) {
     return NextResponse.json({ error: 'Error al guardar' }, { status: 500 });
   }
+
+  void eagerGenerateQrPng({
+    businessProfileId: profile.id,
+    slug: profile.slug,
+    themeColor: profile.theme_color,
+    logoUrl: profile.logo_url,
+    styleTier: isPro ? 'pro' : 'free',
+  });
 
   return NextResponse.json({ success: true, qr: updated });
 }

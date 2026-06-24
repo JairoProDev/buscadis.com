@@ -12,7 +12,7 @@ import { sanitizeBusinessProfilePayload } from '@/lib/business';
 import { revalidateTag } from 'next/cache';
 import { BUSINESS_CACHE_TAG } from '@/lib/business/seo';
 import { isPlatformAdminEmail, isPlatformAdminProfile } from '@/lib/platform-admin';
-import { ensureQrCodeForBusiness } from '@/lib/qr/service';
+import { ensureQrCodeForBusiness, eagerGenerateQrPng } from '@/lib/qr/service';
 
 const supabaseAdmin = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -170,6 +170,23 @@ export async function POST(req: NextRequest) {
                 slug: updated.slug,
                 themeColor: updated.theme_color,
             });
+
+            const changedFields = updates && typeof updates === 'object'
+                ? Object.keys(updates)
+                : [];
+            if (changedFields.length > 0) {
+                const { invalidateQrOnProfileChange } = await import('@/lib/qr/service');
+                await invalidateQrOnProfileChange(updated.id, changedFields);
+            }
+
+            if (updated.is_published) {
+                void eagerGenerateQrPng({
+                    businessProfileId: updated.id,
+                    slug: updated.slug,
+                    themeColor: updated.theme_color,
+                    logoUrl: updated.logo_url,
+                });
+            }
         }
 
         return NextResponse.json({ success: true, profile: updated });

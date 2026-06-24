@@ -1,6 +1,6 @@
 import type { QrKitTemplate } from '../types';
-import { generateFreeQrPng } from '../generate-free';
-import { generateProQrPng } from '../generate-pro';
+import { generateQrPng } from '../generate';
+import { resolveRenderMode } from '../presets';
 import type { QrStyleConfig } from '../types';
 
 export interface KitTemplateInput {
@@ -15,21 +15,17 @@ export interface KitTemplateInput {
 }
 
 async function getQrImageTag(input: KitTemplateInput, size = 400): Promise<string> {
-  const png = input.usePro
-    ? await generateProQrPng({
-        data: input.qrTargetUrl,
-        styleConfig: input.styleConfig,
-        width: size,
-        logoUrl: input.logoUrl,
-      })
-    : await generateFreeQrPng({
-        data: input.qrTargetUrl,
-        themeColor: input.themeColor,
-        styleConfig: input.styleConfig,
-        width: size,
-        logoUrl: input.logoUrl,
-      });
-  const b64 = png.toString('base64');
+  const renderMode = resolveRenderMode(input.styleConfig, 'branded');
+  const result = await generateQrPng({
+    data: input.qrTargetUrl,
+    styleConfig: input.styleConfig,
+    width: size,
+    logoUrl: input.logoUrl,
+    themeColor: input.themeColor,
+    tier: input.usePro ? 'pro' : 'free',
+    renderMode,
+  });
+  const b64 = result.png.toString('base64');
   return `<image href="data:image/png;base64,${b64}" width="${size}" height="${size}"/>`;
 }
 
