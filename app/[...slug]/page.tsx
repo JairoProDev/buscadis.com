@@ -28,6 +28,21 @@ const RESERVED_STATIC_PREFIXES = new Set([
   'workbox',
 ]);
 
+const RESERVED_BUSINESS_SLUGS = new Set([
+  'login',
+  'auth',
+  'signup',
+  'register',
+  'perfil',
+  'mi-negocio',
+  'admin',
+  'api',
+]);
+
+function isReservedBusinessSlug(slug: string): boolean {
+  return RESERVED_BUSINESS_SLUGS.has(slug.toLowerCase());
+}
+
 function isReservedStaticPath(slug: string[]): boolean {
   if (slug.length === 0) return false;
   const root = slug[0].toLowerCase();
@@ -59,6 +74,9 @@ export async function generateMetadata(props: PageProps): Promise<Metadata> {
 
     if (slug.length === 1) {
         const targetSlug = decodeURIComponent(slug[0]);
+        if (isReservedBusinessSlug(targetSlug)) {
+            notFound();
+        }
         const supabaseAdmin = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
         try {
             const { data } = await supabaseAdmin.from('business_profiles').select('name, description, logo_url, banner_url, slug, meta_title, meta_description, og_image_url, tagline').eq('slug', targetSlug).single();
@@ -128,6 +146,9 @@ export default async function Page(props: PageProps) {
     if (slug.length === 1) {
         // Custom static landings live in public/{slug}/ (see next.config.js rewrites)
         if (slug[0].toLowerCase() === 'villachaco') {
+            notFound();
+        }
+        if (isReservedBusinessSlug(slug[0])) {
             notFound();
         }
         // Format 3: /[business_slug]

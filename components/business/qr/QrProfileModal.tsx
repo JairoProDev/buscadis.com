@@ -5,6 +5,8 @@ import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { IconDownload, IconQrcode, IconShareAlt, IconX } from '@/components/Icons';
 import { getBusinessCanonicalUrl } from '@/lib/business/public-utils';
+import { useAuth } from '@/hooks/useAuth';
+import { useUI } from '@/contexts/UIContext';
 import QrPreview from './QrPreview';
 
 const QrStudio = dynamic(() => import('./QrStudio'), { ssr: false });
@@ -28,8 +30,11 @@ export default function QrProfileModal({
   isPro = false,
   themeColor,
 }: QrProfileModalProps) {
+  const { user } = useAuth();
+  const { openAuthModal } = useUI();
   const [scanUrl, setScanUrl] = useState<string | null>(null);
   const [refreshToken, setRefreshToken] = useState(0);
+  const isLoggedIn = Boolean(user?.id);
 
   useEffect(() => {
     if (!open) return;
@@ -226,13 +231,26 @@ export default function QrProfileModal({
                   <span className="font-mono text-slate-700 break-all">{scanUrl}</span>
                 </p>
               )}
-              <p className="text-[11px] text-slate-400 text-center">
-                ¿Eres el dueño?{' '}
-                <Link href="/login" className="text-blue-600 font-semibold hover:underline">
-                  Inicia sesión
-                </Link>{' '}
-                para personalizar colores, plantillas y analítica Pro.
-              </p>
+              {!isLoggedIn ? (
+                <p className="text-[11px] text-slate-400 text-center">
+                  ¿Eres el dueño?{' '}
+                  <button
+                    type="button"
+                    onClick={openAuthModal}
+                    className="text-blue-600 font-semibold hover:underline"
+                  >
+                    Inicia sesión
+                  </button>{' '}
+                  para personalizar colores, plantillas y analítica Pro.
+                </p>
+              ) : (
+                <p className="text-[11px] text-slate-400 text-center">
+                  Para personalizar este QR, entra con la cuenta del negocio.{' '}
+                  <Link href="/mi-negocio" className="text-blue-600 font-semibold hover:underline">
+                    Ir a Mi negocio
+                  </Link>
+                </p>
+              )}
             </div>
           )}
         </div>

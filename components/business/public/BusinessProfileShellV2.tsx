@@ -4,6 +4,8 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { cn } from '@/lib/utils';
 import { IconPlus } from '@/components/Icons';
 import { useAuth } from '@/hooks/useAuth';
+import { useUser } from '@/hooks/useUser';
+import { supabase } from '@/lib/supabase';
 import { useToast } from '@/hooks/useToast';
 import { useBusinessCart } from '@/hooks/useBusinessCart';
 import BusinessShareTools from '@/components/business/public/BusinessShareTools';
@@ -37,8 +39,10 @@ export default function BusinessProfileShellV2({
   onTrackEvent,
 }: BusinessProfileShellProps) {
   const { user } = useAuth();
+  const { isPlatformAdmin } = useUser();
   const { success: toastSuccess } = useToast();
   const [mounted, setMounted] = useState(false);
+  const [isTeamMember, setIsTeamMember] = useState(false);
   const [printAdisos, setPrintAdisos] = useState(adisos);
   const [reviewAggregate, setReviewAggregate] = useState<BusinessReviewAggregate | null>(
     reviewAggregateProp ?? null
@@ -95,8 +99,36 @@ export default function BusinessProfileShellV2({
     return () => window.removeEventListener('scroll', onScroll);
   }, [isStorefront]);
 
+  useEffect(() => {
+    if (!mounted || !user?.id || !profile?.id) {
+      setIsTeamMember(false);
+      return;
+    }
+    if (profile.user_id === user.id || isPlatformAdmin) {
+      setIsTeamMember(false);
+      return;
+    }
+    let cancelled = false;
+    void supabase
+      .from('business_members')
+      .select('role')
+      .eq('user_id', user.id)
+      .eq('business_profile_id', profile.id)
+      .eq('status', 'active')
+      .maybeSingle()
+      .then(({ data }) => {
+        if (cancelled) return;
+        const role = data?.role;
+        setIsTeamMember(Boolean(role && ['owner', 'admin', 'editor'].includes(role)));
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [mounted, user?.id, profile?.id, profile?.user_id, isPlatformAdmin]);
+
   const isOwner = Boolean(mounted && user?.id && profile?.user_id && user.id === profile.user_id);
-  const showEditControls = Boolean(isOwner && isEditor);
+  const canManageQr = Boolean(mounted && user?.id && (isOwner || isTeamMember || isPlatformAdmin));
+  const showEditControls = Boolean(canManageQr && isEditor);
   const showMarketplaceChrome = false;
   const showCommerceDock = (isStorefront || isEditor) && !isPreviewMode;
   const dockBottomPad = showCommerceDock ? 'pb-24' : '';
@@ -224,7 +256,7 @@ export default function BusinessProfileShellV2({
           onClose={() => setQrModalOpen(false)}
           slug={profile.slug}
           businessName={profile.name || 'Negocio'}
-          isOwner={isOwner}
+          isOwner={canManageQr}
           isPro={canUseProQr(profile)}
           themeColor={profile.theme_color}
         />
@@ -241,7 +273,7 @@ export default function BusinessProfileShellV2({
         />
       )}
 
-      {isEditor && isOwner && (
+      {isEditor && canManageQr && (
         <div className="fixed right-4 bottom-28 z-[95] flex flex-col gap-2 print:hidden md:bottom-6">
           <button
             type="button"
@@ -254,7 +286,7 @@ export default function BusinessProfileShellV2({
         </div>
       )}
 
-      {isEditor && isOwner && (
+      {isEditor && canManageQr && (
         <>
           <button
             type="button"
