@@ -7,6 +7,8 @@ import {
   EVENT_SCORE_DELTAS,
 } from './schema';
 import { getAnonymousId, getSessionId } from './session';
+import { getAttributionContext } from '@/lib/analytics/attribution';
+import { bridgeBehavioralEvent } from '@/lib/analytics/marketing-bridge';
 
 type TrackOptions = {
   entityType?: EntityType;
@@ -71,7 +73,7 @@ export function trackEvent(eventType: BehavioralEventType, options: TrackOptions
     entityType: options.entityType,
     entityId: options.entityId,
     payload: options.payload,
-    context: { ...buildContext(), ...options.context },
+    context: { ...buildContext(), ...getAttributionContext(), ...options.context },
     scoreDelta: options.scoreDelta ?? EVENT_SCORE_DELTAS[eventType],
     sessionId: getSessionId(),
     anonymousId: getAnonymousId(),
@@ -80,6 +82,10 @@ export function trackEvent(eventType: BehavioralEventType, options: TrackOptions
   };
 
   queue.push(event);
+  bridgeBehavioralEvent(eventType, {
+    payload: options.payload,
+    entityId: options.entityId,
+  });
   if (queue.length >= MAX_QUEUE) {
     flushEvents();
   } else {

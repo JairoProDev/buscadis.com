@@ -1,15 +1,28 @@
 'use client';
 
-import { Suspense, useEffect, useState } from 'react';
+import { Suspense, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
+import { trackEvent } from '@/lib/events/track';
 
 function PromocionarExitoContent() {
   const params = useSearchParams();
   const orderId = params.get('order');
   const { session } = useAuth();
   const [status, setStatus] = useState<'loading' | 'ok' | 'pending' | 'error'>('loading');
+  const trackedPurchase = useRef(false);
+
+  useEffect(() => {
+    if (status === 'ok' && orderId && !trackedPurchase.current) {
+      trackedPurchase.current = true;
+      trackEvent('promotion.purchased', {
+        entityType: 'promotion',
+        entityId: orderId,
+        payload: { orderId },
+      });
+    }
+  }, [status, orderId]);
 
   useEffect(() => {
     if (!orderId || !session?.access_token) {

@@ -6,6 +6,7 @@ import { supabase } from '@/lib/supabase';
 import { Profile } from '@/types';
 import { getProfile } from '@/lib/user';
 import { onAuthStateChange, getCurrentUser, getSession } from '@/lib/auth';
+import { trackEvent } from '@/lib/events/track';
 import { cacheGet, cacheSet, cacheRemove, CacheKeys, CACHE_TTL } from '@/lib/offline-cache';
 import {
   isBuscadisNativeApp,
@@ -132,6 +133,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       if (sessionData?.user) {
         const sessionUser = sessionData.user;
+        if (event === 'SIGNED_IN') {
+          const createdAt = sessionUser.created_at ? new Date(sessionUser.created_at).getTime() : 0;
+          const isNewUser = createdAt > 0 && Date.now() - createdAt < 120_000;
+          if (isNewUser) {
+            trackEvent('auth.sign_up', {
+              entityType: 'auth',
+              entityId: sessionUser.id,
+              payload: {
+                method: sessionUser.app_metadata?.provider || 'oauth',
+              },
+            });
+          }
+        }
         setUser(sessionUser);
         cacheSet(CacheKeys.authSession(), sessionUser, CACHE_TTL.AUTH_SESSION);
         loadProfile(sessionUser.id);

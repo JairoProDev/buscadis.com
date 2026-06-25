@@ -61,6 +61,29 @@ export default function PrivacidadPage() {
             notificaciones push) que procesan datos en nuestro nombre bajo contrato. No vendemos tus datos
             personales a terceros para publicidad externa.
           </p>
+          <p className="text-slate-600">
+            Herramientas de medición activas en buscadis.com (según tu consentimiento de cookies):
+          </p>
+          <ul className="list-disc space-y-2 pl-5 text-slate-600">
+            <li>
+              <strong>Vercel Analytics y Speed Insights</strong> — tráfico agregado y rendimiento (Core Web Vitals).
+            </li>
+            <li>
+              <strong>Google Analytics 4</strong> — páginas visitadas, búsquedas y conversiones (solo si aceptas
+              cookies de analítica).
+            </li>
+            <li>
+              <strong>Microsoft Clarity</strong> — mapas de calor y grabaciones de sesión anonimizadas (solo si
+              aceptas cookies de analítica).
+            </li>
+            <li>
+              <strong>Sentry</strong> — detección de errores técnicos para mantener la estabilidad del servicio.
+            </li>
+            <li>
+              <strong>Analítica propia (Supabase)</strong> — eventos de producto como búsquedas, clics en anuncios y
+              contactos por WhatsApp, necesarios para mejorar la plataforma.
+            </li>
+          </ul>
         </section>
 
         <section className="space-y-3">

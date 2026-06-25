@@ -9,6 +9,7 @@ import { useDealsFeed } from '@/hooks/useDealsFeed';
 import { useRef, useEffect, useState } from 'react';
 import { IconPlus } from '@/components/Icons';
 import { DealLiveSession } from '@/types';
+import { DEAL_EVENTS, trackDealClientEvent } from '@/lib/deals/client-analytics';
 
 interface DealsFeedProps {
   initialClipId?: string;
@@ -29,6 +30,10 @@ export default function DealsFeed({ initialClipId }: DealsFeedProps) {
 
   const [showPublish, setShowPublish] = useState(false);
   const [liveSessions, setLiveSessions] = useState<DealLiveSession[]>([]);
+
+  useEffect(() => {
+    trackDealClientEvent(DEAL_EVENTS.FEED_OPEN, 'feed');
+  }, []);
 
   useEffect(() => {
     fetch('/api/deals/live')

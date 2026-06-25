@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { signUp, signIn, signInWithOAuth, signInWithMagicLink } from '@/lib/auth';
 import { useAuth } from '@/hooks/useAuth';
+import { trackEvent } from '@/lib/events/track';
 import { IconClose, IconGoogle, IconFacebook } from './Icons';
 
 interface AuthModalProps {
@@ -46,6 +47,11 @@ export default function AuthModal({ abierto, onCerrar, modoInicial = 'signup' }:
         }
 
         if (user) {
+          trackEvent('auth.sign_up', {
+            entityType: 'auth',
+            entityId: user.id,
+            payload: { method: 'email' },
+          });
           setMensaje('¡Registro exitoso! Revisa tu email para confirmar tu cuenta. El modal se cerrará automáticamente en 5 segundos.');
           // No cerrar inmediatamente, dar tiempo para leer el mensaje
           setTimeout(() => {

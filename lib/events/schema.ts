@@ -20,6 +20,18 @@ export const BEHAVIORAL_EVENT_TYPES = [
   'publish.draft_update',
   'publish.abandon',
   'seek.intent_saved',
+  'promotion.purchased',
+  'auth.sign_up',
+  'deal.feed.open',
+  'deal.clip.view',
+  'deal.clip.like',
+  'deal.clip.save',
+  'deal.clip.share',
+  'deal.clip.cta_click',
+  'deal.clip.whatsapp_click',
+  'deal.clip.not_interested',
+  'deal.publish.start',
+  'deal.publish.complete',
 ] as const;
 
 export type BehavioralEventType = (typeof BEHAVIORAL_EVENT_TYPES)[number];
@@ -31,6 +43,9 @@ export const ENTITY_TYPES = [
   'category',
   'publish_draft',
   'session',
+  'deal_clip',
+  'promotion',
+  'auth',
 ] as const;
 
 export type EntityType = (typeof ENTITY_TYPES)[number];

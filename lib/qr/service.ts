@@ -234,6 +234,7 @@ export async function recordQrScan(params: {
   country?: string | null;
   city?: string | null;
   sessionId?: string | null;
+  metadata?: Record<string, unknown>;
 }): Promise<void> {
   const device_type = parseDeviceType(params.userAgent ?? null);
   await supabaseAdmin.from('qr_scans').insert({
@@ -244,6 +245,7 @@ export async function recordQrScan(params: {
     city: params.city ?? null,
     device_type,
     session_id: params.sessionId ?? null,
+    metadata: params.metadata ?? {},
   });
 
   const { data: current } = await supabaseAdmin

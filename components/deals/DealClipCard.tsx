@@ -12,6 +12,7 @@ import { getAdisoById } from '@/lib/storage';
 import { getWhatsAppUrl } from '@/lib/utils';
 import { Adiso } from '@/types';
 import ModalAdiso from '@/components/ModalAdiso';
+import { DEAL_EVENTS, trackDealClientEvent } from '@/lib/deals/client-analytics';
 
 const MUTE_KEY = 'deals_mute';
 
@@ -54,6 +55,7 @@ export default function DealClipCard({
       v.play().catch(() => {});
       if (!viewSent.current) {
         viewSent.current = true;
+        trackDealClientEvent(DEAL_EVENTS.CLIP_VIEW, clip.id);
         interactDealClip(clip.id, 'view', { token, watchTimeMs: 0 }).catch(() => {});
       }
     } else {
@@ -76,6 +78,7 @@ export default function DealClipCard({
         liked: res.liked,
         like_count: clip.like_count + (res.liked ? 1 : -1),
       });
+      if (res.liked) trackDealClientEvent(DEAL_EVENTS.CLIP_LIKE, clip.id);
     } catch {
       // ignore
     }
@@ -113,6 +116,7 @@ export default function DealClipCard({
         await navigator.clipboard.writeText(url);
       }
       await interactDealClip(clip.id, 'share', { token });
+      trackDealClientEvent(DEAL_EVENTS.CLIP_SHARE, clip.id);
       onUpdate({ share_count: clip.share_count + 1 });
     } catch {
       // ignore
@@ -122,6 +126,7 @@ export default function DealClipCard({
   const openAdiso = async () => {
     if (!clip.adiso_id) return;
     await interactDealClip(clip.id, 'cta_click', { token });
+    trackDealClientEvent(DEAL_EVENTS.CTA_CLICK, clip.id);
     onUpdate({ cta_click_count: clip.cta_click_count + 1 });
     const adiso = await getAdisoById(clip.adiso_id);
     if (adiso) setAdisoOpen(adiso);
@@ -132,6 +137,7 @@ export default function DealClipCard({
     const adiso = await getAdisoById(clip.adiso_id);
     if (!adiso?.contacto) return;
     await interactDealClip(clip.id, 'whatsapp_click', { token });
+    trackDealClientEvent(DEAL_EVENTS.WHATSAPP_CLICK, clip.id);
     window.open(getWhatsAppUrl(adiso.contacto, clip.title, adiso), '_blank');
   };
 

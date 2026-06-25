@@ -12,6 +12,7 @@ import { FavoritosProvider } from '@/contexts/FavoritosContext';
 import OfflineIndicator from '@/components/pwa/OfflineIndicator';
 import InstallPrompt from '@/components/pwa/InstallPrompt';
 import SessionTracker from '@/components/SessionTracker';
+import AnalyticsProvider from '@/components/analytics/AnalyticsProvider';
 import {
   buildDefaultOgImageMeta,
   buildDefaultTwitterImageMeta,
@@ -145,6 +146,7 @@ export default function RootLayout({
                   <AdisosGratuitosCacheProvider>
                     <NavigationProvider>
                       <SessionTracker />
+                      <AnalyticsProvider />
                       <OfflineIndicator />
                       {children}
                       <InstallPrompt />

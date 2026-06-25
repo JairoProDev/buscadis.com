@@ -1,8 +1,28 @@
 import { MetadataRoute } from 'next';
+import { createClient } from '@supabase/supabase-js';
 import { getAdisosFromSupabase } from '@/lib/supabase';
 import { Categoria } from '@/types';
+import { getBusinessProfilePath } from '@/lib/seo/business-metadata';
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://buscadis.com';
+
+async function getPublishedBusinessProfiles(): Promise<{ slug: string; updated_at?: string | null }[]> {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  if (!url || !key) return [];
+
+  const client = createClient(url, key, {
+    auth: { autoRefreshToken: false, persistSession: false },
+  });
+
+  const { data } = await client
+    .from('business_profiles')
+    .select('slug, updated_at')
+    .eq('is_published', true)
+    .limit(5000);
+
+  return data || [];
+}
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const categorias: Categoria[] = [
@@ -23,6 +43,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       lastModified: new Date(),
       changeFrequency: 'hourly',
       priority: 1,
+    },
+    {
+      url: `${siteUrl}/deals`,
+      lastModified: new Date(),
+      changeFrequency: 'hourly',
+      priority: 0.9,
     },
   ];
 
@@ -80,5 +106,18 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // Continuar sin adisos si hay error
   }
 
-  return [...staticPages, ...categoriaPages, ...adisoPages];
+  let businessPages: MetadataRoute.Sitemap = [];
+  try {
+    const profiles = await getPublishedBusinessProfiles();
+    businessPages = profiles.map((profile) => ({
+      url: `${siteUrl}${getBusinessProfilePath(profile.slug)}`,
+      lastModified: profile.updated_at ? new Date(profile.updated_at) : new Date(),
+      changeFrequency: 'weekly' as const,
+      priority: 0.7,
+    }));
+  } catch (error) {
+    console.error('Error al generar sitemap de negocios:', error);
+  }
+
+  return [...staticPages, ...categoriaPages, ...adisoPages, ...businessPages];
 }

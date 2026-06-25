@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getQrByShortCode, recordQrScan } from '@/lib/qr/service';
 import { getProfileRedirectUrl } from '@/lib/qr/resolve-url';
+import { parseUtmFromSearchParams } from '@/lib/analytics/attribution';
 
 export const runtime = 'nodejs';
 
@@ -31,7 +32,18 @@ export async function GET(
     lookupCache.set(shortCode, cached);
   }
 
-  const destination = getProfileRedirectUrl(cached.slug, true);
+  const destinationBase = getProfileRedirectUrl(cached.slug, true);
+  const utm = parseUtmFromSearchParams(req.nextUrl.searchParams);
+  const destinationUrl = new URL(destinationBase);
+  for (const [key, value] of Object.entries(utm)) {
+    if (value) destinationUrl.searchParams.set(key, value);
+  }
+  if (!destinationUrl.searchParams.has('utm_source')) {
+    destinationUrl.searchParams.set('utm_source', 'qr');
+  }
+  if (!destinationUrl.searchParams.has('utm_medium')) {
+    destinationUrl.searchParams.set('utm_medium', 'offline');
+  }
 
   const scanPayload = {
     qrCodeId: cached.qrId,
@@ -40,9 +52,10 @@ export async function GET(
     country: req.headers.get('x-vercel-ip-country') || req.headers.get('cf-ipcountry'),
     city: req.headers.get('x-vercel-ip-city'),
     sessionId: req.headers.get('x-vercel-id'),
+    metadata: { utm, short_code: shortCode },
   };
 
   void recordQrScan(scanPayload).catch(() => {});
 
-  return NextResponse.redirect(destination, { status: 302 });
+  return NextResponse.redirect(destinationUrl, { status: 302 });
 }
