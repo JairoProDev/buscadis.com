@@ -1,6 +1,6 @@
 import type { QrKitTemplate } from '../types';
 import { generateQrPng } from '../generate';
-import { resolveRenderMode } from '../presets';
+import { normalizeStyleConfig } from '../default-style';
 import type { QrStyleConfig } from '../types';
 
 export interface KitTemplateInput {
@@ -37,15 +37,15 @@ function darken(hex: string, pct: number): string {
 }
 
 async function getQrImageTag(input: KitTemplateInput, size = 400): Promise<string> {
-  const renderMode = resolveRenderMode(input.styleConfig, 'branded');
+  const styleConfig = normalizeStyleConfig(input.styleConfig, input.themeColor);
   const result = await generateQrPng({
     data: input.qrTargetUrl,
-    styleConfig: input.styleConfig,
+    styleConfig,
     width: size,
     logoUrl: input.logoUrl,
     themeColor: input.themeColor,
     tier: input.usePro ? 'pro' : 'free',
-    renderMode,
+    renderMode: 'branded',
   });
   const b64 = result.png.toString('base64');
   return `<image href="data:image/png;base64,${b64}" width="${size}" height="${size}" preserveAspectRatio="xMidYMid meet"/>`;

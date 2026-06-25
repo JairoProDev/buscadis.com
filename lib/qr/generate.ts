@@ -21,6 +21,14 @@ async function finalizePng(png: Buffer, config: QrStyleConfig): Promise<Buffer> 
   return applyTransparentBackground(png);
 }
 
+async function withCenterLogo(png: Buffer, options: GenerateQrOptions): Promise<Buffer> {
+  if (!options.logoUrl) return png;
+  const { compositeLogoOnQr } = await import('./composite-logo');
+  const width = options.width ?? 512;
+  const ratio = clampLogoSizeRatio(options.styleConfig.imageSize);
+  return compositeLogoOnQr(png, options.logoUrl, width, ratio);
+}
+
 async function generateClassicPng(options: GenerateQrOptions): Promise<Buffer> {
   const config = options.styleConfig;
   const width = options.width ?? 512;
@@ -28,20 +36,22 @@ async function generateClassicPng(options: GenerateQrOptions): Promise<Buffer> {
 
   try {
     const { generateProQrPng } = await import('./generate-pro');
-    return await generateProQrPng({
+    const styled = await generateProQrPng({
       data: options.data,
       styleConfig: config,
       width,
       skipLogo: true,
     });
+    return withCenterLogo(styled, options);
   } catch {
-    return QRCode.toBuffer(options.data, {
+    const plain = await QRCode.toBuffer(options.data, {
       type: 'png',
       errorCorrectionLevel: 'H',
       margin: 2,
       width,
       color: { dark, light: resolveBackgroundColor(config) },
     });
+    return withCenterLogo(plain, options);
   }
 }
 
@@ -118,6 +128,14 @@ async function tryMode(
   const bg = isTransparentBackground(options.styleConfig)
     ? '#ffffff'
     : options.styleConfig.backgroundColor || '#ffffff';
+
+  // jsQR no decodifica bien QRs con logo centrado; el escaneo real con ECC-H sí funciona.
+  if (mode === 'branded' && options.logoUrl) {
+    const { validateQrContrast } = await import('./quality-gate');
+    const contrast = validateQrContrast(dots, bg);
+    return { png, qaOk: contrast.ok, message: contrast.message };
+  }
+
   const qa = await runFullQualityGate(png, options.data, dots, bg, {
     mode,
     requireRobust: false,

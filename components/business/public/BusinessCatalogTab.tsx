@@ -392,10 +392,18 @@ export default function BusinessCatalogTab({
                                             </div>
                                         </div>
                                     ) : viewMode === 'grid' ? (
-                                        <button
+                                        <div
                                             key={adiso.id}
+                                            role="button"
+                                            tabIndex={0}
                                             onClick={() => router.push(getAdisoUrl(adiso))}
-                                            className="group relative bg-white rounded-2xl overflow-hidden border border-slate-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 text-left flex flex-col"
+                                            onKeyDown={(e) => {
+                                                if (e.key === 'Enter' || e.key === ' ') {
+                                                    e.preventDefault();
+                                                    router.push(getAdisoUrl(adiso));
+                                                }
+                                            }}
+                                            className="group relative bg-white rounded-2xl overflow-hidden border border-slate-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 text-left flex flex-col cursor-pointer"
                                         >
                                             <div className="relative w-full bg-slate-50 overflow-hidden" style={{ aspectRatio: '4/3' }}>
                                                 {adiso.imagenUrl || adiso.imagenesUrls?.[0] ? (
@@ -487,7 +495,7 @@ export default function BusinessCatalogTab({
                                                     </div>
                                                 </div>
                                             </div>
-                                        </button>
+                                        </div>
                                     ) : (
                                         <div
                                             key={adiso.id}
