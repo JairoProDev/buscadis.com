@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import { cn } from '@/lib/utils';
-import type { QrQaStatus, QrRenderMode, QrStyleConfig } from '@/lib/qr/types';
+import type { QrQaStatus, QrStyleConfig } from '@/lib/qr/types';
 import { buildPreviewQuery, previewStyleFingerprint } from '@/lib/qr/preview-params';
 
 interface QrPreviewProps {
@@ -17,14 +17,7 @@ interface QrPreviewProps {
   livePreview?: boolean;
   refreshToken?: number;
   qaStatus?: QrQaStatus | null;
-  renderMode?: QrRenderMode | null;
 }
-
-const MODE_LABELS: Record<QrRenderMode, string> = {
-  visual: 'Logo integrado',
-  branded: 'Con logo',
-  classic: 'Básico',
-};
 
 export default function QrPreview({
   slug,
@@ -37,23 +30,20 @@ export default function QrPreview({
   livePreview = false,
   refreshToken = 0,
   qaStatus,
-  renderMode,
 }: QrPreviewProps) {
   const encoded = encodeURIComponent(slug);
   const [error, setError] = useState(false);
   const [loadedSrc, setLoadedSrc] = useState<string | null>(null);
   const [scanMsg, setScanMsg] = useState<string | null>(null);
 
-  const displayMode = styleConfig?.renderMode || renderMode || 'branded';
-
   const src = useMemo(() => {
     if (livePreview && styleConfig) {
-      const q = buildPreviewQuery({ ...styleConfig, renderMode: displayMode });
+      const q = buildPreviewQuery(styleConfig);
       const fp = previewStyleFingerprint(styleConfig);
       return `/api/business/${encoded}/qr?${q}&tier=${tier}&t=${refreshToken}&fp=${encodeURIComponent(fp)}`;
     }
     return `/api/business/${encoded}/qr?format=${format}&tier=${tier}&refresh=1&t=${refreshToken}`;
-  }, [encoded, tier, format, livePreview, styleConfig, displayMode, refreshToken]);
+  }, [encoded, tier, format, livePreview, styleConfig, refreshToken]);
 
   const tryScan = async () => {
     setScanMsg(null);
@@ -99,14 +89,6 @@ export default function QrPreview({
   return (
     <div className={cn('space-y-2', className)}>
       <div className="flex flex-wrap gap-2 justify-center">
-        <span className="text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full bg-blue-100 text-blue-800">
-          {MODE_LABELS[displayMode]}
-        </span>
-        {qaStatus === 'degraded' && (
-          <span className="text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full bg-amber-100 text-amber-800">
-            Modo seguro
-          </span>
-        )}
         {livePreview && (
           <span className="text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">
             Vista previa

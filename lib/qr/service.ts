@@ -2,7 +2,7 @@ import { supabaseAdmin } from '@/lib/supabase-admin';
 import { createShortCode } from './short-code';
 import { buildFreeStyleConfig } from './presets';
 import type { QrCodeRecord, QrRenderMode, QrStyleConfig } from './types';
-import { resolveRenderMode } from './presets';
+import { normalizeStyleConfig } from './default-style';
 
 export async function getQrByShortCode(shortCode: string): Promise<QrCodeRecord | null> {
   const { data, error } = await supabaseAdmin
@@ -106,7 +106,7 @@ export async function updateQrStyle(
   const existing = await getQrByBusinessId(businessProfileId);
   if (existing) await invalidateQrAssetCache(existing.id);
 
-  const renderMode = resolveRenderMode(styleConfig, existing?.render_mode || 'branded');
+  const renderMode = 'branded' as const;
 
   const { data, error } = await supabaseAdmin
     .from('qr_codes')
@@ -175,11 +175,14 @@ export async function eagerGenerateQrPng(params: {
     } = await import('./asset-cache');
 
     const targetUrl = getQrTargetUrl(qr.short_code);
-    const styleConfig = {
-      ...buildFreeStyleConfig(params.themeColor),
-      ...(qr.style_config || {}),
-    };
-    const renderMode = resolveRenderMode(styleConfig, qr.render_mode || 'branded');
+    const styleConfig = normalizeStyleConfig(
+      {
+        ...buildFreeStyleConfig(params.themeColor),
+        ...(qr.style_config || {}),
+      },
+      params.themeColor
+    );
+    const renderMode = 'branded' as const;
     const tier = params.styleTier || qr.style_tier || 'free';
     const width = 512;
 

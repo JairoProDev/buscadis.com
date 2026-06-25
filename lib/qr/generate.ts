@@ -1,6 +1,6 @@
 import QRCode from 'qrcode';
 import type { GenerateQrResult, QrRenderMode, QrStyleConfig } from './types';
-import { resolveRenderMode } from './presets';
+import { normalizeStyleConfig } from './default-style';
 import { runFullQualityGate } from './quality-robust';
 import { isTransparentBackground, resolveBackgroundColor, applyTransparentBackground } from './transparent-bg';
 import { clampLogoSizeRatio } from './logo-constants';
@@ -127,33 +127,28 @@ async function tryMode(
 }
 
 /**
- * Genera PNG con fallback automático: visual → branded → classic.
+ * Genera PNG con fallback automático: branded → classic.
  * Nunca entrega un QR que no pase QA en al menos un modo.
  */
 export async function generateQrPng(options: GenerateQrOptions): Promise<GenerateQrResult> {
-  const requested =
-    options.renderMode || resolveRenderMode(options.styleConfig, 'branded');
-
-  const chain: QrRenderMode[] =
-    requested === 'visual'
-      ? ['visual', 'branded']
-      : requested === 'branded'
-        ? ['branded', 'classic']
-        : ['classic'];
+  const config = normalizeStyleConfig(options.styleConfig, options.themeColor);
+  const chain: QrRenderMode[] = ['branded', 'classic'];
 
   let lastError: string | undefined;
   let lastPng: Buffer | null = null;
+
+  const requested: QrRenderMode = 'branded';
 
   for (const mode of chain) {
     try {
       const { png: rawPng, qaOk, message } = await tryMode(mode, {
         ...options,
-        styleConfig: { ...options.styleConfig, renderMode: mode },
+        styleConfig: { ...config, renderMode: mode },
       });
       lastPng = rawPng;
       if (qaOk) {
         const degraded = mode !== requested;
-        const png = await finalizePng(rawPng, options.styleConfig);
+        const png = await finalizePng(rawPng, config);
         return {
           png,
           requestedMode: requested,
@@ -170,7 +165,7 @@ export async function generateQrPng(options: GenerateQrOptions): Promise<Generat
   }
 
   if (lastPng) {
-    const png = await finalizePng(lastPng, options.styleConfig);
+    const png = await finalizePng(lastPng, config);
     return {
       png,
       requestedMode: requested,
@@ -184,26 +179,26 @@ export async function generateQrPng(options: GenerateQrOptions): Promise<Generat
 }
 
 export async function generateQrSvg(options: GenerateQrOptions): Promise<string> {
-  const mode = options.renderMode || resolveRenderMode(options.styleConfig, 'branded');
+  const config = normalizeStyleConfig(options.styleConfig, options.themeColor);
   const width = options.width ?? 400;
 
   try {
     const { generateProQrSvg } = await import('./generate-pro');
     return await generateProQrSvg({
       data: options.data,
-      styleConfig: { ...options.styleConfig, renderMode: mode },
+      styleConfig: { ...config, renderMode: 'branded' },
       width,
-      logoUrl: mode === 'classic' ? undefined : options.logoUrl,
-      skipLogo: mode === 'classic',
+      logoUrl: options.logoUrl,
+      skipLogo: false,
     });
   } catch {
-    const dark = options.styleConfig.dotsColor || options.themeColor || '#1e293b';
+    const dark = config.dotsColor || options.themeColor || '#1e293b';
     return QRCode.toString(options.data, {
       type: 'svg',
       errorCorrectionLevel: 'H',
       margin: 2,
       width,
-      color: { dark, light: resolveBackgroundColor(options.styleConfig) },
+      color: { dark, light: resolveBackgroundColor(config) },
     });
   }
 }

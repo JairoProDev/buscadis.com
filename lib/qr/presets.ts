@@ -1,4 +1,5 @@
 import type { QrRenderMode, QrStyleConfig } from './types';
+import { buildQrStudioDefaults } from './default-style';
 
 export interface QrPreset {
   id: string;
@@ -154,19 +155,5 @@ export function resolveRenderMode(config: QrStyleConfig, fallback: QrRenderMode 
 }
 
 export function buildFreeStyleConfig(themeColor?: string): QrStyleConfig {
-  return {
-    renderMode: 'branded',
-    dotsColor: themeColor && /^#[0-9a-fA-F]{6}$/.test(themeColor) ? themeColor : '#1e293b',
-    backgroundColor: '#ffffff',
-    dotType: 'rounded',
-    cornerSquareType: 'extra-rounded',
-    cornerDotType: 'dot',
-    hideBackgroundDots: true,
-    imageSize: 0.5,
-    halftoneIntensity: 0.75,
-    dotScale: 0.35,
-    buscadisFinderMark: true,
-    quietZoneModules: 4,
-    presetId: 'brand-theme',
-  };
+  return buildQrStudioDefaults(themeColor);
 }

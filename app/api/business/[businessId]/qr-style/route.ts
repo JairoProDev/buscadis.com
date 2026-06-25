@@ -6,6 +6,7 @@ import { canUseProQr } from '@/lib/business/subscription';
 import { ensureQrCodeForBusiness, updateQrStyle, eagerGenerateQrPng } from '@/lib/qr/service';
 import { validateQrContrast } from '@/lib/qr/quality-gate';
 import { getQrTargetUrl } from '@/lib/qr/resolve-url';
+import { normalizeStyleConfig } from '@/lib/qr/default-style';
 import { QR_PRESETS } from '@/lib/qr/presets';
 import type { QrStyleConfig } from '@/lib/qr/types';
 
@@ -54,10 +55,10 @@ export async function PUT(
   }
 
   const body = (await req.json()) as { styleConfig?: QrStyleConfig };
-  const styleConfig = body.styleConfig;
-  if (!styleConfig) {
+  if (!body.styleConfig) {
     return NextResponse.json({ error: 'styleConfig requerido' }, { status: 400 });
   }
+  const styleConfig = normalizeStyleConfig(body.styleConfig, profile.theme_color);
 
   const isPro = canUseProQr(profile);
   const contrast = validateQrContrast(

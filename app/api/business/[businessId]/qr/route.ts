@@ -4,7 +4,8 @@ import { getQrTargetUrl } from '@/lib/qr/resolve-url';
 import { ensureQrCodeForBusiness, getQrByBusinessId } from '@/lib/qr/service';
 import { generateQrPng, generateQrSvg } from '@/lib/qr/generate';
 import { canUseProQr } from '@/lib/business/subscription';
-import { buildFreeStyleConfig, resolveRenderMode } from '@/lib/qr/presets';
+import { buildFreeStyleConfig } from '@/lib/qr/presets';
+import { normalizeStyleConfig } from '@/lib/qr/default-style';
 import { applyStyleQueryOverrides } from '@/lib/qr/preview-params';
 import {
   computeQrAssetHash,
@@ -62,16 +63,19 @@ export async function GET(
 
     const isPreview = req.nextUrl.searchParams.get('preview') === '1';
 
-    const styleConfig = applyStyleQueryOverrides(
-      {
-        ...buildFreeStyleConfig(profile.theme_color),
-        ...(qr.style_config || {}),
-        dotsColor: qr.style_config?.dotsColor || profile.theme_color || '#1e293b',
-      },
-      req.nextUrl.searchParams
+    const styleConfig = normalizeStyleConfig(
+      applyStyleQueryOverrides(
+        {
+          ...buildFreeStyleConfig(profile.theme_color),
+          ...(qr.style_config || {}),
+          dotsColor: qr.style_config?.dotsColor || profile.theme_color || '#1e293b',
+        },
+        req.nextUrl.searchParams
+      ),
+      profile.theme_color
     );
 
-    const renderMode = resolveRenderMode(styleConfig, qr.render_mode || 'branded');
+    const renderMode = 'branded' as const;
 
     if (format === 'svg') {
       const svg = await generateQrSvg({

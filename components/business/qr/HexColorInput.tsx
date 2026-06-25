@@ -17,41 +17,56 @@ function normalizeHex(v: string): string {
   return v;
 }
 
-const BODY_LOCK_FLAG = 'data-qr-color-picker';
-
-/** El picker nativo + overflow:hidden en el modal bloquea clicks en el SO. */
-function releaseBodyScrollLock() {
-  if (document.body.style.overflow === 'hidden') {
-    document.body.setAttribute(BODY_LOCK_FLAG, '1');
-    document.body.style.overflow = '';
-  }
-}
-
-function restoreBodyScrollLock() {
-  if (document.body.getAttribute(BODY_LOCK_FLAG) === '1') {
-    document.body.style.overflow = 'hidden';
-    document.body.removeAttribute(BODY_LOCK_FLAG);
-  }
-}
+const QUICK_SWATCHES = [
+  '#1e293b',
+  '#0f172a',
+  '#b91c1c',
+  '#dc2626',
+  '#2563eb',
+  '#3c6997',
+  '#059669',
+  '#d97706',
+  '#7c3aed',
+  '#ffffff',
+  '#000000',
+];
 
 export function HexColorInput({
   label,
   value,
   onChange,
-  debounceMs = 500,
+  debounceMs = 400,
 }: HexColorInputProps) {
   const [local, setLocal] = useState(value);
+  const [open, setOpen] = useState(false);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const pickingRef = useRef(false);
+  const rootRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setLocal(value);
   }, [value]);
 
+  useEffect(() => {
+    if (!open) return;
+    const onDoc = (e: MouseEvent) => {
+      if (rootRef.current && !rootRef.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setOpen(false);
+    };
+    document.addEventListener('mousedown', onDoc);
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('mousedown', onDoc);
+      document.removeEventListener('keydown', onKey);
+    };
+  }, [open]);
+
   useEffect(
     () => () => {
       if (timerRef.current) clearTimeout(timerRef.current);
-      if (pickingRef.current) restoreBodyScrollLock();
     },
     []
   );
@@ -75,34 +90,24 @@ export function HexColorInput({
   const safe = /^#[0-9a-fA-F]{6}$/.test(local) ? local : '#1e293b';
 
   return (
-    <label className="block text-xs font-bold text-slate-600">
+    <div
+      ref={rootRef}
+      className="block text-xs font-bold text-slate-600"
+      onMouseDown={(e) => e.stopPropagation()}
+      onClick={(e) => e.stopPropagation()}
+    >
       {label}
-      <div className="mt-1 flex gap-2 items-center">
-        <input
-          type="color"
-          value={safe}
-          className="w-10 h-9 rounded-lg cursor-pointer border border-slate-200 shrink-0 p-0.5"
-          aria-label={`${label} selector`}
-          onPointerDown={() => {
-            pickingRef.current = true;
-            releaseBodyScrollLock();
+      <div className="mt-1 flex gap-2 items-center relative">
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            setOpen((o) => !o);
           }}
-          onFocus={() => {
-            pickingRef.current = true;
-            releaseBodyScrollLock();
-          }}
-          onBlur={() => {
-            pickingRef.current = false;
-            window.setTimeout(() => {
-              restoreBodyScrollLock();
-              commit(local);
-            }, 250);
-          }}
-          onChange={(e) => {
-            const hex = e.target.value;
-            setLocal(hex);
-            scheduleCommit(hex);
-          }}
+          className="w-10 h-9 rounded-lg border border-slate-200 shrink-0 shadow-inner"
+          style={{ backgroundColor: safe }}
+          aria-label={`${label} elegir color`}
+          aria-expanded={open}
         />
         <input
           type="text"
@@ -129,7 +134,35 @@ export function HexColorInput({
           )}
           spellCheck={false}
         />
+
+        {open && (
+          <div
+            className="absolute left-0 top-full z-[250] mt-1 w-56 rounded-xl border border-slate-200 bg-white p-3 shadow-lg"
+            onMouseDown={(e) => e.stopPropagation()}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="grid grid-cols-6 gap-1.5">
+              {QUICK_SWATCHES.map((hex) => (
+                <button
+                  key={hex}
+                  type="button"
+                  title={hex}
+                  onClick={() => {
+                    setLocal(hex);
+                    commit(hex);
+                    setOpen(false);
+                  }}
+                  className={cn(
+                    'w-7 h-7 rounded-md border border-slate-200',
+                    hex === safe && 'ring-2 ring-blue-500 ring-offset-1'
+                  )}
+                  style={{ backgroundColor: hex }}
+                />
+              ))}
+            </div>
+          </div>
+        )}
       </div>
-    </label>
+    </div>
   );
 }

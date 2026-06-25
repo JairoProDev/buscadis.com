@@ -1,12 +1,11 @@
 'use client';
 
-import { useCallback, useDeferredValue, useEffect, useState, type ReactNode } from 'react';
+import { useCallback, useDeferredValue, useEffect, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { IconQrcode, IconSparkles } from '@/components/Icons';
 import { cn } from '@/lib/utils';
-import { QR_PRESETS } from '@/lib/qr/presets';
-import { harmoniousCorners } from '@/lib/qr/dot-harmony';
-import type { QrDotType, QrRenderMode, QrStyleConfig } from '@/lib/qr/types';
+import { buildQrStudioDefaults, normalizeStyleConfig } from '@/lib/qr/default-style';
+import type { QrStyleConfig } from '@/lib/qr/types';
 import { PRO_QR_FEATURES, PRO_QR_MONTHLY_PRICE_PEN } from '@/lib/business/subscription';
 import QrDownloadMenu from './QrDownloadMenu';
 import QrAnalyticsPanel from './QrAnalyticsPanel';
@@ -28,63 +27,6 @@ interface QrStudioProps {
   refreshToken?: number;
 }
 
-/** Tres estilos principales — nombre autoexplicativo + miniatura */
-const QR_STYLES: {
-  id: QrRenderMode;
-  name: string;
-  needsLogo?: boolean;
-  preview: ReactNode;
-}[] = [
-  {
-    id: 'classic',
-    name: 'Básico',
-    preview: (
-      <svg viewBox="0 0 40 40" className="w-11 h-11" aria-hidden>
-        <rect width="40" height="40" rx="6" fill="#f1f5f9" />
-        <rect x="5" y="5" width="10" height="10" fill="#334155" />
-        <rect x="25" y="5" width="10" height="10" fill="#334155" />
-        <rect x="5" y="25" width="10" height="10" fill="#334155" />
-        <rect x="18" y="18" width="3" height="3" fill="#334155" />
-        <rect x="23" y="18" width="3" height="3" fill="#334155" />
-        <rect x="18" y="23" width="3" height="3" fill="#334155" />
-      </svg>
-    ),
-  },
-  {
-    id: 'branded',
-    name: 'Con logo',
-    preview: (
-      <svg viewBox="0 0 40 40" className="w-11 h-11" aria-hidden>
-        <rect width="40" height="40" rx="6" fill="#f1f5f9" />
-        <rect x="5" y="5" width="10" height="10" rx="2" fill="#b91c1c" />
-        <rect x="25" y="5" width="10" height="10" rx="2" fill="#b91c1c" />
-        <rect x="5" y="25" width="10" height="10" rx="2" fill="#b91c1c" />
-        <circle cx="20" cy="20" r="7" fill="#b91c1c" opacity="0.9" />
-        <circle cx="20" cy="20" r="4" fill="#fff" />
-      </svg>
-    ),
-  },
-  {
-    id: 'visual',
-    name: 'Logo integrado',
-    needsLogo: true,
-    preview: (
-      <svg viewBox="0 0 40 40" className="w-11 h-11" aria-hidden>
-        <rect width="40" height="40" rx="6" fill="#f1f5f9" />
-        <circle cx="10" cy="10" r="5" fill="#b91c1c" opacity="0.35" />
-        <circle cx="30" cy="10" r="5" fill="#b91c1c" opacity="0.35" />
-        <circle cx="10" cy="30" r="5" fill="#b91c1c" opacity="0.35" />
-        <circle cx="16" cy="16" r="2" fill="#b91c1c" />
-        <circle cx="22" cy="14" r="1.5" fill="#b91c1c" opacity="0.6" />
-        <circle cx="20" cy="20" r="3" fill="#b91c1c" />
-        <circle cx="26" cy="22" r="2" fill="#b91c1c" opacity="0.7" />
-        <circle cx="18" cy="26" r="1.8" fill="#b91c1c" opacity="0.5" />
-        <ellipse cx="20" cy="20" rx="6" ry="4" fill="#b91c1c" opacity="0.25" />
-      </svg>
-    ),
-  },
-];
-
 export default function QrStudio({
   slug,
   businessName,
@@ -97,16 +39,9 @@ export default function QrStudio({
 }: QrStudioProps) {
   const { session } = useAuth();
   const [tab, setTab] = useState<Tab>('design');
-  const [styleConfig, setStyleConfig] = useState<QrStyleConfig>({
-    renderMode: 'branded',
-    dotsColor: themeColor,
-    backgroundColor: '#ffffff',
-    dotType: 'rounded',
-    imageSize: 0.5,
-    halftoneIntensity: 0.8,
-    dotScale: 0.35,
-    buscadisFinderMark: true,
-  });
+  const [styleConfig, setStyleConfig] = useState<QrStyleConfig>(() =>
+    buildQrStudioDefaults(themeColor)
+  );
   const [shortUrl, setShortUrl] = useState('');
   const [hasLogoRemote, setHasLogoRemote] = useState(hasLogo);
   const [saving, setSaving] = useState(false);
@@ -117,7 +52,6 @@ export default function QrStudio({
 
   const previewStyle = useDeferredValue(styleConfig);
   const logoOk = hasLogo || hasLogoRemote;
-  const renderMode = styleConfig.renderMode || 'branded';
 
   useEffect(() => {
     void (async () => {
@@ -126,12 +60,7 @@ export default function QrStudio({
         if (res.ok) {
           const data = await res.json();
           if (data.qr?.style_config) {
-            setStyleConfig((c) => ({
-              ...c,
-              ...data.qr.style_config,
-              dotsColor: data.qr.style_config.dotsColor || themeColor,
-              imageSize: Math.min(1, Math.max(0.5, data.qr.style_config.imageSize ?? 0.5)),
-            }));
+            setStyleConfig(normalizeStyleConfig(data.qr.style_config, themeColor));
           }
           if (data.shortUrl) setShortUrl(data.shortUrl);
           if (data.hasLogo) setHasLogoRemote(true);
@@ -144,29 +73,14 @@ export default function QrStudio({
   }, [slug, themeColor]);
 
   const patchStyle = useCallback((patch: Partial<QrStyleConfig>) => {
-    setStyleConfig((c) => ({ ...c, ...patch }));
+    setStyleConfig((c) => normalizeStyleConfig({ ...c, ...patch }, themeColor));
     setDirty(true);
-  }, []);
-
-  const selectMode = (mode: QrRenderMode) => {
-    patchStyle({ renderMode: mode, presetId: undefined });
-  };
-
-  const applyProPreset = (presetId: string) => {
-    const preset = QR_PRESETS.find((p) => p.id === presetId);
-    if (!preset || preset.tier === 'free') return;
-    setStyleConfig({
-      ...preset.config,
-      dotsColor: preset.config.dotsColor || styleConfig.dotsColor || themeColor,
-      backgroundColor: preset.config.backgroundColor || '#ffffff',
-      presetId: preset.id,
-    });
-    setDirty(true);
-  };
+  }, [themeColor]);
 
   const saveStyle = useCallback(async () => {
     setSaving(true);
     setSaveMsg(null);
+    const payload = normalizeStyleConfig(styleConfig, themeColor);
     try {
       const res = await fetch(`/api/business/${encodeURIComponent(slug)}/qr-style`, {
         method: 'PUT',
@@ -175,13 +89,14 @@ export default function QrStudio({
           ...(session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {}),
         },
         credentials: 'include',
-        body: JSON.stringify({ styleConfig }),
+        body: JSON.stringify({ styleConfig: payload }),
       });
       const data = await res.json();
       if (!res.ok) {
         setSaveMsg(data.error || 'Error al guardar');
         return;
       }
+      setStyleConfig(payload);
       setPreviewKey((k) => k + 1);
       setDirty(false);
       if (data.qr?.qa_status) setQaStatus(data.qr.qa_status);
@@ -192,7 +107,7 @@ export default function QrStudio({
     } finally {
       setSaving(false);
     }
-  }, [slug, styleConfig, session?.access_token]);
+  }, [slug, styleConfig, themeColor, session?.access_token]);
 
   const tabs: { id: Tab; label: string }[] = [
     { id: 'design', label: 'Diseño' },
@@ -239,7 +154,6 @@ export default function QrStudio({
             livePreview
             refreshToken={refreshToken + previewKey}
             qaStatus={dirty ? null : (qaStatus as 'passed' | 'degraded' | null)}
-            renderMode={renderMode}
           />
           {dirty && (
             <p className="text-[11px] text-amber-700 text-center px-2">
@@ -271,44 +185,13 @@ export default function QrStudio({
 
           {tab === 'design' && (
             <div className="space-y-5">
-              <div>
-                <p className="text-xs font-bold text-slate-500 uppercase tracking-wide mb-2">
-                  Estilo del código
+              {!logoOk && (
+                <p className="text-xs text-amber-800 rounded-xl bg-amber-50 border border-amber-100 px-3 py-2">
+                  Sube un logo en tu perfil para que aparezca en el centro del código QR.
                 </p>
-                <div className="grid grid-cols-3 gap-2">
-                  {QR_STYLES.map((s) => {
-                    const disabled = s.needsLogo && !logoOk;
-                    const active = renderMode === s.id;
-                    return (
-                      <button
-                        key={s.id}
-                        type="button"
-                        disabled={disabled}
-                        onClick={() => selectMode(s.id)}
-                        className={cn(
-                          'flex flex-col items-center gap-1.5 p-2.5 rounded-xl border transition-all',
-                          active
-                            ? 'border-blue-500 bg-blue-50 ring-2 ring-blue-200'
-                            : 'border-slate-200 hover:border-slate-300 bg-white',
-                          disabled && 'opacity-40 cursor-not-allowed'
-                        )}
-                      >
-                        {s.preview}
-                        <span className="text-[11px] font-bold text-slate-800 text-center leading-tight">
-                          {s.name}
-                        </span>
-                      </button>
-                    );
-                  })}
-                </div>
-                {!logoOk && (
-                  <p className="text-[11px] text-slate-500 mt-2">
-                    Sube un logo en tu perfil para usar &quot;Con logo&quot; o &quot;Logo integrado&quot;.
-                  </p>
-                )}
-              </div>
+              )}
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className={cn('grid gap-3', styleConfig.transparentBackground ? 'grid-cols-1' : 'grid-cols-2')}>
                 <HexColorInput
                   label="Color del QR"
                   value={styleConfig.dotsColor || themeColor}
@@ -327,174 +210,11 @@ export default function QrStudio({
                 <input
                   type="checkbox"
                   checked={Boolean(styleConfig.transparentBackground)}
-                  onChange={(e) =>
-                    patchStyle({
-                      transparentBackground: e.target.checked,
-                      backgroundColor: e.target.checked
-                        ? styleConfig.backgroundColor || '#ffffff'
-                        : styleConfig.backgroundColor || '#ffffff',
-                    })
-                  }
+                  onChange={(e) => patchStyle({ transparentBackground: e.target.checked })}
                   className="rounded border-slate-300 text-blue-600 focus:ring-blue-500"
                 />
                 Fondo transparente (solo el código, sin placa blanca)
               </label>
-
-              {(renderMode === 'branded' || renderMode === 'visual') && logoOk && (
-                <label className="block text-xs font-bold text-slate-600">
-                  Tamaño del logo ({Math.max(50, Math.round((styleConfig.imageSize ?? 0.5) * 100))}%)
-                  <input
-                    type="range"
-                    min={50}
-                    max={100}
-                    value={Math.max(50, Math.round((styleConfig.imageSize ?? 0.5) * 100))}
-                    onChange={(e) =>
-                      patchStyle({ imageSize: Number(e.target.value) / 100 })
-                    }
-                    className="mt-1 w-full accent-blue-600"
-                  />
-                  <p className="text-[10px] text-slate-400 font-normal mt-1">
-                    50% mínimo · 100% de borde a borde del área central
-                  </p>
-                </label>
-              )}
-
-              <label className="block text-xs font-bold text-slate-600">
-                Forma de los puntos
-                <select
-                  value={styleConfig.dotType || 'rounded'}
-                  onChange={(e) => {
-                    const dotType = e.target.value as QrDotType;
-                    const harmony = harmoniousCorners(dotType);
-                    patchStyle({
-                      dotType,
-                      cornerSquareType: harmony.cornerSquareType,
-                      cornerDotType: harmony.cornerDotType,
-                    });
-                  }}
-                  className="mt-1 w-full px-3 py-2 rounded-lg border border-slate-200 text-sm bg-white"
-                >
-                  <option value="square">Cuadrados</option>
-                  <option value="dots">Puntos finos</option>
-                  <option value="rounded">Suaves</option>
-                  <option value="extra-rounded">Muy redondeados</option>
-                  <option value="classy">Clásicos</option>
-                  <option value="classy-rounded">Clásicos suaves</option>
-                </select>
-              </label>
-
-
-              {(renderMode === 'classic' || renderMode === 'branded') && (
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <p className="text-xs font-bold text-slate-600 mb-1.5">Marco de esquinas</p>
-                    <div className="flex gap-1.5">
-                      {(
-                        [
-                          ['square', '■'],
-                          ['extra-rounded', '▢'],
-                          ['dot', '●'],
-                        ] as const
-                      ).map(([id, icon]) => (
-                        <button
-                          key={id}
-                          type="button"
-                          onClick={() => patchStyle({ cornerSquareType: id })}
-                          className={cn(
-                            'flex-1 py-2 rounded-lg border text-sm font-bold transition-colors',
-                            (styleConfig.cornerSquareType || 'extra-rounded') === id
-                              ? 'border-blue-500 bg-blue-50 text-blue-800'
-                              : 'border-slate-200 bg-white text-slate-600'
-                          )}
-                          title={id}
-                        >
-                          {icon}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                  <div>
-                    <p className="text-xs font-bold text-slate-600 mb-1.5">Centro de esquinas</p>
-                    <div className="flex gap-1.5">
-                      {(
-                        [
-                          ['square', '■'],
-                          ['dot', '●'],
-                        ] as const
-                      ).map(([id, icon]) => (
-                        <button
-                          key={id}
-                          type="button"
-                          onClick={() => patchStyle({ cornerDotType: id })}
-                          className={cn(
-                            'flex-1 py-2 rounded-lg border text-sm font-bold transition-colors',
-                            (styleConfig.cornerDotType || 'dot') === id
-                              ? 'border-blue-500 bg-blue-50 text-blue-800'
-                              : 'border-slate-200 bg-white text-slate-600'
-                          )}
-                          title={id}
-                        >
-                          {icon}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {renderMode === 'visual' && (
-                <div className="space-y-3 rounded-xl bg-slate-50 border border-slate-100 p-3">
-                  <label className="block text-xs font-bold text-slate-600">
-                    Presencia del logo ({Math.round((styleConfig.halftoneIntensity ?? 0.75) * 100)}%)
-                    <input
-                      type="range"
-                      min={50}
-                      max={100}
-                      value={Math.round((styleConfig.halftoneIntensity ?? 0.75) * 100)}
-                      onChange={(e) =>
-                        patchStyle({ halftoneIntensity: Number(e.target.value) / 100 })
-                      }
-                      className="mt-1 w-full accent-blue-600"
-                    />
-                  </label>
-                  <label className="block text-xs font-bold text-slate-600">
-                    Detalle de puntos ({Math.round((styleConfig.dotScale ?? 0.35) * 100)}%)
-                    <input
-                      type="range"
-                      min={25}
-                      max={55}
-                      value={Math.round((styleConfig.dotScale ?? 0.35) * 100)}
-                      onChange={(e) => patchStyle({ dotScale: Number(e.target.value) / 100 })}
-                      className="mt-1 w-full accent-blue-600"
-                    />
-                  </label>
-                </div>
-              )}
-
-              {isPro && (
-                <div>
-                  <p className="text-xs font-bold text-slate-500 uppercase tracking-wide mb-2">
-                    Estilos Pro
-                  </p>
-                  <div className="flex flex-wrap gap-2">
-                    {QR_PRESETS.filter((p) => p.tier === 'pro').map((p) => (
-                      <button
-                        key={p.id}
-                        type="button"
-                        onClick={() => applyProPreset(p.id)}
-                        className={cn(
-                          'px-3 py-1.5 rounded-full text-[11px] font-bold border transition-colors',
-                          styleConfig.presetId === p.id
-                            ? 'bg-amber-100 border-amber-300 text-amber-900'
-                            : 'bg-white border-slate-200 text-slate-600 hover:border-slate-300'
-                        )}
-                      >
-                        {p.name}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
 
               <button
                 type="button"
