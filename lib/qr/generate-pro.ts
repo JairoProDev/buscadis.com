@@ -1,6 +1,7 @@
 import type { QrStyleConfig } from './types';
 import { fetchLogoDataUrl } from './logo-image';
-import { QR_LOGO_STYLING_RATIO } from './logo-constants';
+import { clampLogoSizeRatio } from './logo-constants';
+import { resolveBackgroundColor } from './transparent-bg';
 
 export interface GenerateProQrOptions {
   data: string;
@@ -53,7 +54,7 @@ async function buildStylingOptions(
     },
     dotsOptions,
     backgroundOptions: {
-      color: styleConfig.backgroundColor || '#ffffff',
+      color: resolveBackgroundColor(styleConfig),
     },
     cornersSquareOptions: {
       type: styleConfig.cornerSquareType || 'extra-rounded',
@@ -69,7 +70,7 @@ async function buildStylingOptions(
     base.image = image;
     base.imageOptions = {
       hideBackgroundDots: styleConfig.hideBackgroundDots ?? true,
-      imageSize: QR_LOGO_STYLING_RATIO,
+      imageSize: clampLogoSizeRatio(styleConfig.imageSize),
       margin: 4,
       crossOrigin: 'anonymous',
       saveAsBlob: true,

@@ -1,7 +1,9 @@
 import QRCode from 'qrcode';
 import sharp from 'sharp';
 import { fetchLogoPngBuffer } from './logo-image';
-import { QR_LOGO_COMPOSITE_RATIO } from './logo-constants';
+import { clampLogoSizeRatio } from './logo-constants';
+import { resolveBackgroundColor } from './transparent-bg';
+import type { QrStyleConfig } from './types';
 
 /**
  * Superpone el logo respetando su forma, transparencia y contorno real.
@@ -10,16 +12,18 @@ import { QR_LOGO_COMPOSITE_RATIO } from './logo-constants';
 export async function compositeLogoOnQr(
   qrPng: Buffer,
   logoUrl: string,
-  width: number
+  width: number,
+  logoRatio = 0.5
 ): Promise<Buffer> {
-  const fetchSize = Math.round(width * QR_LOGO_COMPOSITE_RATIO * 1.2);
+  const ratio = clampLogoSizeRatio(logoRatio);
+  const fetchSize = Math.round(width * ratio * 1.15);
   const logoBuf = await fetchLogoPngBuffer(logoUrl, fetchSize);
   if (!logoBuf) {
     console.warn('[qr] compositeLogoOnQr: logo unavailable', logoUrl.slice(0, 120));
     return qrPng;
   }
 
-  const maxLogo = Math.round(width * QR_LOGO_COMPOSITE_RATIO);
+  const maxLogo = Math.round(width * ratio);
 
   const logo = await sharp(logoBuf)
     .resize(maxLogo, maxLogo, {
@@ -45,8 +49,13 @@ export async function plainQrPng(
   data: string,
   width: number,
   dark: string,
-  light: string
+  lightOrConfig: string | QrStyleConfig
 ): Promise<Buffer> {
+  const light =
+    typeof lightOrConfig === 'string'
+      ? lightOrConfig
+      : resolveBackgroundColor(lightOrConfig);
+
   return QRCode.toBuffer(data, {
     type: 'png',
     errorCorrectionLevel: 'H',

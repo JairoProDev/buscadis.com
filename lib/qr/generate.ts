@@ -2,6 +2,8 @@ import QRCode from 'qrcode';
 import type { GenerateQrResult, QrRenderMode, QrStyleConfig } from './types';
 import { resolveRenderMode } from './presets';
 import { runFullQualityGate } from './quality-robust';
+import { isTransparentBackground, resolveBackgroundColor, applyTransparentBackground } from './transparent-bg';
+import { clampLogoSizeRatio } from './logo-constants';
 
 export interface GenerateQrOptions {
   data: string;
@@ -14,11 +16,15 @@ export interface GenerateQrOptions {
   skipQa?: boolean;
 }
 
+async function finalizePng(png: Buffer, config: QrStyleConfig): Promise<Buffer> {
+  if (!isTransparentBackground(config)) return png;
+  return applyTransparentBackground(png);
+}
+
 async function generateClassicPng(options: GenerateQrOptions): Promise<Buffer> {
   const config = options.styleConfig;
   const width = options.width ?? 512;
   const dark = config.dotsColor || options.themeColor || '#1e293b';
-  const light = config.backgroundColor || '#ffffff';
 
   try {
     const { generateProQrPng } = await import('./generate-pro');
@@ -34,7 +40,7 @@ async function generateClassicPng(options: GenerateQrOptions): Promise<Buffer> {
       errorCorrectionLevel: 'H',
       margin: 2,
       width,
-      color: { dark, light },
+      color: { dark, light: resolveBackgroundColor(config) },
     });
   }
 }
@@ -45,7 +51,7 @@ async function generateBrandedPng(options: GenerateQrOptions): Promise<Buffer> {
   const width = options.width ?? 512;
   const config = options.styleConfig;
   const dark = config.dotsColor || options.themeColor || '#1e293b';
-  const light = config.backgroundColor || '#ffffff';
+  const logoRatio = clampLogoSizeRatio(config.imageSize);
 
   if (options.logoUrl) {
     let styled: Buffer | null = null;
@@ -59,9 +65,9 @@ async function generateBrandedPng(options: GenerateQrOptions): Promise<Buffer> {
       });
     } catch (err) {
       console.warn('[qr] styled QR failed (canvas?), using plain QR + logo:', err);
-      styled = await plainQrPng(options.data, width, dark, light);
+      styled = await plainQrPng(options.data, width, dark, config);
     }
-    return compositeLogoOnQr(styled, options.logoUrl, width);
+    return compositeLogoOnQr(styled, options.logoUrl, width, logoRatio);
   }
 
   if (tier === 'pro') {
@@ -109,7 +115,9 @@ async function tryMode(
   if (options.skipQa) return { png, qaOk: true };
 
   const dots = options.styleConfig.dotsColor || options.themeColor || '#1e293b';
-  const bg = options.styleConfig.backgroundColor || '#ffffff';
+  const bg = isTransparentBackground(options.styleConfig)
+    ? '#ffffff'
+    : options.styleConfig.backgroundColor || '#ffffff';
   const qa = await runFullQualityGate(png, options.data, dots, bg, {
     mode,
     requireRobust: false,
@@ -138,13 +146,14 @@ export async function generateQrPng(options: GenerateQrOptions): Promise<Generat
 
   for (const mode of chain) {
     try {
-      const { png, qaOk, message } = await tryMode(mode, {
+      const { png: rawPng, qaOk, message } = await tryMode(mode, {
         ...options,
         styleConfig: { ...options.styleConfig, renderMode: mode },
       });
-      lastPng = png;
+      lastPng = rawPng;
       if (qaOk) {
         const degraded = mode !== requested;
+        const png = await finalizePng(rawPng, options.styleConfig);
         return {
           png,
           requestedMode: requested,
@@ -161,8 +170,9 @@ export async function generateQrPng(options: GenerateQrOptions): Promise<Generat
   }
 
   if (lastPng) {
+    const png = await finalizePng(lastPng, options.styleConfig);
     return {
-      png: lastPng,
+      png,
       requestedMode: requested,
       actualMode: 'classic',
       qaStatus: 'degraded',
@@ -188,13 +198,12 @@ export async function generateQrSvg(options: GenerateQrOptions): Promise<string>
     });
   } catch {
     const dark = options.styleConfig.dotsColor || options.themeColor || '#1e293b';
-    const light = options.styleConfig.backgroundColor || '#ffffff';
     return QRCode.toString(options.data, {
       type: 'svg',
       errorCorrectionLevel: 'H',
       margin: 2,
       width,
-      color: { dark, light },
+      color: { dark, light: resolveBackgroundColor(options.styleConfig) },
     });
   }
 }

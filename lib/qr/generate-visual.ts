@@ -3,7 +3,8 @@ import { createQrMatrix, getQuietZoneModules } from './matrix-masks';
 import { fetchLogoLuminanceMap, fetchLogoPngBuffer } from './logo-image';
 import { drawDataHalftone, drawLogoUnderlay } from './halftone';
 import { drawFinderPatterns, drawTimingPatterns } from './finder-brand';
-import { QR_LOGO_UNDERLAY_RATIO } from './logo-constants';
+import { clampLogoSizeRatio } from './logo-constants';
+import { isTransparentBackground, resolveBackgroundColor } from './transparent-bg';
 
 export interface GenerateVisualQrOptions {
   data: string;
@@ -29,7 +30,7 @@ export async function generateVisualQrPng(options: GenerateVisualQrOptions): Pro
     options.styleConfig.finderBrandColor ||
     options.themeColor ||
     dotsColor;
-  const bg = options.styleConfig.backgroundColor || '#ffffff';
+  const bg = resolveBackgroundColor(options.styleConfig);
   const intensity = options.styleConfig.halftoneIntensity ?? 0.75;
   const dotScale = options.styleConfig.dotScale ?? 0.35;
   const buscadisMark = options.styleConfig.buscadisFinderMark !== false;
@@ -42,14 +43,22 @@ export async function generateVisualQrPng(options: GenerateVisualQrOptions): Pro
   const canvas = createCanvas(width, width);
   const ctx = canvas.getContext('2d');
 
-  ctx.fillStyle = bg;
-  ctx.fillRect(0, 0, width, width);
+  if (!isTransparentBackground(options.styleConfig)) {
+    ctx.fillStyle = bg;
+    ctx.fillRect(0, 0, width, width);
+  } else {
+    ctx.clearRect(0, 0, width, width);
+  }
 
   if (options.logoUrl) {
-    const logoBuf = await fetchLogoPngBuffer(options.logoUrl, Math.round(width * QR_LOGO_UNDERLAY_RATIO * 1.1));
+    const logoRatio = clampLogoSizeRatio(options.styleConfig.imageSize);
+    const logoBuf = await fetchLogoPngBuffer(
+      options.logoUrl,
+      Math.round(width * logoRatio * 1.1)
+    );
     if (logoBuf) {
       const logoImg = await loadImage(logoBuf);
-      drawLogoUnderlay(ctx, logoImg, width, intensity, QR_LOGO_UNDERLAY_RATIO);
+      drawLogoUnderlay(ctx, logoImg, width, intensity, logoRatio);
     }
   }
 

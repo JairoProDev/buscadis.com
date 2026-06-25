@@ -38,6 +38,8 @@ export interface QrStyleConfig {
   frameText?: string;
   frameColor?: string;
   presetId?: string;
+  /** Fondo PNG/SVG transparente (solo el código, sin placa blanca). */
+  transparentBackground?: boolean;
 }
 
 export interface QrCodeRecord {

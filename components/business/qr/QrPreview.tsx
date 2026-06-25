@@ -113,7 +113,22 @@ export default function QrPreview({
           </span>
         )}
       </div>
-      <div className="relative rounded-2xl border border-slate-200 bg-white p-4 shadow-sm min-h-[200px] flex items-center justify-center">
+      <div
+        className={cn(
+          'relative rounded-2xl border border-slate-200 p-4 shadow-sm min-h-[200px] flex items-center justify-center',
+          styleConfig?.transparentBackground
+            ? 'bg-[length:12px_12px] bg-[position:0_0,6px_6px] bg-white'
+            : 'bg-white'
+        )}
+        style={
+          styleConfig?.transparentBackground
+            ? {
+                backgroundImage:
+                  'linear-gradient(45deg, #e2e8f0 25%, transparent 25%), linear-gradient(-45deg, #e2e8f0 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #e2e8f0 75%), linear-gradient(-45deg, transparent 75%, #e2e8f0 75%)',
+              }
+            : undefined
+        }
+      >
         {!showImage && !error && (
           <div className="absolute inset-4 animate-pulse bg-slate-100 rounded-xl" />
         )}

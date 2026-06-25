@@ -7,7 +7,7 @@ export const QR_ASSETS_BUCKET = 'qr-assets';
 export const QR_FINDER_BRAND_VERSION = 'v1';
 
 /** Incrementar al cambiar motor de generación (invalida PNG cacheados). */
-export const QR_ENGINE_VERSION = 'v9-logo-prod-fix';
+export const QR_ENGINE_VERSION = 'v10-logo-slider-tbg';
 
 export function computeQrAssetHash(params: {
   targetUrl: string;

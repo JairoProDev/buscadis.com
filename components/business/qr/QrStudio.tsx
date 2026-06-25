@@ -102,6 +102,7 @@ export default function QrStudio({
     dotsColor: themeColor,
     backgroundColor: '#ffffff',
     dotType: 'rounded',
+    imageSize: 0.5,
     halftoneIntensity: 0.8,
     dotScale: 0.35,
     buscadisFinderMark: true,
@@ -129,6 +130,7 @@ export default function QrStudio({
               ...c,
               ...data.qr.style_config,
               dotsColor: data.qr.style_config.dotsColor || themeColor,
+              imageSize: Math.min(1, Math.max(0.5, data.qr.style_config.imageSize ?? 0.5)),
             }));
           }
           if (data.shortUrl) setShortUrl(data.shortUrl);
@@ -312,12 +314,50 @@ export default function QrStudio({
                   value={styleConfig.dotsColor || themeColor}
                   onChange={(hex) => patchStyle({ dotsColor: hex })}
                 />
-                <HexColorInput
-                  label="Fondo"
-                  value={styleConfig.backgroundColor || '#ffffff'}
-                  onChange={(hex) => patchStyle({ backgroundColor: hex })}
-                />
+                {!styleConfig.transparentBackground && (
+                  <HexColorInput
+                    label="Fondo"
+                    value={styleConfig.backgroundColor || '#ffffff'}
+                    onChange={(hex) => patchStyle({ backgroundColor: hex })}
+                  />
+                )}
               </div>
+
+              <label className="flex items-center gap-2 text-xs font-bold text-slate-600 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={Boolean(styleConfig.transparentBackground)}
+                  onChange={(e) =>
+                    patchStyle({
+                      transparentBackground: e.target.checked,
+                      backgroundColor: e.target.checked
+                        ? styleConfig.backgroundColor || '#ffffff'
+                        : styleConfig.backgroundColor || '#ffffff',
+                    })
+                  }
+                  className="rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                />
+                Fondo transparente (solo el código, sin placa blanca)
+              </label>
+
+              {(renderMode === 'branded' || renderMode === 'visual') && logoOk && (
+                <label className="block text-xs font-bold text-slate-600">
+                  Tamaño del logo ({Math.max(50, Math.round((styleConfig.imageSize ?? 0.5) * 100))}%)
+                  <input
+                    type="range"
+                    min={50}
+                    max={100}
+                    value={Math.max(50, Math.round((styleConfig.imageSize ?? 0.5) * 100))}
+                    onChange={(e) =>
+                      patchStyle({ imageSize: Number(e.target.value) / 100 })
+                    }
+                    className="mt-1 w-full accent-blue-600"
+                  />
+                  <p className="text-[10px] text-slate-400 font-normal mt-1">
+                    50% mínimo · 100% de borde a borde del área central
+                  </p>
+                </label>
+              )}
 
               <label className="block text-xs font-bold text-slate-600">
                 Forma de los puntos

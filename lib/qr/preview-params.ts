@@ -30,6 +30,8 @@ function readStyleParams(params: URLSearchParams, next: QrStyleConfig): void {
     const n = Number(img);
     if (Number.isFinite(n)) next.imageSize = n;
   }
+  const tbg = params.get('tbg');
+  if (tbg === '1') next.transparentBackground = true;
 }
 
 /** Aplica overrides de query cuando hay parámetros de estilo (preview o descarga). */
@@ -47,7 +49,8 @@ export function applyStyleQueryOverrides(
     params.has('ds') ||
     params.has('cornerSquare') ||
     params.has('cornerDot') ||
-    params.has('img');
+    params.has('img') ||
+    params.has('tbg');
 
   if (!hasStyle) return base;
 
@@ -74,6 +77,7 @@ function appendStyleParams(p: URLSearchParams, styleConfig: QrStyleConfig): void
   if (styleConfig.cornerSquareType) p.set('cornerSquare', styleConfig.cornerSquareType);
   if (styleConfig.cornerDotType) p.set('cornerDot', styleConfig.cornerDotType);
   if (styleConfig.imageSize != null) p.set('img', String(styleConfig.imageSize));
+  if (styleConfig.transparentBackground) p.set('tbg', '1');
 }
 
 export function buildPreviewQuery(styleConfig: QrStyleConfig): string {
@@ -88,8 +92,11 @@ export function buildPreviewQuery(styleConfig: QrStyleConfig): string {
 
 /** Query para descargas — mismos estilos que la vista previa, sin caché obsoleta. */
 export function buildDownloadQuery(styleConfig: QrStyleConfig, extra?: Record<string, string>): string {
-  const p = new URLSearchParams({ refresh: '1', ...extra });
+  const p = new URLSearchParams({ refresh: '1' });
   appendStyleParams(p, styleConfig);
+  if (extra) {
+    for (const [k, v] of Object.entries(extra)) p.set(k, v);
+  }
   return p.toString();
 }
 
@@ -105,5 +112,6 @@ export function previewStyleFingerprint(styleConfig: QrStyleConfig): string {
     styleConfig.cornerSquareType,
     styleConfig.cornerDotType,
     styleConfig.imageSize,
+    styleConfig.transparentBackground ? '1' : '0',
   ].join('|');
 }

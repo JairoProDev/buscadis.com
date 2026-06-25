@@ -62,7 +62,7 @@ export async function PUT(
   const isPro = canUseProQr(profile);
   const contrast = validateQrContrast(
     styleConfig.dotsColor || '#0f172a',
-    styleConfig.backgroundColor || '#ffffff'
+    styleConfig.transparentBackground ? '#ffffff' : styleConfig.backgroundColor || '#ffffff'
   );
   if (!contrast.ok) {
     return NextResponse.json({ error: contrast.message }, { status: 422 });

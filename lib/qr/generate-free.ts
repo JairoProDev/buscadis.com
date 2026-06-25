@@ -2,6 +2,7 @@ import QRCode from 'qrcode';
 import type { QrStyleConfig } from './types';
 import { buildFreeStyleConfig } from './presets';
 import { compositeLogoOnQr, plainQrPng } from './composite-logo';
+import { clampLogoSizeRatio } from './logo-constants';
 import { generateProQrPng } from './generate-pro';
 
 export interface GenerateFreeQrOptions {
@@ -17,13 +18,13 @@ export async function generateFreeQrPng(options: GenerateFreeQrOptions): Promise
   const config = options.styleConfig || buildFreeStyleConfig(options.themeColor);
   const width = options.width ?? 512;
   const dark = config.dotsColor || options.themeColor || '#1e293b';
-  const light = config.backgroundColor || '#ffffff';
 
   if (config.renderMode === 'classic') {
-    return plainQrPng(options.data, width, dark, light);
+    return plainQrPng(options.data, width, dark, config);
   }
 
   if (options.logoUrl) {
+    const logoRatio = clampLogoSizeRatio(config.imageSize);
     try {
       const styled = await generateProQrPng({
         data: options.data,
@@ -36,11 +37,11 @@ export async function generateFreeQrPng(options: GenerateFreeQrOptions): Promise
         width,
         skipLogo: true,
       });
-      return compositeLogoOnQr(styled, options.logoUrl, width);
+      return compositeLogoOnQr(styled, options.logoUrl, width, logoRatio);
     } catch (err) {
       console.warn('[qr] styled branded failed, plain composite:', err);
-      const plain = await plainQrPng(options.data, width, dark, light);
-      return compositeLogoOnQr(plain, options.logoUrl, width);
+      const plain = await plainQrPng(options.data, width, dark, config);
+      return compositeLogoOnQr(plain, options.logoUrl, width, logoRatio);
     }
   }
 
@@ -52,7 +53,7 @@ export async function generateFreeQrPng(options: GenerateFreeQrOptions): Promise
       skipLogo: true,
     });
   } catch {
-    return plainQrPng(options.data, width, dark, light);
+    return plainQrPng(options.data, width, dark, config);
   }
 }
 

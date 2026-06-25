@@ -16,7 +16,7 @@ type DownloadItem = {
   label: string;
   desc: string;
   href: string;
-  wire: 'square' | 'print' | 'packaging' | 'vector' | 'pdf' | 'flyer' | 'sticker' | 'story' | 'tent' | 'poster' | 'card';
+  wire: 'square' | 'print' | 'packaging' | 'vector' | 'pdf' | 'flyer' | 'sticker' | 'story' | 'tent' | 'poster' | 'card' | 'transparent';
   pro?: boolean;
 };
 
@@ -103,6 +103,19 @@ function WireThumb({ type }: { type: DownloadItem['wire'] }) {
           <div className="w-6 h-6 border border-slate-300 mx-auto" />
         </div>
       );
+    case 'transparent':
+      return (
+        <div
+          className={`${base} w-12 h-12`}
+          style={{
+            backgroundImage:
+              'linear-gradient(45deg, #cbd5e1 25%, transparent 25%), linear-gradient(-45deg, #cbd5e1 25%, transparent 25%)',
+            backgroundSize: '8px 8px',
+          }}
+        >
+          <div className="w-7 h-7 border-2 border-slate-500 rounded-sm m-auto mt-2.5" />
+        </div>
+      );
     case 'card':
       return (
         <div className={`${base} w-14 h-9`}>
@@ -151,6 +164,13 @@ export default function QrDownloadMenu({ slug, isPro, shortUrl, styleConfig }: Q
       desc: '512 px · pantallas, web y WhatsApp',
       href: `${base}/qr?format=png&${qrQuery()}`,
       wire: 'square',
+    },
+    {
+      id: 'png-transparent',
+      label: 'PNG fondo transparente',
+      desc: 'Solo el código · ideal para diseños y stickers',
+      href: `${base}/qr?format=png&${qrQuery({ tbg: '1' })}`,
+      wire: 'transparent',
     },
     {
       id: 'png-print',
