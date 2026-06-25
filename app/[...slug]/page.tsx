@@ -150,7 +150,12 @@ export default async function Page(props: PageProps) {
             notFound();
         }
         // Format 3: /[business_slug] or /@handle (fallback si middleware/rewrite no aplica)
-        return <PublicBusinessPage params={{ slug: businessSlug }} searchParams={searchParams} />;
+        return (
+            <PublicBusinessPage
+                params={Promise.resolve({ slug: businessSlug })}
+                searchParams={Promise.resolve(searchParams)}
+            />
+        );
     } else if (slug.length === 3) {
         // New SEO URL: /[ubicacion]/[categoria]/[slug]
         targetId = getIdFromSlug(slug[2]);

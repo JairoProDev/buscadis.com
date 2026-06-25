@@ -33,11 +33,12 @@ export async function POST(
       return NextResponse.json({ error: 'Token inválido' }, { status: 401 });
     }
 
+    const { businessId } = await params;
     const body = bodySchema.parse(await req.json());
     const { data: business, error: fetchErr } = await supabaseAdmin
       .from('business_profiles')
       .select('*')
-      .eq('id', params.businessId)
+      .eq('id', businessId)
       .single();
 
     if (fetchErr || !business) {
@@ -49,7 +50,7 @@ export async function POST(
         .from('business_members')
         .select('role')
         .eq('user_id', user.id)
-        .eq('business_profile_id', params.businessId)
+        .eq('business_profile_id', businessId)
         .eq('status', 'active')
         .maybeSingle();
       if (!member || !['owner', 'admin', 'editor'].includes(member.role)) {
@@ -67,7 +68,7 @@ export async function POST(
     const { data: updated, error: updateErr } = await supabaseAdmin
       .from('business_profiles')
       .update({ ...sanitized, updated_at: new Date().toISOString() })
-      .eq('id', params.businessId)
+      .eq('id', businessId)
       .select()
       .single();
 

@@ -13,7 +13,8 @@ export async function GET(
   }
   
   try {
-    const adiso = await getAdisoByIdFromSupabase(params.id);
+    const { id } = await params;
+    const adiso = await getAdisoByIdFromSupabase(id);
     
     if (!adiso) {
       return NextResponse.json(

@@ -88,9 +88,10 @@ export async function POST(
   { params }: { params: Promise<{ businessId: string }> }
 ) {
   try {
+    const { businessId } = await params;
     const body = bodySchema.parse(await req.json());
     const profile = body.profile as Partial<BusinessProfile>;
-    if (profile.id && profile.id !== params.businessId) {
+    if (profile.id && profile.id !== businessId) {
       return NextResponse.json({ error: 'ID no coincide' }, { status: 400 });
     }
     const result = runTools(body.message, profile);

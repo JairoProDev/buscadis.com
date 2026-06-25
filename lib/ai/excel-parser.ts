@@ -36,7 +36,7 @@ export class ExcelParser {
 
         try {
             const workbook = new ExcelJS.Workbook();
-            await workbook.xlsx.load(buffer);
+            await workbook.xlsx.load(buffer as unknown as Parameters<ExcelJS.Workbook['xlsx']['load']>[0]);
             const worksheet = workbook.worksheets[0];
             if (!worksheet) {
                 throw new Error('No data found in Excel file');

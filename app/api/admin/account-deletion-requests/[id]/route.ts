@@ -36,10 +36,12 @@ export async function PATCH(
       patch.processed_at = new Date().toISOString();
     }
 
+    const { id } = await params;
+
     const { error } = await supabaseAdmin
       .from('account_deletion_requests')
       .update(patch)
-      .eq('id', params.id);
+      .eq('id', id);
 
     if (error) {
       console.error('[admin/account-deletion-requests/:id] update error:', error.message);
