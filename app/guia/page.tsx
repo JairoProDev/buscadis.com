@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import Link from 'next/link';
 import Header from '@/components/Header';
 import { FaBook, FaBullhorn, FaSearch, FaCommentDots, FaUserShield } from 'react-icons/fa';
 import NavbarMobile from '@/components/NavbarMobile';
@@ -57,9 +58,9 @@ export default function GuidePage() {
                 <div className="mt-16 p-8 bg-zinc-900 dark:bg-black rounded-3xl text-white">
                     <h2 className="text-2xl font-bold mb-4">¿Listo para empezar?</h2>
                     <p className="text-gray-400 mb-8">Únete a miles de personas que ya están conectando en Perú.</p>
-                    <a href="/publicar" className="inline-block bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-xl font-bold transition-all transform hover:scale-105">
+                    <Link href="/publicar" className="inline-block bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-xl font-bold transition-all transform hover:scale-105">
                         Publicar mi primer adiso
-                    </a>
+                    </Link>
                 </div>
             </main>
 
