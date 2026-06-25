@@ -36,7 +36,7 @@ const ROLE_LABELS: Record<string, string> = {
  * POST /api/business/[businessId]/invite
  * Body: { email, role }
  */
-export async function POST(request: NextRequest, context: { params: { businessId: string } }) {
+export async function POST(request: NextRequest, context: { params: Promise<{ businessId: string }> }) {
     try {
         const user = await getUserFromRouteRequest(request);
         if (!user) {
@@ -55,7 +55,7 @@ export async function POST(request: NextRequest, context: { params: { businessId
             );
         }
 
-        const { businessId } = context.params;
+        const { businessId } = await context.params;
         const supabase = await createServerClient();
         const ctx = await resolveBusinessForUser(supabase, user.id, businessId);
         if (!ctx) {
@@ -144,14 +144,14 @@ export async function POST(request: NextRequest, context: { params: { businessId
 /**
  * DELETE /api/business/[businessId]/invite?invitationId=
  */
-export async function DELETE(request: NextRequest, context: { params: { businessId: string } }) {
+export async function DELETE(request: NextRequest, context: { params: Promise<{ businessId: string }> }) {
     try {
         const user = await getUserFromRouteRequest(request);
         if (!user) {
             return NextResponse.json({ success: false, error: 'No autenticado' }, { status: 401 });
         }
 
-        const { businessId } = context.params;
+        const { businessId } = await context.params;
         const invitationId = new URL(request.url).searchParams.get('invitationId');
         if (!invitationId) {
             return NextResponse.json({ success: false, error: 'invitationId requerido' }, { status: 400 });

@@ -23,7 +23,7 @@ async function getEmailForUserId(userId: string): Promise<string | null> {
  */
 export async function GET(
     _request: NextRequest,
-    context: { params: { businessId: string } }
+    context: { params: Promise<{ businessId: string }> }
 ) {
     try {
         const user = await getUserFromRouteRequest(_request);
@@ -31,7 +31,7 @@ export async function GET(
             return NextResponse.json({ success: false, error: 'No autenticado' }, { status: 401 });
         }
 
-        const { businessId } = context.params;
+        const { businessId } = await context.params;
         const supabase = await createServerClient();
         const ctx = await resolveBusinessForUser(supabase, user.id, businessId);
         if (!ctx) {

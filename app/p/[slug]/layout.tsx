@@ -8,7 +8,7 @@ import {
 
 interface LayoutProps {
   children: ReactNode;
-  params: Promise<{ slug: string }> | { slug: string };
+  params: Promise<{ slug: string }>;
 }
 
 async function fetchProfileForShare(slug: string) {
@@ -33,7 +33,7 @@ async function fetchProfileForShare(slug: string) {
 }
 
 export async function generateMetadata({ params }: LayoutProps): Promise<Metadata> {
-  const resolved = await Promise.resolve(params);
+  const resolved = await params;
   const slug = decodeURIComponent(resolved.slug);
   const profile = await fetchProfileForShare(slug);
   if (!profile) return buildBusinessNotFoundMetadata();

@@ -7,7 +7,7 @@ import { rateLimit, getClientIP } from '@/lib/rate-limit';
 // GET: Obtener un adiso por ID
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const ip = getClientIP(request);
   const limitResult = rateLimit(`get-adiso-${ip}`, {
@@ -23,7 +23,7 @@ export async function GET(
   }
 
   try {
-    const { id } = params;
+    const { id } = await params;
     const adiso = await getAdisoByIdFromSupabase(id);
 
     if (!adiso) {
@@ -46,7 +46,7 @@ export async function GET(
 // PUT: Actualizar un adiso
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const ip = getClientIP(request);
   const limitResult = rateLimit(`put-adiso-${ip}`, {
@@ -62,7 +62,7 @@ export async function PUT(
   }
 
   try {
-    const { id } = params;
+    const { id } = await params;
     const body = await request.json();
 
     // Validar que el ID coincida
@@ -166,7 +166,7 @@ export async function PUT(
 // DELETE: Eliminar un adiso
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const ip = getClientIP(request);
   const limitResult = rateLimit(`delete-adiso-${ip}`, {
@@ -182,7 +182,7 @@ export async function DELETE(
   }
 
   try {
-    const { id } = params;
+    const { id } = await params;
 
     // Verificar que el adiso existe
     const adisoExistente = await getAdisoByIdFromSupabase(id);

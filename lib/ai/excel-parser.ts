@@ -3,7 +3,7 @@
  * Utility to parse Excel/CSV files into structured data
  */
 
-import * as XLSX from 'xlsx';
+import ExcelJS from 'exceljs';
 
 export interface ParsedExcelData {
     headers: string[];
@@ -15,50 +15,60 @@ export interface ParsedExcelData {
     };
 }
 
+function cellToString(value: ExcelJS.CellValue): string {
+    if (value === null || value === undefined) return '';
+    if (typeof value === 'object' && value !== null && 'text' in value) {
+        return String((value as { text?: string }).text ?? '').trim();
+    }
+    if (value instanceof Date) return value.toISOString();
+    return String(value).trim();
+}
+
 export class ExcelParser {
     /**
      * Parse Excel or CSV file buffer
      */
     async parse(buffer: Buffer): Promise<ParsedExcelData> {
+        const fileType = this.detectFileType(buffer);
+        if (fileType === 'csv') {
+            return this.parseCSV(buffer);
+        }
+
         try {
-            // Read workbook with forced UTF-8 for CSVs without BOM
-            const workbook = XLSX.read(buffer, { type: 'buffer', codepage: 65001 });
+            const workbook = new ExcelJS.Workbook();
+            await workbook.xlsx.load(buffer);
+            const worksheet = workbook.worksheets[0];
+            if (!worksheet) {
+                throw new Error('No data found in Excel file');
+            }
 
-            // Get first sheet
-            const sheetName = workbook.SheetNames[0];
-            const worksheet = workbook.Sheets[sheetName];
-
-            // Convert to JSON (array of arrays)
-            const rawData: any[][] = XLSX.utils.sheet_to_json(worksheet, {
-                header: 1,
-                defval: '', // Default value for empty cells
-                blankrows: false // Skip blank rows
+            const rawData: string[][] = [];
+            worksheet.eachRow((row) => {
+                const values = row.values as ExcelJS.CellValue[];
+                const cells = (values.slice(1) ?? []).map(cellToString);
+                if (cells.some((cell) => cell !== '')) {
+                    rawData.push(cells);
+                }
             });
 
             if (rawData.length === 0) {
                 throw new Error('No data found in Excel file');
             }
 
-            // Extract headers (first row)
-            const headers = rawData[0].map((h: any) => String(h).trim());
-
-            // Extract data rows (rest)
-            const rows = rawData.slice(1).filter(row => {
-                // Filter out completely empty rows
-                return row.some(cell => cell !== '' && cell !== null && cell !== undefined);
-            });
+            const headers = rawData[0];
+            const rows = rawData.slice(1);
 
             return {
                 headers,
                 rows,
                 metadata: {
                     totalRows: rows.length,
-                    totalColumns: headers.length
-                }
+                    totalColumns: headers.length,
+                },
             };
-
-        } catch (error: any) {
-            throw new Error(`Failed to parse Excel file: ${error.message}`);
+        } catch (error: unknown) {
+            const message = error instanceof Error ? error.message : String(error);
+            throw new Error(`Failed to parse Excel file: ${message}`);
         }
     }
 
@@ -115,15 +125,13 @@ export class ExcelParser {
      * Detect file type from buffer
      */
     detectFileType(buffer: Buffer): 'xlsx' | 'xls' | 'csv' | 'unknown' {
-        // Check magic numbers
         if (buffer[0] === 0x50 && buffer[1] === 0x4B) {
-            return 'xlsx'; // ZIP format (XLSX)
+            return 'xlsx';
         }
         if (buffer[0] === 0xD0 && buffer[1] === 0xCF) {
-            return 'xls'; // OLE2 format (XLS)
+            return 'xls';
         }
 
-        // Try to detect CSV by checking if it's valid UTF-8 text
         try {
             buffer.toString('utf-8');
             return 'csv';

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Story } from '@/types';
 import StoryArchiveGrid from '@/components/stories/StoryArchiveGrid';
 import ProfileMyAdisosGrid from './ProfileMyAdisosGrid';
@@ -18,7 +18,7 @@ export default function ProfilePublisherTab({ token, highlightId }: ProfilePubli
   const [stories, setStories] = useState<Story[]>([]);
   const [storiesLoading, setStoriesLoading] = useState(false);
 
-  const fetchStories = async () => {
+  const fetchStories = useCallback(async () => {
     if (!token) return;
     setStoriesLoading(true);
     try {
@@ -32,11 +32,11 @@ export default function ProfilePublisherTab({ token, highlightId }: ProfilePubli
     } finally {
       setStoriesLoading(false);
     }
-  };
+  }, [token]);
 
   useEffect(() => {
     if (subTab === 'historias') fetchStories();
-  }, [subTab, token]);
+  }, [subTab, fetchStories]);
 
   const subs: { id: PublisherSubTab; label: string }[] = [
     { id: 'avisos', label: 'Mis avisos' },

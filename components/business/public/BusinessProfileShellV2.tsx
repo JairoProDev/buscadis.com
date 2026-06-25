@@ -90,7 +90,7 @@ export default function BusinessProfileShellV2({
     return () => {
       cancelled = true;
     };
-  }, [profile?.slug, reviewAggregateProp]);
+  }, [profile?.slug, profile?.id, reviewAggregateProp]);
 
   useEffect(() => {
     if (!isStorefront || typeof window === 'undefined') return;

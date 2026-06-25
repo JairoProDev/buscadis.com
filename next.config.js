@@ -16,6 +16,7 @@ const nextConfig = {
       },
     ],
   },
+  serverExternalPackages: ['@sentry/node', '@sentry/nextjs'],
   async headers() {
     return [
       {
@@ -103,31 +104,36 @@ const nextConfig = {
   },
   transpilePackages: ['@buscadis/profile-engine', '@imgly/background-removal', 'onnxruntime-web'],
   webpack: (config, { isServer }) => {
-    // Si estamos en el cliente, ignoramos onnxruntime-node
     if (!isServer) {
-        config.resolve.alias = {
-            ...config.resolve.alias,
-            'onnxruntime-node': false,
-        };
+      config.resolve.alias = {
+        ...config.resolve.alias,
+        'onnxruntime-node': false,
+      };
     } else {
-        // En el servidor, ignoramos onnxruntime-web y sus sub-rutas (como webgpu)
-        config.resolve.alias = {
-            ...config.resolve.alias,
-            'onnxruntime-web': false,
-            'onnxruntime-web/webgpu': false,
-        };
+      config.resolve.alias = {
+        ...config.resolve.alias,
+        'onnxruntime-web': false,
+        'onnxruntime-web/webgpu': false,
+      };
     }
 
-    // Manejo de archivos .mjs para evitar errores de import.meta en algunos entornos
     config.module.rules.push({
       test: /\.mjs$/,
       include: /node_modules/,
       type: 'javascript/auto',
     });
 
+    config.ignoreWarnings = [
+      ...(config.ignoreWarnings || []),
+      { module: /onnxruntime-web/ },
+      { module: /@apm-js-collab\/tracing-hooks/ },
+      { module: /@sentry\/server-utils/ },
+      /Critical dependency: require function is used in a way in which dependencies cannot be statically extracted/,
+    ];
+
     return config;
   },
-}
+};
 
 const withPwa = require('@ducanh2912/next-pwa').default({
   dest: 'public',
@@ -137,6 +143,7 @@ const withPwa = require('@ducanh2912/next-pwa').default({
   disable: process.env.NODE_ENV === 'development',
   workboxOptions: {
     disableDevLogs: true,
+    maximumFileSizeToCacheInBytes: 25 * 1024 * 1024,
     runtimeCaching: [
       {
         urlPattern: ({ url }) =>
@@ -157,15 +164,37 @@ const withPwa = require('@ducanh2912/next-pwa').default({
   },
 });
 
-const { withSentryConfig } = require('@sentry/nextjs');
+const baseConfig = withPwa(nextConfig);
+const sentryDsn = process.env.NEXT_PUBLIC_SENTRY_DSN;
+const sentryUpload = Boolean(process.env.SENTRY_AUTH_TOKEN);
 
-const sentryWebpackPluginOptions = {
-  org: process.env.SENTRY_ORG,
-  project: process.env.SENTRY_PROJECT,
-  silent: !process.env.CI,
-  widenClientFileUpload: true,
-  disableLogger: true,
-  authToken: process.env.SENTRY_AUTH_TOKEN,
-};
-
-module.exports = withSentryConfig(withPwa(nextConfig), sentryWebpackPluginOptions);
+if (!sentryDsn) {
+  module.exports = baseConfig;
+} else {
+  const { withSentryConfig } = require('@sentry/nextjs');
+  module.exports = withSentryConfig(baseConfig, {
+    org: process.env.SENTRY_ORG,
+    project: process.env.SENTRY_PROJECT,
+    authToken: process.env.SENTRY_AUTH_TOKEN,
+    silent: true,
+    telemetry: false,
+    webpack: {
+      treeshake: {
+        removeDebugLogging: true,
+      },
+      ...(sentryUpload
+        ? {}
+        : {
+            automaticVercelMonitors: false,
+          }),
+    },
+    ...(sentryUpload
+      ? { widenClientFileUpload: true }
+      : {
+          sourcemaps: { disable: true },
+          release: { create: false, finalize: false },
+          disableServerWebpackPlugin: true,
+          disableClientWebpackPlugin: true,
+        }),
+  });
+}

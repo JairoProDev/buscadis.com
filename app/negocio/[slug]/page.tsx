@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState, useCallback, useRef } from 'react';
+import React, { use, useEffect, useState, useCallback, useRef } from 'react';
 import { supabase } from '@/lib/supabase';
 import { BusinessProfile } from '@/types/business';
 import BusinessPublicView from '@/components/business/BusinessPublicView';
@@ -27,10 +27,12 @@ export default function PublicBusinessPage({
     params,
     searchParams,
 }: {
-    params: { slug: string };
-    searchParams: { [key: string]: string | string[] | undefined };
+    params: Promise<{ slug: string }>;
+    searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
-    const slug = normalizeBusinessSlug(params.slug);
+    const { slug: slugParam } = use(params);
+    const resolvedSearchParams = use(searchParams);
+    const slug = normalizeBusinessSlug(slugParam);
     const { user } = useAuth();
     const { profile, isPlatformAdmin } = useUser();
     const { success, error: showError } = useToast();
@@ -53,10 +55,10 @@ export default function PublicBusinessPage({
 
     // Auto-open editor if requested
     useEffect(() => {
-        if (searchParams?.edit === 'true') {
+        if (resolvedSearchParams?.edit === 'true') {
             setIsEditing(true);
         }
-    }, [searchParams]);
+    }, [resolvedSearchParams]);
 
     const [mounted, setMounted] = useState(false);
     const [isMember, setIsMember] = useState(false);
@@ -118,7 +120,7 @@ export default function PublicBusinessPage({
             setLocalProfile(business);
             lastSavedStr.current = JSON.stringify(business);
         }
-    }, [business]);
+    }, [business, localProfile]);
 
     // Reload catalog when ownership is confirmed to ensure drafts are visible
     useEffect(() => {
@@ -156,7 +158,7 @@ export default function PublicBusinessPage({
         const currentStr = JSON.stringify(debouncedProfile);
         if (currentStr === lastSavedStr.current) return;
         handleSave(debouncedProfile, false);
-    }, [debouncedProfile]);
+    }, [debouncedProfile, handleSave]);
 
     // ─── PUBLISH TOGGLE ───────────────────────────────────────────────
     const handlePublish = useCallback(async () => {
@@ -214,11 +216,11 @@ export default function PublicBusinessPage({
     useEffect(() => {
         if (business?.id && isOnline) {
             trackEvent('profile_view', business.id);
-            if (searchParams?.from_qr === '1') {
+            if (resolvedSearchParams?.from_qr === '1') {
                 trackEvent('qr_scan', business.id);
             }
         }
-    }, [business?.id, isOnline, trackEvent, searchParams?.from_qr]);
+    }, [business?.id, isOnline, trackEvent, resolvedSearchParams?.from_qr]);
 
     const handleProductSave = async (updatedProduct: any) => {
         if (business?.id) {

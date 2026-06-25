@@ -14,14 +14,14 @@ const bodySchema = z.object({
  * POST /api/business/[businessId]/transfer-owner
  * Body: { newOwnerUserId } — only current owner; new user must already be an active member.
  */
-export async function POST(request: NextRequest, context: { params: { businessId: string } }) {
+export async function POST(request: NextRequest, context: { params: Promise<{ businessId: string }> }) {
     try {
         const user = await getUserFromRouteRequest(request);
         if (!user) {
             return NextResponse.json({ success: false, error: 'No autenticado' }, { status: 401 });
         }
 
-        const { businessId } = context.params;
+        const { businessId } = await context.params;
         const supabase = await createServerClient();
         const ctx = await resolveBusinessForUser(supabase, user.id, businessId);
         if (!ctx) {

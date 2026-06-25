@@ -93,7 +93,7 @@ export default function ProfileWireframeShell({
   const styleSchema = useMemo(() => resolveBusinessProfileStyle(profile), [profile]);
   const presentation = useMemo(
     () => resolveProfilePresentation(entity, layout, styleSchema, profile.banner_config || undefined),
-    [entity, layout, styleSchema, profile.banner_config, profile.banner_url]
+    [entity, layout, styleSchema, profile.banner_config]
   );
 
   const visibleBlocks = getVisibleBlocks(ctx.blocks);

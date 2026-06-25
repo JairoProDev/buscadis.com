@@ -17,7 +17,7 @@ const patchSchema = z.object({
  */
 export async function PATCH(
     request: NextRequest,
-    context: { params: { businessId: string; memberUserId: string } }
+    context: { params: Promise<{ businessId: string; memberUserId: string }> }
 ) {
     try {
         const user = await getUserFromRouteRequest(request);
@@ -25,7 +25,7 @@ export async function PATCH(
             return NextResponse.json({ success: false, error: 'No autenticado' }, { status: 401 });
         }
 
-        const { businessId, memberUserId } = context.params;
+        const { businessId, memberUserId } = await context.params;
         const supabase = await createServerClient();
         const ctx = await resolveBusinessForUser(supabase, user.id, businessId);
         if (!ctx) {
@@ -79,7 +79,7 @@ export async function PATCH(
  */
 export async function DELETE(
     _request: NextRequest,
-    context: { params: { businessId: string; memberUserId: string } }
+    context: { params: Promise<{ businessId: string; memberUserId: string }> }
 ) {
     try {
         const user = await getUserFromRouteRequest(_request);
@@ -87,7 +87,7 @@ export async function DELETE(
             return NextResponse.json({ success: false, error: 'No autenticado' }, { status: 401 });
         }
 
-        const { businessId, memberUserId } = context.params;
+        const { businessId, memberUserId } = await context.params;
         const supabase = await createServerClient();
         const ctx = await resolveBusinessForUser(supabase, user.id, businessId);
         if (!ctx) {

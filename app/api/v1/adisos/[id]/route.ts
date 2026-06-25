@@ -4,7 +4,7 @@ import { requireApiKey } from '@/lib/api-auth';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   // Verificar API Key
   const authError = await requireApiKey(request);

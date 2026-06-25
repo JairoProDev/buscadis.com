@@ -7,8 +7,8 @@
 
 'use server';
 
-import { createStreamableUI, createStreamableValue } from 'ai/rsc';
-import { CoreMessage, streamText, generateText } from 'ai';
+import { createStreamableUI, createStreamableValue } from '@ai-sdk/rsc';
+import { ModelMessage, streamText, generateText, tool } from 'ai';
 import { openai, AI_MODELS } from '@/lib/ai/openai-client';
 import { hybridSearch } from './ai-search';
 import { snapAndSell } from './ai-vision';
@@ -94,7 +94,7 @@ Return JSON: { "intent": "search", "confidence": 0.95 }`,
  * Main Chat Function - Handles conversational AI with Generative UI
  */
 export async function chat(
-  messages: CoreMessage[]
+  messages: ModelMessage[]
 ): Promise<{
   id: string;
   role: 'assistant';
@@ -150,9 +150,9 @@ export async function chat(
         /**
          * Tool: Search Marketplace
          */
-        search_marketplace: {
+        search_marketplace: tool({
           description: 'Search for listings in the marketplace using semantic + keyword search',
-          parameters: z.object({
+          inputSchema: z.object({
             query: z.string().describe('The search query from the user'),
             category: z.enum([
               'empleos',
@@ -214,14 +214,14 @@ export async function chat(
               };
             }
           },
-        },
+        }),
 
         /**
          * Tool: Analyze Image (Snap & Sell)
          */
-        analyze_image: {
+        analyze_image: tool({
           description: 'Analyze a product image to auto-generate listing details',
-          parameters: z.object({
+          inputSchema: z.object({
             imageUrl: z.string().describe('Public URL of the image to analyze'),
           }),
           execute: async ({ imageUrl }) => {
@@ -270,13 +270,13 @@ export async function chat(
               };
             }
           },
-        },
+        }),
         /**
          * Tool: Start Publication (Text-based Wizard)
          */
-        start_publication: {
+        start_publication: tool({
           description: 'Start the publication flow when the user wants to sell something but has not uploaded an image',
-          parameters: z.object({
+          inputSchema: z.object({
             titulo: z.string().describe('Title of the item to sell, if mentioned'),
             categoria: z.enum([
               'empleos',
@@ -322,9 +322,8 @@ export async function chat(
               message: `He creado un borrador para tu aviso de "${titulo}". Rellena los detalles y publícalo.`,
             };
           },
-        },
+        }),
       },
-      maxSteps: 5, // Allow multi-step reasoning
     });
 
     // Stream text responses
@@ -333,7 +332,7 @@ export async function chat(
 
     for await (const delta of result.fullStream) {
       if (delta.type === 'text-delta') {
-        textContent += delta.textDelta;
+        textContent += delta.text;
         uiStream.update(
           <div style={{
             padding: '12px 16px',

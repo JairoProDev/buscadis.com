@@ -429,7 +429,7 @@ function HomeContent() {
     };
 
     cargarTodo();
-  }, [adisoId]);
+  }, [adisoId, categoriaUrl]);
 
   // Manejar cambios en adisoId cuando ya está cargado (solo actualizar modal, no recargar página)
   useEffect(() => {

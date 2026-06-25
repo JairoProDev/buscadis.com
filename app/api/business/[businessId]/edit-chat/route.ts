@@ -85,7 +85,7 @@ function runTools(message: string, profile: Partial<BusinessProfile>): ToolResul
 
 export async function POST(
   req: NextRequest,
-  { params }: { params: { businessId: string } }
+  { params }: { params: Promise<{ businessId: string }> }
 ) {
   try {
     const body = bodySchema.parse(await req.json());

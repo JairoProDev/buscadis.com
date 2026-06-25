@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/hooks/useAuth';
 import type { BusinessProfile, BusinessReviewAggregate } from '@/types/business';
@@ -27,17 +27,17 @@ export default function BusinessReviewsTab({ slug }: BusinessReviewsTabProps) {
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
 
-  const load = async () => {
+  const load = useCallback(async () => {
     const res = await fetch(`/api/business/${encodeURIComponent(slug)}/reviews`);
     const data = await res.json();
     setReviews(data.reviews || []);
     setAggregate(data.aggregate || null);
     setLoading(false);
-  };
+  }, [slug]);
 
   useEffect(() => {
     load();
-  }, [slug]);
+  }, [load]);
 
   const submit = async () => {
     if (!session?.access_token) {
