@@ -46,6 +46,7 @@ export default function QrStudio({
   const [hasLogoRemote, setHasLogoRemote] = useState(hasLogo);
   const [saving, setSaving] = useState(false);
   const [saveMsg, setSaveMsg] = useState<string | null>(null);
+  const [saveOk, setSaveOk] = useState(false);
   const [previewKey, setPreviewKey] = useState(0);
   const [qaStatus, setQaStatus] = useState<string | null>(null);
   const [dirty, setDirty] = useState(false);
@@ -80,6 +81,7 @@ export default function QrStudio({
   const saveStyle = useCallback(async () => {
     setSaving(true);
     setSaveMsg(null);
+    setSaveOk(false);
     const payload = normalizeStyleConfig(styleConfig, themeColor);
     try {
       const res = await fetch(`/api/business/${encodeURIComponent(slug)}/qr-style`, {
@@ -93,6 +95,7 @@ export default function QrStudio({
       });
       const data = await res.json();
       if (!res.ok) {
+        setSaveOk(false);
         setSaveMsg(data.error || 'Error al guardar');
         return;
       }
@@ -100,9 +103,14 @@ export default function QrStudio({
       setPreviewKey((k) => k + 1);
       setDirty(false);
       if (data.qr?.qa_status) setQaStatus(data.qr.qa_status);
+      setSaveOk(true);
       setSaveMsg('Guardado');
-      setTimeout(() => setSaveMsg(null), 2500);
+      setTimeout(() => {
+        setSaveMsg(null);
+        setSaveOk(false);
+      }, 2500);
     } catch {
+      setSaveOk(false);
       setSaveMsg('Error de conexión');
     } finally {
       setSaving(false);
@@ -163,7 +171,16 @@ export default function QrStudio({
           {shortUrl && (
             <p className="text-[11px] font-mono text-blue-600 truncate max-w-full px-2">{shortUrl}</p>
           )}
-          {saveMsg && <p className="text-xs text-green-600 font-medium">{saveMsg}</p>}
+          {saveMsg && (
+            <p
+              className={cn(
+                'text-xs font-medium',
+                saveOk ? 'text-green-600' : 'text-red-600'
+              )}
+            >
+              {saveMsg}
+            </p>
+          )}
         </div>
 
         <div className="space-y-4">

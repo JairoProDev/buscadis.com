@@ -62,3 +62,29 @@ export async function getBusinessMemberRole(
     .maybeSingle();
   return (data?.role as BusinessMemberRole) || null;
 }
+
+/** Owner, editor+ team member, or platform admin — same rules as publish/upload APIs. */
+export async function canManageBusinessProfile(params: {
+  userId: string;
+  email?: string | null;
+  businessProfileId: string;
+  ownerUserId?: string | null;
+}): Promise<boolean> {
+  const { userId, email, businessProfileId, ownerUserId } = params;
+
+  if (ownerUserId && ownerUserId === userId) return true;
+
+  const role = await getBusinessMemberRole(userId, businessProfileId);
+  if (role && ['owner', 'admin', 'editor'].includes(role)) return true;
+
+  const { isPlatformAdminUser } = await import('@/lib/platform-admin');
+  if (isPlatformAdminUser(email)) return true;
+
+  const { supabaseAdmin } = await import('@/lib/supabase-admin');
+  const { data: adminProfile } = await supabaseAdmin
+    .from('profiles')
+    .select('rol, is_platform_admin')
+    .eq('id', userId)
+    .maybeSingle();
+  return isPlatformAdminUser(email, adminProfile);
+}

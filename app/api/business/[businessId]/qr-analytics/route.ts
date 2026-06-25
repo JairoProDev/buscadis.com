@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getBusinessProfileBySlugAdmin } from '@/lib/qr/get-business-admin';
 import { getUserFromRouteRequest } from '@/lib/supabase-route-auth';
-import { getBusinessMemberRole } from '@/lib/business-access';
+import { canManageBusinessProfile, getBusinessMemberRole } from '@/lib/business-access';
 import { canUseProQr } from '@/lib/business/subscription';
 import { ensureQrCodeForBusiness, getQrScanStats } from '@/lib/qr/service';
 import { supabaseAdmin } from '@/lib/supabase-admin';
@@ -18,11 +18,14 @@ export async function GET(
   const profile = await getBusinessProfileBySlugAdmin(slug);
   if (!profile) return NextResponse.json({ error: 'No encontrado' }, { status: 404 });
 
-  const role = await getBusinessMemberRole(user.id, profile.id);
-  const isOwner = profile.user_id === user.id;
-  const canView =
-    isOwner ||
-    (role && ['owner', 'admin', 'editor', 'viewer'].includes(role));
+  const canManage = await canManageBusinessProfile({
+    userId: user.id,
+    email: user.email,
+    businessProfileId: profile.id,
+    ownerUserId: profile.user_id,
+  });
+  const role = canManage ? null : await getBusinessMemberRole(user.id, profile.id);
+  const canView = canManage || role === 'viewer';
   if (!canView) {
     return NextResponse.json({ error: 'Sin permiso' }, { status: 403 });
   }
