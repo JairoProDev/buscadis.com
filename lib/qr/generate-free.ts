@@ -36,7 +36,7 @@ export async function generateFreeQrPng(options: GenerateFreeQrOptions): Promise
         width,
         skipLogo: true,
       });
-      return compositeLogoOnQr(styled, options.logoUrl, width, config.imageSize ?? 0.5);
+      return compositeLogoOnQr(styled, options.logoUrl, width);
     } catch (err) {
       console.warn('[qr] styled branded failed, plain composite:', err);
       const plain = await plainQrPng(options.data, width, dark, light);
@@ -69,7 +69,6 @@ export async function generateFreeQrSvg(options: GenerateFreeQrOptions): Promise
           cornerSquareType: config.cornerSquareType || 'extra-rounded',
           cornerDotType: config.cornerDotType || 'dot',
           hideBackgroundDots: true,
-          imageSize: config.imageSize ?? 0.28,
         },
         width: options.width ?? 400,
         logoUrl: options.logoUrl,

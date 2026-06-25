@@ -16,7 +16,10 @@ const nextConfig = {
       },
     ],
   },
-  serverExternalPackages: ['@sentry/node', '@sentry/nextjs'],
+  serverExternalPackages: ['@sentry/node', '@sentry/nextjs', 'canvas', 'sharp', 'jsdom'],
+  outputFileTracingIncludes: {
+    '/api/**/*': ['./node_modules/canvas/build/Release/*'],
+  },
   async headers() {
     return [
       {

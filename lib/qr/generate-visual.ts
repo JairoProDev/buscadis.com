@@ -1,9 +1,9 @@
 import type { QrStyleConfig } from './types';
 import { createQrMatrix, getQuietZoneModules } from './matrix-masks';
-import { fetchLogoLuminanceMap } from './logo-image';
+import { fetchLogoLuminanceMap, fetchLogoPngBuffer } from './logo-image';
 import { drawDataHalftone, drawLogoUnderlay } from './halftone';
 import { drawFinderPatterns, drawTimingPatterns } from './finder-brand';
-import { fetchLogoPngBuffer } from './logo-image';
+import { QR_LOGO_UNDERLAY_RATIO } from './logo-constants';
 
 export interface GenerateVisualQrOptions {
   data: string;
@@ -46,10 +46,10 @@ export async function generateVisualQrPng(options: GenerateVisualQrOptions): Pro
   ctx.fillRect(0, 0, width, width);
 
   if (options.logoUrl) {
-    const logoBuf = await fetchLogoPngBuffer(options.logoUrl, Math.round(width * 0.5));
+    const logoBuf = await fetchLogoPngBuffer(options.logoUrl, Math.round(width * QR_LOGO_UNDERLAY_RATIO * 1.1));
     if (logoBuf) {
       const logoImg = await loadImage(logoBuf);
-      drawLogoUnderlay(ctx, logoImg, width, intensity, options.styleConfig.imageSize ?? 0.5);
+      drawLogoUnderlay(ctx, logoImg, width, intensity, QR_LOGO_UNDERLAY_RATIO);
     }
   }
 

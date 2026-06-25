@@ -102,7 +102,6 @@ export default function QrStudio({
     dotsColor: themeColor,
     backgroundColor: '#ffffff',
     dotType: 'rounded',
-    imageSize: 0.5,
     halftoneIntensity: 0.8,
     dotScale: 0.35,
     buscadisFinderMark: true,
@@ -344,21 +343,6 @@ export default function QrStudio({
                 </select>
               </label>
 
-              {(renderMode === 'branded' || renderMode === 'visual') && logoOk && (
-                <label className="block text-xs font-bold text-slate-600">
-                  Tamaño del logo ({Math.round((styleConfig.imageSize ?? 0.5) * 100)}%)
-                  <input
-                    type="range"
-                    min={0}
-                    max={100}
-                    value={Math.round((styleConfig.imageSize ?? 0.5) * 100)}
-                    onChange={(e) =>
-                      patchStyle({ imageSize: Number(e.target.value) / 100 })
-                    }
-                    className="mt-1 w-full accent-blue-600"
-                  />
-                </label>
-              )}
 
               {(renderMode === 'classic' || renderMode === 'branded') && (
                 <div className="grid grid-cols-2 gap-3">

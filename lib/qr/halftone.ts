@@ -35,7 +35,7 @@ export function drawLogoUnderlay(
   intensity: number,
   logoRatio = 0.5
 ) {
-  const maxW = canvasWidth * Math.min(0.55, Math.max(0, logoRatio));
+  const maxW = canvasWidth * Math.min(0.55, Math.max(0.2, logoRatio));
   const scale = maxW / Math.max(logoImg.width, logoImg.height);
   const w = logoImg.width * scale;
   const h = logoImg.height * scale;

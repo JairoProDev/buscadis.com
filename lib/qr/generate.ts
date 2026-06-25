@@ -40,20 +40,28 @@ async function generateClassicPng(options: GenerateQrOptions): Promise<Buffer> {
 }
 
 async function generateBrandedPng(options: GenerateQrOptions): Promise<Buffer> {
-  const { compositeLogoOnQr } = await import('./composite-logo');
+  const { compositeLogoOnQr, plainQrPng } = await import('./composite-logo');
   const tier = options.tier || 'free';
   const width = options.width ?? 512;
+  const config = options.styleConfig;
+  const dark = config.dotsColor || options.themeColor || '#1e293b';
+  const light = config.backgroundColor || '#ffffff';
 
   if (options.logoUrl) {
-    const { generateProQrPng } = await import('./generate-pro');
-    const styled = await generateProQrPng({
-      data: options.data,
-      styleConfig: options.styleConfig,
-      width,
-      skipLogo: true,
-    });
-    const logoRatio = options.styleConfig.imageSize ?? 0.5;
-    return compositeLogoOnQr(styled, options.logoUrl, width, logoRatio);
+    let styled: Buffer | null = null;
+    try {
+      const { generateProQrPng } = await import('./generate-pro');
+      styled = await generateProQrPng({
+        data: options.data,
+        styleConfig: options.styleConfig,
+        width,
+        skipLogo: true,
+      });
+    } catch (err) {
+      console.warn('[qr] styled QR failed (canvas?), using plain QR + logo:', err);
+      styled = await plainQrPng(options.data, width, dark, light);
+    }
+    return compositeLogoOnQr(styled, options.logoUrl, width);
   }
 
   if (tier === 'pro') {

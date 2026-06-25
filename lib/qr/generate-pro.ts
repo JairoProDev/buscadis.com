@@ -1,5 +1,6 @@
 import type { QrStyleConfig } from './types';
 import { fetchLogoDataUrl } from './logo-image';
+import { QR_LOGO_STYLING_RATIO } from './logo-constants';
 
 export interface GenerateProQrOptions {
   data: string;
@@ -68,7 +69,7 @@ async function buildStylingOptions(
     base.image = image;
     base.imageOptions = {
       hideBackgroundDots: styleConfig.hideBackgroundDots ?? true,
-      imageSize: styleConfig.imageSize ?? 0.5,
+      imageSize: QR_LOGO_STYLING_RATIO,
       margin: 4,
       crossOrigin: 'anonymous',
       saveAsBlob: true,

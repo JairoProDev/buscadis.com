@@ -1,6 +1,7 @@
 import QRCode from 'qrcode';
 import sharp from 'sharp';
-import { fetchLogoDataUrl } from './logo-image';
+import { fetchLogoPngBuffer } from './logo-image';
+import { QR_LOGO_COMPOSITE_RATIO } from './logo-constants';
 
 /**
  * Superpone el logo respetando su forma, transparencia y contorno real.
@@ -9,16 +10,16 @@ import { fetchLogoDataUrl } from './logo-image';
 export async function compositeLogoOnQr(
   qrPng: Buffer,
   logoUrl: string,
-  width: number,
-  logoRatio = 0.5
+  width: number
 ): Promise<Buffer> {
-  if (logoRatio <= 0) return qrPng;
+  const fetchSize = Math.round(width * QR_LOGO_COMPOSITE_RATIO * 1.2);
+  const logoBuf = await fetchLogoPngBuffer(logoUrl, fetchSize);
+  if (!logoBuf) {
+    console.warn('[qr] compositeLogoOnQr: logo unavailable', logoUrl.slice(0, 120));
+    return qrPng;
+  }
 
-  const dataUrl = await fetchLogoDataUrl(logoUrl, Math.round(width * 0.6));
-  if (!dataUrl) return qrPng;
-
-  const logoBuf = Buffer.from(dataUrl.split(',')[1]!, 'base64');
-  const maxLogo = Math.round(width * Math.min(0.55, Math.max(0, logoRatio)));
+  const maxLogo = Math.round(width * QR_LOGO_COMPOSITE_RATIO);
 
   const logo = await sharp(logoBuf)
     .resize(maxLogo, maxLogo, {
