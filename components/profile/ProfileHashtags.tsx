@@ -1,5 +1,6 @@
 'use client';
 
+import { profilePageContainerClass } from '@/lib/business/profile-layout';
 import { cn } from '@/lib/utils';
 
 interface ProfileHashtagsProps {
@@ -13,7 +14,7 @@ export default function ProfileHashtags({ tags, className }: ProfileHashtagsProp
   const labels = tags.map((tag) => (tag.startsWith('#') ? tag : `#${tag}`));
 
   return (
-    <div className={cn('max-w-6xl mx-auto px-4 print:hidden', className)}>
+    <div className={cn(profilePageContainerClass(), 'print:hidden', className)}>
       <div className="flex items-center gap-2 overflow-x-auto no-scrollbar whitespace-nowrap text-xs font-semibold text-[var(--brand-color)]">
         {labels.map((label, i) => (
           <span key={label}>

@@ -25,6 +25,7 @@ import ProfileStickyCta from '@/components/profile/ProfileStickyCta';
 import BusinessSocialStrip from '@/components/business/public/BusinessSocialStrip';
 import BusinessOwnerBanner from '@/components/business/public/BusinessOwnerBanner';
 import { profileIsOrphan } from '@/lib/business/social-display';
+import { profilePageContainerClass } from '@/lib/business/profile-layout';
 import {
   IconStore,
   IconMapMarkerAlt,
@@ -213,17 +214,6 @@ export default function ProfileWireframeShell({
   return (
     <div style={{ ...(presentation.cssVars as React.CSSProperties), ...pageBgStyle }}>
       <div className="relative">
-        {isSlotVisible(presentation.layout, 'profile_chrome') && (
-          <ProfileChrome
-            handle={entity.handle}
-            onShare={onShare}
-            onOpenQr={isEditor ? undefined : onOpenQr || ctx.onOpenQr}
-            editAccess={isEditor ? 'denied' : editAccess}
-            onEditRequest={onEditRequest}
-            menuItems={chromeMenuItems}
-          />
-        )}
-
         {isSlotVisible(presentation.layout, 'profile_hero') && (
           <ProfileHeroOverlap
             entity={entity}
@@ -232,10 +222,23 @@ export default function ProfileWireframeShell({
             bannerOnly
             showEditControls={Boolean(isEditor && canEdit)}
             onEditBanner={() => onEditPart?.('visual')}
+            headerSlot={
+              isSlotVisible(presentation.layout, 'profile_chrome') ? (
+                <ProfileChrome
+                  handle={entity.handle}
+                  variant="overlay"
+                  onShare={onShare}
+                  onOpenQr={isEditor ? undefined : onOpenQr || ctx.onOpenQr}
+                  editAccess={isEditor ? 'denied' : editAccess}
+                  onEditRequest={onEditRequest}
+                  menuItems={chromeMenuItems}
+                />
+              ) : undefined
+            }
           />
         )}
 
-        <div className="max-w-6xl mx-auto px-4 relative z-10">
+        <div className={cn(profilePageContainerClass(), 'relative z-10')}>
           <div className="flex items-end gap-4 sm:gap-5 -mt-[3rem] sm:-mt-14 pt-1">
             <ProfileAvatar entity={entity} className="relative z-20" />
             {isSlotVisible(presentation.layout, 'profile_metrics') && entity.metrics && (
@@ -257,7 +260,7 @@ export default function ProfileWireframeShell({
           <BusinessSocialStrip
             profile={profile}
             variant="wireframe"
-            className="max-w-6xl mx-auto px-4 md:flex-wrap max-md:flex-nowrap max-md:overflow-x-auto max-md:no-scrollbar max-md:snap-x max-md:gap-3"
+            className={cn(profilePageContainerClass(), 'md:flex-wrap max-md:flex-nowrap max-md:overflow-x-auto max-md:no-scrollbar max-md:snap-x max-md:gap-3')}
           />
         )}
 
@@ -301,7 +304,7 @@ export default function ProfileWireframeShell({
           className="border-t border-[var(--border-subtle)] bg-[var(--bg-primary)]/95 sticky z-40 shadow-sm backdrop-blur-md print:hidden"
           style={{ top: 'max(env(safe-area-inset-top, 0px), 0px)' }}
         >
-          <div className="max-w-6xl mx-auto px-4">
+          <div className={profilePageContainerClass()}>
             <div className="flex items-center gap-6 overflow-x-auto no-scrollbar">
               {tabs.map((tabId) => {
                 const meta = TAB_META[tabId] || { label: tabId, icon: null };
@@ -332,7 +335,7 @@ export default function ProfileWireframeShell({
         </div>
       )}
 
-      <div className="max-w-6xl mx-auto px-4 py-6 min-h-[40vh]">
+      <div className={cn(profilePageContainerClass(), 'py-6 min-h-[40vh]')}>
         {tabs.map((tabId) => (
           <div key={tabId} className={cn(activeTab !== tabId && 'hidden')}>
             {blocksByTab[tabId]?.map((b) => renderBlock(b))}

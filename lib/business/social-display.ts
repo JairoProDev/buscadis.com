@@ -82,9 +82,9 @@ export function getWireframeSocialLinks(profile: Partial<BusinessProfile>): Soci
   const publicadis = getPublicadisSiteUrl(profile);
 
   if (website) {
-    add({ network: 'custom', url: website, label: 'Sitio web' });
+    add({ network: 'custom', url: website, label: 'Página Web' });
   } else if (publicadis) {
-    add({ network: 'custom', url: publicadis, label: 'Sitio web' });
+    add({ network: 'custom', url: publicadis, label: 'Página Web' });
   }
 
   for (const link of getHeroSocialLinks(profile)) {
@@ -98,9 +98,94 @@ export function getWireframeSocialLinks(profile: Partial<BusinessProfile>): Soci
 }
 
 export function socialLinkLabel(link: SocialLink): string {
-  if (link.label?.trim()) return link.label.trim();
+  if (link.label?.trim()) {
+    const raw = link.label.trim();
+    const lower = raw.toLowerCase();
+    if (lower === 'sitio web' || lower === 'website' || lower.includes('página web')) {
+      return 'Página Web';
+    }
+    return raw;
+  }
+  if (isWebsiteLink(link)) return 'Página Web';
   return NETWORK_LABELS[link.network] || 'Enlace';
 }
+
+function isWebsiteLink(link: SocialLink): boolean {
+  const label = (link.label || '').toLowerCase();
+  return (
+    label.includes('sitio') ||
+    label.includes('website') ||
+    label.includes('página web') ||
+    (link.network === 'custom' &&
+      !link.url.includes('instagram') &&
+      !link.url.includes('facebook') &&
+      !link.url.includes('tiktok') &&
+      !link.url.includes('linkedin') &&
+      !link.url.includes('twitter') &&
+      !link.url.includes('x.com'))
+  );
+}
+
+export type SocialBrandKey =
+  | 'website'
+  | 'instagram'
+  | 'facebook'
+  | 'tiktok'
+  | 'twitter'
+  | 'linkedin'
+  | 'youtube'
+  | 'custom';
+
+export function getSocialBrandKey(link: SocialLink): SocialBrandKey {
+  const url = link.url.toLowerCase();
+  if (url.includes('instagram')) return 'instagram';
+  if (url.includes('facebook') || url.includes('fb.com')) return 'facebook';
+  if (url.includes('tiktok')) return 'tiktok';
+  if (url.includes('linkedin')) return 'linkedin';
+  if (url.includes('youtube') || url.includes('youtu.be')) return 'youtube';
+  if (url.includes('twitter') || url.includes('x.com')) return 'twitter';
+  if (isWebsiteLink(link)) return 'website';
+  return 'custom';
+}
+
+/** Clases Tailwind estáticas (bg/text/border + hover invertido). */
+export const SOCIAL_BRAND_BUTTON_CLASS: Record<
+  SocialBrandKey,
+  { base: string; hover: string }
+> = {
+  website: {
+    base: 'bg-slate-800 text-white border-slate-800',
+    hover: 'hover:bg-white hover:text-slate-800 hover:border-slate-800',
+  },
+  instagram: {
+    base: 'bg-[#E1306C] text-white border-[#E1306C]',
+    hover: 'hover:bg-white hover:text-[#E1306C] hover:border-[#E1306C]',
+  },
+  facebook: {
+    base: 'bg-[#1877F2] text-white border-[#1877F2]',
+    hover: 'hover:bg-white hover:text-[#1877F2] hover:border-[#1877F2]',
+  },
+  tiktok: {
+    base: 'bg-[#010101] text-white border-[#010101]',
+    hover: 'hover:bg-white hover:text-[#010101] hover:border-[#010101]',
+  },
+  twitter: {
+    base: 'bg-[#0F1419] text-white border-[#0F1419]',
+    hover: 'hover:bg-white hover:text-[#0F1419] hover:border-[#0F1419]',
+  },
+  linkedin: {
+    base: 'bg-[#0A66C2] text-white border-[#0A66C2]',
+    hover: 'hover:bg-white hover:text-[#0A66C2] hover:border-[#0A66C2]',
+  },
+  youtube: {
+    base: 'bg-[#FF0000] text-white border-[#FF0000]',
+    hover: 'hover:bg-white hover:text-[#FF0000] hover:border-[#FF0000]',
+  },
+  custom: {
+    base: 'bg-[var(--brand-color)] text-white border-[var(--brand-color)]',
+    hover: 'hover:bg-white hover:text-[var(--brand-color)] hover:border-[var(--brand-color)]',
+  },
+};
 
 export function socialLinksToCustomBlocks(links: SocialLink[]): CustomBlock[] {
   return links.map((link, index) => ({

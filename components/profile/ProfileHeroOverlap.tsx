@@ -4,6 +4,8 @@ import type { BannerConfig } from '@buscadis/profile-engine';
 import type { ProfileEntity } from '@buscadis/profile-engine';
 import { cn } from '@/lib/utils';
 import { getWhatsappUrl } from '@/lib/business/public-utils';
+import { profilePageContainerClass } from '@/lib/business/profile-layout';
+import type { ReactNode } from 'react';
 
 const TEXT_SIZE: Record<string, string> = {
   sm: 'text-lg',
@@ -25,6 +27,8 @@ interface ProfileHeroOverlapProps {
   bannerOnly?: boolean;
   showEditControls?: boolean;
   onEditBanner?: () => void;
+  /** Barra superior (editar, QR, compartir) dentro del banner. */
+  headerSlot?: ReactNode;
   className?: string;
 }
 
@@ -64,6 +68,7 @@ export default function ProfileHeroOverlap({
   bannerOnly = false,
   showEditControls = false,
   onEditBanner,
+  headerSlot,
   className,
 }: ProfileHeroOverlapProps) {
   const hasImage = banner.mode === 'image' && Boolean(entity.bannerImageUrl || banner.imageUrl);
@@ -77,18 +82,27 @@ export default function ProfileHeroOverlap({
 
   return (
     <div className={cn('relative w-full', className)}>
-      <div className="max-w-[1100px] mx-auto px-4 pt-2 sm:pt-3">
+      <div className={profilePageContainerClass('pt-2 sm:pt-3')}>
         <div
           className={cn(
             'relative w-full overflow-hidden bg-gradient-to-br from-[var(--brand-color)] via-[var(--brand-color)] to-[var(--brand-accent)] shadow-sm',
-            'h-[160px] sm:h-[180px] md:h-[200px] rounded-2xl md:rounded-3xl'
+            'h-[180px] sm:h-[200px] md:h-[220px] rounded-2xl md:rounded-3xl'
           )}
         >
+          {headerSlot && (
+            <div
+              className="absolute top-0 inset-x-0 z-20"
+              style={{ paddingTop: 'max(env(safe-area-inset-top, 0px), 0.25rem)' }}
+            >
+              {headerSlot}
+            </div>
+          )}
+
           {hasImage && imageUrl ? (
             <>
               <img src={imageUrl} alt="" className="absolute inset-0 w-full h-full object-cover" />
               <div
-                className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-black/20"
+                className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-black/25"
                 aria-hidden
               />
             </>
@@ -116,7 +130,7 @@ export default function ProfileHeroOverlap({
             <button
               type="button"
               onClick={onEditBanner}
-              className="absolute top-3 right-3 z-30 px-3 py-1.5 rounded-lg bg-black/50 text-white text-xs font-bold backdrop-blur-sm hover:bg-black/65 transition-colors"
+              className="absolute top-12 right-3 z-30 px-3 py-1.5 rounded-lg bg-black/50 text-white text-xs font-bold backdrop-blur-sm hover:bg-black/65 transition-colors"
             >
               Cambiar banner
             </button>
@@ -156,7 +170,7 @@ export default function ProfileHeroOverlap({
       </div>
 
       {!bannerOnly && (
-        <div className="max-w-6xl mx-auto px-4 relative z-10">
+        <div className={cn(profilePageContainerClass(), 'relative z-10')}>
           <div className="-mt-14 sm:-mt-16">
             <ProfileAvatar entity={entity} />
           </div>

@@ -16,6 +16,8 @@ interface ProfileChromeProps {
   onEditRequest?: () => void;
   menuItems?: ProfileMenuItem[];
   className?: string;
+  /** Dentro del banner redondeado (no flota fuera del contenedor). */
+  variant?: 'overlay' | 'fixed';
 }
 
 export default function ProfileChrome({
@@ -27,17 +29,34 @@ export default function ProfileChrome({
   onEditRequest,
   menuItems = [],
   className,
+  variant = 'fixed',
 }: ProfileChromeProps) {
   const profileUrl = `${siteLabel}/@${handle}`;
   const editEnabled = editAccess === 'allowed';
   const editBlocked = editAccess === 'denied';
+  const isOverlay = variant === 'overlay';
 
   return (
     <header
-      className={cn('absolute top-0 inset-x-0 z-50 print:hidden', className)}
-      style={{ paddingTop: 'max(env(safe-area-inset-top, 0px), 0.5rem)' }}
+      className={cn(
+        'print:hidden',
+        isOverlay
+          ? 'relative w-full z-20'
+          : 'absolute top-0 inset-x-0 z-50',
+        className
+      )}
+      style={
+        isOverlay
+          ? undefined
+          : { paddingTop: 'max(env(safe-area-inset-top, 0px), 0.5rem)' }
+      }
     >
-      <div className="max-w-6xl mx-auto px-3 h-11 flex items-center gap-2">
+      <div
+        className={cn(
+          'flex items-center gap-2',
+          isOverlay ? 'w-full px-2 sm:px-3 h-11' : 'max-w-[960px] mx-auto px-3 h-11'
+        )}
+      >
         <Link
           href="/?utm_source=profile&utm_medium=back"
           className="flex items-center gap-1 shrink-0 text-white/95 hover:text-white drop-shadow-md transition-colors"
@@ -92,7 +111,7 @@ export default function ProfileChrome({
             <button
               type="button"
               onClick={onOpenQr}
-              className="h-9 w-9 flex items-center justify-center rounded-lg bg-black/25 backdrop-blur-md text-white hover:bg-black/40 transition-colors"
+              className="h-9 w-9 flex items-center justify-center rounded-lg bg-black/30 backdrop-blur-md text-white hover:bg-black/50 transition-colors"
               aria-label="Código QR"
             >
               <IconQrcode size={18} />
@@ -102,7 +121,7 @@ export default function ProfileChrome({
             <button
               type="button"
               onClick={onShare}
-              className="h-9 w-9 hidden sm:flex items-center justify-center rounded-lg bg-black/25 backdrop-blur-md text-white hover:bg-black/40 transition-colors"
+              className="h-9 w-9 hidden sm:flex items-center justify-center rounded-lg bg-black/30 backdrop-blur-md text-white hover:bg-black/50 transition-colors"
               aria-label="Compartir"
             >
               <IconShareAlt size={16} />

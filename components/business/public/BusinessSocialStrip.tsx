@@ -4,6 +4,8 @@ import type { BusinessProfile } from '@/types/business';
 import {
   getHeroSocialLinks,
   getWireframeSocialLinks,
+  getSocialBrandKey,
+  SOCIAL_BRAND_BUTTON_CLASS,
   socialLinkLabel,
 } from '@/lib/business/social-display';
 import { getSocialIcon } from './social-icons';
@@ -26,19 +28,46 @@ export default function BusinessSocialStrip({
   if (links.length === 0) return null;
 
   const isWireframe = variant === 'wireframe';
-  const isIcons = variant === 'icons' || isWireframe;
+  const isIcons = variant === 'icons';
 
   return (
     <div
       className={cn(
-        'flex flex-wrap items-center print:hidden',
-        isIcons ? 'gap-3' : 'gap-2',
+        'flex flex-wrap items-stretch print:hidden',
+        isWireframe ? 'gap-2 sm:gap-3' : isIcons ? 'gap-3 items-center' : 'gap-2 items-center',
         className
       )}
       aria-label="Redes sociales y enlaces"
     >
       {links.map((link, index) => {
         const label = socialLinkLabel(link);
+
+        if (isWireframe) {
+          const brand = SOCIAL_BRAND_BUTTON_CLASS[getSocialBrandKey(link)];
+          return (
+            <a
+              key={`${link.url}-${index}`}
+              href={link.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={cn(
+                'flex flex-col items-center justify-center gap-1 min-w-[5.5rem] sm:min-w-0',
+                'md:flex-row md:gap-2.5 rounded-xl border px-3 py-2.5 md:py-2 md:px-4',
+                'text-[11px] sm:text-xs font-bold transition-colors shadow-sm',
+                brand.base,
+                brand.hover
+              )}
+            >
+              <span className="shrink-0 flex items-center justify-center">
+                {getSocialIcon(link.url, { size: 20 })}
+              </span>
+              <span className="text-center md:text-left leading-tight max-w-[88px] md:max-w-none truncate">
+                {label}
+              </span>
+            </a>
+          );
+        }
+
         if (isIcons) {
           return (
             <a
@@ -48,15 +77,13 @@ export default function BusinessSocialStrip({
               rel="noopener noreferrer"
               title={label}
               aria-label={label}
-              className={cn(
-                'flex items-center justify-center rounded-full border border-[var(--border-subtle)] bg-[var(--bg-primary)]/90 text-[var(--text-secondary)] shadow-sm transition-all hover:border-[var(--brand-color)] hover:text-[var(--brand-color)] hover:scale-105',
-                isWireframe ? 'h-12 w-12' : 'h-10 w-10'
-              )}
+              className="flex items-center justify-center rounded-full border border-[var(--border-subtle)] bg-[var(--bg-primary)]/90 text-[var(--text-secondary)] shadow-sm transition-all hover:border-[var(--brand-color)] hover:text-[var(--brand-color)] hover:scale-105 h-10 w-10"
             >
-              {getSocialIcon(link.url, { size: isWireframe ? 22 : 18 })}
+              {getSocialIcon(link.url, { size: 18 })}
             </a>
           );
         }
+
         return (
           <a
             key={`${link.url}-${index}`}

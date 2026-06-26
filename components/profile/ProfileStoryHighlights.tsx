@@ -1,6 +1,7 @@
 'use client';
 
 import type { StoryHighlight } from '@buscadis/profile-engine';
+import { profilePageContainerClass } from '@/lib/business/profile-layout';
 import { cn } from '@/lib/utils';
 
 interface ProfileStoryHighlightsProps {
@@ -26,7 +27,7 @@ export default function ProfileStoryHighlights({
   const bannerKey = normalizeImageKey(bannerImageUrl);
 
   return (
-    <div className={cn('max-w-6xl mx-auto px-4 print:hidden', className)}>
+    <div className={cn(profilePageContainerClass(), 'print:hidden', className)}>
       <div className="flex gap-4 overflow-x-auto no-scrollbar pb-1 snap-x snap-mandatory">
         {highlights.map((h) => {
           const coverKey = normalizeImageKey(h.coverUrl);

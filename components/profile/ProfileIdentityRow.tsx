@@ -6,6 +6,7 @@ import VerificationTierBadge, {
   type VerificationTier,
 } from '@/components/profile/VerificationTierBadge';
 import { resolveLocationDisplayText } from '@/lib/profile/resolve-location-display';
+import { profilePageContainerClass } from '@/lib/business/profile-layout';
 import { cn } from '@/lib/utils';
 
 interface ProfileIdentityRowProps {
@@ -45,7 +46,7 @@ export default function ProfileIdentityRow({
   const hasMeta = Boolean(locationText || hasRating);
 
   return (
-    <div className={cn('max-w-6xl mx-auto px-4', className)}>
+    <div className={cn(profilePageContainerClass(), className)}>
       <div className="flex flex-col gap-2">
         <div className="min-w-0">
           <h1 className="text-xl sm:text-2xl font-black text-[var(--text-primary)] m-0 flex items-center gap-1.5 min-w-0">

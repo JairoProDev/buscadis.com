@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
+import { profilePageContainerClass } from '@/lib/business/profile-layout';
 import { cn } from '@/lib/utils';
 
 interface ProfileExpandableBioProps {
@@ -27,7 +28,7 @@ export default function ProfileExpandableBio({
   if (!text?.trim()) return null;
 
   return (
-    <div className={cn('max-w-6xl mx-auto px-4', className)}>
+    <div className={cn(profilePageContainerClass(), className)}>
       <p
         ref={textRef}
         className={cn(

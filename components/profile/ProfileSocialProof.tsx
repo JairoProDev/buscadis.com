@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import type { SocialInsight } from '@buscadis/profile-engine';
 import { IconEye } from '@/components/Icons';
+import { profilePageContainerClass } from '@/lib/business/profile-layout';
 import { cn } from '@/lib/utils';
 
 interface ProfileSocialProofProps {
@@ -40,7 +41,7 @@ export default function ProfileSocialProof({
   const isViewsAggregate = current.id === 'views-aggregate';
 
   return (
-    <div className={cn('max-w-6xl mx-auto px-4 print:hidden', className)}>
+    <div className={cn(profilePageContainerClass(), 'print:hidden', className)}>
       <div className="flex items-center gap-2.5 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)]/50 px-3 py-2">
         {isViewsAggregate ? (
           <>
