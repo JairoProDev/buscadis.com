@@ -244,66 +244,28 @@ export function socialLinkLabel(link: SocialLink): string {
   return BRAND_LABELS[brand] || NETWORK_LABELS[link.network] || 'Enlace';
 }
 
-/**
- * Estilo outline en reposo (legible sobre fondo claro) y relleno de marca al hover.
- */
-export const SOCIAL_BRAND_BUTTON_CLASS: Record<SocialBrandKey, { base: string; hover: string }> = {
-  website: {
-    base: 'bg-white text-slate-800 border-2 border-slate-700 shadow-sm',
-    hover: 'hover:bg-slate-800 hover:text-white hover:border-slate-800',
-  },
-  whatsapp: {
-    base: 'bg-white text-[#128C7E] border-2 border-[#25D366] shadow-sm',
-    hover: 'hover:bg-[#25D366] hover:text-white hover:border-[#25D366]',
-  },
-  telegram: {
-    base: 'bg-white text-[#229ED9] border-2 border-[#229ED9] shadow-sm',
-    hover: 'hover:bg-[#229ED9] hover:text-white hover:border-[#229ED9]',
-  },
-  messenger: {
-    base: 'bg-white text-[#0084FF] border-2 border-[#0084FF] shadow-sm',
-    hover: 'hover:bg-[#0084FF] hover:text-white hover:border-[#0084FF]',
-  },
-  instagram: {
-    base: 'bg-white text-[#C13584] border-2 border-[#E1306C] shadow-sm',
-    hover: 'hover:bg-[#E1306C] hover:text-white hover:border-[#E1306C]',
-  },
-  facebook: {
-    base: 'bg-white text-[#1877F2] border-2 border-[#1877F2] shadow-sm',
-    hover: 'hover:bg-[#1877F2] hover:text-white hover:border-[#1877F2]',
-  },
-  tiktok: {
-    base: 'bg-white text-[#010101] border-2 border-[#010101] shadow-sm',
-    hover: 'hover:bg-[#010101] hover:text-white hover:border-[#010101]',
-  },
-  twitter: {
-    base: 'bg-white text-[#0F1419] border-2 border-[#0F1419] shadow-sm',
-    hover: 'hover:bg-[#0F1419] hover:text-white hover:border-[#0F1419]',
-  },
-  linkedin: {
-    base: 'bg-white text-[#0A66C2] border-2 border-[#0A66C2] shadow-sm',
-    hover: 'hover:bg-[#0A66C2] hover:text-white hover:border-[#0A66C2]',
-  },
-  youtube: {
-    base: 'bg-white text-[#FF0000] border-2 border-[#FF0000] shadow-sm',
-    hover: 'hover:bg-[#FF0000] hover:text-white hover:border-[#FF0000]',
-  },
-  pinterest: {
-    base: 'bg-white text-[#BD081C] border-2 border-[#BD081C] shadow-sm',
-    hover: 'hover:bg-[#BD081C] hover:text-white hover:border-[#BD081C]',
-  },
-  threads: {
-    base: 'bg-white text-[#101010] border-2 border-[#101010] shadow-sm',
-    hover: 'hover:bg-[#101010] hover:text-white hover:border-[#101010]',
-  },
-  spotify: {
-    base: 'bg-white text-[#1DB954] border-2 border-[#1DB954] shadow-sm',
-    hover: 'hover:bg-[#1DB954] hover:text-white hover:border-[#1DB954]',
-  },
-  custom: {
-    base: 'bg-white text-[var(--brand-color)] border-2 border-[var(--brand-color)] shadow-sm',
-    hover: 'hover:bg-[var(--brand-color)] hover:text-white hover:border-[var(--brand-color)]',
-  },
+export type SocialBrandColors = {
+  bg: string;
+  text: string;
+  border: string;
+};
+
+/** Colores de marca — aplicar con style inline (no dependen del purge de Tailwind). */
+export const SOCIAL_BRAND_COLORS: Record<SocialBrandKey, SocialBrandColors> = {
+  website: { bg: '#ffffff', text: '#334155', border: '#334155' },
+  whatsapp: { bg: '#ffffff', text: '#25D366', border: '#25D366' },
+  telegram: { bg: '#ffffff', text: '#229ED9', border: '#229ED9' },
+  messenger: { bg: '#ffffff', text: '#0084FF', border: '#0084FF' },
+  instagram: { bg: '#ffffff', text: '#E1306C', border: '#E1306C' },
+  facebook: { bg: '#ffffff', text: '#1877F2', border: '#1877F2' },
+  tiktok: { bg: '#ffffff', text: '#010101', border: '#010101' },
+  twitter: { bg: '#ffffff', text: '#0F1419', border: '#0F1419' },
+  linkedin: { bg: '#ffffff', text: '#0A66C2', border: '#0A66C2' },
+  youtube: { bg: '#ffffff', text: '#FF0000', border: '#FF0000' },
+  pinterest: { bg: '#ffffff', text: '#BD081C', border: '#BD081C' },
+  threads: { bg: '#ffffff', text: '#101010', border: '#101010' },
+  spotify: { bg: '#ffffff', text: '#1DB954', border: '#1DB954' },
+  custom: { bg: 'var(--brand-color)', text: '#ffffff', border: 'var(--brand-color)' },
 };
 
 export function socialLinksToCustomBlocks(links: SocialLink[]): CustomBlock[] {

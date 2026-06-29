@@ -24,7 +24,12 @@ export async function GET(
 
   try {
     const { id } = await params;
-    const adiso = await getAdisoByIdFromSupabase(id);
+    let adiso = await getAdisoByIdFromSupabase(id);
+
+    if (!adiso) {
+      const { getBusinessProductAsAdiso } = await import('@/lib/business');
+      adiso = await getBusinessProductAsAdiso(id);
+    }
 
     if (!adiso) {
       return NextResponse.json(

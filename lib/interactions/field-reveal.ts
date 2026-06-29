@@ -5,6 +5,8 @@ export const FIELD_QUESTIONS: Record<string, string> = {
   ubicacion: '¿Dónde puedo verlo o recogerlo?',
   descripcion: '¿Me puedes contar más detalles?',
   fotos: '¿Tienes más fotos?',
+  disponibilidad: '¿Sigue disponible?',
+  condiciones: '¿Cuáles son las condiciones?',
 };
 
 export function fieldQuestion(field: RevealField, index?: number): string {
@@ -55,6 +57,12 @@ export function buildAutoReply(
       if (urls[idx]) return 'Aquí tienes otra foto 📷';
       return null;
     }
+    case 'disponibilidad':
+      return 'Sí, sigue disponible. ¿Te gustaría coordinar?';
+    case 'condiciones':
+      return adiso.descripcion?.trim()
+        ? `Las condiciones son: ${adiso.descripcion.trim().slice(0, 280)}${adiso.descripcion.length > 280 ? '…' : ''}`
+        : 'Te cuento las condiciones por mensaje.';
     default:
       return null;
   }

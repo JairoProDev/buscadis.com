@@ -16,8 +16,14 @@ export const createAdisoSlug = (adiso: Adiso): string => {
     return `${titleSlug}-${adiso.id}`;
 };
 
+const UUID_SUFFIX_REGEX = /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 export const getIdFromSlug = (slug: string): string => {
-    // Extract the last part of the slug which is the ID
+    // IDs de catálogo y adisos usan UUID al final del slug SEO
+    const uuidMatch = slug.match(UUID_SUFFIX_REGEX);
+    if (uuidMatch) return uuidMatch[0];
+
+    // Fallback: último segmento (IDs legacy sin guiones)
     const parts = slug.split('-');
     return parts[parts.length - 1];
 };

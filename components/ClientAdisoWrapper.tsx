@@ -6,6 +6,17 @@ import { getAdisoById } from '@/lib/storage';
 import AdisoPageContent from '@/components/AdisoPageContent';
 import { useRouter } from 'next/navigation';
 
+async function fetchCatalogProductAsAdiso(id: string): Promise<Adiso | null> {
+    try {
+        const res = await fetch(`/api/catalog/products/${id}`);
+        if (!res.ok) return null;
+        const data = await res.json();
+        return (data?.adiso as Adiso) ?? null;
+    } catch {
+        return null;
+    }
+}
+
 interface ClientAdisoWrapperProps {
     id: string;
     initialAdiso: Adiso | null;
@@ -30,10 +41,16 @@ export default function ClientAdisoWrapper({ id, initialAdiso }: ClientAdisoWrap
                 const found = await getAdisoById(id);
                 if (found) {
                     setAdiso(found);
-                } else {
-                    // If truly not found even in local storage
-                    setAdiso(null);
+                    return;
                 }
+
+                const catalogAdiso = await fetchCatalogProductAsAdiso(id);
+                if (catalogAdiso) {
+                    setAdiso(catalogAdiso);
+                    return;
+                }
+
+                setAdiso(null);
             } catch (e) {
                 console.error("Error fetching adiso on client:", e);
             } finally {

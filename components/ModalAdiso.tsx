@@ -3,6 +3,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence, PanInfo } from 'framer-motion';
 import { Adiso, AdisoPromotionTier } from '@/types';
 import { getWhatsAppUrl, copiarLink, compartirNativo } from '@/lib/utils';
@@ -41,9 +42,15 @@ import {
   IconSend,
   IconEnvelope,
   IconPhone,
+  IconTag,
+  IconDescription,
+  IconCamera,
+  IconClock,
+  IconFileAlt,
 } from './Icons';
 import { Categoria, UbicacionDetallada } from '@/types';
 import { getAdisoUrl } from '@/lib/url';
+import { FIELD_QUESTIONS, type RevealField } from '@/lib/interactions/field-reveal';
 import {
   pickSocialBadge,
   getCtaLabelPorCategoria,
@@ -80,6 +87,7 @@ interface ModalAdisoProps {
   puedeAnterior: boolean;
   puedeSiguiente: boolean;
   dentroSidebar?: boolean; // Indica si está dentro del sidebar (sin overlay)
+  preservarUrlQuery?: boolean; // Evita replaceState a URL SEO en navegación SPA (home/chat)
   onEditar?: (adiso: Adiso) => void; // Callback para editar adiso
   onEliminar?: (adisoId: string) => void; // Callback para eliminar adiso
   onSuccess?: (message: string) => void; // Callback para mensajes de éxito
@@ -190,11 +198,13 @@ export default function ModalAdiso({
   puedeAnterior,
   puedeSiguiente,
   dentroSidebar = false,
+  preservarUrlQuery = false,
   onEditar,
   onEliminar,
   onSuccess,
   onError
 }: ModalAdisoProps) {
+  const router = useRouter();
   const [copiado, setCopiado] = useState(false);
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
@@ -293,16 +303,14 @@ export default function ModalAdiso({
 
   // Actualizar URL del navegador al abrir adiso (SEO Friendly)
   useEffect(() => {
-    // Solo actualizar URL si NO estamos en el sidebar (para evitar conflictos con el estado de la home)
-    // O si estamos en modo standalone/mobile específico
-    if (adiso && !dentroSidebar) {
+    // No actualizar URL en sidebar ni en SPA home (preserva ?adiso=ID)
+    if (adiso && !dentroSidebar && !preservarUrlQuery) {
       const seoUrl = getAdisoUrl(adiso);
-      // Solo actualizar si es diferente para no llenar el historial
       if (typeof window !== 'undefined' && window.location.pathname !== seoUrl && !window.location.pathname.includes('/admin')) {
         window.history.replaceState(null, '', seoUrl);
       }
     }
-  }, [adiso, dentroSidebar]);
+  }, [adiso, dentroSidebar, preservarUrlQuery]);
 
 
   useEffect(() => {
@@ -370,6 +378,10 @@ export default function ModalAdiso({
 
   const handleCompartir = async () => {
     await compartirNativo(adiso);
+  };
+
+  const handleAbrirPagina = () => {
+    router.push(getAdisoUrl(adiso));
   };
 
   const handleContactar = async (contactoEspecifico?: string) => {
@@ -545,6 +557,15 @@ Ref: ${adiso.edicionNumero || adiso.id}`;
     <div className="flex items-center gap-1">
       <button
         type="button"
+        onClick={handleAbrirPagina}
+        className={actionBtnClass}
+        title="Ver página del anuncio"
+        aria-label="Ver página del anuncio"
+      >
+        <IconExternalLink size={18} />
+      </button>
+      <button
+        type="button"
         onClick={handleCompartir}
         className={actionBtnClass}
         title="Compartir"
@@ -682,7 +703,53 @@ Ref: ${adiso.edicionNumero || adiso.id}`;
     fontWeight: 600,
     cursor: 'pointer',
     textAlign: 'left' as const,
-    width: '100%',
+    flex: 1,
+  };
+
+  const FIELD_ICONS: Record<string, React.ComponentType<{ size?: number; color?: string }>> = {
+    ubicacion: IconLocation,
+    precio: IconTag,
+    descripcion: IconDescription,
+    fotos: IconCamera,
+    disponibilidad: IconClock,
+    condiciones: IconFileAlt,
+  };
+
+  const AskFieldRow = ({
+    field,
+    revealedContent,
+    onAsk,
+    photoIndex,
+  }: {
+    field: RevealField;
+    revealedContent?: React.ReactNode;
+    onAsk?: () => void;
+    photoIndex?: number;
+  }) => {
+    const Icon = FIELD_ICONS[field] || IconDescription;
+    const revealed = isRevealed(field, photoIndex);
+    const question = FIELD_QUESTIONS[field] || `¿Me das más información?`;
+
+    return (
+      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+        <div style={{ color: theme.color, flexShrink: 0 }}>
+          <Icon size={18} />
+        </div>
+        {revealed ? (
+          <span style={{ fontSize: '0.9rem', color: 'var(--text-primary)', fontWeight: 600 }}>
+            {revealedContent ?? 'Te respondemos en el chat'}
+          </span>
+        ) : (
+          <button
+            type="button"
+            style={askBtnStyle}
+            onClick={() => void (onAsk ? onAsk() : askField(field, photoIndex))}
+          >
+            {question}
+          </button>
+        )}
+      </div>
+    );
   };
 
   const ContentBody = () => (
@@ -787,7 +854,7 @@ Ref: ${adiso.edicionNumero || adiso.id}`;
         {displayTitle}
       </h2>
 
-      {displayDescription && (
+      {displayDescription && isRevealed('descripcion') && (
         <div style={{ fontSize: '0.9375rem', lineHeight: 1.55, color: 'var(--text-secondary)', whiteSpace: 'pre-wrap' }}>
           {displayDescription}
         </div>
@@ -805,27 +872,31 @@ Ref: ${adiso.edicionNumero || adiso.id}`;
         <div style={{ fontSize: '0.8rem', color: 'var(--text-tertiary)', fontWeight: 600 }}>
           {getCategoriaLabel(adiso.categoria)}
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <div style={{ color: theme.color }}>
-            <IconLocation size={18} />
-          </div>
-          {isRevealed('ubicacion') ? (
-            <span style={{ fontSize: '0.9rem', color: 'var(--text-primary)', fontWeight: 600 }}>
-              {formatearUbicacion(adiso.ubicacion).texto}
-            </span>
-          ) : (
-            <button type="button" style={askBtnStyle} onClick={() => void askField('ubicacion')}>
-              ¿Dónde puedo verlo o recogerlo?
-            </button>
-          )}
-        </div>
-        {isRevealed('precio') && priceLabel ? (
-          <div style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--brand-blue)' }}>{priceLabel}</div>
-        ) : (
-          <button type="button" style={askBtnStyle} onClick={() => void askField('precio')}>
-            ¿Cuál es el precio?
-          </button>
+        <AskFieldRow
+          field="ubicacion"
+          revealedContent={formatearUbicacion(adiso.ubicacion).texto}
+        />
+        <AskFieldRow
+          field="precio"
+          revealedContent={priceLabel || undefined}
+        />
+        {displayDescription && (
+          <AskFieldRow
+            field="descripcion"
+            revealedContent={displayDescription}
+          />
         )}
+        {imagenesGaleria.length > 1 && (
+          <AskFieldRow
+            field="fotos"
+            revealedContent={`${imagenesGaleria.length} fotos disponibles`}
+          />
+        )}
+        <AskFieldRow field="disponibilidad" revealedContent="Sí, sigue disponible" />
+        <AskFieldRow
+          field="condiciones"
+          revealedContent={displayDescription ? displayDescription.slice(0, 120) + (displayDescription.length > 120 ? '…' : '') : undefined}
+        />
         {interactionUpsell && (
           <p style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', margin: 0 }}>
             Con un plan pago las respuestas pueden ser automáticas e instantáneas.

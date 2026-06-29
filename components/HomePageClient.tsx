@@ -102,6 +102,7 @@ import { getLocationCountryCode } from '@/lib/geo/flags';
 import { getCountryByCode, DEFAULT_COUNTRY_CODE } from '@/lib/geo/countries-data';
 import BrowseEmptyState from '@/components/BrowseEmptyState';
 import ParaTiSection from '@/components/home/ParaTiSection';
+import BusinessDirectorySection from '@/components/home/BusinessDirectorySection';
 const TEST_REGEX = /toyota test|test adiso|test anuncio/i;
 
 function getBrowseCountLabel(
@@ -137,6 +138,7 @@ function HomeContent() {
   const cargadoInicialmente = useRef(false);
   const adisosRef = useRef<Adiso[]>([]);
   const ultimoErrorAdisoRef = useRef<string | null>(null);
+  const adisoAperturaPendienteRef = useRef<string | null>(null);
 
   const [adisos, setAdisos] = useState<Adiso[]>([]);
   const [adisosFiltrados, setAdisosFiltrados] = useState<Adiso[]>([]);
@@ -436,9 +438,15 @@ function HomeContent() {
     if (cargando) return;
 
     if (!adisoId) {
+      // Evitar cerrar el modal mientras la URL aún no refleja la apertura optimista
+      if (adisoAperturaPendienteRef.current) return;
       ultimoErrorAdisoRef.current = null;
       setAdisoAbierto(null);
       return;
+    }
+
+    if (adisoAperturaPendienteRef.current === adisoId) {
+      adisoAperturaPendienteRef.current = null;
     }
 
     let cancelled = false;
@@ -746,6 +754,7 @@ function HomeContent() {
     trackViewHistory({ adisoId: adiso.id, source: 'feed' }, session?.access_token);
     const indice = adisosFiltrados.findIndex(a => a.id === adiso.id);
     setIndiceAdisoActual(indice >= 0 ? indice : 0);
+    adisoAperturaPendienteRef.current = adiso.id;
     setAdisoAbierto(adiso);
     setSeccionDesktopActiva('adiso');
 
@@ -832,6 +841,7 @@ function HomeContent() {
   };
 
   const handleCerrarAdiso = () => {
+    adisoAperturaPendienteRef.current = null;
     setAdisoAbierto(null);
     if (isDesktop) {
       setIsSidebarMinimizado(true);
@@ -1542,6 +1552,10 @@ function HomeContent() {
               {cargando || filtrando ? (
                 <SkeletonAdisos isDesktop={isDesktop} />
               ) : adisosFiltrados.length === 0 ? (
+                <>
+                {categoriaFiltro === 'negocios' && (
+                  <BusinessDirectorySection className="mb-4 px-1" />
+                )}
                 <BrowseEmptyState
                   variant={
                     browseFilters.ubicacion?.countryCode &&
@@ -1578,8 +1592,12 @@ function HomeContent() {
                   }}
                   onChangeLocation={() => setMostrarFiltroUbicacion(true)}
                 />
+                </>
               ) : (
                 <>
+                {categoriaFiltro === 'negocios' && (
+                  <BusinessDirectorySection className="mb-4 px-1" />
+                )}
                 <ParaTiSection onAbrirAdiso={handleAbrirAdiso} />
                 <GrillaAdisos
                   adisos={adisosFiltrados.slice(0, visibleCount)}
@@ -1633,6 +1651,7 @@ function HomeContent() {
               onSuccess={(msg) => success(msg)}
               onError={(msg) => error(msg)}
               dentroSidebar={false}
+              preservarUrlQuery={true}
             />
           )}
 

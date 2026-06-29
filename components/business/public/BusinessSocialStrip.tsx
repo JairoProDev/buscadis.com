@@ -1,11 +1,13 @@
 'use client';
 
+import { useState, type CSSProperties } from 'react';
 import type { BusinessProfile } from '@/types/business';
+import type { SocialBrandKey } from '@/lib/business/social-display';
 import {
   getHeroSocialLinks,
   getWireframeSocialLinks,
   getSocialBrandKey,
-  SOCIAL_BRAND_BUTTON_CLASS,
+  SOCIAL_BRAND_COLORS,
   socialLinkLabel,
 } from '@/lib/business/social-display';
 import { getSocialIconByBrand } from './social-icons';
@@ -14,8 +16,62 @@ import { cn } from '@/lib/utils';
 interface BusinessSocialStripProps {
   profile: Partial<BusinessProfile>;
   className?: string;
-  /** Iconos compactos vs chips con etiqueta */
   variant?: 'icons' | 'chips' | 'wireframe';
+}
+
+function wireframeButtonStyle(brand: SocialBrandKey, hovered: boolean): CSSProperties {
+  const c = SOCIAL_BRAND_COLORS[brand];
+  if (hovered) {
+    return {
+      backgroundColor: c.border,
+      color: '#ffffff',
+      borderColor: c.border,
+      borderWidth: 2,
+      borderStyle: 'solid',
+    };
+  }
+  return {
+    backgroundColor: c.bg,
+    color: c.text,
+    borderColor: c.border,
+    borderWidth: 2,
+    borderStyle: 'solid',
+  };
+}
+
+function WireframeSocialButton({
+  href,
+  label,
+  brand,
+}: {
+  href: string;
+  label: string;
+  brand: SocialBrandKey;
+}) {
+  const [hovered, setHovered] = useState(false);
+
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={wireframeButtonStyle(brand, hovered)}
+      className={cn(
+        'flex flex-col items-center justify-center gap-1 min-w-[5.5rem] sm:min-w-0',
+        'md:flex-row md:gap-2.5 rounded-xl px-3 py-2.5 md:py-2 md:px-4',
+        'text-[11px] sm:text-xs font-bold shadow-sm transition-colors duration-200 no-underline'
+      )}
+    >
+      <span className="shrink-0 flex items-center justify-center" style={{ color: 'inherit' }}>
+        {getSocialIconByBrand(brand, 20)}
+      </span>
+      <span className="text-center md:text-left leading-tight max-w-[88px] md:max-w-none truncate">
+        {label}
+      </span>
+    </a>
+  );
 }
 
 export default function BusinessSocialStrip({
@@ -44,28 +100,13 @@ export default function BusinessSocialStrip({
         const brand = getSocialBrandKey(link);
 
         if (isWireframe) {
-          const styles = SOCIAL_BRAND_BUTTON_CLASS[brand];
           return (
-            <a
+            <WireframeSocialButton
               key={`${link.url}-${index}`}
               href={link.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className={cn(
-                'group flex flex-col items-center justify-center gap-1 min-w-[5.5rem] sm:min-w-0',
-                'md:flex-row md:gap-2.5 rounded-xl px-3 py-2.5 md:py-2 md:px-4',
-                'text-[11px] sm:text-xs font-bold transition-all duration-200',
-                styles.base,
-                styles.hover
-              )}
-            >
-              <span className="shrink-0 flex items-center justify-center text-current">
-                {getSocialIconByBrand(brand, 20)}
-              </span>
-              <span className="text-center md:text-left leading-tight max-w-[88px] md:max-w-none truncate">
-                {label}
-              </span>
-            </a>
+              label={label}
+              brand={brand}
+            />
           );
         }
 

@@ -146,6 +146,35 @@ export async function getBusinessProfileBySlug(slug: string): Promise<BusinessPr
     return normalizeBusinessProfile(data as BusinessProfile) as BusinessProfile;
 }
 
+/** Perfiles de negocio publicados para el directorio del marketplace. */
+export async function listPublishedBusinessProfiles(options?: {
+    limit?: number;
+    offset?: number;
+}): Promise<BusinessProfile[]> {
+    if (!supabase) return [];
+
+    let query = supabase
+        .from(BUSINESS_TABLE)
+        .select('id, slug, name, description, tagline, logo_url, banner_url, theme_color, is_verified, contact_address, created_at, updated_at')
+        .eq('is_published', true)
+        .order('updated_at', { ascending: false });
+
+    if (options?.limit) {
+        const from = options.offset || 0;
+        query = query.range(from, from + options.limit - 1);
+    } else {
+        query = query.limit(50);
+    }
+
+    const { data, error } = await query;
+    if (error) {
+        console.error('Error listing published business profiles:', error);
+        return [];
+    }
+
+    return (data || []).map((row) => normalizeBusinessProfile(row as BusinessProfile) as BusinessProfile);
+}
+
 export async function createBusinessProfile(profile: Partial<BusinessProfile>): Promise<BusinessProfile | null> {
     if (!supabase) return null;
 
