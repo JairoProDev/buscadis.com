@@ -74,7 +74,7 @@ export default function SimilarAdisos({ currentAdiso }: SimilarAdisosProps) {
     <section className="mt-8 border-t border-[var(--border-color)] pt-8" aria-label={sectionTitle}>
       <h3 className="mb-4 text-lg font-bold text-[var(--text-primary)]">{sectionTitle}</h3>
 
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
         {similarAds.map((ad) => (
           <Link
             key={ad.id}

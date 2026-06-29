@@ -3,8 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { Adiso } from '@/types';
 import Header from '@/components/Header';
-import ModalAdiso from '@/components/ModalAdiso';
-import SimilarAdisos from '@/components/SimilarAdisos';
+import AdisoLandingPage from '@/components/adiso/AdisoLandingPage';
 
 interface AdisoPageContentProps {
   adiso: Adiso;
@@ -29,19 +28,7 @@ export default function AdisoPageContent({ adiso }: AdisoPageContentProps) {
   return (
     <div className="min-h-screen bg-[var(--bg-secondary)]">
       <Header onChangelogClick={() => router.push('/progreso')} />
-
-      <ModalAdiso
-        adiso={adiso}
-        modoPagina
-        onCerrar={handleVolver}
-        puedeAnterior={false}
-        puedeSiguiente={false}
-        preservarUrlQuery
-      />
-
-      <div className="mx-auto max-w-3xl px-4 pb-16">
-        <SimilarAdisos currentAdiso={adiso} />
-      </div>
+      <AdisoLandingPage adiso={adiso} onVolver={handleVolver} />
     </div>
   );
 }
