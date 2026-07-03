@@ -9,6 +9,9 @@ export interface ExternalContactChannel {
 }
 
 export function resolveExternalContact(adiso: Adiso): ExternalContactChannel | null {
+  if (adiso.contactLocked || adiso.paymentStatus === 'pending' || adiso.paymentStatus === 'underpaid') {
+    return null;
+  }
   const contactos = adiso.contactosMultiples?.filter((c) => c.valor?.trim());
   if (contactos?.length) {
     const principal = contactos.find((c) => c.principal) ?? contactos[0];

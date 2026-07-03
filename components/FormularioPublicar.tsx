@@ -1,5 +1,8 @@
 'use client';
 
+/**
+ * @deprecated Use PublishStudioShell instead. Kept for legacy imports only.
+ */
 import React, { useState, FormEvent, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Adiso, AdisoFormData, Categoria, TamañoPaquete, PAQUETES, PaqueteInfo } from '@/types';

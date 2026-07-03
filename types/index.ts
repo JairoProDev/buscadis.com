@@ -337,9 +337,14 @@ export const ADISO_PROMOTION_TIERS: Record<AdisoPromotionTier, AdisoPromotionTie
 export interface Adiso {
   id: string;
   categoria: Categoria;
+  subcategoria?: string;
+  subsubcategoria?: string;
+  atributos?: Record<string, string | string[] | boolean | number>;
   titulo: string;
   descripcion: string;
   contacto: string;
+  contactLocked?: boolean;
+  paymentStatus?: 'free' | 'pending' | 'verified' | 'underpaid';
   ubicacion: Ubicacion; // Puede ser string (compatibilidad) o UbicacionDetallada
   fechaPublicacion: string;
   horaPublicacion: string;
@@ -406,6 +411,9 @@ export interface AdisoFormData {
   titulo: string;
   descripcion: string;
   contacto: string;
+  subcategoria?: string;
+  subsubcategoria?: string;
+  atributos?: Record<string, string | string[] | boolean | number>;
   ubicacion?: UbicacionDetallada; // Opcional: el anunciante puede decidir no incluir ubicación
   tamaño?: TamañoPaquete; // Tamaño del paquete seleccionado
   imagenes?: File[]; // Archivos de imagen (opcional, múltiples)

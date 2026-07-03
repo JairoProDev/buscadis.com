@@ -391,6 +391,10 @@ export default function ModalAdiso({
   };
 
   const handleContactar = async (contactoEspecifico?: string) => {
+    if (adiso.contactLocked || adiso.paymentStatus === 'pending' || adiso.paymentStatus === 'underpaid') {
+      return;
+    }
+
     const contactoAUsar = contactoEspecifico || adiso.contacto;
 
     // Verificar si el anuncio está caducado o es histórico
@@ -624,8 +628,9 @@ Ref: ${adiso.edicionNumero || adiso.id}`;
 
   const ContactFooter = () => {
     const isOwnerView = esMiAdiso || esPropietario;
-    const showInApp = canMessageInApp && !isOwnerView;
-    const showExternal = Boolean(externalContact);
+    const contactLocked = adiso.contactLocked || adiso.paymentStatus === 'pending' || adiso.paymentStatus === 'underpaid';
+    const showInApp = canMessageInApp && !isOwnerView && !contactLocked;
+    const showExternal = Boolean(externalContact) && !contactLocked;
 
     if (!showInApp && !showExternal && !isOwnerView) return null;
     if (isOwnerView && !showExternal && !canMessageInApp) return null;
@@ -635,6 +640,13 @@ Ref: ${adiso.edicionNumero || adiso.id}`;
 
     return (
       <div className="flex shrink-0 flex-col border-t border-[var(--border-color)] bg-[var(--bg-primary)] shadow-[var(--shadow-up)]">
+        {contactLocked && !isOwnerView && (
+          <div className="px-3 pt-3 pb-1">
+            <p className="m-0 text-center text-xs font-medium text-amber-700 bg-amber-50 rounded-xl py-2 px-3">
+              El anunciante está captando interesados. El contacto se activará cuando verifique su pago.
+            </p>
+          </div>
+        )}
         {isOwnerView && (previewInApp || previewExternal) && (
           <p className="px-3 pt-2 text-center text-[0.7rem] font-medium text-[var(--text-tertiary)]">
             Vista previa — así contactan los interesados

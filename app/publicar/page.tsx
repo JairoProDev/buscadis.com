@@ -11,8 +11,8 @@ import { useToast } from '@/hooks/useToast';
 import FeedbackButton from '@/components/FeedbackButton';
 import { useSearchParams } from 'next/navigation';
 
-const PublishChatWizard = dynamic(() => import('@/components/publish/PublishChatWizard'), {
-  loading: () => <div className="p-6 text-center text-sm text-[var(--text-secondary)]">Cargando asistente…</div>,
+const PublishStudioShell = dynamic(() => import('@/components/publish/PublishStudioShell'), {
+  loading: () => <div className="p-6 text-center text-sm text-[var(--text-secondary)]">Cargando Publish Studio…</div>,
   ssr: false,
 });
 
@@ -23,6 +23,7 @@ function PublicarHubContent() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [initialText, setInitialText] = useState('');
   const [initialImageUrl, setInitialImageUrl] = useState<string | null>(null);
+  const [initialContacto, setInitialContacto] = useState<string | undefined>();
   const [seedKey, setSeedKey] = useState(0);
 
   useEffect(() => {
@@ -34,10 +35,12 @@ function PublicarHubContent() {
     const descripcion = searchParams.get('descripcion');
     const text = searchParams.get('text') || searchParams.get('descripcion');
     const imagen = searchParams.get('imagen');
-    if (titulo || descripcion || text) {
+    const contacto = searchParams.get('contacto');
+    if (titulo || descripcion || text || imagen || contacto) {
       const combined = [titulo, descripcion || text].filter(Boolean).join('. ');
       setInitialText(combined);
       if (imagen) setInitialImageUrl(imagen);
+      if (contacto) setInitialContacto(contacto);
       setSeedKey((k) => k + 1);
     }
   }, [searchParams]);
@@ -51,19 +54,21 @@ function PublicarHubContent() {
     <div className="min-h-screen bg-[var(--bg-secondary)] flex flex-col pb-16 md:pb-0">
       <Header onToggleLeftSidebar={() => setSidebarOpen(true)} seccionActiva="publicar" />
       <main className="flex-1 w-full flex flex-col min-h-0">
-        <div className="container mx-auto px-4 py-4 md:py-6 max-w-2xl flex-1 flex flex-col min-h-0 w-full">
+        <div className="container mx-auto px-4 py-4 md:py-6 max-w-6xl flex-1 flex flex-col min-h-0 w-full">
           <h1 className="text-xl md:text-2xl font-bold text-center mb-1 text-[var(--text-primary)] shrink-0">
             Publica tu aviso
           </h1>
           <p className="text-center text-sm text-[var(--text-secondary)] mb-4 shrink-0">
-            Conversa con ADIS abajo — te guía paso a paso.
+            Sube fotos, describe tu aviso y deja que la IA haga el resto.
           </p>
 
           <div className="flex-1 flex flex-col min-h-[min(680px,calc(100vh-180px))]">
-            <PublishChatWizard
+            <PublishStudioShell
               key={seedKey}
+              variant="page"
               initialText={initialText}
               initialImageUrl={initialImageUrl}
+              initialContacto={initialContacto}
               onNotify={notify}
               onPublished={() => {
                 setInitialText('');

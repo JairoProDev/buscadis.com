@@ -352,8 +352,34 @@ export function validarYNormalizarAnuncio(adiso: Partial<Adiso>): Adiso | null {
   return anuncioNormalizado;
 }
 
+/** Lenient validation for Publish Studio — only requires minimum content */
+export function validarAnuncioStudio(adiso: Partial<Adiso>): ResultadoValidacion {
+  const errores: string[] = [];
+  const advertencias: string[] = [];
 
+  const hasContent =
+    Boolean(adiso.titulo?.trim()) ||
+    Boolean(adiso.descripcion?.trim()) ||
+    Boolean(adiso.imagenesUrls?.length || adiso.imagenUrl);
 
+  if (!hasContent) {
+    errores.push('Agrega al menos un título, descripción o imagen');
+  }
+
+  if (adiso.titulo && adiso.titulo.length > 120) {
+    advertencias.push('El título se acortará a 120 caracteres');
+  }
+
+  if (adiso.descripcion && adiso.descripcion.length > 2000) {
+    advertencias.push('La descripción se acortará a 2000 caracteres');
+  }
+
+  if (adiso.contacto) {
+    errores.push(...validarContactos(adiso.contactosMultiples || adiso.contacto));
+  }
+
+  return { valido: errores.length === 0, errores, advertencias };
+}
 
 
 

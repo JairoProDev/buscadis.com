@@ -18,6 +18,7 @@ import { SeccionSidebar } from './SidebarDesktop';
 import ModalAdiso from './ModalAdiso';
 import MapaInteractivo from './MapaInteractivo';
 import FormularioPublicar from './FormularioPublicar';
+import PublishStudioShell from './publish/PublishStudioShell';
 import AdisosGratuitos from './AdisosGratuitos';
 import ChatbotIANew from './ChatbotIANew';
 import { IconSparkles, IconAdis } from './Icons';
@@ -367,12 +368,14 @@ export default function ModalNavegacionMobile({
                   />
                 )}
                 {seccionInicial === 'publicar' && (
-                  <FormularioPublicar
-                    onPublicar={onPublicar || (() => { })}
-                    onCerrar={onCerrar}
-                    onError={onError}
-                    onSuccess={onSuccess}
-                    dentroSidebar={true}
+                  <PublishStudioShell
+                    variant="sidebar"
+                    onNotify={(msg, type) => {
+                      if (type === 'error') onError?.(msg);
+                      else if (type === 'success') onSuccess?.(msg);
+                    }}
+                    onPublished={() => onPublicar?.({} as never)}
+                    onClose={onCerrar}
                   />
                 )}
                 {seccionInicial === 'gratuitos' && (

@@ -53,13 +53,24 @@ export async function POST(request: NextRequest) {
     const { data: adiso } = await supabaseAdmin
       .from('adisos')
       .select(
-        'id, titulo, descripcion, precio, moneda, tipo_precio, ubicacion, imagenes_urls, user_id, publish_tier, features, private_data'
+        'id, titulo, descripcion, precio, moneda, tipo_precio, ubicacion, imagenes_urls, user_id, publish_tier, features, private_data, contact_locked, payment_status, contacto'
       )
       .eq('id', adisoId)
       .maybeSingle();
 
     if (!adiso) {
       return NextResponse.json({ error: 'Aviso no encontrado' }, { status: 404 });
+    }
+
+    const contactLocked = Boolean(adiso.contact_locked) ||
+      adiso.payment_status === 'pending' ||
+      adiso.payment_status === 'underpaid';
+
+    if (contactLocked && (field === 'contacto' || field === 'whatsapp')) {
+      return NextResponse.json({
+        error: 'contact_locked',
+        message: 'El contacto del anunciante estará disponible cuando verifique su pago.',
+      }, { status: 403 });
     }
 
     const sellerId = adiso.user_id as string;

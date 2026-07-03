@@ -127,6 +127,27 @@ export const createAdisoSchema = adisoSchema
     ubicacion: ubicacionSchema.optional(),
   });
 
+// Schema for Publish Studio — all fields optional except minimum content rule enforced server-side
+export const publishStudioSchema = z.object({
+  categoria: z.enum([
+    'empleos', 'inmuebles', 'vehiculos', 'servicios', 'productos', 'eventos', 'negocios', 'comunidad',
+  ]).optional(),
+  subcategoria: z.string().optional(),
+  subsubcategoria: z.string().optional(),
+  titulo: z.string().max(120).optional(),
+  descripcion: z.string().max(2000).optional(),
+  contacto: z.string().max(30).optional(),
+  ubicacion: ubicacionSchema.optional(),
+  imagenes: z.array(z.string().url()).optional(),
+  precio: z.number().optional(),
+  moneda: z.enum(['PEN', 'USD']).optional(),
+  tipoPrecio: z.enum(['fijo', 'a_convenir', 'gratis', 'consultar']).optional(),
+  atributos: z.record(z.union([z.string(), z.number(), z.boolean(), z.array(z.string())])).optional(),
+  plan: z.enum(['free', 'paid']).default('paid'),
+  paidDays: z.number().int().min(1).max(90).optional(),
+  dailyRate: z.number().min(5).max(50).optional(),
+});
+
 // Schema para crear adiso gratuito
 export const createAdisoGratuitoSchema = adisoGratuitoSchema;
 
