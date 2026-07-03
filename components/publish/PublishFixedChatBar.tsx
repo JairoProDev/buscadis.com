@@ -1,14 +1,14 @@
 'use client';
 
 import { useRef, useState } from 'react';
-import Image from 'next/image';
-import { IconCamera, IconChevronDown, IconMicrophone, IconSend, IconX } from '@/components/Icons';
+import { IconAdis, IconChevronDown, IconMicrophone } from '@/components/Icons';
+import PublishChatInput from './PublishChatInput';
+import PublishImagePreview from './PublishImagePreview';
 
 interface PublishFixedChatBarProps {
   onSend: (text: string, imageUrl?: string) => void;
   onUploadImage: (file: File) => Promise<string | null>;
   sending?: boolean;
-  placeholder?: string;
   embedded?: boolean;
 }
 
@@ -16,7 +16,6 @@ export default function PublishFixedChatBar({
   onSend,
   onUploadImage,
   sending = false,
-  placeholder = 'Escribe o dicta tu aviso…',
   embedded = false,
 }: PublishFixedChatBarProps) {
   const [minimized, setMinimized] = useState(false);
@@ -32,6 +31,8 @@ export default function PublishFixedChatBar({
     setText('');
     setPendingImage(null);
   };
+
+  const handleFilePick = () => fileRef.current?.click();
 
   const handleFile = async (files: FileList | null) => {
     const file = files?.[0];
@@ -73,10 +74,6 @@ export default function PublishFixedChatBar({
     rec.start();
   };
 
-  const positionClass = embedded
-    ? 'relative border-t border-[var(--border-color)] bg-[var(--bg-primary)] mt-2 -mx-1'
-    : 'fixed bottom-0 inset-x-0 z-[1100] border-t border-[var(--border-color)] bg-[var(--bg-primary)] shadow-[0_-4px_24px_rgba(0,0,0,0.08)]';
-
   if (minimized) {
     const fabClass = embedded
       ? 'absolute bottom-3 right-3 z-10'
@@ -85,85 +82,66 @@ export default function PublishFixedChatBar({
       <button
         type="button"
         onClick={() => setMinimized(false)}
-        className={`${fabClass} w-11 h-11 rounded-full shadow-lg flex items-center justify-center text-white`}
-        style={{ background: 'var(--brand-blue)' }}
-        aria-label="Abrir chat con ADIS"
+        className={`${fabClass} w-12 h-12 rounded-full shadow-[var(--shadow-hover)] flex items-center justify-center bg-[var(--brand-blue)] ring-2 ring-white/20`}
+        aria-label="Abrir asistente ADIS"
       >
-        <IconSend size={16} />
+        <IconAdis size={20} color="#fff" />
       </button>
     );
   }
 
+  const wrapperClass = embedded
+    ? 'relative mt-3 pt-3 border-t border-[var(--border-color)]'
+    : 'fixed bottom-0 inset-x-0 z-[1100] border-t border-[var(--border-color)] bg-[var(--bg-primary)]/95 backdrop-blur-md shadow-[0_-8px_32px_rgba(0,0,0,0.08)]';
+
   return (
-    <div className={positionClass}>
-      <div className={`${embedded ? '' : 'max-w-3xl mx-auto'} px-2 pt-2 pb-[max(0.5rem,env(safe-area-inset-bottom))]`}>
-        <div className="flex justify-end mb-1">
+    <div className={wrapperClass}>
+      <div className={`${embedded ? '' : 'max-w-xl mx-auto'} px-3 pt-2 pb-[max(0.75rem,env(safe-area-inset-bottom))]`}>
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center gap-2">
+            <div className="w-7 h-7 rounded-full bg-[rgba(var(--brand-primary-rgb),0.1)] ring-1 ring-[rgba(var(--brand-primary-rgb),0.15)] flex items-center justify-center">
+              <IconAdis size={14} color="var(--brand-blue)" />
+            </div>
+            <span className="text-xs font-semibold text-[var(--text-primary)]">Asistente ADIS</span>
+          </div>
           <button
             type="button"
             onClick={() => setMinimized(true)}
-            className="text-[10px] font-medium text-[var(--text-tertiary)] flex items-center gap-0.5 px-2 py-0.5"
+            className="text-[11px] font-medium text-[var(--text-tertiary)] flex items-center gap-0.5 hover:text-[var(--text-secondary)]"
           >
-            Minimizar <IconChevronDown size={10} />
+            Minimizar <IconChevronDown size={12} />
           </button>
         </div>
 
         {pendingImage && (
-          <div className="relative inline-block mb-2">
-            <div className="relative w-14 h-14 rounded-lg overflow-hidden border border-[var(--border-color)]">
-              <Image src={pendingImage} alt="" fill className="object-cover" unoptimized />
-            </div>
-            <button
-              type="button"
-              onClick={() => setPendingImage(null)}
-              className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-[var(--text-primary)] text-[var(--bg-primary)] flex items-center justify-center"
-              aria-label="Quitar imagen"
-            >
-              <IconX size={10} />
-            </button>
+          <div className="mb-2">
+            <PublishImagePreview url={pendingImage} onRemove={() => setPendingImage(null)} size="sm" />
           </div>
         )}
 
         <div className="flex items-end gap-2">
           <button
             type="button"
-            onClick={() => fileRef.current?.click()}
-            disabled={uploading}
-            className="shrink-0 w-10 h-10 rounded-xl border border-[var(--border-color)] flex items-center justify-center text-[var(--text-secondary)]"
-            aria-label="Adjuntar imagen"
-          >
-            <IconCamera size={18} />
-          </button>
-          <button
-            type="button"
             onClick={startVoice}
-            className="shrink-0 w-10 h-10 rounded-xl border border-[var(--border-color)] flex items-center justify-center text-[var(--text-secondary)]"
+            className="shrink-0 mb-0.5 flex h-9 w-9 items-center justify-center rounded-full text-[var(--text-tertiary)] hover:bg-[var(--hover-bg)] hover:text-[var(--brand-blue)] transition-colors"
             aria-label="Entrada de voz"
           >
             <IconMicrophone size={18} />
           </button>
-          <textarea
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                handleSend();
-              }
-            }}
-            rows={1}
-            placeholder={placeholder}
-            className="flex-1 min-h-[40px] max-h-24 px-3 py-2 rounded-xl bg-[var(--bg-secondary)] border border-[var(--border-color)] text-sm resize-none focus:outline-none focus:border-[var(--brand-blue)]"
-          />
-          <button
-            type="button"
-            onClick={handleSend}
-            disabled={sending || (!text.trim() && !pendingImage)}
-            className="shrink-0 w-10 h-10 rounded-xl flex items-center justify-center text-white disabled:opacity-40"
-            style={{ background: 'var(--brand-blue)' }}
-            aria-label="Enviar"
-          >
-            <IconSend size={16} />
-          </button>
+          <div className="flex-1 min-w-0">
+            <PublishChatInput
+              value={text}
+              onChange={setText}
+              onSend={handleSend}
+              sending={sending}
+              disabled={sending}
+              placeholder="Describe tu aviso o pega el texto…"
+              onAttachImage={handleFilePick}
+              imageAttached={Boolean(pendingImage)}
+              imageUploading={uploading}
+              compact
+            />
+          </div>
         </div>
       </div>
       <input

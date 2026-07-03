@@ -3,6 +3,7 @@
 import { useRef, useState } from 'react';
 import Image from 'next/image';
 import { IconCamera, IconStar, IconX } from '@/components/Icons';
+import { publishLabel } from './publish-ui';
 
 const ENHANCE_OPTIONS = [
   { id: 'remove_bg', label: 'Quitar fondo' },
@@ -59,9 +60,9 @@ export default function PublishPhotoZone({
 
   return (
     <div>
-      <label className="text-[10px] font-bold uppercase text-[var(--text-tertiary)]">Foto</label>
+      <label className={publishLabel}>Foto</label>
       <div
-        className={`flex gap-2 mt-1 overflow-x-auto pb-0.5 -mx-0.5 px-0.5 ${dragOver ? 'ring-2 ring-[var(--brand-blue)] rounded-xl' : ''}`}
+        className={`flex gap-2 mt-1.5 overflow-x-auto pb-1 ${dragOver ? 'ring-2 ring-[rgba(var(--brand-primary-rgb),0.4)] rounded-xl' : ''}`}
         onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
         onDragLeave={() => setDragOver(false)}
         onDrop={(e) => {
@@ -71,12 +72,15 @@ export default function PublishPhotoZone({
         }}
       >
         {images.map((url) => (
-          <div key={url} className="relative shrink-0 w-[72px] h-[72px] sm:w-20 sm:h-20 rounded-xl overflow-hidden border border-[var(--border-color)]">
+          <div
+            key={url}
+            className="relative shrink-0 w-[76px] h-[76px] sm:w-20 sm:h-20 rounded-xl overflow-hidden ring-1 ring-[var(--border-color)] shadow-sm"
+          >
             <Image src={url} alt="" fill className="object-cover" unoptimized />
             <button
               type="button"
               onClick={() => onRemove(url)}
-              className="absolute top-0.5 right-0.5 w-5 h-5 rounded-full bg-black/55 text-white flex items-center justify-center"
+              className="absolute top-1 right-1 w-5 h-5 rounded-full bg-black/55 text-white flex items-center justify-center"
               aria-label="Quitar"
             >
               <IconX size={10} />
@@ -86,24 +90,24 @@ export default function PublishPhotoZone({
                 type="button"
                 onClick={() => setMenuUrl(menuUrl === url ? null : url)}
                 disabled={enhancing}
-                className="absolute bottom-0.5 left-0.5 right-0.5 py-0.5 rounded-md bg-black/55 text-white text-[9px] font-semibold flex items-center justify-center gap-0.5"
+                className="absolute bottom-1 left-1 right-1 py-0.5 rounded-md bg-[var(--brand-blue)]/90 text-white text-[9px] font-semibold flex items-center justify-center gap-0.5"
               >
                 <IconStar size={8} /> Mejorar
               </button>
             )}
             {menuUrl === url && (
-              <div className="absolute inset-0 z-10 bg-black/75 flex flex-col justify-center gap-1 p-1">
+              <div className="absolute inset-0 z-10 bg-black/80 flex flex-col justify-center gap-1 p-1.5">
                 {ENHANCE_OPTIONS.map((opt) => (
                   <button
                     key={opt.id}
                     type="button"
                     onClick={() => runEnhance(url, opt.id)}
-                    className="text-[9px] text-white py-1 rounded bg-[var(--brand-blue)]/90 font-medium"
+                    className="text-[10px] text-white py-1 rounded-md bg-[var(--brand-blue)] font-medium"
                   >
                     {opt.label}
                   </button>
                 ))}
-                <button type="button" onClick={() => setMenuUrl(null)} className="text-[9px] text-white/70 py-0.5">
+                <button type="button" onClick={() => setMenuUrl(null)} className="text-[9px] text-white/70">
                   Cerrar
                 </button>
               </div>
@@ -115,10 +119,10 @@ export default function PublishPhotoZone({
             type="button"
             onClick={() => inputRef.current?.click()}
             disabled={uploading}
-            className="shrink-0 w-[72px] h-[72px] sm:w-20 sm:h-20 rounded-xl border-2 border-dashed border-[var(--border-color)] flex flex-col items-center justify-center gap-0.5 text-[var(--text-tertiary)] hover:border-[var(--brand-blue)] hover:text-[var(--brand-blue)] transition"
+            className="shrink-0 w-[76px] h-[76px] sm:w-20 sm:h-20 rounded-xl border-2 border-dashed border-[rgba(var(--brand-primary-rgb),0.35)] bg-[rgba(var(--brand-primary-rgb),0.04)] flex flex-col items-center justify-center gap-0.5 text-[var(--brand-blue)] hover:bg-[rgba(var(--brand-primary-rgb),0.08)] transition-colors"
           >
-            <IconCamera size={18} />
-            <span className="text-[9px] font-medium">{uploading ? '…' : 'Agregar'}</span>
+            <IconCamera size={20} />
+            <span className="text-[10px] font-semibold">{uploading ? '…' : 'Agregar'}</span>
           </button>
         )}
       </div>

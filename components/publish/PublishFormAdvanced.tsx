@@ -2,6 +2,7 @@
 
 import { PublishDraft } from '@/lib/publish/publish-draft-types';
 import { getPublishFieldsForCategory, PublishFieldDefinition } from '@/lib/publish/category-tree';
+import { publishInput, publishLabel } from './publish-ui';
 
 interface PublishFormAdvancedProps {
   draft: PublishDraft;
@@ -58,7 +59,7 @@ function FieldInput({
       <select
         value={typeof value === 'string' ? value : ''}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full mt-1 px-3 py-2 rounded-xl bg-[var(--bg-secondary)] border border-[var(--border-color)] text-sm"
+        className={publishInput}
       >
         <option value="">Seleccionar…</option>
         {field.options.map((o) => (
@@ -74,7 +75,7 @@ function FieldInput({
       value={value !== undefined && value !== null ? String(value) : ''}
       onChange={(e) => onChange(field.type === 'number' ? Number(e.target.value) : e.target.value)}
       placeholder={field.placeholder}
-      className="w-full mt-1 px-3 py-2 rounded-xl bg-[var(--bg-secondary)] border border-[var(--border-color)] text-sm"
+      className={publishInput}
     />
   );
 }
@@ -90,7 +91,7 @@ export default function PublishFormAdvanced({ draft, onSetAtributo }: PublishFor
           key={field.id}
           className={field.type === 'chips' && (field.options?.length ?? 0) > 3 ? 'sm:col-span-2' : ''}
         >
-          <label className="text-[10px] font-bold uppercase text-[var(--text-tertiary)]">{field.label}</label>
+          <label className={publishLabel}>{field.label}</label>
           <FieldInput
             field={field}
             value={draft.atributos[field.id]}

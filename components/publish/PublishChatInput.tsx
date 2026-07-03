@@ -31,7 +31,7 @@ export default function PublishChatInput({
 }: PublishChatInputProps) {
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const hasText = value.trim().length > 0;
-  const canSend = !disabled && !sending && hasText;
+  const canSend = !disabled && !sending && (hasText || imageAttached);
 
   const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {

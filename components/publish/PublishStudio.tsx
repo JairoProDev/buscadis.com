@@ -7,15 +7,16 @@ import { usePublishDraft } from '@/hooks/usePublishDraft';
 import { usePublishActions } from '@/hooks/usePublishActions';
 import PublishPhotoZone from './PublishPhotoZone';
 import PublishFormCompact from './PublishFormCompact';
-import PublishPreviewCard from './PublishPreviewCard';
-import PublishReachLines from './PublishReachLines';
+import PublishReviewStep from './PublishReviewStep';
 import PublishCheckoutPanel from './PublishCheckoutPanel';
 import PublishFixedChatBar from './PublishFixedChatBar';
 import PublishStepIndicator from './PublishStepIndicator';
 import { PublishDraft } from '@/lib/publish/publish-draft-types';
 import { hasMinimumContent } from '@/lib/publish/publish-draft-types';
+import { publishPrimaryBtn, publishSecondaryBtn, publishCard } from './publish-ui';
+import { IconAdis } from '@/components/Icons';
 
-type StudioStep = 'create' | 'pay';
+type StudioStep = 'compose' | 'review' | 'pay';
 
 interface PublishStudioProps {
   initialText?: string;
@@ -56,7 +57,7 @@ export default function PublishStudio({
   });
 
   const { uploadPublishImage, uploadingImage } = usePublishActions(onNotify);
-  const [step, setStep] = useState<StudioStep>('create');
+  const [step, setStep] = useState<StudioStep>('compose');
   const [analyzing, setAnalyzing] = useState(false);
   const [publishing, setPublishing] = useState(false);
   const [enhancingField, setEnhancingField] = useState<'titulo' | 'descripcion' | null>(null);
@@ -182,7 +183,7 @@ export default function PublishStudio({
       } else {
         onNotify?.('¡Publicado gratis por 24h!', 'success');
         resetDraft();
-        setStep('create');
+        setStep('compose');
         onPublished?.();
       }
     } catch (e) {
@@ -192,45 +193,50 @@ export default function PublishStudio({
     }
   }, [user?.id, draft, session?.access_token, openAuthModal, onNotify, resetDraft, onPublished]);
 
-  const goToPay = () => {
+  const goToReview = () => {
     if (!hasMinimumContent(draft)) {
       onNotify?.('Agrega título, descripción o al menos una imagen', 'error');
       return;
     }
-    setStep('pay');
+    setStep('review');
   };
 
-  const chatPadding = step === 'create' && !publishedOrderId && !compact ? 'pb-[88px]' : '';
+  const stepNumber = step === 'compose' ? 1 : step === 'review' ? 2 : 3;
+  const chatPadding = step === 'compose' && !publishedOrderId && !compact ? 'pb-[120px]' : '';
 
   return (
     <div className={`flex flex-col ${compact ? 'h-full min-h-0 relative' : 'min-h-0'} ${chatPadding}`}>
       {onClose && (
         <div className="flex items-center justify-between shrink-0 mb-2">
-          <h2 className="text-base font-bold m-0">Publicar aviso</h2>
-          <button type="button" onClick={onClose} className="p-2 text-[var(--text-tertiary)]" aria-label="Cerrar">✕</button>
+          <h2 className="text-base font-bold m-0 text-[var(--text-primary)]">Publicar aviso</h2>
+          <button
+            type="button"
+            onClick={onClose}
+            className="p-2 rounded-lg text-[var(--text-tertiary)] hover:bg-[var(--hover-bg)] transition-colors"
+            aria-label="Cerrar"
+          >
+            ✕
+          </button>
         </div>
       )}
 
-      <PublishStepIndicator
-        step={step === 'create' ? 1 : 2}
-        total={2}
-        labels={['Tu aviso', 'Publicar']}
-      />
+      <PublishStepIndicator step={stepNumber} />
 
-      {step === 'create' && (
-        <div className={`flex flex-col flex-1 min-h-0 ${compact ? '' : ''}`}>
-          <div className="shrink-0 mb-2">
-            <div className="flex flex-row items-start gap-3">
-              <div className="shrink-0 max-h-[34vh] sm:max-h-[38vh] overflow-hidden">
-                <PublishPreviewCard draft={draft} variant="live" compact />
-              </div>
-              <div className="flex-1 min-w-0 pt-1 flex items-center min-h-[80px]">
-                <PublishReachLines draft={draft} />
-              </div>
+      {step === 'compose' && (
+        <div className="flex flex-col flex-1 min-h-0">
+          <div className={`${publishCard} p-3 mb-3 flex items-center gap-3 shrink-0`}>
+            <div className="w-9 h-9 rounded-full bg-[rgba(var(--brand-primary-rgb),0.12)] ring-1 ring-[rgba(var(--brand-primary-rgb),0.2)] flex items-center justify-center shrink-0">
+              <IconAdis size={18} color="var(--brand-blue)" />
+            </div>
+            <div className="min-w-0">
+              <p className="text-sm font-semibold text-[var(--text-primary)] m-0">Crea tu aviso</p>
+              <p className="text-xs text-[var(--text-secondary)] m-0 mt-0.5 leading-snug">
+                Completa el formulario o describe tu aviso con ADIS abajo.
+              </p>
             </div>
           </div>
 
-          <div className="flex-1 min-h-0 overflow-y-auto space-y-2 pb-1">
+          <div className="flex-1 min-h-0 overflow-y-auto space-y-4 pb-2">
             <PublishPhotoZone
               images={draft.imagenes}
               onAdd={addImage}
@@ -251,29 +257,13 @@ export default function PublishStudio({
               onEnhanceField={handleEnhanceField}
               enhancingField={enhancingField}
             />
-
-            {!compact && (
-              <button
-                type="button"
-                onClick={goToPay}
-                className="w-full py-3 rounded-xl font-bold text-white"
-                style={{ background: 'var(--brand-blue)' }}
-              >
-                Continuar
-              </button>
-            )}
           </div>
 
-          {compact && (
-            <button
-              type="button"
-              onClick={goToPay}
-              className="shrink-0 w-full py-2.5 rounded-xl font-bold text-white text-sm mb-1"
-              style={{ background: 'var(--brand-blue)' }}
-            >
-              Continuar
+          <div className={`shrink-0 pt-2 ${compact ? 'mb-1' : ''}`}>
+            <button type="button" onClick={goToReview} className={publishPrimaryBtn}>
+              Revisar aviso
             </button>
-          )}
+          </div>
 
           <PublishFixedChatBar
             onSend={handleChatSend}
@@ -284,18 +274,42 @@ export default function PublishStudio({
         </div>
       )}
 
+      {step === 'review' && (
+        <div className="flex flex-col flex-1 min-h-0">
+          <div className="flex-1 min-h-0 overflow-y-auto pb-3">
+            <PublishReviewStep draft={draft} />
+          </div>
+          <div className="shrink-0 space-y-2 pt-2 border-t border-[var(--border-color)]">
+            <button type="button" onClick={() => setStep('pay')} className={publishPrimaryBtn}>
+              Elegir plan y publicar
+            </button>
+            <button type="button" onClick={() => setStep('compose')} className={publishSecondaryBtn}>
+              ← Volver a editar
+            </button>
+          </div>
+        </div>
+      )}
+
       {step === 'pay' && (
-        <div className="flex-1 min-h-0 overflow-y-auto pb-4">
-          <PublishCheckoutPanel
-            draft={draft}
-            onChange={setDraft}
-            onPublishFree={() => publish('free')}
-            onPublishPaid={() => publish('paid')}
-            publishing={publishing}
-            publishedOrderId={publishedOrderId}
-            publishedAdisoId={publishedAdisoId}
-            onBack={() => setStep('create')}
-          />
+        <div className="flex flex-col flex-1 min-h-0">
+          <div className="flex-1 min-h-0 overflow-y-auto pb-3">
+            <PublishCheckoutPanel
+              draft={draft}
+              onChange={setDraft}
+              onPublishFree={() => publish('free')}
+              onPublishPaid={() => publish('paid')}
+              publishing={publishing}
+              publishedOrderId={publishedOrderId}
+              publishedAdisoId={publishedAdisoId}
+            />
+          </div>
+          {!publishedOrderId && (
+            <div className="shrink-0 pt-2 border-t border-[var(--border-color)]">
+              <button type="button" onClick={() => setStep('review')} className={publishSecondaryBtn}>
+                ← Volver a revisar
+              </button>
+            </div>
+          )}
         </div>
       )}
     </div>

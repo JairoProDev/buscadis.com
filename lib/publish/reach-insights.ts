@@ -5,20 +5,32 @@ export function pickReachInsight(
   funnel: AudienceFunnel,
   ctx: { categoria?: string; subcategoria?: string; titulo?: string }
 ): string {
-  if (funnel.E > 0 && ctx.titulo?.trim()) {
-    return `${funnel.E.toLocaleString()} personas podrían estar interesadas en tu aviso ahora mismo.`;
-  }
-  if (funnel.D > 0 && ctx.subcategoria) {
-    return `${funnel.D.toLocaleString()} personas buscan en esta subcategoría en nuestra red.`;
-  }
-  if (funnel.C > 0 && ctx.categoria) {
-    return `${funnel.C.toLocaleString()} personas activas en esta categoría en todos nuestros canales.`;
+  const lines = getReachInsightLines(funnel, ctx);
+  return lines[lines.length - 1] ?? 'Completa tu aviso para ver el potencial de alcance.';
+}
+
+/** Progressive reach lines for review step — no A/B/C labels */
+export function getReachInsightLines(
+  funnel: AudienceFunnel,
+  ctx: { categoria?: string; subcategoria?: string; titulo?: string }
+): string[] {
+  const lines: string[] = [];
+
+  if (funnel.A > 0) {
+    lines.push(`${funnel.A.toLocaleString()} personas ven anuncios en todos nuestros canales.`);
   }
   if (funnel.B > 0) {
-    return `${funnel.B.toLocaleString()} búsquedas registradas podrían coincidir con lo que publicas.`;
+    lines.push(`${funnel.B.toLocaleString()} búsquedas registradas en marketplace y ADIS AI.`);
   }
-  if (funnel.A > 0) {
-    return `Tu aviso puede llegar a ${funnel.A.toLocaleString()} personas en marketplace, ADIS AI, redes y más.`;
+  if (funnel.C > 0 && ctx.categoria) {
+    lines.push(`${funnel.C.toLocaleString()} personas activas en esta categoría.`);
   }
-  return 'Completa tu aviso para ver el potencial de alcance.';
+  if (funnel.D > 0 && ctx.subcategoria) {
+    lines.push(`${funnel.D.toLocaleString()} interesados en esta subcategoría.`);
+  }
+  if (funnel.E > 0 && ctx.titulo?.trim()) {
+    lines.push(`${funnel.E.toLocaleString()} podrían estar interesados en tu aviso ahora mismo.`);
+  }
+
+  return lines;
 }
