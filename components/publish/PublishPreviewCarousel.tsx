@@ -107,7 +107,7 @@ export default function PublishPreviewCarousel({ draft }: PublishPreviewCarousel
       <div className="rounded-2xl border border-[var(--border-color)] p-3 bg-[var(--bg-secondary)] min-h-[200px] overflow-hidden">
         {active === 'buscadis' && (
           <div className="max-w-[280px] mx-auto pointer-events-none">
-            <AdisoCard adiso={mockAdiso} onClick={() => {}} vista="buscadis" />
+            <AdisoCard adiso={mockAdiso} onClick={() => {}} vista="feed" />
           </div>
         )}
         {active === 'story' && <StoryFrame draft={draft} />}

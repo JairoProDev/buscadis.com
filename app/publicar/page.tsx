@@ -54,13 +54,11 @@ function PublicarHubContent() {
     <div className="min-h-screen bg-[var(--bg-secondary)] flex flex-col pb-16 md:pb-0">
       <Header onToggleLeftSidebar={() => setSidebarOpen(true)} seccionActiva="publicar" />
       <main className="flex-1 w-full flex flex-col min-h-0">
-        <div className="container mx-auto px-4 py-4 md:py-6 max-w-6xl flex-1 flex flex-col min-h-0 w-full">
-          <h1 className="text-xl md:text-2xl font-bold text-center mb-1 text-[var(--text-primary)] shrink-0">
-            Publica tu aviso
+        <div className="container mx-auto px-3 py-3 md:py-5 max-w-xl flex-1 flex flex-col min-h-0 w-full">
+          <h1 className="text-lg md:text-xl font-bold text-center mb-0.5 text-[var(--text-primary)] shrink-0">
+            Publica tu oferta u oportunidad en Buscadis
           </h1>
-          <p className="text-center text-sm text-[var(--text-secondary)] mb-4 shrink-0">
-            Sube fotos, describe tu aviso y deja que la IA haga el resto.
-          </p>
+
 
           <div className="flex-1 flex flex-col min-h-[min(680px,calc(100vh-180px))]">
             <PublishStudioShell

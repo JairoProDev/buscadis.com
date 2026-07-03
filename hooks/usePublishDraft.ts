@@ -35,7 +35,6 @@ export function usePublishDraft(initial?: Partial<PublishDraft>) {
     ...loadDraft(),
     ...initial,
   }));
-  const [simpleMode, setSimpleMode] = useState(false);
   const [showAdvanced, setShowAdvanced] = useState(false);
 
   useEffect(() => {
@@ -136,8 +135,6 @@ export function usePublishDraft(initial?: Partial<PublishDraft>) {
     setField,
     setAtributo,
     addChatMessage,
-    simpleMode,
-    setSimpleMode,
     showAdvanced,
     setShowAdvanced,
   };

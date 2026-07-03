@@ -41,8 +41,8 @@ export default function PublishStudioShell({
           aria-label="Cerrar"
           onClick={onClose}
         />
-        <div className="relative w-full max-w-4xl max-h-[92vh] overflow-hidden bg-[var(--bg-primary)] rounded-t-2xl sm:rounded-2xl shadow-2xl flex flex-col">
-          <div className="flex-1 overflow-y-auto p-4 sm:p-6">
+        <div className="relative w-full max-w-lg sm:max-w-xl max-h-[94vh] overflow-hidden bg-[var(--bg-primary)] rounded-t-2xl sm:rounded-2xl shadow-2xl flex flex-col">
+          <div className="flex-1 min-h-0 overflow-hidden p-4 sm:p-5">
             <PublishStudio
               compact
               initialText={initialText}
@@ -60,7 +60,7 @@ export default function PublishStudioShell({
 
   if (variant === 'sidebar') {
     return (
-      <div className="h-full flex flex-col p-3 overflow-hidden">
+      <div className="h-full flex flex-col min-h-0 relative overflow-hidden">
         <PublishStudio
           compact
           initialText={initialText}
@@ -75,13 +75,14 @@ export default function PublishStudioShell({
   }
 
   return (
-    <PublishStudio
-      compact={compact}
-      initialText={initialText}
-      initialImageUrl={initialImageUrl}
-      initialContacto={initialContacto}
-      onNotify={onNotify}
-      onPublished={onPublished}
-    />
+    <div className="max-w-xl mx-auto w-full">
+      <PublishStudio
+        initialText={initialText}
+        initialImageUrl={initialImageUrl}
+        initialContacto={initialContacto}
+        onNotify={onNotify}
+        onPublished={onPublished}
+      />
+    </div>
   );
 }
