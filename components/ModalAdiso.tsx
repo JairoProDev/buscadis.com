@@ -986,10 +986,7 @@ Ref: ${adiso.edicionNumero || adiso.id}`;
     return (
       <>
         <div className="mx-auto w-full max-w-3xl">
-          <div
-            className="sticky z-[900] border-b border-[var(--border-color)] bg-[var(--bg-primary)]/95 backdrop-blur-md"
-            style={{ top: '72px' }}
-          >
+          <div className="border-b border-[var(--border-color)] bg-[var(--bg-primary)]">
             <div className="flex items-center justify-between gap-3 px-4 py-3">
               <button
                 type="button"

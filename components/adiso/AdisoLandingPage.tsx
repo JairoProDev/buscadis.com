@@ -386,11 +386,8 @@ export default function AdisoLandingPage({ adiso, onVolver }: AdisoLandingPagePr
 
   return (
     <>
-      {/* Toolbar */}
-      <div
-        className="sticky z-[900] border-b border-[var(--border-color)] bg-[var(--bg-primary)]/95 backdrop-blur-md"
-        style={{ top: '72px' }}
-      >
+      {/* Toolbar — fluye con la página (no sticky) */}
+      <div className="border-b border-[var(--border-color)] bg-[var(--bg-primary)]">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3 lg:px-8">
           <button
             type="button"
@@ -486,7 +483,7 @@ export default function AdisoLandingPage({ adiso, onVolver }: AdisoLandingPagePr
 
           {/* Panel de compra — sticky en desktop */}
           <div className="lg:col-span-5">
-            <div className="lg:sticky" style={{ top: 'calc(72px + 56px)' }}>
+            <div className="lg:sticky" style={{ top: 'calc(var(--header-height, 72px) + 1rem)' }}>
               <div className="rounded-3xl border border-[var(--border-color)] bg-[var(--bg-primary)] p-5 shadow-sm lg:p-6">
                 <PurchasePanel />
               </div>
