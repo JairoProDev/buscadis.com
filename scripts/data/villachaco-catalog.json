@@ -189,28 +189,30 @@
         "roast": "Gourmet"
       },
       "images": [
-        { "file": "catalog-cafe-gourmet-tostado-molido-250g.jpg", "is_primary": true, "alt": "Café Gourmet Tostado Molido Villa Chaco — Finca Santiago" },
+        { "file": "catalog-cafe-gourmet-tostado-molido-250g.jpg", "is_primary": true, "alt": "Café Gourmet Tostado — Villa Chaco (promocional)" },
+        { "file": "catalog-cafe-gourmet-tostado-molido-250g-foto.jpg", "is_primary": false, "alt": "Café Gourmet Tostado Molido Villa Chaco — Finca Santiago" },
         { "file": "producto-cafe-tostado.jpeg", "is_primary": false, "alt": "Empaque Café Gourmet Tostado Molido 250g — Villa Chaco" }
       ],
       "sort_order": 10,
       "is_featured": true
     },
     {
-      "sku": "VC-MIEL-500",
-      "title": "Miel de Abeja Gourmet 500g",
-      "description": "Miel de abeja pura y natural de La Convención, Cusco. Presentación gourmet 500g (17.64 oz).",
+      "sku": "VC-MIEL-400",
+      "title": "Miel de Abeja Gourmet 400g",
+      "description": "Miel de abeja pura y natural de La Convención, Cusco. Presentación gourmet 400g. 100% pura, sin aditivos ni conservantes.",
       "category": "Miel",
       "tags": ["miel", "gourmet", "abeja", "natural", "cusco", "quillabamba"],
       "brand": "Villa Chaco",
       "attributes": {
-        "weight": "500g",
-        "volume": "17.64 oz",
+        "weight": "400g",
+        "volume": "27.84 fl oz",
         "origin": "La Convención, Cusco, Perú",
         "type": "Miel de abeja pura"
       },
       "images": [
-        { "file": "producto-miel-gourmet.jpg", "is_primary": true, "alt": "Miel de Abeja Gourmet 500g — Villa Chaco" },
-        { "file": "hero-miel-gourmet.jpg", "is_primary": false, "alt": "Miel gourmet Villa Chaco" }
+        { "file": "producto-miel-gourmet.jpg", "is_primary": true, "alt": "Miel de Abeja Gourmet 400g — Villa Chaco (promocional)" },
+        { "file": "producto-miel-gourmet-foto.jpg", "is_primary": false, "alt": "Miel de Abeja Gourmet 400g — Villa Chaco" },
+        { "file": "hero-miel-gourmet-foto.jpg", "is_primary": false, "alt": "Miel gourmet Villa Chaco" }
       ],
       "sort_order": 11,
       "is_featured": true
@@ -266,7 +268,9 @@
         "gluten": "Sin gluten"
       },
       "images": [
-        { "file": "producto-cacao-polvo.jpg", "is_primary": true, "alt": "Cacao en Polvo 100% Natural 200g — Villa Chaco" }
+        { "file": "producto-cacao-polvo.jpg", "is_primary": true, "alt": "Cacao en Polvo 100% Natural 200g — Villa Chaco (promocional)" },
+        { "file": "producto-cacao-polvo-foto.jpg", "is_primary": false, "alt": "Cacao en Polvo 100% Natural 200g — Villa Chaco" },
+        { "file": "hero-cacao-polvo-foto.jpg", "is_primary": false, "alt": "Cacao en Polvo — Villa Chaco" }
       ],
       "sort_order": 14,
       "is_featured": false
@@ -284,7 +288,8 @@
         "type": "Bebida especial"
       },
       "images": [
-        { "file": "producto-coctel-cacao.jpg", "is_primary": true, "alt": "Cóctel de Cacao artesanal — Villa Chaco" }
+        { "file": "producto-coctel-cacao.jpg", "is_primary": true, "alt": "Cóctel de Cacao artesanal — Villa Chaco (promocional)" },
+        { "file": "producto-coctel-cacao-foto.jpg", "is_primary": false, "alt": "Cóctel de Cacao artesanal — Villa Chaco" }
       ],
       "sort_order": 15,
       "is_featured": false
