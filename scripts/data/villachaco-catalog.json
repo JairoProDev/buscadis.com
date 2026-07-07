@@ -13,7 +13,7 @@
     "publicadis_site_url": "https://publicadis.com/p/villachaco",
     "social_instagram": "https://www.instagram.com/villachaco",
     "social_facebook": "https://www.facebook.com/villachaco",
-    "logo_file": "logo-villa-chaco.svg",
+    "logo_file": "logo-villa-chaco.png",
     "banner_file": "hero-chocolates-bean-to-bar.jpg",
     "og_image_file": "featured-chocolate-coleccion.jpg",
     "meta_title": "Villa Chaco Productos — Sabores que nacen de la tierra",
@@ -172,6 +172,49 @@
         { "file": "producto-chocolate-pistachos.jpeg", "is_primary": false, "alt": "Empaque Chocolate Dark Pistachos 70% — Villa Chaco" }
       ],
       "sort_order": 7,
+      "is_featured": true
+    },
+    {
+      "sku": "VC-CHOC-CUSCO-MILK-50",
+      "title": "Chocolate Cusco Milk 50% Cacao",
+      "description": "Chocolate con leche bean to bar con 50% de cacao de La Convención, Cusco. Suave, cremoso y con sabor auténtico de origen.",
+      "category": "Chocolate",
+      "tags": ["chocolate", "bean-to-bar", "50%-cacao", "leche", "milk", "cusco", "chuncho"],
+      "brand": "Villa Chaco",
+      "attributes": {
+        "cacao_percentage": "50%",
+        "weight": "50g",
+        "origin": "La Convención, Cusco, Perú",
+        "process": "Bean to Bar",
+        "type": "Chocolate con leche",
+        "flavor_es": "Cusco Milk",
+        "flavor_en": "Cusco Milk"
+      },
+      "images": [
+        { "file": "catalog-chocolate-cusco-milk-50cacao-50g.jpg", "is_primary": true, "alt": "Chocolate Cusco Milk 50% Cacao — Villa Chaco" }
+      ],
+      "sort_order": 8,
+      "is_featured": true
+    },
+    {
+      "sku": "VC-CHOC-ALMENDRAS-50",
+      "title": "Chocolate Almendras 70% Cacao",
+      "description": "Chocolate bean to bar con 70% cacao chuncho y almendras seleccionadas. Intenso, crujiente y elaborado con pasión en La Convención, Cusco.",
+      "category": "Chocolate",
+      "tags": ["chocolate", "bean-to-bar", "70%-cacao", "almendras", "almonds", "cusco", "chuncho"],
+      "brand": "Villa Chaco",
+      "attributes": {
+        "cacao_percentage": "70%",
+        "weight": "50g",
+        "origin": "La Convención, Cusco, Perú",
+        "process": "Bean to Bar",
+        "flavor_es": "Almendras",
+        "flavor_en": "Almonds"
+      },
+      "images": [
+        { "file": "catalog-chocolate-almendras-70cacao-50g.jpg", "is_primary": true, "alt": "Chocolate Almendras 70% Cacao — Villa Chaco" }
+      ],
+      "sort_order": 9,
       "is_featured": true
     },
     {
