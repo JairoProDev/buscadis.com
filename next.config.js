@@ -1,7 +1,4 @@
 /** @type {import('next').NextConfig} */
-const publicadisOrigin = (process.env.NEXT_PUBLIC_PUBLICADIS_URL || 'https://publicadis.com').replace(/\/$/, '');
-const villachacoOnBuscadis = process.env.VILLACHACO_SERVE_ON_BUSCADIS === 'true';
-
 const nextConfig = {
   reactStrictMode: true,
   images: {
@@ -85,40 +82,14 @@ const nextConfig = {
       },
     ];
 
-    if (!villachacoOnBuscadis) {
-      redirects.push(
-        {
-          source: '/villachaco',
-          destination: `${publicadisOrigin}/p/villachaco`,
-          permanent: true,
-        },
-        {
-          source: '/villachaco/',
-          destination: `${publicadisOrigin}/p/villachaco`,
-          permanent: true,
-        }
-      );
-    }
-
     return redirects;
   },
   async rewrites() {
-    const atProfileRewrites = {
+    return {
       beforeFiles: [
         { source: '/@:slug', destination: '/negocio/:slug' },
       ],
     };
-
-    if (villachacoOnBuscadis) {
-      return {
-        beforeFiles: [
-          ...atProfileRewrites.beforeFiles,
-          { source: '/villachaco', destination: '/villachaco/index.html' },
-          { source: '/villachaco/', destination: '/villachaco/index.html' },
-        ],
-      };
-    }
-    return atProfileRewrites;
   },
   transpilePackages: ['@buscadis/profile-engine', '@imgly/background-removal', 'onnxruntime-web'],
   webpack: (config, { isServer }) => {

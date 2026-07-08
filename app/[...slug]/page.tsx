@@ -8,10 +8,11 @@ import { Categoria, Adiso } from '@/types';
 import PublicBusinessPage from '@/app/negocio/[slug]/page';
 import { createClient } from '@supabase/supabase-js';
 
-import { buildBusinessShareMetadata } from '@/lib/seo/business-metadata';
+import { buildBusinessShareMetadata, getBusinessProfilePath } from '@/lib/seo/business-metadata';
 import { buildAdisoMetadata } from '@/lib/seo/adiso-metadata';
 import { withDefaultShareImage } from '@/lib/seo/og-image';
 import { normalizeBusinessSlug } from '@/lib/business/normalize-slug';
+import { getBusinessProfileBySlug } from '@/lib/business';
 
 const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL || 'https://buscadis.com').replace(/\/$/, '');
 
@@ -50,6 +51,31 @@ function isReservedStaticPath(slug: string[]): boolean {
   if (RESERVED_STATIC_PREFIXES.has(root)) return true;
   if (root.startsWith('workbox-') || root.startsWith('fallback-')) return true;
   return false;
+}
+
+function buildSearchQuery(
+  searchParams: { [key: string]: string | string[] | undefined }
+): string {
+  const query = new URLSearchParams();
+  for (const [key, value] of Object.entries(searchParams)) {
+    if (typeof value === 'string') query.set(key, value);
+    else if (Array.isArray(value)) value.forEach((v) => query.append(key, v));
+  }
+  const qs = query.toString();
+  return qs ? `?${qs}` : '';
+}
+
+async function redirectBareSlugToCanonicalProfile(
+  slug: string,
+  searchParams: { [key: string]: string | string[] | undefined }
+): Promise<void> {
+  const businessSlug = normalizeBusinessSlug(slug);
+  if (!businessSlug || isReservedBusinessSlug(businessSlug)) return;
+
+  const profile = await getBusinessProfileBySlug(businessSlug);
+  if (!profile) return;
+
+  redirect(`${getBusinessProfilePath(businessSlug)}${buildSearchQuery(searchParams)}`);
 }
 
 export const revalidate = 3600;
@@ -149,7 +175,7 @@ export default async function Page(props: PageProps) {
         if (isReservedBusinessSlug(businessSlug)) {
             notFound();
         }
-        // Format 3: /[business_slug] or /@handle (fallback si middleware/rewrite no aplica)
+        await redirectBareSlugToCanonicalProfile(slug[0], searchParams);
         return (
             <PublicBusinessPage
                 params={Promise.resolve({ slug: businessSlug })}
