@@ -2,7 +2,7 @@
 
 import { useMemo } from 'react';
 import Ordenamiento, { type OrdenamientoOption } from '@/components/Ordenamiento';
-import { IconSort, IconSortDown, IconSortUp, IconStar } from '@/components/Icons';
+import { IconSort, IconSortDown, IconSortUp } from '@/components/Icons';
 import {
   VISITOR_SORT_OPTIONS,
   setStoredVisitorSort,
@@ -11,7 +11,7 @@ import {
 import { cn } from '@/lib/utils';
 
 const CATALOG_SORT_ICONS: Record<VisitorSortOption, OrdenamientoOption<VisitorSortOption>['icon']> = {
-  owner: IconStar,
+  owner: IconSort,
   title_asc: IconSort,
   title_desc: IconSort,
   price_asc: IconSortUp,
@@ -45,6 +45,8 @@ export default function ProductSortControl({ value, onChange, className }: Produ
         valor={value}
         onChange={handleChange}
         options={options}
+        variant="icon"
+        triggerIcon={IconSort}
         ariaLabel="Ordenar productos"
         sheetTitle="Ordenar productos"
       />

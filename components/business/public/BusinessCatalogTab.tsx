@@ -87,6 +87,18 @@ export default function BusinessCatalogTab({
 
     const categories = Array.from(new Set(adisos.map(a => a.categoria || 'Otros').filter(Boolean)));
 
+    const categoryThumbs = useMemo(() => {
+        const map = new Map<string, string>();
+        for (const a of adisos) {
+            const cat = a.categoria || 'Otros';
+            if (!map.has(cat)) {
+                const url = a.imagenesUrls?.[0] || a.imagenUrl;
+                if (url) map.set(cat, url);
+            }
+        }
+        return map;
+    }, [adisos]);
+
     useEffect(() => {
         let result = adisos;
 
@@ -522,45 +534,53 @@ export default function BusinessCatalogTab({
                             </div>
                         )}
 
-                        {/* Row 2: Count + Sort + View Mode Toggles */}
-                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                            <div className="flex items-center gap-3 flex-wrap">
-                                <div className="flex items-center gap-2 text-xs font-bold text-slate-400">
-                                    <IconBox size={14} />
-                                    <span>{filteredAdisos.length} productos</span>
-                                </div>
-                                {!showEditControls && (
-                                    <ProductSortControl value={visitorSort} onChange={setVisitorSort} />
-                                )}
+                        {/* Toolbar: count + sort + view modes + PDF — one line */}
+                        <div className="flex items-center gap-2 flex-nowrap min-w-0">
+                            <div className="flex items-center gap-2 text-xs font-bold text-slate-400 min-w-0 shrink">
+                                <IconBox size={14} className="shrink-0" />
+                                <span className="truncate">{filteredAdisos.length} productos</span>
                             </div>
 
-                            <div className="flex items-center gap-1 bg-white border border-slate-100 p-1 rounded-2xl shadow-sm shrink-0">
+                            <div className="flex items-center gap-1.5 shrink-0 ml-auto">
+                                {!showEditControls && (
+                                    <ProductSortControl
+                                        value={visitorSort}
+                                        onChange={setVisitorSort}
+                                    />
+                                )}
+
+                                <div className="flex items-center gap-1 bg-white border border-slate-100 p-1 rounded-2xl shadow-sm">
+                                    <button
+                                        type="button"
+                                        onClick={() => setViewMode('grid')}
+                                        className={cn('p-2.5 rounded-xl transition-all', viewMode === 'grid' ? 'bg-[var(--brand-color)] text-white shadow-md' : 'text-slate-400 hover:text-slate-600')}
+                                        title="Cuadrícula"
+                                    >
+                                        <IconGrid size={18} />
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => setViewMode('feed')}
+                                        className={cn('p-2.5 rounded-xl transition-all', viewMode === 'feed' ? 'bg-[var(--brand-color)] text-white shadow-md' : 'text-slate-400 hover:text-slate-600')}
+                                        title="Feed"
+                                    >
+                                        <IconFeed size={18} />
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => setViewMode('list')}
+                                        className={cn('p-2.5 rounded-xl transition-all', viewMode === 'list' ? 'bg-[var(--brand-color)] text-white shadow-md' : 'text-slate-400 hover:text-slate-600')}
+                                        title="Lista"
+                                    >
+                                        <IconList size={18} />
+                                    </button>
+                                </div>
+
                                 <button
-                                    onClick={() => setViewMode('grid')}
-                                    className={cn("p-2.5 rounded-xl transition-all", viewMode === 'grid' ? "bg-[var(--brand-color)] text-white shadow-md" : "text-slate-400 hover:text-slate-600")}
-                                    title="Cuadrícula"
-                                >
-                                    <IconGrid size={18} />
-                                </button>
-                                <button
-                                    onClick={() => setViewMode('feed')}
-                                    className={cn("p-2.5 rounded-xl transition-all", viewMode === 'feed' ? "bg-[var(--brand-color)] text-white shadow-md" : "text-slate-400 hover:text-slate-600")}
-                                    title="Feed"
-                                >
-                                    <IconFeed size={18} />
-                                </button>
-                                <button
-                                    onClick={() => setViewMode('list')}
-                                    className={cn("p-2.5 rounded-xl transition-all", viewMode === 'list' ? "bg-[var(--brand-color)] text-white shadow-md" : "text-slate-400 hover:text-slate-600")}
-                                    title="Lista"
-                                >
-                                    <IconList size={18} />
-                                </button>
-                                <div className="w-[1px] h-5 bg-slate-200 mx-1" />
-                                <button
+                                    type="button"
                                     onClick={handlePDFDownload}
                                     disabled={generatingPDF}
-                                    className="p-2.5 text-slate-400 hover:text-slate-600 relative disabled:cursor-wait"
+                                    className="p-2.5 rounded-xl text-slate-400 hover:text-slate-600 transition-colors relative disabled:cursor-wait shrink-0"
                                     title="Descargar catálogo en PDF"
                                 >
                                     {generatingPDF ? (
@@ -579,37 +599,71 @@ export default function BusinessCatalogTab({
                             </div>
                         </div>
 
-                        {/* Categories - Horizontal Scroll Pills */}
+                        {/* Categories — IG highlights style (squircle) */}
                         {categories.length > 0 && (
-                            <div className="overflow-x-auto pb-2 -mx-4 px-4 md:mx-0 md:px-0 no-scrollbar mask-fade-right">
-                                <div className="flex gap-2.5">
+                            <div className="overflow-x-auto pb-1 -mx-4 px-4 md:mx-0 md:px-0 no-scrollbar">
+                                <div className="flex gap-4 snap-x snap-mandatory">
                                     <button
+                                        type="button"
                                         onClick={() => setSelectedCategory(null)}
-                                        className={cn(
-                                            "px-5 py-2.5 rounded-full text-sm font-bold transition-all whitespace-nowrap flex items-center gap-2",
-                                            !selectedCategory
-                                                ? "bg-[var(--brand-color)] text-white shadow-lg shadow-[var(--brand-color)]/25 ring-2 ring-[var(--brand-color)] ring-offset-2"
-                                                : "bg-white text-slate-600 border border-slate-200 hover:border-[var(--brand-color)] hover:text-[var(--brand-color)] hover:bg-slate-50"
-                                        )}
+                                        className="flex flex-col items-center gap-1.5 shrink-0 snap-start"
                                     >
-                                        <IconStore size={16} />
-                                        Todos
-                                    </button>
-                                    {categories.map(cat => (
-                                        <button
-                                            key={cat}
-                                            onClick={() => setSelectedCategory(cat)}
+                                        <div
                                             className={cn(
-                                                "px-5 py-2.5 rounded-full text-sm font-bold transition-all whitespace-nowrap flex items-center gap-2",
-                                                selectedCategory === cat
-                                                    ? "bg-[var(--brand-color)] text-white shadow-lg shadow-[var(--brand-color)]/25 ring-2 ring-[var(--brand-color)] ring-offset-2"
-                                                    : "bg-white text-slate-600 border border-slate-200 hover:border-[var(--brand-color)] hover:text-[var(--brand-color)] hover:bg-slate-50"
+                                                'w-[4.25rem] h-[4.25rem] p-[2px] rounded-[28%] transition-all',
+                                                !selectedCategory
+                                                    ? 'bg-gradient-to-tr from-[var(--brand-color)] to-[var(--brand-accent,#ec4899)]'
+                                                    : 'bg-slate-200'
                                             )}
                                         >
-                                            <IconBox size={16} className={selectedCategory === cat ? "text-white" : "text-slate-400"} />
-                                            {cat}
-                                        </button>
-                                    ))}
+                                            <div className="w-full h-full rounded-[26%] border-2 border-white overflow-hidden bg-slate-50 flex items-center justify-center">
+                                                <IconStore size={22} className={!selectedCategory ? 'text-[var(--brand-color)]' : 'text-slate-400'} />
+                                            </div>
+                                        </div>
+                                        <span className={cn(
+                                            'text-[11px] font-medium truncate max-w-[4.5rem] text-center leading-tight',
+                                            !selectedCategory ? 'text-[var(--brand-color)]' : 'text-slate-500'
+                                        )}>
+                                            Todos
+                                        </span>
+                                    </button>
+                                    {categories.map((cat) => {
+                                        const thumb = categoryThumbs.get(cat);
+                                        const selected = selectedCategory === cat;
+                                        return (
+                                            <button
+                                                key={cat}
+                                                type="button"
+                                                onClick={() => setSelectedCategory(cat)}
+                                                className="flex flex-col items-center gap-1.5 shrink-0 snap-start"
+                                            >
+                                                <div
+                                                    className={cn(
+                                                        'w-[4.25rem] h-[4.25rem] p-[2px] rounded-[28%] transition-all',
+                                                        selected
+                                                            ? 'bg-gradient-to-tr from-[var(--brand-color)] to-[var(--brand-accent,#ec4899)]'
+                                                            : 'bg-slate-200'
+                                                    )}
+                                                >
+                                                    <div className="w-full h-full rounded-[26%] border-2 border-white overflow-hidden bg-slate-50">
+                                                        {thumb ? (
+                                                            <img src={thumb} alt={cat} className="w-full h-full object-cover" />
+                                                        ) : (
+                                                            <div className="w-full h-full flex items-center justify-center text-base font-bold text-[var(--brand-color)] bg-[var(--brand-color)]/10">
+                                                                {cat.charAt(0).toUpperCase()}
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                                <span className={cn(
+                                                    'text-[11px] font-medium truncate max-w-[4.5rem] text-center leading-tight',
+                                                    selected ? 'text-[var(--brand-color)]' : 'text-slate-500'
+                                                )}>
+                                                    {cat}
+                                                </span>
+                                            </button>
+                                        );
+                                    })}
                                 </div>
                             </div>
                         )}

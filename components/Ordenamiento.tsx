@@ -27,6 +27,9 @@ interface OrdenamientoProps<V extends string = TipoOrdenamiento> {
   options?: OrdenamientoOption<V>[];
   ariaLabel?: string;
   sheetTitle?: string;
+  /** `icon` = solo icono fijo, sin pill ni etiqueta */
+  variant?: 'pill' | 'icon';
+  triggerIcon?: SortIconComponent;
 }
 
 const SORT_ICONS: Record<TipoOrdenamiento, SortIconComponent> = {
@@ -53,6 +56,8 @@ export default function Ordenamiento<V extends string = TipoOrdenamiento>({
   options,
   ariaLabel,
   sheetTitle,
+  variant = 'pill',
+  triggerIcon: TriggerIconProp,
 }: OrdenamientoProps<V>) {
   const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
@@ -102,7 +107,8 @@ export default function Ordenamiento<V extends string = TipoOrdenamiento>({
   }, [isOpen]);
 
   const opcionActual = opcionesOrdenamiento.find((opt) => opt.valor === valor) || opcionesOrdenamiento[0];
-  const CurrentIcon = opcionActual.icon;
+  const CurrentIcon = variant === 'icon' ? (TriggerIconProp ?? IconSort) : opcionActual.icon;
+  const iconOnly = variant === 'icon';
 
   const handleSelect = (nuevoValor: V) => {
     onChange(nuevoValor);
@@ -149,25 +155,38 @@ export default function Ordenamiento<V extends string = TipoOrdenamiento>({
         aria-label={sortLabel}
         aria-expanded={isOpen}
         aria-haspopup="true"
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: isMobile ? '0.25rem' : '0.5rem',
-          padding: isMobile ? '0 10px' : '0 0.875rem',
-          border: 'none',
-          borderRadius: '14px',
-          color: 'var(--text-primary)',
-          boxShadow: '0 4px 12px rgba(0,0,0,0.03)',
-          cursor: 'pointer',
-          fontSize: '0.85rem',
-          fontWeight: 600,
-          height: '42px',
-          minWidth: isMobile ? '42px' : undefined,
-        }}
-        className="brand-pill-glass hover:shadow-md motion-reduce:hover:translate-y-0 hover:-translate-y-0.5"
+        style={
+          iconOnly
+            ? undefined
+            : {
+                display: 'flex',
+                alignItems: 'center',
+                gap: isMobile ? '0.25rem' : '0.5rem',
+                padding: isMobile ? '0 10px' : '0 0.875rem',
+                border: 'none',
+                borderRadius: '14px',
+                color: 'var(--text-primary)',
+                boxShadow: '0 4px 12px rgba(0,0,0,0.03)',
+                cursor: 'pointer',
+                fontSize: '0.85rem',
+                fontWeight: 600,
+                height: '42px',
+                minWidth: isMobile ? '42px' : undefined,
+              }
+        }
+        className={
+          iconOnly
+            ? 'p-2.5 rounded-xl text-slate-400 hover:text-slate-600 transition-colors shrink-0 inline-flex items-center justify-center'
+            : 'brand-pill-glass hover:shadow-md motion-reduce:hover:translate-y-0 hover:-translate-y-0.5'
+        }
       >
-        <CurrentIcon size={16} aria-hidden="true" className="text-[var(--brand-blue)]" />
-        {mounted && !isMobile && (
+        <CurrentIcon
+          size={16}
+          aria-hidden="true"
+          className={iconOnly ? undefined : 'text-[var(--brand-blue)]'}
+          color={iconOnly ? 'currentColor' : undefined}
+        />
+        {!iconOnly && mounted && !isMobile && (
           <>
             <span className="max-w-[120px] truncate">{getOptionLabel(opcionActual, t)}</span>
             <span
