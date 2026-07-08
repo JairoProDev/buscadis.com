@@ -12,6 +12,7 @@ import {
 } from '@/lib/business/social-display';
 import { getSocialIconByBrand } from './social-icons';
 import { cn } from '@/lib/utils';
+import { IconEdit } from '@/components/Icons';
 
 interface BusinessSocialStripProps {
   profile: Partial<BusinessProfile>;
@@ -76,8 +77,8 @@ function WireframeSocialButton({
         </span>
       </a>
       {showEditControls && (
-        <span className="absolute -top-1 -right-1 z-10 w-5 h-5 rounded-full bg-[var(--brand-color)] text-white text-[10px] font-bold flex items-center justify-center shadow-md pointer-events-none">
-          ✎
+        <span className="absolute -top-1 -right-1 z-10 w-5 h-5 rounded-full bg-white/45 backdrop-blur-md border border-white/60 text-[var(--brand-color)] flex items-center justify-center shadow-sm pointer-events-none">
+          <IconEdit size={10} />
         </span>
       )}
     </div>
@@ -136,8 +137,8 @@ export default function BusinessSocialStrip({
                 {getSocialIconByBrand(brand, 18)}
               </a>
               {showEditControls && (
-                <span className="absolute -top-1 -right-1 z-10 w-5 h-5 rounded-full bg-[var(--brand-color)] text-white text-[10px] font-bold flex items-center justify-center shadow-md pointer-events-none">
-                  ✎
+                <span className="absolute -top-1 -right-1 z-10 w-5 h-5 rounded-full bg-white/45 backdrop-blur-md border border-white/60 text-[var(--brand-color)] flex items-center justify-center shadow-sm pointer-events-none">
+                  <IconEdit size={10} />
                 </span>
               )}
             </div>
@@ -156,8 +157,8 @@ export default function BusinessSocialStrip({
               <span className="truncate max-w-[140px]">{label}</span>
             </a>
             {showEditControls && (
-              <span className="absolute -top-1 -right-1 z-10 w-5 h-5 rounded-full bg-[var(--brand-color)] text-white text-[10px] font-bold flex items-center justify-center shadow-md pointer-events-none">
-                ✎
+              <span className="absolute -top-1 -right-1 z-10 w-5 h-5 rounded-full bg-white/45 backdrop-blur-md border border-white/60 text-[var(--brand-color)] flex items-center justify-center shadow-sm pointer-events-none">
+                <IconEdit size={10} />
               </span>
             )}
           </div>

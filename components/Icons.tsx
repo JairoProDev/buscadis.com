@@ -9,7 +9,7 @@ import {
   FaInfoCircle, FaRegHeart, FaMicrophone, FaLinkedin, FaYoutube,
   FaFile, FaCamera, FaTable, FaUpload, FaList, FaFilter, FaMapPin, FaShoppingCart, FaMagic, FaMinus,
   FaFileExcel, FaDownload, FaLightbulb, FaSyncAlt, FaBolt, FaTag, FaEyeSlash, FaLayerGroup, FaSquare,
-  FaSort, FaSortAmountDown, FaSortAmountUp, FaVideo, FaPaperPlane, FaBell, FaMoon, FaSun, FaUser,
+  FaSort, FaSortAmountDown, FaSortAmountUp, FaVideo, FaPaperPlane, FaBell, FaMoon, FaSun, FaUser, FaHandPointUp,
   FaCog, FaSignOutAlt, FaCompass, FaUserTie, FaUserCog, FaUserEdit, FaEllipsisV
 } from 'react-icons/fa';
 import { FcGoogle } from 'react-icons/fc';
@@ -218,7 +218,7 @@ export const IconLayers = (p: IconProps) => <FaLayerGroup size={getSize(p)} colo
 export const IconSort = (p: IconProps) => <FaSort size={getSize(p)} color={p.color || 'currentColor'} className={p.className} onClick={p.onClick} />;
 export const IconSortDown = (p: IconProps) => <FaSortAmountDown size={getSize(p)} color={p.color || 'currentColor'} className={p.className} onClick={p.onClick} />;
 export const IconSortUp = (p: IconProps) => <FaSortAmountUp size={getSize(p)} color={p.color || 'currentColor'} className={p.className} onClick={p.onClick} />;
-export const IconTouch = (p: IconProps) => <FaHandHoldingHeart size={getSize(p)} color={p.color || 'currentColor'} className={p.className} onClick={p.onClick} />;
+export const IconTouch = (p: IconProps) => <FaHandPointUp size={getSize(p)} color={p.color || 'currentColor'} className={p.className} onClick={p.onClick} />;
 
 // Custom Filter Icons
 export const IconFilterFunnel = (p: IconProps) => (

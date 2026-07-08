@@ -1,6 +1,7 @@
 'use client';
 
 import EditableElement from '@/components/business/EditableElement';
+import { IconEdit } from '@/components/Icons';
 import { useProfileEdit } from '@/contexts/ProfileEditContext';
 import { getEditFieldById } from '@/lib/business/edit-field-registry';
 import type { BusinessProfile } from '@/types/business';
@@ -62,8 +63,8 @@ export default function ProfileEditableRegion({
         >
           {children}
         </button>
-        <span className="absolute top-1 right-1 z-20 w-6 h-6 rounded-full bg-[var(--brand-color)] text-white text-[11px] font-bold flex items-center justify-center shadow-md pointer-events-none">
-          ✎
+        <span className="absolute top-1.5 right-1.5 z-20 w-6 h-6 rounded-full bg-white/45 backdrop-blur-md border border-white/60 text-[var(--brand-color)] flex items-center justify-center shadow-sm pointer-events-none">
+          <IconEdit size={12} />
         </span>
       </div>
     );

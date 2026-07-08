@@ -6,6 +6,7 @@ import { cn } from '@/lib/utils';
 import { getWhatsappUrl } from '@/lib/business/public-utils';
 import { profilePageContainerClass } from '@/lib/business/profile-layout';
 import type { ReactNode } from 'react';
+import { IconEdit } from '@/components/Icons';
 
 const TEXT_SIZE: Record<string, string> = {
   sm: 'text-lg',
@@ -66,10 +67,10 @@ export function ProfileAvatar({
         <button
           type="button"
           onClick={onEditAvatar}
-          className="absolute top-1 right-1 z-10 w-7 h-7 rounded-full bg-[var(--brand-color)] text-white text-[11px] font-bold flex items-center justify-center shadow-md"
+          className="absolute top-1.5 right-1.5 z-10 w-7 h-7 rounded-full bg-white/45 backdrop-blur-md border border-white/60 text-[var(--brand-color)] flex items-center justify-center shadow-sm"
           aria-label="Editar logo"
         >
-          ✎
+          <IconEdit size={12} />
         </button>
       )}
     </div>

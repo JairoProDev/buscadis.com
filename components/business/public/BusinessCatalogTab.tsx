@@ -158,23 +158,23 @@ export default function BusinessCatalogTab({
         showEditControls &&
         Boolean(profile.id) &&
         !searchQuery &&
-        !selectedCategory &&
-        !reorderBusy;
+        !selectedCategory;
 
     const handleReorder = async (orderedIds: string[]) => {
-        if (!profile.id) return;
+        if (!profile.id || reorderBusy) return;
         setReorderBusy(true);
         const prev = filteredAdisos;
         const map = new Map(prev.map((a) => [a.id, a]));
         const next = orderedIds.map((id) => map.get(id)).filter(Boolean) as Adiso[];
         setFilteredAdisos(next);
         const result = await reorderCatalogProducts(profile.id, orderedIds);
-        setReorderBusy(false);
         if (!result.success) {
+            setReorderBusy(false);
             setFilteredAdisos(prev);
             toastError(result.error || 'No se pudo guardar el orden');
             return;
         }
+        setReorderBusy(false);
         toastSuccess('Orden del catálogo actualizado');
         onCatalogReorder?.();
     };
