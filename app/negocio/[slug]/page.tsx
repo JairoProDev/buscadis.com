@@ -22,6 +22,10 @@ import { type BusinessWithRole } from '@/lib/business-access';
 import { saveBusinessViaAPI, publishBusinessViaAPI } from '@/lib/business-api';
 import { useDebounce } from '@/hooks/useDebounce';
 import { normalizeBusinessSlug } from '@/lib/business/normalize-slug';
+import { trackProfileEvent, trackProfileView } from '@/lib/business/analytics/track-profile-event';
+import { ProfileEditProvider } from '@/contexts/ProfileEditContext';
+import ProductEditorModal from '@/components/business/editor/ProductEditorModal';
+import InlineFieldEditorHost from '@/components/business/editor/InlineFieldEditorHost';
 
 export default function PublicBusinessPage({
     params,
@@ -50,7 +54,6 @@ export default function PublicBusinessPage({
     const lastSavedStr = useRef<string>('');
 
     // Modals state
-    const [showProductModal, setShowProductModal] = useState(false);
     const [showAddProductModal, setShowAddProductModal] = useState(false);
 
     // Auto-open editor if requested
@@ -189,45 +192,25 @@ export default function PublicBusinessPage({
 
     const trackEvent = useCallback(async (eventType: string, businessId: string, productId?: string) => {
         if (!isOnline) return;
-        try {
-            await supabase!.from('page_analytics').insert({
-                business_profile_id: businessId,
-                event_type: eventType,
-                product_id: productId,
-                session_id: getSessionId(),
-                user_agent: typeof navigator !== 'undefined' ? navigator.userAgent : '',
-                referrer: typeof document !== 'undefined' ? document.referrer : '',
-            });
-        } catch (error) {
-            // Silenciar errores de analytics offline
-        }
+        await trackProfileEvent(businessId, eventType as Parameters<typeof trackProfileEvent>[1], productId);
     }, [isOnline]);
 
-    const getSessionId = () => {
-        if (typeof sessionStorage === 'undefined') return 'ssr-session';
-        let sessionId = sessionStorage.getItem('session_id');
-        if (!sessionId) {
-            sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-            sessionStorage.setItem('session_id', sessionId);
-        }
-        return sessionId;
-    };
-
     useEffect(() => {
-        if (business?.id && isOnline) {
-            trackEvent('profile_view', business.id);
-            if (resolvedSearchParams?.from_qr === '1') {
-                trackEvent('qr_scan', business.id);
-            }
-        }
-    }, [business?.id, isOnline, trackEvent, resolvedSearchParams?.from_qr]);
+        if (!business?.id || !isOnline) return;
+        const isOwnerOrMember = canEdit;
+        trackProfileView({
+            businessProfileId: business.id,
+            isEditing,
+            isOwnerOrMember,
+            fromQr: resolvedSearchParams?.from_qr === '1',
+        });
+    }, [business?.id, isOnline, isEditing, canEdit, resolvedSearchParams?.from_qr]);
 
     const handleProductSave = async (updatedProduct: any) => {
         if (business?.id) {
             await reloadCatalog(business.id);
             success('Producto guardado correctamente');
         }
-        setShowProductModal(false);
         setEditingProduct(null);
     };
 
@@ -240,7 +223,17 @@ export default function PublicBusinessPage({
         }
     }, []);
 
-    // ─── LOADING STATE ────────────────────────────────────
+    useEffect(() => {
+        if (!isEditing) return;
+        const onKeyDown = (e: KeyboardEvent) => {
+            if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+                e.preventDefault();
+                if (localProfile?.id) handleSave(localProfile, true);
+            }
+        };
+        window.addEventListener('keydown', onKeyDown);
+        return () => window.removeEventListener('keydown', onKeyDown);
+    }, [isEditing, localProfile, handleSave]);
     if (loading) {
         return (
             <div className="min-h-screen bg-slate-50 flex items-center justify-center">
@@ -288,6 +281,12 @@ export default function PublicBusinessPage({
 
     return (
         <>
+        <ProfileEditProvider
+            isEditing={isEditing}
+            initialHub={activeHub}
+            onHubChange={setActiveHub}
+            onEditPart={handleEditPart}
+        >
         <BusinessProfileEditorLayout
             isEditing={isEditing}
             canEdit={canEdit}
@@ -356,35 +355,32 @@ export default function PublicBusinessPage({
                         canEdit={canEdit}
                         onOpenEditor={() => setIsEditing(true)}
                         onEditPart={handleEditPart}
+                        onProfilePatch={(patch) =>
+                            setLocalProfile((prev) => (prev ? { ...prev, ...patch } : prev))
+                        }
                         onEditProduct={(productAdiso) => {
                             setIsEditing(true);
                             setActiveHub('content');
                             const fullProduct = catalogProducts.find((p) => p.id === productAdiso.id);
                             setEditingProduct(fullProduct || productAdiso);
                         }}
+                        onCatalogReorder={() => business?.id && reloadCatalog(business.id)}
                     />
                 </>
             }
             floatingActions={undefined}
         />
-            {(showProductModal || editingProduct) && user && business?.id && (
-                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-300">
-                    <div className="w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-                        <ProductEditor
-                            key={editingProduct?.id || 'new-product'}
-                            product={editingProduct === 'new' ? null : editingProduct}
-                            businessProfileId={business.id}
-                            userId={user.id}
-                            adisos={adisos}
-                            onSave={handleProductSave}
-                            onCancel={() => {
-                                setShowProductModal(false);
-                                setEditingProduct(null);
-                            }}
-                        />
-                    </div>
-                </div>
-            )}
+        <InlineFieldEditorHost />
+        <ProductEditorModal
+            open={Boolean(editingProduct) && Boolean(user?.id && business?.id)}
+            product={editingProduct}
+            businessProfileId={business?.id || ''}
+            userId={user?.id || ''}
+            adisos={adisos}
+            onSave={handleProductSave}
+            onClose={() => setEditingProduct(null)}
+        />
+        </ProfileEditProvider>
 
             {/* Simple Product Add Modal */}
             {showAddProductModal && business?.id && (

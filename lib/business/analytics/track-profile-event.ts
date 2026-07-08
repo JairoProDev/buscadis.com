@@ -10,7 +10,7 @@ export type ProfileAnalyticsEvent =
   | 'add_to_cart'
   | 'qr_scan';
 
-function getSessionId(): string {
+export function getAnalyticsSessionId(): string {
   if (typeof sessionStorage === 'undefined') return 'ssr-session';
   let sessionId = sessionStorage.getItem('session_id');
   if (!sessionId) {
@@ -18,6 +18,43 @@ function getSessionId(): string {
     sessionStorage.setItem('session_id', sessionId);
   }
   return sessionId;
+}
+
+export type TrackProfileViewOptions = {
+  businessProfileId: string;
+  isEditing?: boolean;
+  isOwnerOrMember?: boolean;
+  fromQr?: boolean;
+};
+
+/** Counts a unique profile view (deduped server-side per session/24h). */
+export async function trackProfileView({
+  businessProfileId,
+  isEditing = false,
+  isOwnerOrMember = false,
+  fromQr = false,
+}: TrackProfileViewOptions): Promise<void> {
+  if (!businessProfileId || typeof fetch === 'undefined') return;
+
+  const skipReason = isEditing ? 'editing' : isOwnerOrMember ? 'owner' : undefined;
+
+  try {
+    await fetch(`/api/business/${encodeURIComponent(businessProfileId)}/track-view`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        sessionId: getAnalyticsSessionId(),
+        referrer: typeof document !== 'undefined' ? document.referrer : '',
+        skipReason,
+      }),
+    });
+  } catch {
+    /* offline */
+  }
+
+  if (fromQr && !skipReason) {
+    await trackProfileEvent(businessProfileId, 'qr_scan');
+  }
 }
 
 export async function trackProfileEvent(
@@ -31,7 +68,7 @@ export async function trackProfileEvent(
       business_profile_id: businessProfileId,
       event_type: eventType,
       product_id: productId,
-      session_id: getSessionId(),
+      session_id: getAnalyticsSessionId(),
       user_agent: navigator.userAgent,
       referrer: document.referrer || '',
     });

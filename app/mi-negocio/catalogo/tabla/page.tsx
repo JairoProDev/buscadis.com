@@ -67,6 +67,7 @@ export default function CatalogTablePage() {
                 .from('catalog_products')
                 .select('*')
                 .eq('business_profile_id', businessProfileId)
+                .order('sort_order', { ascending: true })
                 .order('created_at', { ascending: false });
 
             if (fetchError) throw fetchError;

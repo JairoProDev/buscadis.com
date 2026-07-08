@@ -13,7 +13,6 @@ import { isFieldComplete, type ProfileFieldStatus } from '@/lib/business/profile
 import {
   IconPlus, IconEdit, IconTrash, IconSearch, IconBox, IconSparkles, IconArrowRight, IconArrowLeft,
 } from '@/components/Icons';
-import { ProductEditor } from '@/components/business/ProductEditor';
 import type { Adiso } from '@/types';
 
 const METRIC_KEYS = Object.keys(METRIC_LABELS) as MetricsConfig['keys'][number][];
@@ -147,24 +146,15 @@ export default function ContentHubFields({
       <div>
         <FieldLabel number={4} label="Catálogo" complete={done('catalog')} />
         {editingProduct ? (
-          <div>
+          <div className="p-3 rounded-xl bg-blue-50 border border-blue-100 text-sm text-blue-800">
+            Editando producto en el editor visual. Cierra el modal para volver al listado.
             <button
               type="button"
               onClick={() => setEditingProduct?.(null)}
-              className="text-xs text-slate-500 flex items-center gap-1 mb-2 font-bold"
+              className="block mt-2 text-xs font-bold text-[var(--brand-blue,#53acc5)]"
             >
-              <IconArrowLeft size={10} /> Volver
+              Cerrar editor de producto
             </button>
-            <ProductEditor
-              product={editingProduct === 'new' ? undefined : editingProduct}
-              businessProfileId={profile.id || ''}
-              userId={profile.user_id || ''}
-              onSave={() => {
-                setEditingProduct?.(null);
-                onRefreshCatalog?.();
-              }}
-              onCancel={() => setEditingProduct?.(null)}
-            />
           </div>
         ) : (
           <>

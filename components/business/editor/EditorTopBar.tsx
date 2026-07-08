@@ -7,6 +7,8 @@ import EditorProgressWidget from '@/components/business/editor/EditorProgressWid
 import { EditorCloseButton } from '@/components/business/editor/BusinessProfileEditorLayout';
 import { IconCheck, IconEye } from '@/components/Icons';
 import { cn } from '@/lib/utils';
+import EditSurfaceToggle from '@/components/business/editor/EditSurfaceToggle';
+import { useProfileEdit } from '@/contexts/ProfileEditContext';
 
 interface EditorTopBarProps {
   saving: boolean;
@@ -39,11 +41,28 @@ export default function EditorTopBar({
   onPublish,
   onToggleVacation,
 }: EditorTopBarProps) {
+  const editCtx = useProfileEdit();
+
   return (
     <div
       className="sticky top-0 z-[70] bg-white border-b border-slate-200 shadow-sm [--editor-header-h:5.625rem] md:[--editor-header-h:3.5rem]"
       data-editor-header
     >
+      {editCtx?.showEditOnboarding && (
+        <div className="px-4 py-2 bg-blue-50 border-b border-blue-100 text-xs text-blue-900 flex items-start justify-between gap-3">
+          <p>
+            <strong>Dos formas de editar:</strong> usa <em>Formulario</em> con el panel lateral o{' '}
+            <em>Clic directo</em> para tocar lo que quieres cambiar en la vista previa.
+          </p>
+          <button
+            type="button"
+            onClick={editCtx.dismissEditOnboarding}
+            className="shrink-0 font-bold text-blue-700 hover:underline"
+          >
+            Entendido
+          </button>
+        </div>
+      )}
       {/* Fila 1: título + progreso (móvil) / título + acciones (desktop) */}
       <div className="flex items-center gap-2 px-4 pt-2.5 pb-2 md:py-2 md:min-h-14">
         <EditorCloseButton onClick={onClose} />
@@ -81,6 +100,9 @@ export default function EditorTopBar({
         </div>
 
         <div className="hidden md:flex items-center gap-2 shrink-0">
+          {editCtx && (
+            <EditSurfaceToggle value={editCtx.editSurface} onChange={editCtx.setEditSurface} />
+          )}
           <SaveStatus saving={saving} lastSavedTime={lastSavedTime} />
           <PreviewButton onClick={onPreview} />
           <PublishButton
@@ -110,7 +132,11 @@ export default function EditorTopBar({
       </div>
 
       {/* Fila 2: acciones (solo móvil) */}
-      <div className="flex items-center gap-2 px-4 pb-2.5 md:hidden">
+      <div className="flex flex-col gap-2 px-4 pb-2.5 md:hidden">
+        {editCtx && (
+          <EditSurfaceToggle value={editCtx.editSurface} onChange={editCtx.setEditSurface} className="w-full justify-center" />
+        )}
+        <div className="flex items-center gap-2">
         <PreviewButton onClick={onPreview} iconOnly />
         <PublishButton
           isPublished={Boolean(editableProfile.is_published)}
@@ -129,6 +155,7 @@ export default function EditorTopBar({
             mobile
           />
         )}
+        </div>
       </div>
     </div>
   );

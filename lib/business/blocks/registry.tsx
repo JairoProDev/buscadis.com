@@ -28,7 +28,7 @@ export function renderProfileBlock(
 ): ReactNode {
   if (!block.visible) return null;
 
-  const { profile, adisos, catalogProducts, showEditControls, onEditPart, onEditProduct, addItem, reviewAggregate } =
+  const { profile, adisos, catalogProducts, showEditControls, onEditPart, onEditProduct, addItem, reviewAggregate, onProfilePatch } =
     ctx;
   const catalogView =
     (block.config.viewMode as 'grid' | 'list' | 'feed' | undefined) ||
@@ -44,6 +44,7 @@ export function renderProfileBlock(
           profile={profile}
           showEditControls={showEditControls}
           onEditPart={onEditPart}
+          onProfilePatch={onProfilePatch}
           reviewAggregate={reviewAggregate}
           embedded={ctx.isPreview}
           onOpenQr={ctx.onOpenQr}
@@ -72,6 +73,7 @@ export function renderProfileBlock(
           defaultViewMode={catalogView}
           showPinnedCarousel={template.catalogPresentation === 'pinned_carousel'}
           visible
+          onCatalogReorder={ctx.onCatalogReorder}
         />
       );
     }

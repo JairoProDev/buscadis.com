@@ -19,6 +19,9 @@ import { SectorSelectorModal } from '@/components/catalog/SectorSelectorModal';
 import { groupProducts, getFilterOptions, type GroupedProduct } from '@/lib/catalog/product-grouping';
 import { ProductEditor } from '@/components/business/ProductEditor';
 import { listBusinessProfilesForUser } from '@/lib/business';
+import SortableProductList from '@/components/catalog/SortableProductList';
+import { reorderCatalogProducts } from '@/lib/catalog/reorder';
+import type { Adiso } from '@/types';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -84,7 +87,7 @@ function CatalogPageContent() {
 
     const [products, setProducts] = useState<CatalogProduct[]>([]);
     const [loading, setLoading] = useState(true);
-    const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+    const [viewMode, setViewMode] = useState<'grid' | 'list' | 'order'>('grid');
     const [searchQuery, setSearchQuery] = useState('');
     const [businessProfileId, setBusinessProfileId] = useState<string | null>(null);
     const [userId, setUserId] = useState<string | null>(null);
@@ -113,6 +116,7 @@ function CatalogPageContent() {
     const [aiSelectedCategories, setAiSelectedCategories] = useState<Set<string>>(new Set());
     const [aiApplying, setAiApplying] = useState(false);
     const [aiTotal, setAiTotal] = useState(0);
+    const [reorderBusy, setReorderBusy] = useState(false);
 
     // Guided fix mode
     const [fixModeIdx, setFixModeIdx] = useState(0);
@@ -180,6 +184,7 @@ function CatalogPageContent() {
                 .from('catalog_products')
                 .select('*')
                 .eq('business_profile_id', pid)
+                .order('sort_order', { ascending: true })
                 .order('created_at', { ascending: false });
 
             if (error) throw error;
@@ -637,6 +642,14 @@ function CatalogPageContent() {
                             >
                                 <IconList size={16} />
                             </button>
+                            <button
+                                onClick={() => setViewMode('order')}
+                                className="px-2.5 py-2 transition-colors text-xs font-bold"
+                                title="Ordenar catálogo"
+                                style={{ backgroundColor: viewMode === 'order' ? 'var(--brand-blue)' : 'transparent', color: viewMode === 'order' ? '#fff' : 'var(--text-secondary)' }}
+                            >
+                                ⠿
+                            </button>
                         </div>
                     </div>
 
@@ -691,6 +704,67 @@ function CatalogPageContent() {
                             onAddClick={() => setShowAddModal(true)}
                             onClearFilter={() => { setQuickFilter('all'); setSearchQuery(''); }}
                         />
+                    ) : viewMode === 'order' ? (
+                        searchQuery || selectedCategory !== 'all' || selectedBrand !== 'all' || quickFilter !== 'all' ? (
+                            <div className="p-6 text-center rounded-2xl bg-amber-50 border border-amber-100 text-sm text-amber-800">
+                                Limpia búsqueda y filtros para reordenar el catálogo completo.
+                            </div>
+                        ) : (
+                            <SortableProductList
+                                items={filteredProducts.map((p) => ({
+                                    id: p.id,
+                                    titulo: p.title,
+                                    precio: p.price ?? undefined,
+                                    imagenUrl: getFirstImageUrl(p),
+                                    imagenesUrls: p.images?.map((img) => typeof img === 'string' ? img : img.url).filter(Boolean) as string[],
+                                })) as Adiso[]}
+                                disabled={reorderBusy || !businessProfileId}
+                                className="space-y-2"
+                                onReorder={async (orderedIds) => {
+                                    if (!businessProfileId) return;
+                                    setReorderBusy(true);
+                                    const result = await reorderCatalogProducts(businessProfileId, orderedIds);
+                                    setReorderBusy(false);
+                                    if (!result.success) {
+                                        showError(result.error || 'Error al reordenar');
+                                        return;
+                                    }
+                                    success('Orden guardado');
+                                    void loadProducts();
+                                }}
+                                renderItem={(adiso, handle) => {
+                                    const product = filteredProducts.find((p) => p.id === adiso.id);
+                                    if (!product) return null;
+                                    return (
+                                        <div className="flex items-center gap-3 p-3 bg-white rounded-2xl border-2" style={{ borderColor: 'var(--border-color)' }}>
+                                            {handle}
+                                            <div className="w-12 h-12 rounded-xl overflow-hidden bg-slate-100 shrink-0">
+                                                {getFirstImageUrl(product) ? (
+                                                    <img src={getFirstImageUrl(product)} alt={product.title} className="w-full h-full object-cover" />
+                                                ) : (
+                                                    <div className="w-full h-full flex items-center justify-center text-slate-300">
+                                                        <IconPackage size={18} />
+                                                    </div>
+                                                )}
+                                            </div>
+                                            <div className="flex-1 min-w-0">
+                                                <p className="font-bold text-sm truncate">{product.title}</p>
+                                                {product.price != null && (
+                                                    <p className="text-xs text-slate-500">S/ {product.price}</p>
+                                                )}
+                                            </div>
+                                            <button
+                                                type="button"
+                                                onClick={() => { setEditingProduct(product); setShowEditModal(true); }}
+                                                className="p-2 rounded-lg hover:bg-slate-50"
+                                            >
+                                                <IconEdit size={16} />
+                                            </button>
+                                        </div>
+                                    );
+                                }}
+                            />
+                        )
                     ) : (
                         <div className={
                             viewMode === 'grid'
@@ -701,7 +775,7 @@ function CatalogPageContent() {
                                 <ProductCard
                                     key={group.baseId}
                                     group={group}
-                                    viewMode={viewMode}
+                                    viewMode={viewMode === 'grid' ? 'grid' : 'list'}
                                     isSelecting={isSelecting}
                                     isSelected={group.allProducts.some(p => selectedIds.has(p.id))}
                                     onToggleSelect={() => {

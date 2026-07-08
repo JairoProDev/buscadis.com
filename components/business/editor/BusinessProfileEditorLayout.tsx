@@ -3,6 +3,7 @@
 import type { ReactNode } from 'react';
 import { cn } from '@/lib/utils';
 import { IconEdit, IconEye, IconX } from '@/components/Icons';
+import { useProfileEdit } from '@/contexts/ProfileEditContext';
 
 interface BusinessProfileEditorLayoutProps {
   isEditing: boolean;
@@ -24,6 +25,9 @@ export default function BusinessProfileEditorLayout({
   preview,
   floatingActions,
 }: BusinessProfileEditorLayoutProps) {
+  const editCtx = useProfileEdit();
+  const sidebarOpen = Boolean(canEdit && isEditing && !editCtx?.sidebarCollapsed);
+
   return (
     <div className="min-h-screen bg-slate-50 relative flex flex-col overflow-x-clip">
       {canEdit && isEditing && editorTopBar}
@@ -32,7 +36,7 @@ export default function BusinessProfileEditorLayout({
         <div
           className={cn(
             'fixed inset-y-0 left-0 z-[60] w-full md:w-[400px] bg-white shadow-2xl transform transition-transform duration-300 ease-in-out border-r border-slate-200 overflow-y-auto',
-            canEdit && isEditing ? 'translate-x-0 top-[var(--editor-header-h,5.625rem)]' : '-translate-x-full'
+            sidebarOpen ? 'translate-x-0 top-[var(--editor-header-h,5.625rem)]' : '-translate-x-full'
           )}
         >
           {isEditing && canEdit && sidebar}
@@ -41,15 +45,24 @@ export default function BusinessProfileEditorLayout({
         <div
           className={cn(
             'flex-1 min-w-0 transition-all duration-300',
-            canEdit && isEditing ? 'md:ml-[400px]' : ''
+            sidebarOpen ? 'md:ml-[400px]' : ''
           )}
         >
           {preview}
           {canEdit && !isEditing && floatingActions}
+          {canEdit && isEditing && editCtx?.sidebarCollapsed && (
+            <button
+              type="button"
+              onClick={() => editCtx.setSidebarCollapsed(false)}
+              className="fixed bottom-6 left-4 z-[65] md:left-6 px-4 py-2.5 rounded-full bg-white border border-slate-200 shadow-lg text-sm font-bold text-slate-700 hover:bg-slate-50"
+            >
+              Abrir panel
+            </button>
+          )}
         </div>
       </div>
 
-      {canEdit && isEditing && (
+      {canEdit && isEditing && !editCtx?.sidebarCollapsed && (
         <div
           className="fixed inset-0 bg-black/30 z-[55] md:hidden"
           onClick={onCloseEditor}

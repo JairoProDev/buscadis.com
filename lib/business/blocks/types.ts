@@ -24,4 +24,6 @@ export interface BlockRenderContext {
   addItem: (item: CartAddItem) => void;
   defaultCatalogView?: 'grid' | 'list' | 'feed';
   onOpenQr?: () => void;
+  onCatalogReorder?: () => void;
+  onProfilePatch?: (patch: Partial<BusinessProfile>) => void;
 }

@@ -14,6 +14,7 @@ import {
   heroSubtitleClass,
   heroHandleClass,
 } from '@/lib/business/banner-luminance';
+import ProfileEditableRegion from '@/components/business/editor/ProfileEditableRegion';
 
 interface BusinessHeroProps {
   profile: Partial<BusinessProfile>;
@@ -22,6 +23,7 @@ interface BusinessHeroProps {
   reviewAggregate?: BusinessReviewAggregate | null;
   embedded?: boolean;
   onOpenQr?: () => void;
+  onProfilePatch?: (patch: Partial<BusinessProfile>) => void;
 }
 
 export default function BusinessHero({
@@ -31,6 +33,7 @@ export default function BusinessHero({
   reviewAggregate,
   embedded = false,
   onOpenQr,
+  onProfilePatch,
 }: BusinessHeroProps) {
   const [mounted, setMounted] = useState(false);
   const [openStatus, setOpenStatus] = useState<boolean | null>(null);
@@ -133,18 +136,50 @@ export default function BusinessHero({
           </motion.div>
 
           <div className="flex-1 pb-1 md:pt-28 md:pb-0 min-w-0">
-            <h1
-              className={cn(
-                'text-2xl md:text-5xl font-black tracking-tight leading-tight line-clamp-2 md:line-clamp-none',
-                heroTitleClass(hasBanner)
-              )}
-            >
-              {profile.name || 'Mi Negocio'}
-            </h1>
-            {profile.tagline && (
-              <p className={cn('text-sm md:text-base font-medium mt-1', heroSubtitleClass(hasBanner))}>
-                {profile.tagline}
-              </p>
+            {onProfilePatch ? (
+              <ProfileEditableRegion
+                fieldKey="name"
+                profile={profile}
+                onPatch={onProfilePatch}
+                editMode={!!showEditControls}
+              >
+                <h1
+                  className={cn(
+                    'text-2xl md:text-5xl font-black tracking-tight leading-tight line-clamp-2 md:line-clamp-none',
+                    heroTitleClass(hasBanner)
+                  )}
+                >
+                  {profile.name || 'Mi Negocio'}
+                </h1>
+              </ProfileEditableRegion>
+            ) : (
+              <h1
+                className={cn(
+                  'text-2xl md:text-5xl font-black tracking-tight leading-tight line-clamp-2 md:line-clamp-none',
+                  heroTitleClass(hasBanner)
+                )}
+              >
+                {profile.name || 'Mi Negocio'}
+              </h1>
+            )}
+            {(profile.tagline || onProfilePatch) && (
+              onProfilePatch ? (
+                <ProfileEditableRegion
+                  fieldKey="tagline"
+                  profile={profile}
+                  onPatch={onProfilePatch}
+                  editMode={!!showEditControls}
+                  className="block"
+                >
+                  <p className={cn('text-sm md:text-base font-medium mt-1', heroSubtitleClass(hasBanner))}>
+                    {profile.tagline || 'Agregar eslogan'}
+                  </p>
+                </ProfileEditableRegion>
+              ) : profile.tagline ? (
+                <p className={cn('text-sm md:text-base font-medium mt-1', heroSubtitleClass(hasBanner))}>
+                  {profile.tagline}
+                </p>
+              ) : null
             )}
             <p className={cn('text-xs md:text-base font-medium truncate', heroHandleClass(hasBanner))}>
               @{profile.slug}
@@ -166,7 +201,18 @@ export default function BusinessHero({
         <div className="flex flex-col md:flex-row gap-6 md:pl-[220px]">
           <div className="flex-1 min-w-0">
             <div className="text-[var(--bp-text-muted)] text-sm md:text-lg font-medium leading-relaxed mb-3">
-              {profile.description || 'Bienvenido a nuestra tienda oficial.'}
+              {onProfilePatch ? (
+                <ProfileEditableRegion
+                  fieldKey="description"
+                  profile={profile}
+                  onPatch={onProfilePatch}
+                  editMode={!!showEditControls}
+                >
+                  <span>{profile.description || 'Bienvenido a nuestra tienda oficial.'}</span>
+                </ProfileEditableRegion>
+              ) : (
+                profile.description || 'Bienvenido a nuestra tienda oficial.'
+              )}
             </div>
             <div className="flex flex-wrap items-center gap-4 text-sm text-[var(--bp-text-muted)]">
               {profile.contact_address && (

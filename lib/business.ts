@@ -286,6 +286,7 @@ export async function getBusinessCatalog(businessProfileId: string): Promise<any
         .from('catalog_products')
         .select('*')
         .eq('business_profile_id', businessProfileId)
+        .order('sort_order', { ascending: true })
         .order('created_at', { ascending: false });
 
     if (error) {
@@ -370,7 +371,8 @@ export async function getCatalogProductsByBusinessSlug(
         `)
         .eq('business_profile_id', profile.id)
         .eq('status', 'published')
-        .order('updated_at', { ascending: false })
+        .order('sort_order', { ascending: true })
+        .order('created_at', { ascending: false })
         .limit(options?.limit ?? 8);
 
     const { data, error } = await query;

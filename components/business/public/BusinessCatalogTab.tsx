@@ -16,6 +16,15 @@ import { useNetworkStatus } from '@/hooks/useNetworkStatus';
 import { getProductWhatsappUrl } from '@/lib/business/public-utils';
 import { getAdisoUrl } from '@/lib/url';
 import type { CartItem } from '@/lib/business/cart';
+import ProductSortControl from '@/components/catalog/ProductSortControl';
+import SortableProductList from '@/components/catalog/SortableProductList';
+import { reorderCatalogProducts } from '@/lib/catalog/reorder';
+import {
+  getStoredVisitorSort,
+  sortCatalogItems,
+  type VisitorSortOption,
+} from '@/lib/catalog/sort-products';
+import { useToast } from '@/hooks/useToast';
 
 interface BusinessCatalogTabProps {
     profile: Partial<BusinessProfile>;
@@ -29,6 +38,7 @@ interface BusinessCatalogTabProps {
     showPinnedCarousel?: boolean;
     visible?: boolean;
     onFilteredAdisosChange?: (adisos: Adiso[]) => void;
+    onCatalogReorder?: () => void;
 }
 
 export default function BusinessCatalogTab({
@@ -43,9 +53,11 @@ export default function BusinessCatalogTab({
     showPinnedCarousel = false,
     visible = true,
     onFilteredAdisosChange,
+    onCatalogReorder,
 }: BusinessCatalogTabProps) {
     const router = useRouter();
     const { isOnline } = useNetworkStatus();
+    const { success: toastSuccess, error: toastError } = useToast();
     const showEntireCatalogOffline = !isOnline;
     const catalogImgLoading = showEntireCatalogOffline ? ('eager' as const) : ('lazy' as const);
 
@@ -58,7 +70,15 @@ export default function BusinessCatalogTab({
             setViewMode('feed');
         }
     }, [defaultViewMode]);
+
+    useEffect(() => {
+        if (!showEditControls) {
+            setVisitorSort(getStoredVisitorSort());
+        }
+    }, [showEditControls]);
     const [filteredAdisos, setFilteredAdisos] = useState(adisos);
+    const [visitorSort, setVisitorSort] = useState<VisitorSortOption>('owner');
+    const [reorderBusy, setReorderBusy] = useState(false);
     const [visibleCount, setVisibleCount] = useState(24);
     const [confirmDeleteAdiso, setConfirmDeleteAdiso] = useState<Adiso | null>(null);
     const [deletingAdisoId, setDeletingAdisoId] = useState<string | null>(null);
@@ -82,9 +102,20 @@ export default function BusinessCatalogTab({
             result = result.filter(a => (a.categoria || 'Otros') === selectedCategory);
         }
 
+        if (!showEditControls) {
+            const catalogRows = catalogProducts.length > 0 ? catalogProducts : adisos;
+            result = sortCatalogItems(
+                result.map((a) => {
+                    const row = catalogRows.find((p: { id: string }) => p.id === a.id);
+                    return { ...a, ...(row || {}) };
+                }),
+                visitorSort
+            );
+        }
+
         setFilteredAdisos(result);
         setVisibleCount(24);
-    }, [searchQuery, selectedCategory, adisos]);
+    }, [searchQuery, selectedCategory, adisos, catalogProducts, showEditControls, visitorSort]);
 
     useEffect(() => {
         onFilteredAdisosChange?.(filteredAdisos);
@@ -122,6 +153,31 @@ export default function BusinessCatalogTab({
             }
         };
     }, [hasMore, visibleCount]);
+
+    const canReorder =
+        showEditControls &&
+        Boolean(profile.id) &&
+        !searchQuery &&
+        !selectedCategory &&
+        !reorderBusy;
+
+    const handleReorder = async (orderedIds: string[]) => {
+        if (!profile.id) return;
+        setReorderBusy(true);
+        const prev = filteredAdisos;
+        const map = new Map(prev.map((a) => [a.id, a]));
+        const next = orderedIds.map((id) => map.get(id)).filter(Boolean) as Adiso[];
+        setFilteredAdisos(next);
+        const result = await reorderCatalogProducts(profile.id, orderedIds);
+        setReorderBusy(false);
+        if (!result.success) {
+            setFilteredAdisos(prev);
+            toastError(result.error || 'No se pudo guardar el orden');
+            return;
+        }
+        toastSuccess('Orden del catálogo actualizado');
+        onCatalogReorder?.();
+    };
 
     const handleDeleteAdiso = async (adiso: Adiso) => {
         setDeletingAdisoId(adiso.id);
@@ -208,11 +264,16 @@ export default function BusinessCatalogTab({
                             </div>
                         )}
 
-                        {/* Row 2: Count + View Mode Toggles */}
-                        <div className="flex items-center justify-between gap-3">
-                            <div className="flex items-center gap-2 text-xs font-bold text-slate-400">
-                                <IconBox size={14} />
-                                <span>{filteredAdisos.length} productos encontrados</span>
+                        {/* Row 2: Count + Sort + View Mode Toggles */}
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                            <div className="flex items-center gap-3 flex-wrap">
+                                <div className="flex items-center gap-2 text-xs font-bold text-slate-400">
+                                    <IconBox size={14} />
+                                    <span>{filteredAdisos.length} productos encontrados</span>
+                                </div>
+                                {!showEditControls && (
+                                    <ProductSortControl value={visitorSort} onChange={setVisitorSort} />
+                                )}
                             </div>
 
                             <div className="flex items-center gap-1 bg-white border border-slate-100 p-1 rounded-2xl shadow-sm shrink-0">
@@ -294,10 +355,72 @@ export default function BusinessCatalogTab({
                                 </div>
                             </div>
                         )}
+                        {showEditControls && (searchQuery || selectedCategory) && (
+                            <p className="text-xs text-amber-700 bg-amber-50 border border-amber-100 rounded-xl px-3 py-2">
+                                Limpia la búsqueda y categoría para reordenar productos arrastrando.
+                            </p>
+                        )}
+                        {canReorder && (
+                            <p className="text-xs text-[var(--brand-color)] bg-[var(--brand-color)]/5 border border-[var(--brand-color)]/15 rounded-xl px-3 py-2">
+                                Arrastra los productos para cambiar el orden que ven tus clientes.
+                            </p>
+                        )}
                     </div>
 
-                    {/* Products Grid / List */}
-                    {displayedAdisos.length > 0 ? (
+                    {/* Reorder mode — compact sortable list */}
+                    {canReorder && displayedAdisos.length > 0 ? (
+                        <SortableProductList
+                            items={displayedAdisos}
+                            onReorder={handleReorder}
+                            disabled={reorderBusy}
+                            className="space-y-2"
+                            renderItem={(adiso, handle) => (
+                                <div className="flex items-center gap-3 p-3 bg-white rounded-2xl border border-slate-100 shadow-sm">
+                                    {handle}
+                                    <div className="w-14 h-14 rounded-xl overflow-hidden bg-slate-100 shrink-0">
+                                        {adiso.imagenUrl || adiso.imagenesUrls?.[0] ? (
+                                            <img
+                                                src={adiso.imagenesUrls?.[0] || adiso.imagenUrl || ''}
+                                                alt={adiso.titulo}
+                                                className="w-full h-full object-cover"
+                                            />
+                                        ) : (
+                                            <div className="w-full h-full flex items-center justify-center text-slate-300">
+                                                <IconBox size={20} />
+                                            </div>
+                                        )}
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                        <p className="font-bold text-sm text-slate-900 truncate">{adiso.titulo}</p>
+                                        {adiso.precio != null && (
+                                            <p className="text-xs text-slate-500">S/ {adiso.precio}</p>
+                                        )}
+                                    </div>
+                                    <div className="flex items-center gap-1 shrink-0">
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                if (onEditProduct) onEditProduct(adiso);
+                                                else onEditPart?.('catalog');
+                                            }}
+                                            className="text-slate-400 hover:text-[var(--brand-color)] p-2 rounded-lg hover:bg-slate-50"
+                                            aria-label="Editar producto"
+                                        >
+                                            <IconEdit size={16} />
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => setConfirmDeleteAdiso(adiso)}
+                                            className="text-slate-300 hover:text-red-500 p-2 rounded-lg hover:bg-red-50"
+                                            aria-label="Eliminar producto"
+                                        >
+                                            <IconTrash size={14} />
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+                        />
+                    ) : displayedAdisos.length > 0 ? (
                         <>
                             <div className={cn(
                                 "grid gap-3 md:gap-4",

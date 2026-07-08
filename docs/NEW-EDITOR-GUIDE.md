@@ -15,9 +15,9 @@ Hemos rediseñado completamente la experiencia para que crear tu página sea **m
 - Múltiples pantallas para agregar productos
 
 ### Ahora ✅
-- **Chatbot que te guía paso a paso** 💬
+- **Dos modos de edición**: Formulario (panel lateral) o Clic directo (toca lo que quieres cambiar)
 - **Vista en tiempo real** - ves tu página mientras la creas
-- **Colores brillantes** - Turquesa y Amarillo
+- **Catálogo ordenable** - arrastra productos; visitantes pueden ordenar por precio o nombre
 - **Agregar productos en UN SOLO FLUJO** simplificado
 
 ---

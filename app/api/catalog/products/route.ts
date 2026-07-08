@@ -24,6 +24,8 @@ const UPDATABLE_FIELDS = [
     'track_inventory',
     'status',
     'ai_metadata',
+    'sort_order',
+    'is_featured',
 ] as const;
 
 type CatalogPerm = 'catalog:read' | 'catalog:write';
@@ -94,7 +96,10 @@ export async function GET(request: NextRequest) {
         const limit = Math.min(100, Math.max(1, perPage));
         const to = from + limit - 1;
 
-        query = query.order('created_at', { ascending: false }).range(from, to);
+        query = query
+            .order('sort_order', { ascending: true })
+            .order('created_at', { ascending: false })
+            .range(from, to);
 
         const { data: products, error, count } = await query;
         if (error) {

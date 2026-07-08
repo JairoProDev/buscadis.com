@@ -153,6 +153,7 @@ export function useBusinessData(slug: string, isOwner: boolean) {
           .from('catalog_products')
           .select('*')
           .eq('business_profile_id', businessId)
+          .order('sort_order', { ascending: true })
           .order('created_at', { ascending: false });
 
         if (!ownerMode) {

@@ -21,4 +21,6 @@ export interface BusinessProfileShellProps {
   /** Permiso de edición (owner, member o admin) */
   canEdit?: boolean;
   onOpenEditor?: () => void;
+  onCatalogReorder?: () => void;
+  onProfilePatch?: (patch: Partial<import('@/types/business').BusinessProfile>) => void;
 }
