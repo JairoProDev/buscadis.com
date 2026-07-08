@@ -13,6 +13,7 @@ interface ProfileEditableRegionProps {
   editMode: boolean;
   children: ReactNode;
   className?: string;
+  onActivate?: () => void;
 }
 
 /**
@@ -27,6 +28,7 @@ export default function ProfileEditableRegion({
   editMode,
   children,
   className,
+  onActivate,
 }: ProfileEditableRegionProps) {
   const ctx = useProfileEdit();
   const field = getEditFieldById(fieldKey);
@@ -39,22 +41,31 @@ export default function ProfileEditableRegion({
 
   if (surface === 'direct') {
     return (
-      <button
-        type="button"
-        className={`${className || ''} text-left w-full rounded-xl transition-all hover:outline hover:outline-2 hover:outline-dashed hover:outline-[var(--brand-color)]/40 cursor-pointer`}
-        onClick={() => {
-          ctx?.openInlineField({
-            fieldId: field.fieldId,
-            title: field.label,
-            type: field.type,
-            value: field.getValue(profile),
-            hub: field.hub,
-            onSave: (value) => onPatch(field.patch(profile, value)),
-          });
-        }}
-      >
-        {children}
-      </button>
+      <div className={`${className || ''} relative`}>
+        <button
+          type="button"
+          className="text-left w-full rounded-xl transition-all hover:outline hover:outline-2 hover:outline-dashed hover:outline-[var(--brand-color)]/40 cursor-pointer"
+          onClick={() => {
+            if (onActivate) {
+              onActivate();
+              return;
+            }
+            ctx?.openInlineField({
+              fieldId: field.fieldId,
+              title: field.label,
+              type: field.type,
+              value: field.getValue(profile),
+              hub: field.hub,
+              onSave: (value) => onPatch(field.patch(profile, value)),
+            });
+          }}
+        >
+          {children}
+        </button>
+        <span className="absolute top-1 right-1 z-20 w-6 h-6 rounded-full bg-[var(--brand-color)] text-white text-[11px] font-bold flex items-center justify-center shadow-md pointer-events-none">
+          ✎
+        </span>
+      </div>
     );
   }
 

@@ -2,6 +2,7 @@
 
 import { cn } from '@/lib/utils';
 import type { EditSurface } from '@/contexts/ProfileEditContext';
+import { IconEdit, IconTouch } from '@/components/Icons';
 
 interface EditSurfaceToggleProps {
   value: EditSurface;
@@ -12,10 +13,7 @@ interface EditSurfaceToggleProps {
 export default function EditSurfaceToggle({ value, onChange, className }: EditSurfaceToggleProps) {
   return (
     <div
-      className={cn(
-        'inline-flex items-center rounded-xl border border-slate-200 bg-slate-50 p-0.5 text-xs font-semibold',
-        className
-      )}
+      className={cn('inline-flex items-center rounded-xl border border-slate-200 bg-slate-50 p-0.5', className)}
       role="group"
       aria-label="Modo de edición"
     >
@@ -23,27 +21,29 @@ export default function EditSurfaceToggle({ value, onChange, className }: EditSu
         type="button"
         onClick={() => onChange('panel')}
         className={cn(
-          'px-3 py-1.5 rounded-lg transition-all',
+          'w-8 h-8 rounded-lg transition-all flex items-center justify-center',
           value === 'panel'
             ? 'bg-white text-slate-900 shadow-sm ring-1 ring-slate-200'
             : 'text-slate-500 hover:text-slate-700'
         )}
-        title="Edita desde el panel lateral"
+        title="Modo: Guiado"
+        aria-label="Modo guiado"
       >
-        Formulario
+        <IconEdit size={14} />
       </button>
       <button
         type="button"
         onClick={() => onChange('direct')}
         className={cn(
-          'px-3 py-1.5 rounded-lg transition-all',
+          'w-8 h-8 rounded-lg transition-all flex items-center justify-center',
           value === 'direct'
             ? 'bg-white text-slate-900 shadow-sm ring-1 ring-slate-200'
             : 'text-slate-500 hover:text-slate-700'
         )}
-        title="Toca lo que quieres cambiar"
+        title="Modo: Tocar"
+        aria-label="Modo tocar"
       >
-        Clic directo
+        <IconTouch size={14} />
       </button>
     </div>
   );

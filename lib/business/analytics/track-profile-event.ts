@@ -22,37 +22,32 @@ export function getAnalyticsSessionId(): string {
 
 export type TrackProfileViewOptions = {
   businessProfileId: string;
-  isEditing?: boolean;
-  isOwnerOrMember?: boolean;
   fromQr?: boolean;
 };
 
 /** Counts a unique profile view (deduped server-side per session/24h). */
 export async function trackProfileView({
   businessProfileId,
-  isEditing = false,
-  isOwnerOrMember = false,
   fromQr = false,
 }: TrackProfileViewOptions): Promise<void> {
   if (!businessProfileId || typeof fetch === 'undefined') return;
 
-  const skipReason = isEditing ? 'editing' : isOwnerOrMember ? 'owner' : undefined;
-
   try {
+    // Count every page load/refresh as a visit.
+    const sessionId = `${getAnalyticsSessionId()}_${Date.now()}`;
     await fetch(`/api/business/${encodeURIComponent(businessProfileId)}/track-view`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        sessionId: getAnalyticsSessionId(),
+        sessionId,
         referrer: typeof document !== 'undefined' ? document.referrer : '',
-        skipReason,
       }),
     });
   } catch {
     /* offline */
   }
 
-  if (fromQr && !skipReason) {
+  if (fromQr) {
     await trackProfileEvent(businessProfileId, 'qr_scan');
   }
 }

@@ -18,14 +18,9 @@ export async function POST(
     const { businessId } = await params;
     const body = await request.json().catch(() => ({}));
     const sessionId = typeof body.sessionId === 'string' ? body.sessionId.trim() : '';
-    const skipReason = body.skipReason as string | undefined;
 
     if (!businessId || !sessionId) {
       return NextResponse.json({ success: false, error: 'missing_params' }, { status: 400 });
-    }
-
-    if (skipReason === 'owner' || skipReason === 'editing') {
-      return NextResponse.json({ success: true, counted: false, reason: skipReason });
     }
 
     const supabase = getServiceClient();

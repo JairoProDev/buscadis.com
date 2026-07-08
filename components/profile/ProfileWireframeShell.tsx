@@ -24,6 +24,7 @@ import ProfileStoryHighlights from '@/components/profile/ProfileStoryHighlights'
 import ProfileStickyCta from '@/components/profile/ProfileStickyCta';
 import BusinessSocialStrip from '@/components/business/public/BusinessSocialStrip';
 import BusinessOwnerBanner from '@/components/business/public/BusinessOwnerBanner';
+import ProfileEditableRegion from '@/components/business/editor/ProfileEditableRegion';
 import { profileIsOrphan } from '@/lib/business/social-display';
 import { profilePageContainerClass } from '@/lib/business/profile-layout';
 import {
@@ -240,7 +241,19 @@ export default function ProfileWireframeShell({
 
         <div className={cn(profilePageContainerClass(), 'relative z-10')}>
           <div className="flex items-end gap-4 sm:gap-5 -mt-[3rem] sm:-mt-14 pt-1">
-            <ProfileAvatar entity={entity} className="relative z-20" />
+            <ProfileEditableRegion
+              fieldKey="logo"
+              profile={profile}
+              onPatch={(patch) => ctx.onProfilePatch?.(patch)}
+              editMode={Boolean(isEditor && canEdit)}
+            >
+              <ProfileAvatar
+                entity={entity}
+                className="relative z-20"
+                showEditControls={Boolean(isEditor && canEdit)}
+                onEditAvatar={() => onEditPart?.('logo')}
+              />
+            </ProfileEditableRegion>
             {isSlotVisible(presentation.layout, 'profile_metrics') && entity.metrics && (
               <ProfileMetrics metrics={entity.metrics} className="flex-1 min-w-0 pb-0.5" />
             )}
@@ -250,22 +263,45 @@ export default function ProfileWireframeShell({
 
       <div className="space-y-3 pb-4 pt-2">
         {isSlotVisible(presentation.layout, 'profile_identity') && (
-          <ProfileIdentityRow
-            entity={entity}
-            verificationTier={profile.verification_tier}
-          />
+          <ProfileEditableRegion
+            fieldKey="name"
+            profile={profile}
+            onPatch={(patch) => ctx.onProfilePatch?.(patch)}
+            editMode={Boolean(isEditor && canEdit)}
+          >
+            <ProfileIdentityRow
+              entity={entity}
+              verificationTier={profile.verification_tier}
+            />
+          </ProfileEditableRegion>
         )}
 
         {isSlotVisible(presentation.layout, 'profile_social_strip') && (
-          <BusinessSocialStrip
+          <ProfileEditableRegion
+            fieldKey="contact_whatsapp"
             profile={profile}
-            variant="wireframe"
-            className={cn(profilePageContainerClass(), 'md:flex-wrap max-md:flex-nowrap max-md:overflow-x-auto max-md:no-scrollbar max-md:snap-x max-md:gap-3')}
-          />
+            onPatch={(patch) => ctx.onProfilePatch?.(patch)}
+            editMode={Boolean(isEditor && canEdit)}
+            onActivate={() => onEditPart?.('social')}
+          >
+            <BusinessSocialStrip
+              profile={profile}
+              variant="wireframe"
+              showEditControls={Boolean(isEditor && canEdit)}
+              className={cn(profilePageContainerClass(), 'md:flex-wrap max-md:flex-nowrap max-md:overflow-x-auto max-md:no-scrollbar max-md:snap-x max-md:gap-3')}
+            />
+          </ProfileEditableRegion>
         )}
 
         {isSlotVisible(presentation.layout, 'profile_bio') && (
-          <ProfileExpandableBio text={entity.description} />
+          <ProfileEditableRegion
+            fieldKey="description"
+            profile={profile}
+            onPatch={(patch) => ctx.onProfilePatch?.(patch)}
+            editMode={Boolean(isEditor && canEdit)}
+          >
+            <ProfileExpandableBio text={entity.description} />
+          </ProfileEditableRegion>
         )}
 
         {isSlotVisible(presentation.layout, 'profile_hashtags') && (

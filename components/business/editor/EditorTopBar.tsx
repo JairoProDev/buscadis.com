@@ -52,7 +52,7 @@ export default function EditorTopBar({
         <div className="px-4 py-2 bg-blue-50 border-b border-blue-100 text-xs text-blue-900 flex items-start justify-between gap-3">
           <p>
             <strong>Dos formas de editar:</strong> usa <em>Formulario</em> con el panel lateral o{' '}
-            <em>Clic directo</em> para tocar lo que quieres cambiar en la vista previa.
+            <em>Tocar</em> para editar desde la vista previa.
           </p>
           <button
             type="button"
@@ -103,13 +103,8 @@ export default function EditorTopBar({
           {editCtx && (
             <EditSurfaceToggle value={editCtx.editSurface} onChange={editCtx.setEditSurface} />
           )}
-          <SaveStatus saving={saving} lastSavedTime={lastSavedTime} />
+          <SaveBadge saving={saving} lastSavedTime={lastSavedTime} />
           <PreviewButton onClick={onPreview} />
-          <PublishButton
-            isPublished={Boolean(editableProfile.is_published)}
-            saving={saving}
-            onClick={onPublish}
-          />
           {businessOptions.length > 0 && businessId && (
             <EditorChromeMenu
               businesses={businessOptions}
@@ -122,39 +117,27 @@ export default function EditorTopBar({
           )}
         </div>
 
-        <div className="md:hidden shrink-0 w-[72px]">
+        <div className="md:hidden flex items-center gap-1 shrink-0">
+          {editCtx && <EditSurfaceToggle value={editCtx.editSurface} onChange={editCtx.setEditSurface} />}
+          <PreviewButton onClick={onPreview} iconOnly />
+          {businessOptions.length > 0 && businessId && (
+            <EditorChromeMenu
+              businesses={businessOptions}
+              currentBusinessId={businessId}
+              profile={editableProfile}
+              onCloseEditor={onClose}
+              onPublish={onPublish}
+              onToggleVacation={onToggleVacation}
+              mobile
+            />
+          )}
+        </div>
+        <div className="md:hidden shrink-0 w-[56px]">
           <EditorProgressWidget
             profile={editableProfile}
             productCount={catalogProductCount}
             compact
           />
-        </div>
-      </div>
-
-      {/* Fila 2: acciones (solo móvil) */}
-      <div className="flex flex-col gap-2 px-4 pb-2.5 md:hidden">
-        {editCtx && (
-          <EditSurfaceToggle value={editCtx.editSurface} onChange={editCtx.setEditSurface} className="w-full justify-center" />
-        )}
-        <div className="flex items-center gap-2">
-        <PreviewButton onClick={onPreview} iconOnly />
-        <PublishButton
-          isPublished={Boolean(editableProfile.is_published)}
-          saving={saving}
-          onClick={onPublish}
-          className="flex-1 justify-center"
-        />
-        {businessOptions.length > 0 && businessId && (
-          <EditorChromeMenu
-            businesses={businessOptions}
-            currentBusinessId={businessId}
-            profile={editableProfile}
-            onCloseEditor={onClose}
-            onPublish={onPublish}
-            onToggleVacation={onToggleVacation}
-            mobile
-          />
-        )}
         </div>
       </div>
     </div>
@@ -211,29 +194,24 @@ function PreviewButton({
   );
 }
 
-function PublishButton({
-  isPublished,
+function SaveBadge({
   saving,
-  onClick,
-  className,
+  lastSavedTime,
 }: {
-  isPublished: boolean;
   saving: boolean;
-  onClick: () => void;
-  className?: string;
+  lastSavedTime: Date | null;
 }) {
+  if (saving) {
+    return (
+      <div className="px-3 py-2 rounded-lg font-bold text-xs bg-amber-100 text-amber-700">
+        Guardando...
+      </div>
+    );
+  }
+
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      disabled={saving}
-      className={cn(
-        'px-3 py-2 rounded-lg font-bold text-white text-xs flex items-center gap-1.5 transition-all disabled:opacity-50 shrink-0',
-        isPublished ? 'bg-emerald-500 hover:bg-emerald-600' : 'bg-[var(--brand-blue,#53acc5)] hover:brightness-110',
-        className
-      )}
-    >
-      {isPublished ? '✓ Publicado' : 'Publicar'}
-    </button>
+    <div className={cn('px-3 py-2 rounded-lg font-bold text-xs', lastSavedTime ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-600')}>
+      {lastSavedTime ? 'Guardado' : 'Sin guardar'}
+    </div>
   );
 }

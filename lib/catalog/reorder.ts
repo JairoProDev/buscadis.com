@@ -6,7 +6,7 @@ export async function reorderCatalogProducts(
     const res = await fetch('/api/catalog/products/reorder', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ businessProfileId, orderedIds }),
+      body: JSON.stringify({ business_profile_id: businessProfileId, orderedIds }),
     });
     const json = await res.json();
     if (!res.ok) {

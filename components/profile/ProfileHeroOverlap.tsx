@@ -30,22 +30,27 @@ interface ProfileHeroOverlapProps {
   /** Barra superior (editar, QR, compartir) dentro del banner. */
   headerSlot?: ReactNode;
   className?: string;
+  onEditAvatar?: () => void;
 }
 
 export function ProfileAvatar({
   entity,
   className,
   size = 'md',
+  showEditControls = false,
+  onEditAvatar,
 }: {
   entity: ProfileEntity;
   className?: string;
   size?: 'md' | 'lg';
+  showEditControls?: boolean;
+  onEditAvatar?: () => void;
 }) {
   const dim = size === 'lg' ? 'w-[128px] h-[128px]' : 'w-[112px] h-[112px] sm:w-[128px] sm:h-[128px]';
   return (
     <div
       className={cn(
-        'shrink-0 rounded-2xl border-4 border-[var(--bg-secondary)] bg-[var(--bg-primary)] shadow-lg overflow-hidden',
+        'shrink-0 rounded-2xl border-4 border-[var(--bg-secondary)] bg-[var(--bg-primary)] shadow-lg overflow-hidden relative',
         dim,
         className
       )}
@@ -56,6 +61,16 @@ export function ProfileAvatar({
         <div className="w-full h-full flex items-center justify-center bg-[var(--brand-color)]/15 text-3xl font-black text-[var(--brand-color)]">
           {entity.displayName.charAt(0).toUpperCase()}
         </div>
+      )}
+      {showEditControls && onEditAvatar && (
+        <button
+          type="button"
+          onClick={onEditAvatar}
+          className="absolute top-1 right-1 z-10 w-7 h-7 rounded-full bg-[var(--brand-color)] text-white text-[11px] font-bold flex items-center justify-center shadow-md"
+          aria-label="Editar logo"
+        >
+          ✎
+        </button>
       )}
     </div>
   );
@@ -70,6 +85,7 @@ export default function ProfileHeroOverlap({
   onEditBanner,
   headerSlot,
   className,
+  onEditAvatar,
 }: ProfileHeroOverlapProps) {
   const hasImage = banner.mode === 'image' && Boolean(entity.bannerImageUrl || banner.imageUrl);
   const imageUrl = entity.bannerImageUrl || banner.imageUrl;
@@ -172,7 +188,7 @@ export default function ProfileHeroOverlap({
       {!bannerOnly && (
         <div className={cn(profilePageContainerClass(), 'relative z-10')}>
           <div className="-mt-14 sm:-mt-16">
-            <ProfileAvatar entity={entity} />
+            <ProfileAvatar entity={entity} showEditControls={showEditControls} onEditAvatar={onEditAvatar} />
           </div>
         </div>
       )}

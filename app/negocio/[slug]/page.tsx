@@ -197,14 +197,11 @@ export default function PublicBusinessPage({
 
     useEffect(() => {
         if (!business?.id || !isOnline) return;
-        const isOwnerOrMember = canEdit;
         trackProfileView({
             businessProfileId: business.id,
-            isEditing,
-            isOwnerOrMember,
             fromQr: resolvedSearchParams?.from_qr === '1',
         });
-    }, [business?.id, isOnline, isEditing, canEdit, resolvedSearchParams?.from_qr]);
+    }, [business?.id, isOnline, resolvedSearchParams?.from_qr]);
 
     const handleProductSave = async (updatedProduct: any) => {
         if (business?.id) {

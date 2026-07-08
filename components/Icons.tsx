@@ -218,6 +218,7 @@ export const IconLayers = (p: IconProps) => <FaLayerGroup size={getSize(p)} colo
 export const IconSort = (p: IconProps) => <FaSort size={getSize(p)} color={p.color || 'currentColor'} className={p.className} onClick={p.onClick} />;
 export const IconSortDown = (p: IconProps) => <FaSortAmountDown size={getSize(p)} color={p.color || 'currentColor'} className={p.className} onClick={p.onClick} />;
 export const IconSortUp = (p: IconProps) => <FaSortAmountUp size={getSize(p)} color={p.color || 'currentColor'} className={p.className} onClick={p.onClick} />;
+export const IconTouch = (p: IconProps) => <FaHandHoldingHeart size={getSize(p)} color={p.color || 'currentColor'} className={p.className} onClick={p.onClick} />;
 
 // Custom Filter Icons
 export const IconFilterFunnel = (p: IconProps) => (
