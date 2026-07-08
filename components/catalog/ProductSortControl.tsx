@@ -1,55 +1,53 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useMemo } from 'react';
+import Ordenamiento, { type OrdenamientoOption } from '@/components/Ordenamiento';
+import { IconSort, IconSortDown, IconSortUp, IconStar } from '@/components/Icons';
 import {
   VISITOR_SORT_OPTIONS,
-  getStoredVisitorSort,
   setStoredVisitorSort,
   type VisitorSortOption,
 } from '@/lib/catalog/sort-products';
 import { cn } from '@/lib/utils';
 
+const CATALOG_SORT_ICONS: Record<VisitorSortOption, OrdenamientoOption<VisitorSortOption>['icon']> = {
+  owner: IconStar,
+  title_asc: IconSort,
+  title_desc: IconSort,
+  price_asc: IconSortUp,
+  price_desc: IconSortDown,
+  newest: IconSortDown,
+};
+
+const CATALOG_SORT_OPTIONS: OrdenamientoOption<VisitorSortOption>[] = VISITOR_SORT_OPTIONS.map((opt) => ({
+  valor: opt.id,
+  label: opt.label,
+  icon: CATALOG_SORT_ICONS[opt.id],
+}));
+
 interface ProductSortControlProps {
-  value?: VisitorSortOption;
+  value: VisitorSortOption;
   onChange: (sort: VisitorSortOption) => void;
   className?: string;
 }
 
 export default function ProductSortControl({ value, onChange, className }: ProductSortControlProps) {
-  const [internal, setInternal] = useState<VisitorSortOption>(value ?? 'owner');
-
-  useEffect(() => {
-    if (value !== undefined) {
-      setInternal(value);
-      return;
-    }
-    setInternal(getStoredVisitorSort());
-  }, [value]);
+  const options = useMemo(() => CATALOG_SORT_OPTIONS, []);
 
   const handleChange = (next: VisitorSortOption) => {
-    setInternal(next);
     setStoredVisitorSort(next);
     onChange(next);
   };
 
   return (
-    <div className={cn('flex items-center gap-2 flex-wrap', className)}>
-      <label htmlFor="catalog-sort" className="text-xs font-medium text-slate-500 shrink-0">
-        Ordenar:
-      </label>
-      <select
-        id="catalog-sort"
-        value={internal}
-        onChange={(e) => handleChange(e.target.value as VisitorSortOption)}
-        className="text-xs font-medium rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-slate-700 focus:outline-none focus:ring-2 focus:ring-[var(--brand-color)]/30"
-        aria-label="Ordenar productos"
-      >
-        {VISITOR_SORT_OPTIONS.map((opt) => (
-          <option key={opt.id} value={opt.id}>
-            {opt.label}
-          </option>
-        ))}
-      </select>
+    <div className={cn('shrink-0', className)}>
+      <Ordenamiento
+        valor={value}
+        onChange={handleChange}
+        options={options}
+        ariaLabel="Ordenar productos"
+        sheetTitle="Ordenar productos"
+      />
     </div>
   );
 }

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { IconSort, IconSortDown, IconSortUp, IconChevronDown } from './Icons';
 import { useTranslation } from '@/hooks/useTranslation';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
@@ -8,15 +8,28 @@ import { BROWSE_SORT_OPTIONS, type TipoOrdenamiento } from '@/lib/filters/sort-o
 
 export type { TipoOrdenamiento };
 
-interface OrdenamientoProps {
-  valor: TipoOrdenamiento;
-  onChange: (valor: TipoOrdenamiento) => void;
+export type SortIconComponent = React.ComponentType<{
+  size?: number;
+  color?: string;
+  className?: string;
+}>;
+
+export interface OrdenamientoOption<V extends string = TipoOrdenamiento> {
+  valor: V;
+  labelKey?: string;
+  label?: string;
+  icon: SortIconComponent;
 }
 
-const SORT_ICONS: Record<
-  TipoOrdenamiento,
-  React.ComponentType<{ size?: number; color?: string; className?: string }>
-> = {
+interface OrdenamientoProps<V extends string = TipoOrdenamiento> {
+  valor: V;
+  onChange: (valor: V) => void;
+  options?: OrdenamientoOption<V>[];
+  ariaLabel?: string;
+  sheetTitle?: string;
+}
+
+const SORT_ICONS: Record<TipoOrdenamiento, SortIconComponent> = {
   recientes: IconSortDown,
   antiguos: IconSortUp,
   'titulo-asc': IconSort,
@@ -25,22 +38,43 @@ const SORT_ICONS: Record<
   'precio-desc': IconSortDown,
 };
 
-export default function Ordenamiento({ valor, onChange }: OrdenamientoProps) {
+function getOptionLabel<V extends string>(
+  opt: OrdenamientoOption<V>,
+  t: (key: string) => string
+): string {
+  if (opt.label) return opt.label;
+  if (opt.labelKey) return t(opt.labelKey);
+  return opt.valor;
+}
+
+export default function Ordenamiento<V extends string = TipoOrdenamiento>({
+  valor,
+  onChange,
+  options,
+  ariaLabel,
+  sheetTitle,
+}: OrdenamientoProps<V>) {
   const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const isMobile = useMediaQuery('(max-width: 767px)');
 
+  const opcionesOrdenamiento = useMemo(() => {
+    if (options?.length) return options;
+    return BROWSE_SORT_OPTIONS.map((opt) => ({
+      valor: opt.value as V,
+      labelKey: opt.labelKey,
+      icon: SORT_ICONS[opt.value],
+    }));
+  }, [options]);
+
+  const sortLabel = ariaLabel ?? t('sort.label');
+  const sortSheetTitle = sheetTitle ?? 'Ordenar resultados';
+
   useEffect(() => {
     setMounted(true);
   }, []);
-
-  const opcionesOrdenamiento = BROWSE_SORT_OPTIONS.map((opt) => ({
-    valor: opt.value,
-    labelKey: opt.labelKey,
-    icon: SORT_ICONS[opt.value],
-  }));
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -70,7 +104,7 @@ export default function Ordenamiento({ valor, onChange }: OrdenamientoProps) {
   const opcionActual = opcionesOrdenamiento.find((opt) => opt.valor === valor) || opcionesOrdenamiento[0];
   const CurrentIcon = opcionActual.icon;
 
-  const handleSelect = (nuevoValor: TipoOrdenamiento) => {
+  const handleSelect = (nuevoValor: V) => {
     onChange(nuevoValor);
     setIsOpen(false);
   };
@@ -101,7 +135,7 @@ export default function Ordenamiento({ valor, onChange }: OrdenamientoProps) {
         }}
       >
         <OptionIcon size={14} color={isSelected ? 'var(--brand-blue)' : undefined} />
-        <span>{t(opcion.labelKey)}</span>
+        <span>{getOptionLabel(opcion, t)}</span>
         {isSelected && <span style={{ marginLeft: 'auto', color: 'var(--brand-blue)' }}>●</span>}
       </button>
     );
@@ -112,7 +146,7 @@ export default function Ordenamiento({ valor, onChange }: OrdenamientoProps) {
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        aria-label={t('sort.label')}
+        aria-label={sortLabel}
         aria-expanded={isOpen}
         aria-haspopup="true"
         style={{
@@ -135,7 +169,7 @@ export default function Ordenamiento({ valor, onChange }: OrdenamientoProps) {
         <CurrentIcon size={16} aria-hidden="true" className="text-[var(--brand-blue)]" />
         {mounted && !isMobile && (
           <>
-            <span className="max-w-[120px] truncate">{t(opcionActual.labelKey)}</span>
+            <span className="max-w-[120px] truncate">{getOptionLabel(opcionActual, t)}</span>
             <span
               aria-hidden
               style={{
@@ -186,7 +220,7 @@ export default function Ordenamiento({ valor, onChange }: OrdenamientoProps) {
           <div
             role="dialog"
             aria-modal="true"
-            aria-label={t('sort.label')}
+            aria-label={sortLabel}
             style={{
               position: 'fixed',
               left: 0,
@@ -209,7 +243,7 @@ export default function Ordenamiento({ valor, onChange }: OrdenamientoProps) {
               }}
             />
             <div style={{ fontSize: '0.9rem', fontWeight: 700, padding: '4px 8px 12px', color: 'var(--text-primary)' }}>
-              Ordenar resultados
+              {sortSheetTitle}
             </div>
             {optionList}
           </div>

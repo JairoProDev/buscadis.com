@@ -527,7 +527,7 @@ export default function BusinessCatalogTab({
                             <div className="flex items-center gap-3 flex-wrap">
                                 <div className="flex items-center gap-2 text-xs font-bold text-slate-400">
                                     <IconBox size={14} />
-                                    <span>{filteredAdisos.length} productos encontrados</span>
+                                    <span>{filteredAdisos.length} productos</span>
                                 </div>
                                 {!showEditControls && (
                                     <ProductSortControl value={visitorSort} onChange={setVisitorSort} />
