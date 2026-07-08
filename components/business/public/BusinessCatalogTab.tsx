@@ -121,14 +121,20 @@ export default function BusinessCatalogTab({
         onFilteredAdisosChange?.(filteredAdisos);
     }, [filteredAdisos, onFilteredAdisosChange]);
 
+    const canReorder =
+        showEditControls &&
+        Boolean(profile.id) &&
+        !searchQuery &&
+        !selectedCategory;
+
     const displayedAdisos = useMemo(
         () =>
-            showEntireCatalogOffline
+            canReorder || showEntireCatalogOffline
                 ? filteredAdisos
                 : filteredAdisos.slice(0, visibleCount),
-        [showEntireCatalogOffline, filteredAdisos, visibleCount]
+        [canReorder, showEntireCatalogOffline, filteredAdisos, visibleCount]
     );
-    const hasMore = !showEntireCatalogOffline && visibleCount < filteredAdisos.length;
+    const hasMore = !canReorder && !showEntireCatalogOffline && visibleCount < filteredAdisos.length;
 
     const loadMoreRef = useRef<HTMLDivElement>(null);
 
@@ -154,18 +160,17 @@ export default function BusinessCatalogTab({
         };
     }, [hasMore, visibleCount]);
 
-    const canReorder =
-        showEditControls &&
-        Boolean(profile.id) &&
-        !searchQuery &&
-        !selectedCategory;
-
     const handleReorder = async (orderedIds: string[]) => {
         if (!profile.id || reorderBusy) return;
         setReorderBusy(true);
         const prev = filteredAdisos;
         const map = new Map(prev.map((a) => [a.id, a]));
         const next = orderedIds.map((id) => map.get(id)).filter(Boolean) as Adiso[];
+        if (next.length !== orderedIds.length) {
+            setReorderBusy(false);
+            toastError('No se pudo reordenar: productos no encontrados');
+            return;
+        }
         setFilteredAdisos(next);
         const result = await reorderCatalogProducts(profile.id, orderedIds);
         if (!result.success) {
@@ -178,6 +183,259 @@ export default function BusinessCatalogTab({
         toastSuccess('Orden del catálogo actualizado');
         onCatalogReorder?.();
     };
+
+    const openProduct = (adiso: Adiso) => {
+        if (canReorder) return;
+        router.push(getAdisoUrl(adiso));
+    };
+
+    const renderEditActions = (adiso: Adiso, dragHandle?: React.ReactNode, className?: string) => (
+        <div className={cn('flex items-center gap-1 shrink-0', className)}>
+            {dragHandle}
+            <button
+                type="button"
+                onClick={(e) => {
+                    e.stopPropagation();
+                    if (onEditProduct) onEditProduct(adiso);
+                    else onEditPart?.('catalog');
+                }}
+                className="p-1.5 bg-white/95 backdrop-blur-sm rounded-lg shadow-md border border-slate-100 hover:bg-[var(--brand-color)] hover:text-white text-slate-600 transition-colors"
+                title="Editar producto"
+                aria-label="Editar producto"
+            >
+                <IconEdit size={14} />
+            </button>
+            <button
+                type="button"
+                onClick={(e) => {
+                    e.stopPropagation();
+                    setConfirmDeleteAdiso(adiso);
+                }}
+                disabled={deletingAdisoId === adiso.id}
+                className="p-1.5 bg-white/95 backdrop-blur-sm rounded-lg shadow-md border border-red-100 text-red-400 hover:bg-red-500 hover:text-white transition-colors disabled:opacity-50"
+                title="Eliminar producto"
+                aria-label="Eliminar producto"
+            >
+                {deletingAdisoId === adiso.id
+                    ? <div className="w-3.5 h-3.5 border-2 border-red-300 border-t-transparent rounded-full animate-spin" />
+                    : <IconTrash size={12} />}
+            </button>
+        </div>
+    );
+
+    const renderCatalogCard = (adiso: Adiso, dragHandle?: React.ReactNode) => {
+        if (viewMode === 'feed') {
+            return (
+                <div className="bg-white rounded-2xl overflow-hidden border border-slate-100 shadow-sm flex flex-col">
+                    <div className="p-3 flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-2 min-w-0">
+                            <div className="w-8 h-8 rounded-full overflow-hidden bg-slate-100 relative shrink-0">
+                                {profile.logo_url ? (
+                                    <img src={profile.logo_url} alt={profile.name || 'Logo'} className="w-full h-full object-cover" />
+                                ) : (
+                                    <div className="w-full h-full flex items-center justify-center text-xs font-bold text-slate-300">
+                                        {profile.name?.substring(0, 1) || 'N'}
+                                    </div>
+                                )}
+                            </div>
+                            <span className="text-sm font-bold text-slate-900 truncate">{profile.name}</span>
+                        </div>
+                        {showEditControls && renderEditActions(adiso, dragHandle)}
+                    </div>
+
+                    <div
+                        className={cn(
+                            'relative w-full aspect-square bg-slate-50 overflow-hidden',
+                            !canReorder && 'cursor-pointer'
+                        )}
+                        onClick={() => openProduct(adiso)}
+                    >
+                        {adiso.imagenUrl || adiso.imagenesUrls?.[0] ? (
+                            <img
+                                src={adiso.imagenesUrls?.[0] || adiso.imagenUrl || ''}
+                                alt={adiso.titulo}
+                                className="w-full h-full object-contain"
+                                loading={catalogImgLoading}
+                            />
+                        ) : (
+                            <div className="w-full h-full flex items-center justify-center text-slate-200">
+                                <IconBox size={48} />
+                            </div>
+                        )}
+                        {adiso.precio && (
+                            <div className="absolute bottom-4 right-4 bg-white/90 backdrop-blur-md px-3 py-1.5 rounded-xl shadow-lg border border-white/50">
+                                <span className="font-black text-slate-900">S/ {adiso.precio}</span>
+                            </div>
+                        )}
+                    </div>
+
+                    <div className="p-4 flex flex-col gap-1">
+                        <h3
+                            className={cn('font-bold text-base text-slate-900 leading-tight', !canReorder && 'cursor-pointer')}
+                            onClick={() => openProduct(adiso)}
+                        >
+                            {adiso.titulo}
+                        </h3>
+                        {adiso.descripcion && (
+                            <p className="text-sm text-slate-600 leading-relaxed mt-1">
+                                {adiso.descripcion.replace('Precio:', '').trim()}
+                            </p>
+                        )}
+                        {profile.contact_whatsapp && (
+                            <a
+                                href={`https://wa.me/${profile.contact_whatsapp}?text=${encodeURIComponent(`Hola! Me interesa: ${adiso.titulo}`)}`}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="mt-3 bg-green-500 hover:bg-green-600 text-white py-2.5 rounded-xl font-bold text-center transition-all flex items-center justify-center gap-2"
+                            >
+                                <IconWhatsapp size={18} /> Pedir ahora
+                            </a>
+                        )}
+                    </div>
+                </div>
+            );
+        }
+
+        if (viewMode === 'grid') {
+            return (
+                <div
+                    role={canReorder ? undefined : 'button'}
+                    tabIndex={canReorder ? undefined : 0}
+                    onClick={() => openProduct(adiso)}
+                    onKeyDown={canReorder ? undefined : (e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            openProduct(adiso);
+                        }
+                    }}
+                    className={cn(
+                        'group relative bg-white rounded-2xl overflow-hidden border border-slate-100 shadow-sm transition-all duration-300 text-left flex flex-col',
+                        canReorder ? 'cursor-default' : 'hover:shadow-xl hover:-translate-y-1 cursor-pointer'
+                    )}
+                >
+                    <div className="relative w-full bg-slate-50 overflow-hidden" style={{ aspectRatio: '4/3' }}>
+                        {adiso.imagenUrl || adiso.imagenesUrls?.[0] ? (
+                            <img
+                                src={adiso.imagenesUrls?.[0] || adiso.imagenUrl || ''}
+                                alt={adiso.titulo}
+                                className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500"
+                                loading={catalogImgLoading}
+                            />
+                        ) : (
+                            <div className="w-full h-full flex flex-col items-center justify-center gap-2 text-slate-200">
+                                <IconBox size={40} />
+                            </div>
+                        )}
+                        {adiso.categoria && (
+                            <span className="absolute top-2 left-2 bg-white/90 backdrop-blur-sm text-[10px] font-bold px-2 py-0.5 rounded-full text-[var(--brand-color)] shadow-sm">
+                                {adiso.categoria}
+                            </span>
+                        )}
+                        {showEditControls && (
+                            <div className="absolute top-2 right-2 z-10">
+                                {renderEditActions(adiso, dragHandle)}
+                            </div>
+                        )}
+                    </div>
+                    <div className="p-3 flex flex-col gap-1 flex-1">
+                        <h3 className="font-bold text-sm text-slate-800 line-clamp-2 leading-snug">
+                            {adiso.titulo}
+                        </h3>
+                        {adiso.descripcion && (
+                            <p className="text-xs text-slate-400 line-clamp-2 leading-relaxed flex-1">
+                                {adiso.descripcion.replace('Precio:', '').trim()}
+                            </p>
+                        )}
+                        <div className="flex items-center justify-between mt-1 pt-2 border-t border-slate-50 gap-2">
+                            <span className="font-black text-base text-slate-900">
+                                {adiso.precio ? `S/ ${adiso.precio}` : <span className="text-sm font-semibold text-slate-400">Consultar</span>}
+                            </span>
+                            <div className="flex items-center gap-1">
+                                <button
+                                    type="button"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        addItem({
+                                            productId: adiso.id,
+                                            title: adiso.titulo,
+                                            price: adiso.precio,
+                                            imageUrl: adiso.imagenesUrls?.[0] || adiso.imagenUrl,
+                                        });
+                                    }}
+                                    className="text-[10px] font-bold px-2 py-1 bg-[var(--brand-color)]/10 text-[var(--brand-color)] rounded-lg hover:bg-[var(--brand-color)] hover:text-white transition-colors"
+                                >
+                                    + Carrito
+                                </button>
+                                {profile.contact_whatsapp && (
+                                    <a
+                                        href={getProductWhatsappUrl(profile.contact_whatsapp, profile.name || 'Negocio', adiso)}
+                                        target="_blank"
+                                        rel="noreferrer"
+                                        onClick={(e) => e.stopPropagation()}
+                                        className="text-[10px] font-bold px-2 py-1 bg-green-50 text-green-700 rounded-lg hover:bg-green-100 transition-colors flex items-center gap-1"
+                                    >
+                                        <IconWhatsapp size={11} />
+                                    </a>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        return (
+            <div
+                className={cn(
+                    'bg-white rounded-2xl border border-slate-100 shadow-sm transition-all flex gap-3 items-start relative group p-3',
+                    canReorder ? 'cursor-default' : 'hover:shadow-md cursor-pointer'
+                )}
+                onClick={() => openProduct(adiso)}
+            >
+                {showEditControls && dragHandle && (
+                    <div className="flex items-start pt-1 shrink-0">{dragHandle}</div>
+                )}
+                <div className="w-20 h-20 flex-shrink-0 bg-slate-50 rounded-xl overflow-hidden">
+                    {adiso.imagenUrl || adiso.imagenesUrls?.[0] ? (
+                        <img
+                            src={adiso.imagenesUrls?.[0] || adiso.imagenUrl || ''}
+                            alt={adiso.titulo || 'Producto'}
+                            className="w-full h-full object-contain"
+                            loading={catalogImgLoading}
+                        />
+                    ) : (
+                        <div className="w-full h-full flex items-center justify-center text-slate-200">
+                            <IconBox size={28} />
+                        </div>
+                    )}
+                </div>
+                <div className="flex-1 min-w-0 pr-8">
+                    <span className="text-[10px] font-bold text-[var(--brand-color)] uppercase tracking-wide block mb-0.5">{adiso.categoria || ''}</span>
+                    <h3 className="font-bold text-sm text-slate-800 mb-1 leading-snug line-clamp-2">{adiso.titulo}</h3>
+                    {adiso.descripcion && (
+                        <p className="text-xs text-slate-400 line-clamp-2 leading-relaxed">{adiso.descripcion.replace('Precio:', '').trim()}</p>
+                    )}
+                    <div className="mt-2 font-black text-lg text-slate-900">
+                        {adiso.precio ? `S/ ${adiso.precio}` : <span className="text-sm font-semibold text-slate-400">Consultar</span>}
+                    </div>
+                </div>
+                {showEditControls && (
+                    <div className="absolute top-2 right-2">
+                        {renderEditActions(adiso, viewMode === 'list' ? undefined : dragHandle)}
+                    </div>
+                )}
+            </div>
+        );
+    };
+
+    const catalogGridClassName = cn(
+        'grid gap-3 md:gap-4',
+        viewMode === 'grid'
+            ? 'grid-cols-2 md:grid-cols-3 lg:grid-cols-4'
+            : viewMode === 'feed'
+                ? 'grid-cols-1 max-w-xl mx-auto'
+                : 'grid-cols-1'
+    );
 
     const handleDeleteAdiso = async (adiso: Adiso) => {
         setDeletingAdisoId(adiso.id);
@@ -367,317 +625,26 @@ export default function BusinessCatalogTab({
                         )}
                     </div>
 
-                    {/* Reorder mode — compact sortable list */}
-                    {canReorder && displayedAdisos.length > 0 ? (
-                        <SortableProductList
-                            items={displayedAdisos}
-                            onReorder={handleReorder}
-                            disabled={reorderBusy}
-                            className="space-y-2"
-                            renderItem={(adiso, handle) => (
-                                <div className="flex items-center gap-3 p-3 bg-white rounded-2xl border border-slate-100 shadow-sm">
-                                    {handle}
-                                    <div className="w-14 h-14 rounded-xl overflow-hidden bg-slate-100 shrink-0">
-                                        {adiso.imagenUrl || adiso.imagenesUrls?.[0] ? (
-                                            <img
-                                                src={adiso.imagenesUrls?.[0] || adiso.imagenUrl || ''}
-                                                alt={adiso.titulo}
-                                                className="w-full h-full object-cover"
-                                            />
-                                        ) : (
-                                            <div className="w-full h-full flex items-center justify-center text-slate-300">
-                                                <IconBox size={20} />
-                                            </div>
-                                        )}
-                                    </div>
-                                    <div className="flex-1 min-w-0">
-                                        <p className="font-bold text-sm text-slate-900 truncate">{adiso.titulo}</p>
-                                        {adiso.precio != null && (
-                                            <p className="text-xs text-slate-500">S/ {adiso.precio}</p>
-                                        )}
-                                    </div>
-                                    <div className="flex items-center gap-1 shrink-0">
-                                        <button
-                                            type="button"
-                                            onClick={() => {
-                                                if (onEditProduct) onEditProduct(adiso);
-                                                else onEditPart?.('catalog');
-                                            }}
-                                            className="text-slate-400 hover:text-[var(--brand-color)] p-2 rounded-lg hover:bg-slate-50"
-                                            aria-label="Editar producto"
-                                        >
-                                            <IconEdit size={16} />
-                                        </button>
-                                        <button
-                                            type="button"
-                                            onClick={() => setConfirmDeleteAdiso(adiso)}
-                                            className="text-slate-300 hover:text-red-500 p-2 rounded-lg hover:bg-red-50"
-                                            aria-label="Eliminar producto"
-                                        >
-                                            <IconTrash size={14} />
-                                        </button>
-                                    </div>
+                    {displayedAdisos.length > 0 ? (
+                        <>
+                            {canReorder ? (
+                                <SortableProductList
+                                    items={displayedAdisos}
+                                    onReorder={handleReorder}
+                                    disabled={reorderBusy}
+                                    className={catalogGridClassName}
+                                    strategy={viewMode === 'grid' ? 'grid' : 'list'}
+                                    renderItem={(adiso, handle) => renderCatalogCard(adiso, handle)}
+                                />
+                            ) : (
+                                <div className={catalogGridClassName}>
+                                    {displayedAdisos.map((adiso) => (
+                                        <React.Fragment key={adiso.id}>
+                                            {renderCatalogCard(adiso)}
+                                        </React.Fragment>
+                                    ))}
                                 </div>
                             )}
-                        />
-                    ) : displayedAdisos.length > 0 ? (
-                        <>
-                            <div className={cn(
-                                "grid gap-3 md:gap-4",
-                                viewMode === 'grid'
-                                    ? "grid-cols-2 md:grid-cols-3 lg:grid-cols-4"
-                                    : viewMode === 'feed'
-                                        ? "grid-cols-1 max-w-xl mx-auto"
-                                        : "grid-cols-1"
-                            )}>
-                                {displayedAdisos.map((adiso) => (
-                                    viewMode === 'feed' ? (
-                                        <div
-                                            key={adiso.id}
-                                            className="bg-white rounded-2xl overflow-hidden border border-slate-100 shadow-sm flex flex-col"
-                                        >
-                                            <div className="p-3 flex items-center justify-between">
-                                                <div className="flex items-center gap-2">
-                                                    <div className="w-8 h-8 rounded-full overflow-hidden bg-slate-100 relative">
-                                                        {profile.logo_url ? (
-                                                            <img src={profile.logo_url} alt={profile.name || "Logo"} className="w-full h-full object-cover" />
-                                                        ) : (
-                                                            <div className="w-full h-full flex items-center justify-center text-xs font-bold text-slate-300">
-                                                                {profile.name?.substring(0, 1) || 'N'}
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                    <span className="text-sm font-bold text-slate-900">{profile.name}</span>
-                                                </div>
-                                                {showEditControls && (
-                                                    <div className="flex items-center gap-1">
-                                                        <button
-                                                            onClick={() => {
-                                                                if (onEditProduct) onEditProduct(adiso);
-                                                                else onEditPart?.('catalog');
-                                                            }}
-                                                            className="text-slate-400 hover:text-[var(--brand-color)] p-1.5 rounded-lg hover:bg-slate-100 transition-colors"
-                                                        >
-                                                            <IconEdit size={16} />
-                                                        </button>
-                                                        <button
-                                                            onClick={() => setConfirmDeleteAdiso(adiso)}
-                                                            disabled={deletingAdisoId === adiso.id}
-                                                            className="text-slate-300 hover:text-red-500 p-1.5 rounded-lg hover:bg-red-50 transition-colors disabled:opacity-50"
-                                                        >
-                                                            {deletingAdisoId === adiso.id
-                                                                ? <div className="w-4 h-4 border-2 border-red-300 border-t-transparent rounded-full animate-spin" />
-                                                                : <IconTrash size={14} />}
-                                                        </button>
-                                                    </div>
-                                                )}
-                                            </div>
-
-                                            <div className="relative w-full aspect-square bg-slate-50 overflow-hidden cursor-pointer" onClick={() => router.push(getAdisoUrl(adiso))}>
-                                                {adiso.imagenUrl || adiso.imagenesUrls?.[0] ? (
-                                                    <img
-                                                        src={adiso.imagenesUrls?.[0] || adiso.imagenUrl || ''}
-                                                        alt={adiso.titulo}
-                                                        className="w-full h-full object-contain"
-                                                        loading={catalogImgLoading}
-                                                    />
-                                                ) : (
-                                                    <div className="w-full h-full flex items-center justify-center text-slate-200">
-                                                        <IconBox size={48} />
-                                                    </div>
-                                                )}
-                                                {adiso.precio && (
-                                                    <div className="absolute bottom-4 right-4 bg-white/90 backdrop-blur-md px-3 py-1.5 rounded-xl shadow-lg border border-white/50">
-                                                        <span className="font-black text-slate-900">S/ {adiso.precio}</span>
-                                                    </div>
-                                                )}
-                                            </div>
-
-                                            <div className="p-4 flex flex-col gap-1">
-                                                <h3 className="font-bold text-base text-slate-900 leading-tight cursor-pointer" onClick={() => router.push(getAdisoUrl(adiso))}>
-                                                    {adiso.titulo}
-                                                </h3>
-                                                {adiso.descripcion && (
-                                                    <p className="text-sm text-slate-600 leading-relaxed mt-1">
-                                                        {adiso.descripcion.replace('Precio:', '').trim()}
-                                                    </p>
-                                                )}
-                                                {profile.contact_whatsapp && (
-                                                    <a
-                                                        href={`https://wa.me/${profile.contact_whatsapp}?text=${encodeURIComponent(`Hola! Me interesa: ${adiso.titulo}`)}`}
-                                                        target="_blank"
-                                                        rel="noreferrer"
-                                                        className="mt-3 bg-green-500 hover:bg-green-600 text-white py-2.5 rounded-xl font-bold text-center transition-all flex items-center justify-center gap-2"
-                                                    >
-                                                        <IconWhatsapp size={18} /> Pedir ahora
-                                                    </a>
-                                                )}
-                                            </div>
-                                        </div>
-                                    ) : viewMode === 'grid' ? (
-                                        <div
-                                            key={adiso.id}
-                                            role="button"
-                                            tabIndex={0}
-                                            onClick={() => router.push(getAdisoUrl(adiso))}
-                                            onKeyDown={(e) => {
-                                                if (e.key === 'Enter' || e.key === ' ') {
-                                                    e.preventDefault();
-                                                    router.push(getAdisoUrl(adiso));
-                                                }
-                                            }}
-                                            className="group relative bg-white rounded-2xl overflow-hidden border border-slate-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 text-left flex flex-col cursor-pointer"
-                                        >
-                                            <div className="relative w-full bg-slate-50 overflow-hidden" style={{ aspectRatio: '4/3' }}>
-                                                {adiso.imagenUrl || adiso.imagenesUrls?.[0] ? (
-                                                    <img
-                                                        src={adiso.imagenesUrls?.[0] || adiso.imagenUrl || ''}
-                                                        alt={adiso.titulo}
-                                                        className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500"
-                                                        loading={catalogImgLoading}
-                                                    />
-                                                ) : (
-                                                    <div className="w-full h-full flex flex-col items-center justify-center gap-2 text-slate-200">
-                                                        <IconBox size={40} />
-                                                    </div>
-                                                )}
-                                                {adiso.categoria && (
-                                                    <span className="absolute top-2 left-2 bg-white/90 backdrop-blur-sm text-[10px] font-bold px-2 py-0.5 rounded-full text-[var(--brand-color)] shadow-sm">
-                                                        {adiso.categoria}
-                                                    </span>
-                                                )}
-                                                {showEditControls && (
-                                                    <div className="absolute top-2 right-2 flex gap-1 z-10">
-                                                        <button
-                                                            onClick={(e) => {
-                                                                e.stopPropagation();
-                                                                if (onEditProduct) onEditProduct(adiso);
-                                                                else onEditPart?.('catalog');
-                                                            }}
-                                                            className="p-1.5 bg-white/95 backdrop-blur-sm rounded-lg shadow-md border border-slate-100 hover:bg-[var(--brand-color)] hover:text-white text-slate-600 transition-colors"
-                                                            title="Editar producto"
-                                                        >
-                                                            <IconEdit size={14} />
-                                                        </button>
-                                                        <button
-                                                            onClick={(e) => {
-                                                                e.stopPropagation();
-                                                                setConfirmDeleteAdiso(adiso);
-                                                            }}
-                                                            disabled={deletingAdisoId === adiso.id}
-                                                            className="p-1.5 bg-white/95 backdrop-blur-sm rounded-lg shadow-md border border-red-100 text-red-400 hover:bg-red-500 hover:text-white transition-colors disabled:opacity-50"
-                                                            title="Eliminar producto"
-                                                        >
-                                                            {deletingAdisoId === adiso.id
-                                                                ? <div className="w-3.5 h-3.5 border-2 border-red-300 border-t-transparent rounded-full animate-spin" />
-                                                                : <IconTrash size={12} />}
-                                                        </button>
-                                                    </div>
-                                                )}
-                                            </div>
-                                            <div className="p-3 flex flex-col gap-1 flex-1">
-                                                <h3 className="font-bold text-sm text-slate-800 line-clamp-2 leading-snug">
-                                                    {adiso.titulo}
-                                                </h3>
-                                                {adiso.descripcion && (
-                                                    <p className="text-xs text-slate-400 line-clamp-2 leading-relaxed flex-1">
-                                                        {adiso.descripcion.replace('Precio:', '').trim()}
-                                                    </p>
-                                                )}
-                                                <div className="flex items-center justify-between mt-1 pt-2 border-t border-slate-50 gap-2">
-                                                    <span className="font-black text-base text-slate-900">
-                                                        {adiso.precio ? `S/ ${adiso.precio}` : <span className="text-sm font-semibold text-slate-400">Consultar</span>}
-                                                    </span>
-                                                    <div className="flex items-center gap-1">
-                                                        <button
-                                                            type="button"
-                                                            onClick={(e) => {
-                                                                e.stopPropagation();
-                                                                addItem({
-                                                                    productId: adiso.id,
-                                                                    title: adiso.titulo,
-                                                                    price: adiso.precio,
-                                                                    imageUrl: adiso.imagenesUrls?.[0] || adiso.imagenUrl,
-                                                                });
-                                                            }}
-                                                            className="text-[10px] font-bold px-2 py-1 bg-[var(--brand-color)]/10 text-[var(--brand-color)] rounded-lg hover:bg-[var(--brand-color)] hover:text-white transition-colors"
-                                                        >
-                                                            + Carrito
-                                                        </button>
-                                                        {profile.contact_whatsapp && (
-                                                            <a
-                                                                href={getProductWhatsappUrl(profile.contact_whatsapp, profile.name || 'Negocio', adiso)}
-                                                                target="_blank"
-                                                                rel="noreferrer"
-                                                                onClick={(e) => e.stopPropagation()}
-                                                                className="text-[10px] font-bold px-2 py-1 bg-green-50 text-green-700 rounded-lg hover:bg-green-100 transition-colors flex items-center gap-1"
-                                                            >
-                                                                <IconWhatsapp size={11} />
-                                                            </a>
-                                                        )}
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    ) : (
-                                        <div
-                                            key={adiso.id}
-                                            className="bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all flex gap-3 items-start relative group cursor-pointer p-3"
-                                            onClick={() => router.push(getAdisoUrl(adiso))}
-                                        >
-                                            <div className="w-20 h-20 flex-shrink-0 bg-slate-50 rounded-xl overflow-hidden">
-                                                {adiso.imagenUrl || adiso.imagenesUrls?.[0] ? (
-                                                    <img
-                                                        src={adiso.imagenesUrls?.[0] || adiso.imagenUrl || ''}
-                                                        alt={adiso.titulo || "Producto"}
-                                                        className="w-full h-full object-contain"
-                                                        loading={catalogImgLoading}
-                                                    />
-                                                ) : (
-                                                    <div className="w-full h-full flex items-center justify-center text-slate-200">
-                                                        <IconBox size={28} />
-                                                    </div>
-                                                )}
-                                            </div>
-                                            <div className="flex-1 min-w-0 pr-8">
-                                                <span className="text-[10px] font-bold text-[var(--brand-color)] uppercase tracking-wide block mb-0.5">{adiso.categoria || ''}</span>
-                                                <h3 className="font-bold text-sm text-slate-800 mb-1 leading-snug line-clamp-2">{adiso.titulo}</h3>
-                                                {adiso.descripcion && (
-                                                    <p className="text-xs text-slate-400 line-clamp-2 leading-relaxed">{adiso.descripcion.replace('Precio:', '').trim()}</p>
-                                                )}
-                                                <div className="mt-2 font-black text-lg text-slate-900">
-                                                    {adiso.precio ? `S/ ${adiso.precio}` : <span className="text-sm font-semibold text-slate-400">Consultar</span>}
-                                                </div>
-                                            </div>
-                                            {showEditControls && (
-                                                <div className="absolute top-2 right-2 flex gap-1">
-                                                    <button
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            if (onEditProduct) onEditProduct(adiso);
-                                                        }}
-                                                        className="p-1.5 bg-slate-100 text-slate-600 rounded-lg hover:bg-[var(--brand-color)] hover:text-white transition-colors"
-                                                    >
-                                                        <IconEdit size={16} />
-                                                    </button>
-                                                    <button
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            setConfirmDeleteAdiso(adiso);
-                                                        }}
-                                                        disabled={deletingAdisoId === adiso.id}
-                                                        className="p-1.5 bg-red-50 text-red-400 rounded-lg hover:bg-red-500 hover:text-white transition-colors disabled:opacity-50"
-                                                    >
-                                                        {deletingAdisoId === adiso.id
-                                                            ? <div className="w-4 h-4 border-2 border-red-300 border-t-transparent rounded-full animate-spin" />
-                                                            : <IconTrash size={14} />}
-                                                    </button>
-                                                </div>
-                                            )}
-                                        </div>
-                                    )
-                                ))}
-                            </div>
 
                             {hasMore && (
                                 <div

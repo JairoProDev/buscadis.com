@@ -15,6 +15,8 @@ import {
   sortableKeyboardCoordinates,
   useSortable,
   rectSortingStrategy,
+  verticalListSortingStrategy,
+  type SortingStrategy,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { cn } from '@/lib/utils';
@@ -26,7 +28,13 @@ interface SortableProductListProps {
   disabled?: boolean;
   renderItem: (adiso: Adiso, dragHandle: React.ReactNode) => React.ReactNode;
   className?: string;
+  strategy?: 'grid' | 'list';
 }
+
+const STRATEGIES: Record<'grid' | 'list', SortingStrategy> = {
+  grid: rectSortingStrategy,
+  list: verticalListSortingStrategy,
+};
 
 export default function SortableProductList({
   items,
@@ -34,6 +42,7 @@ export default function SortableProductList({
   disabled = false,
   renderItem,
   className,
+  strategy = 'grid',
 }: SortableProductListProps) {
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
@@ -54,7 +63,7 @@ export default function SortableProductList({
 
   return (
     <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-      <SortableContext items={ids} strategy={rectSortingStrategy}>
+      <SortableContext items={ids} strategy={STRATEGIES[strategy]}>
         <div className={className}>
           {items.map((adiso) => (
             <SortableProductRow key={adiso.id} id={adiso.id} disabled={disabled}>
