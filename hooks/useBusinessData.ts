@@ -411,6 +411,9 @@ function mapProductsToAdisos(products: any[], business: BusinessProfile | null):
         ? new Date(p.created_at).toLocaleTimeString()
         : new Date().toLocaleTimeString(),
       status: p.status,
+      sort_order: p.sort_order ?? 0,
+      is_featured: Boolean(p.is_featured),
+      created_at: p.created_at,
     };
   });
 }

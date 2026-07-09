@@ -14,7 +14,7 @@ export type VisitorSortOption =
   | 'newest';
 
 export const VISITOR_SORT_OPTIONS: { id: VisitorSortOption; label: string }[] = [
-  { id: 'owner', label: 'Destacados' },
+  { id: 'owner', label: 'Orden del catálogo' },
   { id: 'title_asc', label: 'Nombre A→Z' },
   { id: 'title_desc', label: 'Nombre Z→A' },
   { id: 'price_asc', label: 'Precio: menor a mayor' },
@@ -56,8 +56,6 @@ export function sortCatalogItems<T extends { title?: string; titulo?: string; pr
 
   if (sort === 'owner') {
     return copy.sort((a, b) => {
-      const feat = Number(Boolean(b.is_featured)) - Number(Boolean(a.is_featured));
-      if (feat !== 0) return feat;
       const ao = a.sort_order ?? 0;
       const bo = b.sort_order ?? 0;
       if (ao !== bo) return ao - bo;

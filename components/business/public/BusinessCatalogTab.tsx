@@ -26,6 +26,22 @@ import {
 } from '@/lib/catalog/sort-products';
 import { useToast } from '@/hooks/useToast';
 
+function enrichAdisosForSort(
+  items: Adiso[],
+  catalogProducts: any[]
+): Array<Adiso & { sort_order?: number; is_featured?: boolean; created_at?: string }> {
+  const catalogRows = catalogProducts.length > 0 ? catalogProducts : items;
+  return items.map((a) => {
+    const row = catalogRows.find((p: { id: string }) => p.id === a.id);
+    return { ...a, ...(row || {}) };
+  });
+}
+
+function isPublishedCatalogAdiso(a: Adiso): boolean {
+  const status = (a as Adiso & { status?: string }).status;
+  return status !== 'draft' && status !== 'archived';
+}
+
 interface BusinessCatalogTabProps {
     profile: Partial<BusinessProfile>;
     adisos: Adiso[];
@@ -85,8 +101,6 @@ export default function BusinessCatalogTab({
 
     const { openCatalogPdf, generating: generatingPDF, progress: pdfProgress } = useCatalogPDF();
 
-    const categories = Array.from(new Set(adisos.map(a => a.categoria || 'Otros').filter(Boolean)));
-
     const categoryThumbs = useMemo(() => {
         const map = new Map<string, string>();
         for (const a of adisos) {
@@ -99,8 +113,14 @@ export default function BusinessCatalogTab({
         return map;
     }, [adisos]);
 
+    const categories = Array.from(new Set(adisos.map(a => a.categoria || 'Otros').filter(Boolean)));
+
     useEffect(() => {
         let result = adisos;
+
+        if (!showEditControls) {
+            result = result.filter(isPublishedCatalogAdiso);
+        }
 
         if (searchQuery) {
             const query = searchQuery.toLowerCase();
@@ -114,16 +134,8 @@ export default function BusinessCatalogTab({
             result = result.filter(a => (a.categoria || 'Otros') === selectedCategory);
         }
 
-        if (!showEditControls) {
-            const catalogRows = catalogProducts.length > 0 ? catalogProducts : adisos;
-            result = sortCatalogItems(
-                result.map((a) => {
-                    const row = catalogRows.find((p: { id: string }) => p.id === a.id);
-                    return { ...a, ...(row || {}) };
-                }),
-                visitorSort
-            );
-        }
+        const sortKey = showEditControls ? 'owner' : visitorSort;
+        result = sortCatalogItems(enrichAdisosForSort(result, catalogProducts), sortKey);
 
         setFilteredAdisos(result);
         setVisibleCount(24);
