@@ -12,6 +12,7 @@ import { buildBusinessShareMetadata, getBusinessProfilePath } from '@/lib/seo/bu
 import { buildAdisoMetadata } from '@/lib/seo/adiso-metadata';
 import { withDefaultShareImage } from '@/lib/seo/og-image';
 import { normalizeBusinessSlug } from '@/lib/business/normalize-slug';
+import { isReservedBusinessSlug } from '@/lib/business/reserved-slugs';
 import { getPublishedBusinessProfileBySlug } from '@/lib/business/get-public-profile';
 
 const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL || 'https://buscadis.com').replace(/\/$/, '');
@@ -29,21 +30,6 @@ const RESERVED_STATIC_PREFIXES = new Set([
   'sw.js',
   'workbox',
 ]);
-
-const RESERVED_BUSINESS_SLUGS = new Set([
-  'login',
-  'auth',
-  'signup',
-  'register',
-  'perfil',
-  'mi-negocio',
-  'admin',
-  'api',
-]);
-
-function isReservedBusinessSlug(slug: string): boolean {
-  return RESERVED_BUSINESS_SLUGS.has(slug.toLowerCase());
-}
 
 function isReservedStaticPath(slug: string[]): boolean {
   if (slug.length === 0) return false;

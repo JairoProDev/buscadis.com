@@ -1,7 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { normalizeBusinessSlug } from '@/lib/business/normalize-slug';
 
-/** Hosts legacy sin app propia → mismo origen canónico (QR impresos antiguos). */
+/**
+ * Rutas canónicas de perfil Buscadis:
+ * - Canónica: /@{slug}
+ * - Alias legacy: /p/{slug} → redirect 308 a /@{slug}
+ * - Alias corto: /{slug} → redirect vía catch-all si el negocio está publicado
+ *
+ * Publicadis vive en publicadis.com — solo enlace desde botón Web del perfil.
+ */
 const LEGACY_QR_HOSTS = new Set(['market.adis.lat', 'www.adis.lat', 'adis.lat']);
 
 export function middleware(req: NextRequest) {
