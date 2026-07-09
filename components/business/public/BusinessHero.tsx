@@ -7,6 +7,7 @@ import HeroQrButton from '@/components/business/qr/HeroQrButton';
 import BusinessSocialStrip from '@/components/business/public/BusinessSocialStrip';
 import type { BusinessProfile, BusinessReviewAggregate } from '@/types/business';
 import { cn } from '@/lib/utils';
+import { withMediaCacheBust } from '@/lib/media-url';
 import { isBusinessOpenNow } from '@/lib/business/hours';
 import {
   profileHasBanner,
@@ -38,6 +39,9 @@ export default function BusinessHero({
   const [mounted, setMounted] = useState(false);
   const [openStatus, setOpenStatus] = useState<boolean | null>(null);
   const hasBanner = profileHasBanner(profile.banner_url);
+  const mediaVersion = profile.updated_at ?? null;
+  const bannerSrc = withMediaCacheBust(profile.banner_url, mediaVersion);
+  const logoSrc = withMediaCacheBust(profile.logo_url, mediaVersion);
 
   useEffect(() => {
     setMounted(true);
@@ -54,7 +58,7 @@ export default function BusinessHero({
       >
         {hasBanner ? (
           <img
-            src={profile.banner_url}
+            src={bannerSrc}
             alt="Portada"
             className="w-full h-full object-cover object-center transition-transform duration-700 group-hover:scale-105"
           />
@@ -101,7 +105,7 @@ export default function BusinessHero({
             >
               {profile.logo_url ? (
                 <img
-                  src={profile.logo_url}
+                  src={logoSrc}
                   alt="Logo"
                   className={cn(
                     'w-full h-full',

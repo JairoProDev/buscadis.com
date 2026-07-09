@@ -12,7 +12,7 @@ import { buildBusinessShareMetadata, getBusinessProfilePath } from '@/lib/seo/bu
 import { buildAdisoMetadata } from '@/lib/seo/adiso-metadata';
 import { withDefaultShareImage } from '@/lib/seo/og-image';
 import { normalizeBusinessSlug } from '@/lib/business/normalize-slug';
-import { getBusinessProfileBySlug } from '@/lib/business';
+import { getPublishedBusinessProfileBySlug } from '@/lib/business/get-public-profile';
 
 const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL || 'https://buscadis.com').replace(/\/$/, '');
 
@@ -48,6 +48,7 @@ function isReservedBusinessSlug(slug: string): boolean {
 function isReservedStaticPath(slug: string[]): boolean {
   if (slug.length === 0) return false;
   const root = slug[0].toLowerCase();
+  if (root === 'api') return true;
   if (RESERVED_STATIC_PREFIXES.has(root)) return true;
   if (root.startsWith('workbox-') || root.startsWith('fallback-')) return true;
   return false;
@@ -72,7 +73,7 @@ async function redirectBareSlugToCanonicalProfile(
   const businessSlug = normalizeBusinessSlug(slug);
   if (!businessSlug || isReservedBusinessSlug(businessSlug)) return;
 
-  const profile = await getBusinessProfileBySlug(businessSlug);
+  const profile = await getPublishedBusinessProfileBySlug(businessSlug);
   if (!profile) return;
 
   redirect(`${getBusinessProfilePath(businessSlug)}${buildSearchQuery(searchParams)}`);
@@ -106,7 +107,12 @@ export async function generateMetadata(props: PageProps): Promise<Metadata> {
         }
         const supabaseAdmin = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
         try {
-            const { data } = await supabaseAdmin.from('business_profiles').select('name, description, logo_url, banner_url, slug, meta_title, meta_description, og_image_url, tagline').eq('slug', targetSlug).single();
+            const { data } = await supabaseAdmin
+          .from('business_profiles')
+          .select('name, description, logo_url, banner_url, slug, meta_title, meta_description, og_image_url, tagline')
+          .eq('slug', targetSlug)
+          .eq('is_published', true)
+          .single();
             if (data) {
                 return buildBusinessShareMetadata(data);
             }

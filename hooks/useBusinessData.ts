@@ -14,6 +14,7 @@ import { getBusinessProfileBySlug } from '@/lib/business';
 import {
   cacheSet,
   cacheGet,
+  cacheRemove,
   CacheKeys,
   CACHE_TTL,
 } from '@/lib/offline-cache';
@@ -123,14 +124,39 @@ export function useBusinessData(slug: string, isOwner: boolean) {
       return 'skip';
     }
     try {
-      const profileData = await getBusinessProfileBySlug(normalizedSlug);
+      let profileData: BusinessProfile | null = null;
+
+      if (isOwner) {
+        profileData = await getBusinessProfileBySlug(normalizedSlug);
+      } else {
+        const res = await fetch(`/api/business/by-slug/${encodeURIComponent(normalizedSlug)}`, {
+          cache: 'no-store',
+        });
+        if (res.ok) {
+          const json = await res.json();
+          profileData = json.profile ?? null;
+        } else if (res.status !== 404) {
+          return 'skip';
+        }
+      }
+
       if (profileData) {
-        cacheSet(CacheKeys.businessProfile(normalizedSlug), profileData, CACHE_TTL.BUSINESS_PROFILE);
+        const cacheKey = CacheKeys.businessProfile(normalizedSlug);
+        const cached = cacheGet<BusinessProfile>(cacheKey, true);
+        if (
+          cached?.updated_at &&
+          profileData.updated_at &&
+          cached.updated_at !== profileData.updated_at
+        ) {
+          cacheRemove(cacheKey);
+        }
+        cacheSet(cacheKey, profileData, CACHE_TTL.BUSINESS_PROFILE);
+        const mediaVersion = profileData.updated_at || Date.now();
         if (profileData.logo_url) {
           queueMicrotask(() => {
             const im = new Image();
             im.decoding = 'async';
-            im.src = profileData.logo_url as string;
+            im.src = `${profileData!.logo_url}${profileData!.logo_url!.includes('?') ? '&' : '?'}v=${encodeURIComponent(String(mediaVersion))}`;
           });
         }
       }
@@ -139,7 +165,7 @@ export function useBusinessData(slug: string, isOwner: boolean) {
       console.error('[useBusinessData] Error fetching profile:', e);
       return 'skip';
     }
-  }, [normalizedSlug]);
+  }, [normalizedSlug, isOwner]);
 
   /** null = error/offline, no sobrescribir catálogo en pantalla */
   const fetchCatalog = useCallback(

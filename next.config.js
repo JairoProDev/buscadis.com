@@ -80,6 +80,21 @@ const nextConfig = {
         destination: '/deals',
         permanent: true,
       },
+      {
+        source: '/villachaco',
+        destination: '/@villachaco',
+        permanent: true,
+      },
+      {
+        source: '/villachaco/index.html',
+        destination: '/@villachaco',
+        permanent: true,
+      },
+      {
+        source: '/villachaco/images/:path*',
+        destination: 'https://publicadis.com/villachaco/images/:path*',
+        permanent: true,
+      },
     ];
 
     return redirects;
@@ -137,12 +152,13 @@ const withPwa = require('@ducanh2912/next-pwa').default({
       {
         urlPattern: ({ url }) =>
           /^https:\/\/[^/]+\.supabase\.co\/storage\/v1\//i.test(url.href),
-        handler: 'StaleWhileRevalidate',
+        handler: 'NetworkFirst',
         options: {
           cacheName: 'supabase-catalog-images',
+          networkTimeoutSeconds: 8,
           expiration: {
             maxEntries: 500,
-            maxAgeSeconds: 7 * 24 * 60 * 60,
+            maxAgeSeconds: 24 * 60 * 60,
           },
           cacheableResponse: {
             statuses: [0, 200],
