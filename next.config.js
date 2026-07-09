@@ -80,21 +80,6 @@ const nextConfig = {
         destination: '/deals',
         permanent: true,
       },
-      {
-        source: '/villachaco',
-        destination: '/@villachaco',
-        permanent: true,
-      },
-      {
-        source: '/villachaco/index.html',
-        destination: '/@villachaco',
-        permanent: true,
-      },
-      {
-        source: '/villachaco/images/:path*',
-        destination: 'https://publicadis.com/villachaco/images/:path*',
-        permanent: true,
-      },
     ];
 
     return redirects;
