@@ -24,6 +24,7 @@ import {
   sortCatalogItems,
   type VisitorSortOption,
 } from '@/lib/catalog/sort-products';
+import { getCategoryIconDataUrl } from '@/lib/catalog/category-icons';
 import { useToast } from '@/hooks/useToast';
 
 function enrichAdisosForSort(
@@ -101,6 +102,8 @@ export default function BusinessCatalogTab({
 
     const { openCatalogPdf, generating: generatingPDF, progress: pdfProgress } = useCatalogPDF();
 
+    const categories = Array.from(new Set(adisos.map(a => a.categoria || 'Otros').filter(Boolean)));
+
     const categoryThumbs = useMemo(() => {
         const map = new Map<string, string>();
         for (const a of adisos) {
@@ -110,10 +113,14 @@ export default function BusinessCatalogTab({
                 if (url) map.set(cat, url);
             }
         }
+        for (const cat of categories) {
+            if (!map.has(cat)) {
+                const icon = getCategoryIconDataUrl(cat);
+                if (icon) map.set(cat, icon);
+            }
+        }
         return map;
-    }, [adisos]);
-
-    const categories = Array.from(new Set(adisos.map(a => a.categoria || 'Otros').filter(Boolean)));
+    }, [adisos, categories]);
 
     useEffect(() => {
         let result = adisos;

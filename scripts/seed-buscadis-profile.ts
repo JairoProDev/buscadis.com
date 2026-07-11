@@ -229,7 +229,7 @@ async function main() {
     meta_description: b.meta_description,
     is_verified: b.is_verified ?? true,
     is_published: true,
-    view_count: 12840,
+    view_count: 0,
     announcement_text: b.announcement_text,
     announcement_active: b.announcement_active ?? false,
     business_hours: b.business_hours || {},

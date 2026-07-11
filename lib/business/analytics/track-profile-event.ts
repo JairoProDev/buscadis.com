@@ -20,22 +20,27 @@ export function getAnalyticsSessionId(): string {
   return sessionId;
 }
 
+export type TrackProfileViewResult = {
+  success: boolean;
+  counted: boolean;
+  view_count: number;
+};
+
 export type TrackProfileViewOptions = {
   businessProfileId: string;
   fromQr?: boolean;
 };
 
-/** Counts a unique profile view (deduped server-side per session/24h). */
+/** Registra visita al perfil; devuelve view_count actualizado para refrescar métricas en UI. */
 export async function trackProfileView({
   businessProfileId,
   fromQr = false,
-}: TrackProfileViewOptions): Promise<void> {
-  if (!businessProfileId || typeof fetch === 'undefined') return;
+}: TrackProfileViewOptions): Promise<TrackProfileViewResult | null> {
+  if (!businessProfileId || typeof fetch === 'undefined') return null;
 
   try {
-    // Count every page load/refresh as a visit.
     const sessionId = `${getAnalyticsSessionId()}_${Date.now()}`;
-    await fetch(`/api/business/${encodeURIComponent(businessProfileId)}/track-view`, {
+    const res = await fetch(`/api/business/${encodeURIComponent(businessProfileId)}/track-view`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -43,12 +48,16 @@ export async function trackProfileView({
         referrer: typeof document !== 'undefined' ? document.referrer : '',
       }),
     });
-  } catch {
-    /* offline */
-  }
 
-  if (fromQr) {
-    await trackProfileEvent(businessProfileId, 'qr_scan');
+    if (!res.ok) return null;
+
+    const json = (await res.json()) as TrackProfileViewResult;
+    if (fromQr && json.success) {
+      await trackProfileEvent(businessProfileId, 'qr_scan');
+    }
+    return json;
+  } catch {
+    return null;
   }
 }
 

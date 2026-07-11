@@ -43,7 +43,17 @@ export async function POST(
       return NextResponse.json({ success: false, error: error.message }, { status: 500 });
     }
 
-    return NextResponse.json({ success: true, counted: Boolean(data) });
+    const { data: profile } = await supabase
+      .from('business_profiles')
+      .select('view_count')
+      .eq('id', businessId)
+      .maybeSingle();
+
+    return NextResponse.json({
+      success: true,
+      counted: Boolean(data),
+      view_count: profile?.view_count ?? 0,
+    });
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : 'unknown';
     console.error('track-view error:', message);

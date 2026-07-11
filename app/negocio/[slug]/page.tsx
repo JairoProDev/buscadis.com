@@ -79,6 +79,8 @@ export default function PublicBusinessPage({
         updateBusiness,
     } = useBusinessData(slug, isPlatformAdmin || isMember);
 
+    const viewTrackedRef = useRef(false);
+
     useEffect(() => {
         setMounted(true);
     }, []);
@@ -196,12 +198,25 @@ export default function PublicBusinessPage({
     }, [isOnline]);
 
     useEffect(() => {
-        if (!business?.id || !isOnline) return;
-        trackProfileView({
+        if (!business?.id || !isOnline || viewTrackedRef.current) return;
+        viewTrackedRef.current = true;
+
+        void trackProfileView({
             businessProfileId: business.id,
             fromQr: resolvedSearchParams?.from_qr === '1',
+        }).then((result) => {
+            if (!result?.success) return;
+            updateBusiness((prev) => ({
+                ...prev,
+                view_count:
+                    typeof result.view_count === 'number'
+                        ? result.view_count
+                        : result.counted
+                          ? (prev.view_count ?? 0) + 1
+                          : prev.view_count,
+            }));
         });
-    }, [business?.id, isOnline, resolvedSearchParams?.from_qr]);
+    }, [business?.id, isOnline, resolvedSearchParams?.from_qr, updateBusiness]);
 
     const handleProductSave = async (updatedProduct: any) => {
         if (business?.id) {
