@@ -419,8 +419,15 @@ function catalogProductToAdiso(product: any): Adiso {
             .map((img: any) => (typeof img === 'string' ? img : img?.url))
             .filter(Boolean)
         : [];
-    const createdAt = product.created_at ? new Date(product.created_at) : new Date();
-    const fechaPublicacion = createdAt.toISOString();
+    // Con fotos: updated_at refleja cuando se hizo visible/comercial.
+    // Sin fotos: created_at evita que un bulk update (p.ej. categorías) las catapulte al tope.
+    const rawDate = images.length > 0
+        ? (product.updated_at || product.created_at)
+        : (product.created_at || product.updated_at);
+    const publishedAt = rawDate ? new Date(rawDate) : new Date();
+    const safeDate = Number.isNaN(publishedAt.getTime()) ? new Date() : publishedAt;
+    const fechaPublicacion = safeDate.toISOString().split('T')[0];
+    const horaPublicacion = safeDate.toISOString().slice(11, 16);
 
     return {
         id: product.id,
@@ -433,7 +440,7 @@ function catalogProductToAdiso(product: any): Adiso {
         categoria: normalizeCatalogCategory(product.category),
         ubicacion: business?.contact_address || 'Perú',
         fechaPublicacion,
-        horaPublicacion: createdAt.toISOString().slice(11, 19),
+        horaPublicacion,
         contacto: business?.contact_whatsapp || business?.contact_phone || business?.contact_email || '',
         vistas: product.view_count || 0,
         contactos: product.click_count || 0,
@@ -468,10 +475,17 @@ export async function getCatalogProductsAsAdisos(options?: {
     offset?: number;
     categoria?: string;
     busqueda?: string;
+    /** En el feed "todos", priorizar productos con foto (visibilidad comercial). */
+    preferImages?: boolean;
 }): Promise<Adiso[]> {
     if (!supabase) return [];
 
     try {
+        const preferImages = options?.preferImages !== false;
+        const requestedLimit = options?.limit || 20;
+        // Pedir más filas si priorizamos fotos, para no quedarnos cortos tras filtrar.
+        const fetchLimit = preferImages ? Math.min(requestedLimit * 3, 100) : requestedLimit;
+
         let query = supabase
             .from('catalog_products')
             .select(`
@@ -508,15 +522,12 @@ export async function getCatalogProductsAsAdisos(options?: {
             }
         }
 
-        query = query.order('updated_at', { ascending: false });
+        query = query
+            .order('updated_at', { ascending: false })
+            .order('created_at', { ascending: false });
 
-        if (options?.limit) {
-            const from = options.offset || 0;
-            const to = from + options.limit - 1;
-            query = query.range(from, to);
-        } else {
-            query = query.limit(20);
-        }
+        const from = options?.offset || 0;
+        query = query.range(from, from + fetchLimit - 1);
 
         const { data, error } = await query;
         if (error) {
@@ -530,7 +541,22 @@ export async function getCatalogProductsAsAdisos(options?: {
             return profile.is_published !== false;
         });
 
-        return publishedProducts.map(catalogProductToAdiso);
+        const hasImages = (p: any) =>
+            Array.isArray(p.images) &&
+            p.images.some((img: any) =>
+                typeof img === 'string' ? Boolean(img.trim()) : Boolean(img?.url?.trim())
+            );
+
+        let selected = publishedProducts;
+        if (preferImages) {
+            const withImg = publishedProducts.filter(hasImages);
+            const withoutImg = publishedProducts.filter((p) => !hasImages(p));
+            selected = [...withImg, ...withoutImg].slice(0, requestedLimit);
+        } else {
+            selected = publishedProducts.slice(0, requestedLimit);
+        }
+
+        return selected.map(catalogProductToAdiso);
     } catch (error) {
         console.error('Error mapping catalog products to adisos:', error);
         return [];
@@ -546,10 +572,15 @@ export async function getMarketplaceFeed(options: {
     busqueda?: string;
 }): Promise<Adiso[]> {
     const productosTab = options.categoria === 'productos';
+    // En "todos", balancear ~50/50 para que productos recientes no queden sepultados
+    // detrás de un bloque grande de clasificados antiguos.
     const adisoLimit = productosTab
         ? Math.max(4, Math.ceil(options.limit * 0.25))
-        : Math.max(10, Math.ceil(options.limit * 0.7));
-    const catalogLimit = Math.max(productosTab ? 12 : 6, options.limit - adisoLimit);
+        : Math.max(8, Math.ceil(options.limit * 0.5));
+    const catalogLimit = Math.max(
+        productosTab ? 12 : Math.ceil(options.limit * 0.5),
+        options.limit - adisoLimit
+    );
 
     const [adisosBase, catalogAdisos] = await Promise.all([
         getAdisosFromSupabase({
@@ -562,6 +593,7 @@ export async function getMarketplaceFeed(options: {
             offset: options.offset,
             categoria: options.categoria,
             busqueda: options.busqueda,
+            preferImages: !productosTab,
         }),
     ]);
 

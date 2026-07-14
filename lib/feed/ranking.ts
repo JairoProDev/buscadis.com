@@ -24,10 +24,19 @@ export function getPackageRank(tamaño: TamañoPaquete | undefined): number {
 function parsePublishedTimestamp(adiso: Adiso): number {
   if (!adiso.fechaPublicacion) return 0;
   try {
-    let hora = adiso.horaPublicacion || '00:00';
+    const raw = String(adiso.fechaPublicacion).trim();
+    // ISO completo (legacy catalog / API): usar tal cual
+    if (raw.includes('T') || raw.endsWith('Z')) {
+      const iso = new Date(raw);
+      if (!Number.isNaN(iso.getTime())) return iso.getTime();
+    }
+
+    let hora = (adiso.horaPublicacion || '00:00').trim();
     if (hora.length === 4) hora = `${hora.substring(0, 2)}:${hora.substring(2)}`;
+    else if (hora.length >= 8) hora = hora.slice(0, 5); // HH:MM:SS → HH:MM
     else if (hora.length !== 5) hora = '00:00';
-    const date = new Date(`${adiso.fechaPublicacion}T${hora}:00`);
+
+    const date = new Date(`${raw}T${hora}:00`);
     return Number.isNaN(date.getTime()) ? 0 : date.getTime();
   } catch {
     return 0;

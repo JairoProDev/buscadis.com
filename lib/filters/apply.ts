@@ -12,10 +12,18 @@ const TEST_REGEX = /toyota test|test adiso|test anuncio/i;
 function parsearFecha(fechaPublicacion: string, horaPublicacion: string): number {
   if (!fechaPublicacion) return 0;
   try {
-    let hora = horaPublicacion || '00:00';
+    const raw = String(fechaPublicacion).trim();
+    if (raw.includes('T') || raw.endsWith('Z')) {
+      const iso = new Date(raw);
+      if (!Number.isNaN(iso.getTime())) return iso.getTime();
+    }
+
+    let hora = (horaPublicacion || '00:00').trim();
     if (hora.length === 4) hora = `${hora.substring(0, 2)}:${hora.substring(2)}`;
+    else if (hora.length >= 8) hora = hora.slice(0, 5);
     else if (hora.length !== 5) hora = '00:00';
-    const date = new Date(`${fechaPublicacion}T${hora}:00`);
+
+    const date = new Date(`${raw}T${hora}:00`);
     return Number.isNaN(date.getTime()) ? 0 : date.getTime();
   } catch {
     return 0;
