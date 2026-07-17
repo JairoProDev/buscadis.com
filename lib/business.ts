@@ -470,6 +470,56 @@ function catalogMarketplaceCategory(categoria?: string): boolean {
     return categoria === 'productos';
 }
 
+function catalogProductHasImages(product: any): boolean {
+    return (
+        Array.isArray(product.images) &&
+        product.images.some((img: any) =>
+            typeof img === 'string' ? Boolean(img.trim()) : Boolean(img?.url?.trim())
+        )
+    );
+}
+
+/**
+ * Intercala productos de distintos negocios.
+ * Sin esto, un catálogo grande (p.ej. Quival con updated_at masivo) monopoliza
+ * la ventana ORDER BY updated_at y sepulta Villachaco/Agrilsur fuera del feed.
+ */
+function diversifyCatalogByBusiness<T extends { business_profile_id?: string }>(
+    products: T[],
+    limit: number,
+): T[] {
+    if (limit <= 0 || products.length <= limit) return products.slice(0, limit);
+
+    const queues = new Map<string, T[]>();
+    const businessOrder: string[] = [];
+
+    for (const product of products) {
+        const key = product.business_profile_id || 'unknown';
+        const queue = queues.get(key);
+        if (queue) {
+            queue.push(product);
+        } else {
+            queues.set(key, [product]);
+            businessOrder.push(key);
+        }
+    }
+
+    const selected: T[] = [];
+    while (selected.length < limit) {
+        let added = false;
+        for (const key of businessOrder) {
+            const queue = queues.get(key);
+            if (!queue?.length) continue;
+            selected.push(queue.shift()!);
+            added = true;
+            if (selected.length >= limit) break;
+        }
+        if (!added) break;
+    }
+
+    return selected;
+}
+
 export async function getCatalogProductsAsAdisos(options?: {
     limit?: number;
     offset?: number;
@@ -483,8 +533,12 @@ export async function getCatalogProductsAsAdisos(options?: {
     try {
         const preferImages = options?.preferImages !== false;
         const requestedLimit = options?.limit || 20;
-        // Pedir más filas si priorizamos fotos, para no quedarnos cortos tras filtrar.
-        const fetchLimit = preferImages ? Math.min(requestedLimit * 3, 100) : requestedLimit;
+        const offset = options?.offset || 0;
+        // Pool amplio para diversificar por negocio; luego slice por offset/limit.
+        const poolSize = Math.min(
+            Math.max(offset + requestedLimit * 8, preferImages ? 120 : 60),
+            200,
+        );
 
         let query = supabase
             .from('catalog_products')
@@ -506,6 +560,11 @@ export async function getCatalogProductsAsAdisos(options?: {
             `)
             .eq('status', 'published');
 
+        // Filtrar sin foto en SQL: evita que bulk updates sin imagen llenen el pool.
+        if (preferImages) {
+            query = query.neq('images', '[]');
+        }
+
         const marketplaceCategoria = options?.categoria;
         if (
             marketplaceCategoria &&
@@ -524,10 +583,8 @@ export async function getCatalogProductsAsAdisos(options?: {
 
         query = query
             .order('updated_at', { ascending: false })
-            .order('created_at', { ascending: false });
-
-        const from = options?.offset || 0;
-        query = query.range(from, from + fetchLimit - 1);
+            .order('created_at', { ascending: false })
+            .range(0, poolSize - 1);
 
         const { data, error } = await query;
         if (error) {
@@ -535,28 +592,18 @@ export async function getCatalogProductsAsAdisos(options?: {
             return [];
         }
 
-        const publishedProducts = (data || []).filter((p: any) => {
+        let publishedProducts = (data || []).filter((p: any) => {
             const profile = p.business_profiles;
             if (!profile) return true;
             return profile.is_published !== false;
         });
 
-        const hasImages = (p: any) =>
-            Array.isArray(p.images) &&
-            p.images.some((img: any) =>
-                typeof img === 'string' ? Boolean(img.trim()) : Boolean(img?.url?.trim())
-            );
-
-        let selected = publishedProducts;
         if (preferImages) {
-            const withImg = publishedProducts.filter(hasImages);
-            const withoutImg = publishedProducts.filter((p) => !hasImages(p));
-            selected = [...withImg, ...withoutImg].slice(0, requestedLimit);
-        } else {
-            selected = publishedProducts.slice(0, requestedLimit);
+            publishedProducts = publishedProducts.filter(catalogProductHasImages);
         }
 
-        return selected.map(catalogProductToAdiso);
+        const diversified = diversifyCatalogByBusiness(publishedProducts, offset + requestedLimit);
+        return diversified.slice(offset, offset + requestedLimit).map(catalogProductToAdiso);
     } catch (error) {
         console.error('Error mapping catalog products to adisos:', error);
         return [];
