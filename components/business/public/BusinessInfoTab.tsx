@@ -1,5 +1,6 @@
 'use client';
 
+import type { ReactNode } from 'react';
 import { motion } from 'framer-motion';
 import BentoCard from '@/components/BentoCard';
 import BusinessCustomBlocks from './BusinessCustomBlocks';
@@ -7,6 +8,7 @@ import { getSocialIcon } from './social-icons';
 import type { BusinessProfile } from '@/types/business';
 import type { Adiso } from '@/types';
 import {
+  IconEdit,
   IconMapMarkerAlt,
   IconPhone,
   IconStore,
@@ -16,17 +18,64 @@ import { cn } from '@/lib/utils';
 import { getWhatsappUrl } from '@/lib/business/public-utils';
 import { getPublicadisSiteUrl } from '@/lib/business/publicadis';
 import { getAdisoUrl } from '@/lib/url';
+import { useProfileEdit } from '@/contexts/ProfileEditContext';
+import ProfileEditableRegion from '@/components/business/editor/ProfileEditableRegion';
+import ProfileLinksEditor from '@/components/business/editor/inline/ProfileLinksEditor';
+import HoursEditor from '@/components/business/editor/inline/HoursEditor';
 
 interface BusinessInfoTabProps {
   profile: Partial<BusinessProfile>;
   adisos: Adiso[];
   showCustomLinks?: boolean;
+  showEditControls?: boolean;
+  onProfilePatch?: (patch: Partial<BusinessProfile>) => void;
 }
 
-export default function BusinessInfoTab({ profile, adisos, showCustomLinks = true }: BusinessInfoTabProps) {
+export default function BusinessInfoTab({
+  profile,
+  adisos,
+  showCustomLinks = true,
+  showEditControls = false,
+  onProfilePatch,
+}: BusinessInfoTabProps) {
   const publicadisUrl = getPublicadisSiteUrl(profile);
   const socialArray = Array.isArray(profile.social_links) ? profile.social_links : [];
   const hasSocials = socialArray.length > 0;
+  const editCtx = useProfileEdit();
+  const canEdit = showEditControls && Boolean(onProfilePatch);
+
+  const wrap = (fieldKey: string, node: ReactNode) =>
+    canEdit ? (
+      <ProfileEditableRegion
+        fieldKey={fieldKey}
+        profile={profile}
+        onPatch={onProfilePatch!}
+        editMode
+        className="block"
+      >
+        {node}
+      </ProfileEditableRegion>
+    ) : (
+      node
+    );
+
+  const openLinksEditor = () =>
+    editCtx?.openInlineEditor({
+      editorId: 'links',
+      title: 'Enlaces y redes sociales',
+      render: (close) => (
+        <ProfileLinksEditor profile={profile} onPatch={onProfilePatch!} onClose={close} />
+      ),
+    });
+
+  const openHoursEditor = () =>
+    editCtx?.openInlineEditor({
+      editorId: 'hours',
+      title: 'Horarios de atención',
+      render: (close) => (
+        <HoursEditor profile={profile} onPatch={onProfilePatch!} onClose={close} />
+      ),
+    });
 
   return (
     <motion.div
@@ -37,22 +86,45 @@ export default function BusinessInfoTab({ profile, adisos, showCustomLinks = tru
       <div className="lg:col-span-1 space-y-6">
         <div className="bg-[var(--bg-primary)] p-6 rounded-3xl shadow-sm border border-[var(--border-subtle)]">
           <h3 className="font-bold text-lg mb-4">Sobre Nosotros</h3>
-          <p className="text-[var(--text-secondary)] text-sm leading-relaxed mb-6">
-            {profile.description || 'Sin descripción disponible.'}
-          </p>
-          {hasSocials && (
-            <div className="flex gap-4 flex-wrap">
-              {socialArray.map((link, idx) => (
-                <a
-                  key={idx}
-                  href={link.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="bg-[var(--bg-secondary)] p-3 rounded-full hover:bg-[var(--brand-color)] hover:text-white transition-all text-[var(--text-secondary)]"
+          {wrap(
+            'description',
+            <p className="text-[var(--text-secondary)] text-sm leading-relaxed mb-6">
+              {profile.description || (canEdit ? 'Agregar descripción del negocio.' : 'Sin descripción disponible.')}
+            </p>
+          )}
+          {(hasSocials || canEdit) && (
+            <div className="flex gap-4 flex-wrap items-center">
+              {socialArray.map((link, idx) =>
+                canEdit ? (
+                  <button
+                    key={idx}
+                    type="button"
+                    onClick={openLinksEditor}
+                    className="bg-[var(--bg-secondary)] p-3 rounded-full hover:bg-[var(--brand-color)] hover:text-white transition-all text-[var(--text-secondary)]"
+                  >
+                    {getSocialIcon(link.url)}
+                  </button>
+                ) : (
+                  <a
+                    key={idx}
+                    href={link.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="bg-[var(--bg-secondary)] p-3 rounded-full hover:bg-[var(--brand-color)] hover:text-white transition-all text-[var(--text-secondary)]"
+                  >
+                    {getSocialIcon(link.url)}
+                  </a>
+                )
+              )}
+              {canEdit && (
+                <button
+                  type="button"
+                  onClick={openLinksEditor}
+                  className="inline-flex items-center gap-1.5 text-sm font-semibold text-[var(--brand-color)] border-2 border-dashed border-[var(--brand-color)]/40 rounded-full px-3 py-2 hover:bg-[var(--brand-color)]/5"
                 >
-                  {getSocialIcon(link.url)}
-                </a>
-              ))}
+                  <IconEdit size={14} /> Editar redes
+                </button>
+              )}
             </div>
           )}
           {publicadisUrl && (
@@ -101,9 +173,12 @@ export default function BusinessInfoTab({ profile, adisos, showCustomLinks = tru
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <p className="text-[var(--text-secondary)] mb-4">
-                {profile.contact_address || 'Dirección no especificada'}
-              </p>
+              {wrap(
+                'location',
+                <p className="text-[var(--text-secondary)] mb-4">
+                  {profile.contact_address || (canEdit ? 'Agregar dirección' : 'Dirección no especificada')}
+                </p>
+              )}
               <div className="w-full h-48 bg-[var(--bg-secondary)] rounded-xl overflow-hidden border border-[var(--border-color)]">
                 <iframe
                   title="Mapa"
@@ -116,9 +191,20 @@ export default function BusinessInfoTab({ profile, adisos, showCustomLinks = tru
               </div>
             </div>
             <div className="space-y-4">
-              <h4 className="font-bold text-sm text-[var(--text-secondary)] uppercase tracking-wider">
-                Horarios
-              </h4>
+              <div className="flex items-center justify-between gap-2">
+                <h4 className="font-bold text-sm text-[var(--text-secondary)] uppercase tracking-wider">
+                  Horarios
+                </h4>
+                {canEdit && (
+                  <button
+                    type="button"
+                    onClick={openHoursEditor}
+                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-[var(--brand-color)] hover:underline"
+                  >
+                    <IconEdit size={13} /> Editar
+                  </button>
+                )}
+              </div>
               <div className="space-y-2">
                 {Object.entries(profile.business_hours || {}).length > 0 ? (
                   Object.entries(profile.business_hours || {}).map(([day, hours]) => (
@@ -136,6 +222,14 @@ export default function BusinessInfoTab({ profile, adisos, showCustomLinks = tru
                       </span>
                     </div>
                   ))
+                ) : canEdit ? (
+                  <button
+                    type="button"
+                    onClick={openHoursEditor}
+                    className="text-sm font-semibold text-[var(--brand-color)] border-2 border-dashed border-[var(--brand-color)]/40 rounded-xl px-3 py-2 hover:bg-[var(--brand-color)]/5"
+                  >
+                    + Agregar horarios
+                  </button>
                 ) : (
                   <p className="text-sm text-[var(--text-tertiary)] italic">
                     Consulte horarios directamente.

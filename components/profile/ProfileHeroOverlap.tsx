@@ -28,6 +28,7 @@ interface ProfileHeroOverlapProps {
   bannerOnly?: boolean;
   showEditControls?: boolean;
   onEditBanner?: () => void;
+  onEditCta?: () => void;
   /** Barra superior (editar, QR, compartir) dentro del banner. */
   headerSlot?: ReactNode;
   className?: string;
@@ -84,6 +85,7 @@ export default function ProfileHeroOverlap({
   bannerOnly = false,
   showEditControls = false,
   onEditBanner,
+  onEditCta,
   headerSlot,
   className,
   onEditAvatar,
@@ -160,28 +162,43 @@ export default function ProfileHeroOverlap({
             />
           )}
 
-          {cta && (ctaHref || cta.action === 'cart') && (
+          {showEditControls && onEditCta ? (
             <div className="absolute bottom-3 right-3 sm:bottom-4 sm:right-4 z-20">
-              {ctaHref ? (
-                <a
-                  href={ctaHref}
-                  target={cta.action === 'whatsapp' ? '_blank' : undefined}
-                  rel={cta.action === 'whatsapp' ? 'noreferrer' : undefined}
-                  onClick={onBannerCtaClick}
-                  className="inline-flex items-center px-3 py-2 sm:px-4 rounded-xl bg-white/95 text-slate-900 text-xs sm:text-sm font-bold shadow-lg hover:bg-white transition-colors"
-                >
-                  {cta.label || 'Contactar'}
-                </a>
-              ) : (
-                <button
-                  type="button"
-                  onClick={onBannerCtaClick}
-                  className="inline-flex items-center px-3 py-2 rounded-xl bg-white/95 text-slate-900 text-xs sm:text-sm font-bold shadow-lg"
-                >
-                  {cta.label || 'Ver más'}
-                </button>
-              )}
+              <button
+                type="button"
+                onClick={onEditCta}
+                className="relative inline-flex items-center gap-1.5 px-3 py-2 sm:px-4 rounded-xl bg-white/95 text-slate-900 text-xs sm:text-sm font-bold shadow-lg hover:bg-white transition-colors"
+              >
+                {cta?.label || 'Contactar'}
+                <span className="w-5 h-5 rounded-full bg-[var(--brand-color)]/10 text-[var(--brand-color)] flex items-center justify-center">
+                  <IconEdit size={11} />
+                </span>
+              </button>
             </div>
+          ) : (
+            cta && (ctaHref || cta.action === 'cart') && (
+              <div className="absolute bottom-3 right-3 sm:bottom-4 sm:right-4 z-20">
+                {ctaHref ? (
+                  <a
+                    href={ctaHref}
+                    target={cta.action === 'whatsapp' ? '_blank' : undefined}
+                    rel={cta.action === 'whatsapp' ? 'noreferrer' : undefined}
+                    onClick={onBannerCtaClick}
+                    className="inline-flex items-center px-3 py-2 sm:px-4 rounded-xl bg-white/95 text-slate-900 text-xs sm:text-sm font-bold shadow-lg hover:bg-white transition-colors"
+                  >
+                    {cta.label || 'Contactar'}
+                  </a>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={onBannerCtaClick}
+                    className="inline-flex items-center px-3 py-2 rounded-xl bg-white/95 text-slate-900 text-xs sm:text-sm font-bold shadow-lg"
+                  >
+                    {cta.label || 'Ver más'}
+                  </button>
+                )}
+              </div>
+            )
           )}
         </div>
       </div>

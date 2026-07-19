@@ -9,7 +9,7 @@ import BusinessCatalogTab from '@/components/business/public/BusinessCatalogTab'
 import BusinessDealsTab from '@/components/business/public/BusinessDealsTab';
 import BusinessReviewsTab from '@/components/business/public/BusinessReviewsTab';
 import BusinessInfoTab from '@/components/business/public/BusinessInfoTab';
-import BusinessCustomBlocks from '@/components/business/public/BusinessCustomBlocks';
+import BusinessLinksBlock from '@/components/business/public/BusinessLinksBlock';
 import HeroRenderer from '@/components/business/public/heroes/HeroRenderer';
 import { getWhatsappUrl } from '@/lib/business/public-utils';
 import { getTemplateById } from '@/lib/business/templates/registry';
@@ -88,11 +88,15 @@ export function renderProfileBlock(
       ) : null;
     case 'links': {
       const linkBlocks = resolveLinktreeBlocks(profile);
-      if (!linkBlocks.length) return null;
+      if (!linkBlocks.length && !showEditControls) return null;
       return (
-        <div key={block.id} className="max-w-6xl mx-auto px-4 py-4">
-          <BusinessCustomBlocks blocks={linkBlocks} />
-        </div>
+        <BusinessLinksBlock
+          key={block.id}
+          profile={profile}
+          blocks={linkBlocks}
+          showEditControls={showEditControls}
+          onProfilePatch={onProfilePatch}
+        />
       );
     }
     case 'reviews':
@@ -102,7 +106,13 @@ export function renderProfileBlock(
     case 'map':
       return (
         <div key={block.id} className="max-w-6xl mx-auto px-4 py-8">
-          <BusinessInfoTab profile={profile} adisos={adisos} showCustomLinks={false} />
+          <BusinessInfoTab
+            profile={profile}
+            adisos={adisos}
+            showCustomLinks={false}
+            showEditControls={showEditControls}
+            onProfilePatch={onProfilePatch}
+          />
         </div>
       );
     case 'text':

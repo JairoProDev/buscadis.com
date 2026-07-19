@@ -8,12 +8,15 @@ interface ProfileExpandableBioProps {
   text?: string;
   maxLines?: number;
   className?: string;
+  /** When true, hides the "Ver más" toggle so the region acts as a single tap-to-edit target. */
+  disableToggle?: boolean;
 }
 
 export default function ProfileExpandableBio({
   text,
   maxLines = 3,
   className,
+  disableToggle = false,
 }: ProfileExpandableBioProps) {
   const [expanded, setExpanded] = useState(false);
   const [needsExpand, setNeedsExpand] = useState(false);
@@ -22,8 +25,8 @@ export default function ProfileExpandableBio({
   useEffect(() => {
     const el = textRef.current;
     if (!el || expanded) return;
-    setNeedsExpand(el.scrollHeight > el.clientHeight + 2);
-  }, [text, maxLines, expanded]);
+    setNeedsExpand(disableToggle ? false : el.scrollHeight > el.clientHeight + 2);
+  }, [text, maxLines, expanded, disableToggle]);
 
   if (!text?.trim()) return null;
 

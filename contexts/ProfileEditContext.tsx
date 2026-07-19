@@ -18,6 +18,13 @@ export interface InlineFieldState {
   onSave: (value: string) => void;
 }
 
+/** Rich inline editor for complex fields (links, hours, CTA, categories). */
+export interface InlineEditorState {
+  editorId: string;
+  title: string;
+  render: (close: () => void) => React.ReactNode;
+}
+
 interface ProfileEditContextValue {
   editSurface: EditSurface;
   setEditSurface: (surface: EditSurface) => void;
@@ -28,6 +35,9 @@ interface ProfileEditContextValue {
   inlineField: InlineFieldState | null;
   openInlineField: (field: InlineFieldState) => void;
   closeInlineField: () => void;
+  inlineEditor: InlineEditorState | null;
+  openInlineEditor: (editor: InlineEditorState) => void;
+  closeInlineEditor: () => void;
   openHubForPart: (part: string) => void;
   editingProduct: unknown | null;
   openProductEditor: (product: unknown | 'new') => void;
@@ -67,6 +77,7 @@ export function ProfileEditProvider({
   const [activeHub, setActiveHubState] = useState<ProfileHubId | null>(initialHub);
   const [activeFieldId, setActiveFieldId] = useState<string | null>(null);
   const [inlineField, setInlineField] = useState<InlineFieldState | null>(null);
+  const [inlineEditor, setInlineEditor] = useState<InlineEditorState | null>(null);
   const [editingProduct, setEditingProduct] = useState<unknown | null>(null);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [showEditOnboarding, setShowEditOnboarding] = useState(false);
@@ -88,6 +99,7 @@ export function ProfileEditProvider({
     setSidebarCollapsed(surface === 'direct');
     if (surface === 'panel') {
       setInlineField(null);
+      setInlineEditor(null);
     }
   }, []);
 
@@ -100,6 +112,7 @@ export function ProfileEditProvider({
   );
 
   const openInlineField = useCallback((field: InlineFieldState) => {
+    setInlineEditor(null);
     setInlineField(field);
     setActiveFieldId(field.fieldId);
     setActiveHubState(field.hub);
@@ -109,6 +122,15 @@ export function ProfileEditProvider({
   const closeInlineField = useCallback(() => {
     setInlineField(null);
     setActiveFieldId(null);
+  }, []);
+
+  const openInlineEditor = useCallback((editor: InlineEditorState) => {
+    setInlineField(null);
+    setInlineEditor(editor);
+  }, []);
+
+  const closeInlineEditor = useCallback(() => {
+    setInlineEditor(null);
   }, []);
 
   const openHubForPart = useCallback(
@@ -145,6 +167,9 @@ export function ProfileEditProvider({
       inlineField,
       openInlineField,
       closeInlineField,
+      inlineEditor,
+      openInlineEditor,
+      closeInlineEditor,
       openHubForPart,
       editingProduct,
       openProductEditor,
@@ -163,6 +188,9 @@ export function ProfileEditProvider({
       inlineField,
       openInlineField,
       closeInlineField,
+      inlineEditor,
+      openInlineEditor,
+      closeInlineEditor,
       openHubForPart,
       editingProduct,
       openProductEditor,

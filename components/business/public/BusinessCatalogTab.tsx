@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import type { BusinessProfile } from '@/types/business';
@@ -25,6 +25,8 @@ import {
   type VisitorSortOption,
 } from '@/lib/catalog/sort-products';
 import { getCategoryIconDataUrl } from '@/lib/catalog/category-icons';
+import { listBusinessCategories, type BusinessCategory } from '@/lib/catalog/categories';
+import CategoryManagerModal from '@/components/business/editor/CategoryManagerModal';
 import { useToast } from '@/hooks/useToast';
 
 function enrichAdisosForSort(
@@ -102,10 +104,57 @@ export default function BusinessCatalogTab({
 
     const { openCatalogPdf, generating: generatingPDF, progress: pdfProgress } = useCatalogPDF();
 
-    const categories = Array.from(new Set(adisos.map(a => a.categoria || 'Otros').filter(Boolean)));
+    const [storedCategories, setStoredCategories] = useState<BusinessCategory[]>([]);
+    const [categoryManagerOpen, setCategoryManagerOpen] = useState(false);
+
+    const productCategories = useMemo(
+        () => Array.from(new Set(adisos.map(a => a.categoria || 'Otros').filter(Boolean))),
+        [adisos]
+    );
+
+    const categoryCounts = useMemo(() => {
+        const map = new Map<string, number>();
+        for (const a of adisos) {
+            const cat = a.categoria || 'Otros';
+            map.set(cat, (map.get(cat) || 0) + 1);
+        }
+        return map;
+    }, [adisos]);
+
+    const loadStoredCategories = useCallback(() => {
+        if (!profile.id) return;
+        listBusinessCategories(profile.id).then(setStoredCategories);
+    }, [profile.id]);
+
+    useEffect(() => {
+        loadStoredCategories();
+    }, [loadStoredCategories]);
+
+    // Ordered category names: stored (by sort_order) first, then product-derived not stored.
+    const categories = useMemo(() => {
+        const ordered: string[] = [];
+        const seen = new Set<string>();
+        for (const sc of storedCategories) {
+            if (!seen.has(sc.name)) {
+                ordered.push(sc.name);
+                seen.add(sc.name);
+            }
+        }
+        for (const name of productCategories) {
+            if (!seen.has(name)) {
+                ordered.push(name);
+                seen.add(name);
+            }
+        }
+        // Visitors don't see empty categories.
+        return showEditControls ? ordered : ordered.filter((c) => (categoryCounts.get(c) || 0) > 0);
+    }, [storedCategories, productCategories, showEditControls, categoryCounts]);
 
     const categoryThumbs = useMemo(() => {
         const map = new Map<string, string>();
+        for (const sc of storedCategories) {
+            if (sc.image_url) map.set(sc.name, sc.image_url);
+        }
         for (const a of adisos) {
             const cat = a.categoria || 'Otros';
             if (!map.has(cat)) {
@@ -120,7 +169,7 @@ export default function BusinessCatalogTab({
             }
         }
         return map;
-    }, [adisos, categories]);
+    }, [adisos, categories, storedCategories]);
 
     useEffect(() => {
         let result = adisos;
@@ -619,9 +668,9 @@ export default function BusinessCatalogTab({
                         </div>
 
                         {/* Categories — IG highlights style (squircle) */}
-                        {categories.length > 0 && (
+                        {(categories.length > 0 || showEditControls) && (
                             <div className="overflow-x-auto pb-1 -mx-4 px-4 md:mx-0 md:px-0 no-scrollbar">
-                                <div className="flex gap-4 snap-x snap-mandatory">
+                                <div className="flex gap-4 snap-x snap-mandatory items-start">
                                     <button
                                         type="button"
                                         onClick={() => setSelectedCategory(null)}
@@ -683,6 +732,21 @@ export default function BusinessCatalogTab({
                                             </button>
                                         );
                                     })}
+                                    {showEditControls && (
+                                        <button
+                                            type="button"
+                                            onClick={() => setCategoryManagerOpen(true)}
+                                            className="flex flex-col items-center gap-1.5 shrink-0 snap-start"
+                                            title="Gestionar categorías"
+                                        >
+                                            <div className="w-[4.25rem] h-[4.25rem] rounded-[26%] border-2 border-dashed border-[var(--brand-color)]/40 flex items-center justify-center text-[var(--brand-color)] bg-[var(--brand-color)]/5">
+                                                <IconEdit size={22} />
+                                            </div>
+                                            <span className="text-[11px] font-medium truncate max-w-[4.5rem] text-center leading-tight text-[var(--brand-color)]">
+                                                Editar
+                                            </span>
+                                        </button>
+                                    )}
                                 </div>
                             </div>
                         )}
@@ -742,6 +806,16 @@ export default function BusinessCatalogTab({
                         </div>
                     )}
                 </motion.div>
+            )}
+
+            {categoryManagerOpen && profile.id && (
+                <CategoryManagerModal
+                    businessProfileId={profile.id}
+                    productCategories={productCategories}
+                    autoThumbs={categoryThumbs}
+                    onClose={() => setCategoryManagerOpen(false)}
+                    onChanged={loadStoredCategories}
+                />
             )}
 
             {confirmDeleteAdiso && (

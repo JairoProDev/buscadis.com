@@ -9,6 +9,7 @@ import { findPotentialDuplicate, validatePrice } from '@/lib/business-validation
 import { Adiso } from '@/types';
 import ProductImageGallery from '@/components/catalog/ProductImageGallery';
 import { analyzeProductFromImage, enhanceProductFieldFromImage } from '@/lib/catalog/product-ai';
+import { listBusinessCategories } from '@/lib/catalog/categories';
 
 const UNITS = ['unidad', 'par', 'caja', 'kg', 'g', 'litro', 'ml', 'metro', 'cm', 'rollo', 'paquete', 'docena', 'servicio'];
 
@@ -175,6 +176,14 @@ export function ProductEditor({ product, businessProfileId, userId, onSave, onCa
     const [enhancingIdx, setEnhancingIdx] = useState<number | null>(null);
     const [uploadedFiles, setUploadedFiles] = useState<(File | null)[]>([]);
     const [bgRemovedIdx, setBgRemovedIdx] = useState<Set<number>>(new Set());
+    const [categorySuggestions, setCategorySuggestions] = useState<string[]>([]);
+
+    useEffect(() => {
+        if (!businessProfileId) return;
+        listBusinessCategories(businessProfileId).then((cats) =>
+            setCategorySuggestions(cats.map((c) => c.name))
+        );
+    }, [businessProfileId]);
 
     const isDirty = serializeFormData(formData) !== baselineRef.current;
 
@@ -535,6 +544,7 @@ export function ProductEditor({ product, businessProfileId, userId, onSave, onCa
                         </label>
                         <input
                             type="text"
+                            list="product-category-suggestions"
                             value={formData.category}
                             onChange={e => update('category', e.target.value)}
                             className="w-full px-3 py-2.5 rounded-xl border-2 text-sm outline-none transition-colors"
@@ -542,6 +552,11 @@ export function ProductEditor({ product, businessProfileId, userId, onSave, onCa
                             placeholder="Ej. Pinturas"
                             disabled={loading}
                         />
+                        <datalist id="product-category-suggestions">
+                            {categorySuggestions.map((c) => (
+                                <option key={c} value={c} />
+                            ))}
+                        </datalist>
                     </div>
                 </div>
 

@@ -25,6 +25,10 @@ import ProfileStickyCta from '@/components/profile/ProfileStickyCta';
 import BusinessSocialStrip from '@/components/business/public/BusinessSocialStrip';
 import BusinessOwnerBanner from '@/components/business/public/BusinessOwnerBanner';
 import ProfileEditableRegion from '@/components/business/editor/ProfileEditableRegion';
+import SlugEditor from '@/components/business/editor/inline/SlugEditor';
+import ProfileLinksEditor from '@/components/business/editor/inline/ProfileLinksEditor';
+import CtaEditor from '@/components/business/editor/inline/CtaEditor';
+import { useProfileEdit } from '@/contexts/ProfileEditContext';
 import { profileIsOrphan } from '@/lib/business/social-display';
 import { profilePageContainerClass } from '@/lib/business/profile-layout';
 import {
@@ -82,6 +86,43 @@ export default function ProfileWireframeShell({
   onEditRequest,
 }: ProfileWireframeShellProps) {
   const profile = ctx.profile;
+  const editCtx = useProfileEdit();
+  const patchProfile = (patch: Partial<typeof profile>) => ctx.onProfilePatch?.(patch);
+
+  const openUsernameEditor = () => {
+    editCtx?.openInlineEditor({
+      editorId: 'username',
+      title: 'Nombre de usuario',
+      render: (close) => (
+        <SlugEditor
+          currentSlug={profile.slug || ''}
+          onSave={(slug) => patchProfile({ slug })}
+          onClose={close}
+        />
+      ),
+    });
+  };
+
+  const openLinksEditor = () => {
+    editCtx?.openInlineEditor({
+      editorId: 'links',
+      title: 'Enlaces y redes sociales',
+      render: (close) => (
+        <ProfileLinksEditor profile={profile} onPatch={patchProfile} onClose={close} />
+      ),
+    });
+  };
+
+  const openCtaEditor = () => {
+    editCtx?.openInlineEditor({
+      editorId: 'cta',
+      title: 'Botón de acción',
+      render: (close) => (
+        <CtaEditor profile={profile} onPatch={patchProfile} onClose={close} />
+      ),
+    });
+  };
+
   const entity = useMemo(
     () =>
       businessProfileToEntity(profile, {
@@ -223,6 +264,7 @@ export default function ProfileWireframeShell({
             bannerOnly
             showEditControls={Boolean(isEditor && canEdit)}
             onEditBanner={() => onEditPart?.('visual')}
+            onEditCta={openCtaEditor}
             headerSlot={
               isSlotVisible(presentation.layout, 'profile_chrome') ? (
                 <ProfileChrome
@@ -263,46 +305,40 @@ export default function ProfileWireframeShell({
 
       <div className="space-y-3 pb-4 pt-2">
         {isSlotVisible(presentation.layout, 'profile_identity') && (
-          <ProfileEditableRegion
-            fieldKey="name"
-            profile={profile}
-            onPatch={(patch) => ctx.onProfilePatch?.(patch)}
+          <ProfileIdentityRow
+            entity={entity}
+            verificationTier={profile.verification_tier}
             editMode={Boolean(isEditor && canEdit)}
-          >
-            <ProfileIdentityRow
-              entity={entity}
-              verificationTier={profile.verification_tier}
-            />
-          </ProfileEditableRegion>
+            profile={profile}
+            onProfilePatch={(patch) => ctx.onProfilePatch?.(patch)}
+            onEditUsername={() => openUsernameEditor()}
+          />
         )}
 
         {isSlotVisible(presentation.layout, 'profile_social_strip') && (
-          <ProfileEditableRegion
-            fieldKey="contact_whatsapp"
+          <BusinessSocialStrip
             profile={profile}
-            onPatch={(patch) => ctx.onProfilePatch?.(patch)}
-            editMode={Boolean(isEditor && canEdit)}
-            onActivate={() => onEditPart?.('social')}
-          >
-            <BusinessSocialStrip
-              profile={profile}
-              variant="wireframe"
-              showEditControls={Boolean(isEditor && canEdit)}
-              className={cn(profilePageContainerClass(), 'md:flex-wrap max-md:flex-nowrap max-md:overflow-x-auto max-md:no-scrollbar max-md:snap-x max-md:gap-3')}
-            />
-          </ProfileEditableRegion>
+            variant="wireframe"
+            showEditControls={Boolean(isEditor && canEdit)}
+            onManage={openLinksEditor}
+            className={cn(profilePageContainerClass(), 'md:flex-wrap max-md:flex-nowrap max-md:overflow-x-auto max-md:no-scrollbar max-md:snap-x max-md:gap-3')}
+          />
         )}
 
-        {isSlotVisible(presentation.layout, 'profile_bio') && (
-          <ProfileEditableRegion
-            fieldKey="description"
-            profile={profile}
-            onPatch={(patch) => ctx.onProfilePatch?.(patch)}
-            editMode={Boolean(isEditor && canEdit)}
-          >
-            <ProfileExpandableBio text={entity.description} />
-          </ProfileEditableRegion>
-        )}
+        {isSlotVisible(presentation.layout, 'profile_bio') &&
+          (entity.description || (isEditor && canEdit)) && (
+            <ProfileEditableRegion
+              fieldKey="description"
+              profile={profile}
+              onPatch={(patch) => ctx.onProfilePatch?.(patch)}
+              editMode={Boolean(isEditor && canEdit)}
+            >
+              <ProfileExpandableBio
+                text={entity.description || 'Agregar descripción del negocio.'}
+                disableToggle={Boolean(isEditor && canEdit)}
+              />
+            </ProfileEditableRegion>
+          )}
 
         {isSlotVisible(presentation.layout, 'profile_hashtags') && (
           <ProfileHashtags tags={entity.hashtags} />
