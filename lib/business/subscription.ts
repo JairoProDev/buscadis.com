@@ -12,6 +12,17 @@ export function canUseProQr(profile: Partial<BusinessProfile>): boolean {
   return tier === 'pro' || tier === 'enterprise';
 }
 
+/**
+ * Whether the profile may be made public. Creating and editing are always free;
+ * publishing (going public) requires an active subscription.
+ */
+export function canPublishProfile(profile: Partial<BusinessProfile>): boolean {
+  return getSubscriptionTier(profile) !== 'free';
+}
+
+/** Monthly price to publish a Buscadis profile (digital card + catalog). */
+export const PROFILE_PUBLISH_MONTHLY_PEN = 30;
+
 export const PRO_QR_MONTHLY_PRICE_PEN = 29;
 
 export const PRO_QR_FEATURES = [

@@ -71,4 +71,7 @@ export type AIEventName =
   | 'chat.error'
   | 'search.executed'
   | 'vision.executed'
-  | 'publish.draft.created';
+  | 'publish.draft.created'
+  | 'builder.request.received'
+  | 'builder.response.sent'
+  | 'builder.error';

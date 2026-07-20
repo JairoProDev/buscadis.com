@@ -82,7 +82,7 @@ export async function POST(req: NextRequest) {
         // 3. Verify the user owns this business (by user_id OR business_members)
         const { data: profile } = await supabaseAdmin
             .from('business_profiles')
-            .select('id, user_id')
+            .select('id, user_id, subscription_tier')
             .eq('id', businessId)
             .single();
 
@@ -133,6 +133,22 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ 
                 error: `Sin permiso. Tu ID: ${user.id}, Propietario: ${profile.user_id || 'sin propietario'}` 
             }, { status: 403 });
+        }
+
+        // 3b. Paywall gate: going public requires an active subscription.
+        //     Creating/editing stays free. Dev bypass for local testing only.
+        if (is_published === true) {
+            const tier = (profile as { subscription_tier?: string }).subscription_tier || 'free';
+            const devBypass = process.env.PUBLISH_DEV_BYPASS === 'true';
+            if (tier === 'free' && !devBypass) {
+                return NextResponse.json(
+                    {
+                        error: 'Necesitas una suscripción activa para publicar tu página.',
+                        code: 'SUBSCRIPTION_REQUIRED',
+                    },
+                    { status: 402 }
+                );
+            }
         }
 
         // 4. Perform the update using admin client (bypasses RLS)

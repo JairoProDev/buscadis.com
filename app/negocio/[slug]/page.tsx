@@ -26,6 +26,8 @@ import { trackProfileEvent, trackProfileView } from '@/lib/business/analytics/tr
 import { ProfileEditProvider } from '@/contexts/ProfileEditContext';
 import ProductEditorModal from '@/components/business/editor/ProductEditorModal';
 import InlineFieldEditorHost from '@/components/business/editor/InlineFieldEditorHost';
+import PublishGateModal from '@/components/business/builder/PublishGateModal';
+import { canPublishProfile } from '@/lib/business/subscription';
 
 export default function PublicBusinessPage({
     params,
@@ -55,6 +57,7 @@ export default function PublicBusinessPage({
 
     // Modals state
     const [showAddProductModal, setShowAddProductModal] = useState(false);
+    const [showPublishGate, setShowPublishGate] = useState(false);
 
     // Auto-open editor if requested
     useEffect(() => {
@@ -166,15 +169,10 @@ export default function PublicBusinessPage({
     }, [debouncedProfile, handleSave]);
 
     // ─── PUBLISH TOGGLE ───────────────────────────────────────────────
-    const handlePublish = useCallback(async () => {
-        if (!localProfile?.id) {
-            showError('Carga tu negocio primero (recarga la página)');
-            return;
-        }
-        // Skip client-side permission check — let Supabase RLS be the authority
+    const doPublish = useCallback(async (newState: boolean) => {
+        if (!localProfile?.id) return;
         try {
             setSaving(true);
-            const newState = !localProfile.is_published;
             const saved = await publishBusinessViaAPI(localProfile.id, newState);
             if (saved) {
                 setLocalProfile(saved);
@@ -185,12 +183,31 @@ export default function PublicBusinessPage({
                 showError('No se pudo publicar. Verifica permisos en Supabase.');
             }
         } catch (err: any) {
-            console.error('handlePublish error:', err);
-            showError('Error al publicar: ' + (err?.message || JSON.stringify(err)));
+            // Server-side paywall (defense in depth): open the upgrade gate.
+            if (String(err?.message || '').toLowerCase().includes('suscri')) {
+                setShowPublishGate(true);
+            } else {
+                console.error('handlePublish error:', err);
+                showError('Error al publicar: ' + (err?.message || JSON.stringify(err)));
+            }
         } finally {
             setSaving(false);
         }
     }, [localProfile, updateBusiness, success, showError]);
+
+    const handlePublish = useCallback(async () => {
+        if (!localProfile?.id) {
+            showError('Carga tu negocio primero (recarga la página)');
+            return;
+        }
+        const newState = !localProfile.is_published;
+        // Free until publish: going public requires an active subscription.
+        if (newState && !canPublishProfile(localProfile)) {
+            setShowPublishGate(true);
+            return;
+        }
+        await doPublish(newState);
+    }, [localProfile, doPublish, showError]);
 
     const trackEvent = useCallback(async (eventType: string, businessId: string, productId?: string) => {
         if (!isOnline) return;
@@ -393,6 +410,22 @@ export default function PublicBusinessPage({
             onClose={() => setEditingProduct(null)}
         />
         </ProfileEditProvider>
+
+            {showPublishGate && localProfile?.id && (
+                <PublishGateModal
+                    open={showPublishGate}
+                    businessId={localProfile.id}
+                    profile={localProfile}
+                    onClose={() => setShowPublishGate(false)}
+                    onActivated={async () => {
+                        setShowPublishGate(false);
+                        setLocalProfile((prev) =>
+                            prev ? { ...prev, subscription_tier: 'pro' as any } : prev
+                        );
+                        await doPublish(true);
+                    }}
+                />
+            )}
 
             {/* Simple Product Add Modal */}
             {showAddProductModal && business?.id && (

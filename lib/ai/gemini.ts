@@ -4,6 +4,7 @@
  */
 
 import { GoogleGenerativeAI, GenerativeModel } from '@google/generative-ai';
+import type { ZodType, ZodTypeDef } from 'zod';
 
 if (!process.env.GEMINI_API_KEY) {
     console.warn('⚠️ GEMINI_API_KEY no está configurado. Las funciones de IA estarán deshabilitadas.');
@@ -12,6 +13,11 @@ if (!process.env.GEMINI_API_KEY) {
 const genAI = process.env.GEMINI_API_KEY
     ? new GoogleGenerativeAI(process.env.GEMINI_API_KEY)
     : null;
+
+/** Whether Gemini is configured (used by the Vector engine to degrade gracefully). */
+export function isGeminiConfigured(): boolean {
+    return genAI !== null;
+}
 
 // Gemini 2.0 Flash - Ultra barato y rápido
 const MODEL_FLASH = 'gemini-2.0-flash-exp';
@@ -529,6 +535,133 @@ export async function batchGenerateContent(
     return results;
 }
 
+// ============================================================
+// MULTIMODAL INGESTION (Vector engine primitives)
+// ============================================================
+
+export type GeminiPart = string | { inlineData: { data: string; mimeType: string } };
+
+/** Recursively drop null/undefined values so Zod optionals validate cleanly. */
+function stripNulls(value: unknown): unknown {
+    if (Array.isArray(value)) {
+        return value.map(stripNulls).filter((v) => v !== null && v !== undefined);
+    }
+    if (value && typeof value === 'object') {
+        const out: Record<string, unknown> = {};
+        for (const [k, v] of Object.entries(value as Record<string, unknown>)) {
+            if (v === null || v === undefined) continue;
+            out[k] = stripNulls(v);
+        }
+        return out;
+    }
+    return value;
+}
+
+/** Build a Gemini inlineData part from a File/Blob or a remote URL. */
+export async function toGeminiPart(
+    source: File | Blob | string,
+    fallbackMime = 'application/octet-stream'
+): Promise<{ inlineData: { data: string; mimeType: string } }> {
+    if (typeof source === 'string') {
+        const response = await fetch(source);
+        const buffer = await response.arrayBuffer();
+        return {
+            inlineData: {
+                data: Buffer.from(buffer).toString('base64'),
+                mimeType: response.headers.get('content-type') || fallbackMime,
+            },
+        };
+    }
+    const part = await fileToGenerativePart(source);
+    if (!part.inlineData.mimeType) part.inlineData.mimeType = fallbackMime;
+    return part;
+}
+
+/**
+ * Transcribe an audio clip to text (Gemini native audio understanding).
+ * Returns the spoken content verbatim, in its original language.
+ */
+export async function transcribeAudio(source: File | Blob | string): Promise<string> {
+    if (!genAI) throw new Error('Gemini API no configurado');
+    const model = genAI.getGenerativeModel({ model: MODEL_FLASH });
+    const audioPart = await toGeminiPart(source, 'audio/mpeg');
+    const prompt =
+        'Transcribe este audio palabra por palabra, en el idioma original (español si aplica). ' +
+        'Devuelve SOLO el texto transcrito, sin comentarios ni formato adicional.';
+    const result = await model.generateContent([prompt, audioPart]);
+    return result.response.text().trim();
+}
+
+/**
+ * Extract all readable text from a document (PDF handled natively; images OCR'd).
+ */
+export async function extractTextFromDocument(source: File | Blob | string): Promise<string> {
+    if (!genAI) throw new Error('Gemini API no configurado');
+    const model = genAI.getGenerativeModel({
+        model: MODEL_FLASH,
+        generationConfig: { temperature: 0.1 },
+    });
+    const docPart = await toGeminiPart(source, 'application/pdf');
+    const prompt =
+        'Extrae TODO el texto legible de este documento, preservando el orden y la estructura ' +
+        '(títulos, listas, precios, datos de contacto). Devuelve SOLO el texto, sin comentarios.';
+    const result = await model.generateContent([prompt, docPart]);
+    return result.response.text().trim();
+}
+
+/** Describe an image in natural language for downstream structuring. */
+export async function describeImage(source: File | Blob | string): Promise<string> {
+    if (!genAI) throw new Error('Gemini API no configurado');
+    const model = genAI.getGenerativeModel({ model: MODEL_FLASH });
+    const imagePart = await toGeminiPart(source, 'image/jpeg');
+    const prompt =
+        'Describe minuciosamente esta imagen para un perfil de negocio: ' +
+        'qué muestra, nombre/marca visible, productos, precios, datos de contacto, ' +
+        'estilo y colores predominantes. Devuelve SOLO la descripción en español.';
+    const result = await model.generateContent([prompt, imagePart]);
+    return result.response.text().trim();
+}
+
+/**
+ * Generic structured extraction: run a prompt over arbitrary multimodal parts and
+ * return JSON validated against a Zod schema. Throws if Gemini output can't be parsed.
+ */
+export async function structuredExtract<T>(
+    parts: GeminiPart[],
+    schema: ZodType<T, ZodTypeDef, unknown>,
+    opts?: { systemPrompt?: string; model?: string; temperature?: number }
+): Promise<T> {
+    if (!genAI) throw new Error('Gemini API no configurado');
+    const model = genAI.getGenerativeModel({
+        model: opts?.model || MODEL_FLASH,
+        systemInstruction: opts?.systemPrompt,
+        generationConfig: {
+            temperature: opts?.temperature ?? 0.2,
+            responseMimeType: 'application/json',
+        },
+    });
+
+    const result = await model.generateContent(parts as never);
+    const text = result.response.text();
+
+    let raw: unknown;
+    try {
+        raw = JSON.parse(text);
+    } catch {
+        const match = text.match(/[[{][\s\S]*[\]}]/);
+        if (!match) throw new Error('Gemini no devolvió JSON válido');
+        raw = JSON.parse(match[0]);
+    }
+
+    // LLMs frequently emit `null` for unknown fields; treat those as absent so
+    // Zod optionals validate cleanly.
+    const parsed = schema.safeParse(stripNulls(raw));
+    if (!parsed.success) {
+        throw new Error(`Salida de Gemini no cumple el esquema: ${parsed.error.message}`);
+    }
+    return parsed.data;
+}
+
 const GeminiAI = {
     detectProductsInImage,
     generateProductContent,
@@ -537,7 +670,13 @@ const GeminiAI = {
     extractProductAttributes,
     extractProductsFromPDF,
     suggestCategories,
-    batchGenerateContent
+    batchGenerateContent,
+    transcribeAudio,
+    extractTextFromDocument,
+    describeImage,
+    structuredExtract,
+    toGeminiPart,
+    isGeminiConfigured,
 };
 
 export default GeminiAI;

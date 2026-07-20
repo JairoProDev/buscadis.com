@@ -24,12 +24,19 @@ import BlockInspector from './BlockInspector';
 import CustomBlocksEditor from './CustomBlocksEditor';
 import ProfileLayoutStyleEditor from './ProfileLayoutStyleEditor';
 import UnifiedAssistant from '@/components/business/editor/UnifiedAssistant';
+import AiProfileBuilder from './AiProfileBuilder';
 import { cn } from '@/lib/utils';
 import { trackBlockReordered, trackThemeChanged, trackBuilderModeChanged } from '@/lib/business/profile-analytics';
 import { BLOCK_LABELS } from './BlockInspector';
 import { IconEye } from '@/components/Icons';
 
-type BuilderMode = 'design' | 'assist';
+type BuilderMode = 'ai' | 'design' | 'assist';
+
+const MODE_LABELS: Record<BuilderMode, string> = {
+  ai: 'Crear con IA',
+  design: 'Diseño',
+  assist: 'Asistente',
+};
 
 interface ProfileBuilderModesProps {
   profile: Partial<BusinessProfile>;
@@ -117,7 +124,7 @@ export default function ProfileBuilderModes({
   selectedBlockId: controlledBlockId,
   onSelectBlock,
 }: ProfileBuilderModesProps) {
-  const [mode, setMode] = useState<BuilderMode>('design');
+  const [mode, setMode] = useState<BuilderMode>('ai');
   const [internalBlockId, setInternalBlockId] = useState<string | null>(null);
   const [visualPanel, setVisualPanel] = useState<'blocks' | 'links'>('blocks');
   const undoSnapshot = useRef<Partial<BusinessProfile> | null>(null);
@@ -195,7 +202,7 @@ export default function ProfileBuilderModes({
   return (
     <div className="space-y-3">
       <div className="flex gap-1.5 p-1 bg-slate-100 rounded-xl">
-        {(['design', 'assist'] as BuilderMode[]).map((m) => (
+        {(['ai', 'design', 'assist'] as BuilderMode[]).map((m) => (
           <button
             key={m}
             type="button"
@@ -207,10 +214,18 @@ export default function ProfileBuilderModes({
                 : 'text-slate-500 hover:text-slate-700'
             )}
           >
-            {m === 'design' ? 'Diseño' : 'Asistente'}
+            {MODE_LABELS[m]}
           </button>
         ))}
       </div>
+
+      {mode === 'ai' && (
+        <AiProfileBuilder
+          profile={profile}
+          onUpdate={onUpdate}
+          onProfileCreated={(id) => onUpdate({ id } as Partial<BusinessProfile>)}
+        />
+      )}
 
       {mode === 'design' && (
         <div className="space-y-4">
