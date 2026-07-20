@@ -10,10 +10,14 @@ export const publishCard =
   'rounded-2xl bg-[var(--bg-primary)] ring-1 ring-[var(--border-color)] shadow-[0_1px_2px_rgba(0,0,0,0.04)]';
 
 export const publishInput =
-  'w-full mt-1 px-3 py-2.5 rounded-xl bg-[var(--bg-secondary)] border border-[var(--border-color)] text-sm text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] focus:outline-none focus:border-[rgba(var(--brand-primary-rgb),0.45)] focus:ring-2 focus:ring-[rgba(var(--brand-primary-rgb),0.12)] transition-shadow';
+  'w-full mt-1.5 px-4 py-3 rounded-xl bg-[var(--bg-secondary)] border border-[var(--border-color)] text-sm leading-snug text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] focus:outline-none focus:border-[rgba(var(--brand-primary-rgb),0.45)] focus:ring-2 focus:ring-[rgba(var(--brand-primary-rgb),0.12)] transition-shadow';
 
 export const publishLabel =
-  'text-[10px] font-bold uppercase tracking-wider text-[var(--text-tertiary)]';
+  'text-[10px] font-bold uppercase tracking-wider text-[var(--text-tertiary)] block px-0.5';
+
+/** Highlight when ADIS just filled a field */
+export const publishInputAiFilled =
+  'ring-2 ring-[rgba(var(--brand-primary-rgb),0.28)] border-[rgba(var(--brand-primary-rgb),0.4)] bg-[rgba(var(--brand-primary-rgb),0.04)]';
 
 export const publishInsightBg =
   'rounded-xl px-3 py-2.5 ring-1 ring-[rgba(var(--brand-primary-rgb),0.18)] bg-[rgba(var(--brand-primary-rgb),0.06)]';

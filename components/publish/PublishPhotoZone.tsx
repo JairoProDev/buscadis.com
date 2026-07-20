@@ -114,15 +114,21 @@ export default function PublishPhotoZone({
             )}
           </div>
         ))}
+        {uploading && (
+          <div
+            className="shrink-0 w-[76px] h-[76px] sm:w-20 sm:h-20 rounded-xl bg-[var(--bg-secondary)] animate-pulse ring-1 ring-[var(--border-color)]"
+            aria-label="Subiendo foto"
+          />
+        )}
         {images.length < maxImages && (
           <button
             type="button"
             onClick={() => inputRef.current?.click()}
             disabled={uploading}
-            className="shrink-0 w-[76px] h-[76px] sm:w-20 sm:h-20 rounded-xl border-2 border-dashed border-[rgba(var(--brand-primary-rgb),0.35)] bg-[rgba(var(--brand-primary-rgb),0.04)] flex flex-col items-center justify-center gap-0.5 text-[var(--brand-blue)] hover:bg-[rgba(var(--brand-primary-rgb),0.08)] transition-colors"
+            className="shrink-0 w-[76px] h-[76px] sm:w-20 sm:h-20 rounded-xl border-2 border-dashed border-[rgba(var(--brand-primary-rgb),0.35)] bg-[rgba(var(--brand-primary-rgb),0.04)] flex flex-col items-center justify-center gap-0.5 text-[var(--brand-blue)] hover:bg-[rgba(var(--brand-primary-rgb),0.08)] transition-colors disabled:opacity-50"
           >
             <IconCamera size={20} />
-            <span className="text-[10px] font-semibold">{uploading ? '…' : 'Agregar'}</span>
+            <span className="text-[10px] font-semibold">{uploading ? 'Subiendo…' : 'Agregar'}</span>
           </button>
         )}
       </div>

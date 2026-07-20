@@ -43,7 +43,7 @@ export function formatPrice(amount: number): string {
 }
 
 export function getYapePhone(): string {
-  return process.env.NEXT_PUBLIC_YAPE_PHONE || process.env.YAPE_PHONE || '999999999';
+  return process.env.NEXT_PUBLIC_YAPE_PHONE || process.env.YAPE_PHONE || '990551461';
 }
 
 export function getYapeQrUrl(): string | null {

@@ -136,9 +136,12 @@ export async function POST(request: NextRequest) {
             result.categoria = mapped;
             result.confidence.categoria = 0.75;
           }
+        } else {
+          const errBody = await res.json().catch(() => ({}));
+          console.warn('[publish/analyze] image analysis failed', res.status, errBody);
         }
-      } catch {
-        // image analysis optional
+      } catch (err) {
+        console.warn('[publish/analyze] image analysis error', err);
       }
     }
 

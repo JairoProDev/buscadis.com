@@ -5,7 +5,7 @@ import { PublishDraft } from '@/lib/publish/publish-draft-types';
 import { PUBLISH_CATEGORIAS, getSubcategories, getSubsubcategories } from '@/lib/publish/category-tree';
 import { IconChevronDown, IconStar } from '@/components/Icons';
 import PublishFormAdvanced from './PublishFormAdvanced';
-import { publishInput, publishLabel } from './publish-ui';
+import { publishInput, publishInputAiFilled, publishLabel } from './publish-ui';
 
 interface PublishFormCompactProps {
   draft: PublishDraft;
@@ -15,6 +15,7 @@ interface PublishFormCompactProps {
   onToggleAdvanced: () => void;
   onEnhanceField: (field: 'titulo' | 'descripcion') => void;
   enhancingField?: 'titulo' | 'descripcion' | null;
+  analyzing?: boolean;
 }
 
 export default function PublishFormCompact({
@@ -25,30 +26,39 @@ export default function PublishFormCompact({
   onToggleAdvanced,
   onEnhanceField,
   enhancingField,
+  analyzing = false,
 }: PublishFormCompactProps) {
   const subs = draft.categoria ? getSubcategories(draft.categoria) : [];
   const subsubs = draft.categoria && draft.subcategoria
     ? getSubsubcategories(draft.categoria, draft.subcategoria)
     : [];
 
+  const aiClass = (field: string) =>
+    draft.aiConfidence[field] ? publishInputAiFilled : analyzing ? 'animate-pulse' : '';
+
   return (
-    <div className="space-y-3">
+    <div className="space-y-4 px-1">
+      {analyzing && (
+        <div className="rounded-xl px-3 py-2.5 text-xs text-[var(--brand-blue)] bg-[rgba(var(--brand-primary-rgb),0.08)] animate-pulse">
+          ADIS está extrayendo título, descripción y datos de tu foto…
+        </div>
+      )}
       <div>
         <label className={publishLabel}>Título</label>
-        <div className="relative mt-1">
+        <div className="relative">
           <input
             type="text"
             value={draft.titulo || ''}
             onChange={(e) => onChange({ titulo: e.target.value })}
             placeholder="Ej: Mozo para restaurante"
             maxLength={120}
-            className={`${publishInput} pr-10`}
+            className={`${publishInput} pr-11 ${aiClass('titulo')}`}
           />
           <button
             type="button"
             onClick={() => onEnhanceField('titulo')}
             disabled={!draft.titulo?.trim() || enhancingField === 'titulo'}
-            className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-lg text-[var(--brand-blue)] hover:bg-[rgba(var(--brand-primary-rgb),0.1)] disabled:opacity-30 transition-colors"
+            className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1.5 rounded-lg text-[var(--brand-blue)] hover:bg-[rgba(var(--brand-primary-rgb),0.1)] disabled:opacity-30 transition-colors"
             aria-label="Mejorar título"
           >
             <IconStar size={15} />
@@ -58,20 +68,20 @@ export default function PublishFormCompact({
 
       <div>
         <label className={publishLabel}>Descripción</label>
-        <div className="relative mt-1">
+        <div className="relative">
           <textarea
             value={draft.descripcion || ''}
             onChange={(e) => onChange({ descripcion: e.target.value })}
             placeholder="Detalles, condiciones, horarios…"
-            rows={2}
+            rows={3}
             maxLength={2000}
-            className={`${publishInput} pr-10 resize-none min-h-[56px]`}
+            className={`${publishInput} pr-11 resize-none min-h-[72px] ${aiClass('descripcion')}`}
           />
           <button
             type="button"
             onClick={() => onEnhanceField('descripcion')}
             disabled={!draft.descripcion?.trim() || enhancingField === 'descripcion'}
-            className="absolute right-2 top-2 p-1.5 rounded-lg text-[var(--brand-blue)] hover:bg-[rgba(var(--brand-primary-rgb),0.1)] disabled:opacity-30 transition-colors"
+            className="absolute right-2.5 top-3 p-1.5 rounded-lg text-[var(--brand-blue)] hover:bg-[rgba(var(--brand-primary-rgb),0.1)] disabled:opacity-30 transition-colors"
             aria-label="Mejorar descripción"
           >
             <IconStar size={15} />
@@ -87,7 +97,7 @@ export default function PublishFormCompact({
             value={draft.contacto || ''}
             onChange={(e) => onChange({ contacto: e.target.value })}
             placeholder="WhatsApp"
-            className={publishInput}
+            className={`${publishInput} ${aiClass('contacto')}`}
           />
         </div>
       </div>

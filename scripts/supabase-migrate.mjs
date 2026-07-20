@@ -23,9 +23,23 @@ try {
   const list = run('npx supabase migration list --linked');
   const pending = [];
 
-  for (const line of list.split('\n')) {
-    const match = line.match(/^\s*(\d{3})\s*\|\s*\|\s*/);
-    if (match) pending.push(match[1]);
+  // CLI reciente puede devolver JSON; el formato tabular usa | entre local/remote.
+  try {
+    const json = JSON.parse(list);
+    const rows = Array.isArray(json) ? json : json.migrations;
+    if (Array.isArray(rows)) {
+      for (const row of rows) {
+        const local = String(row.local ?? row.version ?? '').replace(/\D/g, '').slice(0, 3);
+        const remote = String(row.remote ?? '');
+        if (local && !remote) pending.push(local.padStart(3, '0'));
+      }
+    }
+  } catch {
+    for (const line of list.split('\n')) {
+      // local present, remote empty: "033 |     | 033" or "033 |  | 033"
+      const match = line.match(/^\s*(\d{3})\s*\|\s*\|\s*/);
+      if (match) pending.push(match[1]);
+    }
   }
 
   if (pending.length === 0) {

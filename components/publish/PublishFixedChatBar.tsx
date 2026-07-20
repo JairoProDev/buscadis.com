@@ -10,6 +10,8 @@ interface PublishFixedChatBarProps {
   onUploadImage: (file: File) => Promise<string | null>;
   sending?: boolean;
   embedded?: boolean;
+  /** Últimos mensajes del asistente para feedback visible */
+  statusMessage?: string | null;
 }
 
 export default function PublishFixedChatBar({
@@ -17,6 +19,7 @@ export default function PublishFixedChatBar({
   onUploadImage,
   sending = false,
   embedded = false,
+  statusMessage = null,
 }: PublishFixedChatBarProps) {
   const [minimized, setMinimized] = useState(false);
   const [text, setText] = useState('');
@@ -74,15 +77,26 @@ export default function PublishFixedChatBar({
     rec.start();
   };
 
+  // Minimizado embebido: botón en flujo (no FAB encima de "Revisar aviso")
   if (minimized) {
-    const fabClass = embedded
-      ? 'absolute bottom-3 right-3 z-10'
-      : 'fixed bottom-4 right-4 z-[1100]';
+    if (embedded) {
+      return (
+        <button
+          type="button"
+          onClick={() => setMinimized(false)}
+          className="mt-3 w-full flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl border border-[rgba(var(--brand-primary-rgb),0.25)] bg-[rgba(var(--brand-primary-rgb),0.08)] text-[var(--brand-blue)] text-sm font-semibold hover:bg-[rgba(var(--brand-primary-rgb),0.14)] transition-colors"
+          aria-label="Abrir asistente ADIS"
+        >
+          <IconAdis size={16} color="var(--brand-blue)" />
+          Abrir asistente ADIS
+        </button>
+      );
+    }
     return (
       <button
         type="button"
         onClick={() => setMinimized(false)}
-        className={`${fabClass} w-12 h-12 rounded-full shadow-[var(--shadow-hover)] flex items-center justify-center bg-[var(--brand-blue)] ring-2 ring-white/20`}
+        className="fixed bottom-4 right-4 z-[1100] w-12 h-12 rounded-full shadow-[var(--shadow-hover)] flex items-center justify-center bg-[var(--brand-blue)] ring-2 ring-white/20"
         aria-label="Abrir asistente ADIS"
       >
         <IconAdis size={20} color="#fff" />
@@ -113,9 +127,32 @@ export default function PublishFixedChatBar({
           </button>
         </div>
 
-        {pendingImage && (
-          <div className="mb-2">
-            <PublishImagePreview url={pendingImage} onRemove={() => setPendingImage(null)} size="sm" />
+        {(sending || statusMessage) && (
+          <div
+            className={`mb-2 rounded-xl px-3 py-2 text-xs leading-snug ${
+              sending
+                ? 'bg-[rgba(var(--brand-primary-rgb),0.08)] text-[var(--brand-blue)] animate-pulse'
+                : 'bg-[var(--bg-secondary)] text-[var(--text-secondary)]'
+            }`}
+          >
+            {sending ? 'ADIS está leyendo tu aviso y rellenando los campos…' : statusMessage}
+          </div>
+        )}
+
+        {(pendingImage || uploading) && (
+          <div className="mb-2 flex items-center gap-2">
+            {uploading && !pendingImage && (
+              <div
+                className="w-14 h-14 rounded-xl bg-[var(--bg-secondary)] animate-pulse ring-1 ring-[var(--border-color)]"
+                aria-label="Subiendo imagen"
+              />
+            )}
+            {pendingImage && (
+              <PublishImagePreview url={pendingImage} onRemove={() => setPendingImage(null)} size="sm" />
+            )}
+            {uploading && (
+              <span className="text-[11px] text-[var(--text-tertiary)] animate-pulse">Subiendo foto…</span>
+            )}
           </div>
         )}
 
@@ -123,7 +160,8 @@ export default function PublishFixedChatBar({
           <button
             type="button"
             onClick={startVoice}
-            className="shrink-0 mb-0.5 flex h-9 w-9 items-center justify-center rounded-full text-[var(--text-tertiary)] hover:bg-[var(--hover-bg)] hover:text-[var(--brand-blue)] transition-colors"
+            disabled={sending}
+            className="shrink-0 mb-0.5 flex h-9 w-9 items-center justify-center rounded-full text-[var(--text-tertiary)] hover:bg-[var(--hover-bg)] hover:text-[var(--brand-blue)] transition-colors disabled:opacity-40"
             aria-label="Entrada de voz"
           >
             <IconMicrophone size={18} />

@@ -11,7 +11,7 @@ import {
   getYapeQrUrl,
   estimateDailyReach,
 } from '@/lib/publish/pricing';
-import PublishPreviewCard from './PublishPreviewCard';
+import PublishPreviewCard, { type PublisherPreview } from './PublishPreviewCard';
 import PublishReachLines from './PublishReachLines';
 import { publishCard, publishPrimaryBtn, publishSecondaryBtn, publishLabel } from './publish-ui';
 
@@ -23,6 +23,7 @@ interface PublishCheckoutPanelProps {
   publishing?: boolean;
   publishedOrderId?: string | null;
   publishedAdisoId?: string | null;
+  publisher?: PublisherPreview | null;
 }
 
 export default function PublishCheckoutPanel({
@@ -33,6 +34,7 @@ export default function PublishCheckoutPanel({
   publishing = false,
   publishedOrderId,
   publishedAdisoId,
+  publisher,
 }: PublishCheckoutPanelProps) {
   const days = draft.paidDays ?? 7;
   const rate = draft.dailyRate ?? 5;
@@ -88,8 +90,8 @@ export default function PublishCheckoutPanel({
           Compara tu aviso
         </p>
         <div className="grid grid-cols-2 gap-3 items-start">
-          <PublishPreviewCard draft={draft} variant="free" label="Gratis" compact />
-          <PublishPreviewCard draft={draft} variant="paid" label="Promocionado" compact />
+          <PublishPreviewCard draft={draft} variant="free" label="Gratis" compact publisher={publisher} />
+          <PublishPreviewCard draft={draft} variant="paid" label="Promocionado" compact publisher={publisher} />
         </div>
         <div className="mt-3 pt-3 border-t border-[var(--border-color)]">
           <PublishReachLines draft={{ ...draft, dailyRate: rate }} variant="stack" />
