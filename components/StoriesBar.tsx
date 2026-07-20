@@ -69,6 +69,14 @@ export default function StoriesBar({ categoria }: StoriesBarProps) {
     loadStories();
   }, [loadStories]);
 
+  useEffect(() => {
+    const onRefresh = () => {
+      void loadStories();
+    };
+    window.addEventListener('buscadis:stories-refresh', onRefresh);
+    return () => window.removeEventListener('buscadis:stories-refresh', onRefresh);
+  }, [loadStories]);
+
   const updateScrollHint = useCallback(() => {
     const el = scrollRef.current;
     if (!el) return;

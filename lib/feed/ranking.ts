@@ -48,9 +48,9 @@ function parsePublishedTimestamp(adiso: Adiso): number {
  * No supera la recencia de publicaciones muy nuevas sin imagen,
  * pero empuja avisos con foto por encima de texto plano del mismo tier.
  */
-const IMAGE_BOOST_MS = 2 * 24 * 60 * 60 * 1000; // 2 días
-const CATALOG_EXTRA_BOOST_MS = 1 * 24 * 60 * 60 * 1000; // +1 día catálogo
-const MULTI_IMAGE_BOOST_MS = 12 * 60 * 60 * 1000; // +12 h si hay varias fotos
+const IMAGE_BOOST_MS = 4 * 60 * 60 * 1000; // 4 h
+const CATALOG_EXTRA_BOOST_MS = 45 * 60 * 1000; // 45 min — no debe ganarle a un aviso de hace minutos
+const MULTI_IMAGE_BOOST_MS = 30 * 60 * 1000; // 30 min
 
 export function getFeedVisualBoostMs(adiso: Adiso): number {
   let boost = 0;
@@ -85,10 +85,14 @@ export function getFeedEffectiveTimestamp(
 /**
  * Comparador del feed por defecto ("recientes"):
  * 1. Promoción pagada (premium/destacada)
- * 2. Recencia efectiva (con boost por imagen y catálogo)
- * 3. Tamaño de paquete legacy (miniatura → gigante)
- * 4. id estable
+ * 2. Recencia real — si hay >2h de diferencia, gana lo más nuevo
+ *    (evita que boosts de imagen/catálogo/personalización sepulten un aviso recién publicado)
+ * 3. Timestamp efectivo (boosts menores) como desempate
+ * 4. Tamaño de paquete legacy
+ * 5. id estable
  */
+const REAL_RECENCY_GAP_MS = 2 * 60 * 60 * 1000; // 2 horas
+
 export function compareRecientesFeed(
   a: Adiso,
   b: Adiso,
@@ -97,6 +101,12 @@ export function compareRecientesFeed(
   const ra = a.promotionRank ?? 0;
   const rb = b.promotionRank ?? 0;
   if (ra !== rb) return rb - ra;
+
+  const ta = parsePublishedTimestamp(a);
+  const tb = parsePublishedTimestamp(b);
+  if (Math.abs(ta - tb) > REAL_RECENCY_GAP_MS) {
+    return tb - ta;
+  }
 
   const fa = getFeedEffectiveTimestamp(a, interestProfile);
   const fb = getFeedEffectiveTimestamp(b, interestProfile);

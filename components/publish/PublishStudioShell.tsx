@@ -1,6 +1,7 @@
 'use client';
 
 import dynamic from 'next/dynamic';
+import type { Adiso } from '@/types';
 
 const PublishStudio = dynamic(() => import('./PublishStudio'), {
   loading: () => (
@@ -17,7 +18,7 @@ interface PublishStudioShellProps {
   initialImageUrl?: string | null;
   initialContacto?: string;
   onNotify?: (msg: string, type?: 'info' | 'error' | 'success') => void;
-  onPublished?: () => void;
+  onPublished?: (adiso: Adiso) => void;
   onClose?: () => void;
 }
 

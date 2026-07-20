@@ -2,7 +2,10 @@
 
 import { Story, StoryGroup } from '@/types';
 import { STORY_RAIL, ringClassFor } from './story-rail-styles';
-import { resolveStoryPublisherName } from '@/lib/stories/display-name';
+import {
+  formatStoryTimeRemaining,
+  resolveStoryPublisherName,
+} from '@/lib/stories/display-name';
 
 interface UserStoryCardProps {
   group: StoryGroup;
@@ -16,6 +19,22 @@ function previewStory(group: StoryGroup): Story {
   return group.stories[0];
 }
 
+/** La historia del grupo que expira antes (más FOMO). */
+function earliestExpiry(group: StoryGroup): string | undefined {
+  let best: string | undefined;
+  let bestTs = Infinity;
+  for (const s of group.stories) {
+    const until = s.visible_until || s.expires_at;
+    if (!until) continue;
+    const ts = new Date(until).getTime();
+    if (ts < bestTs) {
+      bestTs = ts;
+      best = until;
+    }
+  }
+  return best;
+}
+
 export default function UserStoryCard({
   group,
   width,
@@ -26,6 +45,7 @@ export default function UserStoryCard({
   const story = previewStory(group);
   const name = resolveStoryPublisherName(group);
   const ring = ringClassFor(group.topTier, group.hasUnseen);
+  const timeLeft = formatStoryTimeRemaining(earliestExpiry(group));
 
   return (
     <button
@@ -37,7 +57,7 @@ export default function UserStoryCard({
         height,
         borderRadius: STORY_RAIL.radius,
       }}
-      aria-label={`Historia de ${name}, ${group.stories.length} publicación${group.stories.length === 1 ? '' : 'es'}${group.hasUnseen ? ', sin ver' : ''}`}
+      aria-label={`Historia de ${name}, ${group.stories.length} publicación${group.stories.length === 1 ? '' : 'es'}${group.hasUnseen ? ', sin ver' : ''}${timeLeft ? `, queda ${timeLeft}` : ''}`}
     >
       <div className="absolute inset-0 bg-[var(--bg-tertiary)]">
         {story.media_type === 'video' ? (
@@ -49,6 +69,7 @@ export default function UserStoryCard({
             preload="metadata"
           />
         ) : (
+          // eslint-disable-next-line @next/next/no-img-element
           <img src={story.media_url} alt="" className="h-full w-full object-cover" />
         )}
       </div>
@@ -68,6 +89,7 @@ export default function UserStoryCard({
           style={{ width: avatarSize, height: avatarSize }}
         >
           {group.vendedor?.avatarUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
             <img src={group.vendedor.avatarUrl} alt="" className="h-full w-full object-cover" />
           ) : (
             <span className="flex h-full w-full items-center justify-center text-xs font-bold text-white/90">
@@ -101,6 +123,11 @@ export default function UserStoryCard({
         <span className="block truncate text-[11px] font-semibold leading-tight text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
           {name}
         </span>
+        {timeLeft && (
+          <span className="mt-0.5 inline-flex items-center rounded-md bg-black/55 px-1.5 py-0.5 text-[9px] font-bold tabular-nums text-white/95 backdrop-blur-sm">
+            {timeLeft} restantes
+          </span>
+        )}
       </div>
     </button>
   );

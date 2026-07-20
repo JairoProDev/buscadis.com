@@ -22,6 +22,9 @@ import { PublishDraft } from '@/lib/publish/publish-draft-types';
 import { hasMinimumContent } from '@/lib/publish/publish-draft-types';
 import { publishPrimaryBtn, publishSecondaryBtn, publishCard } from './publish-ui';
 import { IconAdis } from '@/components/Icons';
+import type { Adiso } from '@/types';
+
+export const STORIES_REFRESH_EVENT = 'buscadis:stories-refresh';
 
 interface PublishStudioProps {
   initialText?: string;
@@ -29,7 +32,7 @@ interface PublishStudioProps {
   initialContacto?: string;
   compact?: boolean;
   onNotify?: (msg: string, type?: 'info' | 'error' | 'success') => void;
-  onPublished?: () => void;
+  onPublished?: (adiso: Adiso) => void;
   onClose?: () => void;
 }
 
@@ -269,26 +272,43 @@ export default function PublishStudio({
             dailyRate: publishDraft.dailyRate ?? 5,
           }),
         });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || 'Error al publicar');
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Error al publicar');
 
-        if (plan === 'paid') {
-          setPublishedAdisoId(data.adiso?.id);
-          setPublishedOrderId(data.orderId);
-          onNotify?.('¡Publicado! Verifica tu pago Yape.', 'success');
-        } else {
-          onNotify?.('¡Publicado gratis por 24h!', 'success');
-          resetDraft();
-          setStep('compose');
-          onPublished?.();
+      const created = data.adiso as Adiso | undefined;
+      if (created) {
+        // Enriquecer con logo/nombre del negocio para que el card del feed se vea completo
+        if (publisher && !created.vendedor) {
+          created.vendedor = {
+            id: created.user_id || created.usuario_id || 'me',
+            nombre: publisher.name || 'Tu negocio',
+            avatarUrl: publisher.logoUrl,
+            esVerificado: true,
+            nivelVerificacion: 'negocio',
+          };
         }
+        onPublished?.(created);
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(new CustomEvent(STORIES_REFRESH_EVENT));
+        }
+      }
+
+      if (plan === 'paid') {
+        setPublishedAdisoId(data.adiso?.id);
+        setPublishedOrderId(data.orderId);
+        onNotify?.('¡Ya está en el feed! Verifica tu pago Yape para activar el contacto.', 'success');
+      } else {
+        onNotify?.('¡Publicado! Ya aparece arriba en el feed (gratis 24h).', 'success');
+        resetDraft();
+        setStep('compose');
+      }
       } catch (e) {
         onNotify?.(e instanceof Error ? e.message : 'Error al publicar', 'error');
       } finally {
         setPublishing(false);
       }
     },
-    [user?.id, draft, session?.access_token, openAuthModal, onNotify, resetDraft, onPublished, setStep]
+    [user?.id, draft, session?.access_token, openAuthModal, onNotify, resetDraft, onPublished, setStep, publisher]
   );
 
   const goToReview = () => {

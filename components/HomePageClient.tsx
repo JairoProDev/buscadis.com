@@ -710,41 +710,34 @@ function HomeContent() {
 
   const handlePublicar = (nuevoAdiso: Adiso) => {
     // Optimistic update: mostrar inmediatamente
-    // Prevenir duplicados: verificar si el adiso ya existe
     const adisoExiste = adisos.find(a => a.id === nuevoAdiso.id);
 
     let adisosActualizados: Adiso[];
     if (adisoExiste) {
-      // Actualización: reemplazar el adiso existente
       adisosActualizados = adisos.map(a => a.id === nuevoAdiso.id ? nuevoAdiso : a);
     } else {
-      // Nuevo adiso: agregar al inicio
       adisosActualizados = [nuevoAdiso, ...adisos];
     }
 
     setAdisos(adisosActualizados);
+    setOrdenamiento('recientes');
+    setVisibleCount((n) => Math.max(n, 20));
 
-    // El useEffect se encargará de recalcular filtrados y ordenamiento (más recientes primero) automáticamente
+    // Llevar la vista al inicio del feed para que se note de inmediato
+    if (typeof window !== 'undefined') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      const feedEl = document.getElementById('feed-adisos') || document.getElementById('grilla-adisos');
+      feedEl?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
 
-    // Solo abrir modal si es un adiso nuevo
     if (!adisoExiste) {
       setAdisoAbierto(nuevoAdiso);
       setIndiceAdisoActual(0);
-      // En mobile, abrir sección de adiso automáticamente
-      /*
-      if (!isDesktop) {
-        setSeccionMobileActiva('adiso');
-      }
-      */
-      // Actualizar URL sin recargar la página
       const params = new URLSearchParams(searchParams.toString());
       params.set('adiso', nuevoAdiso.id);
       router.replace(`/?${params.toString()}`, { scroll: false });
-    } else {
-      // Si es una actualización (con imagen), actualizar el modal si está abierto
-      if (adisoAbierto?.id === nuevoAdiso.id) {
-        setAdisoAbierto(nuevoAdiso);
-      }
+    } else if (adisoAbierto?.id === nuevoAdiso.id) {
+      setAdisoAbierto(nuevoAdiso);
     }
   };
 

@@ -19,6 +19,7 @@ import {
 } from '@/lib/stories/config';
 
 function dbToStory(row: Record<string, unknown>): Story {
+  const vendedor = row.vendedor as Story['vendedor'] | undefined;
   return {
     id: row.id as string,
     user_id: row.user_id as string,
@@ -37,6 +38,7 @@ function dbToStory(row: Record<string, unknown>): Story {
     source: (row.source as StorySource) || 'manual',
     objective: (row.objective as StoryObjective) || 'contactos',
     cta_url: (row.cta_url as string) || undefined,
+    vendedor: vendedor || undefined,
   };
 }
 
@@ -155,14 +157,28 @@ export async function getActiveStoriesServer(params?: {
   const perfiles = new Map<string, { nombre: string; avatarUrl?: string }>();
 
   if (userIds.length > 0) {
-    const { data: profiles } = await supabaseAdmin
-      .from('profiles')
-      .select('id, nombre, avatar_url')
-      .in('id', userIds);
+    const [{ data: profiles }, { data: businesses }] = await Promise.all([
+      supabaseAdmin.from('profiles').select('id, nombre, avatar_url').in('id', userIds),
+      supabaseAdmin
+        .from('business_profiles')
+        .select('user_id, name, logo_url, is_verified')
+        .in('user_id', userIds),
+    ]);
 
     (profiles || []).forEach((p: { id: string; nombre: string; avatar_url?: string }) => {
       perfiles.set(p.id, { nombre: p.nombre || 'Usuario', avatarUrl: p.avatar_url || undefined });
     });
+
+    (businesses || []).forEach(
+      (b: { user_id: string; name?: string; logo_url?: string; is_verified?: boolean }) => {
+        if (!b.user_id || !b.name?.trim()) return;
+        const prev = perfiles.get(b.user_id);
+        perfiles.set(b.user_id, {
+          nombre: b.name.trim(),
+          avatarUrl: b.logo_url || prev?.avatarUrl,
+        });
+      }
+    );
   }
 
   return data.map((row) =>

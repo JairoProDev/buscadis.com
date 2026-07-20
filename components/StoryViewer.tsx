@@ -13,6 +13,7 @@ import {
   markStorySeen,
   recordStoryInteraction,
 } from '@/lib/stories';
+import { resolveStoryPublisherName } from '@/lib/stories/display-name';
 import { getAdisoById } from '@/lib/storage';
 import { getWhatsAppUrl } from '@/lib/utils';
 import {
@@ -107,7 +108,7 @@ export default function StoryViewer({ groups, initialGroupIndex, onClose }: Stor
 
   const group = groups[pos.g];
   const story = group?.stories[pos.s];
-  const creatorName = group?.vendedor?.nombre || 'Usuario';
+  const creatorName = group ? resolveStoryPublisherName(group) : 'Verificado';
   const storyIndex = pos.s + 1;
   const storyTotal = group?.stories.length ?? 0;
   const hasAdiso = Boolean(story?.adiso_id || story?.cta_url);

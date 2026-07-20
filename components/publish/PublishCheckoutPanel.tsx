@@ -50,35 +50,43 @@ export default function PublishCheckoutPanel({
       `Hola, publiqué mi aviso ${publishedAdisoId}. Adjunto captura de pago Yape por ${formatPrice(total)}.`
     );
     return (
-      <div className={`${publishCard} p-5 space-y-4 text-center`}>
-        <div className="w-12 h-12 mx-auto rounded-full bg-[rgba(var(--brand-primary-rgb),0.12)] flex items-center justify-center text-xl">
-          ✓
+      <div className="space-y-4">
+        <div className={`${publishCard} p-5 space-y-3 text-center`}>
+          <div className="w-12 h-12 mx-auto rounded-full bg-[rgba(var(--brand-primary-rgb),0.12)] flex items-center justify-center text-xl">
+            ✓
+          </div>
+          <div>
+            <p className="font-bold text-lg text-[var(--text-primary)] m-0">¡Ya está en el feed!</p>
+            <p className="text-sm text-[var(--text-secondary)] m-0 mt-1 leading-snug">
+              Tu aviso aparece arriba en Inicio. Verifica el pago Yape para activar el contacto con interesados.
+            </p>
+          </div>
+          <div className="pt-1">
+            <PublishPreviewCard draft={draft} variant="paid" compact publisher={publisher} />
+          </div>
         </div>
-        <div>
-          <p className="font-bold text-lg text-[var(--text-primary)] m-0">¡Aviso publicado!</p>
-          <p className="text-sm text-[var(--text-secondary)] m-0 mt-1">
-            Verifica tu pago para activar el contacto con interesados.
+
+        <div className={`${publishCard} p-4 space-y-3 text-center`}>
+          {yapeQr && (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={yapeQr}
+              alt="QR Yape"
+              className="w-36 h-36 mx-auto rounded-2xl ring-1 ring-[var(--border-color)] shadow-sm"
+            />
+          )}
+          <p className="text-base font-bold m-0 text-[var(--brand-blue)]">
+            {formatPrice(total)} → Yape {yapePhone}
           </p>
+          <a
+            href={`https://wa.me/51${yapePhone.replace(/\D/g, '')}?text=${waMsg}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={`${publishPrimaryBtn} block text-center no-underline`}
+          >
+            Enviar captura por WhatsApp
+          </a>
         </div>
-        {yapeQr && (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={yapeQr}
-            alt="QR Yape"
-            className="w-40 h-40 mx-auto rounded-2xl ring-1 ring-[var(--border-color)] shadow-sm"
-          />
-        )}
-        <p className="text-base font-bold m-0 text-[var(--brand-blue)]">
-          {formatPrice(total)} → Yape {yapePhone}
-        </p>
-        <a
-          href={`https://wa.me/51${yapePhone.replace(/\D/g, '')}?text=${waMsg}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className={`${publishPrimaryBtn} block text-center no-underline`}
-        >
-          Enviar captura por WhatsApp
-        </a>
       </div>
     );
   }

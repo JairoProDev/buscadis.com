@@ -319,6 +319,7 @@ export default function SidebarDesktop({
                     if (type === 'error') onError?.(msg);
                     else onSuccess?.(msg);
                   }}
+                  onPublished={onPublicar}
                 />
               </div>
             )}

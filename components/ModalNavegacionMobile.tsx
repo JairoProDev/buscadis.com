@@ -374,7 +374,7 @@ export default function ModalNavegacionMobile({
                       if (type === 'error') onError?.(msg);
                       else if (type === 'success') onSuccess?.(msg);
                     }}
-                    onPublished={() => onPublicar?.({} as never)}
+                    onPublished={(adiso) => onPublicar?.(adiso)}
                     onClose={onCerrar}
                   />
                 )}
