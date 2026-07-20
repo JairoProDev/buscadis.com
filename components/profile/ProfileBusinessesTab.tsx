@@ -29,7 +29,7 @@ export default function ProfileBusinessesTab() {
         title="Sin negocios aún"
         description="Crea tu página de negocio con catálogo, horarios y contacto."
         actionLabel="Crear negocio"
-        actionHref="/mi-negocio?new=1"
+        actionHref="/mi-negocio/crear"
       />
     );
   }
@@ -38,7 +38,7 @@ export default function ProfileBusinessesTab() {
     <div className="space-y-3">
       <div className="flex justify-end">
         <Link
-          href="/mi-negocio?new=1"
+          href="/mi-negocio/crear"
           className="text-sm font-semibold text-[var(--brand-blue)] hover:underline"
         >
           + Nuevo negocio

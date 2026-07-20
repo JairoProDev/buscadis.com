@@ -140,6 +140,7 @@ export default function ContentHubFields({
           profile={profile}
           onUpdate={(patch) => setProfile({ ...profile, ...patch })}
           adisos={userAdisos}
+          onProductsChanged={onRefreshCatalog}
         />
       </div>
 

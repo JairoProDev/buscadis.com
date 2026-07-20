@@ -59,21 +59,27 @@ export async function createMercadoPagoPreference(params: {
           ? '&type=package'
           : '';
 
+  const slugForReturn = params.metadata?.slug?.trim();
+  const businessReturnBase = slugForReturn
+    ? `${appUrl}/@${slugForReturn}?edit=true`
+    : `${appUrl}/mi-negocio`;
+  const subJoin = businessReturnBase.includes('?') ? '&' : '?';
+
   const successUrl =
     kind === 'business_subscription'
-      ? `${appUrl}/mi-negocio?subscription=success`
+      ? `${businessReturnBase}${subJoin}subscription=success`
       : kind === 'catalog_order'
       ? `${appUrl}/checkout/exito?order=${params.orderId}${typeQuery}`
       : `${appUrl}/promocionar/exito?order=${params.orderId}${typeQuery}`;
   const failureUrl =
     kind === 'business_subscription'
-      ? `${appUrl}/mi-negocio?subscription=error`
+      ? `${businessReturnBase}${subJoin}subscription=error`
       : kind === 'catalog_order'
       ? `${appUrl}/checkout/error?order=${params.orderId}${typeQuery}`
       : `${appUrl}/promocionar/error?order=${params.orderId}${typeQuery}`;
   const pendingUrl =
     kind === 'business_subscription'
-      ? `${appUrl}/mi-negocio?subscription=pending`
+      ? `${businessReturnBase}${subJoin}subscription=pending`
       : kind === 'catalog_order'
       ? `${appUrl}/checkout/pendiente?order=${params.orderId}${typeQuery}`
       : `${appUrl}/promocionar/pendiente?order=${params.orderId}${typeQuery}`;

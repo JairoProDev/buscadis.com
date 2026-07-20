@@ -209,14 +209,22 @@ export function useBusinessData(slug: string, isOwner: boolean) {
   );
 
   const applyCatalogToState = useCallback(
-    (profileData: BusinessProfile, catalogData: any[]) => {
+    async (profileData: BusinessProfile, catalogData: any[]) => {
       const enriched = enrichBusinessProfile(profileData);
-      const mappedAdisos = mapProductsToAdisos(catalogData, enriched);
+      const mappedCatalog = mapProductsToAdisos(catalogData, enriched);
+      const classifieds = enriched.user_id
+        ? await fetchOwnerClassifieds(enriched.user_id, enriched)
+        : [];
+      // Catálogo primero; clasificados al final del merge (el sort del tab decide orden)
+      const byId = new Map<string, Adiso>();
+      [...mappedCatalog, ...classifieds].forEach((a) => byId.set(a.id, a));
+      const merged = Array.from(byId.values());
+
       businessRef.current = enriched;
       setState((prev) => ({
         ...prev,
         business: enriched,
-        adisos: mappedAdisos,
+        adisos: merged,
         catalogProducts: catalogData,
         loading: false,
         revalidating: false,
@@ -268,15 +276,20 @@ export function useBusinessData(slug: string, isOwner: boolean) {
         const catalogResult = await fetchCatalog(enrichedProfile.id, isOwner);
 
         if (catalogResult !== null) {
-          applyCatalogToState(enrichedProfile, catalogResult);
+          await applyCatalogToState(enrichedProfile, catalogResult);
         } else {
           const fallback = await readCachedCatalog(enrichedProfile.id);
           const mapped = mapProductsToAdisos(fallback, enrichedProfile);
+          const classifieds = enrichedProfile.user_id
+            ? await fetchOwnerClassifieds(enrichedProfile.user_id, enrichedProfile)
+            : [];
+          const byId = new Map<string, Adiso>();
+          [...mapped, ...classifieds].forEach((a) => byId.set(a.id, a));
           businessRef.current = enrichedProfile;
           setState((prev) => ({
             ...prev,
             business: enrichedProfile,
-            adisos: mapped.length > 0 ? mapped : prev.adisos,
+            adisos: byId.size > 0 ? Array.from(byId.values()) : prev.adisos,
             catalogProducts: fallback.length > 0 ? fallback : prev.catalogProducts,
             loading: false,
             revalidating: false,
@@ -308,7 +321,7 @@ export function useBusinessData(slug: string, isOwner: boolean) {
       const currentBusiness = businessRef.current;
       const catalogData = await fetchCatalog(businessId, isOwner);
       if (catalogData !== null && currentBusiness) {
-        applyCatalogToState(currentBusiness, catalogData);
+        await applyCatalogToState(currentBusiness, catalogData);
       }
     },
     [isOnline, fetchCatalog, isOwner, applyCatalogToState]
@@ -337,7 +350,7 @@ export function useBusinessData(slug: string, isOwner: boolean) {
     if (!state.business?.id || !isOnline) return;
     fetchCatalog(state.business.id, isOwner).then((catalogData) => {
       if (catalogData !== null && state.business) {
-        applyCatalogToState(state.business, catalogData);
+        void applyCatalogToState(state.business, catalogData);
       }
     });
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -414,6 +427,63 @@ function mapProductsToAdisos(products: any[], business: BusinessProfile | null):
       sort_order: p.sort_order ?? 0,
       is_featured: Boolean(p.is_featured),
       created_at: p.created_at,
-    };
+      privateData: {
+        source: 'catalog_product',
+        business_profile_id: business?.id || p.business_profile_id,
+        business_slug: business?.slug,
+      },
+      vendedor: business
+        ? {
+            id: business.id,
+            nombre: business.name,
+            avatarUrl: business.logo_url || undefined,
+            esVerificado: Boolean(business.is_verified),
+            nivelVerificacion: business.is_verified ? 'negocio' : 'basico',
+          }
+        : undefined,
+    } as Adiso;
   });
+}
+
+/** Clasificados del marketplace publicados por el dueño del negocio. */
+async function fetchOwnerClassifieds(
+  userId: string,
+  business: BusinessProfile
+): Promise<Adiso[]> {
+  if (!supabase || !userId) return [];
+  try {
+    const { data, error } = await supabase
+      .from('adisos')
+      .select('*')
+      .eq('user_id', userId)
+      .eq('esta_activo', true)
+      .order('fecha_publicacion', { ascending: false })
+      .limit(40);
+
+    if (error || !data?.length) return [];
+
+    const { dbToAdiso } = await import('@/lib/supabase');
+    return data.map((row) => {
+      const adiso = dbToAdiso(row);
+      return {
+        ...adiso,
+        privateData: {
+          ...(adiso.privateData || {}),
+          source: 'classified_ad',
+          business_profile_id: business.id,
+          business_slug: business.slug,
+        },
+        vendedor: {
+          id: business.id,
+          nombre: business.name,
+          avatarUrl: business.logo_url || undefined,
+          esVerificado: Boolean(business.is_verified),
+          nivelVerificacion: business.is_verified ? 'negocio' : 'basico',
+        },
+      };
+    });
+  } catch (e) {
+    console.error('[useBusinessData] classifieds error:', e);
+    return [];
+  }
 }

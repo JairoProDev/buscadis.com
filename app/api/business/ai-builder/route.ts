@@ -182,6 +182,17 @@ export async function POST(req: NextRequest) {
       }
       businessId = created.id;
       createdBusiness = true;
+      await supabaseAdmin.from('business_members').upsert(
+        {
+          business_profile_id: businessId,
+          user_id: user.id,
+          role: 'owner',
+          status: 'active',
+          invited_by: user.id,
+          accepted_at: new Date().toISOString(),
+        },
+        { onConflict: 'business_profile_id,user_id' }
+      );
     } else {
       const allowed = await verifyCanManage(user.id, user.email, businessId);
       if (!allowed) return NextResponse.json({ error: 'Sin permiso' }, { status: 403 });
@@ -281,12 +292,14 @@ export async function POST(req: NextRequest) {
       createdBusiness,
       reply: draft.reply,
       appliedPatch: applied.appliedProfilePatch,
+      appliedFields: Object.keys(applied.appliedProfilePatch),
       skippedFields: applied.skippedFields,
       createdProducts: applied.createdProductIds.length,
       createdCategories: applied.createdCategories,
       missingFields: draft.missingFields,
       followUpQuestions: draft.followUpQuestions,
       profile: freshProfile,
+      slug: freshProfile?.slug || null,
     });
   } catch (err) {
     trackAIEvent({

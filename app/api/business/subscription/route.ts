@@ -8,8 +8,16 @@ import {
   createMercadoPagoPreference,
   isMercadoPagoConfigured,
 } from '@/lib/mercadopago';
-import { PRO_QR_MONTHLY_PRICE_PEN, canUseProQr } from '@/lib/business/subscription';
+import {
+  PROFILE_PUBLISH_MONTHLY_PEN,
+  canPublishProfile,
+} from '@/lib/business/subscription';
 
+/**
+ * POST /api/business/subscription
+ * Creates a MercadoPago Checkout Pro preference for the Buscadis Pro plan (S/30).
+ * Body: { slug?: string, businessId?: string }
+ */
 export async function POST(req: NextRequest) {
   const user = await getUserFromRouteRequest(req);
   if (!user?.id) {
@@ -18,17 +26,25 @@ export async function POST(req: NextRequest) {
 
   if (!isMercadoPagoConfigured()) {
     return NextResponse.json(
-      { error: 'Pagos no configurados. Contacta soporte.' },
+      { error: 'Pagos no configurados. Contacta soporte o activa PUBLISH_DEV_BYPASS en desarrollo.' },
       { status: 503 }
     );
   }
 
-  const body = (await req.json()) as { slug?: string };
-  if (!body.slug) {
-    return NextResponse.json({ error: 'slug requerido' }, { status: 400 });
+  const body = (await req.json()) as { slug?: string; businessId?: string };
+  if (!body.slug && !body.businessId) {
+    return NextResponse.json({ error: 'slug o businessId requerido' }, { status: 400 });
   }
 
-  const profile = await getBusinessProfileBySlug(body.slug);
+  let profile = body.slug ? await getBusinessProfileBySlug(body.slug) : null;
+  if (!profile && body.businessId) {
+    const { data } = await supabaseAdmin
+      .from('business_profiles')
+      .select('*')
+      .eq('id', body.businessId)
+      .maybeSingle();
+    profile = data;
+  }
   if (!profile) {
     return NextResponse.json({ error: 'Negocio no encontrado' }, { status: 404 });
   }
@@ -38,8 +54,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Sin permiso' }, { status: 403 });
   }
 
-  if (canUseProQr(profile)) {
-    return NextResponse.json({ error: 'Ya tienes plan Pro activo' }, { status: 400 });
+  if (canPublishProfile(profile)) {
+    return NextResponse.json({ error: 'Ya tienes plan Pro activo', alreadyActive: true }, { status: 400 });
   }
 
   const orderId = `bizsub_${nanoid(12)}`;
@@ -49,7 +65,7 @@ export async function POST(req: NextRequest) {
       business_profile_id: profile.id,
       tier: 'pro',
       status: 'pending',
-      amount_pen: PRO_QR_MONTHLY_PRICE_PEN,
+      amount_pen: PROFILE_PUBLISH_MONTHLY_PEN,
       external_order_id: orderId,
     })
     .select('id')
@@ -62,10 +78,14 @@ export async function POST(req: NextRequest) {
 
   const preference = await createMercadoPagoPreference({
     orderId,
-    title: `Buscadis Pro — ${profile.name}`,
-    unitPricePen: PRO_QR_MONTHLY_PRICE_PEN,
+    title: `Buscadis Pro — ${profile.name || 'Tu negocio'}`,
+    unitPricePen: PROFILE_PUBLISH_MONTHLY_PEN,
     payerEmail: user.email,
     kind: 'business_subscription',
+    metadata: {
+      business_profile_id: profile.id,
+      slug: profile.slug || '',
+    },
   });
 
   if (!preference) {
@@ -84,5 +104,6 @@ export async function POST(req: NextRequest) {
     initPoint: preference.initPoint,
     sandboxInitPoint: preference.sandboxInitPoint,
     orderId,
+    amountPen: PROFILE_PUBLISH_MONTHLY_PEN,
   });
 }

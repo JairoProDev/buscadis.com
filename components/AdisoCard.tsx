@@ -73,6 +73,9 @@ function getMediaAspectClass(tamaño: string, vista: string, isCatalogProduct = 
     if (isCatalogProduct) return 'w-full aspect-square';
     if (tamaño === 'miniatura' && !hasImage) return 'w-full h-[72px]';
     if (tamaño === 'gigante' || tamaño === 'grande') return 'w-full aspect-video';
+    // Flyers / fotos altas: más alto que cuadrado para no cortar tanto
+    if (vista === 'feed' && hasImage) return 'w-full aspect-[4/5]';
+    if (hasImage) return 'w-full aspect-[4/5]';
     if (vista === 'feed') return 'w-full aspect-square';
     return 'w-full aspect-[4/3]';
 }
@@ -146,8 +149,9 @@ const AdisoCard = forwardRef<HTMLDivElement, AdisoCardProps>(
                 style={{
                     gridColumn,
                     gridRow,
-                    height: '100%',
+                    height: vista === 'feed' ? 'auto' : '100%',
                     minHeight: minHeight || 'auto',
+                    alignSelf: vista === 'feed' ? 'start' : undefined,
                 }}
             >
                 {vista === 'feed' && (
@@ -224,7 +228,7 @@ const AdisoCard = forwardRef<HTMLDivElement, AdisoCardProps>(
                         ${getMediaAspectClass(tamaño, vista, isCatalogProduct, Boolean(imagenUrl))}
                     `}
                     style={{
-                        backgroundColor: isCatalogProduct && imagenUrl
+                        backgroundColor: imagenUrl
                             ? 'var(--bg-secondary)'
                             : placeholderBg,
                     }}
@@ -236,10 +240,14 @@ const AdisoCard = forwardRef<HTMLDivElement, AdisoCardProps>(
                                 alt={displayTitle}
                                 fill
                                 sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
-                                className={`${isCatalogProduct ? 'object-contain p-1.5' : 'object-cover'} motion-reduce:transition-none`}
+                                className={`${
+                                    isCatalogProduct || vista === 'feed'
+                                        ? 'object-contain p-1.5'
+                                        : 'object-cover'
+                                } motion-reduce:transition-none`}
                                 loading="lazy"
                             />
-                            {!isCatalogProduct && (
+                            {!isCatalogProduct && vista !== 'feed' && (
                                 <div className="absolute inset-0 bg-gradient-to-t from-black/35 via-transparent to-transparent pointer-events-none" />
                             )}
                         </>
@@ -304,8 +312,8 @@ const AdisoCard = forwardRef<HTMLDivElement, AdisoCardProps>(
                 </div>
 
                 <div
-                    className={`flex flex-col flex-1 min-w-0 ${
-                        vista === 'feed' ? 'p-4' : 'p-3'
+                    className={`flex flex-col min-w-0 ${
+                        vista === 'feed' ? 'p-4' : 'flex-1 p-3'
                     } ${vista === 'list' ? 'py-2 pr-2' : ''}`}
                 >
                     {(adiso.promotionTier === 'destacada' || adiso.promotionTier === 'premium') && (

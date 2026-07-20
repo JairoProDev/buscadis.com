@@ -64,7 +64,29 @@ export default function PublicBusinessPage({
         if (resolvedSearchParams?.edit === 'true') {
             setIsEditing(true);
         }
+        if (resolvedSearchParams?.hub === 'content') {
+            setActiveHub('content');
+        }
     }, [resolvedSearchParams]);
+
+    // After MercadoPago return: refresh tier and nudge publish
+    useEffect(() => {
+        const status = resolvedSearchParams?.subscription;
+        if (!status || !localProfile) return;
+        if (status === 'success') {
+            setLocalProfile((prev) =>
+                prev ? { ...prev, subscription_tier: 'pro' as any } : prev
+            );
+            success('¡Plan Pro activo! Ya puedes publicar tu página.');
+            if (!localProfile.is_published) {
+                // Soft hint — user taps Publicar; avoid auto-publish surprise
+            }
+        } else if (status === 'pending') {
+            showError('Tu pago está pendiente. En cuanto se confirme, podrás publicar.');
+        } else if (status === 'error') {
+            showError('El pago no se completó. Puedes intentarlo de nuevo al publicar.');
+        }
+    }, [resolvedSearchParams?.subscription]); // eslint-disable-line react-hooks/exhaustive-deps
 
     const [mounted, setMounted] = useState(false);
     const [isMember, setIsMember] = useState(false);

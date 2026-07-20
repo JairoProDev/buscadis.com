@@ -4,6 +4,7 @@ import { createOrUpdateDraft, getDraft, listDraftsBySession, markDraftPublished 
 import { trackAIEvent } from '@/lib/ai/observability';
 import { createAdisoInSupabase } from '@/lib/supabase';
 import { Adiso, Categoria } from '@/types';
+import { newAdisoId } from '@/lib/url';
 
 const upsertSchema = z.object({
   sessionId: z.string().min(1),
@@ -67,7 +68,7 @@ export async function PUT(request: NextRequest) {
 
   const now = new Date();
   const adiso: Adiso = {
-    id: `adiso-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+    id: newAdisoId(),
     categoria: draft.data.categoria as Categoria,
     titulo: draft.data.titulo,
     descripcion: draft.data.descripcion,

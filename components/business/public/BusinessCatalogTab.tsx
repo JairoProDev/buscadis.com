@@ -41,6 +41,7 @@ function enrichAdisosForSort(
 }
 
 function isPublishedCatalogAdiso(a: Adiso): boolean {
+  if (a.privateData?.source === 'classified_ad') return a.estaActivo !== false;
   const status = (a as Adiso & { status?: string }).status;
   return status !== 'draft' && status !== 'archived';
 }
@@ -107,19 +108,33 @@ export default function BusinessCatalogTab({
     const [storedCategories, setStoredCategories] = useState<BusinessCategory[]>([]);
     const [categoryManagerOpen, setCategoryManagerOpen] = useState(false);
 
-    const productCategories = useMemo(
-        () => Array.from(new Set(adisos.map(a => a.categoria || 'Otros').filter(Boolean))),
-        [adisos]
-    );
-
     const categoryCounts = useMemo(() => {
         const map = new Map<string, number>();
+        let classifiedCount = 0;
         for (const a of adisos) {
+            if (a.privateData?.source === 'classified_ad') {
+                classifiedCount += 1;
+                continue;
+            }
             const cat = a.categoria || 'Otros';
             map.set(cat, (map.get(cat) || 0) + 1);
         }
+        if (classifiedCount > 0) map.set('Clasificados', classifiedCount);
         return map;
     }, [adisos]);
+
+    const productCategories = useMemo(
+        () =>
+            Array.from(
+                new Set(
+                    adisos
+                        .filter((a) => a.privateData?.source !== 'classified_ad')
+                        .map((a) => a.categoria || 'Otros')
+                        .filter(Boolean)
+                )
+            ),
+        [adisos]
+    );
 
     const loadStoredCategories = useCallback(() => {
         if (!profile.id) return;
@@ -130,10 +145,15 @@ export default function BusinessCatalogTab({
         loadStoredCategories();
     }, [loadStoredCategories]);
 
-    // Ordered category names: stored (by sort_order) first, then product-derived not stored.
+    // Ordered category names: Clasificados (virtual) + stored + product-derived
     const categories = useMemo(() => {
         const ordered: string[] = [];
         const seen = new Set<string>();
+        const hasClassifieds = adisos.some((a) => a.privateData?.source === 'classified_ad');
+        if (hasClassifieds) {
+            ordered.push('Clasificados');
+            seen.add('Clasificados');
+        }
         for (const sc of storedCategories) {
             if (!seen.has(sc.name)) {
                 ordered.push(sc.name);
@@ -141,14 +161,16 @@ export default function BusinessCatalogTab({
             }
         }
         for (const name of productCategories) {
-            if (!seen.has(name)) {
+            if (!seen.has(name) && name !== ('Clasificados' as string)) {
                 ordered.push(name);
                 seen.add(name);
             }
         }
-        // Visitors don't see empty categories.
-        return showEditControls ? ordered : ordered.filter((c) => (categoryCounts.get(c) || 0) > 0);
-    }, [storedCategories, productCategories, showEditControls, categoryCounts]);
+        return showEditControls ? ordered : ordered.filter((c) => {
+            if (c === 'Clasificados') return hasClassifieds;
+            return (categoryCounts.get(c) || 0) > 0;
+        });
+    }, [storedCategories, productCategories, showEditControls, categoryCounts, adisos]);
 
     const categoryThumbs = useMemo(() => {
         const map = new Map<string, string>();
@@ -187,7 +209,15 @@ export default function BusinessCatalogTab({
         }
 
         if (selectedCategory) {
-            result = result.filter(a => (a.categoria || 'Otros') === selectedCategory);
+            if (selectedCategory === 'Clasificados') {
+                result = result.filter((a) => a.privateData?.source === 'classified_ad');
+            } else {
+                result = result.filter(
+                    (a) =>
+                        a.privateData?.source !== 'classified_ad' &&
+                        (a.categoria || 'Otros') === selectedCategory
+                );
+            }
         }
 
         const sortKey = showEditControls ? 'owner' : visitorSort;

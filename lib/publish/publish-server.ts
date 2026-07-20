@@ -14,6 +14,7 @@ import { PublishDraft, hasMinimumContent } from './publish-draft-types';
 import { calculateTotalPrice } from './pricing';
 import { supabaseAdmin } from '@/lib/supabase-admin';
 import { runInstantMatchCampaign } from '@/lib/activation/instant-match';
+import { newAdisoId } from '@/lib/url';
 
 export interface PublishStudioInput {
   userId: string;
@@ -74,7 +75,7 @@ export async function publishFromStudio(input: PublishStudioInput): Promise<{
     : null;
 
   const adiso: Adiso = {
-    id: `adiso-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+    id: newAdisoId(),
     categoria,
     subcategoria: draft.subcategoria,
     subsubcategoria: draft.subsubcategoria,

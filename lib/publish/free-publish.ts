@@ -10,6 +10,7 @@ import {
   inferCategoryFromText,
 } from './tiers';
 import { createStoryFromAdiso } from '@/lib/stories/adiso-sync';
+import { newAdisoId } from '@/lib/url';
 
 export interface FreePublishInput {
   userId: string;
@@ -44,7 +45,7 @@ export async function publishFreeAdiso(input: FreePublishInput): Promise<Adiso> 
   const descFinal = descripcion.slice(0, FREE_TIER_LIMITS.maxDescChars);
 
   const adiso: Adiso = {
-    id: `adiso-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+    id: newAdisoId(),
     categoria,
     titulo: tituloFinal,
     descripcion: descFinal,

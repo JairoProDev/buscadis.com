@@ -1,6 +1,7 @@
 import { createAdisoInSupabase } from './supabase';
 import { Adiso, Categoria, Profile } from '@/types';
 import { DraftListingData } from '@/components/ai/DraftListingCard';
+import { newAdisoId } from '@/lib/url';
 
 /**
  * Publica un anuncio "rápido" generado a partir del buscador unificado
@@ -14,7 +15,7 @@ export async function publishQuickAd(
     const now = new Date();
 
     const adiso: Adiso = {
-        id: `adiso-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+        id: newAdisoId(),
         categoria: draft.categoria as Categoria,
         titulo: draft.titulo,
         descripcion: draft.descripcion,

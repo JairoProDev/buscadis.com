@@ -20,15 +20,21 @@ export function canPublishProfile(profile: Partial<BusinessProfile>): boolean {
   return getSubscriptionTier(profile) !== 'free';
 }
 
-/** Monthly price to publish a Buscadis profile (digital card + catalog). */
+/**
+ * Single Pro plan: publish your digital card + catalog + Pro QR.
+ * Creating and editing stay free; paying unlocks going public.
+ */
 export const PROFILE_PUBLISH_MONTHLY_PEN = 30;
 
-export const PRO_QR_MONTHLY_PRICE_PEN = 29;
+/** @deprecated Use PROFILE_PUBLISH_MONTHLY_PEN — same Pro plan. */
+export const PRO_QR_MONTHLY_PRICE_PEN = PROFILE_PUBLISH_MONTHLY_PEN;
 
-export const PRO_QR_FEATURES = [
-  'Gradientes y formas avanzadas',
-  'Plantillas para redes e impresión',
-  'Kits phygital (cartel, tarjeta, sticker Pro)',
-  'Analítica de escaneos y conversiones',
-  'Exportación PDF y PNG hasta 2048px',
+export const PROFILE_PUBLISH_FEATURES = [
+  'Tu tarjeta de presentación digital pública',
+  'Catálogo interactivo y canal de ventas',
+  'Enlace único para redes, WhatsApp y QR',
+  'Edición ilimitada (IA, formulario y tocar)',
+  'QR Pro, analítica y kits para imprimir',
 ] as const;
+
+export const PRO_QR_FEATURES = PROFILE_PUBLISH_FEATURES;

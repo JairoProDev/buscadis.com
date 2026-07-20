@@ -1,12 +1,8 @@
 'use client';
 
 /**
- * AI profile builder ("Crear con IA").
- *
- * A warm, human chat where the user sends anything — text, files, photos,
- * PDFs, audio, links — and Adis builds/edits their profile + catalog via the
- * Vector engine. Applied patches flow through `onUpdate` so the live preview
- * and the other edit modes stay in sync.
+ * AI profile builder ("Crear con IA") — magical zero-to-one chat.
+ * Multimodal: text, files, photos, PDFs, audio, links.
  */
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { BusinessProfile } from '@/types/business';
@@ -22,6 +18,7 @@ interface FollowUp {
 interface BuilderSummary {
   createdProducts: number;
   createdCategories: string[];
+  appliedFields: string[];
   skippedFields: string[];
 }
 
@@ -35,8 +32,11 @@ interface ChatMessage {
 interface AiProfileBuilderProps {
   profile: Partial<BusinessProfile>;
   onUpdate: (patch: Partial<BusinessProfile>) => void;
-  onProfileCreated?: (businessId: string) => void;
+  onProfileCreated?: (businessId: string, slug?: string | null) => void;
   onProductsChanged?: () => void;
+  /** Compact for sidebar; full for dedicated create page. */
+  variant?: 'embedded' | 'hero';
+  className?: string;
 }
 
 interface Attachment {
@@ -45,10 +45,38 @@ interface Attachment {
   kind: 'image' | 'audio' | 'doc';
 }
 
+const FIELD_LABELS: Record<string, string> = {
+  name: 'Nombre',
+  slug: 'Usuario (@)',
+  tagline: 'Eslogan',
+  description: 'Descripción',
+  contact_whatsapp: 'WhatsApp',
+  contact_phone: 'Teléfono',
+  contact_email: 'Email',
+  contact_address: 'Dirección',
+  contact_maps_url: 'Mapa',
+  theme_color: 'Color',
+  social_links: 'Redes',
+  business_hours: 'Horario',
+  profile_hashtags: 'Hashtags',
+};
+
 const GREETING =
-  '¡Hola! Soy Adis. Cuéntame de tu negocio y yo armo tu perfil por ti. ' +
-  'Puedes escribir, mandarme fotos de tus productos o local, un audio contándome, ' +
-  'documentos, PDFs o enlaces. Mientras más me compartas, mejor quedará. ¿Empezamos?';
+  '¡Hola! Soy Adis. En menos de un minuto armo tu página profesional con catálogo.\n\n' +
+  'Mándame lo que tengas: un audio contándome tu negocio, fotos de productos, un PDF, un enlace o simplemente escribe. Yo hago el resto.';
+
+const STARTERS = [
+  'Vendo ropa y accesorios en Cusco',
+  'Tengo un restaurante / cafeteria',
+  'Ofrezco servicios (belleza, reparaciones…)',
+];
+
+const LOADING_STEPS = [
+  'Leyendo lo que me enviaste…',
+  'Entendiendo tu negocio…',
+  'Armando tu perfil y catálogo…',
+  'Casi listo…',
+];
 
 function attachmentKind(file: File): Attachment['kind'] {
   if (file.type.startsWith('image/')) return 'image';
@@ -61,19 +89,24 @@ export default function AiProfileBuilder({
   onUpdate,
   onProfileCreated,
   onProductsChanged,
+  variant = 'embedded',
+  className,
 }: AiProfileBuilderProps) {
   const [messages, setMessages] = useState<ChatMessage[]>([{ role: 'assistant', content: GREETING }]);
   const [input, setInput] = useState('');
   const [attachments, setAttachments] = useState<Attachment[]>([]);
   const [loading, setLoading] = useState(false);
+  const [loadingStep, setLoadingStep] = useState(0);
   const [recording, setRecording] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [dragOver, setDragOver] = useState(false);
 
   const sessionIdRef = useRef<string>(`builder_${Date.now().toString(36)}`);
   const businessIdRef = useRef<string | undefined>(profile.id);
   const scrollRef = useRef<HTMLDivElement>(null);
   const recorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     businessIdRef.current = profile.id;
@@ -82,6 +115,17 @@ export default function AiProfileBuilder({
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' });
   }, [messages, loading]);
+
+  useEffect(() => {
+    if (!loading) {
+      setLoadingStep(0);
+      return;
+    }
+    const id = setInterval(() => {
+      setLoadingStep((s) => (s + 1) % LOADING_STEPS.length);
+    }, 2200);
+    return () => clearInterval(id);
+  }, [loading]);
 
   const addFiles = useCallback((files: FileList | File[]) => {
     const next = Array.from(files).map((file) => ({
@@ -127,7 +171,11 @@ export default function AiProfileBuilder({
 
       setError(null);
       setInput('');
-      const userLabel = text || `${attachments.length} archivo(s) adjunto(s)`;
+      const userLabel =
+        text ||
+        (attachments.length === 1
+          ? attachments[0].file.name
+          : `${attachments.length} archivos adjuntos`);
       setMessages((m) => [...m, { role: 'user', content: userLabel }]);
       setLoading(true);
 
@@ -156,13 +204,16 @@ export default function AiProfileBuilder({
 
         if (json.businessId && !businessIdRef.current) {
           businessIdRef.current = json.businessId;
-          onProfileCreated?.(json.businessId);
+          onProfileCreated?.(json.businessId, json.slug);
         }
-        if (json.appliedPatch && Object.keys(json.appliedPatch).length > 0) {
+        if (json.profile) {
+          onUpdate(json.profile as Partial<BusinessProfile>);
+        } else if (json.appliedPatch && Object.keys(json.appliedPatch).length > 0) {
           onUpdate({ ...(json.appliedPatch as Partial<BusinessProfile>) });
         }
         if (json.createdBusiness && json.businessId) {
-          onUpdate({ id: json.businessId } as Partial<BusinessProfile>);
+          onUpdate({ id: json.businessId, ...(json.slug ? { slug: json.slug } : {}) } as Partial<BusinessProfile>);
+          onProfileCreated?.(json.businessId, json.slug);
         }
         if (json.createdProducts > 0) onProductsChanged?.();
 
@@ -170,10 +221,11 @@ export default function AiProfileBuilder({
           ...m,
           {
             role: 'assistant',
-            content: json.reply || 'Listo, actualicé tu perfil.',
+            content: json.reply || 'Listo, actualicé tu perfil. Mira la vista previa.',
             summary: {
               createdProducts: json.createdProducts || 0,
               createdCategories: json.createdCategories || [],
+              appliedFields: json.appliedFields || Object.keys(json.appliedPatch || {}),
               skippedFields: json.skippedFields || [],
             },
             followUps: json.followUpQuestions || [],
@@ -183,7 +235,11 @@ export default function AiProfileBuilder({
         setError((e as Error).message);
         setMessages((m) => [
           ...m,
-          { role: 'assistant', content: 'Ups, tuve un problema. ¿Lo intentamos otra vez?' },
+          {
+            role: 'assistant',
+            content:
+              'Tuve un problema al procesar eso. Prueba de nuevo con un mensaje más corto o una foto.',
+          },
         ]);
       } finally {
         setLoading(false);
@@ -192,68 +248,160 @@ export default function AiProfileBuilder({
     [input, attachments, loading, onUpdate, onProfileCreated, onProductsChanged]
   );
 
+  const showStarters = messages.length <= 1 && !loading;
+
   return (
-    <div className="flex flex-col h-[420px] rounded-2xl border border-slate-200 overflow-hidden bg-white">
-      <div className="px-3 py-2 border-b border-slate-100 bg-gradient-to-r from-indigo-50 to-fuchsia-50">
-        <p className="text-xs font-bold text-slate-700">Crear con IA</p>
-        <p className="text-[11px] text-slate-500">
-          Mándame texto, fotos, audios, PDFs o enlaces. Yo armo tu perfil.
-        </p>
+    <div
+      className={cn(
+        'flex flex-col overflow-hidden bg-white border border-slate-200',
+        variant === 'hero' ? 'rounded-3xl shadow-xl h-[min(680px,78vh)]' : 'rounded-2xl h-[420px]',
+        className
+      )}
+      onDragOver={(e) => {
+        e.preventDefault();
+        setDragOver(true);
+      }}
+      onDragLeave={() => setDragOver(false)}
+      onDrop={(e) => {
+        e.preventDefault();
+        setDragOver(false);
+        if (e.dataTransfer.files?.length) addFiles(e.dataTransfer.files);
+      }}
+    >
+      <div className="px-4 py-3 border-b border-slate-100 bg-gradient-to-r from-teal-50 via-white to-cyan-50">
+        <div className="flex items-center justify-between gap-2">
+          <div>
+            <p className="text-sm font-black text-slate-800 tracking-tight">Crear con IA</p>
+            <p className="text-[11px] text-slate-500">
+              Texto, fotos, audio, PDF o enlaces — yo armo tu página.
+            </p>
+          </div>
+          <span className="shrink-0 text-[10px] font-bold uppercase tracking-wide px-2 py-1 rounded-full bg-teal-100 text-teal-800">
+            Magia en ~30s
+          </span>
+        </div>
       </div>
 
-      <div ref={scrollRef} className="flex-1 overflow-y-auto p-3 space-y-2 bg-slate-50">
+      <div
+        ref={scrollRef}
+        className={cn(
+          'flex-1 overflow-y-auto p-3 space-y-2 bg-slate-50',
+          dragOver && 'ring-2 ring-inset ring-teal-400 bg-teal-50/40'
+        )}
+      >
         {messages.map((msg, i) => (
           <div key={i} className={cn('flex flex-col', msg.role === 'user' ? 'items-end' : 'items-start')}>
             <div
               className={cn(
-                'text-sm rounded-2xl px-3 py-2 max-w-[92%] whitespace-pre-wrap',
+                'text-sm rounded-2xl px-3.5 py-2.5 max-w-[94%] whitespace-pre-wrap leading-relaxed',
                 msg.role === 'user'
-                  ? 'bg-[var(--brand-color,#4f46e5)] text-white'
-                  : 'bg-white border border-slate-100 text-slate-700'
+                  ? 'bg-teal-600 text-white'
+                  : 'bg-white border border-slate-100 text-slate-700 shadow-sm'
               )}
             >
               {msg.content}
             </div>
 
-            {msg.summary && (msg.summary.createdProducts > 0 || msg.summary.createdCategories.length > 0) && (
-              <div className="mt-1.5 text-[11px] rounded-xl bg-emerald-50 border border-emerald-100 text-emerald-800 px-3 py-2 max-w-[92%]">
-                <p className="font-bold mb-0.5">Esto es lo que creé</p>
-                {msg.summary.createdProducts > 0 && <p>• {msg.summary.createdProducts} producto(s) al catálogo</p>}
-                {msg.summary.createdCategories.length > 0 && (
-                  <p>• Categorías: {msg.summary.createdCategories.join(', ')}</p>
-                )}
-              </div>
-            )}
+            {msg.summary &&
+              (msg.summary.appliedFields.length > 0 ||
+                msg.summary.createdProducts > 0 ||
+                msg.summary.createdCategories.length > 0) && (
+                <div className="mt-1.5 text-[11px] rounded-xl bg-emerald-50 border border-emerald-100 text-emerald-900 px-3 py-2.5 max-w-[94%] w-full">
+                  <p className="font-bold mb-1">Listo — esto ya está en tu página</p>
+                  {msg.summary.appliedFields.length > 0 && (
+                    <p>
+                      •{' '}
+                      {msg.summary.appliedFields
+                        .map((f) => FIELD_LABELS[f] || f)
+                        .slice(0, 8)
+                        .join(', ')}
+                    </p>
+                  )}
+                  {msg.summary.createdProducts > 0 && (
+                    <p>• {msg.summary.createdProducts} producto(s) en el catálogo</p>
+                  )}
+                  {msg.summary.createdCategories.length > 0 && (
+                    <p>• Categorías: {msg.summary.createdCategories.join(', ')}</p>
+                  )}
+                  <p className="mt-1 text-emerald-700/80">Mira la vista previa — puedes seguir afinando o publicar.</p>
+                </div>
+              )}
 
             {msg.followUps && msg.followUps.length > 0 && (
-              <div className="mt-1.5 flex flex-wrap gap-1.5 max-w-[92%]">
+              <div className="mt-1.5 flex flex-wrap gap-1.5 max-w-[94%]">
                 {msg.followUps.map((q) => (
                   <button
                     key={q.id}
                     type="button"
-                    onClick={() => setInput(q.question)}
-                    className="text-[11px] font-semibold px-2.5 py-1 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-100 hover:bg-indigo-100"
+                    onClick={() => void send(q.question)}
+                    className="text-[11px] font-semibold px-2.5 py-1.5 rounded-full bg-white text-teal-800 border border-teal-200 hover:bg-teal-50"
                   >
                     {q.question}
                   </button>
                 ))}
+                <button
+                  type="button"
+                  onClick={() =>
+                    setMessages((m) => [
+                      ...m,
+                      {
+                        role: 'assistant',
+                        content:
+                          'Perfecto, omitimos eso. Cuando quieras, manda más fotos o datos — o publica cuando estés listo.',
+                      },
+                    ])
+                  }
+                  className="text-[11px] font-semibold px-2.5 py-1.5 rounded-full bg-slate-100 text-slate-500 border border-slate-200"
+                >
+                  Omitir por ahora
+                </button>
               </div>
             )}
           </div>
         ))}
-        {loading && <p className="text-xs text-slate-400 animate-pulse">Analizando y creando tu perfil…</p>}
+
+        {showStarters && (
+          <div className="flex flex-wrap gap-1.5 pt-1">
+            {STARTERS.map((s) => (
+              <button
+                key={s}
+                type="button"
+                onClick={() => void send(s)}
+                className="text-[11px] font-semibold px-3 py-1.5 rounded-full bg-white border border-slate-200 text-slate-600 hover:border-teal-300 hover:text-teal-800"
+              >
+                {s}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {loading && (
+          <div className="flex items-center gap-2 text-xs text-teal-700 font-medium">
+            <span className="inline-block h-3.5 w-3.5 rounded-full border-2 border-teal-200 border-t-teal-600 animate-spin" />
+            {LOADING_STEPS[loadingStep]}
+          </div>
+        )}
         {error && <p className="text-xs text-rose-500">{error}</p>}
+        {dragOver && (
+          <p className="text-center text-sm font-semibold text-teal-700 py-6">Suelta aquí tus archivos</p>
+        )}
       </div>
 
       {attachments.length > 0 && (
-        <div className="flex flex-wrap gap-1.5 px-2 py-1.5 border-t border-slate-100 bg-white">
+        <div className="flex flex-wrap gap-1.5 px-3 py-2 border-t border-slate-100 bg-white">
           {attachments.map((a) => (
             <span
               key={a.id}
-              className="inline-flex items-center gap-1 text-[11px] bg-slate-100 rounded-full px-2 py-1 text-slate-600"
+              className="inline-flex items-center gap-1 text-[11px] bg-slate-100 rounded-full px-2.5 py-1 text-slate-600"
             >
-              {a.kind === 'image' ? '🖼️' : a.kind === 'audio' ? '🎙️' : '📄'} {a.file.name.slice(0, 18)}
-              <button type="button" onClick={() => removeAttachment(a.id)} className="text-slate-400 hover:text-rose-500">
+              {a.kind === 'image' ? 'Foto' : a.kind === 'audio' ? 'Audio' : 'Archivo'}:{' '}
+              {a.file.name.slice(0, 18)}
+              <button
+                type="button"
+                onClick={() => removeAttachment(a.id)}
+                className="text-slate-400 hover:text-rose-500 ml-0.5"
+                aria-label="Quitar"
+              >
                 ×
               </button>
             </span>
@@ -261,27 +409,33 @@ export default function AiProfileBuilder({
         </div>
       )}
 
-      <div className="flex items-end gap-1.5 p-2 border-t bg-white">
-        <label className="shrink-0 cursor-pointer p-2 rounded-full text-slate-500 hover:bg-slate-100" title="Adjuntar">
-          <input
-            type="file"
-            multiple
-            accept="image/*,audio/*,application/pdf,.doc,.docx,.txt,.csv"
-            className="hidden"
-            onChange={(e) => e.target.files && addFiles(e.target.files)}
-          />
+      <div className="flex items-end gap-1.5 p-2.5 border-t bg-white">
+        <input
+          ref={fileInputRef}
+          type="file"
+          multiple
+          accept="image/*,audio/*,application/pdf,.doc,.docx,.txt,.csv"
+          className="hidden"
+          onChange={(e) => e.target.files && addFiles(e.target.files)}
+        />
+        <button
+          type="button"
+          onClick={() => fileInputRef.current?.click()}
+          className="shrink-0 p-2.5 rounded-full text-slate-500 hover:bg-slate-100"
+          title="Adjuntar fotos, PDF o documentos"
+        >
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <path d="M21.44 11.05l-9.19 9.19a5 5 0 01-7.07-7.07l9.19-9.19a3 3 0 014.24 4.24l-9.2 9.19a1 1 0 01-1.41-1.41l8.49-8.49" />
           </svg>
-        </label>
+        </button>
         <button
           type="button"
           onClick={recording ? stopRecording : startRecording}
           className={cn(
-            'shrink-0 p-2 rounded-full transition-colors',
+            'shrink-0 p-2.5 rounded-full transition-colors',
             recording ? 'bg-rose-500 text-white animate-pulse' : 'text-slate-500 hover:bg-slate-100'
           )}
-          title={recording ? 'Detener' : 'Grabar audio'}
+          title={recording ? 'Detener grabación' : 'Grabar audio'}
         >
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z" />
@@ -289,9 +443,9 @@ export default function AiProfileBuilder({
           </svg>
         </button>
         <textarea
-          className="flex-1 text-sm border border-slate-200 rounded-xl px-3 py-2 outline-none resize-none max-h-24"
+          className="flex-1 text-sm border border-slate-200 rounded-xl px-3 py-2.5 outline-none resize-none max-h-28 focus:border-teal-400 focus:ring-2 focus:ring-teal-100"
           rows={1}
-          placeholder="Escribe o pega un enlace…"
+          placeholder="Cuéntame tu negocio o pega un enlace…"
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => {
@@ -306,7 +460,7 @@ export default function AiProfileBuilder({
           type="button"
           onClick={() => void send()}
           disabled={loading || (!input.trim() && attachments.length === 0)}
-          className="shrink-0 px-4 py-2 rounded-xl bg-[var(--brand-color,#4f46e5)] text-white text-sm font-bold disabled:opacity-50"
+          className="shrink-0 px-4 py-2.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-sm font-bold disabled:opacity-50 transition-colors"
         >
           Enviar
         </button>

@@ -2,7 +2,7 @@ import { Metadata } from 'next';
 import { notFound, redirect } from 'next/navigation';
 import { getAdisoByIdFromSupabase } from '@/lib/supabase';
 import { getBusinessProductAsAdiso } from '@/lib/business';
-import { getIdFromSlug } from '@/lib/url';
+import { getIdFromSlug, getAdisoUrl } from '@/lib/url';
 import ClientAdisoWrapper from '@/components/ClientAdisoWrapper';
 import { Categoria, Adiso } from '@/types';
 import PublicBusinessPage from '@/app/negocio/[slug]/page';
@@ -198,8 +198,12 @@ export default async function Page(props: PageProps) {
         console.error('Error fetching adiso:', err);
     }
 
-    // Render Wrapper
-    // Wrapper handles "loading..." or "storage fallback" if server adiso is null
+    // Canonical: legacy SEO → /a/{id}/{slug}
+    if (adiso) {
+        redirect(getAdisoUrl(adiso));
+    }
+
+    // Render Wrapper (client may still resolve from cache)
     return <ClientAdisoWrapper id={targetId} initialAdiso={adiso} />;
 }
 

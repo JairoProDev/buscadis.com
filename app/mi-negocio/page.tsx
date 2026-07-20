@@ -18,13 +18,13 @@ function MiNegocioRedirect() {
     if (!user) return;
 
     if (isNew) {
-      router.replace('/publicar?tipo=negocio');
+      router.replace('/mi-negocio/crear');
       return;
     }
 
     listBusinessProfilesForUser(user.id).then((list) => {
       if (list.length === 0) {
-        router.replace('/publicar?tipo=negocio');
+        router.replace('/mi-negocio/crear');
         return;
       }
       const picked = businessId

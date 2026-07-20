@@ -45,6 +45,7 @@ interface ProfileBuilderModesProps {
   recommendedTemplateId?: string;
   selectedBlockId?: string | null;
   onSelectBlock?: (id: string | null) => void;
+  onProductsChanged?: () => void;
 }
 
 function SortableBlockRow({
@@ -123,6 +124,7 @@ export default function ProfileBuilderModes({
   recommendedTemplateId,
   selectedBlockId: controlledBlockId,
   onSelectBlock,
+  onProductsChanged,
 }: ProfileBuilderModesProps) {
   const [mode, setMode] = useState<BuilderMode>('ai');
   const [internalBlockId, setInternalBlockId] = useState<string | null>(null);
@@ -223,7 +225,10 @@ export default function ProfileBuilderModes({
         <AiProfileBuilder
           profile={profile}
           onUpdate={onUpdate}
-          onProfileCreated={(id) => onUpdate({ id } as Partial<BusinessProfile>)}
+          onProfileCreated={(id, slug) =>
+            onUpdate({ id, ...(slug ? { slug } : {}) } as Partial<BusinessProfile>)
+          }
+          onProductsChanged={onProductsChanged}
         />
       )}
 
