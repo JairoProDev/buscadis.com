@@ -1,11 +1,11 @@
 'use client';
 
-import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useEffect, useRef, useState, ReactNode } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabase';
 import { Profile } from '@/types';
 import { getProfile } from '@/lib/user';
-import { onAuthStateChange, getCurrentUser, getSession } from '@/lib/auth';
+import { onAuthStateChange, getSession } from '@/lib/auth';
 import { trackEvent } from '@/lib/events/track';
 import { cacheGet, cacheSet, cacheRemove, CacheKeys, CACHE_TTL } from '@/lib/offline-cache';
 import {
@@ -13,18 +13,44 @@ import {
   linkPushTokenToSession,
   unlinkPushTokenFromSession,
 } from '@/lib/mobile-app-bridge';
+import type { ClaimedBusinessSummary } from '@/lib/business/claimed-business';
+import BusinessAccessWelcome, {
+  pickWelcomeBusiness,
+} from '@/components/business/BusinessAccessWelcome';
 
-async function claimPendingBusinessPages(accessToken?: string | null) {
-  if (!accessToken) return;
-  try {
-    await fetch('/api/business/claim-pending', {
-      method: 'POST',
-      credentials: 'include',
-      headers: { Authorization: `Bearer ${accessToken}` },
-    });
-  } catch {
-    // Non-blocking: profile claim retries on next session
-  }
+type ClaimPendingResponse = {
+  ok?: boolean;
+  businesses?: ClaimedBusinessSummary[];
+};
+
+let claimInFlight: Promise<ClaimPendingResponse | null> | null = null;
+
+async function claimPendingBusinessPages(
+  accessToken?: string | null
+): Promise<ClaimPendingResponse | null> {
+  if (!accessToken) return null;
+  if (claimInFlight) return claimInFlight;
+
+  claimInFlight = (async () => {
+    try {
+      const res = await fetch('/api/business/claim-pending', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
+      if (!res.ok) return null;
+      return (await res.json()) as ClaimPendingResponse;
+    } catch {
+      // Non-blocking: profile claim retries on next session
+      return null;
+    } finally {
+      window.setTimeout(() => {
+        claimInFlight = null;
+      }, 2500);
+    }
+  })();
+
+  return claimInFlight;
 }
 
 interface AuthContextType {
@@ -61,6 +87,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const cached = cacheGet<User>(CacheKeys.authSession(), true);
     return !cached; // Si tenemos caché, no hay loading inicial
   });
+  const [welcomeBusiness, setWelcomeBusiness] = useState<ClaimedBusinessSummary | null>(null);
+  const welcomeShownForUser = useRef<string | null>(null);
+
+  const maybeShowBusinessWelcome = (payload: ClaimPendingResponse | null, userId: string) => {
+    if (!payload?.businesses?.length) return;
+    // Una sola bienvenida por sesión de usuario (evita doble disparo getSession + SIGNED_IN)
+    if (welcomeShownForUser.current === userId) return;
+    const pick = pickWelcomeBusiness(payload.businesses);
+    if (!pick) return;
+    welcomeShownForUser.current = userId;
+    setWelcomeBusiness(pick);
+  };
 
   const loadProfile = async (userId: string) => {
     try {
@@ -111,7 +149,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
         // Cargar perfil actualizado en background
         loadProfile(sessionUser.id);
-        void claimPendingBusinessPages(sessionData.access_token);
+        void claimPendingBusinessPages(sessionData.access_token).then((payload) => {
+          maybeShowBusinessWelcome(payload, sessionUser.id);
+        });
         if (isBuscadisNativeApp()) {
           void linkPushTokenToSession(sessionUser.id);
         }
@@ -120,6 +160,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         cacheRemove(CacheKeys.authSession());
         setUser(null);
         setProfile(null);
+        setWelcomeBusiness(null);
+        welcomeShownForUser.current = null;
         setLoading(false);
       }
     }).catch(() => {
@@ -149,7 +191,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(sessionUser);
         cacheSet(CacheKeys.authSession(), sessionUser, CACHE_TTL.AUTH_SESSION);
         loadProfile(sessionUser.id);
-        void claimPendingBusinessPages(sessionData.access_token);
+        void claimPendingBusinessPages(sessionData.access_token).then((payload) => {
+          maybeShowBusinessWelcome(payload, sessionUser.id);
+        });
         if (isBuscadisNativeApp()) {
           void linkPushTokenToSession(sessionUser.id);
         }
@@ -159,6 +203,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         cacheRemove(CacheKeys.authSession());
         setUser(null);
         setProfile(null);
+        setWelcomeBusiness(null);
+        welcomeShownForUser.current = null;
         if (isBuscadisNativeApp()) {
           void unlinkPushTokenFromSession();
         }
@@ -200,6 +246,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }}
     >
       {children}
+      {welcomeBusiness && (
+        <BusinessAccessWelcome
+          business={welcomeBusiness}
+          onDismiss={() => setWelcomeBusiness(null)}
+        />
+      )}
     </AuthContext.Provider>
   );
 }

@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { listBusinessProfilesForUser } from '@/lib/business';
 import { hasPermission, type BusinessMemberRole } from '@/lib/business-access';
+import { isPlatformAdminUser } from '@/lib/platform-admin';
 import AuthModal from '@/components/AuthModal';
 import { IconX } from '@/components/Icons';
 import { useToast } from '@/hooks/useToast';
@@ -53,10 +54,11 @@ const ACTION_LABELS: Record<string, string> = {
 };
 
 function EquipoPageContent() {
-    const { user, loading: authLoading } = useAuth();
+    const { user, profile, loading: authLoading } = useAuth();
     const router = useRouter();
     const searchParams = useSearchParams();
     const { success, error: toastError } = useToast();
+    const isPlatformAdmin = isPlatformAdminUser(user?.email, profile);
 
     const [loading, setLoading] = useState(true);
     const [businessId, setBusinessId] = useState<string | null>(searchParams.get('business'));
@@ -71,6 +73,12 @@ function EquipoPageContent() {
     const [auditItems, setAuditItems] = useState<AuditItem[]>([]);
     const [auditLoading, setAuditLoading] = useState(false);
     const [transferTargetId, setTransferTargetId] = useState('');
+    const [pendingOwnerEmail, setPendingOwnerEmail] = useState<string | null>(null);
+    const [assignOwnerEmail, setAssignOwnerEmail] = useState('');
+    const [adminLookupSlug, setAdminLookupSlug] = useState('');
+    const [adminAssignEmail, setAdminAssignEmail] = useState('');
+    const [adminLookupId, setAdminLookupId] = useState<string | null>(null);
+    const [adminLookupName, setAdminLookupName] = useState<string | null>(null);
 
     const loadBusinesses = useCallback(async () => {
         if (!user) return;
@@ -93,6 +101,7 @@ function EquipoPageContent() {
             if (!res.ok) throw new Error(json.error || 'Error');
             setMembers(json.members || []);
             setInvitations(json.invitations || []);
+            setPendingOwnerEmail(json.business?.pending_owner_email || null);
             if (json.yourRole) setYourRole(json.yourRole);
         } catch (e: any) {
             toastError(e.message || 'Error al cargar el equipo');
@@ -264,6 +273,79 @@ function EquipoPageContent() {
         }
     };
 
+    const assignOwnerByEmail = async (targetBusinessId: string, email: string) => {
+        const trimmed = email.trim().toLowerCase();
+        if (!targetBusinessId || !trimmed) return;
+        if (
+            !confirm(
+                `¿Asignar este negocio a ${trimmed}? Si ya tiene cuenta, se convierte en dueño ahora. Si no, se reserva hasta que inicie sesión.`
+            )
+        ) {
+            return;
+        }
+        setSaving(true);
+        try {
+            const res = await fetch(`/api/business/${targetBusinessId}/assign-owner`, {
+                method: 'POST',
+                credentials: 'include',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: trimmed }),
+            });
+            const json = await res.json();
+            if (!res.ok) throw new Error(json.error || 'Error');
+            if (json.mode === 'transferred') {
+                success(
+                    json.emailWarning
+                        ? 'Dueño asignado (revisa el correo de aviso)'
+                        : 'Dueño asignado y aviso enviado'
+                );
+            } else {
+                success(
+                    json.emailWarning
+                        ? 'Correo reservado. Cuando inicie sesión, el negocio se vinculará solo.'
+                        : 'Correo reservado y aviso enviado. Se vinculará al iniciar sesión.'
+                );
+            }
+            setAssignOwnerEmail('');
+            setAdminAssignEmail('');
+            if (businessId === targetBusinessId) {
+                await fetchTeam();
+                await fetchAudit();
+                await loadBusinesses();
+            }
+        } catch (e: any) {
+            toastError(e.message);
+        } finally {
+            setSaving(false);
+        }
+    };
+
+    const lookupBusinessForAdmin = async (e: React.FormEvent) => {
+        e.preventDefault();
+        const slug = adminLookupSlug.trim().replace(/^@/, '');
+        if (!slug) return;
+        setSaving(true);
+        try {
+            const res = await fetch(`/api/business/lookup?slug=${encodeURIComponent(slug)}`, {
+                credentials: 'include',
+            });
+            const json = await res.json();
+            if (!res.ok) throw new Error(json.error || 'No encontrado');
+            setAdminLookupId(json.business.id);
+            setAdminLookupName(json.business.name || json.business.slug);
+            if (json.business.pending_owner_email) {
+                setAdminAssignEmail(json.business.pending_owner_email);
+            }
+            success(`Negocio encontrado: ${json.business.name || json.business.slug}`);
+        } catch (err: any) {
+            setAdminLookupId(null);
+            setAdminLookupName(null);
+            toastError(err.message);
+        } finally {
+            setSaving(false);
+        }
+    };
+
     if (authLoading) {
         return (
             <div className="min-h-screen flex items-center justify-center">
@@ -304,6 +386,66 @@ function EquipoPageContent() {
             </header>
 
             <main className="max-w-3xl mx-auto px-4 py-8 space-y-8">
+                {isPlatformAdmin && (
+                    <section className="bg-slate-900 rounded-xl border border-slate-700 p-6 shadow-sm text-white">
+                        <h2 className="font-semibold mb-1">Buscadis · Asignar dueño por correo</h2>
+                        <p className="text-xs text-slate-300 mb-4">
+                            Busca el negocio por slug (ej. agrilsur) y asigna el correo del dueño. Si aún no
+                            tiene cuenta, se reserva; al iniciar sesión se vincula solo y verá un aviso para
+                            editar.
+                        </p>
+                        <form
+                            onSubmit={lookupBusinessForAdmin}
+                            className="flex flex-col sm:flex-row gap-2 mb-3"
+                        >
+                            <input
+                                type="text"
+                                placeholder="slug-del-negocio"
+                                className="flex-1 border border-slate-600 bg-slate-800 rounded-lg px-3 py-2 text-sm text-white placeholder:text-slate-500"
+                                value={adminLookupSlug}
+                                onChange={(e) => setAdminLookupSlug(e.target.value)}
+                            />
+                            <button
+                                type="submit"
+                                disabled={saving || !adminLookupSlug.trim()}
+                                className="px-4 py-2 rounded-lg bg-slate-100 text-slate-900 text-sm font-semibold disabled:opacity-50"
+                            >
+                                Buscar
+                            </button>
+                        </form>
+                        {adminLookupId && (
+                            <div className="space-y-2">
+                                <p className="text-sm text-emerald-300">
+                                    {adminLookupName}{' '}
+                                    <span className="text-slate-400 font-mono text-xs">
+                                        ({adminLookupId.slice(0, 8)}…)
+                                    </span>
+                                </p>
+                                <div className="flex flex-col sm:flex-row gap-2">
+                                    <input
+                                        type="email"
+                                        required
+                                        placeholder="dueño@correo.com"
+                                        className="flex-1 border border-slate-600 bg-slate-800 rounded-lg px-3 py-2 text-sm text-white placeholder:text-slate-500"
+                                        value={adminAssignEmail}
+                                        onChange={(e) => setAdminAssignEmail(e.target.value)}
+                                    />
+                                    <button
+                                        type="button"
+                                        disabled={saving || !adminAssignEmail.trim()}
+                                        onClick={() =>
+                                            assignOwnerByEmail(adminLookupId, adminAssignEmail)
+                                        }
+                                        className="px-4 py-2 rounded-lg bg-blue-500 text-white text-sm font-semibold disabled:opacity-50"
+                                    >
+                                        Asignar dueño
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+                    </section>
+                )}
+
                 {options.length > 0 && (
                     <div>
                         <label className="block text-xs font-semibold text-slate-500 mb-1">Negocio</label>
@@ -415,6 +557,49 @@ function EquipoPageContent() {
                             </section>
                         )}
 
+                        {yourRole === 'owner' && (
+                            <section className="bg-sky-50 rounded-xl border border-sky-200 p-6 shadow-sm">
+                                <h2 className="font-semibold text-sky-950 mb-2">
+                                    Asignar / transferir dueño por correo
+                                </h2>
+                                <p className="text-xs text-sky-900/80 mb-3">
+                                    Escribe el correo de la persona. Si ya tiene cuenta en Buscadis, recibe el
+                                    negocio al instante. Si no, queda reservado hasta que inicie sesión con ese
+                                    correo (verá un aviso para ver y editar su página).
+                                </p>
+                                {pendingOwnerEmail && (
+                                    <p className="text-xs font-medium text-amber-800 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 mb-3">
+                                        Reservado actualmente para: {pendingOwnerEmail}
+                                    </p>
+                                )}
+                                <form
+                                    className="flex flex-col sm:flex-row gap-2"
+                                    onSubmit={(e) => {
+                                        e.preventDefault();
+                                        if (businessId) {
+                                            void assignOwnerByEmail(businessId, assignOwnerEmail);
+                                        }
+                                    }}
+                                >
+                                    <input
+                                        type="email"
+                                        required
+                                        placeholder="nuevo-dueno@correo.com"
+                                        className="flex-1 border border-sky-200 rounded-lg px-3 py-2 text-sm bg-white"
+                                        value={assignOwnerEmail}
+                                        onChange={(e) => setAssignOwnerEmail(e.target.value)}
+                                    />
+                                    <button
+                                        type="submit"
+                                        disabled={saving || !assignOwnerEmail.trim()}
+                                        className="px-4 py-2 rounded-lg bg-sky-700 text-white text-sm font-semibold disabled:opacity-50"
+                                    >
+                                        Asignar
+                                    </button>
+                                </form>
+                            </section>
+                        )}
+
                         {yourRole === 'owner' && members.length > 0 && (
                             <section className="bg-amber-50 rounded-xl border border-amber-200 p-6 shadow-sm">
                                 <h2 className="font-semibold text-amber-950 mb-2">Transferir propiedad</h2>
@@ -494,7 +679,13 @@ function EquipoPageContent() {
 
                         {canInvite && (
                             <section className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
-                                <h2 className="font-semibold text-slate-900 mb-4">Invitar por correo</h2>
+                                <h2 className="font-semibold text-slate-900 mb-1">
+                                    Invitar ayudantes al equipo
+                                </h2>
+                                <p className="text-xs text-slate-500 mb-4">
+                                    Los administradores del negocio pueden sumar personas que ayuden a editar
+                                    o gestionar el equipo. No transfieren la propiedad: solo dan acceso.
+                                </p>
                                 <form onSubmit={handleInvite} className="flex flex-col sm:flex-row gap-3">
                                     <input
                                         type="email"
@@ -524,9 +715,8 @@ function EquipoPageContent() {
                                     </button>
                                 </form>
                                 <p className="text-xs text-slate-500 mt-3">
-                                    La persona debe aceptar con una cuenta que use el mismo correo. Los
-                                    administradores pueden gestionar miembros; los editores pueden editar el
-                                    catálogo y la página; solo lectura puede ver sin cambiar.
+                                    La persona acepta con una cuenta que use el mismo correo. Admin: gestiona
+                                    miembros; editor: catálogo y página; solo lectura: ver sin cambiar.
                                 </p>
                             </section>
                         )}

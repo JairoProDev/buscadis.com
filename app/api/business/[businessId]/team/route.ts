@@ -62,12 +62,19 @@ export async function GET(
 
         if (invErr) throw invErr;
 
+        const { data: profileExtra } = await supabaseAdmin
+            .from('business_profiles')
+            .select('pending_owner_email')
+            .eq('id', businessId)
+            .maybeSingle();
+
         return NextResponse.json({
             success: true,
             business: {
                 id: ctx.id,
                 name: ctx.name,
                 slug: ctx.slug,
+                pending_owner_email: profileExtra?.pending_owner_email ?? null,
             },
             yourRole: ctx.role,
             members: memberRows.map((m, i) => ({
