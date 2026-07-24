@@ -112,6 +112,9 @@ export default function ProfileCapabilitiesSpaces() {
       const json = await res.json();
       if (!res.ok) {
         setError(json.error || 'No se pudo activar');
+        if (json.needs_kyc && json.next) {
+          router.push(json.next);
+        }
         return;
       }
       setCaps(json.capabilities || []);

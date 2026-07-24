@@ -460,6 +460,11 @@ export interface Profile {
   rol: RolUsuario;
   es_verificado: boolean;
   fecha_verificacion?: string;
+  identity_kyc_status?: 'none' | 'pending' | 'approved' | 'rejected';
+  identity_kyc_submitted_at?: string;
+  identity_kyc_reviewed_at?: string;
+  identity_kyc_rejection_reason?: string;
+  name_match_score?: number;
   fecha_nacimiento?: string;
   genero?: Genero;
   bio?: string;

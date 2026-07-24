@@ -1,9 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { useAuth } from '@/hooks/useAuth';
-import { crearSolicitudVerificacion } from '@/lib/verification';
 import { IconClose } from '@/components/Icons';
+import IdentityKycUploader from '@/components/auth/IdentityKycUploader';
 
 interface VerificationGateModalProps {
   abierto: boolean;
@@ -11,29 +9,16 @@ interface VerificationGateModalProps {
   onContinuar: () => void;
 }
 
+/**
+ * Hard gate: publish requires photo KYC (pending allows wait message;
+ * only approved continues to publish via parent isVerificado).
+ */
 export default function VerificationGateModal({
   abierto,
   onCerrar,
   onContinuar,
 }: VerificationGateModalProps) {
-  const { user } = useAuth();
-  const [solicitando, setSolicitando] = useState(false);
-  const [solicitudEnviada, setSolicitudEnviada] = useState(false);
-
   if (!abierto) return null;
-
-  const handleSolicitar = async () => {
-    if (!user?.id) return;
-    setSolicitando(true);
-    try {
-      await crearSolicitudVerificacion(user.id, 'identidad');
-      setSolicitudEnviada(true);
-    } catch {
-      // Gate suave: permitir continuar aunque falle la solicitud
-    } finally {
-      setSolicitando(false);
-    }
-  };
 
   return (
     <div className="fixed inset-0 z-[2000] flex items-end justify-center bg-black/50 p-4 sm:items-center">
@@ -45,43 +30,26 @@ export default function VerificationGateModal({
           </button>
         </div>
 
-        <p className="text-sm text-[var(--text-secondary)]">
-          Para publicar con confianza, verificamos tu identidad. Puedes solicitar verificación ahora o
-          publicar y completar el proceso después.
+        <p className="mb-4 text-sm text-[var(--text-secondary)]">
+          Para publicar, crear negocio o ser rider necesitamos fotos de tu DNI y una selfie. Así
+          protegemos a la comunidad de fraudes.
         </p>
 
-        {solicitudEnviada ? (
-          <p className="mt-4 rounded-lg bg-emerald-500/10 px-3 py-2 text-sm text-emerald-700">
-            Solicitud enviada. Te avisaremos cuando sea revisada.
-          </p>
-        ) : null}
+        <IdentityKycUploader
+          allowPendingContinue
+          onApprovedOrPending={(status) => {
+            if (status === 'approved') onContinuar();
+            // pending: stay on gate — user can't publish until approved
+          }}
+        />
 
-        <div className="mt-6 flex flex-col gap-2">
-          {!solicitudEnviada && (
-            <button
-              type="button"
-              onClick={handleSolicitar}
-              disabled={solicitando}
-              className="w-full rounded-full bg-[var(--brand-blue)] py-3 text-sm font-semibold text-white disabled:opacity-50"
-            >
-              {solicitando ? 'Enviando…' : 'Solicitar verificación'}
-            </button>
-          )}
-          <button
-            type="button"
-            onClick={onContinuar}
-            className="w-full rounded-full border border-[var(--border-color)] py-3 text-sm font-semibold text-[var(--text-primary)]"
-          >
-            Publicar de todos modos
-          </button>
-          <button
-            type="button"
-            onClick={onCerrar}
-            className="text-sm text-[var(--text-secondary)] hover:underline"
-          >
-            Cancelar
-          </button>
-        </div>
+        <button
+          type="button"
+          onClick={onCerrar}
+          className="mt-4 w-full text-sm text-[var(--text-secondary)] hover:underline"
+        >
+          Cancelar
+        </button>
       </div>
     </div>
   );

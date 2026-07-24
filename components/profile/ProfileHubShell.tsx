@@ -27,12 +27,14 @@ import ProfileCompletionCard from './ProfileCompletionCard';
 import ProfileHubSkeleton from './ProfileHubSkeleton';
 import ModeIndicator from './ModeIndicator';
 import ProfileCapabilitiesSpaces from './ProfileCapabilitiesSpaces';
+import IdentityKycUploader from '@/components/auth/IdentityKycUploader';
 import {
   IconVerified,
   IconHeart,
   IconMessages,
   IconMegaphone,
 } from '@/components/Icons';
+import { useSearchParams } from 'next/navigation';
 
 interface ProfileHubShellProps {
   initialTab?: ProfileTabId;
@@ -46,7 +48,9 @@ export default function ProfileHubShell({
   focusSection,
 }: ProfileHubShellProps) {
   const router = useRouter();
-  const { user, signOut, session, loading: authLoading } = useAuth();
+  const searchParams = useSearchParams();
+  const showKyc = searchParams.get('kyc') === '1';
+  const { user, signOut, session, loading: authLoading, refreshProfile } = useAuth();
   const { profile, isAnunciante, isVerificado } = useUser();
   const { openAuthModal } = useUI();
 
@@ -250,6 +254,21 @@ export default function ProfileHubShell({
       </div>
 
       <ProfileCapabilitiesSpaces />
+
+      {(!isVerificado || showKyc || profile?.identity_kyc_status === 'pending' || profile?.identity_kyc_status === 'rejected') && (
+        <section className="rounded-2xl border border-[var(--border-color)] bg-[var(--bg-primary)] p-4 shadow-sm">
+          <IdentityKycUploader
+            onApprovedOrPending={async () => {
+              await refreshProfile();
+              if (showKyc) {
+                const url = new URL(window.location.href);
+                url.searchParams.delete('kyc');
+                window.history.replaceState(null, '', url.pathname + url.search);
+              }
+            }}
+          />
+        </section>
+      )}
 
       <ProfileTabs
         active={tab}

@@ -57,6 +57,28 @@ export async function POST(request: NextRequest) {
 
   let next: string | null = null;
 
+  const { data: kycProfile } = await supabaseAdmin
+    .from('profiles')
+    .select('identity_kyc_status, es_verificado')
+    .eq('id', user.id)
+    .maybeSingle();
+
+  const kycOk =
+    kycProfile?.identity_kyc_status === 'approved' || kycProfile?.es_verificado === true;
+
+  if ((capability === 'publish' || capability === 'business' || capability === 'rider') && !kycOk) {
+    return NextResponse.json(
+      {
+        ok: false,
+        error:
+          'Para publicar, negocio o rider debes verificar tu identidad con fotos del DNI y selfie',
+        needs_kyc: true,
+        next: '/perfil?kyc=1',
+      },
+      { status: 403 }
+    );
+  }
+
   if (capability === 'publish') {
     await upsertCapability(user.id, capability, 'active');
     next = '/publicar';
@@ -65,7 +87,6 @@ export async function POST(request: NextRequest) {
     next = '/mi-negocio';
   } else if (capability === 'rider') {
     await upsertCapability(user.id, capability, 'pending');
-    // Ensure draft rider row exists lightly
     const { data: rider } = await supabaseAdmin
       .from('moto_riders')
       .select('id')

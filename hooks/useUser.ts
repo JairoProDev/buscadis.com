@@ -39,7 +39,8 @@ export function useUser() {
     isAnunciante: profile?.rol === 'anunciante' || profile?.rol === 'admin',
     isAdmin: profile?.rol === 'admin',
     isPlatformAdmin: isPlatformAdminUser(user?.email, profile),
-    isVerificado: profile?.es_verificado || false
+    isVerificado:
+      profile?.es_verificado === true || profile?.identity_kyc_status === 'approved',
   };
 }
 

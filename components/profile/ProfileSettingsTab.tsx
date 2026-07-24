@@ -433,10 +433,11 @@ export default function ProfileSettingsTab({
         done={taskDone('verified')}
       >
         <div className="flex flex-wrap items-center gap-3">
-          <VerificationBadge esVerificado={!!profile?.es_verificado} />
-          {!profile?.es_verificado && (
+          <VerificationBadge esVerificado={!!profile?.es_verificado || profile?.identity_kyc_status === 'approved'} />
+          {!profile?.es_verificado && profile?.identity_kyc_status !== 'approved' && (
             <p className="text-sm text-[var(--text-secondary)]">
-              Verifica tu identidad para destacar como anunciante confiable.
+              Sube fotos de tu DNI y una selfie en la sección de verificación del perfil (o al
+              publicar). Sin eso no podrás publicar ni ser rider.
             </p>
           )}
         </div>
