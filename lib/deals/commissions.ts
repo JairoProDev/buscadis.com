@@ -18,4 +18,6 @@ export function buildAttributionLink(baseUrl: string, clipId: string, code?: str
   return url.toString();
 }
 
+export { captureReferralFromUrl, getStoredReferralCode } from '@/lib/auth/referral-capture';
+
 export const DEFAULT_CREATOR_COMMISSION_PCT = 5;

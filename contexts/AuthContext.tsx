@@ -163,6 +163,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
         // Cargar perfil actualizado en background
         loadProfile(sessionUser.id);
+        void fetch('/api/auth/sync-google-profile', {
+          method: 'POST',
+          credentials: 'include',
+          headers: sessionData.access_token
+            ? { Authorization: `Bearer ${sessionData.access_token}` }
+            : undefined,
+        }).then(() => loadProfile(sessionUser.id)).catch(() => {});
         void claimPendingBusinessPages(sessionData.access_token).then((payload) => {
           maybeShowBusinessWelcome(payload, sessionUser.id);
         });
@@ -207,6 +214,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(sessionUser);
         cacheSet(CacheKeys.authSession(), sessionUser, CACHE_TTL.AUTH_SESSION);
         loadProfile(sessionUser.id);
+        if (event === 'SIGNED_IN') {
+          void fetch('/api/auth/sync-google-profile', {
+            method: 'POST',
+            credentials: 'include',
+            headers: sessionData.access_token
+              ? { Authorization: `Bearer ${sessionData.access_token}` }
+              : undefined,
+          }).then(() => loadProfile(sessionUser.id)).catch(() => {});
+        }
         void claimPendingBusinessPages(sessionData.access_token).then((payload) => {
           maybeShowBusinessWelcome(payload, sessionUser.id);
         });

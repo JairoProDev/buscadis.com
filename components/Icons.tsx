@@ -11,7 +11,7 @@ import {
   FaFileExcel, FaDownload, FaLightbulb, FaSyncAlt, FaBolt, FaTag, FaEyeSlash, FaLayerGroup, FaSquare,
   FaSort, FaSortAmountDown, FaSortAmountUp, FaVideo, FaPaperPlane, FaBell, FaMoon, FaSun, FaUser, FaHandPointUp,
   FaCog, FaSignOutAlt, FaCompass, FaUserTie, FaUserCog, FaUserEdit, FaEllipsisV,
-  FaMotorcycle
+  FaMotorcycle, FaHandshake, FaUserPlus
 } from 'react-icons/fa';
 import { FcGoogle } from 'react-icons/fc';
 import { MdCenterFocusWeak } from 'react-icons/md';
@@ -61,6 +61,8 @@ export const IconMoon = (p: IconProps) => <FaMoon size={getSize(p)} color={p.col
 export const IconSun = (p: IconProps) => <FaSun size={getSize(p)} color={p.color || 'currentColor'} className={p.className} onClick={p.onClick} />;
 export const IconUser = (p: IconProps) => <FaUser size={getSize(p)} color={p.color || 'currentColor'} className={p.className} onClick={p.onClick} />;
 export const IconMotorcycle = (p: IconProps) => <FaMotorcycle size={getSize(p)} color={p.color || 'currentColor'} className={p.className} onClick={p.onClick} />;
+export const IconInfluencer = (p: IconProps) => <FaHandshake size={getSize(p)} color={p.color || 'currentColor'} className={p.className} onClick={p.onClick} />;
+export const IconUserPlus = (p: IconProps) => <FaUserPlus size={getSize(p)} color={p.color || 'currentColor'} className={p.className} onClick={p.onClick} />;
 export const IconSettings = (p: IconProps) => <FaCog size={getSize(p)} color={p.color || 'currentColor'} className={p.className} onClick={p.onClick} />;
 export const IconSignOut = (p: IconProps) => <FaSignOutAlt size={getSize(p)} color={p.color || 'currentColor'} className={p.className} onClick={p.onClick} />;
 export const IconExplore = (p: IconProps) => <FaCompass size={getSize(p)} color={p.color || 'currentColor'} className={p.className} onClick={p.onClick} />;

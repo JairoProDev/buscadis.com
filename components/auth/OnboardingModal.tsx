@@ -1,13 +1,14 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useAuth } from '@/hooks/useAuth';
-import { IconClose } from '@/components/Icons';
-import type { UserIntencion } from '@/lib/auth/profile-complete';
-import { needsBusinessRuc } from '@/lib/auth/profile-complete';
+import { IconClose, IconExplore, IconMegaphone, IconStore, IconMotorcycle, IconInfluencer } from '@/components/Icons';
+import type { CapabilityKey } from '@/lib/auth/capability-types';
+import { getStoredReferralCode, clearStoredReferralCode } from '@/lib/auth/referral-capture';
+import type { Genero } from '@/types';
 
-type Step = 'intencion' | 'dni' | 'whatsapp';
+type Step = 'dni' | 'demographics' | 'whatsapp' | 'capabilities';
 
 type DniData = {
   dni: string;
@@ -17,36 +18,73 @@ type DniData = {
   nombreCompleto: string;
 };
 
-/**
- * Onboarding corto post-login: intención → DNI (+ RUC si publica) → WhatsApp OTP.
- */
+const CAP_CARDS: Array<{
+  key: CapabilityKey;
+  title: string;
+  subtitle: string;
+  Icon: React.ComponentType<{ size?: number; color?: string }>;
+}> = [
+  {
+    key: 'publish',
+    title: 'Publicar ofertas',
+    subtitle: 'Anuncios y oportunidades',
+    Icon: IconMegaphone,
+  },
+  {
+    key: 'business',
+    title: 'Mi negocio',
+    subtitle: 'Catálogo virtual con RUC',
+    Icon: IconStore,
+  },
+  {
+    key: 'rider',
+    title: 'Ser rider',
+    subtitle: 'Gana con deliveries en moto',
+    Icon: IconMotorcycle,
+  },
+  {
+    key: 'influencer',
+    title: 'Influencer / referidos',
+    subtitle: 'UGC y marketing de afiliados',
+    Icon: IconInfluencer,
+  },
+];
+
 export default function OnboardingModal({ abierto, onCerrar }: { abierto: boolean; onCerrar: () => void }) {
   const { session, refreshProfile } = useAuth();
-  const [step, setStep] = useState<Step>('intencion');
-  const [intencion, setIntencion] = useState<UserIntencion | null>(null);
+  const [step, setStep] = useState<Step>('dni');
   const [dni, setDni] = useState('');
   const [ruc, setRuc] = useState('');
   const [dniPreview, setDniPreview] = useState<DniData | null>(null);
   const [razonSocial, setRazonSocial] = useState<string | null>(null);
+  const [fechaNacimiento, setFechaNacimiento] = useState('');
+  const [genero, setGenero] = useState<Genero | ''>('');
+  const [interests, setInterests] = useState<CapabilityKey[]>([]);
   const [phone, setPhone] = useState('');
   const [otp, setOtp] = useState('');
   const [otpSent, setOtpSent] = useState(false);
   const [devCode, setDevCode] = useState<string | null>(null);
   const [cargando, setCargando] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [identitySaved, setIdentitySaved] = useState(false);
 
-  if (!abierto || typeof document === 'undefined') return null;
+  const wantsBusiness = interests.includes('business');
 
-  const authHeaders = (): HeadersInit => {
+  const authHeaders = useMemo((): HeadersInit => {
     const h: Record<string, string> = { 'Content-Type': 'application/json' };
     if (session?.access_token) h.Authorization = `Bearer ${session.access_token}`;
     return h;
+  }, [session?.access_token]);
+
+  if (!abierto || typeof document === 'undefined') return null;
+
+  const phoneForApi = () => {
+    const local = phone.replace(/\D/g, '').replace(/^51/, '');
+    return local.length === 9 ? `51${local}` : phone;
   };
 
-  const pickIntencion = (value: UserIntencion) => {
-    setIntencion(value);
-    setError(null);
-    setStep('dni');
+  const toggleInterest = (key: CapabilityKey) => {
+    setInterests((prev) => (prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]));
   };
 
   const lookupIdentity = async () => {
@@ -55,7 +93,7 @@ export default function OnboardingModal({ abierto, onCerrar }: { abierto: boolea
     try {
       const dniRes = await fetch('/api/identity/dni', {
         method: 'POST',
-        headers: authHeaders(),
+        headers: authHeaders,
         credentials: 'include',
         body: JSON.stringify({ dni }),
       });
@@ -66,10 +104,10 @@ export default function OnboardingModal({ abierto, onCerrar }: { abierto: boolea
       }
       setDniPreview(dniJson.data as DniData);
 
-      if (intencion && needsBusinessRuc(intencion)) {
+      if (wantsBusiness && ruc.replace(/\D/g, '').length === 11) {
         const rucRes = await fetch('/api/identity/ruc', {
           method: 'POST',
-          headers: authHeaders(),
+          headers: authHeaders,
           credentials: 'include',
           body: JSON.stringify({ ruc }),
         });
@@ -89,20 +127,22 @@ export default function OnboardingModal({ abierto, onCerrar }: { abierto: boolea
     }
   };
 
-  const confirmIdentity = async () => {
-    if (!intencion || !dniPreview) return;
+  const saveIdentity = async () => {
+    if (!dniPreview) return;
     setError(null);
     setCargando(true);
     try {
       const res = await fetch('/api/auth/onboarding', {
         method: 'POST',
-        headers: authHeaders(),
+        headers: authHeaders,
         credentials: 'include',
         body: JSON.stringify({
-          intencion,
           dni: dniPreview.dni,
-          ruc: needsBusinessRuc(intencion) ? ruc : undefined,
-          confirmNombre: true,
+          ruc: wantsBusiness ? ruc : undefined,
+          fecha_nacimiento: fechaNacimiento || undefined,
+          genero: genero || undefined,
+          interests,
+          referred_by_code: getStoredReferralCode(),
         }),
       });
       const json = await res.json();
@@ -110,6 +150,8 @@ export default function OnboardingModal({ abierto, onCerrar }: { abierto: boolea
         setError(json.error || 'No se pudo guardar');
         return;
       }
+      clearStoredReferralCode();
+      setIdentitySaved(true);
       await refreshProfile();
       setStep('whatsapp');
     } catch {
@@ -119,18 +161,13 @@ export default function OnboardingModal({ abierto, onCerrar }: { abierto: boolea
     }
   };
 
-  const phoneForApi = () => {
-    const local = phone.replace(/\D/g, '').replace(/^51/, '');
-    return local.length === 9 ? `51${local}` : phone;
-  };
-
   const sendOtp = async () => {
     setError(null);
     setCargando(true);
     try {
       const res = await fetch('/api/auth/whatsapp/send-otp', {
         method: 'POST',
-        headers: authHeaders(),
+        headers: authHeaders,
         credentials: 'include',
         body: JSON.stringify({ phone: phoneForApi() }),
       });
@@ -154,7 +191,7 @@ export default function OnboardingModal({ abierto, onCerrar }: { abierto: boolea
     try {
       const res = await fetch('/api/auth/whatsapp/verify-otp', {
         method: 'POST',
-        headers: authHeaders(),
+        headers: authHeaders,
         credentials: 'include',
         body: JSON.stringify({ phone: phoneForApi(), code: otp }),
       });
@@ -171,6 +208,24 @@ export default function OnboardingModal({ abierto, onCerrar }: { abierto: boolea
       setCargando(false);
     }
   };
+
+  const title =
+    step === 'dni'
+      ? 'Verifica tu identidad'
+      : step === 'demographics'
+        ? 'Personaliza tu experiencia'
+        : step === 'capabilities'
+          ? '¿Qué te interesa hacer?'
+          : 'Tu WhatsApp';
+
+  const subtitle =
+    step === 'dni'
+      ? 'Pedimos tu DNI para evitar fraudes. Es por tu seguridad y la de la comunidad.'
+      : step === 'demographics'
+        ? 'Google no comparte edad ni género. Tú los confirmas (opcional) para mejores oportunidades.'
+        : step === 'capabilities'
+          ? 'Puedes activar varias. Todas parten de tu perfil de usuario. Puedes cambiar después.'
+          : 'Ahí te avisamos de oportunidades. La mayoría revisa WhatsApp más que el correo.';
 
   return createPortal(
     <div
@@ -192,9 +247,9 @@ export default function OnboardingModal({ abierto, onCerrar }: { abierto: boolea
         aria-labelledby="onboarding-title"
         style={{
           backgroundColor: 'var(--bg-primary)',
-          borderRadius: '12px',
+          borderRadius: 16,
           padding: '1.75rem',
-          maxWidth: '420px',
+          maxWidth: 440,
           width: '100%',
           margin: 'auto',
           boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
@@ -205,20 +260,13 @@ export default function OnboardingModal({ abierto, onCerrar }: { abierto: boolea
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
           <div>
             <h2 id="onboarding-title" style={{ margin: 0, fontSize: '1.25rem', fontWeight: 600, color: 'var(--text-primary)' }}>
-              {step === 'intencion' && '¿Qué quieres hacer?'}
-              {step === 'dni' && 'Verifica tu identidad'}
-              {step === 'whatsapp' && 'Tu WhatsApp'}
+              {title}
             </h2>
-            <p style={{ margin: '0.4rem 0 0', fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: 1.4 }}>
-              {step === 'intencion' && 'Así te mostramos lo que te sirve. Puedes cambiar después.'}
-              {step === 'dni' &&
-                'Pedimos tu DNI para evitar fraudes y perfiles falsos. Es por tu seguridad y la de la comunidad.'}
-              {step === 'whatsapp' &&
-                'Ahí te avisamos de oportunidades. La mayoría revisa WhatsApp más que el correo.'}
+            <p style={{ margin: '0.45rem 0 0', fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: 1.4 }}>
+              {subtitle}
             </p>
           </div>
-          {/* No permitir cerrar a medias si falta identidad — solo en whatsapp tras identidad */}
-          {step === 'whatsapp' && (
+          {step === 'whatsapp' && identitySaved && (
             <button
               type="button"
               onClick={onCerrar}
@@ -235,7 +283,7 @@ export default function OnboardingModal({ abierto, onCerrar }: { abierto: boolea
             style={{
               padding: '0.65rem',
               marginBottom: '0.75rem',
-              borderRadius: 6,
+              borderRadius: 8,
               background: 'rgba(239,68,68,0.1)',
               border: '1px solid rgba(239,68,68,0.3)',
               color: '#ef4444',
@@ -243,23 +291,6 @@ export default function OnboardingModal({ abierto, onCerrar }: { abierto: boolea
             }}
           >
             {error}
-          </div>
-        )}
-
-        {step === 'intencion' && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-            <button type="button" onClick={() => pickIntencion('explorador')} style={choiceBtn}>
-              <strong>Buscar oportunidades</strong>
-              <span style={choiceSub}>Empleos, deals, productos… soy una persona que busca</span>
-            </button>
-            <button type="button" onClick={() => pickIntencion('anunciante')} style={choiceBtn}>
-              <strong>Publicar ofertas</strong>
-              <span style={choiceSub}>Publicaré anuncios (con mi RUC si aplica)</span>
-            </button>
-            <button type="button" onClick={() => pickIntencion('negocio')} style={choiceBtn}>
-              <strong>Tengo un negocio</strong>
-              <span style={choiceSub}>Mi RUC queda vinculado a mi cuenta personal (DNI)</span>
-            </button>
           </div>
         )}
 
@@ -278,26 +309,6 @@ export default function OnboardingModal({ abierto, onCerrar }: { abierto: boolea
               style={inputStyle}
             />
 
-            {intencion && needsBusinessRuc(intencion) && (
-              <>
-                <label style={{ ...labelStyle, marginTop: '0.75rem' }}>RUC (10 o 20…)</label>
-                <input
-                  inputMode="numeric"
-                  maxLength={11}
-                  value={ruc}
-                  onChange={(e) => {
-                    setRuc(e.target.value.replace(/\D/g, '').slice(0, 11));
-                    setRazonSocial(null);
-                  }}
-                  placeholder="20xxxxxxxxx"
-                  style={inputStyle}
-                />
-                <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', margin: '0.35rem 0 0' }}>
-                  El negocio no es independiente: queda ligado a tu DNI.
-                </p>
-              </>
-            )}
-
             {!dniPreview ? (
               <button
                 type="button"
@@ -305,22 +316,12 @@ export default function OnboardingModal({ abierto, onCerrar }: { abierto: boolea
                 onClick={lookupIdentity}
                 style={{ ...primaryBtn(cargando || dni.length !== 8), marginTop: '1rem' }}
               >
-                {cargando ? 'Validando…' : 'Validar con padrón'}
+                {cargando ? 'Validando…' : 'Validar con SUNAT'}
               </button>
             ) : (
               <div style={{ marginTop: '1rem' }}>
-                <div
-                  style={{
-                    padding: '0.75rem',
-                    borderRadius: 8,
-                    border: '1px solid var(--border-color)',
-                    marginBottom: '0.75rem',
-                    fontSize: '0.9rem',
-                  }}
-                >
-                  <div>
-                    <strong>{dniPreview.nombreCompleto}</strong>
-                  </div>
+                <div style={previewBox}>
+                  <strong>{dniPreview.nombreCompleto}</strong>
                   <div style={{ color: 'var(--text-secondary)', fontSize: '0.8rem' }}>DNI {dniPreview.dni}</div>
                   {razonSocial && (
                     <div style={{ marginTop: '0.5rem', fontSize: '0.85rem' }}>
@@ -328,8 +329,8 @@ export default function OnboardingModal({ abierto, onCerrar }: { abierto: boolea
                     </div>
                   )}
                 </div>
-                <button type="button" disabled={cargando} onClick={confirmIdentity} style={primaryBtn(cargando)}>
-                  {cargando ? 'Guardando…' : 'Confirmar, soy yo'}
+                <button type="button" disabled={cargando} onClick={() => setStep('demographics')} style={primaryBtn(cargando)}>
+                  Confirmar, soy yo
                 </button>
                 <button
                   type="button"
@@ -343,8 +344,106 @@ export default function OnboardingModal({ abierto, onCerrar }: { abierto: boolea
                 </button>
               </div>
             )}
+          </div>
+        )}
 
-            <button type="button" onClick={() => setStep('intencion')} style={{ ...linkBtn, display: 'block', marginTop: '1rem' }}>
+        {step === 'demographics' && (
+          <div>
+            <label style={labelStyle}>Fecha de nacimiento (opcional)</label>
+            <input type="date" value={fechaNacimiento} onChange={(e) => setFechaNacimiento(e.target.value)} style={inputStyle} />
+            <label style={{ ...labelStyle, marginTop: '0.85rem' }}>Género (opcional)</label>
+            <select
+              value={genero}
+              onChange={(e) => setGenero(e.target.value as Genero | '')}
+              style={inputStyle}
+            >
+              <option value="">Prefiero elegir después</option>
+              <option value="femenino">Femenino</option>
+              <option value="masculino">Masculino</option>
+              <option value="otro">Otro</option>
+              <option value="prefiero_no_decir">Prefiero no decir</option>
+            </select>
+            <button type="button" onClick={() => setStep('capabilities')} style={{ ...primaryBtn(false), marginTop: '1rem' }}>
+              Continuar
+            </button>
+            <button type="button" onClick={() => setStep('dni')} style={{ ...linkBtn, display: 'block', marginTop: '0.75rem' }}>
+              ← Volver
+            </button>
+          </div>
+        )}
+
+        {step === 'capabilities' && (
+          <div>
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: '1fr 1fr',
+                gap: '0.75rem',
+              }}
+            >
+              <div style={{ ...capCard(false), gridColumn: '1 / -1', cursor: 'default', opacity: 0.95 }}>
+                <IconExplore size={40} color="var(--brand-blue)" />
+                <strong style={{ marginTop: 8 }}>Usuario Buscadis</strong>
+                <span style={capSub}>Siempre activo: buscar y encontrar</span>
+              </div>
+              {CAP_CARDS.map(({ key, title: t, subtitle: s, Icon }) => {
+                const on = interests.includes(key);
+                return (
+                  <button key={key} type="button" onClick={() => toggleInterest(key)} style={capCard(on)}>
+                    <Icon size={40} color={on ? 'var(--brand-blue)' : 'var(--text-secondary)'} />
+                    <strong style={{ marginTop: 8, fontSize: '0.9rem' }}>{t}</strong>
+                    <span style={capSub}>{s}</span>
+                  </button>
+                );
+              })}
+            </div>
+
+            {wantsBusiness && (
+              <div style={{ marginTop: '1rem' }}>
+                <label style={labelStyle}>RUC de tu negocio (10 o 20…)</label>
+                <input
+                  inputMode="numeric"
+                  maxLength={11}
+                  value={ruc}
+                  onChange={(e) => {
+                    setRuc(e.target.value.replace(/\D/g, '').slice(0, 11));
+                    setRazonSocial(null);
+                  }}
+                  placeholder="20xxxxxxxxx"
+                  style={inputStyle}
+                />
+                <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', margin: '0.35rem 0 0' }}>
+                  Queda vinculado a tu DNI (persona). Puedes completarlo después.
+                </p>
+              </div>
+            )}
+
+            <button
+              type="button"
+              disabled={cargando}
+              onClick={async () => {
+                if (wantsBusiness && ruc.replace(/\D/g, '').length === 11 && dniPreview) {
+                  setCargando(true);
+                  try {
+                    const rucRes = await fetch('/api/identity/ruc', {
+                      method: 'POST',
+                      headers: authHeaders,
+                      credentials: 'include',
+                      body: JSON.stringify({ ruc }),
+                    });
+                    const rucJson = await rucRes.json();
+                    if (rucRes.ok) setRazonSocial(rucJson.data?.razonSocial || null);
+                  } finally {
+                    setCargando(false);
+                  }
+                }
+                await saveIdentity();
+              }}
+              style={{ ...primaryBtn(cargando), marginTop: '1rem' }}
+            >
+              {cargando ? 'Guardando…' : 'Continuar'}
+            </button>
+            <button type="button" onClick={() => setStep('demographics')} style={{ ...linkBtn, display: 'block', marginTop: '0.75rem' }}>
               ← Volver
             </button>
           </div>
@@ -385,9 +484,7 @@ export default function OnboardingModal({ abierto, onCerrar }: { abierto: boolea
                   style={inputStyle}
                 />
                 {devCode && (
-                  <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
-                    Dev: código {devCode}
-                  </p>
+                  <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Dev: código {devCode}</p>
                 )}
                 <button
                   type="button"
@@ -414,7 +511,7 @@ const inputStyle: React.CSSProperties = {
   width: '100%',
   padding: '0.75rem',
   border: '1px solid var(--border-color)',
-  borderRadius: '6px',
+  borderRadius: 8,
   fontSize: '0.875rem',
   backgroundColor: 'var(--bg-primary)',
   color: 'var(--text-primary)',
@@ -427,23 +524,12 @@ const labelStyle: React.CSSProperties = {
   marginBottom: '0.4rem',
 };
 
-const choiceBtn: React.CSSProperties = {
-  textAlign: 'left',
-  padding: '0.9rem 1rem',
+const previewBox: React.CSSProperties = {
+  padding: '0.75rem',
   borderRadius: 10,
   border: '1px solid var(--border-color)',
-  background: 'var(--bg-primary)',
-  cursor: 'pointer',
-  display: 'flex',
-  flexDirection: 'column',
-  gap: 4,
-  color: 'var(--text-primary)',
-};
-
-const choiceSub: React.CSSProperties = {
-  fontSize: '0.8rem',
-  color: 'var(--text-secondary)',
-  fontWeight: 400,
+  marginBottom: '0.75rem',
+  fontSize: '0.9rem',
 };
 
 const linkBtn: React.CSSProperties = {
@@ -455,6 +541,29 @@ const linkBtn: React.CSSProperties = {
   fontSize: '0.85rem',
 };
 
+const capSub: React.CSSProperties = {
+  fontSize: '0.72rem',
+  color: 'var(--text-secondary)',
+  textAlign: 'center',
+  lineHeight: 1.3,
+  marginTop: 4,
+};
+
+function capCard(on: boolean): React.CSSProperties {
+  return {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    textAlign: 'center',
+    padding: '1rem 0.65rem',
+    borderRadius: 14,
+    border: on ? '2px solid var(--brand-blue)' : '1px solid var(--border-color)',
+    background: on ? 'rgba(var(--brand-primary-rgb), 0.08)' : 'var(--bg-primary)',
+    cursor: 'pointer',
+    color: 'var(--text-primary)',
+  };
+}
+
 function primaryBtn(disabled: boolean): React.CSSProperties {
   return {
     width: '100%',
@@ -462,7 +571,7 @@ function primaryBtn(disabled: boolean): React.CSSProperties {
     backgroundColor: disabled ? 'var(--text-tertiary)' : 'var(--text-primary)',
     color: 'var(--bg-primary)',
     border: 'none',
-    borderRadius: '6px',
+    borderRadius: 8,
     fontSize: '0.875rem',
     fontWeight: 600,
     cursor: disabled ? 'not-allowed' : 'pointer',

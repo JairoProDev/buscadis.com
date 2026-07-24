@@ -449,6 +449,10 @@ export interface Profile {
   whatsapp?: string;
   whatsapp_verified_at?: string;
   intencion?: UserIntencion;
+  can_publish?: boolean;
+  locale?: string;
+  google_profile?: Record<string, unknown>;
+  referred_by_code?: string;
   avatar_url?: string;
   ubicacion?: string;
   latitud?: number;

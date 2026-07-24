@@ -26,6 +26,7 @@ import ProfileBusinessesTab from './ProfileBusinessesTab';
 import ProfileCompletionCard from './ProfileCompletionCard';
 import ProfileHubSkeleton from './ProfileHubSkeleton';
 import ModeIndicator from './ModeIndicator';
+import ProfileCapabilitiesSpaces from './ProfileCapabilitiesSpaces';
 import {
   IconVerified,
   IconHeart,
@@ -247,6 +248,8 @@ export default function ProfileHubShell({
           )}
         </div>
       </div>
+
+      <ProfileCapabilitiesSpaces />
 
       <ProfileTabs
         active={tab}

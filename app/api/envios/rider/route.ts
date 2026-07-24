@@ -110,6 +110,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
+  const { upsertCapability } = await import('@/lib/auth/capabilities');
+  await upsertCapability(user.id, 'rider', 'pending', { rider_id: data.id });
+
   return NextResponse.json({ rider: data }, { status: 201 });
 }
 
@@ -177,6 +180,8 @@ export async function PATCH(request: NextRequest) {
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
+    const { upsertCapability } = await import('@/lib/auth/capabilities');
+    await upsertCapability(user.id, 'rider', 'pending', { rider_id: data.id });
     return NextResponse.json({ rider: data });
   }
 

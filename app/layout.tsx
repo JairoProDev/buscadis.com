@@ -13,6 +13,7 @@ import OfflineIndicator from '@/components/pwa/OfflineIndicator';
 import InstallPrompt from '@/components/pwa/InstallPrompt';
 import SessionTracker from '@/components/SessionTracker';
 import AnalyticsProvider from '@/components/analytics/AnalyticsProvider';
+import ReferralCapture from '@/components/auth/ReferralCapture';
 import {
   buildDefaultOgImageMeta,
   buildDefaultTwitterImageMeta,
@@ -147,6 +148,7 @@ export default function RootLayout({
                     <NavigationProvider>
                       <SessionTracker />
                       <AnalyticsProvider />
+                      <ReferralCapture />
                       <OfflineIndicator />
                       {children}
                       <InstallPrompt />

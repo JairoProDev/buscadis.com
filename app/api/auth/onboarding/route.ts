@@ -3,10 +3,10 @@ import { getUserFromRouteRequest } from '@/lib/supabase-route-auth';
 import { rateLimit, getClientIP } from '@/lib/rate-limit';
 import { isDniResult, isRucResult, lookupDni, lookupRuc } from '@/lib/peru-id/decolecta';
 import { supabaseAdmin } from '@/lib/supabase-admin';
-import type { UserIntencion } from '@/lib/auth/profile-complete';
-import { needsBusinessRuc } from '@/lib/auth/profile-complete';
+import { upsertCapability, type CapabilityKey } from '@/lib/auth/capabilities';
 
-const INTENCIONES: UserIntencion[] = ['explorador', 'anunciante', 'negocio'];
+const CAP_KEYS: CapabilityKey[] = ['publish', 'business', 'rider', 'influencer'];
+const GENEROS = ['masculino', 'femenino', 'otro', 'prefiero_no_decir'] as const;
 
 export async function POST(request: NextRequest) {
   const user = await getUserFromRouteRequest(request);
@@ -24,20 +24,17 @@ export async function POST(request: NextRequest) {
   }
 
   let body: {
-    intencion?: string;
     dni?: string;
     ruc?: string;
-    confirmNombre?: boolean;
+    fecha_nacimiento?: string;
+    genero?: string;
+    interests?: string[];
+    referred_by_code?: string | null;
   };
   try {
     body = await request.json();
   } catch {
     return NextResponse.json({ error: 'JSON inválido' }, { status: 400 });
-  }
-
-  const intencion = body.intencion as UserIntencion | undefined;
-  if (!intencion || !INTENCIONES.includes(intencion)) {
-    return NextResponse.json({ error: 'Elige si buscas oportunidades o publicarás' }, { status: 400 });
   }
 
   const dniResult = await lookupDni(String(body.dni || ''));
@@ -59,26 +56,46 @@ export async function POST(request: NextRequest) {
     );
   }
 
+  const interests = (body.interests || []).filter((c): c is CapabilityKey =>
+    CAP_KEYS.includes(c as CapabilityKey)
+  );
+
   let rucVerifiedAt: string | null = null;
   let rucValue: string | null = null;
   let razonSocial: string | null = null;
 
-  if (needsBusinessRuc(intencion)) {
+  if (interests.includes('business') || body.ruc) {
     const rucRaw = String(body.ruc || '').replace(/\D/g, '');
-    if (!rucRaw) {
-      return NextResponse.json(
-        { error: 'Si publicas o tienes negocio, indica tu RUC (10 o 20)' },
-        { status: 400 }
-      );
+    if (rucRaw) {
+      const rucResult = await lookupRuc(rucRaw);
+      if (!isRucResult(rucResult)) {
+        return NextResponse.json({ error: rucResult.error }, { status: rucResult.status });
+      }
+      rucValue = rucResult.ruc;
+      razonSocial = rucResult.razonSocial;
+      rucVerifiedAt = new Date().toISOString();
     }
-    const rucResult = await lookupRuc(rucRaw);
-    if (!isRucResult(rucResult)) {
-      return NextResponse.json({ error: rucResult.error }, { status: rucResult.status });
-    }
-    rucValue = rucResult.ruc;
-    razonSocial = rucResult.razonSocial;
-    rucVerifiedAt = new Date().toISOString();
   }
+
+  const genero =
+    body.genero && GENEROS.includes(body.genero as (typeof GENEROS)[number])
+      ? body.genero
+      : null;
+
+  let fechaNacimiento: string | null = null;
+  if (body.fecha_nacimiento) {
+    const d = new Date(body.fecha_nacimiento);
+    if (!Number.isNaN(d.getTime())) {
+      fechaNacimiento = body.fecha_nacimiento.slice(0, 10);
+    }
+  }
+
+  const wantsPublish = interests.includes('publish') || interests.includes('business');
+  const intencion = interests.includes('business')
+    ? 'negocio'
+    : interests.includes('publish')
+      ? 'anunciante'
+      : 'explorador';
 
   const now = new Date().toISOString();
   const nombre = dniResult.nombres;
@@ -97,7 +114,11 @@ export async function POST(request: NextRequest) {
         ruc: rucValue,
         ruc_verified_at: rucVerifiedAt,
         intencion,
-        rol: intencion === 'explorador' ? 'usuario' : 'anunciante',
+        can_publish: wantsPublish,
+        rol: wantsPublish ? 'anunciante' : 'usuario',
+        fecha_nacimiento: fechaNacimiento,
+        genero,
+        referred_by_code: body.referred_by_code?.trim().toUpperCase() || null,
         updated_at: now,
       },
       { onConflict: 'id' }
@@ -108,6 +129,17 @@ export async function POST(request: NextRequest) {
   if (error) {
     console.error('onboarding upsert', error);
     return NextResponse.json({ error: 'No se pudo guardar tu identidad' }, { status: 500 });
+  }
+
+  for (const cap of interests) {
+    if (cap === 'publish') {
+      await upsertCapability(user.id, 'publish', 'active');
+    } else if (cap === 'business') {
+      await upsertCapability(user.id, 'publish', 'active');
+      await upsertCapability(user.id, 'business', 'inactive', { interested: true });
+    } else {
+      await upsertCapability(user.id, cap, 'inactive', { interested: true });
+    }
   }
 
   return NextResponse.json({
