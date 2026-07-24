@@ -8,6 +8,12 @@ export const ADISO_IMAGES_BUCKET =
 
 export const FEEDBACK_IMAGES_BUCKET = 'feedback-images';
 
+/** KYC privado de motorizados (Envíos) */
+export const MOTO_KYC_BUCKET = 'moto-kyc';
+
+/** Fotos públicas opcionales de paquetes */
+export const MOTO_PACKAGES_BUCKET = 'moto-packages';
+
 /** Intenta el bucket configurado y, si no existe, el alias histórico. */
 export const ADISO_IMAGES_BUCKET_FALLBACKS = [
   ADISO_IMAGES_BUCKET,

@@ -13,7 +13,8 @@
   },
   "header": {
     "title": "buscadis.com",
-    "progress": "Our Progress"
+    "progress": "Our Progress",
+    "envios": "Deliveries"
   },
   "nav": {
     "home": "Home",
@@ -21,6 +22,11 @@
     "publish": "Publish",
     "search": "Search",
     "map": "Map"
+  },
+  "envios": {
+    "title": "Deliveries",
+    "cta": "Request a delivery",
+    "rider": "I'm a rider"
   },
   "deals": {
     "tabForYou": "For You",

@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import {
   FaChartLine,
 } from 'react-icons/fa';
@@ -11,6 +11,7 @@ import HeaderIconButton from './HeaderIconButton';
 import NotificationsPopover from './NotificationsPopover';
 import MessagesPopover from './MessagesPopover';
 import HeaderPopoverPanel from './HeaderPopoverPanel';
+import IconEnvios from '@/components/envios/IconEnvios';
 import { useUI } from '@/contexts/UIContext';
 import { useTranslation } from '@/hooks/useTranslation';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
@@ -55,6 +56,7 @@ export default function Header({
   categoria = 'todos',
 }: HeaderProps) {
   const pathname = usePathname();
+  const router = useRouter();
   const [mounted, setMounted] = useState(false);
   const { t } = useTranslation();
   const isDesktop = useMediaQuery('(min-width: 768px)');
@@ -70,6 +72,7 @@ export default function Header({
   const { unreadCount: unreadMessages } = useConversations();
   const { unreadCount: unreadNotifications } = useNotifications();
   const isAuthenticated = !!user;
+  const enviosActive = pathname.startsWith('/envios');
 
   const categoriaLabel =
     categoria !== 'todos' ? getCategoriaLabel(categoria as Categoria) : 'Todas las categorías';
@@ -230,6 +233,19 @@ export default function Header({
 
   const actionButtons = (
     <div className="flex items-center gap-0.5">
+      <HeaderIconButton
+        onClick={() => router.push('/envios')}
+        active={enviosActive}
+        accent="blue"
+        title="Envíos"
+        aria-label="Envíos — mandados en moto"
+      >
+        <IconEnvios
+          size={17}
+          color={enviosActive ? 'var(--brand-blue)' : 'var(--text-secondary)'}
+        />
+      </HeaderIconButton>
+
       <HeaderIconButton
         onClick={toggleTheme}
         accent="neutral"
