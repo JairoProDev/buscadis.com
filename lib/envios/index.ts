@@ -5,3 +5,5 @@ export * from './detect-uso';
 export * from './matching';
 export * from './notify';
 export * from './soft-launch';
+export * from './chat';
+export * from './auth-fetch';

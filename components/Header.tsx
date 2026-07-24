@@ -11,7 +11,6 @@ import HeaderIconButton from './HeaderIconButton';
 import NotificationsPopover from './NotificationsPopover';
 import MessagesPopover from './MessagesPopover';
 import HeaderPopoverPanel from './HeaderPopoverPanel';
-import IconEnvios from '@/components/envios/IconEnvios';
 import { useUI } from '@/contexts/UIContext';
 import { useTranslation } from '@/hooks/useTranslation';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
@@ -29,6 +28,7 @@ import {
   IconSun,
   IconMessages,
   IconMegaphone,
+  IconMotorcycle,
 } from './Icons';
 import { useAuth } from '@/hooks/useAuth';
 import { Categoria } from '@/types';
@@ -72,7 +72,7 @@ export default function Header({
   const { unreadCount: unreadMessages } = useConversations();
   const { unreadCount: unreadNotifications } = useNotifications();
   const isAuthenticated = !!user;
-  const enviosActive = pathname.startsWith('/envios');
+  const enviosActive = pathname.startsWith('/delivery') || pathname.startsWith('/envios');
 
   const categoriaLabel =
     categoria !== 'todos' ? getCategoriaLabel(categoria as Categoria) : 'Todas las categorías';
@@ -234,13 +234,13 @@ export default function Header({
   const actionButtons = (
     <div className="flex items-center gap-0.5">
       <HeaderIconButton
-        onClick={() => router.push('/envios')}
+        onClick={() => router.push('/delivery')}
         active={enviosActive}
         accent="blue"
-        title="Envíos"
-        aria-label="Envíos — mandados en moto"
+        title="Delivery"
+        aria-label="Delivery"
       >
-        <IconEnvios
+        <IconMotorcycle
           size={17}
           color={enviosActive ? 'var(--brand-blue)' : 'var(--text-secondary)'}
         />

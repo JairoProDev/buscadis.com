@@ -27,6 +27,8 @@ export function detectUso(
   category: MotoCategory,
   description: string
 ): UsoDetectado {
+  if (category === 'acompanamiento') return 'posible_viaje';
+
   const text = (description || '').trim();
 
   if (category === 'paquete' || category === 'documentos' || category === 'mandado') {
@@ -39,7 +41,7 @@ export function detectUso(
     return 'envio';
   }
 
-  // otro — principal camuflaje de viajes
+  // otro — principal camuflaje adicional
   if (!text) return 'desconocido';
   if (VIAJE_PATTERNS.some((re) => re.test(text))) return 'posible_viaje';
 

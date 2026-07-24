@@ -5,6 +5,7 @@ export const MOTO_CATEGORIES = [
   'documentos',
   'mandado',
   'olvidado',
+  'acompanamiento',
   'otro',
 ] as const;
 
@@ -15,8 +16,23 @@ export const MOTO_CATEGORY_LABELS: Record<MotoCategory, string> = {
   documentos: 'Documentos',
   mandado: 'Mandado / compra',
   olvidado: 'Olvidado / urgente',
+  acompanamiento: 'Acompañamiento',
   otro: 'Otro',
 };
+
+/** Opciones UI Pedir — copy amigable; acompañamiento camufla traslado personal */
+export const DELIVERY_ENVIO_OPTIONS: {
+  id: MotoCategory;
+  label: string;
+  hint: string;
+}[] = [
+  { id: 'paquete', label: 'Paquete', hint: 'Caja, bolsa, encomienda' },
+  { id: 'documentos', label: 'Documentos', hint: 'Sobres, papeles, trámites' },
+  { id: 'mandado', label: 'Mandado', hint: 'Que compren y te lo traigan' },
+  { id: 'olvidado', label: 'Olvidado', hint: 'Llaves, cargador, algo urgente' },
+  { id: 'acompanamiento', label: 'Acompañamiento', hint: 'Necesito que me lleven' },
+  { id: 'otro', label: 'Otro', hint: 'Describe abajo qué es' },
+];
 
 export const MOTO_RIDER_STATES = [
   'borrador',
@@ -129,6 +145,13 @@ export interface MotoRequest {
   status: MotoRequestStatus;
   uso_detectado: UsoDetectado;
   source_adiso_id: string | null;
+  conversation_id: string | null;
+  rider_lat: number | null;
+  rider_lng: number | null;
+  rider_location_at: string | null;
+  requester_lat: number | null;
+  requester_lng: number | null;
+  requester_location_at: string | null;
   cancel_reason: string | null;
   accepted_at: string | null;
   picked_up_at: string | null;
@@ -150,7 +173,8 @@ export interface MotoRating {
 
 export interface CreateMotoRequestInput {
   category: MotoCategory;
-  description: string;
+  description?: string | null;
+  contact_name?: string | null;
   photo_url?: string | null;
   pickup: MotoPoint;
   dropoff: MotoPoint;

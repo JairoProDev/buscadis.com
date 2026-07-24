@@ -39,7 +39,7 @@ export async function notifyRidersNewRequest(request: MotoRequest): Promise<numb
       const ok = await sendPushToUser(r.user_id, title, body, {
         kind: 'moto_request_new',
         request_id: request.id,
-        url: `/envios/conductor`,
+        url: `/delivery/llevar`,
       });
       if (ok) sent += 1;
     })
@@ -60,7 +60,7 @@ export async function notifyRequesterStatus(
   await sendPushToUser(request.requester_id, title, message, {
     kind: 'moto_request_status',
     request_id: request.id,
-    url: `/envios/${request.id}`,
+    url: `/delivery/${request.id}`,
   });
 }
 
@@ -80,6 +80,6 @@ export async function notifyRiderKyc(
   });
   await sendPushToUser(userId, title, message, {
     kind: 'moto_kyc',
-    url: '/envios/conductor',
+    url: '/delivery/llevar',
   });
 }

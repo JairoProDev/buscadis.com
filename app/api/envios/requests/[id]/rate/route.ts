@@ -9,7 +9,7 @@ type Ctx = { params: Promise<{ id: string }> };
 export async function POST(request: NextRequest, ctx: Ctx) {
   const user = await getUserFromRouteRequest(request);
   if (!user?.id) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    return NextResponse.json({ error: 'Debes iniciar sesión' }, { status: 401 });
   }
 
   const { id } = await ctx.params;

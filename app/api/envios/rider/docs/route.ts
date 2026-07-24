@@ -9,7 +9,7 @@ export const dynamic = 'force-dynamic';
 export async function POST(request: NextRequest) {
   const user = await getUserFromRouteRequest(request);
   if (!user?.id) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    return NextResponse.json({ error: 'Debes iniciar sesión' }, { status: 401 });
   }
 
   const { data: rider } = await supabaseAdmin

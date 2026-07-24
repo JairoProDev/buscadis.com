@@ -3,6 +3,7 @@ import { getUserFromRouteRequest } from '@/lib/supabase-route-auth';
 import { supabaseAdmin } from '@/lib/supabase-admin';
 import {
   MOTO_CATEGORIES,
+  MOTO_CATEGORY_LABELS,
   detectUso,
   detectZoneFromText,
   estimateDistanceKm,
@@ -18,7 +19,7 @@ export const dynamic = 'force-dynamic';
 export async function GET(request: NextRequest) {
   const user = await getUserFromRouteRequest(request);
   if (!user?.id) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    return NextResponse.json({ error: 'Debes iniciar sesión' }, { status: 401 });
   }
 
   const scope = request.nextUrl.searchParams.get('scope') || 'mine';
@@ -33,7 +34,7 @@ export async function GET(request: NextRequest) {
       .maybeSingle();
 
     if (!rider) {
-      return NextResponse.json({ error: 'Rider no aprobado' }, { status: 403 });
+      return NextResponse.json({ error: 'Aún no eres motorizado aprobado' }, { status: 403 });
     }
 
     let q = supabaseAdmin
@@ -99,7 +100,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   const user = await getUserFromRouteRequest(request);
   if (!user?.id) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    return NextResponse.json({ error: 'Debes iniciar sesión' }, { status: 401 });
   }
 
   let body: CreateMotoRequestInput;
@@ -114,13 +115,17 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Categoría inválida' }, { status: 400 });
   }
 
-  const description = (body.description || '').trim();
-  if (description.length < 3) {
-    return NextResponse.json(
-      { error: 'Describe qué necesitas (mínimo 3 caracteres)' },
-      { status: 400 }
-    );
-  }
+  const contactName = (body.contact_name || '').trim();
+  const baseDescription =
+    (body.description || '').trim() ||
+    (category === 'paquete'
+      ? 'Paquete'
+      : category === 'acompanamiento'
+        ? 'Acompañamiento'
+        : category === 'otro'
+          ? 'Otro'
+          : MOTO_CATEGORY_LABELS[category] || 'Envío');
+  const description = contactName ? `${contactName} · ${baseDescription}` : baseDescription;
 
   if (!body.pickup?.lat || !body.pickup?.lng || !body.dropoff?.lat || !body.dropoff?.lng) {
     return NextResponse.json({ error: 'Recojo y destino son obligatorios' }, { status: 400 });
