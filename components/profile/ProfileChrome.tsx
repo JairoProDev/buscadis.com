@@ -94,7 +94,7 @@ export default function ProfileChrome({
                   ? 'Editar página'
                   : editBlocked
                     ? 'Sin permiso para editar'
-                    : 'Iniciar sesión para editar'
+                    : 'Entrar para editar'
               }
               title={
                 editEnabled

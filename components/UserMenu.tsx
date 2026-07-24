@@ -265,7 +265,7 @@ export default function UserMenu(props: UserMenuProps) {
           onClick={() => setMostrarAuthModal(true)}
           className="rounded-xl bg-[var(--brand-blue)] px-4 py-2 text-sm font-semibold text-white transition-opacity hover:opacity-90"
         >
-          Ingresar
+          Entrar
         </button>
         <AuthModal abierto={mostrarAuthModal} onCerrar={() => setMostrarAuthModal(false)} />
       </>

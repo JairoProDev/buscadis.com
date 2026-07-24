@@ -432,12 +432,23 @@ export type TipoVerificacion = 'identidad' | 'telefono' | 'email' | 'negocio';
 export type EstadoVerificacion = 'pendiente' | 'en_revision' | 'aprobado' | 'rechazado';
 export type TipoEventoAnalytics = 'busqueda' | 'click' | 'favorito' | 'contacto' | 'publicacion' | 'visualizacion';
 
+export type UserIntencion = 'explorador' | 'anunciante' | 'negocio';
+
 export interface Profile {
   id: string;
   email?: string;
   nombre?: string;
   apellido?: string;
   telefono?: string;
+  /** DNI 8 dígitos (identidad personal) */
+  dni?: string;
+  dni_verified_at?: string;
+  /** RUC 10/20 vinculado a la persona (negocio) */
+  ruc?: string;
+  ruc_verified_at?: string;
+  whatsapp?: string;
+  whatsapp_verified_at?: string;
+  intencion?: UserIntencion;
   avatar_url?: string;
   ubicacion?: string;
   latitud?: number;

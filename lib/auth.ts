@@ -67,7 +67,25 @@ export async function signIn(data: SignInData): Promise<AuthResponse> {
 }
 
 /**
- * Inicia sesión con OAuth (Google, Facebook, etc.)
+ * Google One Tap / GIS: ID token en tu dominio (no redirige a *.supabase.co).
+ */
+export async function signInWithGoogleIdToken(idToken: string, nonce?: string) {
+  if (!supabase) {
+    throw new Error('Supabase no está configurado');
+  }
+
+  const { data, error } = await supabase.auth.signInWithIdToken({
+    provider: 'google',
+    token: idToken,
+    nonce,
+  });
+
+  return { data, error };
+}
+
+/**
+ * OAuth redirect legacy — evita en UI (muestra *.supabase.co sin custom domain de pago).
+ * Conservado solo por compatibilidad interna.
  */
 export async function signInWithOAuth(provider: 'google' | 'facebook' | 'github') {
   if (!supabase) {
@@ -80,7 +98,7 @@ export async function signInWithOAuth(provider: 'google' | 'facebook' | 'github'
       redirectTo: `${window.location.origin}/auth/callback`,
       queryParams: {
         access_type: 'offline',
-        prompt: 'consent',
+        prompt: 'select_account',
       },
     }
   });

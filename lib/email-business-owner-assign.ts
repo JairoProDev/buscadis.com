@@ -50,7 +50,7 @@ export async function sendBusinessOwnerAssignEmail(params: {
       }
     </p>
     <a href="${escapeAttr(isPending ? params.loginUrl : params.editUrl)}" style="display: inline-block; background: #2563eb; color: #fff; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600;">
-      ${isPending ? 'Iniciar sesión' : 'Editar mi negocio'}
+      ${isPending ? 'Entrar con mi cuenta' : 'Editar mi negocio'}
     </a>
     <p style="margin-top: 20px; font-size: 14px;">
       Página pública: <a href="${escapeAttr(params.publicUrl)}">${escapeHtml(params.publicUrl)}</a>
