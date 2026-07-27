@@ -3,7 +3,7 @@ import { TipoOrdenamiento } from '@/components/Ordenamiento';
 import { BrowseFilterState } from './types';
 import { adisoMatchesFacets, adisoPublicadoDentroDe, adisoTieneImagen } from './matchers';
 import { personalizeAdisos } from '@/lib/ai/personalization';
-import { compareRecientesFeed } from '@/lib/feed/ranking';
+import { compareRecientesFeed, injectFeedExploration } from '@/lib/feed/ranking';
 import type { UserInterestProfile } from '@/lib/interactions';
 import { getCountryByCode, DEFAULT_COUNTRY_CODE } from '@/lib/geo/countries-data';
 
@@ -229,7 +229,10 @@ export function applyBrowseFilters({
   });
 
   if (ordenamiento === 'recientes' && interestProfile) {
-    return personalizeAdisos(sorted, interestProfile);
+    return injectFeedExploration(personalizeAdisos(sorted, interestProfile));
+  }
+  if (ordenamiento === 'recientes') {
+    return injectFeedExploration(sorted);
   }
   return sorted;
 }

@@ -64,6 +64,37 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Storage failed' }, { status: 500 });
     }
 
+    // Near-real-time profile bump for high-signal events (cron still handles decay)
+    const HIGH = new Set([
+      'ad.favorite',
+      'ad.dismiss',
+      'ad.dismiss_reason',
+      'ad.contact_whatsapp',
+      'ad.contact_chat',
+      'ad.contact_copy',
+      'deal.clip.like',
+      'deal.clip.save',
+      'deal.clip.not_interested',
+      'deal.clip.whatsapp_click',
+    ]);
+    const toRebuild = [
+      ...new Set(
+        rows
+          .filter((r) => r.user_id && HIGH.has(r.event_type))
+          .map((r) => r.user_id as string)
+      ),
+    ].slice(0, 5);
+
+    if (toRebuild.length > 0) {
+      void import('@/lib/behavior/rebuild-profiles').then(({ rebuildUserBehaviorProfile }) => {
+        for (const uid of toRebuild) {
+          void rebuildUserBehaviorProfile(uid).catch((e) =>
+            console.warn('[events] incremental rebuild', uid, e)
+          );
+        }
+      });
+    }
+
     return NextResponse.json({ ok: true, count: rows.length });
   } catch (e) {
     const message = e instanceof Error ? e.message : String(e);

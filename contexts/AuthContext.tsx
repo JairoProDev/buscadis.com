@@ -18,9 +18,12 @@ import BusinessAccessWelcome, {
   pickWelcomeBusiness,
 } from '@/components/business/BusinessAccessWelcome';
 import dynamic from 'next/dynamic';
-import { isProfileOnboardingComplete } from '@/lib/auth/profile-complete';
+import { getAnonymousId } from '@/lib/events/session';
 
-const OnboardingModal = dynamic(() => import('@/components/auth/OnboardingModal'), { ssr: false });
+const ProgressivePromptModal = dynamic(
+  () => import('@/components/profiling/ProgressivePromptModal'),
+  { ssr: false }
+);
 const GoogleOneTap = dynamic(() => import('@/components/auth/GoogleOneTap'), { ssr: false });
 
 type ClaimPendingResponse = {
@@ -93,7 +96,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return !cached; // Si tenemos caché, no hay loading inicial
   });
   const [welcomeBusiness, setWelcomeBusiness] = useState<ClaimedBusinessSummary | null>(null);
-  const [onboardingDismissed, setOnboardingDismissed] = useState(false);
   const [profileReady, setProfileReady] = useState(() => {
     if (typeof window === 'undefined') return false;
     const cachedUser = cacheGet<User>(CacheKeys.authSession(), true);
@@ -183,7 +185,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setProfile(null);
         setWelcomeBusiness(null);
         welcomeShownForUser.current = null;
-        setOnboardingDismissed(false);
         setProfileReady(false);
         setLoading(false);
       }
@@ -222,6 +223,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               ? { Authorization: `Bearer ${sessionData.access_token}` }
               : undefined,
           }).then(() => loadProfile(sessionUser.id)).catch(() => {});
+
+          // Merge pre-login behavioral events into this user
+          try {
+            const anonymousId = getAnonymousId();
+            if (anonymousId && sessionData.access_token) {
+              void fetch('/api/events/merge', {
+                method: 'POST',
+                credentials: 'include',
+                headers: {
+                  'Content-Type': 'application/json',
+                  Authorization: `Bearer ${sessionData.access_token}`,
+                },
+                body: JSON.stringify({ anonymousId }),
+              }).catch(() => {});
+            }
+          } catch {
+            /* non-blocking */
+          }
         }
         void claimPendingBusinessPages(sessionData.access_token).then((payload) => {
           maybeShowBusinessWelcome(payload, sessionUser.id);
@@ -237,7 +256,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setProfile(null);
         setWelcomeBusiness(null);
         welcomeShownForUser.current = null;
-        setOnboardingDismissed(false);
         if (isBuscadisNativeApp()) {
           void unlinkPushTokenFromSession();
         }
@@ -267,13 +285,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setProfile(null);
   };
 
-  const showOnboarding =
-    Boolean(user) &&
-    !loading &&
-    profileReady &&
-    !onboardingDismissed &&
-    !isProfileOnboardingComplete(profile);
-
   return (
     <AuthContext.Provider
       value={{
@@ -287,15 +298,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     >
       {children}
       {!user && !loading && <GoogleOneTap />}
-      {showOnboarding && (
-        <OnboardingModal
-          abierto
-          onCerrar={() => {
-            // Solo permite cerrar en paso WhatsApp; si ya hay DNI, puede diferir WhatsApp
-            if (profile?.dni_verified_at) setOnboardingDismissed(true);
-          }}
-        />
-      )}
+      {user && !loading && profileReady && <ProgressivePromptModal />}
       {welcomeBusiness && (
         <BusinessAccessWelcome
           business={welcomeBusiness}

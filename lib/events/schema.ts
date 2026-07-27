@@ -22,6 +22,7 @@ export const BEHAVIORAL_EVENT_TYPES = [
   'seek.intent_saved',
   'promotion.purchased',
   'auth.sign_up',
+  'ai.chat.preference',
   'deal.feed.open',
   'deal.clip.view',
   'deal.clip.like',

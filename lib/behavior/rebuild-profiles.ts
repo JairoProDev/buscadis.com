@@ -126,6 +126,17 @@ export async function rebuildUserBehaviorProfile(userId: string): Promise<void> 
         engagementStats.contacts = (engagementStats.contacts || 0) + 1;
         if (categoria) categoryAffinity = bumpJson(categoryAffinity, categoria, 3);
         break;
+      case 'ai.chat.preference': {
+        engagementStats.searches = (engagementStats.searches || 0) + 1;
+        if (categoria) categoryAffinity = bumpJson(categoryAffinity, categoria, Math.max(delta, 0.5));
+        const kws = Array.isArray(payload.keywords) ? payload.keywords : [];
+        for (const w of kws.slice(0, 8)) {
+          if (typeof w === 'string' && w.length > 2) {
+            keywordAffinity = bumpJson(keywordAffinity, w.toLowerCase(), 0.8);
+          }
+        }
+        break;
+      }
       case 'filter.applied':
         if (payload.filters && typeof payload.filters === 'object') {
           facetPreferences = { ...facetPreferences, ...(payload.filters as Record<string, unknown>) };

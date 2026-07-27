@@ -1,5 +1,5 @@
 import { DealClip, DealFeedTab } from '@/types';
-import { getUserInterestProfile } from '@/lib/interactions';
+import { getUserFeatures, toInterestProfile } from '@/lib/behavior/features';
 import { rankDealClips, filterByTab, DealRankingContext } from '@/lib/deals/ranking';
 import {
   getActiveDealClipsServer,
@@ -36,9 +36,8 @@ export async function buildDealFeed(params: DealFeedParams): Promise<{
     categoria: params.categoria,
   });
 
-  const interestProfile = params.userId
-    ? await getUserInterestProfile(params.userId)
-    : null;
+  const features = params.userId ? await getUserFeatures(params.userId) : null;
+  const interestProfile = toInterestProfile(features);
 
   const followingIds = params.userId ? await getFollowingIds(params.userId) : new Set<string>();
 

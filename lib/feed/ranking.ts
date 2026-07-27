@@ -119,3 +119,32 @@ export function compareRecientesFeed(
 
   return a.id.localeCompare(b.id);
 }
+
+/**
+ * Exploration / diversity: every `everyN` items, swap in a lower-ranked ad
+ * from a different category than the previous slot (epsilon-style explore).
+ * Keeps personalization strong while avoiding filter bubbles.
+ */
+export function injectFeedExploration(
+  sorted: Adiso[],
+  options?: { everyN?: number; exploreFromTail?: number },
+): Adiso[] {
+  if (sorted.length < 6) return sorted;
+  const everyN = options?.everyN ?? 5;
+  const exploreFromTail = options?.exploreFromTail ?? Math.min(20, sorted.length);
+  const result = [...sorted];
+  const pool = sorted.slice(-exploreFromTail);
+
+  for (let i = everyN - 1; i < result.length; i += everyN) {
+    const prevCat = result[i - 1]?.categoria;
+    const candidate = pool.find(
+      (a) => a.categoria !== prevCat && !result.slice(Math.max(0, i - 2), i).some((x) => x.id === a.id)
+    );
+    if (!candidate) continue;
+    const fromIdx = result.findIndex((a) => a.id === candidate.id);
+    if (fromIdx <= i) continue;
+    const [item] = result.splice(fromIdx, 1);
+    result.splice(i, 0, item);
+  }
+  return result;
+}

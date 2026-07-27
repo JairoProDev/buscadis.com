@@ -21,8 +21,29 @@ import { snapAndSell } from '@/actions/ai-vision';
 import { analizarBusqueda } from '@/lib/chatbot-nlu';
 import { buscarMejorada, generarRespuestaBusqueda } from '@/lib/busqueda-mejorada';
 import { getAdisosFromSupabase } from '@/lib/supabase';
-import { getInteraccionesUsuario, getUserInterestProfile } from '@/lib/interactions';
+import { getInteraccionesUsuario } from '@/lib/interactions';
 import { personalizeAdisos, topInterestCategories } from '@/lib/ai/personalization';
+import { getUserFeatures, toInterestProfile } from '@/lib/behavior/features';
+import {
+  persistChatTurn,
+  recordChatInterestSignal,
+} from '@/lib/ai/conversation-persist';
+
+function rememberAssistant(
+  sessionId: string,
+  text: string,
+  userId?: string,
+  metadata?: Record<string, unknown>
+) {
+  appendTurn(sessionId, 'assistant', text);
+  void persistChatTurn({
+    userId,
+    sessionId,
+    role: 'assistant',
+    content: text,
+    metadata,
+  });
+}
 
 const bodySchema = z.object({
   message: z.string().min(1),
@@ -100,6 +121,12 @@ export async function POST(request: NextRequest) {
     const body: AIChatRequest = parsed.data;
     const session = getOrCreateSession(body.sessionId);
     appendTurn(session.sessionId, 'user', body.message);
+    void persistChatTurn({
+      userId: body.userId,
+      sessionId: session.sessionId,
+      role: 'user',
+      content: body.message,
+    });
 
     trackAIEvent({
       name: 'chat.request.received',
@@ -128,6 +155,13 @@ export async function POST(request: NextRequest) {
         meta: { provider: 'heuristic', latencyMs: Date.now() - started },
       };
       appendTurn(session.sessionId, 'assistant', resp.text);
+      void persistChatTurn({
+        userId: body.userId,
+        sessionId: session.sessionId,
+        role: 'assistant',
+        content: resp.text,
+        metadata: { intent: 'help', budget: true },
+      });
       return NextResponse.json(resp);
     }
 
@@ -148,8 +182,13 @@ export async function POST(request: NextRequest) {
       }
 
       if (body.userId) {
-        const profile = await getUserInterestProfile(body.userId);
+        const profile = toInterestProfile(await getUserFeatures(body.userId));
         items = personalizeAdisos(items, profile);
+        void recordChatInterestSignal({
+          userId: body.userId,
+          message: body.message,
+          categoria: body.context?.category || items[0]?.categoria,
+        });
       }
 
       const text = items.length
@@ -169,7 +208,7 @@ export async function POST(request: NextRequest) {
         },
         warnings: variant !== 'control' ? [`ab_variant_${variant}`] : undefined,
       };
-      appendTurn(session.sessionId, 'assistant', text);
+      rememberAssistant(session.sessionId, text, body.userId, { intent, total: items.length });
       trackAIEvent({
         name: 'search.executed',
         sessionId: session.sessionId,
@@ -206,7 +245,7 @@ export async function POST(request: NextRequest) {
           payload,
           meta: { provider: 'openai', latencyMs: Date.now() - started, costUsd: estimated },
         };
-        appendTurn(session.sessionId, 'assistant', text);
+        rememberAssistant(session.sessionId, text, body.userId, { intent: 'vision' });
         trackAIEvent({
           name: 'vision.executed',
           sessionId: session.sessionId,
@@ -242,7 +281,7 @@ export async function POST(request: NextRequest) {
         payload,
         meta: { provider: 'heuristic', latencyMs: Date.now() - started, costUsd: estimated },
       };
-      appendTurn(session.sessionId, 'assistant', text);
+      rememberAssistant(session.sessionId, text, body.userId, { intent: 'publish' });
       trackAIEvent({
         name: 'publish.draft.created',
         sessionId: session.sessionId,
@@ -254,7 +293,9 @@ export async function POST(request: NextRequest) {
     }
 
     if (intent === 'recommend') {
-      const profile = body.userId ? await getUserInterestProfile(body.userId) : null;
+      const profile = body.userId
+        ? toInterestProfile(await getUserFeatures(body.userId))
+        : null;
       const ocultos = body.userId ? await getInteraccionesUsuario(body.userId, 'not_interested') : new Set<string>();
       const topCategorias = profile ? topInterestCategories(profile) : [];
 
@@ -271,6 +312,15 @@ export async function POST(request: NextRequest) {
         items = recientes.filter((a) => !ocultos.has(a.id)).slice(0, 10);
       }
 
+      if (body.userId && topCategorias[0]) {
+        void recordChatInterestSignal({
+          userId: body.userId,
+          message: body.message,
+          categoria: topCategorias[0],
+          delta: 0.5,
+        });
+      }
+
       const text = topCategorias.length > 0
         ? `Según tus intereses, estos anuncios de ${topCategorias[0]} podrían gustarte.`
         : 'Aquí tienes algunos anuncios recientes que podrían interesarte.';
@@ -283,7 +333,10 @@ export async function POST(request: NextRequest) {
         payload: { type: 'recommendations', items },
         meta: { provider: 'heuristic', latencyMs: Date.now() - started, costUsd: estimated },
       };
-      appendTurn(session.sessionId, 'assistant', text);
+      rememberAssistant(session.sessionId, text, body.userId, {
+        intent: 'recommend',
+        total: items.length,
+      });
       trackAIEvent({
         name: 'chat.tool.executed',
         sessionId: session.sessionId,
@@ -310,7 +363,7 @@ export async function POST(request: NextRequest) {
       meta: { provider: 'heuristic', latencyMs: Date.now() - started, costUsd: estimated },
       warnings: [`ai_budget_remaining_${budget.remainingUsd}`],
     };
-    appendTurn(session.sessionId, 'assistant', fallback.text);
+    rememberAssistant(session.sessionId, fallback.text, body.userId, { intent });
     trackAIEvent({
       name: 'chat.response.sent',
       sessionId: session.sessionId,

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { executeSearch, logSearchEvent } from '@/lib/search/execute-search';
 import { upsertDemandIntent } from '@/lib/demand-intents/server';
+import { getUserFeatures, toInterestProfile } from '@/lib/behavior/features';
 import { Categoria } from '@/types';
 
 const bodySchema = z.object({
@@ -26,12 +27,17 @@ export async function POST(req: NextRequest) {
     const { query, category, location, maxResults, userId } = parsed.data;
     const started = Date.now();
 
+    const interestProfile = userId
+      ? toInterestProfile(await getUserFeatures(userId))
+      : null;
+
     const result = await executeSearch({
       query,
       category: category as Categoria | 'todos' | undefined,
       location,
       maxResults: maxResults ?? 40,
       userId,
+      interestProfile,
     });
 
     void logSearchEvent(query, result.adisos.length, userId);
@@ -57,6 +63,7 @@ export async function POST(req: NextRequest) {
       },
       source: result.source,
       latencyMs: Date.now() - started,
+      personalized: Boolean(interestProfile),
     });
   } catch (err) {
     console.error('[POST /api/search]', err);

@@ -3,18 +3,24 @@ import { supabaseAdmin } from '@/lib/supabase-admin';
 export async function logDealBehavioralEvent(params: {
   userId?: string;
   sessionId?: string;
+  anonymousId?: string;
   eventType: string;
   clipId: string;
   metadata?: Record<string, unknown>;
+  payload?: Record<string, unknown>;
+  scoreDelta?: number;
 }): Promise<void> {
   try {
     await supabaseAdmin.from('behavioral_events').insert({
       user_id: params.userId || null,
       session_id: params.sessionId || null,
+      anonymous_id: params.anonymousId || null,
       event_type: params.eventType,
       entity_type: 'deal_clip',
       entity_id: params.clipId,
-      metadata: params.metadata || {},
+      payload: params.payload ?? params.metadata ?? {},
+      context: {},
+      score_delta: params.scoreDelta ?? 0,
     });
   } catch (e) {
     console.warn('[deals/analytics] behavioral event failed', e);

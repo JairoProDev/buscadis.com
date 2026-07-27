@@ -2,7 +2,10 @@ import type { Profile } from '@/types';
 
 export type UserIntencion = 'explorador' | 'anunciante' | 'negocio';
 
-/** Identidad mínima: DNI + WhatsApp. Capacidades se activan aparte. */
+/**
+ * Identidad “fuerte” para gates (publicar / negocio / rider).
+ * Ya no bloquea el acceso a la app: el profiling progresivo es omitible.
+ */
 export function isProfileOnboardingComplete(profile: Profile | null | undefined): boolean {
   if (!profile) return false;
   return Boolean(
@@ -11,6 +14,11 @@ export function isProfileOnboardingComplete(profile: Profile | null | undefined)
       profile.whatsapp &&
       profile.whatsapp_verified_at
   );
+}
+
+/** Soft identity for progressive prompts — WhatsApp number enough (OTP optional). */
+export function hasSoftContact(profile: Profile | null | undefined): boolean {
+  return Boolean(profile?.whatsapp);
 }
 
 export function needsBusinessRuc(intencion: UserIntencion | null | undefined): boolean {
