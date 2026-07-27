@@ -17,11 +17,36 @@ export default function CookieConsentBanner() {
   const [marketing, setMarketing] = useState(false);
 
   useEffect(() => {
-    setVisible(getConsent() === null);
+    // Show banner if user has NOT accepted analytics (Accept All).
+    // If user chose a non-accept-all option previously, show only once per browser session.
+    const consent = getConsent();
+    const dismissedThisSession = typeof window !== 'undefined' && sessionStorage.getItem('buscadis_cookie_dismissed') === '1';
+    const shouldHidePermanently = consent?.analytics === true;
+    setVisible(!shouldHidePermanently && !dismissedThisSession);
+
+    // initialize customize toggles from existing consent if present
+    if (consent) {
+      setAnalytics(Boolean(consent.analytics));
+      setMarketing(Boolean(consent.marketing));
+    }
   }, []);
 
   const applyConsent = (consent: ConsentState) => {
-    setVisible(false);
+    // If the user accepted analytics (Accept All), persist and hide permanently.
+    // For other choices, persist but only hide for this browser session — show again next session.
+    if (consent.analytics === true) {
+      setVisible(false);
+      // ensure no session dismissal flag remains
+      try {
+        sessionStorage.removeItem('buscadis_cookie_dismissed');
+      } catch {}
+    } else {
+      // hide only for this session
+      try {
+        sessionStorage.setItem('buscadis_cookie_dismissed', '1');
+      } catch {}
+      setVisible(false);
+    }
     setShowCustomize(false);
   };
 
