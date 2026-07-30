@@ -29,8 +29,8 @@ const CARDS: Array<{
   },
   {
     key: 'publish',
-    title: 'Publicar',
-    subtitle: 'Anuncios y oportunidades',
+    title: 'Publicar un adiso',
+    subtitle: 'Aviso clasificado',
     href: '/publicar',
     Icon: IconMegaphone,
   },
@@ -43,14 +43,14 @@ const CARDS: Array<{
   },
   {
     key: 'rider',
-    title: 'Rider',
-    subtitle: 'Deliveries y ganar con tu moto',
+    title: 'Hacer delivery',
+    subtitle: 'Llevar envíos y ganar con tu moto',
     href: '/delivery/llevar/registro',
     Icon: IconMotorcycle,
   },
   {
     key: 'influencer',
-    title: 'Influencer',
+    title: 'Ser influencer',
     subtitle: 'Referidos, UGC y afiliados',
     href: '/perfil/creator',
     Icon: IconInfluencer,

@@ -99,18 +99,27 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
-  // Also update foto_moto / foto_perfil convenience fields
+  // Convenience fields for profile / verification UI
   if (tipo === 'foto_moto') {
+    // Foto con la moto → perfil visible al cliente + referencia de la moto
     await supabaseAdmin
       .from('moto_riders')
-      .update({ foto_moto_url: url })
+      .update({ foto_moto_url: url, foto_perfil_url: url })
       .eq('id', rider.id);
   }
   if (tipo === 'selfie') {
-    await supabaseAdmin
+    // Selfie KYC: solo rellena perfil si aún no hay foto con moto
+    const { data: current } = await supabaseAdmin
       .from('moto_riders')
-      .update({ foto_perfil_url: url })
-      .eq('id', rider.id);
+      .select('foto_perfil_url')
+      .eq('id', rider.id)
+      .maybeSingle();
+    if (!current?.foto_perfil_url) {
+      await supabaseAdmin
+        .from('moto_riders')
+        .update({ foto_perfil_url: url })
+        .eq('id', rider.id);
+    }
   }
 
   return NextResponse.json({

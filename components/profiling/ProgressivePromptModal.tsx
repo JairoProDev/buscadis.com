@@ -35,8 +35,8 @@ const CAP_CARDS: Array<{
 }> = [
   {
     key: 'publish',
-    title: 'Publicar ofertas',
-    subtitle: 'Anuncios y oportunidades',
+    title: 'Publicar un adiso',
+    subtitle: 'Aviso clasificado',
     Icon: IconMegaphone,
   },
   {
@@ -47,13 +47,13 @@ const CAP_CARDS: Array<{
   },
   {
     key: 'rider',
-    title: 'Ser rider',
-    subtitle: 'Deliveries en moto',
+    title: 'Hacer delivery',
+    subtitle: 'Llevar envíos en moto',
     Icon: IconMotorcycle,
   },
   {
     key: 'influencer',
-    title: 'Influencer',
+    title: 'Ser influencer',
     subtitle: 'Referidos y UGC',
     Icon: IconInfluencer,
   },
@@ -331,14 +331,14 @@ export default function ProgressivePromptModal() {
 
   return createPortal(
     <div
-      className="fixed inset-0 z-[80] flex items-center justify-center p-4"
+      className="fixed inset-0 z-[10050] flex items-center justify-center p-4"
       style={{ background: 'rgba(0,0,0,0.55)' }}
       role="dialog"
       aria-modal="true"
       aria-labelledby="progressive-prompt-title"
     >
       <div
-        className="relative w-full max-w-md rounded-2xl border border-[var(--border-color)] bg-[var(--bg-secondary)] p-5 shadow-xl"
+        className="relative z-[10051] max-h-[90vh] w-full max-w-md overflow-y-auto rounded-2xl border border-[var(--border-color)] bg-[var(--bg-secondary)] p-5 shadow-xl"
         onClick={(e) => e.stopPropagation()}
       >
         <button
@@ -494,7 +494,7 @@ export default function ProgressivePromptModal() {
         )}
 
         {prompt.id === 'intents' && (
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid max-h-[50vh] grid-cols-2 gap-2 overflow-y-auto pr-0.5">
             <button
               type="button"
               onClick={() => setInterests([])}

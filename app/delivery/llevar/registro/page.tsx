@@ -7,6 +7,7 @@ import Header from '@/components/Header';
 import { useAuth } from '@/hooks/useAuth';
 import {
   MOTO_DOC_LABELS,
+  MOTO_DOC_HINTS,
   REQUIRED_DOCS_FOR_SUBMIT,
   type MotoDocType,
   type MotoRider,
@@ -24,6 +25,7 @@ const STEP3_DOCS: MotoDocType[] = [
   'antecedentes_penales',
   'antecedentes_policiales',
   'foto_moto',
+  'placa',
 ];
 
 export default function ConductorRegistroPage() {
@@ -375,13 +377,17 @@ function DocUploadRow({
   disabled: boolean;
   onFile: (f: File) => void;
 }) {
+  const hint = MOTO_DOC_HINTS[tipo];
   return (
     <label className="flex cursor-pointer items-center justify-between gap-3 rounded-xl border border-[var(--border-color)] px-3 py-3">
-      <div>
+      <div className="min-w-0 flex-1">
         <div className="text-sm font-medium">{MOTO_DOC_LABELS[tipo]}</div>
         <div className="text-xs text-[var(--text-secondary)]">
           {done ? '✓ Subido' : 'Toca para subir'}
         </div>
+        {hint && (
+          <p className="mt-1 text-[11px] leading-snug text-[var(--text-secondary)]">{hint}</p>
+        )}
       </div>
       <input
         type="file"
@@ -390,9 +396,11 @@ function DocUploadRow({
             ? 'image/*,application/pdf'
             : 'image/*'
         }
-        capture={tipo === 'selfie' ? 'user' : undefined}
+        capture={
+          tipo === 'selfie' ? 'user' : tipo === 'foto_moto' || tipo === 'placa' ? 'environment' : undefined
+        }
         disabled={disabled}
-        className="max-w-[140px] text-xs"
+        className="max-w-[140px] shrink-0 text-xs"
         onChange={(e) => {
           const f = e.target.files?.[0];
           if (f) onFile(f);

@@ -102,11 +102,11 @@ export type MotoDocType = (typeof MOTO_DOC_TYPES)[number];
 export const MOTO_DOC_LABELS: Record<MotoDocType, string> = {
   dni_frente: 'DNI (frente)',
   dni_reverso: 'DNI (reverso)',
-  selfie: 'Selfie',
+  selfie: 'Selfie (rostro claro)',
   antecedentes_penales: 'Antecedentes penales',
   antecedentes_policiales: 'Antecedentes policiales',
-  foto_moto: 'Foto de la moto',
-  placa: 'Placa',
+  foto_moto: 'Tú con la moto (perfil)',
+  placa: 'Foto de la placa (legible)',
   licencia: 'Licencia de conducir',
   soat: 'SOAT',
 };
@@ -237,8 +237,17 @@ export const REQUIRED_DOCS_FOR_SUBMIT: MotoDocType[] = [
   'dni_reverso',
   'selfie',
   'foto_moto',
+  'placa',
   'licencia',
   'soat',
   'antecedentes_penales',
   'antecedentes_policiales',
 ];
+
+/** Hints UI por tipo de documento */
+export const MOTO_DOC_HINTS: Partial<Record<MotoDocType, string>> = {
+  foto_moto:
+    'Sal tú y la moto en la misma foto — se usa en tu perfil visible al aceptar pedidos.',
+  placa: 'La placa debe leerse clara (sin reflejos). Sirve para verificar la moto.',
+  selfie: 'Rostro descubierto, buena luz — se compara con tu DNI.',
+};

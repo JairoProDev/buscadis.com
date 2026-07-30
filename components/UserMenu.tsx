@@ -15,6 +15,9 @@ import {
   IconSignOut,
   IconVerified,
   IconPlus,
+  IconMegaphone,
+  IconMotorcycle,
+  IconInfluencer,
 } from './Icons';
 import { FaChartLine } from 'react-icons/fa';
 import { useTranslation } from '@/hooks/useTranslation';
@@ -60,6 +63,33 @@ function UserMenuContent({ onProgressClick }: UserMenuProps) {
   };
 
   const navItems = [
+    {
+      icon: <IconMegaphone size={16} color="var(--brand-blue)" />,
+      iconBg: 'bg-[rgba(var(--brand-primary-rgb),0.12)]',
+      label: 'Publicar un adiso',
+      onClick: () => {
+        setMostrarMenu(false);
+        router.push('/publicar');
+      },
+    },
+    {
+      icon: <IconMotorcycle size={16} color="var(--brand-blue)" />,
+      iconBg: 'bg-[rgba(var(--brand-primary-rgb),0.12)]',
+      label: 'Hacer delivery',
+      onClick: () => {
+        setMostrarMenu(false);
+        router.push('/delivery');
+      },
+    },
+    {
+      icon: <IconInfluencer size={16} color="var(--brand-yellow)" />,
+      iconBg: 'bg-[rgba(var(--brand-yellow-rgb),0.15)]',
+      label: 'Ser influencer',
+      onClick: () => {
+        setMostrarMenu(false);
+        router.push('/perfil/creator');
+      },
+    },
     {
       icon: <IconStore size={16} color="var(--brand-yellow)" />,
       iconBg: 'bg-[rgba(var(--brand-yellow-rgb),0.15)]',

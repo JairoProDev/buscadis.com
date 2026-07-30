@@ -26,8 +26,8 @@ const CAP_CARDS: Array<{
 }> = [
   {
     key: 'publish',
-    title: 'Publicar ofertas',
-    subtitle: 'Anuncios y oportunidades',
+    title: 'Publicar un adiso',
+    subtitle: 'Aviso clasificado',
     Icon: IconMegaphone,
   },
   {
@@ -38,14 +38,14 @@ const CAP_CARDS: Array<{
   },
   {
     key: 'rider',
-    title: 'Ser rider',
-    subtitle: 'Gana con deliveries en moto',
+    title: 'Hacer delivery',
+    subtitle: 'Gana con envíos en moto',
     Icon: IconMotorcycle,
   },
   {
     key: 'influencer',
-    title: 'Influencer / referidos',
-    subtitle: 'UGC y marketing de afiliados',
+    title: 'Ser influencer',
+    subtitle: 'Referidos, UGC y afiliados',
     Icon: IconInfluencer,
   },
 ];
