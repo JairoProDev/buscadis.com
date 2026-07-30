@@ -75,6 +75,31 @@ export default function AdminEnviosRidersPage() {
     }
   };
 
+  const approveAllVisible = async () => {
+    if (estado !== 'pendiente' || riders.length === 0) return;
+    if (!confirm(`¿Aprobar ${riders.length} riders de la cola?`)) return;
+    setBusy('batch');
+    try {
+      for (const r of riders) {
+        const res = await fetch('/api/admin/envios/riders', {
+          method: 'PATCH',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ rider_id: r.id, action: 'aprobar' }),
+        });
+        if (!res.ok) {
+          const data = await res.json();
+          throw new Error(data.error || `Falló ${r.display_name}`);
+        }
+      }
+      await load();
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : 'Error');
+    } finally {
+      setBusy(null);
+    }
+  };
+
   const dniSelfie = (docs: RiderDoc[]) => {
     const frente = docs.find((d) => d.tipo === 'dni_frente');
     const selfie = docs.find((d) => d.tipo === 'selfie');
@@ -104,6 +129,17 @@ export default function AdminEnviosRidersPage() {
             <option value="suspendido">Suspendidos</option>
           </select>
         </div>
+
+        {estado === 'pendiente' && riders.length > 0 && (
+          <button
+            type="button"
+            disabled={busy === 'batch'}
+            onClick={() => void approveAllVisible()}
+            className="mb-4 rounded-full bg-emerald-600 px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
+          >
+            {busy === 'batch' ? 'Aprobando…' : `Aprobar todos (${riders.length})`}
+          </button>
+        )}
 
         {loading && <p className="text-sm">Cargando…</p>}
         {error && <p className="text-sm text-red-500">{error}</p>}

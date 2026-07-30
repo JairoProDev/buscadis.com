@@ -16,22 +16,53 @@ export const MOTO_CATEGORY_LABELS: Record<MotoCategory, string> = {
   documentos: 'Documentos',
   mandado: 'Mandado / compra',
   olvidado: 'Olvidado / urgente',
-  acompanamiento: 'Acompañamiento',
+  acompanamiento: 'Asistencia con carga',
   otro: 'Otro',
 };
 
-/** Opciones UI Pedir — copy amigable; acompañamiento camufla traslado personal */
+/** Opciones UI Pedir — mirror del formato del grupo, elevado y privado */
 export const DELIVERY_ENVIO_OPTIONS: {
   id: MotoCategory;
   label: string;
   hint: string;
+  example: string;
 }[] = [
-  { id: 'paquete', label: 'Paquete', hint: 'Caja, bolsa, encomienda' },
-  { id: 'documentos', label: 'Documentos', hint: 'Sobres, papeles, trámites' },
-  { id: 'mandado', label: 'Mandado', hint: 'Que compren y te lo traigan' },
-  { id: 'olvidado', label: 'Olvidado', hint: 'Llaves, cargador, algo urgente' },
-  { id: 'acompanamiento', label: 'Acompañamiento', hint: 'Necesito que me lleven' },
-  { id: 'otro', label: 'Otro', hint: 'Describe abajo qué es' },
+  {
+    id: 'paquete',
+    label: 'Paquete',
+    hint: 'Caja, bolsa, encomienda',
+    example: 'Ej: caja mediana con ropa',
+  },
+  {
+    id: 'documentos',
+    label: 'Documentos',
+    hint: 'Sobres, papeles, trámites',
+    example: 'Ej: carpeta para la municipalidad',
+  },
+  {
+    id: 'mandado',
+    label: 'Mandado',
+    hint: 'Que compren y te lo traigan',
+    example: 'Ej: comprar pan y leche en la esquina',
+  },
+  {
+    id: 'olvidado',
+    label: 'Olvidado',
+    hint: 'Llaves, cargador, algo urgente',
+    example: 'Ej: llaves dejadas en la oficina',
+  },
+  {
+    id: 'acompanamiento',
+    label: 'Asistencia con carga',
+    hint: 'Ayuda a mover un envío grande o frágil',
+    example: 'Ej: ayudar a subir una caja pesada al recojo',
+  },
+  {
+    id: 'otro',
+    label: 'Otro',
+    hint: 'Describe abajo qué es',
+    example: 'Describe el envío con claridad',
+  },
 ];
 
 export const MOTO_RIDER_STATES = [
@@ -80,7 +111,8 @@ export const MOTO_DOC_LABELS: Record<MotoDocType, string> = {
   soat: 'SOAT',
 };
 
-export type UsoDetectado = 'envio' | 'posible_viaje' | 'desconocido';
+/** Analytics de producto (no se muestra al usuario) */
+export type UsoDetectado = 'envio' | 'asistencia' | 'desconocido';
 
 export type WhenType = 'ahora' | 'programado';
 
@@ -142,6 +174,7 @@ export interface MotoRequest {
   distance_km: number;
   fare_estimate: number;
   tip_amount: number | null;
+  fare_agreed: number | null;
   status: MotoRequestStatus;
   uso_detectado: UsoDetectado;
   source_adiso_id: string | null;
@@ -152,6 +185,11 @@ export interface MotoRequest {
   requester_lat: number | null;
   requester_lng: number | null;
   requester_location_at: string | null;
+  evidence_pickup_url: string | null;
+  evidence_delivery_url: string | null;
+  scheduled_notified_at: string | null;
+  share_token: string | null;
+  phone_shared_at: string | null;
   cancel_reason: string | null;
   accepted_at: string | null;
   picked_up_at: string | null;

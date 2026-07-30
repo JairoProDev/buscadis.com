@@ -1,49 +1,44 @@
 import type { MotoCategory, UsoDetectado } from './types';
 
 /**
- * Inferencia silenciosa de uso (viaje vs envío).
- * No se muestra en UI — solo analytics / admin.
+ * Clasificación de producto para analytics admin:
+ * - envio: pedido típico de mercancía
+ * - asistencia: ayuda con carga / casos especiales descritos
+ * - desconocido: sin señal clara
+ *
+ * No se muestra en UI al usuario.
  */
-const VIAJE_PATTERNS: RegExp[] = [
-  /\bviaje\b/i,
-  /\bpasajer[oa]s?\b/i,
-  /\bllevarme\b/i,
-  /\bllevame\b/i,
-  /\brecoger\s+(a\s+)?(alguien|persona|mi|me)\b/i,
-  /\btaxi\b/i,
-  /\bmoto\s*taxi\b/i,
-  /\bme\s+llevan?\b/i,
-  /\bme\s+recogen?\b/i,
-  /\bir\s+a\b/i,
-  /\bllegar\s+a\b/i,
-  /\baeropuerto\b/i,
-  /\btraslado\b/i,
-  /\bpersona\b/i,
-  /\byo\s+voy\b/i,
-  /\bnecesito\s+(ir|llegar|moverme)\b/i,
+const ASISTENCIA_PATTERNS: RegExp[] = [
+  /\bcaja\s+pesad/i,
+  /\bcarga\s+grande/i,
+  /\bayuda(r)?\s+(a\s+)?(subir|bajar|cargar|mover)/i,
+  /\bfr[aá]gil\b/i,
+  /\bvolumino/i,
+  /\bnecesito\s+ayuda\b/i,
+  /\basistencia\b/i,
 ];
 
 export function detectUso(
   category: MotoCategory,
   description: string
 ): UsoDetectado {
-  if (category === 'acompanamiento') return 'posible_viaje';
+  if (category === 'acompanamiento') return 'asistencia';
 
   const text = (description || '').trim();
 
   if (category === 'paquete' || category === 'documentos' || category === 'mandado') {
-    if (VIAJE_PATTERNS.some((re) => re.test(text))) return 'posible_viaje';
+    if (ASISTENCIA_PATTERNS.some((re) => re.test(text))) return 'asistencia';
     return 'envio';
   }
 
   if (category === 'olvidado') {
-    if (VIAJE_PATTERNS.some((re) => re.test(text))) return 'posible_viaje';
+    if (ASISTENCIA_PATTERNS.some((re) => re.test(text))) return 'asistencia';
     return 'envio';
   }
 
-  // otro — principal camuflaje adicional
+  // otro
   if (!text) return 'desconocido';
-  if (VIAJE_PATTERNS.some((re) => re.test(text))) return 'posible_viaje';
+  if (ASISTENCIA_PATTERNS.some((re) => re.test(text))) return 'asistencia';
 
   return 'envio';
 }

@@ -7,3 +7,5 @@ export * from './notify';
 export * from './soft-launch';
 export * from './chat';
 export * from './auth-fetch';
+export * from './status-machine';
+export * from './viewers';

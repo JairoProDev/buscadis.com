@@ -16,6 +16,20 @@ import {
 import { enviosAuthFetch } from '@/lib/envios/auth-fetch';
 import { IconArrowLeft } from '@/components/Icons';
 
+const RIDER_ONBOARDING_KEY = 'buscadis:delivery-rider-onboarding-v1';
+
+interface RiderStats {
+  summary: {
+    delivered: number;
+    earningsEstimate: number;
+    km: number;
+  };
+  demandHints: {
+    tip: string;
+    topZonas: Array<{ zona: string; count: number }>;
+  };
+}
+
 export default function ConductorFeedPage() {
   const { user } = useAuth();
   const { openChat } = useUI();
@@ -25,7 +39,15 @@ export default function ConductorFeedPage() {
   const [loading, setLoading] = useState(true);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [requesterPhones, setRequesterPhones] = useState<Record<string, string>>({});
+  const [showOnboarding, setShowOnboarding] = useState(false);
+  const [stats, setStats] = useState<RiderStats | null>(null);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    if (!localStorage.getItem(RIDER_ONBOARDING_KEY)) {
+      setShowOnboarding(true);
+    }
+  }, []);
 
   const load = useCallback(async () => {
     if (!user) return;
@@ -35,9 +57,10 @@ export default function ConductorFeedPage() {
       setRider(meData.rider || null);
 
       if (meData.rider?.estado === 'aprobado') {
-        const [avail, mine] = await Promise.all([
+        const [avail, mine, st] = await Promise.all([
           enviosAuthFetch('/api/envios/requests?scope=available'),
           enviosAuthFetch('/api/envios/requests?scope=mine'),
+          enviosAuthFetch('/api/envios/rider/stats'),
         ]);
         const availData = await avail.json();
         const mineData = await mine.json();
@@ -50,6 +73,10 @@ export default function ConductorFeedPage() {
               ['aceptado', 'recogido'].includes(r.status)
           )
         );
+        if (st.ok) {
+          const stData = await st.json();
+          setStats(stData);
+        }
       }
       setError(null);
     } catch (e: unknown) {
@@ -67,7 +94,6 @@ export default function ConductorFeedPage() {
     void load();
   }, [user, load]);
 
-  // Realtime nuevas solicitudes pendientes
   useEffect(() => {
     if (!rider || rider.estado !== 'aprobado' || !supabase) return;
 
@@ -116,7 +142,17 @@ export default function ConductorFeedPage() {
         body: JSON.stringify({ action }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Error');
+      if (!res.ok) {
+        if (res.status === 409 || data.code === 'taken') {
+          setError(
+            data.error ||
+              'Otro motorizado ya tomó este pedido. Mira los disponibles abajo.'
+          );
+          await load();
+          return;
+        }
+        throw new Error(data.error || 'Error');
+      }
       if (action === 'accept' && data.conversationId) {
         openChat(data.conversationId);
       }
@@ -125,15 +161,6 @@ export default function ConductorFeedPage() {
       setError(e instanceof Error ? e.message : 'Error');
     } finally {
       setBusyId(null);
-    }
-  };
-
-  const loadPhone = async (requestId: string) => {
-    if (requesterPhones[requestId]) return;
-    const res = await enviosAuthFetch(`/api/envios/requests/${requestId}`);
-    const data = await res.json();
-    if (data.requester?.telefono) {
-      setRequesterPhones((p) => ({ ...p, [requestId]: data.requester.telefono }));
     }
   };
 
@@ -159,10 +186,34 @@ export default function ConductorFeedPage() {
           href="/delivery"
           className="mb-4 inline-flex items-center gap-2 text-sm text-[var(--text-secondary)]"
         >
-          <IconArrowLeft size={16} /> Envíos
+          <IconArrowLeft size={16} /> Delivery
         </Link>
 
         <h1 className="text-xl font-bold">Llevar</h1>
+        <p className="mt-1 text-xs text-[var(--text-secondary)]">
+          Solo pedidos reales — sin spam del grupo
+        </p>
+
+        {showOnboarding && (
+          <div className="mt-4 rounded-3xl border border-[var(--brand-blue)]/25 bg-[rgba(var(--brand-primary-rgb),0.08)] p-4">
+            <p className="text-sm font-bold">Tu reputación ya no se pierde en el chat</p>
+            <ul className="mt-2 space-y-1 text-xs text-[var(--text-secondary)]">
+              <li>· Activa Online en picos 7–10 y 16–20.</li>
+              <li>· Acepta → coordina por el chat de la app (suma a tu perfil).</li>
+              <li>· Sin comisión. Cada entrega bien hecha queda para siempre.</li>
+            </ul>
+            <button
+              type="button"
+              onClick={() => {
+                localStorage.setItem(RIDER_ONBOARDING_KEY, '1');
+                setShowOnboarding(false);
+              }}
+              className="mt-3 w-full rounded-full bg-[var(--brand-blue)] py-2.5 text-sm font-semibold text-white"
+            >
+              Empezar
+            </button>
+          </div>
+        )}
 
         {loading && <p className="mt-4 text-sm text-[var(--text-secondary)]">Cargando…</p>}
 
@@ -237,6 +288,30 @@ export default function ConductorFeedPage() {
               </button>
             </div>
 
+            {stats && (
+              <div className="mt-4 grid grid-cols-3 gap-2">
+                {[
+                  ['Entregas', stats.summary.delivered],
+                  ['Est. S/', stats.summary.earningsEstimate],
+                  ['Km', stats.summary.km],
+                ].map(([label, value]) => (
+                  <div
+                    key={String(label)}
+                    className="rounded-xl border border-[var(--border-color)] p-2 text-center"
+                  >
+                    <div className="text-lg font-bold text-[var(--brand-blue)]">{value}</div>
+                    <div className="text-[10px] text-[var(--text-secondary)]">{label}</div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {stats?.demandHints?.tip && (
+              <p className="mt-3 rounded-xl bg-[rgba(var(--brand-primary-rgb),0.08)] px-3 py-2 text-xs text-[var(--text-secondary)]">
+                {stats.demandHints.tip}
+              </p>
+            )}
+
             {active.length > 0 && (
               <section className="mt-6">
                 <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-[var(--text-secondary)]">
@@ -249,9 +324,10 @@ export default function ConductorFeedPage() {
                       request={r}
                       busy={busyId === r.id}
                       mode="active"
-                      phone={requesterPhones[r.id]}
-                      onFocus={() => void loadPhone(r.id)}
                       onAction={(a) => void act(r.id, a)}
+                      onOpenChat={() => {
+                        if (r.conversation_id) openChat(r.conversation_id);
+                      }}
                     />
                   ))}
                 </div>
@@ -264,7 +340,7 @@ export default function ConductorFeedPage() {
               </h2>
               {!rider.online && (
                 <p className="mb-3 text-xs text-amber-600">
-                  Ponte online para que te notifiquen nuevos envíos.
+                  Ponte online para que te notifiquen nuevos envíos primero.
                 </p>
               )}
               {requests.length === 0 ? (
@@ -298,23 +374,17 @@ function RequestCard({
   request,
   busy,
   mode,
-  phone,
-  onFocus,
   onAction,
+  onOpenChat,
 }: {
   request: MotoRequest;
   busy: boolean;
   mode: 'available' | 'active';
-  phone?: string;
-  onFocus?: () => void;
   onAction: (action: string) => void;
+  onOpenChat?: () => void;
 }) {
   return (
-    <article
-      className="rounded-2xl border border-[var(--border-color)] p-4"
-      onMouseEnter={onFocus}
-      onFocus={onFocus}
-    >
+    <article className="rounded-2xl border border-[var(--border-color)] p-4">
       <div className="text-xs font-semibold text-[var(--brand-blue)]">
         {MOTO_CATEGORY_LABELS[request.category as MotoCategory]}
       </div>
@@ -329,12 +399,17 @@ function RequestCard({
       <div className="mt-2 flex items-center justify-between text-sm">
         <span>~{Number(request.distance_km).toFixed(1)} km</span>
         <span className="font-bold text-[var(--brand-blue)]">
-          {formatFareSoles(Number(request.fare_estimate))}
+          {formatFareSoles(Number(request.fare_agreed ?? request.fare_estimate))}
         </span>
       </div>
       {request.when_type === 'programado' && request.scheduled_at && (
         <p className="mt-1 text-xs text-[var(--text-secondary)]">
           Programado: {new Date(request.scheduled_at).toLocaleString('es-PE')}
+        </p>
+      )}
+      {request.budget_estimate != null && (
+        <p className="mt-1 text-xs text-[var(--text-secondary)]">
+          Presupuesto compra: {formatFareSoles(Number(request.budget_estimate))}
         </p>
       )}
 
@@ -349,12 +424,21 @@ function RequestCard({
             Aceptar
           </button>
         )}
+        {mode === 'active' && onOpenChat && (
+          <button
+            type="button"
+            onClick={onOpenChat}
+            className="rounded-full bg-[var(--brand-blue)] px-4 py-2 text-sm font-semibold text-white"
+          >
+            Chat
+          </button>
+        )}
         {mode === 'active' && request.status === 'aceptado' && (
           <button
             type="button"
             disabled={busy}
             onClick={() => onAction('recogido')}
-            className="rounded-full bg-[var(--brand-blue)] px-4 py-2 text-sm font-semibold text-white"
+            className="rounded-full border border-[var(--border-color)] px-4 py-2 text-sm font-semibold"
           >
             Marcar recogido
           </button>
@@ -368,18 +452,6 @@ function RequestCard({
           >
             Marcar entregado
           </button>
-        )}
-        {mode === 'active' && phone && (
-          <a
-            href={`https://wa.me/${phone.replace(/\D/g, '')}?text=${encodeURIComponent(
-              'Hola, soy el motorizado de Buscadis Envíos. Voy al recojo.'
-            )}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="rounded-full border border-[var(--border-color)] px-4 py-2 text-sm font-semibold"
-          >
-            WhatsApp
-          </a>
         )}
         {mode === 'active' && (
           <button

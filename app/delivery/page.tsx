@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import Header from '@/components/Header';
 import { IconBox, IconMotorcycle, IconUser } from '@/components/Icons';
+import { PILOT_LAUNCH } from '@/lib/envios';
 
 export default function DeliveryHubPage() {
   return (
@@ -13,10 +14,10 @@ export default function DeliveryHubPage() {
           className="text-center text-2xl font-bold tracking-tight text-[var(--text-primary)]"
           style={{ fontFamily: '"Plus Jakarta Sans", sans-serif' }}
         >
-          Delivery
+          Buscadis Delivery
         </h1>
         <p className="mt-2 text-center text-sm text-[var(--text-secondary)]">
-          ¿Qué quieres hacer?
+          Envíos y mandados en Cusco · motorizados verificados · tu número no se publica
         </p>
 
         <div className="mt-8 grid gap-4">
@@ -36,7 +37,7 @@ export default function DeliveryHubPage() {
             </span>
             <span className="text-xl font-bold text-[var(--text-primary)]">Pedir</span>
             <span className="text-center text-xs text-[var(--text-secondary)]">
-              Solicita un envío o traslado
+              Nombre, recojo, destino y hora — como siempre, pero privado
             </span>
           </Link>
 
@@ -49,10 +50,15 @@ export default function DeliveryHubPage() {
             </span>
             <span className="text-xl font-bold text-[var(--text-primary)]">Llevar</span>
             <span className="text-center text-xs text-[var(--text-secondary)]">
-              Soy motorizado — ver y aceptar pedidos
+              Soy motorizado — pedidos limpios, reputación permanente, 0 comisión
             </span>
           </Link>
         </div>
+
+        <p className="mt-8 text-center text-[11px] leading-relaxed text-[var(--text-secondary)]">
+          Corredor piloto: {PILOT_LAUNCH.corridor.join(' · ')}. Coordinas por el chat de la
+          app — más seguro que publicar tu número a cientos de personas.
+        </p>
       </main>
     </div>
   );

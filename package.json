@@ -18,7 +18,8 @@
     "search:sync-typesense": "node scripts/sync-typesense.mjs",
     "deals:seed": "node scripts/seed-deal-clips.mjs",
     "seed:buscadis": "npx tsx scripts/seed-buscadis-profile.ts",
-    "demo:buscadis": "npm run seed:buscadis && npm run dev"
+    "demo:buscadis": "npm run seed:buscadis && npm run dev",
+    "test:envios": "npx tsx scripts/test-envios-status.ts"
   },
   "dependencies": {
     "@ai-sdk/openai": "^4.0.0",

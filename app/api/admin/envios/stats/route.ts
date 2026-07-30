@@ -26,6 +26,8 @@ export async function GET(request: NextRequest) {
     { count: delivered },
     { count: ridersPending },
     { count: ridersApproved },
+    { count: phoneShared },
+    { count: openClaims },
     { data: byUso },
     { data: byZona },
     { data: recent },
@@ -47,11 +49,21 @@ export async function GET(request: NextRequest) {
       .from('moto_riders')
       .select('id', { count: 'exact', head: true })
       .eq('estado', 'aprobado'),
+    supabaseAdmin
+      .from('moto_requests')
+      .select('id', { count: 'exact', head: true })
+      .not('phone_shared_at', 'is', null),
+    supabaseAdmin
+      .from('moto_claims')
+      .select('id', { count: 'exact', head: true })
+      .eq('status', 'abierto'),
     supabaseAdmin.from('moto_requests').select('uso_detectado'),
     supabaseAdmin.from('moto_requests').select('pickup_zona'),
     supabaseAdmin
       .from('moto_requests')
-      .select('id, category, status, pickup_zona, fare_estimate, uso_detectado, created_at')
+      .select(
+        'id, category, status, pickup_zona, fare_estimate, uso_detectado, phone_shared_at, created_at'
+      )
       .order('created_at', { ascending: false })
       .limit(20),
   ]);
@@ -68,13 +80,22 @@ export async function GET(request: NextRequest) {
     zonaCounts[k] = (zonaCounts[k] || 0) + 1;
   }
 
+  const deliveredN = delivered || 0;
+  const phoneSharedN = phoneShared || 0;
+
   return NextResponse.json({
     totals: {
       requests: totalRequests || 0,
       pending: pending || 0,
-      delivered: delivered || 0,
+      delivered: deliveredN,
       ridersPending: ridersPending || 0,
       ridersApproved: ridersApproved || 0,
+      phoneShared: phoneSharedN,
+      openClaims: openClaims || 0,
+      chatOnlyPct:
+        deliveredN > 0
+          ? Math.round(((deliveredN - Math.min(phoneSharedN, deliveredN)) / deliveredN) * 100)
+          : null,
     },
     usoDetectado: usoCounts,
     zonas: zonaCounts,

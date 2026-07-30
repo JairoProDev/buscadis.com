@@ -109,8 +109,26 @@ export async function PATCH(request: NextRequest) {
     return NextResponse.json({ error: error?.message || 'Error' }, { status: 500 });
   }
 
-  if (body.action === 'aprobar' || body.action === 'rechazar') {
-    await notifyRiderKyc(data.user_id, body.action === 'aprobar', body.note);
+  if (body.action === 'aprobar') {
+    const { upsertCapability } = await import('@/lib/auth/capabilities');
+    await upsertCapability(data.user_id, 'rider', 'active', {
+      rider_id: data.id,
+      estado: 'aprobado',
+    });
+    await notifyRiderKyc(data.user_id, true, body.note);
+  } else if (body.action === 'rechazar') {
+    const { upsertCapability } = await import('@/lib/auth/capabilities');
+    await upsertCapability(data.user_id, 'rider', 'inactive', {
+      rider_id: data.id,
+      estado: 'rechazado',
+    });
+    await notifyRiderKyc(data.user_id, false, body.note);
+  } else if (body.action === 'suspender') {
+    const { upsertCapability } = await import('@/lib/auth/capabilities');
+    await upsertCapability(data.user_id, 'rider', 'suspended', {
+      rider_id: data.id,
+      estado: 'suspendido',
+    });
   }
 
   return NextResponse.json({ rider: data });

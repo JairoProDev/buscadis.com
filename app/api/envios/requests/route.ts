@@ -3,12 +3,12 @@ import { getUserFromRouteRequest } from '@/lib/supabase-route-auth';
 import { supabaseAdmin } from '@/lib/supabase-admin';
 import {
   MOTO_CATEGORIES,
-  MOTO_CATEGORY_LABELS,
   detectUso,
   detectZoneFromText,
   estimateDistanceKm,
   estimateFare,
   notifyRidersNewRequest,
+  recordFeedViews,
   type CreateMotoRequestInput,
   type MotoCategory,
   type MotoRequest,
@@ -60,8 +60,13 @@ export async function GET(request: NextRequest) {
           );
 
     // Si filtro vacío, devolver todas pendientes (cobertura inicial)
+    const list = filtered.length > 0 ? filtered : data || [];
+    void recordFeedViews(
+      rider.id,
+      list.map((r: { id: string }) => r.id)
+    );
     return NextResponse.json({
-      requests: filtered.length > 0 ? filtered : data || [],
+      requests: list,
       rider,
     });
   }
@@ -116,16 +121,16 @@ export async function POST(request: NextRequest) {
   }
 
   const contactName = (body.contact_name || '').trim();
-  const baseDescription =
-    (body.description || '').trim() ||
-    (category === 'paquete'
-      ? 'Paquete'
-      : category === 'acompanamiento'
-        ? 'Acompañamiento'
-        : category === 'otro'
-          ? 'Otro'
-          : MOTO_CATEGORY_LABELS[category] || 'Envío');
-  const description = contactName ? `${contactName} · ${baseDescription}` : baseDescription;
+  const rawDescription = (body.description || '').trim();
+  if (rawDescription.length < 3) {
+    return NextResponse.json(
+      { error: 'Describe qué vas a enviar (mínimo unas palabras)' },
+      { status: 400 }
+    );
+  }
+  const description = contactName
+    ? `${contactName} · ${rawDescription}`
+    : rawDescription;
 
   if (!body.pickup?.lat || !body.pickup?.lng || !body.dropoff?.lat || !body.dropoff?.lng) {
     return NextResponse.json({ error: 'Recojo y destino son obligatorios' }, { status: 400 });
@@ -198,10 +203,23 @@ export async function POST(request: NextRequest) {
 
   const requestRow = data as MotoRequest;
 
-  // Notificar riders sin bloquear la respuesta
-  void notifyRidersNewRequest(requestRow).catch((e) =>
-    console.error('[envios notify]', e)
-  );
+  // Programados lejanos: no notificar aún (cron /api/envios/cron/scheduled)
+  const isImmediate =
+    requestRow.when_type === 'ahora' ||
+    (requestRow.scheduled_at &&
+      new Date(requestRow.scheduled_at).getTime() - Date.now() < 45 * 60 * 1000);
+
+  if (isImmediate) {
+    if (requestRow.when_type === 'programado') {
+      await supabaseAdmin
+        .from('moto_requests')
+        .update({ scheduled_notified_at: new Date().toISOString() })
+        .eq('id', requestRow.id);
+    }
+    void notifyRidersNewRequest(requestRow).catch((e) =>
+      console.error('[envios notify]', e)
+    );
+  }
 
   return NextResponse.json({ request: requestRow }, { status: 201 });
 }

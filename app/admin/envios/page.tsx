@@ -11,6 +11,9 @@ interface Stats {
     delivered: number;
     ridersPending: number;
     ridersApproved: number;
+    phoneShared?: number;
+    openClaims?: number;
+    chatOnlyPct?: number | null;
   };
   usoDetectado: Record<string, number>;
   zonas: Record<string, number>;
@@ -61,13 +64,15 @@ export default function AdminEnviosPage() {
 
         {stats && (
           <>
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-7">
               {[
                 ['Solicitudes', stats.totals.requests],
                 ['Pendientes', stats.totals.pending],
                 ['Entregados', stats.totals.delivered],
                 ['Riders OK', stats.totals.ridersApproved],
                 ['KYC cola', stats.totals.ridersPending],
+                ['Chat-only %', stats.totals.chatOnlyPct ?? '—'],
+                ['Reclamos', stats.totals.openClaims ?? 0],
               ].map(([label, value]) => (
                 <div
                   key={String(label)}
@@ -81,7 +86,7 @@ export default function AdminEnviosPage() {
 
             <section className="mt-8">
               <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-[var(--text-secondary)]">
-                Uso detectado (silencioso)
+                Tipo de solicitud (analytics producto)
               </h2>
               <div className="flex flex-wrap gap-2">
                 {Object.entries(stats.usoDetectado).map(([k, v]) => (
@@ -145,7 +150,8 @@ export default function AdminEnviosPage() {
                 </table>
               </div>
               <p className="mt-2 text-xs text-[var(--text-secondary)]">
-                *uso_detectado es interno (no se muestra a usuarios)
+                Analytics interno (envio / asistencia / desconocido). Chat-only % = entregas sin
+                compartir teléfono.
               </p>
             </section>
           </>

@@ -19,11 +19,26 @@ async function insertInAppNotification(
   });
 }
 
-export async function notifyRidersNewRequest(request: MotoRequest): Promise<number> {
-  const riders = await findEligibleRiders({
+export async function notifyRidersNewRequest(
+  request: MotoRequest
+): Promise<{ sent: number; eligible: number; onlineOnly: boolean }> {
+  const onlineOnly = true;
+  let riders = await findEligibleRiders({
     zona: request.pickup_zona,
     mandadoCompra: request.category === 'mandado',
+    onlineOnly,
   });
+
+  // Fallback suave: si nadie online, avisa a aprobados (sin spam push agresivo — in-app only)
+  let usedOnlineOnly = true;
+  if (riders.length === 0) {
+    riders = await findEligibleRiders({
+      zona: request.pickup_zona,
+      mandadoCompra: request.category === 'mandado',
+      onlineOnly: false,
+    });
+    usedOnlineOnly = false;
+  }
 
   const cat = MOTO_CATEGORY_LABELS[request.category];
   const title = 'Nuevo envío disponible';
@@ -36,15 +51,18 @@ export async function notifyRidersNewRequest(request: MotoRequest): Promise<numb
         kind: 'moto_request_new',
         request_id: request.id,
       });
-      const ok = await sendPushToUser(r.user_id, title, body, {
-        kind: 'moto_request_new',
-        request_id: request.id,
-        url: `/delivery/llevar`,
-      });
-      if (ok) sent += 1;
+      // Push solo a online (o a todos si fallback y son pocos)
+      if (usedOnlineOnly || riders.length <= 15) {
+        const ok = await sendPushToUser(r.user_id, title, body, {
+          kind: 'moto_request_new',
+          request_id: request.id,
+          url: `/delivery/llevar`,
+        });
+        if (ok) sent += 1;
+      }
     })
   );
-  return sent;
+  return { sent, eligible: riders.length, onlineOnly: usedOnlineOnly };
 }
 
 export async function notifyRequesterStatus(
