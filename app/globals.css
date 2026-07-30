@@ -725,3 +725,11 @@ html.theme-transitioning * {
     fill 0.2s ease,
     stroke 0.2s ease !important;
 }
+/* Modales de perfil/OTP por encima del buscador sticky (z≈900) y header (z≈1000) */
+body.buscadis-modal-open [data-sticky-search] {
+  z-index: 1 !important;
+  pointer-events: none;
+}
+body.buscadis-modal-open .brand-header-sheen {
+  z-index: 1 !important;
+}

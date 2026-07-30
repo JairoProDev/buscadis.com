@@ -36,6 +36,8 @@ export async function POST(request: NextRequest) {
   return NextResponse.json({
     ok: true,
     channel: result.channel,
+    skipVerification: result.skipVerification === true,
+    message: result.message || undefined,
     ...(result.devCode ? { devCode: result.devCode } : {}),
   });
 }

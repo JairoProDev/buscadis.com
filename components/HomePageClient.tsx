@@ -1196,6 +1196,7 @@ function HomeContent() {
             </div>
             {/* Buscador + filtros: sticky compacto, alineados bajo el mismo ancho */}
             <div
+              data-sticky-search
               style={{
                 position: 'sticky',
                 top: 'var(--header-height, 72px)',

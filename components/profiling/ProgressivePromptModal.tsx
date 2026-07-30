@@ -107,7 +107,16 @@ export default function ProgressivePromptModal() {
     setOpen(false);
     setPrompt(null);
     resetFields();
+    if (typeof document !== 'undefined') {
+      document.body.classList.remove('buscadis-modal-open');
+    }
   }, []);
+
+  useEffect(() => {
+    if (!open) return;
+    document.body.classList.add('buscadis-modal-open');
+    return () => document.body.classList.remove('buscadis-modal-open');
+  }, [open]);
 
   const loadNext = useCallback(async () => {
     if (!user?.id || !session?.access_token) return;
@@ -231,6 +240,11 @@ export default function ProgressivePromptModal() {
           await verifyOtp();
           return;
         }
+        const local = phone.replace(/\D/g, '').replace(/^51/, '');
+        if (local.length !== 9) {
+          setError('Ingresa un celular peruano de 9 dígitos');
+          return;
+        }
         const res = await fetch('/api/profiling/prompts/complete', {
           method: 'POST',
           headers: authHeaders,
@@ -243,7 +257,7 @@ export default function ProgressivePromptModal() {
           return;
         }
         await refreshProfile();
-        // Optional OTP step (same modal); if send fails, number is already saved
+
         const otpRes = await fetch('/api/auth/whatsapp/send-otp', {
           method: 'POST',
           headers: authHeaders,
@@ -251,12 +265,28 @@ export default function ProgressivePromptModal() {
           body: JSON.stringify({ phone: phoneForApi() }),
         });
         const otpJson = await otpRes.json();
-        if (otpRes.ok) {
-          setOtpSent(true);
-          if (otpJson.devCode) setDevCode(otpJson.devCode);
+
+        if (!otpRes.ok) {
+          setError(
+            otpJson.error ||
+              'Número guardado, pero no pudimos enviar el código. Puedes continuar y verificar después.'
+          );
+          // Number already saved — allow dismiss without trapping the user
           return;
         }
-        closeModal();
+
+        if (otpJson.skipVerification) {
+          // No Meta channel yet: don't leave the user waiting for a code that never arrives
+          closeModal();
+          return;
+        }
+
+        setOtpSent(true);
+        if (otpJson.devCode) setDevCode(String(otpJson.devCode));
+        if (otpJson.message) {
+          // soft info via error slot in green? keep as non-error note
+          setError(null);
+        }
         return;
       }
 
@@ -331,14 +361,19 @@ export default function ProgressivePromptModal() {
 
   return createPortal(
     <div
-      className="fixed inset-0 z-[10050] flex items-center justify-center p-4"
-      style={{ background: 'rgba(0,0,0,0.55)' }}
+      className="fixed inset-0 flex items-center justify-center p-4"
+      style={{
+        zIndex: 20000,
+        background: 'rgba(0,0,0,0.55)',
+        isolation: 'isolate',
+      }}
       role="dialog"
       aria-modal="true"
       aria-labelledby="progressive-prompt-title"
     >
       <div
-        className="relative z-[10051] max-h-[90vh] w-full max-w-md overflow-y-auto rounded-2xl border border-[var(--border-color)] bg-[var(--bg-secondary)] p-5 shadow-xl"
+        className="relative max-h-[90vh] w-full max-w-md overflow-y-auto rounded-2xl border border-[var(--border-color)] bg-[var(--bg-secondary)] p-5 shadow-xl"
+        style={{ zIndex: 20001 }}
         onClick={(e) => e.stopPropagation()}
       >
         <button
@@ -405,6 +440,12 @@ export default function ProgressivePromptModal() {
               </div>
             </label>
             {otpSent && (
+              <p className="m-0 text-xs text-[var(--text-secondary)]">
+                Si no te llega el mensaje en 1–2 minutos, revisa que el número sea correcto o
+                usa «Guardar número y verificar después».
+              </p>
+            )}
+            {otpSent && (
               <label className="block text-sm text-[var(--text-secondary)]">
                 Código
                 <input
@@ -418,7 +459,9 @@ export default function ProgressivePromptModal() {
               </label>
             )}
             {devCode && (
-              <p className="m-0 text-xs text-amber-400">Dev: código {devCode}</p>
+              <p className="m-0 rounded-lg bg-amber-500/15 px-3 py-2 text-xs text-amber-600 dark:text-amber-300">
+                Código de desarrollo: <strong>{devCode}</strong>
+              </p>
             )}
             {otpSent && (
               <button

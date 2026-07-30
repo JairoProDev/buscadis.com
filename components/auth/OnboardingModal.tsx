@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { IconClose, IconExplore, IconMegaphone, IconStore, IconMotorcycle, IconInfluencer } from '@/components/Icons';
@@ -69,6 +69,12 @@ export default function OnboardingModal({ abierto, onCerrar }: { abierto: boolea
   const [identitySaved, setIdentitySaved] = useState(false);
 
   const wantsBusiness = interests.includes('business');
+
+  useEffect(() => {
+    if (!abierto) return;
+    document.body.classList.add('buscadis-modal-open');
+    return () => document.body.classList.remove('buscadis-modal-open');
+  }, [abierto]);
 
   const authHeaders = useMemo((): HeadersInit => {
     const h: Record<string, string> = { 'Content-Type': 'application/json' };
@@ -176,6 +182,12 @@ export default function OnboardingModal({ abierto, onCerrar }: { abierto: boolea
         setError(json.error || 'No se pudo enviar el código');
         return;
       }
+      if (json.skipVerification) {
+        // Sin Meta: no pedimos código; el número ya está en el perfil via onboarding
+        await refreshProfile();
+        setStep('capabilities');
+        return;
+      }
       setOtpSent(true);
       setDevCode(json.devCode || null);
     } catch {
@@ -236,7 +248,8 @@ export default function OnboardingModal({ abierto, onCerrar }: { abierto: boolea
         display: 'flex',
         alignItems: 'flex-start',
         justifyContent: 'center',
-        zIndex: 10002,
+        zIndex: 20000,
+        isolation: 'isolate',
         padding: '1rem',
         overflowY: 'auto',
       }}
