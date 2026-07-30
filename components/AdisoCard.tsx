@@ -26,7 +26,6 @@ import {
     formatPrecioDisplay,
     shouldShowPriceOnCard,
     shouldShowLocationOnCard,
-    getCardDescriptionSnippet,
     formatUbicacionCorta,
     toDisplayTitle,
     getAdisoCardMetaRow,
@@ -73,11 +72,7 @@ function getMediaAspectClass(tamaño: string, vista: string, isCatalogProduct = 
     if (isCatalogProduct) return 'w-full aspect-square';
     if (tamaño === 'miniatura' && !hasImage) return 'w-full h-[72px]';
     if (tamaño === 'gigante' || tamaño === 'grande') return 'w-full aspect-video';
-    // Flyers / fotos altas: más alto que cuadrado para no cortar tanto
-    if (vista === 'feed' && hasImage) return 'w-full aspect-[4/5]';
-    if (hasImage) return 'w-full aspect-[4/5]';
-    if (vista === 'feed') return 'w-full aspect-square';
-    return 'w-full aspect-[4/3]';
+    return 'w-full aspect-square';
 }
 
 const AdisoCard = forwardRef<HTMLDivElement, AdisoCardProps>(
@@ -93,7 +88,6 @@ const AdisoCard = forwardRef<HTMLDivElement, AdisoCardProps>(
         const tamaño = adiso.tamaño || 'miniatura';
         const paquete = PAQUETES[tamaño];
         const displayTitle = toDisplayTitle(adiso.titulo);
-        const displayDescription = getCardDescriptionSnippet(adiso.descripcion);
         const locationShort = shouldShowLocationOnCard(adiso) ? formatUbicacionCorta(adiso.ubicacion) : '';
         const priceLabel = shouldShowPriceOnCard(adiso) ? formatPrecioDisplay(adiso) : null;
         const salaryLabel = adiso.categoria === 'empleos' ? getJobSalaryLabel(adiso) : null;
@@ -362,18 +356,6 @@ const AdisoCard = forwardRef<HTMLDivElement, AdisoCardProps>(
                                 </span>
                             )}
                         </div>
-                    )}
-
-                    {displayDescription && (
-                        <p
-                            className={`
-                                text-[13px] text-[var(--text-secondary)] leading-snug mb-2
-                                line-clamp-1 md:line-clamp-2
-                                ${tamaño === 'miniatura' ? 'hidden md:line-clamp-1' : ''}
-                            `}
-                        >
-                            {displayDescription}
-                        </p>
                     )}
 
                     {vista === 'feed' && priceLabel && (

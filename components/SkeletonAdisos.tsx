@@ -21,46 +21,33 @@ export function SkeletonCard() {
         flexDirection: 'column',
       }}
     >
-      {/* Image placeholder — aspect ratio 4/3 matching the card */}
+      {/* Image placeholder — square matching the card */}
       <div
         className="skeleton-shimmer"
         style={{
           width: '100%',
-          aspectRatio: '4/3',
+          aspectRatio: '1 / 1',
           backgroundColor: 'var(--bg-tertiary)',
         }}
       />
 
       {/* Content area */}
       <div style={{ padding: '0.625rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-        {/* Title line (70%) */}
+        {/* Title lines (max 2) */}
         <div
           className="skeleton-shimmer"
           style={{
             height: '13px',
-            width: '72%',
+            width: '92%',
             borderRadius: '6px',
             backgroundColor: 'var(--bg-tertiary)',
           }}
         />
-
-        {/* Description line 1 (100%) */}
         <div
           className="skeleton-shimmer"
           style={{
-            height: '11px',
-            width: '100%',
-            borderRadius: '6px',
-            backgroundColor: 'var(--bg-tertiary)',
-          }}
-        />
-
-        {/* Description line 2 (85%) */}
-        <div
-          className="skeleton-shimmer"
-          style={{
-            height: '11px',
-            width: '85%',
+            height: '13px',
+            width: '68%',
             borderRadius: '6px',
             backgroundColor: 'var(--bg-tertiary)',
           }}
