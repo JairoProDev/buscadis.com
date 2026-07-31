@@ -97,9 +97,9 @@ const AdisoCard = forwardRef<HTMLDivElement, AdisoCardProps>(
         const isCatalogProduct = adiso.privateData?.source === 'catalog_product';
 
         const gridColumnSpan = paquete.columnas;
-        const gridRowSpan = paquete.filas;
         const gridColumn = vista === 'list' || vista === 'feed' ? '1 / -1' : `span ${gridColumnSpan}`;
-        const gridRow = vista === 'list' || vista === 'feed' ? 'auto' : `span ${gridRowSpan}`;
+        // Keep cards compact: never span multiple grid rows (was making cards very tall)
+        const gridRow = 'auto';
         const minHeight = vista === 'list' ? '96px' : undefined;
 
         if (isHidden) {
@@ -143,9 +143,9 @@ const AdisoCard = forwardRef<HTMLDivElement, AdisoCardProps>(
                 style={{
                     gridColumn,
                     gridRow,
-                    height: vista === 'feed' ? 'auto' : '100%',
+                    height: 'auto',
                     minHeight: minHeight || 'auto',
-                    alignSelf: vista === 'feed' ? 'start' : undefined,
+                    alignSelf: 'start',
                 }}
             >
                 {vista === 'feed' && (

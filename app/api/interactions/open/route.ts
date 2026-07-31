@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { getUserFromRouteRequest } from '@/lib/supabase-route-auth';
-import { supabaseAdmin } from '@/lib/supabase-admin';
 import { openAdInteraction } from '@/lib/interactions/auto-contact';
+import { resolveListingForInteraction } from '@/lib/interactions/resolve-listing';
 import { registrarContacto } from '@/lib/analytics';
 
 const bodySchema = z.object({
@@ -22,18 +22,13 @@ export async function POST(request: NextRequest) {
     }
 
     const { adisoId } = parsed.data;
+    const listing = await resolveListingForInteraction(adisoId);
 
-    const { data: adiso } = await supabaseAdmin
-      .from('adisos')
-      .select('id, titulo, user_id, categoria, esta_activo')
-      .eq('id', adisoId)
-      .maybeSingle();
-
-    if (!adiso) {
+    if (!listing) {
       return NextResponse.json({ error: 'Aviso no encontrado' }, { status: 404 });
     }
 
-    const sellerId = adiso.user_id as string | null;
+    const sellerId = listing.sellerUserId;
     if (!sellerId) {
       return NextResponse.json({ error: 'Vendedor no registrado en la app' }, { status: 422 });
     }
@@ -42,24 +37,20 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'No puedes contactarte a ti mismo' }, { status: 400 });
     }
 
-    if (adiso.esta_activo === false) {
-      return NextResponse.json({ error: 'Aviso no activo' }, { status: 410 });
-    }
-
     const result = await openAdInteraction({
       viewerUserId: user.id,
-      adisoId,
-      adisoTitle: adiso.titulo as string,
+      adisoId: listing.id,
+      adisoTitle: listing.titulo,
       sellerUserId: sellerId,
     });
 
     if (result.isNew) {
-      await registrarContacto(user.id, adisoId, adiso.categoria as string, 'chat');
+      await registrarContacto(user.id, listing.id, listing.categoria || 'productos', 'chat');
     }
 
     return NextResponse.json({
       ...result,
-      adisoTitle: adiso.titulo,
+      adisoTitle: listing.titulo,
     });
   } catch (e) {
     console.error('[interactions/open]', e);

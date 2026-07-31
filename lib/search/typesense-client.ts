@@ -42,6 +42,8 @@ export async function typesenseSuggest(prefix: string, limit = 8): Promise<Sugge
   if (!cfg || prefix.trim().length < 2) return [];
 
   const q = prefix.trim();
+  // Short queries: typos invent garbage ("ceviche" → unrelated). Longer: allow 1 typo.
+  const titleTypos = q.length <= 6 ? 0 : 1;
   const body = {
     searches: [
       {
@@ -49,7 +51,7 @@ export async function typesenseSuggest(prefix: string, limit = 8): Promise<Sugge
         q,
         query_by: 'titulo',
         prefix: true,
-        num_typos: 2,
+        num_typos: titleTypos,
         per_page: limit,
       },
       {
@@ -57,7 +59,7 @@ export async function typesenseSuggest(prefix: string, limit = 8): Promise<Sugge
         q,
         query_by: 'query',
         prefix: true,
-        num_typos: 1,
+        num_typos: q.length <= 5 ? 0 : 1,
         per_page: 3,
       },
     ],

@@ -38,8 +38,28 @@ export async function openAdInteraction(params: {
   const initialMessage = `Hola, vi tu aviso "${adisoTitle}" y me interesa saber más.`;
 
   let conversationId: string | undefined;
-  const existingConv = await findConversationBetween(viewerUserId, sellerUserId);
-  conversationId = existingConv?.id as string | undefined;
+
+  // Prefer an existing conversation for THIS listing (avoid mixing iPad with empleos chat)
+  const { data: existingForAd } = await supabaseAdmin
+    .from('conversations')
+    .select('id')
+    .eq('adiso_id', adisoId)
+    .contains('participants', [viewerUserId, sellerUserId])
+    .maybeSingle();
+
+  if (existingForAd?.id) {
+    conversationId = existingForAd.id as string;
+  } else {
+    const existingConv = await findConversationBetween(viewerUserId, sellerUserId);
+    // Only reuse if it has no adiso yet or already points at this one
+    if (existingConv && (!existingConv.adiso_id || existingConv.adiso_id === adisoId)) {
+      conversationId = existingConv.id as string;
+      await supabaseAdmin
+        .from('conversations')
+        .update({ adiso_id: adisoId })
+        .eq('id', conversationId);
+    }
+  }
 
   if (!conversationId) {
     const participants = [viewerUserId, sellerUserId].sort();
@@ -54,24 +74,23 @@ export async function openAdInteraction(params: {
       .select('id')
       .single();
     conversationId = created?.id as string;
-  } else {
-    await supabaseAdmin
-      .from('conversations')
-      .update({ adiso_id: adisoId })
-      .eq('id', conversationId);
   }
 
   if (!conversationId) {
     throw new Error('No se pudo crear la conversación');
   }
 
-  await supabaseAdmin.from('messages').insert({
-    conversation_id: conversationId,
-    sender_id: viewerUserId,
-    content: initialMessage,
-    message_kind: 'system_buyer',
-    metadata: { adiso_id: adisoId, auto: true },
-  });
+  // Only seed the greeting when this listing session is brand new
+  const isBrandNewSession = !existingSession;
+  if (isBrandNewSession) {
+    await supabaseAdmin.from('messages').insert({
+      conversation_id: conversationId,
+      sender_id: viewerUserId,
+      content: initialMessage,
+      message_kind: 'system_buyer',
+      metadata: { adiso_id: adisoId, auto: true },
+    });
+  }
 
   const { data: session, error } = await supabaseAdmin
     .from('ad_interaction_sessions')

@@ -216,22 +216,40 @@ export default function AdisoLandingPage({ adiso, onVolver }: AdisoLandingPagePr
   };
 
   const handleQuickQuestion = async (field: RevealField) => {
-    if (user && session?.access_token) {
-      await askField(field);
+    if (!user || !session?.access_token) {
+      if (externalContact) {
+        const q = FIELD_QUESTIONS[field] || 'Hola, tengo una consulta';
+        if (externalContact.kind === 'whatsapp' || externalContact.kind === 'telefono') {
+          const numero = externalContact.valor.replace(/\D/g, '');
+          const text = encodeURIComponent(`${q}\n\nVi: ${displayTitle}`);
+          window.open(`https://wa.me/${numero}?text=${text}`, '_blank');
+          return;
+        }
+        handleExternalContact(externalContact);
+        return;
+      }
+      openAuthModal();
       return;
     }
-    if (externalContact) {
-      const q = FIELD_QUESTIONS[field] || 'Hola, tengo una consulta';
-      if (externalContact.kind === 'whatsapp' || externalContact.kind === 'telefono') {
-        const numero = externalContact.valor.replace(/\D/g, '');
-        const text = encodeURIComponent(`${q}\n\nVi: ${displayTitle}`);
-        window.open(`https://wa.me/${numero}?text=${text}`, '_blank');
-      } else {
+
+    if (!sellerUserId) {
+      if (externalContact) {
+        const q = FIELD_QUESTIONS[field] || 'Hola, tengo una consulta';
+        if (externalContact.kind === 'whatsapp' || externalContact.kind === 'telefono') {
+          const numero = externalContact.valor.replace(/\D/g, '');
+          const text = encodeURIComponent(`${q}\n\nVi: ${displayTitle}`);
+          window.open(`https://wa.me/${numero}?text=${text}`, '_blank');
+          return;
+        }
         handleExternalContact(externalContact);
       }
       return;
     }
-    openAuthModal();
+
+    const result = await askField(field);
+    if (result && 'needsAuth' in result && result.needsAuth) {
+      openAuthModal();
+    }
   };
 
   const actionBtnClass =

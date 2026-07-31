@@ -549,15 +549,34 @@ function HomeContent() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Error de búsqueda');
 
-      const apiResults = (data.adisos ?? []) as Adiso[];
-      const catalogResults = await getCatalogProductsAsAdisos({
-        limit: 60,
-        offset: 0,
-        categoria: categoriaFiltro !== 'todos' ? categoriaFiltro : undefined,
-        busqueda: q,
-      });
+      const apiResults = ((data.adisos ?? []) as Adiso[]).filter(
+        (a) => typeof a.titulo === 'string' && a.titulo.trim().length > 0
+      );
+      const catalogResults = (
+        await getCatalogProductsAsAdisos({
+          limit: 60,
+          offset: 0,
+          categoria: categoriaFiltro !== 'todos' ? categoriaFiltro : undefined,
+          busqueda: q,
+          preferImages: true,
+        })
+      ).filter((a) => typeof a.titulo === 'string' && a.titulo.trim().length > 0);
+
+      const qNorm = q.toLowerCase();
+      const matchesQuery = (a: Adiso) => {
+        const title = (a.titulo || '').toLowerCase();
+        const desc = (a.descripcion || '').toLowerCase();
+        if (title.includes(qNorm) || desc.includes(qNorm)) return true;
+        // Require at least one significant token (≥4 chars) in title/desc
+        const tokens = qNorm.split(/\s+/).filter((t) => t.length >= 4);
+        if (tokens.length === 0) return title.includes(qNorm);
+        return tokens.some((t) => title.includes(t) || desc.includes(t));
+      };
+
       const merged = new Map<string, Adiso>();
-      [...apiResults, ...catalogResults].forEach((item) => merged.set(item.id, item));
+      [...apiResults, ...catalogResults].forEach((item) => {
+        if (matchesQuery(item)) merged.set(item.id, item);
+      });
       const results = Array.from(merged.values());
       setSearchResults(results);
       setHayMasAdisos(false);
@@ -610,13 +629,14 @@ function HomeContent() {
     }
 
     const baseAdisos = searchResults !== null ? searchResults : adisos;
-
+    // Keep API ranking when searching; "recientes" would destroy relevance
     const filtrados = applyBrowseFilters({
       adisos: baseAdisos,
       categoria: categoriaFiltro,
       busqueda: '',
       filters: browseFilters,
       ordenamiento,
+      preserveOrder: searchResults !== null && ordenamiento === 'recientes',
       userLat: profile?.latitud,
       userLng: profile?.longitud,
       interestProfile,

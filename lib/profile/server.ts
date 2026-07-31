@@ -142,7 +142,7 @@ export async function getViewHistoryServer(userId: string, limit = 50) {
 export async function findConversationBetween(userId: string, otherUserId: string) {
   const { data } = await supabaseAdmin
     .from('conversations')
-    .select('id, participants')
+    .select('id, participants, adiso_id')
     .contains('participants', [userId]);
 
   return (data || []).find(

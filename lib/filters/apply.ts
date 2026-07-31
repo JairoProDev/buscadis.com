@@ -102,6 +102,8 @@ export interface ApplyBrowseFiltersInput {
   busqueda: string;
   filters: BrowseFilterState;
   ordenamiento: TipoOrdenamiento;
+  /** Keep input order (API search ranking) — skips feed re-sort / exploration */
+  preserveOrder?: boolean;
   userLat?: number;
   userLng?: number;
   interestProfile?: UserInterestProfile | null;
@@ -114,6 +116,7 @@ export function applyBrowseFilters({
   busqueda,
   filters,
   ordenamiento,
+  preserveOrder = false,
   userLat,
   userLng,
   interestProfile,
@@ -197,6 +200,11 @@ export function applyBrowseFilters({
       }
       return tituloMatch || descripcionMatch || ubicacionMatch;
     });
+  }
+
+  // Preserve API relevance order (search results already ranked)
+  if (preserveOrder) {
+    return filtrados;
   }
 
   const sorted = [...filtrados].sort((a, b) => {

@@ -39,12 +39,37 @@ function generateShortId(size = 10) {
 
 function detectarCategoria(texto: string): Categoria {
     const t = texto.toLowerCase();
-    if (t.match(/trabajo|empleo|necesito|personal|cocinero|mozo|ayudante|asistente|vendedor/)) return 'empleos';
-    if (t.match(/casa|departamento|terreno|alquiler|vendo|donación/)) return 'inmuebles';
-    if (t.match(/auto|carro|moto|camioneta/)) return 'vehiculos';
-    if (t.match(/servicio|reparación|limpieza|veterinario|clases/)) return 'servicios';
-    if (t.match(/fiesta|evento|show|concierto/)) return 'eventos';
-    if (t.match(/negocio|traspaso|socio/)) return 'negocios';
+    // Orden: más específico primero (evitar que "vendo" mande todo a inmuebles/productos)
+    if (
+        /trabajo|empleo|necesito personal|requiere|requeri|vacante|cocinero|mozo|ayudante|asistente|vendedor|chofer|conductor|curriculum|currículum|\bcv\b|sueldo/.test(
+            t
+        )
+    ) {
+        return 'empleos';
+    }
+    if (
+        /anticresis|habitaci[oó]n|departamento|alquilo|se alquila|en alquiler|terreno|casa ampl|local comercial|oficina en |inmueble|canch[oó]n|lote de |airbnb/.test(
+            t
+        )
+    ) {
+        return 'inmuebles';
+    }
+    if (/auto |carro |camioneta|\bmoto\b|motocicleta|kilometraje|toyota|hyundai|nissan/.test(t)) {
+        return 'vehiculos';
+    }
+    if (/traspaso|negocio en marcha|buscar socio|fondo de comercio/.test(t)) {
+        return 'negocios';
+    }
+    if (/servicio de |reparaci[oó]n|limpieza|veterinario|clases de |gasfiter|electricista/.test(t)) {
+        return 'servicios';
+    }
+    if (/fiesta|evento|show|concierto/.test(t)) {
+        return 'eventos';
+    }
+    // "vendo/venta" genérico → productos solo si no parece inmueble
+    if (/vendo|venta|remato/.test(t) && !/departamento|casa |terreno|local |oficina|habitaci|alquilo/.test(t)) {
+        return 'productos';
+    }
     return 'productos';
 }
 

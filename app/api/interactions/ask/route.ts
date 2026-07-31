@@ -8,33 +8,18 @@ import {
   photoReplyContent,
   RevealField,
 } from '@/lib/interactions/field-reveal';
-import { getInteractionSession, updateRevealedFields } from '@/lib/interactions/auto-contact';
+import {
+  getInteractionSession,
+  openAdInteraction,
+  updateRevealedFields,
+} from '@/lib/interactions/auto-contact';
+import { resolveListingForInteraction } from '@/lib/interactions/resolve-listing';
 
 const bodySchema = z.object({
   adisoId: z.string().min(1),
   field: z.string().min(1),
   photoIndex: z.number().int().min(0).optional(),
 });
-
-function parsePrivateData(row: Record<string, unknown>) {
-  const priv = row.private_data;
-  if (priv && typeof priv === 'object') return priv as Record<string, unknown>;
-  try {
-    return typeof priv === 'string' ? JSON.parse(priv) : {};
-  } catch {
-    return {};
-  }
-}
-
-function parseFeatures(row: Record<string, unknown>) {
-  const f = row.features;
-  if (f && typeof f === 'object') return f as Record<string, unknown>;
-  try {
-    return typeof f === 'string' ? JSON.parse(f) : {};
-  } catch {
-    return {};
-  }
-}
 
 export async function POST(request: NextRequest) {
   try {
@@ -49,38 +34,45 @@ export async function POST(request: NextRequest) {
     }
 
     const { adisoId, field, photoIndex } = parsed.data;
+    const listing = await resolveListingForInteraction(adisoId);
 
-    const { data: adiso } = await supabaseAdmin
-      .from('adisos')
-      .select(
-        'id, titulo, descripcion, precio, moneda, tipo_precio, ubicacion, imagenes_urls, user_id, publish_tier, features, private_data, contact_locked, payment_status, contacto'
-      )
-      .eq('id', adisoId)
-      .maybeSingle();
-
-    if (!adiso) {
+    if (!listing) {
       return NextResponse.json({ error: 'Aviso no encontrado' }, { status: 404 });
     }
 
-    const contactLocked = Boolean(adiso.contact_locked) ||
-      adiso.payment_status === 'pending' ||
-      adiso.payment_status === 'underpaid';
-
-    if (contactLocked && (field === 'contacto' || field === 'whatsapp')) {
-      return NextResponse.json({
-        error: 'contact_locked',
-        message: 'El contacto del anunciante estará disponible cuando verifique su pago.',
-      }, { status: 403 });
+    if (listing.contactLocked && (field === 'contacto' || field === 'whatsapp')) {
+      return NextResponse.json(
+        {
+          error: 'contact_locked',
+          message: 'El contacto del anunciante estará disponible cuando verifique su pago.',
+        },
+        { status: 403 }
+      );
     }
 
-    const sellerId = adiso.user_id as string;
+    const sellerId = listing.sellerUserId;
+    if (!sellerId) {
+      return NextResponse.json({ error: 'Vendedor no registrado en la app' }, { status: 422 });
+    }
     if (sellerId === user.id) {
       return NextResponse.json({ error: 'No aplica en tu propio aviso' }, { status: 400 });
     }
 
-    const session = await getInteractionSession(user.id, adisoId);
+    let session = await getInteractionSession(user.id, listing.id);
     if (!session?.conversation_id) {
-      return NextResponse.json({ error: 'Abre el aviso primero' }, { status: 409 });
+      const opened = await openAdInteraction({
+        viewerUserId: user.id,
+        adisoId: listing.id,
+        adisoTitle: listing.titulo,
+        sellerUserId: sellerId,
+      });
+      session = await getInteractionSession(user.id, listing.id);
+      if (!session?.conversation_id) {
+        return NextResponse.json(
+          { error: 'No se pudo abrir la conversación', conversationId: opened.conversationId },
+          { status: 500 }
+        );
+      }
     }
 
     const conversationId = session.conversation_id as string;
@@ -93,31 +85,16 @@ export async function POST(request: NextRequest) {
       sender_id: user.id,
       content: question,
       message_kind: 'system_buyer',
-      metadata: { field, photoIndex, adiso_id: adisoId },
+      metadata: { field, photoIndex, adiso_id: listing.id },
     });
 
-    const priv = parsePrivateData(adiso as Record<string, unknown>);
-    const features = parseFeatures(adiso as Record<string, unknown>);
-    const publishTier = (adiso.publish_tier as string) || 'paid';
-    const autoReplyEnabled = publishTier === 'paid' && features.auto_reply !== false;
-
-    let imagenesUrls: string[] | undefined;
-    try {
-      imagenesUrls =
-        typeof adiso.imagenes_urls === 'string'
-          ? JSON.parse(adiso.imagenes_urls)
-          : (adiso.imagenes_urls as string[]) || undefined;
-    } catch {
-      imagenesUrls = undefined;
-    }
-
     const adData = {
-      precio: (priv.precio as number) ?? (adiso.precio as number),
-      moneda: (priv.moneda as string) ?? (adiso.moneda as string),
-      tipoPrecio: (priv.tipoPrecio as string) ?? (adiso.tipo_precio as string),
-      ubicacion: priv.ubicacion ?? adiso.ubicacion,
-      descripcion: adiso.descripcion as string,
-      imagenesUrls: (priv.imagenesUrls as string[]) || imagenesUrls,
+      precio: listing.precio ?? undefined,
+      moneda: listing.moneda ?? undefined,
+      tipoPrecio: listing.tipoPrecio ?? undefined,
+      ubicacion: listing.ubicacion,
+      descripcion: listing.descripcion,
+      imagenesUrls: listing.imagenesUrls,
     };
 
     let replyText: string | null = null;
@@ -128,43 +105,47 @@ export async function POST(request: NextRequest) {
       const photo = photoReplyContent(adData.imagenesUrls, idx);
       replyText = photo.text;
       replyImage = photo.imageUrl;
-    } else if (autoReplyEnabled) {
-      replyText = buildAutoReply(field as RevealField, adData, photoIndex);
+    } else {
+      // Always answer with known listing fields so the UI + chat stay in sync
+      replyText =
+        buildAutoReply(field as RevealField, adData, photoIndex) ||
+        'Te confirmo por aquí. ¿Quieres que te cuente algo más?';
     }
 
-    let revealedNow = false;
+    if (!revealed.includes(fieldKey)) revealed.push(fieldKey);
 
-    if (replyText && autoReplyEnabled) {
-      await new Promise((r) => setTimeout(r, 400 + Math.random() * 400));
+    await updateRevealedFields(
+      session.id as string,
+      revealed,
+      field === 'fotos' ? photoIndex ?? 1 : undefined
+    );
 
-      await supabaseAdmin.from('messages').insert({
-        conversation_id: conversationId,
-        sender_id: sellerId,
-        content: replyImage ? `${replyText}\n${replyImage}` : replyText,
-        message_kind: 'system_seller',
-        metadata: { field, photoIndex, adiso_id: adisoId, auto: true, imageUrl: replyImage },
-      });
+    await new Promise((r) => setTimeout(r, 250 + Math.random() * 250));
 
-      if (!revealed.includes(fieldKey)) revealed.push(fieldKey);
-      revealedNow = true;
+    await supabaseAdmin.from('messages').insert({
+      conversation_id: conversationId,
+      sender_id: sellerId,
+      content: replyImage ? `${replyText}\n${replyImage}` : replyText,
+      message_kind: 'system_seller',
+      metadata: { field, photoIndex, adiso_id: listing.id, auto: true, imageUrl: replyImage },
+    });
 
-      await updateRevealedFields(
-        session.id as string,
-        revealed,
-        field === 'fotos' ? photoIndex ?? 1 : undefined
-      );
+    await supabaseAdmin
+      .from('conversations')
+      .update({ last_message: replyText, last_message_at: new Date().toISOString() })
+      .eq('id', conversationId);
 
-      await supabaseAdmin
-        .from('conversations')
-        .update({ last_message: replyText, last_message_at: new Date().toISOString() })
-        .eq('id', conversationId);
-    } else if (!autoReplyEnabled) {
+    const publishTier = listing.publishTier || 'paid';
+    const autoReplyFeature = listing.features.auto_reply !== false;
+    const isPaidAuto = publishTier === 'paid' && autoReplyFeature;
+
+    if (!isPaidAuto) {
       await supabaseAdmin.from('notifications').insert({
         user_id: sellerId,
         type: 'message',
         title: 'Nueva consulta sobre tu aviso',
         body: question,
-        data: { adiso_id: adisoId, conversation_id: conversationId },
+        data: { adiso_id: listing.id, conversation_id: conversationId },
       });
     }
 
@@ -173,9 +154,9 @@ export async function POST(request: NextRequest) {
       question,
       reply: replyText,
       replyImage,
-      revealed: revealedNow,
+      revealed: true,
       revealedFields: revealed,
-      upsell: !autoReplyEnabled,
+      upsell: !isPaidAuto,
     });
   } catch (e) {
     console.error('[interactions/ask]', e);

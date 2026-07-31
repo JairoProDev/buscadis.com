@@ -122,11 +122,12 @@ export async function executeSearch(params: ExecuteSearchParams): Promise<Execut
 
   try {
     const hybridResults = await hybridSearch({
-      query: normalized.cleaned || normalized.raw,
+      // Use raw query for embedding + FTS. Expanded synonym soup ANDs in plainto_tsquery and kills matches.
+      query: normalized.raw,
       category: filterCategory,
       location: filterLocation,
       maxResults,
-      threshold: 0.08,
+      threshold: 0.28,
       onlyActive: true,
     });
 
@@ -142,16 +143,13 @@ export async function executeSearch(params: ExecuteSearchParams): Promise<Execut
     source = 'trgm';
   }
 
-  if (scored.length < Math.min(5, maxResults)) {
+  // Only pad with trigram when hybrid returned nothing — never dilute good matches with fuzzy noise
+  if (scored.length === 0) {
     const trgm = await trgmFallback(normalized.cleaned || normalized.raw, maxResults);
-    const seen = new Set(scored.map((s) => s.adiso.id));
-    for (const item of trgm) {
-      if (!seen.has(item.adiso.id)) {
-        scored.push(item);
-        seen.add(item.adiso.id);
-      }
+    if (trgm.length > 0) {
+      scored = trgm.filter((item) => (item.score ?? 0) >= 0.2);
+      source = 'trgm';
     }
-    if (source === 'hybrid' && trgm.length > 0) source = 'hybrid+trgm';
   }
 
   const reranked = rerankSearchResults(scored, {

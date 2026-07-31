@@ -55,7 +55,7 @@ export async function hybridSearch(
     category,
     location,
     maxResults = 10,
-    threshold = 0.1, // Lower threshold = more results
+    threshold = 0.28,
     onlyActive = true,
   } = params;
 
@@ -90,14 +90,14 @@ export async function hybridSearch(
       throw new Error(`Search failed: ${error.message}`);
     }
 
-    // FALLBACK: If no results, try a "relaxed" search with lower threshold
+    // Relaxed fallback: still require meaningful similarity (never near-zero noise)
     if (!data || data.length === 0) {
-      console.log('⚠️ No exact matches. Attempting relaxed search (lower threshold)...');
+      console.log('⚠️ No exact matches. Attempting relaxed search...');
 
       const relaxedResult = await supabase.rpc('match_adisos_hybrid', {
         query_embedding: queryEmbedding,
         query_text: query,
-        match_threshold: 0.01, // Significantly lower threshold to find broad matches
+        match_threshold: Math.min(threshold, 0.18),
         match_count: maxResults,
         filter_category: category || null,
         filter_location: location || null,
@@ -111,59 +111,79 @@ export async function hybridSearch(
     }
 
     if (!data || data.length === 0) {
-      console.log('📭 No results found even after relaxation');
-      // Fallback keyword-only query to avoid hard zero results.
+      console.log('📭 No hybrid matches — trying title keyword fallback');
       const { data: fallbackRows } = await supabase
         .from('adisos')
         .select('*')
         .ilike('titulo', `%${query}%`)
+        .eq('esta_activo', true)
         .limit(maxResults);
       if (!fallbackRows || fallbackRows.length === 0) return [];
       data = fallbackRows.map((row: any) => ({
         ...row,
         similarity_score: 0,
-        keyword_rank: 0.1,
-        hybrid_score: 0.1,
+        keyword_rank: 0.2,
+        hybrid_score: 0.2,
       }));
     }
 
-    console.log(`✅ Found ${data.length} results`);
+    console.log(`✅ Found ${data.length} raw results`);
 
-    // Step 3: Deduplicate and Transform results
+    // Step 3: Deduplicate, gate weak semantic-only hits, transform
     const uniqueIds = new Set();
     const uniqueTitles = new Set();
     const results: HybridSearchResult[] = [];
+    const queryNorm = query.toLowerCase().trim();
 
     for (const row of data) {
-      // Deduplicate by ID
       if (uniqueIds.has(row.id)) continue;
 
-      // Deduplicate by Title (simple fuzzy check for identical titles in same search)
-      // This prevents "spam" or double posting from looking bad
       const normalizedTitle = row.titulo?.toLowerCase().trim();
+      if (!normalizedTitle) continue;
       if (uniqueTitles.has(normalizedTitle)) continue;
+
+      const similarity = Number(row.similarity_score) || 0;
+      const keywordRank = Number(row.keyword_rank) || 0;
+      const hybrid = Number(row.hybrid_score) || 0;
+      const titleHasQuery =
+        Boolean(normalizedTitle) &&
+        queryNorm.length >= 3 &&
+        normalizedTitle.includes(queryNorm);
+      const descHasQuery =
+        typeof row.descripcion === 'string' &&
+        queryNorm.length >= 3 &&
+        row.descripcion.toLowerCase().includes(queryNorm);
+
+      // Drop pure semantic noise: no lexical signal and weak similarity
+      if (keywordRank <= 0 && !titleHasQuery && !descHasQuery && similarity < 0.35) {
+        continue;
+      }
+      if (hybrid < Math.min(threshold, 0.15) && !titleHasQuery && !descHasQuery) {
+        continue;
+      }
 
       uniqueIds.add(row.id);
       uniqueTitles.add(normalizedTitle);
 
       const freshness = calculateFreshnessBoost(row.fecha_publicacion || row.created_at);
-      const baseScore = row.hybrid_score || 0;
-      const rerankScore = baseScore + freshness;
+      const baseScore = hybrid;
+      const lexicalBoost = titleHasQuery ? 0.25 : descHasQuery ? 0.12 : 0;
+      const rerankScore = baseScore + freshness + lexicalBoost;
       results.push({
         adiso: {
           id: row.id,
           categoria: row.categoria as Categoria,
-          titulo: row.titulo,
-          descripcion: row.descripcion,
+          titulo: row.titulo || '',
+          descripcion: row.descripcion || '',
           contacto: row.contacto,
           ubicacion: row.ubicacion,
           fechaPublicacion: row.fecha_publicacion,
           horaPublicacion: row.hora_publicacion,
           imagenesUrls: typeof row.imagenes_urls === 'string' ? JSON.parse(row.imagenes_urls) : row.imagenes_urls,
         },
-        similarity_score: row.similarity_score || 0,
-        keyword_rank: row.keyword_rank || 0,
-        hybrid_score: row.hybrid_score || 0,
+        similarity_score: similarity,
+        keyword_rank: keywordRank,
+        hybrid_score: hybrid,
         rerank_score: rerankScore,
       });
     }

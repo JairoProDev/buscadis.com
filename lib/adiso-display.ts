@@ -67,8 +67,8 @@ export function sanitizeAdisoDescripcion(descripcion: string | undefined | null)
 }
 
 /** Títulos en MAYÚSCULAS → formato legible */
-export function toDisplayTitle(titulo: string): string {
-  const t = titulo.trim();
+export function toDisplayTitle(titulo: string | null | undefined): string {
+  const t = (titulo ?? '').trim();
   if (!t) return '';
   const letters = t.replace(/[^a-zA-ZáéíóúñÁÉÍÓÚÑ]/g, '');
   if (letters.length === 0) return t;

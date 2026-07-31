@@ -494,12 +494,57 @@ Ref: ${adiso.edicionNumero || adiso.id}`;
     window.open(getWhatsAppUrl(contact.valor, adiso.titulo, adiso), '_blank');
   };
 
-  const sellerUserId = adiso.user_id || adiso.usuario_id || adiso.vendedor?.id;
+  const sellerUserId = adiso.user_id || adiso.usuario_id || undefined;
   const canAutoInteract = Boolean(sellerUserId && !esMiAdiso && user);
-  const { askField, isRevealed, upsell: interactionUpsell } = useAdInteractionSession(
+  const { askField, isRevealed, asking, upsell: interactionUpsell } = useAdInteractionSession(
     adiso.id,
     canAutoInteract
   );
+
+  const [localRevealed, setLocalRevealed] = useState<string[]>([]);
+
+  useEffect(() => {
+    setLocalRevealed([]);
+  }, [adiso.id]);
+
+  const fieldIsRevealed = (field: RevealField, photoIndex?: number) => {
+    const key = photoIndex != null ? `fotos_${photoIndex}` : field;
+    return isRevealed(field, photoIndex) || localRevealed.includes(key) || localRevealed.includes(field);
+  };
+
+  const handleAskField = async (field: RevealField, photoIndex?: number) => {
+    if (esMiAdiso) return;
+
+    if (!user) {
+      openAuthModal();
+      return;
+    }
+
+    const fieldKey = photoIndex != null ? `fotos_${photoIndex}` : field;
+    // Optimistic reveal so info appears immediately in the detail panel
+    setLocalRevealed((prev) => (prev.includes(fieldKey) ? prev : [...prev, fieldKey]));
+
+    if (!sellerUserId) {
+      const q = FIELD_QUESTIONS[field] || 'Hola, tengo una consulta';
+      if (externalContact) {
+        if (externalContact.kind === 'whatsapp' || externalContact.kind === 'telefono') {
+          const numero = externalContact.valor.replace(/\D/g, '');
+          const text = encodeURIComponent(`${q}\n\nVi: ${adiso.titulo}`);
+          window.open(`https://wa.me/${numero}?text=${text}`, '_blank');
+          return;
+        }
+        void handleExternalContact(externalContact);
+        return;
+      }
+      return;
+    }
+
+    const result = await askField(field, photoIndex);
+    if (result && 'needsAuth' in result && result.needsAuth) {
+      openAuthModal();
+      setLocalRevealed((prev) => prev.filter((k) => k !== fieldKey));
+    }
+  };
 
   const handleMensajeBuscadis = async () => {
     if (!sellerUserId || esMiAdiso) return;
@@ -745,7 +790,7 @@ Ref: ${adiso.edicionNumero || adiso.id}`;
     photoIndex?: number;
   }) => {
     const Icon = FIELD_ICONS[field] || IconDescription;
-    const revealed = isRevealed(field, photoIndex);
+    const revealed = fieldIsRevealed(field, photoIndex);
     const question = FIELD_QUESTIONS[field] || `¿Me das más información?`;
 
     return (
@@ -760,8 +805,9 @@ Ref: ${adiso.edicionNumero || adiso.id}`;
         ) : (
           <button
             type="button"
-            style={askBtnStyle}
-            onClick={() => void (onAsk ? onAsk() : askField(field, photoIndex))}
+            style={{ ...askBtnStyle, opacity: asking ? 0.65 : 1 }}
+            disabled={asking}
+            onClick={() => void (onAsk ? onAsk() : handleAskField(field, photoIndex))}
           >
             {question}
           </button>
@@ -832,7 +878,7 @@ Ref: ${adiso.edicionNumero || adiso.id}`;
                 onClick={() => {
                   const next = Math.min(imagenesGaleria.length - 1, galleryIndex + 1);
                   setGalleryIndex(next);
-                  void askField('fotos', next);
+                  void handleAskField('fotos', next);
                 }}
                 disabled={galleryIndex >= imagenesGaleria.length - 1}
                 style={galleryNavBtnStyle}
@@ -872,7 +918,7 @@ Ref: ${adiso.edicionNumero || adiso.id}`;
         {displayTitle}
       </h2>
 
-      {displayDescription && isRevealed('descripcion') && (
+      {displayDescription && fieldIsRevealed('descripcion') && (
         <div style={{ fontSize: '0.9375rem', lineHeight: 1.55, color: 'var(--text-secondary)', whiteSpace: 'pre-wrap' }}>
           {displayDescription}
         </div>

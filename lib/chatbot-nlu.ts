@@ -26,7 +26,9 @@ const SINONIMOS: Record<string, string[]> = {
     'auto': ['carro', 'vehículo', 'automóvil', 'coche'],
     'moto': ['motocicleta', 'scooter', 'lineal'],
     'local': ['tienda', 'comercio', 'espacio comercial', 'stand', 'puesto'],
-    'terreno': ['lote', 'sitio', 'solar', 'predio']
+    'terreno': ['lote', 'sitio', 'solar', 'predio'],
+    'ceviche': ['cevicheria', 'cevichería'],
+    'comida': ['restaurante', 'menu', 'menú', 'almuerzo', 'cena'],
 };
 
 /**
