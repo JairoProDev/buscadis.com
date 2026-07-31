@@ -249,7 +249,8 @@ const AdisoCard = forwardRef<HTMLDivElement, AdisoCardProps>(
                     ) : (
                         (() => {
                             const flyer = flyerStateFromPrivateData(
-                                adiso.privateData as Record<string, unknown> | undefined
+                                adiso.privateData as Record<string, unknown> | undefined,
+                                { categoria: adiso.categoria, adisoId: adiso.id }
                             );
                             const content = buildFlyerContentFromAdiso(adiso);
                             const cfg = resolveFlyerConfig(

@@ -882,7 +882,10 @@ export default function ModalAdiso({
       ) : (
         <div className="overflow-hidden rounded-2xl" style={{ border: '1px solid var(--border-color)' }}>
           {(() => {
-            const flyer = flyerStateFromPrivateData(adiso.privateData as Record<string, unknown>);
+            const flyer = flyerStateFromPrivateData(adiso.privateData as Record<string, unknown>, {
+              categoria: adiso.categoria,
+              adisoId: adiso.id,
+            });
             return (
               <FlyerCanvas
                 templateId={flyer.templateId}

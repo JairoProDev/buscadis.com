@@ -4,7 +4,10 @@ import { getAdisosCache, getAdisos } from '@/lib/storage';
 import Image from 'next/image';
 import Link from 'next/link';
 import { getAdisoUrl } from '@/lib/url';
-import { IconLocation, IconImage } from './Icons';
+import { IconLocation } from './Icons';
+import FlyerCanvas from '@/components/flyer/FlyerCanvas';
+import { buildFlyerContentFromAdiso, flyerStateFromPrivateData } from '@/lib/flyer/layout';
+import { resolveFlyerConfig } from '@/lib/flyer/templates';
 
 interface SimilarAdisosProps {
   currentAdiso: Adiso;
@@ -91,9 +94,20 @@ export default function SimilarAdisos({ currentAdiso }: SimilarAdisosProps) {
                   sizes="(max-width: 640px) 50vw, 200px"
                 />
               ) : (
-                <div className="flex h-full w-full items-center justify-center text-[var(--text-tertiary)]">
-                  <IconImage size={28} />
-                </div>
+                (() => {
+                  const flyer = flyerStateFromPrivateData(
+                    ad.privateData as Record<string, unknown> | undefined,
+                    { categoria: ad.categoria, adisoId: ad.id }
+                  );
+                  return (
+                    <FlyerCanvas
+                      templateId={flyer.templateId}
+                      config={resolveFlyerConfig(ad.categoria, flyer.templateId, flyer.config)}
+                      content={buildFlyerContentFromAdiso(ad)}
+                      className="h-full w-full"
+                    />
+                  );
+                })()
               )}
             </div>
 
