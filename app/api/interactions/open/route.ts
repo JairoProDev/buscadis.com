@@ -7,6 +7,8 @@ import { registrarContacto } from '@/lib/analytics';
 
 const bodySchema = z.object({
   adisoId: z.string().min(1),
+  /** Explicit user action to start chat — notifies the seller. Warm opens should omit this. */
+  notifySeller: z.boolean().optional(),
 });
 
 export async function POST(request: NextRequest) {
@@ -21,7 +23,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Datos inválidos' }, { status: 400 });
     }
 
-    const { adisoId } = parsed.data;
+    const { adisoId, notifySeller } = parsed.data;
     const listing = await resolveListingForInteraction(adisoId);
 
     if (!listing) {
@@ -42,6 +44,7 @@ export async function POST(request: NextRequest) {
       adisoId: listing.id,
       adisoTitle: listing.titulo,
       sellerUserId: sellerId,
+      notifySeller: Boolean(notifySeller),
     });
 
     if (result.isNew) {

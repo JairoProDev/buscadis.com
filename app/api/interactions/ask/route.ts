@@ -14,6 +14,7 @@ import {
   updateRevealedFields,
 } from '@/lib/interactions/auto-contact';
 import { resolveListingForInteraction } from '@/lib/interactions/resolve-listing';
+import { notifyChatParticipant } from '@/lib/chat/notify';
 
 const bodySchema = z.object({
   adisoId: z.string().min(1),
@@ -65,6 +66,7 @@ export async function POST(request: NextRequest) {
         adisoId: listing.id,
         adisoTitle: listing.titulo,
         sellerUserId: sellerId,
+        notifySeller: false,
       });
       session = await getInteractionSession(user.id, listing.id);
       if (!session?.conversation_id) {
@@ -86,6 +88,16 @@ export async function POST(request: NextRequest) {
       content: question,
       message_kind: 'system_buyer',
       metadata: { field, photoIndex, adiso_id: listing.id },
+    });
+
+    // Always notify the real seller — auto-replies do not replace a human notification
+    void notifyChatParticipant({
+      recipientUserId: sellerId,
+      senderUserId: user.id,
+      conversationId,
+      title: `Consulta: ${listing.titulo}`,
+      body: question,
+      adisoId: listing.id,
     });
 
     const adData = {
@@ -138,16 +150,6 @@ export async function POST(request: NextRequest) {
     const publishTier = listing.publishTier || 'paid';
     const autoReplyFeature = listing.features.auto_reply !== false;
     const isPaidAuto = publishTier === 'paid' && autoReplyFeature;
-
-    if (!isPaidAuto) {
-      await supabaseAdmin.from('notifications').insert({
-        user_id: sellerId,
-        type: 'message',
-        title: 'Nueva consulta sobre tu aviso',
-        body: question,
-        data: { adiso_id: listing.id, conversation_id: conversationId },
-      });
-    }
 
     return NextResponse.json({
       conversationId,

@@ -24,7 +24,7 @@ export interface AnuncioExtraido {
 
 /** Starters fuertes: sirven para CORTAR anuncios (evitar Casa/Local sueltos). */
 const SPLIT_START =
-  String.raw`¡?(?:Urgente!?|GRAN(?:DE)?(?:\s+OPORTUNIDAD(?:\s+DE\s+INVERSI[OÓ]N)?)?|REMATO|Remato|Vendo|VENDO|Se\s+vende|SE\s+VENDE|En\s+venta|Alquilo|ALQUILO|Se\s+alquila|SE\s+ALQUILA|Por\s+(?:motivo|viaje|emergencia|ocasi[oó]n)|Por\s+ocasi[oó]n|OCASI[OÓ]N(?:\s*[-–])?\s*(?:VENDO|Vendo|SE\s+VENDE)?|¡?GRAN\s+REMAT|A\s+solo\s+S|Anticresis|Traspaso\s+de|Busco\s+(?:local|terreno|casa|departamento|personal)|Necesito\s+(?:personal|operador|mozo)|AMPLIAMOS|AGENCIA\s+DE|¡?TRABAJO\s+INMEDIATO|DISTRIBUIDORA|SE\s+SOLICITA|SE\s+REQUIERE|REQUIERE(?:\s+PERSONAL)?|BUSCAMOS|CAFETER[IÍ]A|RESTAURANTE|HOTEL\s+\w+\s+SOLICITA|HOSTAL\s+\w+|MACHU\s+TRAVEL|¡URGENTE!\s+BUSCAMOS|VENDO\s+(?:TERRENO|CASA|LOTE|DEPARTAMENTO|LOCAL)|SE\s+VENDE\s+TERRENO|EN\s+VENTA\s+(?:MODERNOS\s+)?DEPARTAMENT)`;
+  String.raw`¡?(?:Urgente!?|GRAN(?:DE)?(?:\s+OPORTUNIDAD(?:\s+DE\s+INVERSI[OÓ]N)?)?|REMATO|Remato|SE\s+REMATA|Vendo|VENDO|Se\s+vende|SE\s+VENDE|En\s+venta|Alquilo|ALQUILO|Se\s+alquila|SE\s+ALQUILA|Por\s+(?:motivo|viaje|emergencia|ocasi[oó]n)|Por\s+ocasi[oó]n|OCASI[OÓ]N(?:\s*[-–])?\s*(?:VENDO|Vendo|SE\s+VENDE)?|¡?GRAN\s+REMAT|A\s+solo\s+S|Anticresis|Traspaso\s+de|Busco\s+(?:local|terreno|casa|departamento|personal)|Necesito\s+(?:personal|operador|mozo|Operador)|AMPLIAMOS|AGENCIA\s+DE|¡?TRABAJO\s+INMEDIATO|DISTRIBUIDORA|SE\s+SOLICITA|SE\s+REQUIERE|REQUIERE(?:\s+PERSONAL)?|BUSCAMOS|CAFETER[IÍ]A|RESTAURANTE|HOTEL\s+\w+\s+SOLICITA|HOSTAL\s+\w+|MACHU\s+TRAVEL|¡URGENTE!\s+BUSCAMOS|VENDO\s+(?:TERRENO|CASA|LOTE|DEPARTAMENTO|LOCAL|LOTES)|SE\s+VENDE\s+TERRENO|EN\s+VENTA\s+(?:MODERNOS\s+)?DEPARTAMENT|INMOBILIARIA|INSTITUCI[OÓ]N|¡?OPORTUNIDAD\s+LABORAL|¡?ÚNETE)`;
 
 /** Contar fusiones reales (no “casa” mid-frase). */
 const FUSION_START =
@@ -137,54 +137,192 @@ function extraerTelefonos9(texto: string): string[] {
 }
 
 /**
- * Parte el texto en anuncios:
- * 1) Normaliza teléfonos
- * 2) Corta tras teléfono(s) cuando sigue un inicio de anuncio
- * 3) Pasa 2: dentro de bloques largos con varios inicios, corta en el 2º+ inicio
- *    si el tramo anterior ya tenía teléfono (vende-vende del mismo vendedor).
+ * Parte el texto en anuncios con escaneo lineal (sin lookahead pesado).
  */
 export function separarAnuncios(textoPagina: string): string[] {
   const limpio = filtrarMetadatos(normalizarTelefonosEnTexto(textoPagina));
   const one = limpio.replace(/\n/g, ' ').replace(/\s{2,}/g, ' ').trim();
   if (!one) return [];
 
-  const start = SPLIT_START;
-  // Tras 1–4 teléfonos (lista), nuevo inicio fuerte
-  const phoneThenStart = new RegExp(
-    String.raw`(\b9\d{8}\b(?:\s*[-–,;/y]+\s*\b9\d{8}\b){0,4})(?:\s*[.,;!]*)\s+(?=${start})`,
-    'gi'
-  );
+  // Pase 1: cortar tras teléfono cuando sigue starter fuerte / extra
+  const chunks = cortarTrasTelefonos(one);
 
-  const chunks: string[] = [];
-  let last = 0;
-  let m: RegExpExecArray | null;
-  while ((m = phoneThenStart.exec(one)) !== null) {
-    const end = m.index + m[1].length;
-    const chunk = one.slice(last, end).trim();
-    if (chunk.length > 35) chunks.push(chunk);
-    last = end;
-    while (last < one.length && /[\s.,;!]/.test(one[last])) last++;
-  }
-  const tail = one.slice(last).trim();
-  if (tail.length > 35) chunks.push(tail);
-
-  // Segunda pasada: desfusionar "Vendo … Cel. X Vendo …" (mismo vendedor)
+  // Pase 2: desfusionar inicios fuertes dentro de cada chunk
   const refined: string[] = [];
   for (const chunk of chunks) {
     refined.push(...desfusionarPorInicios(chunk));
   }
 
-  return refined
+  // Pase 3: partir enormes restantes
+  const fragmented: string[] = [];
+  for (const chunk of refined) {
+    fragmented.push(...fragmentarBloqueEnorme(chunk));
+  }
+
+  return fragmented
     .map((p) => p.replace(/\s+/g, ' ').trim())
     .filter((p) => {
       if (p.length < 50 || !/\b9\d{8}\b/.test(p)) return false;
-      // Descartar restos huérfanos sin verbo de oferta/empleo
-      if (!empiezaConStarterFuerte(p) && !/(vendo|alquilo|vende|requiere|solicita|buscamos|necesito|anticresis|traspaso)/i.test(p.slice(0, 80))) {
-        // Permitir si el cuerpo tiene oferta clara
-        if (!/(vendo|alquilo|se vende|se alquila|m²|terreno|departamento)/i.test(p)) return false;
+      if (
+        !empiezaConStarterFuerte(p) &&
+        !/(vendo|alquilo|vende|requiere|solicita|buscamos|necesito|anticresis|traspaso|remata|inmobiliaria|oportunidad laboral|únete)/i.test(
+          p.slice(0, 100)
+        )
+      ) {
+        if (!/(vendo|alquilo|se vende|se alquila|m²|terreno|departamento|cv|whatsapp|sueldo)/i.test(p)) return false;
       }
       return true;
     });
+}
+
+/** Corta tras cada teléfono si lo que sigue parece un anuncio nuevo. */
+function cortarTrasTelefonos(text: string): string[] {
+  const phones = [...text.matchAll(/\b9\d{8}\b/g)];
+  if (!phones.length) return text.length > 50 ? [text] : [];
+
+  const cutAt: number[] = [];
+  for (let i = 0; i < phones.length; i++) {
+    let end = phones[i].index! + 9;
+    let guard = 0;
+    while (guard++ < 4) {
+      const more = text.slice(end).match(/^\s*[-–,;/y]+\s*(9\d{8})\b/);
+      if (!more) break;
+      end += more[0].length;
+    }
+    while (end < text.length && /[\s.,;!]/.test(text[end])) end++;
+    if (end >= text.length - 40) continue;
+    if (empiezaNuevoAnuncio(text.slice(end)) || empiezaConStarterFuerte(text.slice(end))) {
+      cutAt.push(end);
+    }
+  }
+
+  if (!cutAt.length) return [text];
+
+  const parts: string[] = [];
+  let last = 0;
+  for (const cut of cutAt) {
+    const piece = text.slice(last, cut).trim();
+    if (piece.length > 35) parts.push(piece);
+    last = cut;
+  }
+  const tail = text.slice(last).trim();
+  if (tail.length > 35) parts.push(tail);
+  return parts.length ? parts : [text];
+}
+
+/** Marcadores extra (strings literales / regex simples, sin nested quantifiers). */
+const EXTRA_MARKERS: RegExp[] = [
+  /\bSE\s+REMATA\b/i,
+  /\bVENTA\s+Y\/?O\s+ALQUILER\b/i,
+  /\bINMOBILIARIA\b/i,
+  /\bINSTITUCI[OÓ]N\s+EDUCATIVA\b/i,
+  /¡?OPORTUNIDAD\s+LABORAL/i,
+  /\bNecesito\s+(?:Operador|personal|mozo)/i,
+  /\bEstamos\s+en\s+busca/i,
+  /¡?ÚNETE\s+A\s+NUESTRO/i,
+  /\bHOTEL\s+\w+\s+SOLICITA\b/i,
+  /\bPrestigiosa\s+Cl[ií]nica\b/i,
+  /\bImportante\s+empresa\b/i,
+  /¡?TRABAJO\s+INMEDIATO/i,
+  /\bGRAN\s+MINER[IÍ]A\b/i,
+  /\bAGENCIA\s+DE\s+VIAJES\b/i,
+  /\bRESTAURANTE\s+\w+\s+REQUER/i,
+  /\b_TE\s+ESTAMOS\s+BUSCANDO/i,
+];
+
+function empiezaNuevoAnuncio(slice: string): boolean {
+  const s = slice.trimStart();
+  if (!s) return false;
+  if (empiezaConStarterFuerte(s)) return true;
+  return EXTRA_MARKERS.some((re) => {
+    re.lastIndex = 0;
+    const m = re.exec(s);
+    return m !== null && m.index < 3;
+  });
+}
+
+/**
+ * Parte bloques largos sin regex de lookahead complejos (evita backtracking).
+ * Recorre teléfonos; si tras el teléfono(s) empieza un nuevo anuncio, corta.
+ */
+export function fragmentarBloqueEnorme(chunk: string): string[] {
+  const phones = [...chunk.matchAll(/\b9\d{8}\b/g)];
+  if (chunk.length < 650 && phones.length < 3) return [chunk];
+
+  const cutAfter: number[] = [];
+  for (let i = 0; i < phones.length; i++) {
+    let end = phones[i].index! + phones[i][0].length;
+    // consumir teléfonos siguientes en lista: ", 994687060"
+    let guard = 0;
+    while (guard++ < 4) {
+      const rest = chunk.slice(end);
+      const more = rest.match(/^\s*[-–,;/y]+\s*(9\d{8})\b/);
+      if (!more) break;
+      end += more[0].length;
+    }
+    // saltar puntuación
+    while (end < chunk.length && /[\s.,;!]/.test(chunk[end])) end++;
+    if (end >= chunk.length - 40) continue;
+    if (empiezaNuevoAnuncio(chunk.slice(end))) {
+      cutAfter.push(end);
+    }
+  }
+
+  if (!cutAfter.length) {
+    return fragmentarPorMarcadoresExtra(chunk);
+  }
+
+  const parts: string[] = [];
+  let last = 0;
+  for (const cut of cutAfter) {
+    // cut es el inicio del nuevo anuncio; el anterior termina justo antes
+    const piece = chunk.slice(last, cut).trim();
+    if (piece.length > 40) parts.push(piece);
+    last = cut;
+  }
+  const tail = chunk.slice(last).trim();
+  if (tail.length > 40) parts.push(tail);
+
+  return parts.length > 1 ? parts.filter((p) => /\b9\d{8}\b/.test(p) && p.length >= 50) : fragmentarPorMarcadoresExtra(chunk);
+}
+
+function fragmentarPorMarcadoresExtra(chunk: string): string[] {
+  const indices: number[] = [0];
+  for (const re of EXTRA_MARKERS) {
+    const flags = re.flags.includes('g') ? re.flags : re.flags + 'g';
+    const g = new RegExp(re.source, flags);
+    let m: RegExpExecArray | null;
+    while ((m = g.exec(chunk)) !== null) {
+      if (m.index > 40) indices.push(m.index);
+    }
+  }
+  indices.sort((a, b) => a - b);
+  const uniq = indices.filter((v, i, arr) => i === 0 || v - arr[i - 1] > 60);
+  if (uniq.length <= 1) return [chunk];
+
+  const pieces: string[] = [];
+  for (let i = 0; i < uniq.length; i++) {
+    const start = uniq[i];
+    const end = i + 1 < uniq.length ? uniq[i + 1] : chunk.length;
+    pieces.push(chunk.slice(start, end).trim());
+  }
+
+  const merged: string[] = [];
+  let buf = '';
+  for (const p of pieces) {
+    if (!buf) {
+      buf = p;
+      continue;
+    }
+    if (/\b9\d{8}\b/.test(buf) && buf.length >= 50) {
+      merged.push(buf);
+      buf = p;
+    } else {
+      buf = `${buf} ${p}`.trim();
+    }
+  }
+  if (buf) merged.push(buf);
+  return merged.length ? merged.filter((p) => /\b9\d{8}\b/.test(p) && p.length >= 50) : [chunk];
 }
 
 /** Si un bloque tiene 2+ inicios FUERTES y hay teléfono entre ellos, corta. */

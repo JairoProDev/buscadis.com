@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { getUserFromRouteRequest } from '@/lib/supabase-route-auth';
 import { findConversationBetween } from '@/lib/profile/server';
 import { supabaseAdmin } from '@/lib/supabase-admin';
+import { notifyChatParticipant } from '@/lib/chat/notify';
 
 const bodySchema = z.object({
   recipientId: z.string().uuid(),
@@ -60,11 +61,32 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    if (!conversationId) {
+      return NextResponse.json({ error: 'No se pudo crear la conversación' }, { status: 500 });
+    }
+
     if (initialMessage) {
       await supabaseAdmin.from('messages').insert({
         conversation_id: conversationId,
         sender_id: user.id,
         content: initialMessage,
+      });
+
+      await supabaseAdmin
+        .from('conversations')
+        .update({
+          last_message: initialMessage,
+          last_message_at: new Date().toISOString(),
+        })
+        .eq('id', conversationId);
+
+      void notifyChatParticipant({
+        recipientUserId: recipientId,
+        senderUserId: user.id,
+        conversationId,
+        title: 'Nuevo mensaje en Buscadis',
+        body: initialMessage,
+        adisoId,
       });
     }
 

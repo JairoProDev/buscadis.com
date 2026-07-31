@@ -59,8 +59,7 @@ export default function ChatWindow({
                             {adisoTitle ? `Chat · ${adisoTitle}` : 'Chat'}
                         </h4>
                         <div className="flex items-center gap-1.5 flex-wrap">
-                            <span className="w-2 h-2 bg-green-400 rounded-full" />
-                            <span className="text-xs opacity-80">En línea</span>
+                            <span className="text-xs opacity-80">Mensaje en Buscadis</span>
                             {matchPct != null && matchPct >= 40 && (
                                 <span className="text-[10px] font-bold bg-white/20 px-1.5 py-0.5 rounded-full">
                                     Match {matchPct}%
@@ -107,8 +106,16 @@ export default function ChatWindow({
                     <div className="flex flex-col gap-3">
                         {messages.map((msg) => {
                             const isMe = user?.id === msg.sender_id;
+                            const isAuto =
+                                (msg as { message_kind?: string }).message_kind === 'system_seller' ||
+                                Boolean((msg as { metadata?: { auto?: boolean } }).metadata?.auto);
                             return (
                                 <div key={msg.id} className={`flex flex-col ${isMe ? 'items-end' : 'items-start'}`}>
+                                    {isAuto && !isMe && (
+                                        <span className="mb-0.5 px-1 text-[10px] font-medium text-gray-400">
+                                            Respuesta automática del aviso
+                                        </span>
+                                    )}
                                     <div className={`
                                 max-w-[80%] rounded-2xl px-3 py-2 text-sm shadow-sm
                                 ${isMe

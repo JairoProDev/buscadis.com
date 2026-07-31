@@ -1,6 +1,7 @@
 import { supabaseAdmin } from '@/lib/supabase-admin';
 import { findConversationBetween } from '@/lib/profile/server';
 import { fieldQuestion } from './field-reveal';
+import { notifyChatParticipant } from '@/lib/chat/notify';
 
 export interface OpenInteractionResult {
   sessionId: string;
@@ -15,8 +16,10 @@ export async function openAdInteraction(params: {
   adisoId: string;
   adisoTitle: string;
   sellerUserId: string;
+  /** When true, notify seller about the greeting. Default false (warm/open should not spam). */
+  notifySeller?: boolean;
 }): Promise<OpenInteractionResult> {
-  const { viewerUserId, adisoId, adisoTitle, sellerUserId } = params;
+  const { viewerUserId, adisoId, adisoTitle, sellerUserId, notifySeller = false } = params;
 
   const { data: existingSession } = await supabaseAdmin
     .from('ad_interaction_sessions')
@@ -90,6 +93,25 @@ export async function openAdInteraction(params: {
       message_kind: 'system_buyer',
       metadata: { adiso_id: adisoId, auto: true },
     });
+
+    await supabaseAdmin
+      .from('conversations')
+      .update({
+        last_message: initialMessage,
+        last_message_at: new Date().toISOString(),
+      })
+      .eq('id', conversationId);
+
+    if (notifySeller) {
+      void notifyChatParticipant({
+        recipientUserId: sellerUserId,
+        senderUserId: viewerUserId,
+        conversationId,
+        title: `Alguien te escribió por "${adisoTitle}"`,
+        body: initialMessage,
+        adisoId,
+      });
+    }
   }
 
   const { data: session, error } = await supabaseAdmin

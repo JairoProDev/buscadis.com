@@ -2,7 +2,6 @@ import React from 'react';
 import { useConversations } from '@/hooks/useConversations';
 import { IconSearch, IconUser, IconMessages } from '@/components/Icons';
 import { formatTimeAgo } from '@/utils/date';
-import Image from 'next/image';
 import Link from 'next/link';
 
 interface MessagesPopoverProps {
@@ -79,12 +78,13 @@ export default function MessagesPopover({ onClose, onOpenConversation }: Message
                                 <div className="flex items-center gap-3">
                                     <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-full bg-[var(--bg-tertiary)]">
                                         {conversation.other_user?.avatar_url ? (
-                                            <Image
+                                            <img
                                                 src={conversation.other_user.avatar_url}
                                                 alt=""
                                                 width={40}
                                                 height={40}
-                                                className="object-cover"
+                                                className="h-full w-full object-cover"
+                                                referrerPolicy="no-referrer"
                                             />
                                         ) : (
                                             <span className="flex h-full w-full items-center justify-center">

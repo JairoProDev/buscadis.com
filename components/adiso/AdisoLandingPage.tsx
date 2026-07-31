@@ -201,7 +201,7 @@ export default function AdisoLandingPage({ adiso, onVolver }: AdisoLandingPagePr
           'Content-Type': 'application/json',
           Authorization: `Bearer ${session?.access_token}`,
         },
-        body: JSON.stringify({ adisoId: adiso.id }),
+        body: JSON.stringify({ adisoId: adiso.id, notifySeller: true }),
       });
       const data = (await res.json()) as { conversationId?: string; adisoTitle?: string };
       if (data.conversationId) {

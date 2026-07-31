@@ -72,18 +72,24 @@ export function useChat(conversationId: string | null) {
   }, [user, conversationId, session?.access_token]);
 
   const sendMessage = async (content: string) => {
-    if (!supabase || !user || !conversationId || !content.trim()) return;
+    if (!user || !conversationId || !content.trim() || !session?.access_token) return;
 
     setSending(true);
-    const { error } = await supabase.from('messages').insert({
-      conversation_id: conversationId,
-      sender_id: user.id,
-      content: content.trim(),
-      read: false,
-    });
-
-    if (error) console.error('Error sending message:', error);
-    setSending(false);
+    try {
+      const res = await fetch('/api/conversations/send', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({ conversationId, content: content.trim() }),
+      });
+      if (!res.ok) {
+        console.error('Error sending message:', await res.text());
+      }
+    } finally {
+      setSending(false);
+    }
   };
 
   return {
