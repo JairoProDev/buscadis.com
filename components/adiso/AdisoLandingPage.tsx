@@ -14,7 +14,7 @@ import { getWhatsAppUrl, copiarLink, compartirNativo } from '@/lib/utils';
 import { getBusinessProfilePath } from '@/lib/seo/business-metadata';
 import { FIELD_QUESTIONS, type RevealField } from '@/lib/interactions/field-reveal';
 import { chatContextFromAdiso } from '@/lib/chat/context-from-adiso';
-import { ExternalContactChannel, resolveExternalContact } from '@/lib/adiso-contact';
+import { ExternalContactChannel, resolveExternalContact, isLeadCaptureAd, getOpsLeadWhatsAppUrl } from '@/lib/adiso-contact';
 import {
   formatPrecioDisplay,
   formatRelativePublishedAt,
@@ -154,10 +154,11 @@ export default function AdisoLandingPage({ adiso, onVolver }: AdisoLandingPagePr
         : [];
 
   const sellerUserId = adiso.user_id || adiso.usuario_id || adiso.vendedor?.id;
-  const canMessageInApp = Boolean(sellerUserId);
+  const leadCapture = isLeadCaptureAd(adiso);
+  const canMessageInApp = Boolean(sellerUserId || leadCapture || adiso.esHistorico);
   const { askField } = useAdInteractionSession(
     adiso.id,
-    Boolean(sellerUserId && user),
+    Boolean((sellerUserId || leadCapture || adiso.esHistorico) && user),
     chatContextFromAdiso(adiso)
   );
 
@@ -172,8 +173,53 @@ export default function AdisoLandingPage({ adiso, onVolver }: AdisoLandingPagePr
     setTimeout(() => setCopiado(false), 2000);
   };
 
+  const handleMensajeBuscadis = async (opts?: { alsoOpenOpsWhatsApp?: boolean }) => {
+    if (!canMessageInApp) return;
+    if (!user) {
+      openAuthModal();
+      return;
+    }
+    setEnviandoMensaje(true);
+    try {
+      const res = await fetch('/api/interactions/open', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${session?.access_token}`,
+        },
+        body: JSON.stringify({ adisoId: adiso.id, notifySeller: true }),
+      });
+      const data = (await res.json()) as {
+        conversationId?: string;
+        adisoTitle?: string;
+        leadCapture?: boolean;
+        opsWhatsAppUrl?: string;
+      };
+      if (data.conversationId) {
+        openChat(data.conversationId, chatContextFromAdiso(adiso, {
+          adisoTitle: data.adisoTitle || adiso.titulo,
+        }));
+      }
+      if (opts?.alsoOpenOpsWhatsApp || data.leadCapture || leadCapture) {
+        const url =
+          data.opsWhatsAppUrl ||
+          getOpsLeadWhatsAppUrl(adiso, {
+            baseUrl: typeof window !== 'undefined' ? window.location.origin : undefined,
+          });
+        window.open(url, '_blank');
+        registrarContacto(user.id, adiso.id, adiso.categoria, 'whatsapp');
+      }
+    } finally {
+      setEnviandoMensaje(false);
+    }
+  };
+
   const handleExternalContact = useCallback(
     (contact: ExternalContactChannel) => {
+      if (isLeadCaptureAd(adiso)) {
+        void handleMensajeBuscadis({ alsoOpenOpsWhatsApp: true });
+        return;
+      }
       registrarContacto(user?.id, adiso.id, adiso.categoria, 'whatsapp');
       if (contact.kind === 'email') {
         window.location.href = `mailto:${contact.valor}?subject=${encodeURIComponent(`Interesado en: ${adiso.titulo}`)}`;
@@ -189,38 +235,16 @@ export default function AdisoLandingPage({ adiso, onVolver }: AdisoLandingPagePr
       }
       window.open(getWhatsAppUrl(contact.valor, adiso.titulo, adiso), '_blank');
     },
-    [adiso, user?.id],
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- handleMensajeBuscadis closes over latest adiso/user
+    [adiso, user?.id, leadCapture],
   );
-
-  const handleMensajeBuscadis = async () => {
-    if (!sellerUserId) return;
-    if (!user) {
-      openAuthModal();
-      return;
-    }
-    setEnviandoMensaje(true);
-    try {
-      const res = await fetch('/api/interactions/open', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${session?.access_token}`,
-        },
-        body: JSON.stringify({ adisoId: adiso.id, notifySeller: true }),
-      });
-      const data = (await res.json()) as { conversationId?: string; adisoTitle?: string };
-      if (data.conversationId) {
-        openChat(data.conversationId, chatContextFromAdiso(adiso, {
-          adisoTitle: data.adisoTitle || adiso.titulo,
-        }));
-      }
-    } finally {
-      setEnviandoMensaje(false);
-    }
-  };
 
   const handleQuickQuestion = async (field: RevealField) => {
     if (!user || !session?.access_token) {
+      if (leadCapture) {
+        openAuthModal();
+        return;
+      }
       if (externalContact) {
         const q = FIELD_QUESTIONS[field] || 'Hola, tengo una consulta';
         if (externalContact.kind === 'whatsapp' || externalContact.kind === 'telefono') {
@@ -233,6 +257,11 @@ export default function AdisoLandingPage({ adiso, onVolver }: AdisoLandingPagePr
         return;
       }
       openAuthModal();
+      return;
+    }
+
+    if (!sellerUserId && (leadCapture || adiso.esHistorico)) {
+      await handleMensajeBuscadis({ alsoOpenOpsWhatsApp: leadCapture });
       return;
     }
 

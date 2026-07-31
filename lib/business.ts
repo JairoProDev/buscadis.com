@@ -653,15 +653,17 @@ export async function getMarketplaceFeed(options: {
     const merged = Array.from(mergedMap.values());
 
     if (productosTab) {
-        return merged.sort((a, b) => {
-            const aCatalog = isCatalogProduct(a) ? 1 : 0;
-            const bCatalog = isCatalogProduct(b) ? 1 : 0;
-            if (aCatalog !== bCatalog) return bCatalog - aCatalog;
-            return compareRecientesFeed(a, b);
-        });
+        return merged
+            .sort((a, b) => {
+                const aCatalog = isCatalogProduct(a) ? 1 : 0;
+                const bCatalog = isCatalogProduct(b) ? 1 : 0;
+                if (aCatalog !== bCatalog) return bCatalog - aCatalog;
+                return compareRecientesFeed(a, b);
+            })
+            .slice(0, options.limit);
     }
 
-    return merged.sort((a, b) => compareRecientesFeed(a, b));
+    return merged.sort((a, b) => compareRecientesFeed(a, b)).slice(0, options.limit);
 }
 
 // Helper to get extension from mime type

@@ -1,4 +1,6 @@
-import { Adiso } from '@/types';
+import type { Adiso } from '@/types';
+import { SOPORTE_WHATSAPP_NUMERO } from '@/lib/soporte';
+import { getAdisoUrl } from '@/lib/url';
 
 export type ExternalContactKind = 'whatsapp' | 'email' | 'telefono' | 'link';
 
@@ -34,4 +36,68 @@ export function resolveExternalContact(adiso: Adiso): ExternalContactChannel | n
     return { kind: 'link', valor: contacto, ariaLabel: 'Abrir enlace de contacto' };
   }
   return { kind: 'whatsapp', valor: contacto, ariaLabel: 'Contactar por WhatsApp' };
+}
+
+/** Anuncios caducados / inactivos / Rueda fuera de ventana: lead via chat + WhatsApp ops. */
+export function isLeadCaptureAd(adiso: {
+  estaActivo?: boolean;
+  fechaExpiracion?: string | null;
+  esHistorico?: boolean;
+  fechaPublicacion?: string | null;
+  fechaPublicacionOriginal?: string | null;
+}): boolean {
+  if (adiso.estaActivo === false) return true;
+  if (adiso.fechaExpiracion) {
+    const exp = new Date(adiso.fechaExpiracion);
+    if (!Number.isNaN(exp.getTime()) && exp.getTime() < Date.now()) return true;
+  }
+  // Rueda: después de 14 días desde la fecha de edición → mediado por ops
+  if (adiso.esHistorico) {
+    const raw = adiso.fechaPublicacionOriginal || adiso.fechaPublicacion;
+    if (raw) {
+      const pub = new Date(raw.includes('T') ? raw : `${raw}T12:00:00`);
+      if (!Number.isNaN(pub.getTime())) {
+        const fourteenDays = 14 * 24 * 60 * 60 * 1000;
+        if (Date.now() - pub.getTime() > fourteenDays) return true;
+      }
+    }
+  }
+  return false;
+}
+
+export function buildOpsLeadWhatsAppMessage(
+  adiso: Pick<Adiso, 'titulo' | 'categoria' | 'edicionNumero' | 'id' | 'contacto'>,
+  opts?: { baseUrl?: string; advertiserPhone?: string | null }
+): string {
+  const baseUrl = opts?.baseUrl || 'https://www.buscadis.com';
+  const adisoUrl = `${baseUrl}${getAdisoUrl(adiso as Adiso)}`;
+  const interest =
+    adiso.categoria === 'inmuebles'
+      ? '¿Sigue disponible?'
+      : adiso.categoria === 'empleos'
+        ? '¿Aún están contratando?'
+        : adiso.categoria === 'vehiculos'
+          ? '¿Aún está en venta?'
+          : '¿Sigue disponible?';
+
+  const phoneLine = opts?.advertiserPhone
+    ? `\nTel. anunciante: ${opts.advertiserPhone}`
+    : adiso.contacto
+      ? `\nTel. anunciante: ${adiso.contacto}`
+      : '';
+
+  return `Hola! Interés en anuncio caducado: ${interest}
+
+${adisoUrl}
+${phoneLine}
+
+Ref: ${adiso.edicionNumero || adiso.id}`.trim();
+}
+
+export function getOpsLeadWhatsAppUrl(
+  adiso: Pick<Adiso, 'titulo' | 'categoria' | 'edicionNumero' | 'id' | 'contacto'>,
+  opts?: { baseUrl?: string; advertiserPhone?: string | null }
+): string {
+  const text = buildOpsLeadWhatsAppMessage(adiso, opts);
+  return `https://wa.me/${SOPORTE_WHATSAPP_NUMERO}?text=${encodeURIComponent(text)}`;
 }

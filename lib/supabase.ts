@@ -224,11 +224,10 @@ export async function getAdisosFromSupabase(options?: {
       .from('adisos')
       .select('*');
 
-    // Filtrar por activos si se solicita
+    // Filtrar por activos si se solicita (sin cortar por fecha_expiracion:
+    // los caducados deben seguir visibles; el contacto se enruta a ops).
     if (options?.soloActivos === true) {
       query = query.eq('esta_activo', true);
-      // También filtrar por fecha de expiración si existe
-      query = query.or('fecha_expiracion.is.null,fecha_expiracion.gt.' + new Date().toISOString());
     }
 
     // Filtrar por categoría
@@ -295,7 +294,6 @@ export async function getAdisosPageFromSupabase(options: {
 
     if (options.soloActivos === true) {
       query = query.eq('esta_activo', true);
-      query = query.or('fecha_expiracion.is.null,fecha_expiracion.gt.' + new Date().toISOString());
     }
 
     if (options.categoria && options.categoria !== 'todos') {

@@ -17,6 +17,12 @@ export type InteractionListing = {
   contactLocked: boolean;
   contacto: string | null;
   source: 'adiso' | 'catalog_product';
+  estaActivo?: boolean;
+  fechaExpiracion?: string | null;
+  esHistorico?: boolean;
+  edicionNumero?: string | null;
+  fechaPublicacion?: string | null;
+  fechaPublicacionOriginal?: string | null;
 };
 
 function parseJsonObject(value: unknown): Record<string, unknown> {
@@ -51,13 +57,13 @@ export async function resolveListingForInteraction(
   const { data: adiso } = await supabaseAdmin
     .from('adisos')
     .select(
-      'id, titulo, descripcion, precio, moneda, tipo_precio, ubicacion, imagenes_urls, user_id, publish_tier, features, private_data, contact_locked, payment_status, contacto, categoria, esta_activo'
+      'id, titulo, descripcion, precio, moneda, tipo_precio, ubicacion, imagenes_urls, user_id, publish_tier, features, private_data, contact_locked, payment_status, contacto, categoria, esta_activo, fecha_expiracion, es_historico, edicion_numero, fecha_publicacion, fecha_publicacion_original'
     )
     .eq('id', listingId)
     .maybeSingle();
 
   if (adiso) {
-    if (adiso.esta_activo === false) return null;
+    // Caducados/históricos siguen contactables (lead capture vía ops).
     const priv = parseJsonObject(adiso.private_data);
     const features = parseJsonObject(adiso.features);
     const contactLocked =
@@ -82,6 +88,12 @@ export async function resolveListingForInteraction(
       contactLocked,
       contacto: (adiso.contacto as string) || null,
       source: 'adiso',
+      estaActivo: adiso.esta_activo !== false,
+      fechaExpiracion: (adiso.fecha_expiracion as string) || null,
+      esHistorico: Boolean(adiso.es_historico),
+      edicionNumero: (adiso.edicion_numero as string) || null,
+      fechaPublicacion: (adiso.fecha_publicacion as string) || null,
+      fechaPublicacionOriginal: (adiso.fecha_publicacion_original as string) || null,
     };
   }
 

@@ -63,7 +63,7 @@ import {
   formatPrecioDisplay,
   getCategoriaLabel,
 } from '@/lib/adiso-display';
-import { ExternalContactChannel, resolveExternalContact } from '@/lib/adiso-contact';
+import { ExternalContactChannel, resolveExternalContact, isLeadCaptureAd, getOpsLeadWhatsAppUrl } from '@/lib/adiso-contact';
 
 // Función helper para formatear ubicación
 function formatearUbicacion(ubicacion: any): { texto: string; coordenadas: { lat: number; lng: number } | null } {
@@ -398,44 +398,9 @@ export default function ModalAdiso({
 
     const contactoAUsar = contactoEspecifico || adiso.contacto;
 
-    // Verificar si el anuncio está caducado o es histórico
-    const ahora = new Date();
-    const estaCaducado =
-      adiso.estaActivo === false ||
-      (adiso.fechaExpiracion && new Date(adiso.fechaExpiracion) < ahora);
-    const esHistorico = adiso.esHistorico === true;
-
-    if (estaCaducado || esHistorico) {
-      // Anuncio caducado o histórico - redirigir a WhatsApp del admin
-      // Número de WhatsApp del administrador (sin +51 ni espacios)
-      const adminWhatsApp = '937054328'; // Tu número de WhatsApp
-
-      // Generar URL completa del aviso
-      const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'https://adis.lat';
-      const adisoUrl = `${baseUrl}${getAdisoUrl(adiso)}`;
-
-      // Crear mensaje que parezca natural del usuario pero con info necesaria
-      // Incluye el link para que puedas acceder rápidamente a la info del anunciante
-      const mensaje = `Hola! Me interesa este anuncio: ${adiso.categoria === 'inmuebles' ? '¿Sigue disponible?' :
-        adiso.categoria === 'empleos' ? '¿Aún están contratando?' :
-          adiso.categoria === 'vehiculos' ? '¿Aún está en venta?' :
-            '¿Sigue disponible?'
-        }
-
-${adisoUrl}
-
-Ref: ${adiso.edicionNumero || adiso.id}`;
-
-      // URL de WhatsApp con el mensaje predeterminado
-      const whatsappUrl = `https://wa.me/51${adminWhatsApp}?text=${encodeURIComponent(mensaje)}`;
-
-      // Registrar analytics si hay usuario
-      if (user?.id) {
-        registrarContacto(user.id, adiso.id, adiso.categoria, 'whatsapp');
-      }
-
-      // Abrir WhatsApp
-      window.open(whatsappUrl, '_blank');
+    // Caducados → chat in-app (cuenta stub) + WhatsApp ops (no usar solo esHistorico)
+    if (isLeadCaptureAd(adiso)) {
+      await handleMensajeBuscadis({ alsoOpenOpsWhatsApp: true });
       return;
     }
 
@@ -465,14 +430,8 @@ Ref: ${adiso.edicionNumero || adiso.id}`;
     const contact = channel ?? externalContact;
     if (!contact) return;
 
-    const ahora = new Date();
-    const estaCaducado =
-      adiso.estaActivo === false ||
-      (adiso.fechaExpiracion && new Date(adiso.fechaExpiracion) < ahora);
-    const esHistorico = adiso.esHistorico === true;
-
-    if (estaCaducado || esHistorico) {
-      await handleContactar();
+    if (isLeadCaptureAd(adiso)) {
+      await handleMensajeBuscadis({ alsoOpenOpsWhatsApp: true });
       return;
     }
 
@@ -496,7 +455,9 @@ Ref: ${adiso.edicionNumero || adiso.id}`;
   };
 
   const sellerUserId = adiso.user_id || adiso.usuario_id || undefined;
-  const canAutoInteract = Boolean(sellerUserId && !esMiAdiso && user);
+  const leadCapture = isLeadCaptureAd(adiso);
+  // Caducados sin user_id: el API crea la cuenta stub al abrir chat
+  const canAutoInteract = Boolean((sellerUserId || leadCapture || adiso.esHistorico) && !esMiAdiso && user);
   const listingChatContext = chatContextFromAdiso(adiso);
   const { askField, isRevealed, asking, upsell: interactionUpsell } = useAdInteractionSession(
     adiso.id,
@@ -527,7 +488,7 @@ Ref: ${adiso.edicionNumero || adiso.id}`;
     // Optimistic reveal so info appears immediately in the detail panel
     setLocalRevealed((prev) => (prev.includes(fieldKey) ? prev : [...prev, fieldKey]));
 
-    if (!sellerUserId) {
+    if (!sellerUserId && !leadCapture && !adiso.esHistorico) {
       const q = FIELD_QUESTIONS[field] || 'Hola, tengo una consulta';
       if (externalContact) {
         if (externalContact.kind === 'whatsapp' || externalContact.kind === 'telefono') {
@@ -551,12 +512,15 @@ Ref: ${adiso.edicionNumero || adiso.id}`;
     }
   };
 
-  const handleMensajeBuscadis = async () => {
-    if (!sellerUserId || esMiAdiso) return;
+  const handleMensajeBuscadis = async (opts?: { alsoOpenOpsWhatsApp?: boolean }) => {
+    if (esMiAdiso) return;
     if (!user) {
       openAuthModal();
       return;
     }
+    // Sin seller y sin lead/histórico: no hay a quién chatear
+    if (!sellerUserId && !leadCapture && !adiso.esHistorico) return;
+
     setEnviandoMensaje(true);
     try {
       const res = await fetch('/api/interactions/open', {
@@ -567,11 +531,30 @@ Ref: ${adiso.edicionNumero || adiso.id}`;
         },
         body: JSON.stringify({ adisoId: adiso.id, notifySeller: true }),
       });
-      const data = (await res.json()) as { conversationId?: string; adisoTitle?: string };
+      const data = (await res.json()) as {
+        conversationId?: string;
+        adisoTitle?: string;
+        leadCapture?: boolean;
+        opsWhatsAppUrl?: string;
+        error?: string;
+      };
       if (data.conversationId) {
         openChat(data.conversationId, chatContextFromAdiso(adiso, {
           adisoTitle: data.adisoTitle || adiso.titulo,
         }));
+      }
+      const shouldOpenOps =
+        opts?.alsoOpenOpsWhatsApp || data.leadCapture || leadCapture;
+      if (shouldOpenOps) {
+        const url =
+          data.opsWhatsAppUrl ||
+          getOpsLeadWhatsAppUrl(adiso, {
+            baseUrl: typeof window !== 'undefined' ? window.location.origin : undefined,
+          });
+        window.open(url, '_blank');
+        if (user?.id) {
+          registrarContacto(user.id, adiso.id, adiso.categoria, 'whatsapp');
+        }
       }
     } finally {
       setEnviandoMensaje(false);
@@ -657,7 +640,7 @@ Ref: ${adiso.edicionNumero || adiso.id}`;
     </div>
   );
 
-  const canMessageInApp = !!sellerUserId && !esMiAdiso;
+  const canMessageInApp = (!!sellerUserId || leadCapture || !!adiso.esHistorico) && !esMiAdiso;
 
   const ExternalContactIcon = ({ channel }: { channel: ExternalContactChannel }) => {
     if (channel.kind === 'email') return <IconEnvelope size={22} />;

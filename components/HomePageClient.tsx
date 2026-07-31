@@ -272,7 +272,8 @@ function HomeContent() {
         if (cancelled) return;
         const filtered = items.filter((a) => !TEST_REGEX.test(a.titulo || ''));
         setAdisos(filtered);
-        setHayMasAdisos(filtered.length === ITEMS_POR_PAGINA);
+        setHayMasAdisos(filtered.length >= ITEMS_POR_PAGINA);
+        setVisibleCount(ITEMS_POR_PAGINA);
         setPaginaActual(1);
       } catch (e) {
         console.error('[HomePage] category feed:', e);
@@ -323,7 +324,7 @@ function HomeContent() {
         nuevosFiltrados = nuevosFiltrados.filter(a => !TEST_REGEX.test(a.titulo || ''));
       }
       setAdisos(nuevosFiltrados);
-      setHayMasAdisos(adisosDesdeAPI.length === ITEMS_POR_PAGINA);
+      setHayMasAdisos(adisosDesdeAPI.length >= ITEMS_POR_PAGINA);
       success('Buscando anuncios recientes...');
     } catch (e) {
       console.error(e);
@@ -390,7 +391,8 @@ function HomeContent() {
 
         if (adisosDesdeAPI.length > 0 || cache.length === 0) {
           // Si hay menos de ITEMS_POR_PAGINA, no hay más páginas
-          setHayMasAdisos(adisosDesdeAPI.length === ITEMS_POR_PAGINA);
+          setHayMasAdisos(adisosDesdeAPI.length >= ITEMS_POR_PAGINA);
+          setVisibleCount(ITEMS_POR_PAGINA);
 
           // API manda: no mezclar caché vieja que sepulta avisos nuevos
           setAdisos(adisosDesdeAPI);
@@ -943,7 +945,7 @@ function HomeContent() {
         setVisibleCount(prev => prev + ITEMS_POR_PAGINA);
 
         // Si hay menos de ITEMS_POR_PAGINA, no hay más páginas
-        const tieneMas = nuevosAdisos.length === ITEMS_POR_PAGINA;
+        const tieneMas = nuevosAdisos.length >= ITEMS_POR_PAGINA;
         setHayMasAdisos(tieneMas);
         if (tieneMas) {
           setPaginaActual(siguientePagina);
@@ -961,7 +963,7 @@ function HomeContent() {
 
   // Usar hook profesional para infinite scroll
   const { sentinelRef } = useInfiniteScroll({
-    hasMore: hayMasAdisos,
+    hasMore: hayMasAdisos || visibleCount < adisosFiltrados.length,
     isLoading: cargandoMas,
     onLoadMore: cargarMasAdisos,
     threshold: 200, // Cargar cuando queden 200px para el final
