@@ -427,7 +427,7 @@ export function tituloYDesc(texto: string): { titulo: string; descripcion: strin
   const WEAK_LEFT = /^(?:por\s+)?ocasi[oó]n$|^requiere$|^se\s+requiere$|^se\s+solicita$|^urgente!?$|^buscamos$|^necesito$/i;
 
   // "TITULO: resto"
-  const colon = t.match(/^(.{3,90}?):\s+(.+)$/s);
+  const colon = t.match(/^(.{3,90}?):\s+([\s\S]+)$/);
   if (colon && !/\d{9}/.test(colon[1]) && colon[1].length < 90) {
     const left = colon[1].trim();
     const right = colon[2].trim().replace(/^[\s•]+/g, '');

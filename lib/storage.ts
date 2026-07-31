@@ -1,6 +1,6 @@
 import { Adiso } from '@/types';
 
-const STORAGE_KEY = 'buscadis_adisos';
+const STORAGE_KEY = 'buscadis_adisos_v2';
 
 // Por defecto usa localStorage. Cambiar a false para usar API/Supabase
 const USE_LOCAL_STORAGE = process.env.NEXT_PUBLIC_USE_LOCAL_STORAGE === 'true';

@@ -44,13 +44,12 @@ function parsePublishedTimestamp(adiso: Adiso): number {
 }
 
 /**
- * Adelanto temporal por calidad visual del aviso.
- * No supera la recencia de publicaciones muy nuevas sin imagen,
- * pero empuja avisos con foto por encima de texto plano del mismo tier.
+ * Adelanto temporal por calidad visual — SOLO desempate dentro del mismo día.
+ * Un aviso de hoy sin foto siempre gana a uno de ayer con foto.
  */
-const IMAGE_BOOST_MS = 4 * 60 * 60 * 1000; // 4 h
-const CATALOG_EXTRA_BOOST_MS = 45 * 60 * 1000; // 45 min — no debe ganarle a un aviso de hace minutos
-const MULTI_IMAGE_BOOST_MS = 30 * 60 * 1000; // 30 min
+const IMAGE_BOOST_MS = 2 * 60 * 60 * 1000; // 2 h (desempate suave)
+const CATALOG_EXTRA_BOOST_MS = 30 * 60 * 1000; // 30 min
+const MULTI_IMAGE_BOOST_MS = 20 * 60 * 1000; // 20 min
 
 export function getFeedVisualBoostMs(adiso: Adiso): number {
   let boost = 0;
@@ -82,17 +81,22 @@ export function getFeedEffectiveTimestamp(
     + getFeedVisualBoostMs(adiso);
 }
 
+/** Día civil YYYY-MM-DD (sin hora) para ranking por recencia oficial. */
+function getPublishedDayKey(adiso: Adiso): string {
+  const raw = String(adiso.fechaPublicacion || '').trim();
+  if (!raw) return '0000-00-00';
+  if (raw.includes('T')) return raw.slice(0, 10);
+  return raw.slice(0, 10);
+}
+
 /**
  * Comparador del feed por defecto ("recientes"):
  * 1. Promoción pagada (premium/destacada)
- * 2. Recencia real — si hay >2h de diferencia, gana lo más nuevo
- *    (evita que boosts de imagen/catálogo/personalización sepulten un aviso recién publicado)
- * 3. Timestamp efectivo (boosts menores) como desempate
+ * 2. Día de publicación — lo más nuevo SIEMPRE gana (aunque el otro tenga foto)
+ * 3. Dentro del mismo día: timestamp efectivo (foto/catálogo/personalización)
  * 4. Tamaño de paquete legacy
  * 5. id estable
  */
-const REAL_RECENCY_GAP_MS = 2 * 60 * 60 * 1000; // 2 horas
-
 export function compareRecientesFeed(
   a: Adiso,
   b: Adiso,
@@ -102,10 +106,10 @@ export function compareRecientesFeed(
   const rb = b.promotionRank ?? 0;
   if (ra !== rb) return rb - ra;
 
-  const ta = parsePublishedTimestamp(a);
-  const tb = parsePublishedTimestamp(b);
-  if (Math.abs(ta - tb) > REAL_RECENCY_GAP_MS) {
-    return tb - ta;
+  const dayA = getPublishedDayKey(a);
+  const dayB = getPublishedDayKey(b);
+  if (dayA !== dayB) {
+    return dayB.localeCompare(dayA); // más reciente primero
   }
 
   const fa = getFeedEffectiveTimestamp(a, interestProfile);

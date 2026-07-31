@@ -619,13 +619,13 @@ export async function getMarketplaceFeed(options: {
     busqueda?: string;
 }): Promise<Adiso[]> {
     const productosTab = options.categoria === 'productos';
-    // En "todos", balancear ~50/50 para que productos recientes no queden sepultados
-    // detrás de un bloque grande de clasificados antiguos.
+    // Clasificados llevan el feed; catálogo aporta variedad sin sepultar lo reciente.
+    // Antes era ~50/50 y el usuario solo veía productos/viejos hasta hacer scroll.
     const adisoLimit = productosTab
         ? Math.max(4, Math.ceil(options.limit * 0.25))
-        : Math.max(8, Math.ceil(options.limit * 0.5));
+        : Math.max(14, Math.ceil(options.limit * 0.85));
     const catalogLimit = Math.max(
-        productosTab ? 12 : Math.ceil(options.limit * 0.5),
+        productosTab ? 12 : Math.ceil(options.limit * 0.15),
         options.limit - adisoLimit
     );
 
@@ -633,6 +633,7 @@ export async function getMarketplaceFeed(options: {
         getAdisosFromSupabase({
             ...options,
             limit: adisoLimit,
+            soloActivos: options.soloActivos ?? true,
             categoria: productosTab ? undefined : options.categoria,
         }),
         getCatalogProductsAsAdisos({
@@ -645,6 +646,7 @@ export async function getMarketplaceFeed(options: {
     ]);
 
     const mergedMap = new Map<string, Adiso>();
+    // Clasificados primero en el map; el sort final impone recencia
     [...adisosBase, ...catalogAdisos].forEach((item) => mergedMap.set(item.id, item));
 
     const merged = Array.from(mergedMap.values());

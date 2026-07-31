@@ -265,7 +265,7 @@ function HomeContent() {
         const items = await getMarketplaceFeed({
           limit: ITEMS_POR_PAGINA,
           offset: 0,
-          soloActivos: false,
+          soloActivos: true,
           categoria: categoriaFiltro !== 'todos' ? categoriaFiltro : undefined,
         });
         if (cancelled) return;
@@ -315,7 +315,7 @@ function HomeContent() {
       const adisosDesdeAPI = await getMarketplaceFeed({
         limit: ITEMS_POR_PAGINA,
         offset: 0,
-        soloActivos: false
+        soloActivos: true
       });
       let nuevosFiltrados = adisosDesdeAPI;
       if (nuevosFiltrados.some(a => TEST_REGEX.test(a.titulo || ''))) {
@@ -346,7 +346,7 @@ function HomeContent() {
         cache = cache.filter(a => !TEST_REGEX.test(a.titulo || ''));
         // Actualizar localStorage para que no vuelvan a aparecer
         if (typeof window !== 'undefined') {
-          localStorage.setItem('buscadis_adisos', JSON.stringify(cache));
+          localStorage.setItem('buscadis_adisos_v2', JSON.stringify(cache));
         }
       }
 
@@ -376,7 +376,7 @@ function HomeContent() {
         let adisosDesdeAPI = await getMarketplaceFeed({
           limit: ITEMS_POR_PAGINA,
           offset: 0,
-          soloActivos: false, // Mostrar todos, incluyendo históricos
+          soloActivos: true, // Solo activos: lo reciente aparece primero
           categoria: categoriaUrl || undefined,
         });
 
@@ -390,21 +390,8 @@ function HomeContent() {
           // Si hay menos de ITEMS_POR_PAGINA, no hay más páginas
           setHayMasAdisos(adisosDesdeAPI.length === ITEMS_POR_PAGINA);
 
-          // Merge inteligente usando Map para evitar duplicados
-          setAdisos(prev => {
-            const adisosMap = new Map<string, Adiso>();
-            // Primero agregar adisos desde API
-            adisosDesdeAPI.forEach(adiso => {
-              adisosMap.set(adiso.id, adiso);
-            });
-            // Luego agregar adisos locales que no están en API (pueden ser recién publicados)
-            prev.forEach(adisoLocal => {
-              if (!adisosMap.has(adisoLocal.id) && !TEST_REGEX.test(adisoLocal.titulo || '')) {
-                adisosMap.set(adisoLocal.id, adisoLocal);
-              }
-            });
-            return Array.from(adisosMap.values());
-          });
+          // API manda: no mezclar caché vieja que sepulta avisos nuevos
+          setAdisos(adisosDesdeAPI);
 
           // Si hay adisoId, buscar en la lista actualizada
           if (adisoId) {
@@ -931,7 +918,7 @@ function HomeContent() {
       const nuevosAdisos = await getMarketplaceFeed({
         limit: ITEMS_POR_PAGINA,
         offset: offsetActual,
-        soloActivos: false,
+        soloActivos: true,
         categoria: categoriaFiltro,
         busqueda: committedQuery
       });
