@@ -68,6 +68,19 @@ export async function publishFreeAdiso(input: FreePublishInput): Promise<Adiso> 
     privateData: {},
   };
 
+  if (!input.imageUrl) {
+    adiso.privateData = {
+      coverSource: 'template',
+      flyerTemplateId: 'bold-type',
+      flyerConfig: {},
+    };
+  } else {
+    adiso.privateData = {
+      coverSource: 'user',
+      coverUrl: input.imageUrl,
+    };
+  }
+
   const created = await createAdisoInSupabase(adiso);
   await createStoryFromAdiso(input.userId, created, { promotionTier: 'gratis' });
   return created;

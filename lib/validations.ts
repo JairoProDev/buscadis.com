@@ -146,6 +146,19 @@ export const publishStudioSchema = z.object({
   plan: z.enum(['free', 'paid']).default('paid'),
   paidDays: z.number().int().min(1).max(90).optional(),
   dailyRate: z.number().min(5).max(50).optional(),
+  flyerTemplateId: z.string().optional(),
+  flyerConfig: z
+    .object({
+      primary: z.string().optional(),
+      secondary: z.string().optional(),
+      align: z.enum(['left', 'center']).optional(),
+      badge: z.string().max(40).optional(),
+      showPrice: z.boolean().optional(),
+      showLocation: z.boolean().optional(),
+      showCategory: z.boolean().optional(),
+      titleScale: z.enum(['s', 'm', 'l']).optional(),
+    })
+    .optional(),
 });
 
 // Schema para crear adiso gratuito

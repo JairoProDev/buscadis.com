@@ -432,6 +432,9 @@ export function PublishPhotoOptions({
       >
         Continuar sin foto
       </button>
+      <p className="m-0 text-center text-[10px] text-[var(--text-tertiary)]">
+        Sin foto se genera una portada automática con el título.
+      </p>
     </div>
   );
 }

@@ -108,13 +108,29 @@ export async function publishFromStudio(input: PublishStudioInput): Promise<{
       daily_rate: dailyRate,
       total_amount: totalAmount,
     } as unknown as Record<string, unknown>,
-    privateData: isFree
-      ? {}
-      : {
-          precio: draft.precio,
-          ubicacion: draft.ubicacion,
-          imagenesUrls: draft.imagenes,
-        },
+    privateData: {
+      ...(isFree
+        ? {}
+        : {
+            precio: draft.precio,
+            ubicacion: draft.ubicacion,
+            imagenesUrls: draft.imagenes,
+          }),
+      ...(draft.flyerTemplateId
+        ? {
+            coverSource: 'template' as const,
+            flyerTemplateId: draft.flyerTemplateId,
+            flyerConfig: draft.flyerConfig || {},
+            coverUrl: draft.imagenes[0],
+          }
+        : draft.imagenes.length === 0
+          ? {
+              coverSource: 'template' as const,
+              flyerTemplateId: 'bold-type',
+              flyerConfig: {},
+            }
+          : {}),
+    },
   };
 
   const created = await createAdisoInSupabase(adiso);

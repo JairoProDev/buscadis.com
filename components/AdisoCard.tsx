@@ -33,6 +33,9 @@ import {
 } from '@/lib/adiso-display';
 import { pickCardSignal } from '@/lib/social-proof';
 import AdisoPublisherStrip from '@/components/AdisoPublisherStrip';
+import FlyerCanvas from '@/components/flyer/FlyerCanvas';
+import { buildFlyerContentFromAdiso, flyerStateFromPrivateData } from '@/lib/flyer/layout';
+import { resolveFlyerConfig } from '@/lib/flyer/templates';
 
 const getCategoriaIcon = (categoria: Categoria) => {
     const iconMap = {
@@ -244,14 +247,27 @@ const AdisoCard = forwardRef<HTMLDivElement, AdisoCardProps>(
                             )}
                         </>
                     ) : (
-                        <div
-                            className="absolute inset-0 flex items-center justify-center dark:bg-opacity-100"
-                            style={{ backgroundColor: placeholderBg }}
-                        >
-                            <div className="opacity-50" style={{ color: themeTokens.accent }}>
-                                <IconComponent size={32} />
-                            </div>
-                        </div>
+                        (() => {
+                            const flyer = flyerStateFromPrivateData(
+                                adiso.privateData as Record<string, unknown> | undefined
+                            );
+                            const content = buildFlyerContentFromAdiso(adiso);
+                            const cfg = resolveFlyerConfig(
+                                adiso.categoria,
+                                flyer.templateId,
+                                flyer.config
+                            );
+                            return (
+                                <div className="absolute inset-0">
+                                    <FlyerCanvas
+                                        templateId={flyer.templateId}
+                                        config={cfg}
+                                        content={content}
+                                        className="h-full w-full"
+                                    />
+                                </div>
+                            );
+                        })()
                     )}
 
                     {vista !== 'feed' && (

@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useUI } from '@/contexts/UIContext';
 import {
@@ -23,6 +23,12 @@ import { hasMinimumContent } from '@/lib/publish/publish-draft-types';
 import { publishPrimaryBtn, publishSecondaryBtn, publishCard } from './publish-ui';
 import { IconAdis } from '@/components/Icons';
 import type { Adiso } from '@/types';
+import { defaultFlyerForCategory } from '@/lib/flyer/templates';
+import { exportAndUploadFlyer } from '@/lib/flyer/export-client';
+import type { FlyerConfig, FlyerTemplateId } from '@/lib/flyer/types';
+import FlyerCanvas from '@/components/flyer/FlyerCanvas';
+import { buildFlyerContent } from '@/lib/flyer/layout';
+import { resolveFlyerConfig } from '@/lib/flyer/templates';
 
 export const STORIES_REFRESH_EVENT = 'buscadis:stories-refresh';
 
@@ -84,6 +90,13 @@ export default function PublishStudio({
   const [publishedOrderId, setPublishedOrderId] = useState<string | null>(null);
   const [publishedAdisoId, setPublishedAdisoId] = useState<string | null>(null);
   const [publisher, setPublisher] = useState<PublisherPreview | null>(null);
+  const flyerExportRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (draft.flyerTemplateId) return;
+    const d = defaultFlyerForCategory(draft.categoria);
+    setDraft({ flyerTemplateId: d.templateId, flyerConfig: d.config });
+  }, [draft.categoria, draft.flyerTemplateId, setDraft]);
 
   const setStep = useCallback((next: StudioStep) => {
     setStepState(next);
@@ -258,6 +271,27 @@ export default function PublishStudio({
 
       setPublishing(true);
       try {
+        let imagenes = [...publishDraft.imagenes];
+        let flyerTemplateId = publishDraft.flyerTemplateId;
+        let flyerConfig = publishDraft.flyerConfig;
+
+        if (imagenes.length === 0) {
+          const defaults = defaultFlyerForCategory(publishDraft.categoria);
+          flyerTemplateId = flyerTemplateId || defaults.templateId;
+          flyerConfig = flyerConfig || defaults.config;
+          // Wait a frame so export node has latest paint
+          await new Promise((r) => requestAnimationFrame(() => r(null)));
+          const coverUrl = await exportAndUploadFlyer(flyerExportRef.current);
+          if (coverUrl) {
+            imagenes = [coverUrl];
+          } else {
+            onNotify?.(
+              'No se pudo generar la portada; el aviso usará el flyer en pantalla.',
+              'info'
+            );
+          }
+        }
+
         const res = await fetch('/api/adisos/publish', {
           method: 'POST',
           headers: {
@@ -266,7 +300,9 @@ export default function PublishStudio({
           },
           body: JSON.stringify({
             ...publishDraft,
-            imagenes: publishDraft.imagenes,
+            imagenes,
+            flyerTemplateId,
+            flyerConfig,
             plan,
             paidDays: publishDraft.paidDays ?? 7,
             dailyRate: publishDraft.dailyRate ?? 5,
@@ -322,8 +358,38 @@ export default function PublishStudio({
   const stepNumber = step === 'compose' ? 1 : step === 'review' ? 2 : 3;
   const chatPadding = step === 'compose' && !publishedOrderId && !compact ? 'pb-[120px]' : '';
 
+  const flyerDefaults = defaultFlyerForCategory(draft.categoria);
+  const exportTemplateId = draft.flyerTemplateId || flyerDefaults.templateId;
+  const exportConfig = resolveFlyerConfig(
+    draft.categoria,
+    exportTemplateId,
+    draft.flyerConfig || flyerDefaults.config
+  );
+  const exportContent = buildFlyerContent({
+    titulo: draft.titulo || 'Aviso en Buscadis',
+    precio: draft.precio,
+    moneda: draft.moneda,
+    tipoPrecio: draft.tipoPrecio,
+    ubicacion: draft.ubicacion,
+    categoria: draft.categoria,
+  });
+
   return (
     <div className={`flex flex-col ${compact ? 'h-full min-h-0 relative' : 'min-h-0'} ${chatPadding}`}>
+      {/* Always-mounted export target (offscreen) when no photos */}
+      {draft.imagenes.length === 0 && (
+        <div
+          aria-hidden
+          className="pointer-events-none fixed left-[-9999px] top-0 w-[1080px] opacity-0"
+        >
+          <FlyerCanvas
+            templateId={exportTemplateId}
+            config={exportConfig}
+            content={exportContent}
+            exportRef={flyerExportRef}
+          />
+        </div>
+      )}
       {onClose && (
         <div className="flex items-center justify-between shrink-0 mb-2 px-1">
           <h2 className="text-base font-bold m-0 text-[var(--text-primary)]">Publicar aviso</h2>
@@ -364,6 +430,20 @@ export default function PublishStudio({
               uploading={uploadingImage}
               maxImages={10}
               allowEnhance
+              flyerExportRef={undefined}
+              flyerTemplateId={draft.flyerTemplateId}
+              flyerConfig={draft.flyerConfig}
+              onFlyerChange={(next: { templateId: FlyerTemplateId; config: FlyerConfig }) =>
+                setDraft({ flyerTemplateId: next.templateId, flyerConfig: next.config })
+              }
+              draftPreview={{
+                titulo: draft.titulo,
+                precio: draft.precio,
+                moneda: draft.moneda,
+                tipoPrecio: draft.tipoPrecio,
+                ubicacion: draft.ubicacion,
+                categoria: draft.categoria,
+              }}
             />
 
             <PublishFormCompact

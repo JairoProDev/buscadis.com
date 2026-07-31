@@ -1,4 +1,5 @@
 import { Categoria, Ubicacion } from '@/types';
+import type { FlyerConfig, FlyerTemplateId } from '@/lib/flyer/types';
 
 export type PublishPlan = 'free' | 'paid';
 export type PaymentStatus = 'free' | 'pending' | 'verified' | 'underpaid';
@@ -31,6 +32,10 @@ export interface PublishDraft {
   plan: PublishPlan;
   paidDays?: number;
   dailyRate?: number;
+
+  /** Flyer cover when no real photos */
+  flyerTemplateId?: FlyerTemplateId;
+  flyerConfig?: FlyerConfig;
 }
 
 export const EMPTY_PUBLISH_DRAFT: PublishDraft = {

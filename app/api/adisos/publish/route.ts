@@ -36,7 +36,8 @@ export async function POST(request: NextRequest) {
       chatHistory: [],
       plan: data.plan,
       paidDays: data.paidDays,
-      dailyRate: data.dailyRate,
+      flyerTemplateId: data.flyerTemplateId as PublishDraft['flyerTemplateId'],
+      flyerConfig: data.flyerConfig as PublishDraft['flyerConfig'],
     };
 
     const { adiso, orderId } = await publishFromStudio({ userId: user.id, draft });

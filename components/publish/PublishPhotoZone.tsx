@@ -4,6 +4,11 @@ import { useRef, useState } from 'react';
 import Image from 'next/image';
 import { IconCamera, IconStar, IconX } from '@/components/Icons';
 import { publishLabel } from './publish-ui';
+import FlyerTemplatePicker from '@/components/flyer/FlyerTemplatePicker';
+import { buildFlyerContent } from '@/lib/flyer/layout';
+import { defaultFlyerForCategory } from '@/lib/flyer/templates';
+import type { FlyerConfig, FlyerTemplateId } from '@/lib/flyer/types';
+import type { Categoria, Ubicacion } from '@/types';
 
 const ENHANCE_OPTIONS = [
   { id: 'remove_bg', label: 'Quitar fondo' },
@@ -20,6 +25,20 @@ interface PublishPhotoZoneProps {
   uploading?: boolean;
   maxImages?: number;
   allowEnhance?: boolean;
+  /** Flyer picker when no photos */
+  flyerEnabled?: boolean;
+  flyerTemplateId?: FlyerTemplateId;
+  flyerConfig?: FlyerConfig;
+  onFlyerChange?: (next: { templateId: FlyerTemplateId; config: FlyerConfig }) => void;
+  flyerExportRef?: React.Ref<HTMLDivElement>;
+  draftPreview?: {
+    titulo?: string;
+    precio?: number;
+    moneda?: string;
+    tipoPrecio?: string;
+    ubicacion?: Ubicacion;
+    categoria?: Categoria;
+  };
 }
 
 export default function PublishPhotoZone({
@@ -31,6 +50,12 @@ export default function PublishPhotoZone({
   uploading = false,
   maxImages = 10,
   allowEnhance = true,
+  flyerEnabled = true,
+  flyerTemplateId,
+  flyerConfig,
+  onFlyerChange,
+  flyerExportRef,
+  draftPreview,
 }: PublishPhotoZoneProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [dragOver, setDragOver] = useState(false);
@@ -57,6 +82,19 @@ export default function PublishPhotoZone({
       setEnhancing(false);
     }
   };
+
+  const showFlyer = flyerEnabled && images.length === 0 && onFlyerChange;
+  const defaults = defaultFlyerForCategory(draftPreview?.categoria);
+  const templateId = flyerTemplateId || defaults.templateId;
+  const config = flyerConfig || defaults.config;
+  const content = buildFlyerContent({
+    titulo: draftPreview?.titulo || 'Tu aviso en Buscadis',
+    precio: draftPreview?.precio,
+    moneda: draftPreview?.moneda,
+    tipoPrecio: draftPreview?.tipoPrecio,
+    ubicacion: draftPreview?.ubicacion,
+    categoria: draftPreview?.categoria,
+  });
 
   return (
     <div>
@@ -140,6 +178,18 @@ export default function PublishPhotoZone({
         className="hidden"
         onChange={(e) => handleFiles(e.target.files)}
       />
+
+      {showFlyer && (
+        <div className="mt-4 border-t border-[var(--border-color)] pt-3">
+          <FlyerTemplatePicker
+            content={content}
+            templateId={templateId}
+            config={config}
+            onChange={onFlyerChange}
+            exportRef={flyerExportRef}
+          />
+        </div>
+      )}
     </div>
   );
 }

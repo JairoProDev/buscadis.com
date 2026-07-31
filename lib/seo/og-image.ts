@@ -22,13 +22,16 @@ function toAbsoluteUrl(url: string): string {
   return `${getSiteUrl()}${trimmed.startsWith('/') ? trimmed : `/${trimmed}`}`;
 }
 
-/** Usa la foto del aviso si existe; si no, el banner genérico de marca */
+/** Usa la foto del aviso si existe; si no, cover de flyer; si no, banner genérico */
 export function resolveAdisoOgImage(adiso: {
   imagenUrl?: string | null;
   imagenesUrls?: string[] | null;
+  privateData?: Record<string, unknown> | null;
 }): string {
   const fromGallery = adiso.imagenesUrls?.find((u) => u?.trim());
-  const candidate = fromGallery || adiso.imagenUrl?.trim();
+  const cover =
+    typeof adiso.privateData?.coverUrl === 'string' ? adiso.privateData.coverUrl.trim() : '';
+  const candidate = fromGallery || adiso.imagenUrl?.trim() || cover;
   if (!candidate) return getDefaultOgImageUrl();
   return toAbsoluteUrl(candidate);
 }
@@ -36,8 +39,13 @@ export function resolveAdisoOgImage(adiso: {
 export function adisoHasShareImage(adiso: {
   imagenUrl?: string | null;
   imagenesUrls?: string[] | null;
+  privateData?: Record<string, unknown> | null;
 }): boolean {
-  return Boolean(adiso.imagenesUrls?.some((u) => u?.trim()) || adiso.imagenUrl?.trim());
+  return Boolean(
+    adiso.imagenesUrls?.some((u) => u?.trim()) ||
+      adiso.imagenUrl?.trim() ||
+      (typeof adiso.privateData?.coverUrl === 'string' && adiso.privateData.coverUrl.trim())
+  );
 }
 
 export function buildDefaultOgImageMeta(): NonNullable<Metadata['openGraph']>['images'] {

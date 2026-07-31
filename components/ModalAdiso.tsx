@@ -54,6 +54,9 @@ import Link from 'next/link';
 import { getBusinessProfilePath } from '@/lib/seo/business-metadata';
 import { FIELD_QUESTIONS, type RevealField } from '@/lib/interactions/field-reveal';
 import { chatContextFromAdiso } from '@/lib/chat/context-from-adiso';
+import FlyerCanvas from '@/components/flyer/FlyerCanvas';
+import { buildFlyerContentFromAdiso, flyerStateFromPrivateData } from '@/lib/flyer/layout';
+import { resolveFlyerConfig } from '@/lib/flyer/templates';
 import {
   pickSocialBadge,
   getCtaLabelPorCategoria,
@@ -805,7 +808,7 @@ export default function ModalAdiso({
 
   const ContentBody = () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-      {imagenesGaleria.length > 0 && (
+      {imagenesGaleria.length > 0 ? (
         <div>
           <div
             onClick={() => setImagenAmpliada({ url: imagenesGaleria[galleryIndex], index: galleryIndex })}
@@ -875,6 +878,19 @@ export default function ModalAdiso({
               </button>
             </div>
           )}
+        </div>
+      ) : (
+        <div className="overflow-hidden rounded-2xl" style={{ border: '1px solid var(--border-color)' }}>
+          {(() => {
+            const flyer = flyerStateFromPrivateData(adiso.privateData as Record<string, unknown>);
+            return (
+              <FlyerCanvas
+                templateId={flyer.templateId}
+                config={resolveFlyerConfig(adiso.categoria, flyer.templateId, flyer.config)}
+                content={buildFlyerContentFromAdiso(adiso)}
+              />
+            );
+          })()}
         </div>
       )}
 
