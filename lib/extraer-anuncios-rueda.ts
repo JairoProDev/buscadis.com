@@ -127,7 +127,10 @@ function contarIniciosFusion(texto: string): number {
 }
 
 function empiezaConStarterFuerte(texto: string): boolean {
-  return new RegExp(String.raw`^\s*${SPLIT_START}`, 'i').test(texto);
+  // Lista corta y segura (sin nested quantifiers enormes)
+  return /^(?:¡?(?:Urgente|GRAN|REMATO|Remato|SE\s+REMATA|Vendo|VENDO|Se\s+vende|SE\s+VENDE|En\s+venta|Alquilo|Se\s+alquila|Por\s+(?:motivo|viaje|ocasi[oó]n)|OCASI[OÓ]N|Anticresis|Traspaso|Busco|Necesito|AMPLIAMOS|AGENCIA\s+DE|TRABAJO\s+INMEDIATO|DISTRIBUIDORA|SE\s+SOLICITA|SE\s+REQUIERE|REQUIERE|BUSCAMOS|CAFETER|RESTAURANTE|HOTEL\s|MACHU\s|INMOBILIARIA|INSTITUCI|OPORTUNIDAD\s+LABORAL|ÚNETE|VENDO\s))/i.test(
+    texto.trimStart()
+  );
 }
 
 function extraerTelefonos9(texto: string): string[] {
@@ -252,7 +255,6 @@ export function fragmentarBloqueEnorme(chunk: string): string[] {
   const cutAfter: number[] = [];
   for (let i = 0; i < phones.length; i++) {
     let end = phones[i].index! + phones[i][0].length;
-    // consumir teléfonos siguientes en lista: ", 994687060"
     let guard = 0;
     while (guard++ < 4) {
       const rest = chunk.slice(end);
@@ -260,7 +262,6 @@ export function fragmentarBloqueEnorme(chunk: string): string[] {
       if (!more) break;
       end += more[0].length;
     }
-    // saltar puntuación
     while (end < chunk.length && /[\s.,;!]/.test(chunk[end])) end++;
     if (end >= chunk.length - 40) continue;
     if (empiezaNuevoAnuncio(chunk.slice(end))) {
@@ -268,22 +269,74 @@ export function fragmentarBloqueEnorme(chunk: string): string[] {
     }
   }
 
+  let result: string[];
   if (!cutAfter.length) {
-    return fragmentarPorMarcadoresExtra(chunk);
+    result = fragmentarPorMarcadoresExtra(chunk);
+  } else {
+    const parts: string[] = [];
+    let last = 0;
+    for (const cut of cutAfter) {
+      const piece = chunk.slice(last, cut).trim();
+      if (piece.length > 40) parts.push(piece);
+      last = cut;
+    }
+    const tail = chunk.slice(last).trim();
+    if (tail.length > 40) parts.push(tail);
+    result =
+      parts.length > 1
+        ? parts.filter((p) => /\b9\d{8}\b/.test(p) && p.length >= 50)
+        : fragmentarPorMarcadoresExtra(chunk);
   }
 
-  const parts: string[] = [];
-  let last = 0;
-  for (const cut of cutAfter) {
-    // cut es el inicio del nuevo anuncio; el anterior termina justo antes
-    const piece = chunk.slice(last, cut).trim();
-    if (piece.length > 40) parts.push(piece);
-    last = cut;
+  // Forzar 1 anuncio por teléfono en piezas que sigan enormes
+  const forced: string[] = [];
+  for (const p of result) {
+    if (p.length > 1000 && (p.match(/\b9\d{8}\b/g) || []).length >= 2) {
+      forced.push(...fragmentarUnoPorTelefono(p));
+    } else {
+      forced.push(p);
+    }
   }
-  const tail = chunk.slice(last).trim();
-  if (tail.length > 40) parts.push(tail);
+  return forced.length ? forced : [chunk];
+}
 
-  return parts.length > 1 ? parts.filter((p) => /\b9\d{8}\b/.test(p) && p.length >= 50) : fragmentarPorMarcadoresExtra(chunk);
+/** Último recurso: un aviso por cada teléfono (texto desde el anterior). */
+function fragmentarUnoPorTelefono(chunk: string): string[] {
+  const phones = [...chunk.matchAll(/\b9\d{8}\b/g)];
+  if (phones.length < 2) return [chunk];
+
+  // Agrupar teléfonos consecutivos (listas Cel. A, B)
+  type Cluster = { start: number; end: number };
+  const clusters: Cluster[] = [];
+  let i = 0;
+  while (i < phones.length) {
+    const startPhone = phones[i].index!;
+    let end = startPhone + 9;
+    let j = i + 1;
+    while (j < phones.length) {
+      const between = chunk.slice(end, phones[j].index!);
+      if (/^\s*[-–,;/y]+\s*$/.test(between) && phones[j].index! - end < 20) {
+        end = phones[j].index! + 9;
+        j++;
+      } else break;
+    }
+    clusters.push({ start: startPhone, end });
+    i = j;
+  }
+
+  const out: string[] = [];
+  let cursor = 0;
+  for (const c of clusters) {
+    const piece = chunk.slice(cursor, c.end).trim();
+    if (piece.length >= 50) out.push(piece);
+    cursor = c.end;
+    while (cursor < chunk.length && /[\s.,;!]/.test(chunk[cursor])) cursor++;
+  }
+  const tail = chunk.slice(cursor).trim();
+  if (tail.length >= 50 && /\b9\d{8}\b/.test(tail)) out.push(tail);
+  else if (tail.length >= 20 && out.length) out[out.length - 1] = `${out[out.length - 1]} ${tail}`.trim();
+
+  return out.length >= 2 ? out : [chunk];
 }
 
 function fragmentarPorMarcadoresExtra(chunk: string): string[] {
@@ -325,10 +378,10 @@ function fragmentarPorMarcadoresExtra(chunk: string): string[] {
   return merged.length ? merged.filter((p) => /\b9\d{8}\b/.test(p) && p.length >= 50) : [chunk];
 }
 
-/** Si un bloque tiene 2+ inicios FUERTES y hay teléfono entre ellos, corta. */
+/** Si un bloque tiene 2+ inicios FUERTES (lista corta) y hay teléfono entre ellos, corta. */
 function desfusionarPorInicios(chunk: string): string[] {
   const inicios: number[] = [];
-  const re = new RegExp(String.raw`(^|[\s.])(${SPLIT_START})`, 'gi');
+  const re = new RegExp(String.raw`(^|[\s.])(${FUSION_START})`, 'gi');
   let m: RegExpExecArray | null;
   while ((m = re.exec(chunk)) !== null) {
     const idx = m.index + (m[1] ? m[1].length : 0);
@@ -453,11 +506,12 @@ export function evaluarCalidad(
 
 /** Gate UX: solo auto-publicar si score alto y sin fallas críticas */
 export function esPublicable(a: AnuncioExtraido): boolean {
-  if (a.score < 85) return false;
+  if (a.score < 70) return false;
   if (a.issues.includes('sin_telefono')) return false;
   if (a.issues.includes('ruido_masthead')) return false;
-  if (a.issues.includes('multi_inicio')) return false;
   if (a.issues.includes('muy_corto')) return false;
+  // multi_inicio solo bloquea si además es muy largo
+  if (a.issues.includes('multi_inicio') && a.issues.includes('muy_largo')) return false;
   return true;
 }
 
