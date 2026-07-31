@@ -1,6 +1,6 @@
 'use client';
 
-import React, { forwardRef } from 'react';
+import React, { forwardRef, useEffect, useState } from 'react';
 import Image from 'next/image';
 import { Adiso, Categoria } from '@/types';
 import {
@@ -93,6 +93,12 @@ const AdisoCard = forwardRef<HTMLDivElement, AdisoCardProps>(
         const sellerName = getSellerDisplayName(adiso);
         const isCatalogProduct = adiso.privateData?.source === 'catalog_product';
         const bottomRightPrimary = priceLabel || salaryLabel;
+        // Relative labels use Date.now() — only render after mount to avoid hydration mismatch
+        const [showRelativeMeta, setShowRelativeMeta] = useState(false);
+        useEffect(() => {
+            setShowRelativeMeta(true);
+        }, []);
+        const relativeTimeSafe = showRelativeMeta ? relativeTime : null;
 
         // Uniform grid cells: always 1 column, never multi-row spans
         const gridColumn = vista === 'list' || vista === 'feed' ? '1 / -1' : 'span 1';
@@ -252,25 +258,18 @@ const AdisoCard = forwardRef<HTMLDivElement, AdisoCardProps>(
                         <AdisoPublisherStrip adiso={adiso} tamaño={tamaño} vista={vista} />
                     )}
 
-                    {/* Badges on image so body height stays uniform */}
-                    {(adiso.promotionTier === 'destacada' || adiso.promotionTier === 'premium' || isCatalogProduct) && (
+                    {/* Premium/destacado on image; never "Catálogo" (covers avatar/signals) */}
+                    {(adiso.promotionTier === 'destacada' || adiso.promotionTier === 'premium') && (
                         <div className="absolute top-2 left-2 z-10 flex flex-col gap-1 pointer-events-none">
-                            {(adiso.promotionTier === 'destacada' || adiso.promotionTier === 'premium') && (
-                                <span
-                                    className={`inline-flex items-center gap-1 self-start px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide ${
-                                        adiso.promotionTier === 'premium'
-                                            ? 'bg-gradient-to-r from-[var(--brand-blue)] to-[var(--brand-yellow)] text-white'
-                                            : 'bg-[rgba(var(--brand-yellow-rgb),0.92)] text-[#7a5a00]'
-                                    }`}
-                                >
-                                    {adiso.promotionTier === 'premium' ? 'Premium' : 'Destacado'}
-                                </span>
-                            )}
-                            {isCatalogProduct && (
-                                <span className="inline-flex items-center gap-1 self-start px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide bg-white/92 text-[var(--brand-blue)]">
-                                    Catálogo
-                                </span>
-                            )}
+                            <span
+                                className={`inline-flex items-center gap-1 self-start px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide ${
+                                    adiso.promotionTier === 'premium'
+                                        ? 'bg-gradient-to-r from-[var(--brand-blue)] to-[var(--brand-yellow)] text-white'
+                                        : 'bg-[rgba(var(--brand-yellow-rgb),0.92)] text-[#7a5a00]'
+                                }`}
+                            >
+                                {adiso.promotionTier === 'premium' ? 'Premium' : 'Destacado'}
+                            </span>
                         </div>
                     )}
 
@@ -281,7 +280,7 @@ const AdisoCard = forwardRef<HTMLDivElement, AdisoCardProps>(
                     )}
 
                     {/* Location (left) + date/price (right) on image bottom corners */}
-                    {vista !== 'feed' && (locationShort || bottomRightPrimary || relativeTime) && (
+                    {vista !== 'feed' && (locationShort || bottomRightPrimary || relativeTimeSafe) && (
                         <div className="absolute bottom-2 left-2 right-2 flex justify-between items-end gap-2 z-10 pointer-events-none">
                             {locationShort ? (
                                 <span className="inline-flex items-center gap-1 max-w-[55%] px-2 py-0.5 rounded-full text-[11px] font-medium bg-black/55 text-white truncate">
@@ -303,9 +302,9 @@ const AdisoCard = forwardRef<HTMLDivElement, AdisoCardProps>(
                                         {bottomRightPrimary}
                                     </span>
                                 )}
-                                {relativeTime && (
-                                    <span className="inline-flex px-2 py-0.5 rounded-full text-[11px] font-semibold bg-black/55 text-white">
-                                        {relativeTime}
+                                {relativeTimeSafe && (
+                                    <span className="inline-flex px-2 py-0.5 rounded-full text-[11px] font-semibold bg-black/55 text-white" suppressHydrationWarning>
+                                        {relativeTimeSafe}
                                     </span>
                                 )}
                             </div>

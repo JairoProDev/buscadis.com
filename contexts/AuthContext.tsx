@@ -285,6 +285,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setProfile(null);
   };
 
+  const [clientReady, setClientReady] = useState(false);
+  useEffect(() => {
+    setClientReady(true);
+  }, []);
+
   return (
     <AuthContext.Provider
       value={{
@@ -297,8 +302,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }}
     >
       {children}
-      {!user && !loading && <GoogleOneTap />}
-      {user && !loading && profileReady && <ProgressivePromptModal />}
+      {clientReady && !user && !loading && <GoogleOneTap />}
+      {clientReady && user && !loading && profileReady && <ProgressivePromptModal />}
       {welcomeBusiness && (
         <BusinessAccessWelcome
           business={welcomeBusiness}
