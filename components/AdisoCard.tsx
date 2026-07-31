@@ -2,7 +2,7 @@
 
 import React, { forwardRef } from 'react';
 import Image from 'next/image';
-import { Adiso, Categoria, PAQUETES } from '@/types';
+import { Adiso, Categoria } from '@/types';
 import {
     IconEye,
     IconLocation,
@@ -28,7 +28,7 @@ import {
     shouldShowLocationOnCard,
     formatUbicacionCorta,
     toDisplayTitle,
-    getAdisoCardMetaRow,
+    formatRelativePublishedAt,
     getJobSalaryLabel,
 } from '@/lib/adiso-display';
 import { pickCardSignal } from '@/lib/social-proof';
@@ -63,15 +63,13 @@ function getSellerDisplayName(adiso: Adiso): string | null {
     return rawName;
 }
 
-function getMediaAspectClass(tamaño: string, vista: string, isCatalogProduct = false, hasImage = false): string {
+function getMediaAspectClass(vista: string, isCatalogProduct = false): string {
     if (vista === 'list') {
         return isCatalogProduct
             ? 'w-[112px] h-[112px] shrink-0'
             : 'w-[96px] h-[96px] md:w-[96px] md:h-[96px]';
     }
-    if (isCatalogProduct) return 'w-full aspect-square';
-    if (tamaño === 'miniatura' && !hasImage) return 'w-full h-[72px]';
-    if (tamaño === 'gigante' || tamaño === 'grande') return 'w-full aspect-video';
+    // Grid/feed: always square so every card shares the same media footprint
     return 'w-full aspect-square';
 }
 
@@ -86,19 +84,18 @@ const AdisoCard = forwardRef<HTMLDivElement, AdisoCardProps>(
         const imagenUrl = adiso.imagenesUrls?.[0] || adiso.imagenUrl;
         const extraFotos = Math.max(0, (adiso.imagenesUrls?.length ?? 0) - 1);
         const tamaño = adiso.tamaño || 'miniatura';
-        const paquete = PAQUETES[tamaño];
         const displayTitle = toDisplayTitle(adiso.titulo);
         const locationShort = shouldShowLocationOnCard(adiso) ? formatUbicacionCorta(adiso.ubicacion) : '';
         const priceLabel = shouldShowPriceOnCard(adiso) ? formatPrecioDisplay(adiso) : null;
         const salaryLabel = adiso.categoria === 'empleos' ? getJobSalaryLabel(adiso) : null;
-        const cardMeta = getAdisoCardMetaRow(adiso);
+        const relativeTime = formatRelativePublishedAt(adiso);
         const cardSignal = pickCardSignal(adiso);
         const sellerName = getSellerDisplayName(adiso);
         const isCatalogProduct = adiso.privateData?.source === 'catalog_product';
+        const bottomRightPrimary = priceLabel || salaryLabel;
 
-        const gridColumnSpan = paquete.columnas;
-        const gridColumn = vista === 'list' || vista === 'feed' ? '1 / -1' : `span ${gridColumnSpan}`;
-        // Keep cards compact: never span multiple grid rows (was making cards very tall)
+        // Uniform grid cells: always 1 column, never multi-row spans
+        const gridColumn = vista === 'list' || vista === 'feed' ? '1 / -1' : 'span 1';
         const gridRow = 'auto';
         const minHeight = vista === 'list' ? '96px' : undefined;
 
@@ -138,14 +135,13 @@ const AdisoCard = forwardRef<HTMLDivElement, AdisoCardProps>(
                         ? 'ring-2 ring-[var(--brand-blue)] shadow-[var(--card-shadow-hover)] z-10'
                         : 'shadow-[var(--card-shadow)] hover:shadow-[var(--card-shadow-hover)] hover:-translate-y-0.5 motion-reduce:hover:translate-y-0'
                     }
-                    ${vista === 'feed' ? 'w-full' : ''}
+                    ${vista === 'feed' ? 'w-full' : 'h-full'}
                 `}
                 style={{
                     gridColumn,
                     gridRow,
-                    height: 'auto',
                     minHeight: minHeight || 'auto',
-                    alignSelf: 'start',
+                    alignSelf: vista === 'grid' ? 'stretch' : 'start',
                 }}
             >
                 {vista === 'feed' && (
@@ -219,7 +215,7 @@ const AdisoCard = forwardRef<HTMLDivElement, AdisoCardProps>(
                 <div
                     className={`
                         relative flex-shrink-0 overflow-hidden
-                        ${getMediaAspectClass(tamaño, vista, isCatalogProduct, Boolean(imagenUrl))}
+                        ${getMediaAspectClass(vista, isCatalogProduct)}
                     `}
                     style={{
                         backgroundColor: imagenUrl
@@ -234,15 +230,11 @@ const AdisoCard = forwardRef<HTMLDivElement, AdisoCardProps>(
                                 alt={displayTitle}
                                 fill
                                 sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
-                                className={`${
-                                    isCatalogProduct || vista === 'feed'
-                                        ? 'object-contain p-1.5'
-                                        : 'object-cover'
-                                } motion-reduce:transition-none`}
+                                className="object-cover motion-reduce:transition-none"
                                 loading="lazy"
                             />
-                            {!isCatalogProduct && vista !== 'feed' && (
-                                <div className="absolute inset-0 bg-gradient-to-t from-black/35 via-transparent to-transparent pointer-events-none" />
+                            {vista !== 'feed' && (
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-transparent to-transparent pointer-events-none" />
                             )}
                         </>
                     ) : (
@@ -251,7 +243,7 @@ const AdisoCard = forwardRef<HTMLDivElement, AdisoCardProps>(
                             style={{ backgroundColor: placeholderBg }}
                         >
                             <div className="opacity-50" style={{ color: themeTokens.accent }}>
-                                <IconComponent size={tamaño === 'miniatura' ? 24 : 32} />
+                                <IconComponent size={32} />
                             </div>
                         </div>
                     )}
@@ -260,33 +252,63 @@ const AdisoCard = forwardRef<HTMLDivElement, AdisoCardProps>(
                         <AdisoPublisherStrip adiso={adiso} tamaño={tamaño} vista={vista} />
                     )}
 
-                    {extraFotos > 0 && tamaño !== 'miniatura' && (
+                    {/* Badges on image so body height stays uniform */}
+                    {(adiso.promotionTier === 'destacada' || adiso.promotionTier === 'premium' || isCatalogProduct) && (
+                        <div className="absolute top-2 left-2 z-10 flex flex-col gap-1 pointer-events-none">
+                            {(adiso.promotionTier === 'destacada' || adiso.promotionTier === 'premium') && (
+                                <span
+                                    className={`inline-flex items-center gap-1 self-start px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide ${
+                                        adiso.promotionTier === 'premium'
+                                            ? 'bg-gradient-to-r from-[var(--brand-blue)] to-[var(--brand-yellow)] text-white'
+                                            : 'bg-[rgba(var(--brand-yellow-rgb),0.92)] text-[#7a5a00]'
+                                    }`}
+                                >
+                                    {adiso.promotionTier === 'premium' ? 'Premium' : 'Destacado'}
+                                </span>
+                            )}
+                            {isCatalogProduct && (
+                                <span className="inline-flex items-center gap-1 self-start px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide bg-white/92 text-[var(--brand-blue)]">
+                                    Catálogo
+                                </span>
+                            )}
+                        </div>
+                    )}
+
+                    {extraFotos > 0 && (
                         <span className="absolute top-2 right-14 z-10 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-black/55 text-white border border-white/20">
                             +{extraFotos} {extraFotos === 1 ? 'foto' : 'fotos'}
                         </span>
                     )}
 
-                    {vista !== 'feed' && (locationShort || priceLabel || salaryLabel) && (
+                    {/* Location (left) + date/price (right) on image bottom corners */}
+                    {vista !== 'feed' && (locationShort || bottomRightPrimary || relativeTime) && (
                         <div className="absolute bottom-2 left-2 right-2 flex justify-between items-end gap-2 z-10 pointer-events-none">
                             {locationShort ? (
-                                <span className="inline-flex items-center gap-1 max-w-[70%] px-2 py-0.5 rounded-full text-xs font-medium bg-black/55 text-white truncate">
+                                <span className="inline-flex items-center gap-1 max-w-[55%] px-2 py-0.5 rounded-full text-[11px] font-medium bg-black/55 text-white truncate">
                                     <IconLocation size={10} className="flex-shrink-0" />
                                     <span className="truncate">{locationShort}</span>
                                 </span>
                             ) : (
                                 <span className="flex-1" />
                             )}
-                            {(priceLabel || salaryLabel) && (
-                                <span
-                                    className={`flex-shrink-0 ml-auto inline-flex px-2 py-0.5 rounded-full text-sm font-bold shadow-sm ${
-                                        imagenUrl
-                                            ? 'bg-white/95 text-[var(--brand-blue)]'
-                                            : 'bg-black/55 text-white'
-                                    }`}
-                                >
-                                    {priceLabel || salaryLabel}
-                                </span>
-                            )}
+                            <div className="flex flex-col items-end gap-1 shrink-0 ml-auto">
+                                {bottomRightPrimary && (
+                                    <span
+                                        className={`inline-flex px-2 py-0.5 rounded-full text-sm font-bold shadow-sm ${
+                                            imagenUrl
+                                                ? 'bg-white/95 text-[var(--brand-blue)]'
+                                                : 'bg-black/55 text-white'
+                                        }`}
+                                    >
+                                        {bottomRightPrimary}
+                                    </span>
+                                )}
+                                {relativeTime && (
+                                    <span className="inline-flex px-2 py-0.5 rounded-full text-[11px] font-semibold bg-black/55 text-white">
+                                        {relativeTime}
+                                    </span>
+                                )}
+                            </div>
                         </div>
                     )}
 
@@ -310,56 +332,17 @@ const AdisoCard = forwardRef<HTMLDivElement, AdisoCardProps>(
                         vista === 'feed' ? 'p-4' : 'flex-1 p-3'
                     } ${vista === 'list' ? 'py-2 pr-2' : ''}`}
                 >
-                    {(adiso.promotionTier === 'destacada' || adiso.promotionTier === 'premium') && (
-                        <span
-                            className={`inline-flex items-center gap-1 self-start mb-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide ${
-                                adiso.promotionTier === 'premium'
-                                    ? 'bg-gradient-to-r from-[var(--brand-blue)] to-[var(--brand-yellow)] text-white'
-                                    : 'bg-[rgba(var(--brand-yellow-rgb),0.18)] text-[#b8860b] dark:text-[var(--brand-yellow)]'
-                            }`}
-                        >
-                            {adiso.promotionTier === 'premium' ? '👑 Premium' : '⭐ Destacado'}
-                        </span>
-                    )}
-                    {isCatalogProduct && (
-                        <span className="inline-flex items-center gap-1 self-start mb-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide bg-[rgba(var(--brand-primary-rgb),0.12)] text-[var(--brand-blue)]">
-                            🏪 Producto de catálogo
-                        </span>
-                    )}
                     <h3
                         className={`
-                            font-semibold text-[var(--text-primary)] leading-tight line-clamp-2 mb-1
-                            ${vista === 'list' ? 'text-sm md:text-[15px]' : 'text-sm md:text-[15px]'}
-                            ${tamaño === 'miniatura' ? 'text-sm' : ''}
+                            font-semibold text-[var(--text-primary)] leading-snug line-clamp-2
+                            ${vista === 'list' ? 'text-sm md:text-[15px]' : 'text-sm md:text-[15px] min-h-[2.5rem]'}
                         `}
                     >
                         {displayTitle}
                     </h3>
 
-                    {vista !== 'feed' && (cardMeta.salary || cardMeta.location || cardMeta.price || cardMeta.relativeTime) && (
-                        <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 mb-1.5 min-h-[16px]">
-                            {cardMeta.salary && (
-                                <span className="text-[11px] font-bold text-[var(--brand-blue)]">{cardMeta.salary}</span>
-                            )}
-                            {cardMeta.price && !cardMeta.salary && (
-                                <span className="text-[11px] font-bold text-[var(--brand-blue)]">{cardMeta.price}</span>
-                            )}
-                            {cardMeta.location && (
-                                <span className="inline-flex items-center gap-0.5 text-[11px] text-[var(--text-secondary)] truncate max-w-full">
-                                    <IconLocation size={10} className="flex-shrink-0 opacity-70" />
-                                    <span className="truncate">{cardMeta.location}</span>
-                                </span>
-                            )}
-                            {cardMeta.relativeTime && (
-                                <span className="text-[11px] text-[var(--text-tertiary)] ml-auto shrink-0">
-                                    {cardMeta.relativeTime}
-                                </span>
-                            )}
-                        </div>
-                    )}
-
                     {vista === 'feed' && priceLabel && (
-                        <p className="text-[15px] font-bold text-[var(--brand-blue)] mb-2">{priceLabel}</p>
+                        <p className="text-[15px] font-bold text-[var(--brand-blue)] mb-2 mt-2">{priceLabel}</p>
                     )}
 
                     {cardSignal && vista === 'feed' && (

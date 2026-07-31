@@ -127,6 +127,7 @@ export default function GrillaAdisos({
               adisoRefs.current[adiso.id] = el;
             }}
             data-adiso-id={adiso.id}
+            className={vista === 'grid' ? 'h-full' : undefined}
           >
             <AdisoCard
               adiso={adiso}

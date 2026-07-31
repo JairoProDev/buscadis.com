@@ -31,9 +31,8 @@ export function SkeletonCard() {
         }}
       />
 
-      {/* Content area */}
-      <div style={{ padding: '0.625rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-        {/* Title lines (max 2) */}
+      {/* Content area — title only (meta lives on the image) */}
+      <div style={{ padding: '0.75rem', display: 'flex', flexDirection: 'column' }}>
         <div
           className="skeleton-shimmer"
           style={{
@@ -41,6 +40,7 @@ export function SkeletonCard() {
             width: '92%',
             borderRadius: '6px',
             backgroundColor: 'var(--bg-tertiary)',
+            marginBottom: '6px',
           }}
         />
         <div
@@ -52,28 +52,6 @@ export function SkeletonCard() {
             backgroundColor: 'var(--bg-tertiary)',
           }}
         />
-
-        {/* Footer: price + stats */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '2px' }}>
-          <div
-            className="skeleton-shimmer"
-            style={{
-              height: '10px',
-              width: '36%',
-              borderRadius: '6px',
-              backgroundColor: 'var(--bg-tertiary)',
-            }}
-          />
-          <div
-            className="skeleton-shimmer"
-            style={{
-              height: '10px',
-              width: '28%',
-              borderRadius: '6px',
-              backgroundColor: 'var(--bg-tertiary)',
-            }}
-          />
-        </div>
       </div>
     </div>
   );
