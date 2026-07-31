@@ -37,7 +37,6 @@ interface SidebarDesktopProps {
 }
 
 const SIDEBAR_WIDTH = 420;
-const COLLAPSED_RAIL = 48;
 const HEADER_HEIGHT = 'var(--header-height, 72px)';
 
 const PANEL_TABS: {
@@ -205,47 +204,9 @@ export default function SidebarDesktop({
 
   if (!isDesktop) return null;
 
+  // Collapsed: take no layout space (no thin rail). Reopens when user opens an ad or a tool.
   if (internalMinimizado) {
-    return (
-      <aside
-        className="mx-1 mt-2 flex shrink-0 flex-col gap-1 self-start"
-        style={{
-          width: COLLAPSED_RAIL,
-          position: 'sticky',
-          top: `calc(${HEADER_HEIGHT} + 8px)`,
-          zIndex: 500,
-        }}
-      >
-        {PANEL_TABS.map(({ id, shortLabel, Icon }) => {
-          const isActive = seccionActiva === id && !internalMinimizado;
-          return (
-            <button
-              key={id}
-              type="button"
-              onClick={() => handleSectionChange(id)}
-              title={shortLabel}
-              aria-label={shortLabel}
-              className={`flex h-10 w-10 items-center justify-center rounded-xl border shadow-sm transition-colors ${
-                isActive
-                  ? 'border-[var(--brand-blue)] bg-[rgba(var(--brand-primary-rgb),0.12)] text-[var(--brand-blue)]'
-                  : 'border-[var(--border-color)] bg-[var(--bg-primary)] text-[var(--text-secondary)] hover:border-[var(--brand-blue)]/40 hover:text-[var(--brand-blue)]'
-              }`}
-            >
-              <Icon
-                size={16}
-                color={
-                  id === 'publicar'
-                    ? 'var(--brand-yellow)'
-                    : isActive
-                      ? 'var(--brand-blue)'
-                      : undefined
-                }
-              />
-            </button>
-          );
-        })}
-      </aside>
-    );
+    return null;
   }
 
   const showAdisoDetail = seccionActiva === 'adiso' && adisoAbierto;

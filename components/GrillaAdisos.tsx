@@ -29,7 +29,7 @@ export default function GrillaAdisos({
   adisos,
   onAbrirAdiso,
   adisoSeleccionadoId,
-  espacioAdicional = 0,
+  espacioAdicional: _espacioAdicional = 0,
   cargandoMas = false,
   sentinelRef,
   vista = 'grid',
@@ -38,7 +38,6 @@ export default function GrillaAdisos({
   const impressedRef = useRef<Set<string>>(new Set());
   const isDesktop = useMediaQuery('(min-width: 768px)');
   const { user } = useAuth();
-  const columnMin = espacioAdicional > 0 ? 240 : 200;
 
   const handleClickAdiso = (adiso: Adiso) => {
     registrarClick(user?.id, adiso.id, adiso.categoria);
@@ -111,10 +110,21 @@ export default function GrillaAdisos({
           margin: 0 auto;
         }
 
+        /* Desktop: fixed columns so cards stay large (5 max on wide screens) */
         @media (min-width: 768px) {
           .grilla-adisos {
-            grid-template-columns: repeat(auto-fill, minmax(${columnMin}px, 1fr));
+            grid-template-columns: repeat(3, 1fr);
             gap: var(--space-4, 16px);
+          }
+        }
+        @media (min-width: 1024px) {
+          .grilla-adisos {
+            grid-template-columns: repeat(4, 1fr);
+          }
+        }
+        @media (min-width: 1280px) {
+          .grilla-adisos {
+            grid-template-columns: repeat(5, 1fr);
           }
         }
       `}</style>

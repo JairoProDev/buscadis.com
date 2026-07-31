@@ -119,13 +119,11 @@ export default function SkeletonAdisos({ count, isDesktop, showToolbar = false }
     <>
       {showToolbar && <SkeletonToolbar />}
       <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: isDesktop
-            ? 'repeat(auto-fill, minmax(200px, 1fr))'
-            : 'repeat(2, 1fr)',
-          gap: isDesktop ? 'var(--space-6, 24px)' : 'var(--space-3, 12px)',
-        }}
+        className={
+          isDesktop
+            ? 'grid grid-cols-3 gap-4 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5'
+            : 'grid grid-cols-2 gap-3'
+        }
       >
         {Array.from({ length: cardCount }).map((_, i) => (
           <SkeletonCard key={i} />
