@@ -11,7 +11,12 @@ import {
   type FlyerContent,
   type FlyerTemplateId,
 } from './types';
-import { defaultFlyerForCategory, isFlyerTemplateId, resolveFlyerConfig } from './templates';
+import {
+  adisoUsesGeneratedCover,
+  defaultFlyerForCategory,
+  isFlyerTemplateId,
+  resolveFlyerConfig,
+} from './templates';
 
 export function truncateFlyerTitle(title: string, max = 72): string {
   const t = title.trim().replace(/\s+/g, ' ');
@@ -108,10 +113,21 @@ function pickLegacyTemplate(
 ): FlyerTemplateId {
   const pool: FlyerTemplateId[] =
     categoria === 'empleos' || categoria === 'servicios' || categoria === 'negocios'
-      ? ['negocio', 'minimal-cream', 'split', 'marketplace-tag']
+      ? ['editorial', 'negocio', 'minimal-cream', 'ribbon', 'soft-wash', 'stamp', 'marketplace-tag']
       : categoria === 'eventos'
-        ? ['gradient-dusk', 'diagonal-band', 'bold-type', 'marketplace-tag']
-        : ['bold-type', 'diagonal-band', 'urgent', 'split', 'marketplace-tag', 'gradient-dusk'];
+        ? ['ticket', 'gradient-dusk', 'diagonal-band', 'poster-serif', 'duo-tone', 'corner-mark']
+        : [
+            'bold-type',
+            'diagonal-band',
+            'urgent',
+            'split',
+            'marketplace-tag',
+            'gradient-dusk',
+            'duo-tone',
+            'corner-mark',
+            'poster-serif',
+            'ribbon',
+          ];
 
   if (!adisoId) return pool[0];
   let hash = 0;
@@ -121,5 +137,5 @@ function pickLegacyTemplate(
   return pool[hash % pool.length] || DEFAULT_FLYER_TEMPLATE;
 }
 
-export { resolveFlyerConfig, isFlyerTemplateId, defaultFlyerForCategory };
+export { resolveFlyerConfig, isFlyerTemplateId, defaultFlyerForCategory, adisoUsesGeneratedCover };
 export { DEFAULT_FLYER_TEMPLATE } from './types';

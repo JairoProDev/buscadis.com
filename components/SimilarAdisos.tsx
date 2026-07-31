@@ -7,7 +7,8 @@ import { getAdisoUrl } from '@/lib/url';
 import { IconLocation } from './Icons';
 import FlyerCanvas from '@/components/flyer/FlyerCanvas';
 import { buildFlyerContentFromAdiso, flyerStateFromPrivateData } from '@/lib/flyer/layout';
-import { resolveFlyerConfig } from '@/lib/flyer/templates';
+import { adisoUsesGeneratedCover, resolveFlyerConfig } from '@/lib/flyer/templates';
+import { toDisplayTitle } from '@/lib/adiso-display';
 
 interface SimilarAdisosProps {
   currentAdiso: Adiso;
@@ -78,17 +79,27 @@ export default function SimilarAdisos({ currentAdiso }: SimilarAdisosProps) {
       <h3 className="mb-4 text-lg font-bold text-[var(--text-primary)]">{sectionTitle}</h3>
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-        {similarAds.map((ad) => (
+        {similarAds.map((ad) => {
+          const usesGenerated = adisoUsesGeneratedCover(ad);
+          const photo = ad.imagenesUrls?.[0] || ad.imagenUrl;
+          const showPhoto = Boolean(photo) && !usesGenerated;
+          const displayTitle = toDisplayTitle(ad.titulo) || ad.titulo;
+
+          return (
           <Link
             key={ad.id}
             href={getAdisoUrl(ad)}
             className="group flex flex-col overflow-hidden rounded-2xl border border-[var(--border-color)] bg-[var(--bg-primary)] transition-transform hover:-translate-y-0.5 hover:shadow-md"
           >
-            <div className="relative aspect-square w-full bg-[var(--bg-secondary)]">
-              {ad.imagenesUrls?.[0] || ad.imagenUrl ? (
+            <div
+              className={`relative w-full bg-[var(--bg-secondary)] ${
+                usesGenerated ? 'aspect-[3/4]' : 'aspect-square'
+              }`}
+            >
+              {showPhoto ? (
                 <Image
-                  src={ad.imagenesUrls?.[0] || ad.imagenUrl || ''}
-                  alt={ad.titulo}
+                  src={photo || ''}
+                  alt={displayTitle}
                   fill
                   className="object-contain p-2"
                   sizes="(max-width: 640px) 50vw, 200px"
@@ -111,21 +122,26 @@ export default function SimilarAdisos({ currentAdiso }: SimilarAdisosProps) {
               )}
             </div>
 
-            <div className="flex flex-1 flex-col gap-1 p-2.5">
-              <h4 className="line-clamp-2 text-sm font-semibold leading-snug text-[var(--text-primary)] group-hover:text-[var(--brand-blue)]">
-                {ad.titulo}
-              </h4>
-              <div className="mt-auto flex items-center gap-1 text-[0.7rem] text-[var(--text-tertiary)]">
-                <IconLocation size={11} />
-                <span className="truncate">
-                  {typeof ad.ubicacion === 'string'
-                    ? ad.ubicacion.split(',')[0]
-                    : ad.ubicacion?.distrito || 'Perú'}
-                </span>
+            {usesGenerated ? (
+              <h4 className="sr-only">{displayTitle}</h4>
+            ) : (
+              <div className="flex flex-1 flex-col gap-1 p-2.5">
+                <h4 className="line-clamp-2 text-sm font-semibold leading-snug text-[var(--text-primary)] group-hover:text-[var(--brand-blue)]">
+                  {displayTitle}
+                </h4>
+                <div className="mt-auto flex items-center gap-1 text-[0.7rem] text-[var(--text-tertiary)]">
+                  <IconLocation size={11} />
+                  <span className="truncate">
+                    {typeof ad.ubicacion === 'string'
+                      ? ad.ubicacion.split(',')[0]
+                      : ad.ubicacion?.distrito || 'Perú'}
+                  </span>
+                </div>
               </div>
-            </div>
+            )}
           </Link>
-        ))}
+          );
+        })}
       </div>
     </section>
   );

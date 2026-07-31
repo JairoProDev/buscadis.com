@@ -121,6 +121,35 @@ export default function FlyerTemplatePicker({
         </label>
       </div>
 
+      <div>
+        <p className="m-0 mb-1.5 text-[10px] font-semibold text-[var(--text-tertiary)]">Paletas rápidas</p>
+        <div className="flex flex-wrap gap-1.5">
+          {(
+            [
+              ['#e11d48', '#fff1f2'],
+              ['#0f766e', '#ccfbf1'],
+              ['#1d4ed8', '#dbeafe'],
+              ['#c2410c', '#ffedd5'],
+              ['#7c3aed', '#ede9fe'],
+              ['#0f172a', '#fef3c7'],
+              ['#be123c', '#fff7ed'],
+              ['#0369a1', '#e0f2fe'],
+            ] as const
+          ).map(([p, s]) => (
+            <button
+              key={`${p}-${s}`}
+              type="button"
+              title="Aplicar paleta"
+              onClick={() => patch({ primary: p, secondary: s })}
+              className="h-7 w-7 overflow-hidden rounded-full ring-1 ring-[var(--border-color)]"
+              style={{
+                background: `linear-gradient(135deg, ${p} 0 50%, ${s} 50% 100%)`,
+              }}
+            />
+          ))}
+        </div>
+      </div>
+
       <div className="flex flex-wrap gap-2">
         <div className="flex overflow-hidden rounded-lg ring-1 ring-[var(--border-color)]">
           {(['left', 'center'] as const).map((a) => (

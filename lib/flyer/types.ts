@@ -8,7 +8,15 @@ export type FlyerTemplateId =
   | 'gradient-dusk'
   | 'split'
   | 'urgent'
-  | 'negocio';
+  | 'negocio'
+  | 'poster-serif'
+  | 'ribbon'
+  | 'duo-tone'
+  | 'editorial'
+  | 'stamp'
+  | 'soft-wash'
+  | 'ticket'
+  | 'corner-mark';
 
 export type FlyerConfig = {
   primary?: string;

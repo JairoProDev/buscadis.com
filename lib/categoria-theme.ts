@@ -9,8 +9,8 @@ export interface CategoriaThemeTokens {
 /** Acento 3px + fondos placeholder neutros (spec §2.2) */
 export const CATEGORIA_THEME: Record<Categoria, CategoriaThemeTokens> = {
   empleos: {
-    accent: '#64748b',
-    placeholderBg: '#f8fafc',
+    accent: '#0f766e',
+    placeholderBg: '#f0fdfa',
     placeholderBgDark: '#283038',
   },
   inmuebles: {
@@ -39,8 +39,8 @@ export const CATEGORIA_THEME: Record<Categoria, CategoriaThemeTokens> = {
     placeholderBgDark: '#283038',
   },
   negocios: {
-    accent: '#475569',
-    placeholderBg: '#f8fafc',
+    accent: '#1d4ed8',
+    placeholderBg: '#eff6ff',
     placeholderBgDark: '#283038',
   },
   comunidad: {

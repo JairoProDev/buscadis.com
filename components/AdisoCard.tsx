@@ -35,7 +35,7 @@ import { pickCardSignal } from '@/lib/social-proof';
 import AdisoPublisherStrip from '@/components/AdisoPublisherStrip';
 import FlyerCanvas from '@/components/flyer/FlyerCanvas';
 import { buildFlyerContentFromAdiso, flyerStateFromPrivateData } from '@/lib/flyer/layout';
-import { resolveFlyerConfig } from '@/lib/flyer/templates';
+import { adisoUsesGeneratedCover, resolveFlyerConfig } from '@/lib/flyer/templates';
 
 const getCategoriaIcon = (categoria: Categoria) => {
     const iconMap = {
@@ -66,13 +66,18 @@ function getSellerDisplayName(adiso: Adiso): string | null {
     return rawName;
 }
 
-function getMediaAspectClass(vista: string, isCatalogProduct = false): string {
+function getMediaAspectClass(
+    vista: string,
+    isCatalogProduct = false,
+    usesGeneratedCover = false
+): string {
     if (vista === 'list') {
         return isCatalogProduct
             ? 'w-[112px] h-[112px] shrink-0'
             : 'w-[96px] h-[96px] md:w-[96px] md:h-[96px]';
     }
-    // Grid/feed: always square so every card shares the same media footprint
+    // Flyer covers reclaim the footer: taller portrait media, exclusive to the image
+    if (usesGeneratedCover) return 'w-full aspect-[3/4]';
     return 'w-full aspect-square';
 }
 
@@ -85,6 +90,8 @@ const AdisoCard = forwardRef<HTMLDivElement, AdisoCardProps>(
         const placeholderBg = isDark ? themeTokens.placeholderBgDark : themeTokens.placeholderBg;
 
         const imagenUrl = adiso.imagenesUrls?.[0] || adiso.imagenUrl;
+        const usesGeneratedCover = adisoUsesGeneratedCover(adiso);
+        const showUserPhoto = Boolean(imagenUrl) && !usesGeneratedCover;
         const extraFotos = Math.max(0, (adiso.imagenesUrls?.length ?? 0) - 1);
         const tamaño = adiso.tamaño || 'miniatura';
         const displayTitle = toDisplayTitle(adiso.titulo);
@@ -192,7 +199,7 @@ const AdisoCard = forwardRef<HTMLDivElement, AdisoCardProps>(
                         type="button"
                         onClick={(e) => toggleFav(e)}
                         className={`min-w-[36px] min-h-[36px] flex items-center justify-center rounded-full bg-transparent border-0 transition-transform hover:scale-110 active:scale-95 ${
-                            imagenUrl
+                            showUserPhoto
                                 ? 'text-white drop-shadow-[0_1px_4px_rgba(0,0,0,0.85)]'
                                 : 'text-[var(--text-secondary)]'
                         }`}
@@ -210,7 +217,7 @@ const AdisoCard = forwardRef<HTMLDivElement, AdisoCardProps>(
                         type="button"
                         onClick={(e) => markNotInterested(e)}
                         className={`min-w-[36px] min-h-[36px] flex items-center justify-center rounded-full bg-transparent border-0 transition-transform hover:scale-110 active:scale-95 ${
-                            imagenUrl
+                            showUserPhoto
                                 ? 'text-white drop-shadow-[0_1px_4px_rgba(0,0,0,0.85)]'
                                 : 'text-[var(--text-tertiary)]'
                         }`}
@@ -224,18 +231,19 @@ const AdisoCard = forwardRef<HTMLDivElement, AdisoCardProps>(
                 <div
                     className={`
                         relative flex-shrink-0 overflow-hidden
-                        ${getMediaAspectClass(vista, isCatalogProduct)}
+                        ${getMediaAspectClass(vista, isCatalogProduct, usesGeneratedCover)}
+                        ${usesGeneratedCover && vista !== 'list' ? 'flex-1 min-h-0' : ''}
                     `}
                     style={{
-                        backgroundColor: imagenUrl
+                        backgroundColor: showUserPhoto
                             ? 'var(--bg-secondary)'
                             : placeholderBg,
                     }}
                 >
-                    {imagenUrl ? (
+                    {showUserPhoto ? (
                         <>
                             <Image
-                                src={imagenUrl}
+                                src={imagenUrl!}
                                 alt={displayTitle}
                                 fill
                                 sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
@@ -311,7 +319,7 @@ const AdisoCard = forwardRef<HTMLDivElement, AdisoCardProps>(
                                 {bottomRightPrimary && (
                                     <span
                                         className={`inline-flex px-2 py-0.5 rounded-full text-sm font-bold shadow-sm ${
-                                            imagenUrl
+                                            showUserPhoto
                                                 ? 'bg-white/95 text-[var(--brand-blue)]'
                                                 : 'bg-black/55 text-white'
                                         }`}
@@ -343,31 +351,36 @@ const AdisoCard = forwardRef<HTMLDivElement, AdisoCardProps>(
 
                 </div>
 
-                <div
-                    className={`flex flex-col min-w-0 ${
-                        vista === 'feed' ? 'p-4' : 'flex-1 p-3'
-                    } ${vista === 'list' ? 'py-2 pr-2' : ''}`}
-                >
-                    <h3
-                        className={`
-                            font-semibold text-[var(--text-primary)] leading-snug line-clamp-2
-                            ${vista === 'list' ? 'text-sm md:text-[15px]' : 'text-sm md:text-[15px] min-h-[2.5rem]'}
-                        `}
+                {/* Title stays in DOM for a11y/SEO; visually hidden when flyer already shows the title */}
+                {usesGeneratedCover && vista !== 'list' && vista !== 'feed' ? (
+                    <h3 className="sr-only">{displayTitle}</h3>
+                ) : (
+                    <div
+                        className={`flex flex-col min-w-0 ${
+                            vista === 'feed' ? 'p-4' : 'flex-1 p-3'
+                        } ${vista === 'list' ? 'py-2 pr-2' : ''}`}
                     >
-                        {displayTitle}
-                    </h3>
+                        <h3
+                            className={`
+                                font-semibold text-[var(--text-primary)] leading-snug line-clamp-2
+                                ${vista === 'list' ? 'text-sm md:text-[15px]' : 'text-sm md:text-[15px] min-h-[2.5rem]'}
+                            `}
+                        >
+                            {displayTitle}
+                        </h3>
 
-                    {vista === 'feed' && priceLabel && (
-                        <p className="text-[15px] font-bold text-[var(--brand-blue)] mb-2 mt-2">{priceLabel}</p>
-                    )}
+                        {vista === 'feed' && priceLabel && (
+                            <p className="text-[15px] font-bold text-[var(--brand-blue)] mb-2 mt-2">{priceLabel}</p>
+                        )}
 
-                    {cardSignal && vista === 'feed' && (
-                        <div className="flex items-center gap-1.5 text-xs text-[var(--text-tertiary)] font-medium mt-auto pt-2 border-t border-[var(--border-color)]">
-                            {cardSignal.type === 'popular' && <IconEye size={12} />}
-                            <span>{cardSignal.label}</span>
-                        </div>
-                    )}
-                </div>
+                        {cardSignal && vista === 'feed' && (
+                            <div className="flex items-center gap-1.5 text-xs text-[var(--text-tertiary)] font-medium mt-auto pt-2 border-t border-[var(--border-color)]">
+                                {cardSignal.type === 'popular' && <IconEye size={12} />}
+                                <span>{cardSignal.label}</span>
+                            </div>
+                        )}
+                    </div>
+                )}
             </div>
         );
     }

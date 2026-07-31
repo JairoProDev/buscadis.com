@@ -15,8 +15,8 @@ export interface FlyerCanvasProps {
 
 function titleSize(scale: FlyerConfig['titleScale']): string {
   if (scale === 's') return 'clamp(1.1rem, 7cqi, 2.4rem)';
-  if (scale === 'l') return 'clamp(1.6rem, 10cqi, 3.4rem)';
-  return 'clamp(1.35rem, 8.5cqi, 2.9rem)';
+  if (scale === 'l') return 'clamp(1.55rem, 9.5cqi, 3.2rem)';
+  return 'clamp(1.3rem, 8.2cqi, 2.8rem)';
 }
 
 export default function FlyerCanvas({
@@ -27,7 +27,7 @@ export default function FlyerCanvas({
   exportRef,
 }: FlyerCanvasProps) {
   const cfg = resolveFlyerConfig(content.categoria, templateId, config);
-  const title = truncateFlyerTitle(content.title || 'Aviso en Buscadis');
+  const title = truncateFlyerTitle(content.title || 'Aviso en Buscadis', 90);
   const align = cfg.align === 'center' ? 'center' : 'left';
   const primary = cfg.primary;
   const secondary = cfg.secondary;
@@ -39,6 +39,7 @@ export default function FlyerCanvas({
   ].filter(Boolean) as string[];
 
   const price = cfg.showPrice && content.priceLabel ? content.priceLabel : null;
+  const fillParent = /\bh-full\b/.test(className);
 
   const rootStyle: CSSProperties = {
     containerType: 'inline-size',
@@ -49,7 +50,7 @@ export default function FlyerCanvas({
 
   const titleStyle: CSSProperties = {
     fontSize: titleSize(cfg.titleScale),
-    lineHeight: 1.05,
+    lineHeight: 1.08,
     fontWeight: 800,
     textAlign: align,
     letterSpacing: '-0.02em',
@@ -102,7 +103,7 @@ export default function FlyerCanvas({
 
     case 'minimal-cream':
       body = (
-        <div className="absolute inset-0 flex flex-col justify-between p-[9%]" style={{ background: secondary || '#f1f5f9' }}>
+        <div className="absolute inset-0 flex flex-col justify-between p-[9%]" style={{ background: secondary || '#fff7ed' }}>
           <div className="h-1.5 w-[28%]" style={{ background: primary }} />
           <div>
             {cfg.showCategory && content.categoryLabel && (
@@ -184,16 +185,27 @@ export default function FlyerCanvas({
       );
       break;
 
+    // Top color band — never a dead left rail
     case 'split':
       body = (
-        <div className="absolute inset-0 flex">
-          <div className="w-[38%] shrink-0" style={{ background: primary }} />
-          <div className="flex flex-1 flex-col justify-between p-[8%] pl-[6%]" style={{ background: secondary }}>
-            {cfg.showCategory && content.categoryLabel && (
-              <p className="m-0 font-sans text-[clamp(0.65rem,3cqi,0.9rem)] font-bold uppercase tracking-wider" style={{ color: primary }}>
-                {content.categoryLabel}
-              </p>
-            )}
+        <div className="absolute inset-0 flex flex-col" style={{ background: secondary }}>
+          <div className="relative h-[22%] shrink-0 overflow-hidden" style={{ background: primary }}>
+            <div
+              className="absolute -right-[8%] -top-[40%] h-[180%] w-[42%] rotate-12 bg-white/15"
+              aria-hidden
+            />
+            <div className="absolute inset-0 flex items-center justify-between px-[8%]">
+              {(badge || (cfg.showCategory && content.categoryLabel)) && (
+                <span className="rounded-full bg-black/20 px-3 py-1 font-sans text-[clamp(0.65rem,3cqi,0.9rem)] font-bold uppercase tracking-wide text-white">
+                  {badge || content.categoryLabel}
+                </span>
+              )}
+              <span className="font-sans text-[clamp(0.55rem,2.6cqi,0.75rem)] font-semibold tracking-[0.2em] text-white/85">
+                BUSCADIS
+              </span>
+            </div>
+          </div>
+          <div className="flex flex-1 flex-col justify-between p-[8%]">
             <h2 className="m-0" style={{ ...titleStyle, color: '#0f172a' }}>
               {title}
             </h2>
@@ -270,6 +282,238 @@ export default function FlyerCanvas({
       );
       break;
 
+    case 'poster-serif':
+      body = (
+        <div className="absolute inset-0 flex flex-col items-center justify-center p-[10%]" style={{ background: primary }}>
+          <div className="absolute inset-[5%] border border-white/35" aria-hidden />
+          {(badge || metaBits[0]) && (
+            <p className="m-0 mb-4 font-sans text-[clamp(0.65rem,3cqi,0.9rem)] font-bold uppercase tracking-[0.22em] text-white/85">
+              {badge || metaBits[0]}
+            </p>
+          )}
+          <h2 className="m-0 text-center text-white" style={{ ...titleStyle, textAlign: 'center', fontFamily: 'Georgia, ui-serif, serif' }}>
+            {title}
+          </h2>
+          {price && (
+            <p className="mt-5 m-0 font-sans text-[clamp(1.15rem,5.5cqi,1.9rem)] font-bold text-white/95">{price}</p>
+          )}
+          {cfg.showLocation && content.locationLabel && (
+            <p className="mt-3 m-0 font-sans text-[clamp(0.65rem,3cqi,0.9rem)] text-white/75">{content.locationLabel}</p>
+          )}
+        </div>
+      );
+      break;
+
+    case 'ribbon':
+      body = (
+        <div className="absolute inset-0 flex flex-col justify-between p-[8%]" style={{ background: secondary }}>
+          <div
+            className="absolute left-0 right-0 top-[12%] py-2 text-center font-sans text-[clamp(0.7rem,3.4cqi,1rem)] font-black uppercase tracking-[0.2em] text-white shadow-sm"
+            style={{ background: primary }}
+          >
+            {badge || content.categoryLabel || 'BUSCADIS'}
+          </div>
+          <span className="invisible">.</span>
+          <div className="mt-[18%]">
+            <h2 className="m-0" style={{ ...titleStyle, color: '#0f172a' }}>
+              {title}
+            </h2>
+            {price && (
+              <p className="mt-3 m-0 font-sans text-[clamp(1.1rem,5.5cqi,1.8rem)] font-bold" style={{ color: primary }}>
+                {price}
+              </p>
+            )}
+          </div>
+          {cfg.showLocation && content.locationLabel && (
+            <p className="m-0 font-sans text-[clamp(0.7rem,3.2cqi,1rem)] text-slate-500">{content.locationLabel}</p>
+          )}
+        </div>
+      );
+      break;
+
+    case 'duo-tone':
+      body = (
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute inset-0" style={{ background: primary }} />
+          <div
+            className="absolute inset-x-0 bottom-0 h-[48%]"
+            style={{ background: secondary, clipPath: 'polygon(0 18%, 100% 0, 100% 100%, 0 100%)' }}
+          />
+          <div className="absolute inset-0 flex flex-col justify-between p-[9%]">
+            <span className="self-end font-sans text-[clamp(0.55rem,2.6cqi,0.75rem)] font-semibold tracking-[0.18em] text-white/80">
+              BUSCADIS
+            </span>
+            <div>
+              <h2 className="m-0 text-white" style={titleStyle}>
+                {title}
+              </h2>
+              <div className="mt-3 flex flex-wrap items-end justify-between gap-2">
+                {price ? (
+                  <p className="m-0 font-sans text-[clamp(1.05rem,5cqi,1.7rem)] font-bold" style={{ color: primary }}>
+                    {price}
+                  </p>
+                ) : (
+                  <span />
+                )}
+                {metaBits.length > 0 && (
+                  <p className="m-0 font-sans text-[clamp(0.65rem,3cqi,0.9rem)] text-slate-600">{metaBits.join(' · ')}</p>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+      break;
+
+    case 'editorial':
+      body = (
+        <div className="absolute inset-0 flex flex-col justify-between p-[9%]" style={{ background: secondary || '#fef3c7' }}>
+          <div className="flex items-baseline justify-between gap-2 border-b-2 pb-2" style={{ borderColor: primary }}>
+            <span className="font-sans text-[clamp(0.6rem,2.8cqi,0.8rem)] font-bold uppercase tracking-[0.16em]" style={{ color: primary }}>
+              {badge || content.categoryLabel || 'Aviso'}
+            </span>
+            <span className="font-sans text-[clamp(0.55rem,2.5cqi,0.7rem)] text-slate-500">Buscadis</span>
+          </div>
+          <h2 className="m-0 py-4" style={{ ...titleStyle, color: '#0f172a', fontFamily: 'Georgia, ui-serif, serif' }}>
+            {title}
+          </h2>
+          <div className="flex items-end justify-between gap-2 border-t border-black/10 pt-3">
+            {price ? (
+              <p className="m-0 font-sans text-[clamp(1rem,5cqi,1.65rem)] font-bold" style={{ color: primary }}>
+                {price}
+              </p>
+            ) : (
+              <span />
+            )}
+            {cfg.showLocation && content.locationLabel && (
+              <p className="m-0 font-sans text-[clamp(0.65rem,3cqi,0.9rem)] text-slate-600">{content.locationLabel}</p>
+            )}
+          </div>
+        </div>
+      );
+      break;
+
+    case 'stamp':
+      body = (
+        <div className="absolute inset-0 flex flex-col items-center justify-center p-[8%]" style={{ background: secondary }}>
+          <div
+            className="flex max-w-full flex-col items-center gap-3 rounded-[2rem] border-[3px] border-dashed px-[8%] py-[10%]"
+            style={{ borderColor: primary }}
+          >
+            {(badge || (cfg.showCategory && content.categoryLabel)) && (
+              <span
+                className="rotate-[-6deg] rounded-md px-3 py-1 font-sans text-[clamp(0.65rem,3cqi,0.9rem)] font-black uppercase tracking-wider text-white"
+                style={{ background: primary }}
+              >
+                {badge || content.categoryLabel}
+              </span>
+            )}
+            <h2 className="m-0 text-center" style={{ ...titleStyle, textAlign: 'center', color: '#0f172a' }}>
+              {title}
+            </h2>
+            {price && (
+              <p className="m-0 font-sans text-[clamp(1.15rem,5.5cqi,1.85rem)] font-bold" style={{ color: primary }}>
+                {price}
+              </p>
+            )}
+          </div>
+          {cfg.showLocation && content.locationLabel && (
+            <p className="mt-4 m-0 font-sans text-[clamp(0.65rem,3cqi,0.9rem)] text-slate-500">{content.locationLabel}</p>
+          )}
+        </div>
+      );
+      break;
+
+    case 'soft-wash':
+      body = (
+        <div
+          className="absolute inset-0 flex flex-col justify-between p-[9%]"
+          style={{
+            background: `radial-gradient(120% 80% at 10% 0%, ${primary}33 0%, ${secondary} 45%, #ffffff 100%)`,
+          }}
+        >
+          {cfg.showCategory && content.categoryLabel && (
+            <p className="m-0 font-sans text-[clamp(0.65rem,3cqi,0.9rem)] font-semibold uppercase tracking-[0.14em]" style={{ color: primary }}>
+              {content.categoryLabel}
+            </p>
+          )}
+          <h2 className="m-0" style={{ ...titleStyle, color: '#0f172a' }}>
+            {title}
+          </h2>
+          <div>
+            {price && (
+              <p className="m-0 font-sans text-[clamp(1.1rem,5.5cqi,1.8rem)] font-bold" style={{ color: primary }}>
+                {price}
+              </p>
+            )}
+            {cfg.showLocation && content.locationLabel && (
+              <p className="mt-1 m-0 font-sans text-[clamp(0.7rem,3.2cqi,1rem)] text-slate-600">{content.locationLabel}</p>
+            )}
+          </div>
+        </div>
+      );
+      break;
+
+    case 'ticket':
+      body = (
+        <div className="absolute inset-0 flex flex-col justify-between p-[8%]" style={{ background: secondary }}>
+          <div className="rounded-2xl border-2 border-dashed bg-white/70 p-[8%]" style={{ borderColor: `${primary}99` }}>
+            <div className="mb-3 flex items-center justify-between gap-2">
+              <span className="font-sans text-[clamp(0.6rem,2.8cqi,0.8rem)] font-black uppercase tracking-[0.18em]" style={{ color: primary }}>
+                {badge || 'ENTRADA'}
+              </span>
+              <span className="font-sans text-[clamp(0.55rem,2.5cqi,0.7rem)] text-slate-400">★★★</span>
+            </div>
+            <h2 className="m-0" style={{ ...titleStyle, color: '#0f172a' }}>
+              {title}
+            </h2>
+            {price && (
+              <p className="mt-4 m-0 font-sans text-[clamp(1.2rem,6cqi,2rem)] font-black" style={{ color: primary }}>
+                {price}
+              </p>
+            )}
+          </div>
+          {metaBits.length > 0 && (
+            <p className="m-0 text-center font-sans text-[clamp(0.65rem,3cqi,0.9rem)] text-slate-600">{metaBits.join(' · ')}</p>
+          )}
+        </div>
+      );
+      break;
+
+    case 'corner-mark':
+      body = (
+        <div className="absolute inset-0 overflow-hidden p-[9%]" style={{ background: secondary }}>
+          <div
+            className="absolute -right-6 -top-6 h-[42%] w-[42%] rotate-45"
+            style={{ background: primary }}
+            aria-hidden
+          />
+          <div className="relative z-[1] flex h-full flex-col justify-between">
+            {(badge || (cfg.showCategory && content.categoryLabel)) && (
+              <span className="self-start rounded-md px-2.5 py-1 font-sans text-[clamp(0.65rem,3cqi,0.85rem)] font-bold uppercase tracking-wide text-white" style={{ background: primary }}>
+                {badge || content.categoryLabel}
+              </span>
+            )}
+            <h2 className="m-0 max-w-[92%]" style={{ ...titleStyle, color: '#0f172a' }}>
+              {title}
+            </h2>
+            <div className="flex items-end justify-between gap-2">
+              {price ? (
+                <p className="m-0 font-sans text-[clamp(1.05rem,5cqi,1.7rem)] font-bold" style={{ color: primary }}>
+                  {price}
+                </p>
+              ) : (
+                <span />
+              )}
+              {cfg.showLocation && content.locationLabel && (
+                <p className="m-0 font-sans text-[clamp(0.65rem,3cqi,0.9rem)] text-slate-500">{content.locationLabel}</p>
+              )}
+            </div>
+          </div>
+        </div>
+      );
+      break;
+
     case 'bold-type':
     default:
       body = (
@@ -308,7 +552,7 @@ export default function FlyerCanvas({
       ref={exportRef}
       role="img"
       aria-label={title}
-      className={`relative aspect-square w-full overflow-hidden ${className}`}
+      className={`relative w-full overflow-hidden ${fillParent ? 'h-full min-h-0' : 'aspect-square'} ${className}`}
       style={rootStyle}
       data-flyer-template={templateId}
     >
