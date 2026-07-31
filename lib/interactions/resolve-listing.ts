@@ -85,23 +85,42 @@ export async function resolveListingForInteraction(
     };
   }
 
-  const { data: product } = await supabaseAdmin
+  // catalog_products has no user_id — seller lives on business_profiles.user_id
+  const { data: product, error: productError } = await supabaseAdmin
     .from('catalog_products')
     .select(
-      `
-      id, title, description, price, currency, images, category, status, user_id, business_profile_id, ai_metadata,
-      business_profiles ( user_id, contact_whatsapp, contact_phone, is_published )
-    `
+      'id, title, description, price, currency, images, category, status, business_profile_id, ai_metadata'
     )
     .eq('id', listingId)
     .maybeSingle();
 
+  if (productError) {
+    console.error('[resolveListing] catalog_products', productError.message);
+    return null;
+  }
   if (!product || product.status !== 'published') return null;
 
-  const business = Array.isArray(product.business_profiles)
-    ? product.business_profiles[0]
-    : product.business_profiles;
-  if (business && (business as { is_published?: boolean }).is_published === false) return null;
+  let biz: {
+    user_id?: string | null;
+    contact_whatsapp?: string | null;
+    contact_phone?: string | null;
+    is_published?: boolean | null;
+  } | null = null;
+
+  if (product.business_profile_id) {
+    const { data: business, error: bizError } = await supabaseAdmin
+      .from('business_profiles')
+      .select('user_id, contact_whatsapp, contact_phone, is_published')
+      .eq('id', product.business_profile_id)
+      .maybeSingle();
+    if (bizError) {
+      console.error('[resolveListing] business_profiles', bizError.message);
+    } else {
+      biz = business;
+    }
+  }
+
+  if (biz?.is_published === false) return null;
 
   const images = Array.isArray(product.images)
     ? product.images
@@ -109,18 +128,16 @@ export async function resolveListingForInteraction(
         .filter(Boolean)
     : [];
 
-  const biz = business as { user_id?: string; contact_whatsapp?: string; contact_phone?: string } | null;
-
   return {
     id: product.id as string,
     titulo: (product.title as string) || 'Producto',
     descripcion: (product.description as string) || '',
-    precio: typeof product.price === 'number' ? product.price : null,
+    precio: typeof product.price === 'number' ? product.price : Number(product.price) || null,
     moneda: product.currency === 'USD' ? 'USD' : 'PEN',
     tipoPrecio: null,
     ubicacion: null,
     imagenesUrls: images as string[],
-    sellerUserId: (product.user_id as string) || biz?.user_id || null,
+    sellerUserId: biz?.user_id || null,
     categoria: (product.category as string) || 'productos',
     publishTier: 'paid',
     features: { auto_reply: true },

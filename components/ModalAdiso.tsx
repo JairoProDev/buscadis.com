@@ -540,9 +540,11 @@ Ref: ${adiso.edicionNumero || adiso.id}`;
     }
 
     const result = await askField(field, photoIndex);
-    if (result && 'needsAuth' in result && result.needsAuth) {
-      openAuthModal();
+    if (!result.ok) {
       setLocalRevealed((prev) => prev.filter((k) => k !== fieldKey));
+      if ('needsAuth' in result && result.needsAuth) {
+        openAuthModal();
+      }
     }
   };
 
