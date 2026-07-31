@@ -678,6 +678,12 @@ export interface Notification {
 // MESSAGING SYSTEM
 // ============================================
 
+export interface ConversationListingPreview {
+  title: string;
+  imageUrl?: string;
+  priceLabel?: string;
+}
+
 export interface Conversation {
   id: string;
   participants: string[]; // User IDs
@@ -686,6 +692,9 @@ export interface Conversation {
   unread_count?: number; // Calculated field
   updated_at: string;
   created_at: string;
+  adiso_id?: string | null;
+  story_id?: string | null;
+  listing?: ConversationListingPreview | null;
   // Join data
   other_user?: {
     id: string;
@@ -704,4 +713,8 @@ export interface Message {
   created_at: string;
   message_kind?: 'user' | 'system_buyer' | 'system_seller' | 'reveal';
   metadata?: Record<string, unknown>;
+  /** Client-only: optimistic send state */
+  pending?: boolean;
+  failed?: boolean;
+  clientTempId?: string;
 }

@@ -13,6 +13,7 @@ import { useMediaQuery } from '@/hooks/useMediaQuery';
 import { getWhatsAppUrl, copiarLink, compartirNativo } from '@/lib/utils';
 import { getBusinessProfilePath } from '@/lib/seo/business-metadata';
 import { FIELD_QUESTIONS, type RevealField } from '@/lib/interactions/field-reveal';
+import { chatContextFromAdiso } from '@/lib/chat/context-from-adiso';
 import { ExternalContactChannel, resolveExternalContact } from '@/lib/adiso-contact';
 import {
   formatPrecioDisplay,
@@ -154,7 +155,11 @@ export default function AdisoLandingPage({ adiso, onVolver }: AdisoLandingPagePr
 
   const sellerUserId = adiso.user_id || adiso.usuario_id || adiso.vendedor?.id;
   const canMessageInApp = Boolean(sellerUserId);
-  const { askField } = useAdInteractionSession(adiso.id, Boolean(sellerUserId && user));
+  const { askField } = useAdInteractionSession(
+    adiso.id,
+    Boolean(sellerUserId && user),
+    chatContextFromAdiso(adiso)
+  );
 
   useEffect(() => {
     registrarVisualizacion(user?.id, adiso.id);
@@ -205,10 +210,9 @@ export default function AdisoLandingPage({ adiso, onVolver }: AdisoLandingPagePr
       });
       const data = (await res.json()) as { conversationId?: string; adisoTitle?: string };
       if (data.conversationId) {
-        openChat(data.conversationId, {
+        openChat(data.conversationId, chatContextFromAdiso(adiso, {
           adisoTitle: data.adisoTitle || adiso.titulo,
-          adisoId: adiso.id,
-        });
+        }));
       }
     } finally {
       setEnviandoMensaje(false);

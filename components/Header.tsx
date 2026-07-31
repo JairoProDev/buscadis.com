@@ -327,9 +327,9 @@ export default function Header({
           >
             <MessagesPopover
               onClose={() => setActivePopover(null)}
-              onOpenConversation={(id) => {
+              onOpenConversation={(id, context) => {
                 setActivePopover(null);
-                openChat(id);
+                openChat(id, context);
               }}
             />
           </HeaderPopoverPanel>

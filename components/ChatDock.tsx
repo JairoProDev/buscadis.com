@@ -26,17 +26,27 @@ export default function ChatDock({ chats, onClose, onToggleMinimize }: ChatDockP
       {chats.map((chat, index) => {
         const offset = index * 12;
         if (chat.minimized) {
+          const label =
+            chat.context?.otherUser?.nombre ||
+            chat.context?.adisoTitle ||
+            'Chat';
           return (
             <button
               key={chat.id}
               type="button"
               onClick={() => onToggleMinimize(chat.id)}
-              className="fixed z-[2100] flex items-center gap-2 rounded-full bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-lg hover:bg-blue-700"
+              className="fixed z-[2100] flex max-w-[220px] items-center gap-2 rounded-full bg-[var(--brand-blue)] px-3 py-2 text-sm font-semibold text-white shadow-lg hover:brightness-105"
               style={{ bottom: 16 + offset, right: 16 }}
             >
-              <span className="max-w-[140px] truncate">
-                {chat.context?.adisoTitle ? `Chat · ${chat.context.adisoTitle}` : 'Chat'}
-              </span>
+              {chat.context?.otherUser?.avatar_url ? (
+                <img
+                  src={chat.context.otherUser.avatar_url}
+                  alt=""
+                  className="h-6 w-6 rounded-full object-cover"
+                  referrerPolicy="no-referrer"
+                />
+              ) : null}
+              <span className="truncate">{label}</span>
             </button>
           );
         }
@@ -51,9 +61,7 @@ export default function ChatDock({ chats, onClose, onToggleMinimize }: ChatDockP
               conversationId={chat.id}
               onClose={() => onClose(chat.id)}
               onMinimize={() => onToggleMinimize(chat.id)}
-              matchScore={chat.context?.matchScore}
-              adisoTitle={chat.context?.adisoTitle}
-              initialMessage={undefined}
+              context={chat.context}
             />
           </div>
         );

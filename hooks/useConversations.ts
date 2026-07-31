@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from './useAuth';
 import { Conversation } from '@/types';
+import { fetchListingPreviews } from '@/lib/chat/listing-preview';
 
 async function fetchUnreadForConversations(
   userId: string,
@@ -36,7 +37,7 @@ export function useConversations() {
 
     const { data, error } = await db
       .from('conversations')
-      .select('id, participants, last_message, last_message_at, updated_at, created_at')
+      .select('id, participants, last_message, last_message_at, updated_at, created_at, adiso_id, story_id')
       .contains('participants', [user.id])
       .order('updated_at', { ascending: false });
 
@@ -47,7 +48,11 @@ export function useConversations() {
     }
 
     const ids = (data || []).map((c) => c.id);
-    const unreadMap = await fetchUnreadForConversations(user.id, ids);
+    const adisoIds = (data || []).map((c) => c.adiso_id as string | null).filter(Boolean) as string[];
+    const [unreadMap, listingMap] = await Promise.all([
+      fetchUnreadForConversations(user.id, ids),
+      fetchListingPreviews(db, adisoIds),
+    ]);
 
     const enhanced = await Promise.all(
       (data || []).map(async (conv) => {
@@ -63,10 +68,13 @@ export function useConversations() {
           otherUser = userData;
         }
 
+        const listing = conv.adiso_id ? listingMap.get(String(conv.adiso_id)) || null : null;
+
         return {
           ...conv,
           other_user: otherUser,
           unread_count: unreadMap.get(conv.id) || 0,
+          listing,
         } as Conversation;
       })
     );
@@ -114,5 +122,22 @@ export function useConversations() {
     loading,
     refetch: fetchConversations,
     session,
+  };
+}
+
+/** Build ChatOpenContext from an enriched conversation row. */
+export function chatContextFromConversation(conv: Conversation) {
+  return {
+    adisoId: conv.adiso_id || undefined,
+    adisoTitle: conv.listing?.title,
+    adisoImageUrl: conv.listing?.imageUrl,
+    adisoPriceLabel: conv.listing?.priceLabel,
+    otherUser: conv.other_user
+      ? {
+          id: conv.other_user.id,
+          nombre: conv.other_user.nombre,
+          avatar_url: conv.other_user.avatar_url,
+        }
+      : undefined,
   };
 }

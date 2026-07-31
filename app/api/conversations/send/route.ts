@@ -4,10 +4,25 @@ import { getUserFromRouteRequest } from '@/lib/supabase-route-auth';
 import { supabaseAdmin } from '@/lib/supabase-admin';
 import { getConversationCounterpart, notifyChatParticipant } from '@/lib/chat/notify';
 
-const bodySchema = z.object({
-  conversationId: z.string().uuid(),
-  content: z.string().trim().min(1).max(4000),
-});
+const bodySchema = z
+  .object({
+    conversationId: z.string().uuid(),
+    content: z.string().max(4000).optional(),
+    metadata: z.record(z.unknown()).optional(),
+    message_kind: z.enum(['user', 'system_buyer', 'system_seller', 'reveal']).optional(),
+    clientTempId: z.string().max(80).optional(),
+  })
+  .superRefine((val, ctx) => {
+    const hasText = Boolean(val.content?.trim());
+    const imageUrl =
+      typeof val.metadata?.imageUrl === 'string' ? val.metadata.imageUrl : undefined;
+    if (!hasText && !imageUrl) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Mensaje vacío',
+      });
+    }
+  });
 
 export async function POST(request: NextRequest) {
   try {
@@ -21,7 +36,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Datos inválidos' }, { status: 400 });
     }
 
-    const { conversationId, content } = parsed.data;
+    const { conversationId, metadata, message_kind, clientTempId } = parsed.data;
+    const content = (parsed.data.content || '').trim();
+    const imageUrl =
+      typeof metadata?.imageUrl === 'string' ? (metadata.imageUrl as string) : undefined;
+
     const { otherUserId, adisoId } = await getConversationCounterpart(conversationId, user.id);
 
     if (!otherUserId) {
@@ -39,13 +58,23 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 403 });
     }
 
+    const meta = {
+      ...(metadata || {}),
+      ...(clientTempId ? { clientTempId } : {}),
+      ...(imageUrl ? { type: 'image', imageUrl } : {}),
+    };
+
+    const displayContent = content || (imageUrl ? '📷 Foto' : '');
+
     const { data: message, error } = await supabaseAdmin
       .from('messages')
       .insert({
         conversation_id: conversationId,
         sender_id: user.id,
-        content,
+        content: displayContent,
         read: false,
+        message_kind: message_kind || 'user',
+        metadata: Object.keys(meta).length ? meta : null,
       })
       .select('*')
       .single();
@@ -58,7 +87,7 @@ export async function POST(request: NextRequest) {
     await supabaseAdmin
       .from('conversations')
       .update({
-        last_message: content,
+        last_message: displayContent,
         last_message_at: new Date().toISOString(),
       })
       .eq('id', conversationId);
@@ -70,13 +99,14 @@ export async function POST(request: NextRequest) {
       .maybeSingle();
 
     const senderName = (senderProfile?.nombre as string) || 'Alguien';
+    const notifyBody = content || (imageUrl ? 'Te envió una foto' : displayContent);
 
     void notifyChatParticipant({
       recipientUserId: otherUserId,
       senderUserId: user.id,
       conversationId,
       title: `Mensaje de ${senderName}`,
-      body: content,
+      body: notifyBody,
       adisoId,
     });
 

@@ -11,6 +11,13 @@ export interface ChatOpenContext {
   adisoTitle?: string;
   initialMessage?: string;
   adisoId?: string;
+  adisoImageUrl?: string;
+  adisoPriceLabel?: string;
+  otherUser?: {
+    id: string;
+    nombre?: string;
+    avatar_url?: string;
+  };
 }
 
 interface DockedChat {
@@ -44,7 +51,13 @@ export function UIProvider({ children }: { children: ReactNode }) {
       const existing = prev.find((c) => c.id === id);
       if (existing) {
         return prev.map((c) =>
-          c.id === id ? { ...c, minimized: false, context: context || c.context } : c
+          c.id === id
+            ? {
+                ...c,
+                minimized: false,
+                context: context ? { ...c.context, ...context } : c.context,
+              }
+            : c
         );
       }
       const next = [...prev, { id, minimized: false, context: context || null }];

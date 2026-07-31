@@ -53,6 +53,7 @@ import { getAdisoUrl } from '@/lib/url';
 import Link from 'next/link';
 import { getBusinessProfilePath } from '@/lib/seo/business-metadata';
 import { FIELD_QUESTIONS, type RevealField } from '@/lib/interactions/field-reveal';
+import { chatContextFromAdiso } from '@/lib/chat/context-from-adiso';
 import {
   pickSocialBadge,
   getCtaLabelPorCategoria,
@@ -496,9 +497,11 @@ Ref: ${adiso.edicionNumero || adiso.id}`;
 
   const sellerUserId = adiso.user_id || adiso.usuario_id || undefined;
   const canAutoInteract = Boolean(sellerUserId && !esMiAdiso && user);
+  const listingChatContext = chatContextFromAdiso(adiso);
   const { askField, isRevealed, asking, upsell: interactionUpsell } = useAdInteractionSession(
     adiso.id,
-    canAutoInteract
+    canAutoInteract,
+    listingChatContext
   );
 
   const [localRevealed, setLocalRevealed] = useState<string[]>([]);
@@ -566,10 +569,9 @@ Ref: ${adiso.edicionNumero || adiso.id}`;
       });
       const data = (await res.json()) as { conversationId?: string; adisoTitle?: string };
       if (data.conversationId) {
-        openChat(data.conversationId, {
+        openChat(data.conversationId, chatContextFromAdiso(adiso, {
           adisoTitle: data.adisoTitle || adiso.titulo,
-          adisoId: adiso.id,
-        });
+        }));
       }
     } finally {
       setEnviandoMensaje(false);

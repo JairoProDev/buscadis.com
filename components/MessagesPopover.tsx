@@ -1,12 +1,15 @@
+'use client';
+
 import React from 'react';
-import { useConversations } from '@/hooks/useConversations';
+import { useConversations, chatContextFromConversation } from '@/hooks/useConversations';
 import { IconSearch, IconUser, IconMessages } from '@/components/Icons';
 import { formatTimeAgo } from '@/utils/date';
 import Link from 'next/link';
+import type { ChatOpenContext } from '@/contexts/UIContext';
 
 interface MessagesPopoverProps {
     onClose: () => void;
-    onOpenConversation: (conversationId: string) => void;
+    onOpenConversation: (conversationId: string, context?: ChatOpenContext) => void;
 }
 
 export default function MessagesPopover({ onClose, onOpenConversation }: MessagesPopoverProps) {
@@ -73,7 +76,12 @@ export default function MessagesPopover({ onClose, onOpenConversation }: Message
                                         ? 'bg-[rgba(var(--brand-yellow-rgb),0.06)]'
                                         : ''
                                 }`}
-                                onClick={() => onOpenConversation(conversation.id)}
+                                onClick={() =>
+                                    onOpenConversation(
+                                        conversation.id,
+                                        chatContextFromConversation(conversation)
+                                    )
+                                }
                             >
                                 <div className="flex items-center gap-3">
                                     <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-full bg-[var(--bg-tertiary)]">
@@ -91,6 +99,15 @@ export default function MessagesPopover({ onClose, onOpenConversation }: Message
                                                 <IconUser size={18} color="var(--text-tertiary)" />
                                             </span>
                                         )}
+                                        {conversation.listing?.imageUrl ? (
+                                            <div className="absolute -bottom-0.5 -right-0.5 h-4 w-4 overflow-hidden rounded border-2 border-[var(--bg-primary)]">
+                                                <img
+                                                    src={conversation.listing.imageUrl}
+                                                    alt=""
+                                                    className="h-full w-full object-cover"
+                                                />
+                                            </div>
+                                        ) : null}
                                     </div>
                                     <div className="min-w-0 flex-1">
                                         <div className="mb-0.5 flex items-baseline justify-between gap-2">
@@ -101,6 +118,7 @@ export default function MessagesPopover({ onClose, onOpenConversation }: Message
                                             >
                                                 {conversation.other_user?.nombre ||
                                                     conversation.other_user?.email ||
+                                                    conversation.listing?.title ||
                                                     'Usuario'}
                                             </h4>
                                             <span className="shrink-0 text-[10px] font-medium text-[var(--text-tertiary)]">
@@ -109,6 +127,11 @@ export default function MessagesPopover({ onClose, onOpenConversation }: Message
                                                     : ''}
                                             </span>
                                         </div>
+                                        {conversation.listing?.title ? (
+                                            <p className="truncate text-[10px] font-medium text-[var(--brand-blue)]">
+                                                {conversation.listing.title}
+                                            </p>
+                                        ) : null}
                                         <p className="truncate text-xs text-[var(--text-secondary)]">
                                             {conversation.last_message || (
                                                 <span className="italic opacity-70">Nueva conversación</span>

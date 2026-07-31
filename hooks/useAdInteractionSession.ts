@@ -2,14 +2,18 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useAuth } from './useAuth';
-import { useUI } from '@/contexts/UIContext';
+import { useUI, type ChatOpenContext } from '@/contexts/UIContext';
 
 export type AskFieldResult =
   | { ok: true; conversationId: string; data: Record<string, unknown> }
   | { ok: false; needsAuth: true }
   | { ok: false; error: string };
 
-export function useAdInteractionSession(adisoId: string, enabled: boolean) {
+export function useAdInteractionSession(
+  adisoId: string,
+  enabled: boolean,
+  listingContext?: ChatOpenContext | null
+) {
   const { session } = useAuth();
   const { openChat } = useUI();
   const [revealedFields, setRevealedFields] = useState<string[]>([]);
@@ -19,7 +23,12 @@ export function useAdInteractionSession(adisoId: string, enabled: boolean) {
   const [upsell, setUpsell] = useState(false);
   const conversationIdRef = useRef<string | null>(null);
   const adisoTitleRef = useRef<string | undefined>();
+  const listingContextRef = useRef(listingContext);
   const openInFlightRef = useRef<Promise<string | null> | null>(null);
+
+  useEffect(() => {
+    listingContextRef.current = listingContext;
+  }, [listingContext]);
 
   useEffect(() => {
     conversationIdRef.current = null;
@@ -111,8 +120,10 @@ export function useAdInteractionSession(adisoId: string, enabled: boolean) {
         conversationIdRef.current = convId;
         setConversationId(convId);
         openChat(convId, {
+          ...listingContextRef.current,
           adisoId,
-          adisoTitle: adisoTitleRef.current,
+          adisoTitle:
+            listingContextRef.current?.adisoTitle || adisoTitleRef.current,
         });
 
         return { ok: true, conversationId: convId, data };

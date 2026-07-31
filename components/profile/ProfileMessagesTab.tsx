@@ -1,6 +1,6 @@
 'use client';
 
-import { useConversations } from '@/hooks/useConversations';
+import { useConversations, chatContextFromConversation } from '@/hooks/useConversations';
 import { useUI } from '@/contexts/UIContext';
 import ProfileEmptyState from './ProfileEmptyState';
 import { IconMessages } from '@/components/Icons';
@@ -28,25 +28,34 @@ export default function ProfileMessagesTab() {
       <div className="divide-y divide-[var(--border-color)] overflow-hidden rounded-2xl border border-[var(--border-color)] bg-[var(--bg-primary)]">
         {conversations.map((conv) => {
           const name =
-            conv.other_user?.nombre || conv.other_user?.email?.split('@')[0] || 'Usuario';
+            conv.other_user?.nombre ||
+            conv.other_user?.email?.split('@')[0] ||
+            conv.listing?.title ||
+            'Usuario';
           const unread = conv.unread_count || 0;
           return (
             <button
               key={conv.id}
               type="button"
-              onClick={() => openChat(conv.id)}
+              onClick={() => openChat(conv.id, chatContextFromConversation(conv))}
               className="flex w-full items-center gap-3 px-4 py-3 text-left hover:bg-[var(--hover-bg)]"
             >
-              <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center overflow-hidden rounded-full bg-[var(--brand-blue)]/15 text-sm font-bold text-[var(--brand-blue)]">
+              <div className="relative flex h-11 w-11 flex-shrink-0 items-center justify-center overflow-hidden rounded-full bg-[var(--brand-blue)]/15 text-sm font-bold text-[var(--brand-blue)]">
                 {conv.other_user?.avatar_url ? (
                   <img
                     src={conv.other_user.avatar_url}
                     alt=""
                     className="h-full w-full object-cover"
+                    referrerPolicy="no-referrer"
                   />
                 ) : (
                   name.charAt(0).toUpperCase()
                 )}
+                {conv.listing?.imageUrl ? (
+                  <div className="absolute -bottom-0.5 -right-0.5 h-4 w-4 overflow-hidden rounded border-2 border-[var(--bg-primary)]">
+                    <img src={conv.listing.imageUrl} alt="" className="h-full w-full object-cover" />
+                  </div>
+                ) : null}
               </div>
               <div className="min-w-0 flex-1">
                 <div className="flex items-center justify-between gap-2">
@@ -60,6 +69,11 @@ export default function ProfileMessagesTab() {
                     </span>
                   )}
                 </div>
+                {conv.listing?.title ? (
+                  <p className="truncate text-[11px] font-medium text-[var(--brand-blue)]">
+                    {conv.listing.title}
+                  </p>
+                ) : null}
                 <p className="truncate text-sm text-[var(--text-secondary)]">
                   {conv.last_message || 'Sin mensajes'}
                 </p>
