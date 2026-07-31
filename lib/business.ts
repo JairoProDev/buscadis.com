@@ -633,7 +633,8 @@ export async function getMarketplaceFeed(options: {
         getAdisosFromSupabase({
             ...options,
             limit: adisoLimit,
-            soloActivos: options.soloActivos ?? true,
+            // Por defecto no filtrar por expiración aquí: el home pide soloActivos explícito.
+            soloActivos: options.soloActivos ?? false,
             categoria: productosTab ? undefined : options.categoria,
         }),
         getCatalogProductsAsAdisos({

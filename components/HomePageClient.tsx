@@ -163,7 +163,7 @@ function HomeContent() {
   // Estados para scroll infinito
   const [cargandoMas, setCargandoMas] = useState(false);
   const [hayMasAdisos, setHayMasAdisos] = useState(true);
-  const ITEMS_POR_PAGINA = 20;
+  const ITEMS_POR_PAGINA = 48;
   const [visibleCount, setVisibleCount] = useState(20);
   const [modalMobileAbierto, setModalMobileAbierto] = useState(false);
   const [seccionMobileInicial, setSeccionMobileInicial] = useState<SeccionMobile>('gratuitos');
@@ -265,7 +265,8 @@ function HomeContent() {
         const items = await getMarketplaceFeed({
           limit: ITEMS_POR_PAGINA,
           offset: 0,
-          soloActivos: true,
+          soloActivos: true, // Feed: solo activos; lo reciente aparece primero
+
           categoria: categoriaFiltro !== 'todos' ? categoriaFiltro : undefined,
         });
         if (cancelled) return;
@@ -310,12 +311,12 @@ function HomeContent() {
       return;
     }
     setPaginaActual(1);
-    setVisibleCount(20);
+    setVisibleCount(ITEMS_POR_PAGINA);
     try {
       const adisosDesdeAPI = await getMarketplaceFeed({
         limit: ITEMS_POR_PAGINA,
         offset: 0,
-        soloActivos: true
+        soloActivos: true,
       });
       let nuevosFiltrados = adisosDesdeAPI;
       if (nuevosFiltrados.some(a => TEST_REGEX.test(a.titulo || ''))) {
@@ -376,7 +377,8 @@ function HomeContent() {
         let adisosDesdeAPI = await getMarketplaceFeed({
           limit: ITEMS_POR_PAGINA,
           offset: 0,
-          soloActivos: true, // Solo activos: lo reciente aparece primero
+          soloActivos: true, // Feed: solo activos; lo reciente aparece primero
+ // Solo activos: lo reciente aparece primero
           categoria: categoriaUrl || undefined,
         });
 
@@ -918,7 +920,8 @@ function HomeContent() {
       const nuevosAdisos = await getMarketplaceFeed({
         limit: ITEMS_POR_PAGINA,
         offset: offsetActual,
-        soloActivos: true,
+        soloActivos: true, // Feed: solo activos; lo reciente aparece primero
+
         categoria: categoriaFiltro,
         busqueda: committedQuery
       });

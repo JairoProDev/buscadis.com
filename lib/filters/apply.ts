@@ -63,10 +63,25 @@ function matchUbicacion(
   userLat?: number,
   userLng?: number,
 ): boolean {
-  if (!adiso.ubicacion) return false;
-  const ubi: UbicacionDetallada = typeof adiso.ubicacion === 'string'
-    ? { pais: 'Perú', departamento: adiso.ubicacion, provincia: '', distrito: '' }
-    : adiso.ubicacion;
+  if (!adiso.ubicacion) {
+    // Sin ubicación explícita: no excluir (avisos importados / catálogo nacional)
+    return !filtro.distrito && !filtro.provincia;
+  }
+
+  let ubi: UbicacionDetallada;
+  if (typeof adiso.ubicacion === 'string') {
+    const parts = adiso.ubicacion.split(',').map((p) => p.trim()).filter(Boolean);
+    // "Cusco, Cusco, Cusco" → distrito, provincia, departamento (o al revés)
+    if (parts.length >= 3) {
+      ubi = { pais: 'Perú', distrito: parts[0], provincia: parts[1], departamento: parts[2] };
+    } else if (parts.length === 2) {
+      ubi = { pais: 'Perú', distrito: '', provincia: parts[0], departamento: parts[1] };
+    } else {
+      ubi = { pais: 'Perú', departamento: parts[0] || adiso.ubicacion, provincia: '', distrito: '' };
+    }
+  } else {
+    ubi = adiso.ubicacion;
+  }
 
   if (filtro.countryCode && !adisoMatchesCountry(ubi, filtro.countryCode)) {
     return false;
@@ -75,23 +90,38 @@ function matchUbicacion(
   if (!filtro.departamento && !filtro.provincia && !filtro.distrito) {
     return true;
   }
+
+  const haystack = [ubi.distrito, ubi.provincia, ubi.departamento, ubi.direccion]
+    .filter(Boolean)
+    .map((s) => s!.toLowerCase().trim())
+    .join(' | ');
+
+  // Distrito: match exacto o contenido en haystack (evita perder avisos "Cusco, Cusco, Cusco")
   if (filtro.distrito) {
-    const matchDistrito = ubi.distrito?.toLowerCase().trim() === filtro.distrito.toLowerCase().trim();
-    if (matchDistrito) return true;
+    const d = filtro.distrito.toLowerCase().trim();
+    if (ubi.distrito?.toLowerCase().trim() === d) return true;
+    if (haystack.includes(d)) return true;
     if (filtro.radioKm && ubi.latitud && ubi.longitud && userLat != null && userLng != null) {
       return calcularDistanciaKm(userLat, userLng, ubi.latitud, ubi.longitud) <= (filtro.radioKm || 5);
+    }
+    // Si también hay depto/provincia y coinciden, aceptar
+    if (filtro.departamento && ubi.departamento?.toLowerCase().trim() === filtro.departamento.toLowerCase().trim()) {
+      return true;
     }
     return false;
   }
   if (filtro.provincia) {
-    const match = ubi.provincia?.toLowerCase().trim() === filtro.provincia.toLowerCase().trim();
-    if (match) return true;
-    if (!filtro.distrito) return false;
+    const p = filtro.provincia.toLowerCase().trim();
+    if (ubi.provincia?.toLowerCase().trim() === p || haystack.includes(p)) return true;
+    if (filtro.departamento && ubi.departamento?.toLowerCase().trim() === filtro.departamento.toLowerCase().trim()) {
+      return true;
+    }
+    return false;
   }
   if (filtro.departamento) {
-    const match = ubi.departamento?.toLowerCase().trim() === filtro.departamento.toLowerCase().trim();
-    if (match) return true;
-    if (!filtro.provincia && !filtro.distrito) return false;
+    const dep = filtro.departamento.toLowerCase().trim();
+    if (ubi.departamento?.toLowerCase().trim() === dep || haystack.includes(dep)) return true;
+    return false;
   }
   return true;
 }
@@ -128,13 +158,8 @@ export function applyBrowseFilters({
     filtrados = filtrados.filter((a) => !hiddenAdIds.has(a.id));
   }
 
-  // Exclude categories with strong negative signals
-  if (interestProfile?.categoriaSignals) {
-    filtrados = filtrados.filter((a) => {
-      const neg = interestProfile.categoriaSignals[a.categoria];
-      return neg === undefined || neg > -3;
-    });
-  }
+  // No excluir categorías enteras por señales negativas: eso dejaba el feed en 3–4 avisos.
+  // La personalización solo reordena (personalizeAdisos / compareRecientesFeed).
 
   if (categoria !== 'todos') {
     filtrados = filtrados.filter((a) => a.categoria === categoria);
