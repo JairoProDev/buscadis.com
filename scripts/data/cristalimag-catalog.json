@@ -1,0 +1,149 @@
+{
+  "business": {
+    "slug": "cristalimag",
+    "name": "Cristalimag",
+    "tagline": "Soluciones arquitectónicas en vidrio, aluminio y drywall",
+    "description": "Cristalimag E.I.R.L. diseña, fabrica e instala soluciones arquitectónicas a medida en Cerro Colorado, Arequipa: ventanas y mamparas de aluminio, muros cortina, barandas y escaleras de vidrio, divisiones de ducha, espejos, drywall, pérgolas y estructuras. Atención a vivienda moderna y proyectos comerciales. Instalación a domicilio con personal capacitado. Lun–Sáb 8:00–18:00.",
+    "contact_whatsapp": "+51959206666",
+    "contact_phone": "+51958910762",
+    "contact_email": "cristalimag@gmail.com",
+    "contact_address": "27 de Noviembre 500, cuadra 5 (esquina) — Cerro Colorado, Arequipa",
+    "contact_maps_url": "https://www.google.com/maps/search/?api=1&query=27+de+Noviembre+500+Cerro+Colorado+Arequipa",
+    "theme_color": "#1A6570",
+    "theme_accent_color": "#12161D",
+    "template_id": "modern_tabs",
+    "site_tier": "both",
+    "subscription_tier": "pro",
+    "publicadis_site_url": "https://cristalimag.adis.lat/",
+    "logo_file": "logo-cristalimag.png",
+    "banner_file": "banner-fachada-residencial-vidrio-aluminio.jpg",
+    "og_image_file": "baranda-vidrio-balcon-atardecer.jpg",
+    "meta_title": "Cristalimag — Vidrio, aluminio y drywall a medida | Arequipa",
+    "meta_description": "Soluciones arquitectónicas en Cerro Colorado, Arequipa: mamparas, ventanas, barandas, fachadas, drywall y pérgolas. Cotiza por WhatsApp 959 206 666 · 958 910 762.",
+    "pending_owner_email": "cristalimag@gmail.com"
+  },
+  "products": [
+    {
+      "sku": "CI-MAMPARA-RES",
+      "title": "Mamparas y ventanas piso-techo",
+      "description": "Sistemas correderos y fijos en aluminio negro mate con vidrio templado. Ideal para conectar interior y jardín o terraza con acabado arquitectónico.",
+      "category": "Vidrio y aluminio",
+      "tags": ["mamparas", "ventanas", "piso-techo", "aluminio", "vidrio-templado", "arequipa"],
+      "brand": "Cristalimag",
+      "attributes": {
+        "material": "Aluminio + vidrio templado",
+        "acabado": "Negro mate / anodizado",
+        "zona": "Cerro Colorado, Arequipa"
+      },
+      "images": [
+        { "file": "mampara-corrediza-patio-residencial.jpg", "is_primary": true, "alt": "Mampara corredera de aluminio negro hacia el patio" },
+        { "file": "hero-mampara-cocina-interior-exterior.jpg", "is_primary": false, "alt": "Cocina abierta al exterior con mampara corredera" }
+      ],
+      "sort_order": 1,
+      "is_featured": true
+    },
+    {
+      "sku": "CI-FACHADA-MC",
+      "title": "Fachadas y muros cortina",
+      "description": "Fachadas de vidrio y aluminio para vivienda y comercio. Luz, presencia y sellado profesional.",
+      "category": "Fachadas",
+      "tags": ["fachada", "muro-cortina", "vidrio", "aluminio", "residencial"],
+      "brand": "Cristalimag",
+      "attributes": {
+        "aplicacion": "Residencial / comercial",
+        "sistema": "Muro cortina y paños fijos"
+      },
+      "images": [
+        { "file": "banner-fachada-residencial-vidrio-aluminio.jpg", "is_primary": true, "alt": "Fachada residencial con muro de vidrio y aluminio" }
+      ],
+      "sort_order": 2,
+      "is_featured": true
+    },
+    {
+      "sku": "CI-BARANDA",
+      "title": "Barandas de vidrio templado",
+      "description": "Barandas y pasamanos en vidrio templado con perfiles de aluminio. Balcones, terrazas y escaleras con máxima transparencia.",
+      "category": "Barandas",
+      "tags": ["barandas", "vidrio-templado", "balcon", "pasamanos"],
+      "brand": "Cristalimag",
+      "attributes": {
+        "material": "Vidrio templado",
+        "perfil": "Aluminio negro"
+      },
+      "images": [
+        { "file": "baranda-vidrio-balcon-atardecer.jpg", "is_primary": true, "alt": "Baranda de vidrio en balcón al atardecer" },
+        { "file": "pergola-baranda-vidrio-terraza.jpeg", "is_primary": false, "alt": "Pérgola y baranda de vidrio en terraza" }
+      ],
+      "sort_order": 3,
+      "is_featured": true
+    },
+    {
+      "sku": "CI-VENTANA-DET",
+      "title": "Ventanas de aluminio a medida",
+      "description": "Ventanas proyectantes, correderas y fijas con perfiles de precisión, herrajes y sellado limpio.",
+      "category": "Ventanas",
+      "tags": ["ventanas", "aluminio", "detalle", "herrajes"],
+      "brand": "Cristalimag",
+      "attributes": {
+        "acabado": "Negro mate",
+        "fabricacion": "A medida"
+      },
+      "images": [
+        { "file": "detalle-ventana-aluminio-negro-mate.jpg", "is_primary": true, "alt": "Detalle de ventana de aluminio negro mate abierta" },
+        { "file": "puerta-corrediza-aluminio-negro-salon.jpg", "is_primary": false, "alt": "Puerta corredera de aluminio hacia el salón" }
+      ],
+      "sort_order": 4,
+      "is_featured": true
+    },
+    {
+      "sku": "CI-PERGOLA",
+      "title": "Pérgolas y estructuras",
+      "description": "Pérgolas, techos y estructuras para terrazas con integración de barandas de vidrio e iluminación.",
+      "category": "Estructuras",
+      "tags": ["pergolas", "estructuras", "terraza", "techos"],
+      "brand": "Cristalimag",
+      "attributes": {
+        "uso": "Terrazas y patios"
+      },
+      "images": [
+        { "file": "pergola-baranda-vidrio-terraza.jpeg", "is_primary": true, "alt": "Pérgola con baranda de vidrio" },
+        { "file": "proceso-instalacion-techo-terraza.jpeg", "is_primary": false, "alt": "Instalación de techo en terraza" }
+      ],
+      "sort_order": 5,
+      "is_featured": false
+    },
+    {
+      "sku": "CI-DRYWALL",
+      "title": "Drywall y acabados",
+      "description": "Divisiones, cielo raso, nichos e iluminación indirecta para casas y oficinas. Acabado limpio listo para pintura.",
+      "category": "Drywall",
+      "tags": ["drywall", "cielo-raso", "remodelacion", "oficinas"],
+      "brand": "Cristalimag",
+      "attributes": {
+        "aplicacion": "Casas y oficinas"
+      },
+      "images": [
+        { "file": "hero-mampara-cocina-interior-exterior.jpg", "is_primary": true, "alt": "Interior moderno con acabados e integración de mamparas" }
+      ],
+      "sort_order": 6,
+      "is_featured": false
+    },
+    {
+      "sku": "CI-LOCAL",
+      "title": "Taller y showroom — Cerro Colorado",
+      "description": "Visítanos en 27 de Noviembre 500 (cuadra 5, esquina), Cerro Colorado. Fabricamos e instalamos. WhatsApp 959 206 666 · Tel. 958 910 762.",
+      "category": "Local",
+      "tags": ["local", "taller", "cerro-colorado", "arequipa", "showroom"],
+      "brand": "Cristalimag",
+      "attributes": {
+        "direccion": "27 de Noviembre 500, Cerro Colorado",
+        "horario": "Lun–Sáb 8:00–18:00"
+      },
+      "images": [
+        { "file": "local-cristalimag-esquina-cerro-colorado.jpg", "is_primary": true, "alt": "Local Cristalimag en esquina Cerro Colorado" }
+      ],
+      "sort_order": 7,
+      "is_featured": false
+    }
+  ]
+}
