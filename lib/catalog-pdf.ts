@@ -27,6 +27,9 @@ function firstImageToken(images: unknown): string {
   return '';
 }
 
+/** Subir al cambiar el diseño del PDF: invalida los PDF ya cacheados. */
+export const CATALOG_PDF_LAYOUT_VERSION = 'v2-cover';
+
 /** Firma estable: cambia solo si se añade/edita producto o imagen. */
 export function buildCatalogPdfFingerprint(
   businessId: string,
@@ -36,5 +39,5 @@ export function buildCatalogPdfFingerprint(
   const parts = products
     .map((p) => `${p.id}:${p.updated_at || ''}:${firstImageToken(p.images)}`)
     .sort();
-  return `${businessId}|${profileUpdatedAt || ''}|${products.length}|${parts.join(';')}`;
+  return `${CATALOG_PDF_LAYOUT_VERSION}|${businessId}|${profileUpdatedAt || ''}|${products.length}|${parts.join(';')}`;
 }

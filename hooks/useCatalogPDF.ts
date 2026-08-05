@@ -1,8 +1,9 @@
 'use client';
 
 /**
- * PDF catálogo estilo feed (1 producto / página, imagen ancho completo).
- * Se guarda en IndexedDB; solo se regenera si cambia el catálogo (nuevos/editados productos).
+ * PDF del catálogo: portada tipo tarjeta de presentación + una página por
+ * producto (imagen a ancho completo, estilo feed).
+ * Se guarda en IndexedDB; solo se regenera si cambia el catálogo o la portada.
  */
 
 import { useState, useCallback } from 'react';
@@ -13,6 +14,16 @@ import {
   idbGetCatalogPdf,
   idbSetCatalogPdf,
 } from '@/lib/catalog-pdf';
+import {
+  BUSCADIS_BLUE,
+  hexToRgb,
+  imageAspectRatio,
+  imageFormatFromDataUrl,
+  loadImageDataUrl,
+  type Rgb,
+} from '@/lib/pdf/canvas-assets';
+import { drawCatalogCover } from '@/lib/pdf/cover-page';
+import { getBuscadisProfileUrl } from '@/lib/business/publicadis';
 
 const MARGIN = 12;
 const FOOTER_H = 10;
@@ -104,9 +115,9 @@ async function buildInstagramFeedPdfBlob(
   const pageW = 210;
   const pageH = 297;
   const contentW = pageW - MARGIN * 2;
-  const brandRgb = hexToRgb(profile.theme_color || '#3c6997') || { r: 60, g: 105, b: 151 };
+  const brandRgb = hexToRgb(profile.theme_color, BUSCADIS_BLUE);
 
-  await drawCoverPage(doc, profile, products.length, pageW, pageH, contentW, MARGIN, brandRgb);
+  await drawCatalogCover(doc, { profile, productCount: products.length });
 
   for (let i = 0; i < products.length; i++) {
     const product = products[i];
@@ -118,64 +129,6 @@ async function buildInstagramFeedPdfBlob(
   return doc.output('blob') as Blob;
 }
 
-async function drawCoverPage(
-  doc: any,
-  profile: Partial<BusinessProfile>,
-  count: number,
-  pageW: number,
-  pageH: number,
-  contentW: number,
-  margin: number,
-  brandRgb: { r: number; g: number; b: number }
-) {
-  doc.setFillColor(brandRgb.r, brandRgb.g, brandRgb.b);
-  doc.rect(0, 0, pageW, pageH, 'F');
-
-  let y = 40;
-  if (profile.logo_url) {
-    const logo = await loadImageAsBase64(profile.logo_url);
-    if (logo) {
-      try {
-        doc.addImage(logo, getImageFormatFromDataUrl(logo), margin, 30, 40, 40, undefined, 'FAST');
-        y = 78;
-      } catch {
-        // ignore
-      }
-    }
-  }
-
-  doc.setTextColor(255, 255, 255);
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(26);
-  doc.text(profile.name || 'Catálogo', margin, y);
-  y += 12;
-
-  doc.setFontSize(11);
-  doc.setFont('helvetica', 'normal');
-  if (profile.description) {
-    const lines = doc.splitTextToSize(profile.description.substring(0, 200), contentW);
-    doc.text(lines.slice(0, 4), margin, y);
-    y += lines.slice(0, 4).length * 5 + 4;
-  }
-
-  doc.setFontSize(9);
-  if (profile.contact_phone) {
-    doc.text(`Tel: ${profile.contact_phone}`, margin, y);
-    y += 5;
-  }
-  if (profile.contact_address) {
-    doc.text(`Dir: ${profile.contact_address}`, margin, y);
-    y += 5;
-  }
-
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(14);
-  doc.text(`${count} productos`, margin, pageH - 30);
-  doc.setFontSize(9);
-  doc.setFont('helvetica', 'normal');
-  doc.text(`Generado: ${new Date().toLocaleDateString('es-PE')}`, margin, pageH - 22);
-}
-
 async function drawProductPage(
   doc: any,
   product: Adiso,
@@ -184,7 +137,7 @@ async function drawProductPage(
   pageH: number,
   contentW: number,
   margin: number,
-  brandRgb: { r: number; g: number; b: number },
+  brandRgb: Rgb,
   index: number,
   total: number
 ) {
@@ -201,23 +154,13 @@ async function drawProductPage(
   const maxImgH = pageH - MARGIN - FOOTER_H - textBlockMm - y - 4;
 
   if (imgUrl) {
-    const imgData = await loadImageAsBase64(imgUrl);
+    const imgData = await loadImageDataUrl(imgUrl);
     if (imgData) {
-      const naturalH = await naturalHeightMmForFullWidth(imgData, contentW);
-      let drawH = Math.min(naturalH, Math.max(40, maxImgH));
-      const drawW = contentW;
-      const drawX = margin;
-      let drawY = y;
+      const naturalH = contentW / (await imageAspectRatio(imgData));
+      const drawH = naturalH > Math.max(40, maxImgH) ? maxImgH : naturalH;
 
-      if (naturalH > drawH) {
-        drawH = maxImgH;
-      } else {
-        drawH = naturalH;
-      }
-
-      const format = getImageFormatFromDataUrl(imgData);
-      doc.addImage(imgData, format, drawX, drawY, drawW, drawH, undefined, 'FAST');
-      y = drawY + drawH + 5;
+      doc.addImage(imgData, imageFormatFromDataUrl(imgData), margin, y, contentW, drawH, undefined, 'FAST');
+      y = y + drawH + 5;
     } else {
       drawNoImage(doc, margin, y, contentW, 30);
       y += 35;
@@ -262,6 +205,11 @@ async function drawProductPage(
   doc.setTextColor(148, 163, 184);
   doc.setFont('helvetica', 'normal');
   doc.text('Precios sujetos a cambios sin previo aviso', margin, pageH - 5);
+
+  const profileUrl = getBuscadisProfileUrl(profile);
+  if (profileUrl) {
+    doc.text(profileUrl.replace(/^https?:\/\//, ''), pageW - margin, pageH - 5, { align: 'right' });
+  }
 }
 
 function measureTextBlockMm(doc: any, product: Adiso, contentW: number): number {
@@ -280,94 +228,4 @@ function drawNoImage(doc: any, x: number, y: number, w: number, h: number) {
   doc.setTextColor(203, 213, 225);
   doc.setFontSize(8);
   doc.text('Sin imagen', x + w / 2, y + h / 2, { align: 'center' });
-}
-
-function hexToRgb(hex: string): { r: number; g: number; b: number } | null {
-  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-  return result
-    ? {
-        r: parseInt(result[1], 16),
-        g: parseInt(result[2], 16),
-        b: parseInt(result[3], 16),
-      }
-    : null;
-}
-
-async function loadImageAsBase64(url: string): Promise<string | null> {
-  const proxyUrl = `/api/catalog/image-proxy?url=${encodeURIComponent(url)}`;
-  try {
-    const res = await fetch(proxyUrl);
-    if (res.ok) {
-      const blob = await res.blob();
-      return blobToDataUrl(blob);
-    }
-  } catch {
-    // fallback
-  }
-
-  try {
-    const res = await fetch(url, { mode: 'cors' });
-    if (res.ok) {
-      const blob = await res.blob();
-      return blobToDataUrl(blob);
-    }
-  } catch {
-    // canvas
-  }
-
-  return loadImageViaCanvas(url);
-}
-
-function loadImageViaCanvas(url: string): Promise<string | null> {
-  return new Promise((resolve) => {
-    const img = new Image();
-    img.crossOrigin = 'anonymous';
-    img.onload = () => {
-      try {
-        const canvas = document.createElement('canvas');
-        canvas.width = img.naturalWidth || 1;
-        canvas.height = img.naturalHeight || 1;
-        const ctx = canvas.getContext('2d');
-        if (!ctx) {
-          resolve(null);
-          return;
-        }
-        ctx.drawImage(img, 0, 0);
-        resolve(canvas.toDataURL('image/jpeg', 0.9));
-      } catch {
-        resolve(null);
-      }
-    };
-    img.onerror = () => resolve(null);
-    img.src = url;
-  });
-}
-
-function blobToDataUrl(blob: Blob): Promise<string | null> {
-  return new Promise((resolve) => {
-    const reader = new FileReader();
-    reader.onloadend = () => resolve(reader.result as string);
-    reader.onerror = () => resolve(null);
-    reader.readAsDataURL(blob);
-  });
-}
-
-function getImageFormatFromDataUrl(dataUrl: string): 'PNG' | 'JPEG' {
-  const mime = dataUrl.split(';')[0].toLowerCase();
-  return mime.includes('png') ? 'PNG' : 'JPEG';
-}
-
-function getImageDimensionsFromDataUrl(dataUrl: string): Promise<{ width: number; height: number }> {
-  return new Promise((resolve) => {
-    const img = new Image();
-    img.onload = () => resolve({ width: img.width || 1, height: img.height || 1 });
-    img.onerror = () => resolve({ width: 1, height: 1 });
-    img.src = dataUrl;
-  });
-}
-
-async function naturalHeightMmForFullWidth(dataUrl: string, innerWmm: number): Promise<number> {
-  const { width, height } = await getImageDimensionsFromDataUrl(dataUrl);
-  if (width <= 0 || height <= 0) return 40;
-  return innerWmm * (height / width);
 }
