@@ -286,6 +286,7 @@ export async function getBusinessCatalog(businessProfileId: string): Promise<any
         .from('catalog_products')
         .select('*')
         .eq('business_profile_id', businessProfileId)
+        .is('deleted_at', null)
         .order('sort_order', { ascending: true })
         .order('created_at', { ascending: false });
 
@@ -320,6 +321,7 @@ export async function getBusinessProductAsAdiso(productId: string): Promise<Adis
                 )
             `)
             .eq('id', productId)
+            .is('deleted_at', null)
             .single();
 
         if (error || !product) {
@@ -371,6 +373,7 @@ export async function getCatalogProductsByBusinessSlug(
         `)
         .eq('business_profile_id', profile.id)
         .eq('status', 'published')
+        .is('deleted_at', null)
         .order('sort_order', { ascending: true })
         .order('created_at', { ascending: false })
         .limit(options?.limit ?? 8);
@@ -558,7 +561,8 @@ export async function getCatalogProductsAsAdisos(options?: {
                     is_published
                 )
             `)
-            .eq('status', 'published');
+            .eq('status', 'published')
+            .is('deleted_at', null);
 
         // Filtrar sin foto en SQL: evita que bulk updates sin imagen llenen el pool.
         if (preferImages) {
@@ -767,19 +771,26 @@ export async function createCatalogProduct(product: any): Promise<any> {
     return data;
 }
 
+/**
+ * Envía el producto a la papelera (30 días). Sale al instante del catálogo, el
+ * PDF y las vistas públicas porque RLS filtra `deleted_at is null`.
+ * Devuelve false si la fila no existe o RLS bloqueó el cambio.
+ */
 export async function deleteCatalogProduct(productId: string): Promise<boolean> {
     if (!supabase) return false;
-    const { error } = await supabase
+    const { data, error } = await supabase
         .from('catalog_products')
-        .delete()
-        .eq('id', productId);
+        .update({ deleted_at: new Date().toISOString() })
+        .eq('id', productId)
+        .is('deleted_at', null)
+        .select('id');
 
     if (error) {
         console.error('Error deleting product:', error);
         return false;
     }
 
-    return true;
+    return Boolean(data?.length);
 }
 
 export async function deleteAllBusinessProducts(businessProfileId: string): Promise<boolean> {
@@ -787,8 +798,9 @@ export async function deleteAllBusinessProducts(businessProfileId: string): Prom
 
     const { error } = await supabase
         .from('catalog_products')
-        .delete()
-        .eq('business_profile_id', businessProfileId);
+        .update({ deleted_at: new Date().toISOString() })
+        .eq('business_profile_id', businessProfileId)
+        .is('deleted_at', null);
 
     if (error) {
         console.error('Error deleting all products:', error);

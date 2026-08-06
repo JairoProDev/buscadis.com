@@ -415,7 +415,9 @@ export default function PublicBusinessPage({
                             const fullProduct = catalogProducts.find((p) => p.id === productAdiso.id);
                             setEditingProduct(fullProduct || productAdiso);
                         }}
-                        onCatalogReorder={() => business?.id && reloadCatalog(business.id)}
+                        onCatalogRefresh={async () => {
+                            if (business?.id) await reloadCatalog(business.id);
+                        }}
                     />
                 </>
             }

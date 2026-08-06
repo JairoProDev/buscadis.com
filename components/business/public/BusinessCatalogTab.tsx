@@ -10,7 +10,7 @@ import {
     IconStore, IconWhatsapp, IconSearch, IconEdit, IconBox, IconX, IconTrash,
     IconGrid, IconList, IconFeed, IconFileAlt,
 } from '@/components/Icons';
-import { deleteCatalogProduct } from '@/lib/business';
+import { moveCatalogItemToTrash, TRASH_RETENTION_DAYS } from '@/lib/catalog/trash';
 import { useCatalogPDF } from '@/hooks/useCatalogPDF';
 import { useNetworkStatus } from '@/hooks/useNetworkStatus';
 import { getProductWhatsappUrl } from '@/lib/business/public-utils';
@@ -58,7 +58,7 @@ interface BusinessCatalogTabProps {
     showPinnedCarousel?: boolean;
     visible?: boolean;
     onFilteredAdisosChange?: (adisos: Adiso[]) => void;
-    onCatalogReorder?: () => void;
+    onCatalogRefresh?: () => void | Promise<void>;
 }
 
 export default function BusinessCatalogTab({
@@ -73,7 +73,7 @@ export default function BusinessCatalogTab({
     showPinnedCarousel = false,
     visible = true,
     onFilteredAdisosChange,
-    onCatalogReorder,
+    onCatalogRefresh,
 }: BusinessCatalogTabProps) {
     const router = useRouter();
     const { isOnline } = useNetworkStatus();
@@ -102,6 +102,7 @@ export default function BusinessCatalogTab({
     const [visibleCount, setVisibleCount] = useState(24);
     const [confirmDeleteAdiso, setConfirmDeleteAdiso] = useState<Adiso | null>(null);
     const [deletingAdisoId, setDeletingAdisoId] = useState<string | null>(null);
+    const [trashedIds, setTrashedIds] = useState<Set<string>>(() => new Set());
 
     const { openCatalogPdf, generating: generatingPDF, progress: pdfProgress } = useCatalogPDF();
 
@@ -196,6 +197,12 @@ export default function BusinessCatalogTab({
     useEffect(() => {
         let result = adisos;
 
+        // Los enviados a la papelera se ocultan hasta que el padre recargue,
+        // si no el efecto los repondría desde `adisos` en el siguiente render.
+        if (trashedIds.size > 0) {
+            result = result.filter((a) => !trashedIds.has(a.id));
+        }
+
         if (!showEditControls) {
             result = result.filter(isPublishedCatalogAdiso);
         }
@@ -225,7 +232,7 @@ export default function BusinessCatalogTab({
 
         setFilteredAdisos(result);
         setVisibleCount(24);
-    }, [searchQuery, selectedCategory, adisos, catalogProducts, showEditControls, visitorSort]);
+    }, [searchQuery, selectedCategory, adisos, catalogProducts, showEditControls, visitorSort, trashedIds]);
 
     useEffect(() => {
         onFilteredAdisosChange?.(filteredAdisos);
@@ -291,7 +298,7 @@ export default function BusinessCatalogTab({
         }
         setReorderBusy(false);
         toastSuccess('Orden del catálogo actualizado');
-        onCatalogReorder?.();
+        onCatalogRefresh?.();
     };
 
     const openProduct = (adiso: Adiso) => {
@@ -550,8 +557,21 @@ export default function BusinessCatalogTab({
     const handleDeleteAdiso = async (adiso: Adiso) => {
         setDeletingAdisoId(adiso.id);
         try {
-            await deleteCatalogProduct(adiso.id);
-            setFilteredAdisos(prev => prev.filter(a => a.id !== adiso.id));
+            const result = await moveCatalogItemToTrash(adiso, { businessId: profile.id });
+
+            if (!result.ok) {
+                toastError(result.error || 'No se pudo eliminar. Inténtalo de nuevo.');
+                return;
+            }
+
+            setTrashedIds((prev) => new Set(prev).add(adiso.id));
+            setFilteredAdisos((prev) => prev.filter((a) => a.id !== adiso.id));
+            toastSuccess(
+                result.kind === 'classified_ad'
+                    ? `Aviso eliminado. Queda ${TRASH_RETENTION_DAYS} días en la papelera.`
+                    : `Producto eliminado. Queda ${TRASH_RETENTION_DAYS} días en la papelera.`
+            );
+            await onCatalogRefresh?.();
         } finally {
             setDeletingAdisoId(null);
             setConfirmDeleteAdiso(null);

@@ -40,7 +40,7 @@ export default function BusinessProfileShellV2({
   onTrackEvent,
   canEdit: canEditProp,
   onOpenEditor,
-  onCatalogReorder,
+  onCatalogRefresh,
   onProfilePatch,
 }: BusinessProfileShellProps) {
   const { user } = useAuth();
@@ -209,7 +209,7 @@ export default function BusinessProfileShellV2({
             ? 'feed'
             : 'grid',
       onOpenQr: profile?.slug ? () => setQrModalOpen(true) : undefined,
-      onCatalogReorder,
+      onCatalogRefresh,
       onProfilePatch,
     }),
     [
@@ -226,7 +226,7 @@ export default function BusinessProfileShellV2({
       viewMode,
       showCommerceDock,
       template.catalogPresentation,
-      onCatalogReorder,
+      onCatalogRefresh,
       onProfilePatch,
     ]
   );

@@ -81,7 +81,8 @@ export async function GET(
       'id, title, description, category, price, currency, images, attributes, sort_order, is_featured, status, created_at, updated_at'
     )
     .eq('business_profile_id', profile.id)
-    .eq('status', 'published');
+    .eq('status', 'published')
+    .is('deleted_at', null);
 
   for (const { column, ascending } of CATALOG_DEFAULT_ORDER) {
     query = query.order(column, { ascending });

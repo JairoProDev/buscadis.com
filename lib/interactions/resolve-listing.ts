@@ -60,6 +60,7 @@ export async function resolveListingForInteraction(
       'id, titulo, descripcion, precio, moneda, tipo_precio, ubicacion, imagenes_urls, user_id, publish_tier, features, private_data, contact_locked, payment_status, contacto, categoria, esta_activo, fecha_expiracion, es_historico, edicion_numero, fecha_publicacion, fecha_publicacion_original'
     )
     .eq('id', listingId)
+    .is('deleted_at', null)
     .maybeSingle();
 
   if (adiso) {
@@ -104,6 +105,7 @@ export async function resolveListingForInteraction(
       'id, title, description, price, currency, images, category, status, business_profile_id, ai_metadata'
     )
     .eq('id', listingId)
+    .is('deleted_at', null)
     .maybeSingle();
 
   if (productError) {

@@ -179,6 +179,7 @@ export function useBusinessData(slug: string, isOwner: boolean) {
           .from('catalog_products')
           .select('*')
           .eq('business_profile_id', businessId)
+          .is('deleted_at', null)
           .order('sort_order', { ascending: true })
           .order('created_at', { ascending: false });
 
@@ -457,6 +458,7 @@ async function fetchOwnerClassifieds(
       .select('*')
       .eq('user_id', userId)
       .eq('esta_activo', true)
+      .is('deleted_at', null)
       .order('fecha_publicacion', { ascending: false })
       .limit(40);
 

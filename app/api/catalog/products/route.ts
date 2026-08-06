@@ -80,7 +80,8 @@ export async function GET(request: NextRequest) {
         let query = supabase
             .from('catalog_products')
             .select('*', { count: 'exact' })
-            .eq('business_profile_id', profile.id);
+            .eq('business_profile_id', profile.id)
+            .is('deleted_at', null);
 
         if (status) {
             query = query.eq('status', status);
@@ -311,11 +312,13 @@ export async function DELETE(request: NextRequest) {
             );
         }
 
+        // Borrado lógico: sale del catálogo al instante y se purga a los 30 días.
         const { data: deletedRows, error } = await supabase
             .from('catalog_products')
-            .delete()
+            .update({ deleted_at: new Date().toISOString(), deleted_by: user.id })
             .eq('id', productId)
             .eq('business_profile_id', profile.id)
+            .is('deleted_at', null)
             .select('id');
 
         if (error) {
@@ -330,7 +333,7 @@ export async function DELETE(request: NextRequest) {
 
         return NextResponse.json({
             success: true,
-            message: 'Producto eliminado correctamente',
+            message: 'Producto enviado a la papelera',
         });
     } catch (error: any) {
         console.error('Delete product error:', error);

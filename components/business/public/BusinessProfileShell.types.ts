@@ -21,6 +21,7 @@ export interface BusinessProfileShellProps {
   /** Permiso de edición (owner, member o admin) */
   canEdit?: boolean;
   onOpenEditor?: () => void;
-  onCatalogReorder?: () => void;
+  /** Recarga el catálogo tras reordenar, eliminar o editar productos. */
+  onCatalogRefresh?: () => void | Promise<void>;
   onProfilePatch?: (patch: Partial<import('@/types/business').BusinessProfile>) => void;
 }

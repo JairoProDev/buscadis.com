@@ -59,6 +59,21 @@ export async function idbGetCatalog(businessId: string): Promise<unknown[] | nul
   }
 }
 
+export async function idbClearCatalog(businessId: string): Promise<void> {
+  try {
+    const db = await openDb();
+    await new Promise<void>((resolve, reject) => {
+      const tx = db.transaction(STORE_CATALOG, 'readwrite');
+      tx.objectStore(STORE_CATALOG).delete(businessId);
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => reject(tx.error);
+    });
+    db.close();
+  } catch {
+    // ignore
+  }
+}
+
 export type CachedCatalogPdf = {
   blob: Blob;
   fingerprint: string;

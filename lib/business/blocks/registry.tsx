@@ -73,7 +73,7 @@ export function renderProfileBlock(
           defaultViewMode={catalogView}
           showPinnedCarousel={template.catalogPresentation === 'pinned_carousel'}
           visible
-          onCatalogReorder={ctx.onCatalogReorder}
+          onCatalogRefresh={ctx.onCatalogRefresh}
         />
       );
     }

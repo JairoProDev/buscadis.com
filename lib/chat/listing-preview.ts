@@ -36,8 +36,13 @@ export async function fetchListingPreviews(
     db
       .from('adisos')
       .select('id, titulo, precio, moneda, imagenes_urls, private_data')
-      .in('id', ids),
-    db.from('catalog_products').select('id, title, price, currency, images').in('id', ids),
+      .in('id', ids)
+      .is('deleted_at', null),
+    db
+      .from('catalog_products')
+      .select('id, title, price, currency, images')
+      .in('id', ids)
+      .is('deleted_at', null),
   ]);
 
   for (const row of adisosRes.data || []) {

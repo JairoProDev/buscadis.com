@@ -67,6 +67,7 @@ export default function CatalogTablePage() {
                 .from('catalog_products')
                 .select('*')
                 .eq('business_profile_id', businessProfileId)
+                .is('deleted_at', null)
                 .order('sort_order', { ascending: true })
                 .order('created_at', { ascending: false });
 
@@ -174,18 +175,21 @@ export default function CatalogTablePage() {
     };
 
     const handleDeleteProduct = async (id: string) => {
-        if (!confirm('¿Eliminar este producto?')) return;
+        if (!confirm('¿Eliminar este producto? Quedará 30 días en la papelera.')) return;
 
         try {
             if (!supabase) throw new Error('Supabase no está configurado');
-            const { error: deleteError } = await supabase
+            const { data, error: deleteError } = await supabase
                 .from('catalog_products')
-                .delete()
-                .eq('id', id);
+                .update({ deleted_at: new Date().toISOString() })
+                .eq('id', id)
+                .is('deleted_at', null)
+                .select('id');
 
             if (deleteError) throw deleteError;
+            if (!data?.length) throw new Error('No se encontró el producto o no tienes permiso');
 
-            success('Producto eliminado');
+            success('Producto enviado a la papelera');
             fetchProducts();
         } catch (err: any) {
             showError('Error al eliminar: ' + err.message);
@@ -194,26 +198,28 @@ export default function CatalogTablePage() {
 
     const handleBulkDelete = async () => {
         if (selectedProducts.size === 0) return;
-        if (!confirm(`¿Eliminar ${selectedProducts.size} productos seleccionados?`)) return;
+        if (!confirm(`¿Eliminar ${selectedProducts.size} productos? Quedarán 30 días en la papelera.`)) return;
 
         try {
             if (!supabase) throw new Error('Supabase no está configurado');
 
             const ids = Array.from(selectedProducts);
             const BATCH_SIZE = 50;
+            const deletedAt = new Date().toISOString();
 
             // Process in batches
             for (let i = 0; i < ids.length; i += BATCH_SIZE) {
                 const batch = ids.slice(i, i + BATCH_SIZE);
                 const { error: deleteError } = await supabase
                     .from('catalog_products')
-                    .delete()
-                    .in('id', batch);
+                    .update({ deleted_at: deletedAt })
+                    .in('id', batch)
+                    .is('deleted_at', null);
 
                 if (deleteError) throw deleteError;
             }
 
-            success(`${selectedProducts.size} productos eliminados`);
+            success(`${selectedProducts.size} productos enviados a la papelera`);
             setSelectedProducts(new Set());
             fetchProducts();
         } catch (err: any) {

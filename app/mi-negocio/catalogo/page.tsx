@@ -20,6 +20,7 @@ import { groupProducts, getFilterOptions, type GroupedProduct } from '@/lib/cata
 import { ProductEditor } from '@/components/business/ProductEditor';
 import { listBusinessProfilesForUser } from '@/lib/business';
 import SortableProductList from '@/components/catalog/SortableProductList';
+import CatalogTrashPanel from '@/components/catalog/CatalogTrashPanel';
 import { reorderCatalogProducts } from '@/lib/catalog/reorder';
 import type { Adiso } from '@/types';
 
@@ -92,6 +93,7 @@ function CatalogPageContent() {
     const [businessProfileId, setBusinessProfileId] = useState<string | null>(null);
     const [userId, setUserId] = useState<string | null>(null);
     const [showAddModal, setShowAddModal] = useState(false);
+    const [showTrash, setShowTrash] = useState(false);
     const [editingProduct, setEditingProduct] = useState<CatalogProduct | null>(null);
     const [showEditModal, setShowEditModal] = useState(false);
 
@@ -184,6 +186,7 @@ function CatalogPageContent() {
                 .from('catalog_products')
                 .select('*')
                 .eq('business_profile_id', pid)
+                .is('deleted_at', null)
                 .order('sort_order', { ascending: true })
                 .order('created_at', { ascending: false });
 
@@ -274,16 +277,17 @@ function CatalogPageContent() {
 
     const bulkDelete = async () => {
         if (!supabase || selectedIds.size === 0) return;
-        if (!confirm(`¿Eliminar ${selectedIds.size} productos? Esta acción no se puede deshacer.`)) return;
+        if (!confirm(`¿Eliminar ${selectedIds.size} productos? Quedarán 30 días en la papelera.`)) return;
         setBulkLoading(true);
         try {
             const ids = Array.from(selectedIds);
             const { error } = await supabase
                 .from('catalog_products')
-                .delete()
-                .in('id', ids);
+                .update({ deleted_at: new Date().toISOString() })
+                .in('id', ids)
+                .is('deleted_at', null);
             if (error) throw error;
-            success(`${ids.length} productos eliminados`);
+            success(`${ids.length} productos enviados a la papelera`);
             setSelectedIds(new Set());
             setIsSelecting(false);
             await loadProducts();
@@ -407,12 +411,18 @@ function CatalogPageContent() {
 
     const deleteProduct = async (id: string) => {
         if (!supabase) return;
-        if (!confirm('¿Eliminar este producto?')) return;
+        if (!confirm('¿Eliminar este producto? Quedará 30 días en la papelera.')) return;
         try {
-            const { error } = await supabase.from('catalog_products').delete().eq('id', id);
+            const { data, error } = await supabase
+                .from('catalog_products')
+                .update({ deleted_at: new Date().toISOString() })
+                .eq('id', id)
+                .is('deleted_at', null)
+                .select('id');
             if (error) throw error;
+            if (!data?.length) throw new Error('No se encontró el producto o no tienes permiso');
             setProducts(prev => prev.filter(p => p.id !== id));
-            success('Producto eliminado');
+            success('Producto enviado a la papelera');
         } catch (err: any) {
             showError('Error: ' + err.message);
         }
@@ -484,6 +494,15 @@ function CatalogPageContent() {
                             </div>
 
                             <div className="flex items-center gap-2 flex-shrink-0">
+                                <button
+                                    onClick={() => setShowTrash(true)}
+                                    disabled={!businessProfileId}
+                                    className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-bold border-2 border-slate-200 text-slate-600 transition-all hover:bg-slate-50 disabled:opacity-40"
+                                    title="Papelera (30 días)"
+                                >
+                                    <IconTrash size={15} />
+                                    <span className="hidden sm:inline">Papelera</span>
+                                </button>
                                 <Link
                                     href={
                                         businessProfileId
@@ -872,6 +891,15 @@ function CatalogPageContent() {
                     onClose={() => setShowAddModal(false)}
                     businessProfileId={businessProfileId}
                     onSuccess={loadProducts}
+                />
+            )}
+
+            {businessProfileId && (
+                <CatalogTrashPanel
+                    businessProfileId={businessProfileId}
+                    open={showTrash}
+                    onClose={() => setShowTrash(false)}
+                    onChanged={loadProducts}
                 />
             )}
 

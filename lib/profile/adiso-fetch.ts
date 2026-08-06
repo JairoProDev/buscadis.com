@@ -7,6 +7,7 @@ export async function getAdisoByIdFromDb(adisoId: string): Promise<Adiso | null>
     .from('adisos')
     .select('*')
     .eq('id', adisoId)
+    .is('deleted_at', null)
     .maybeSingle();
 
   if (error || !data) return null;
