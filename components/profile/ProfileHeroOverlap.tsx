@@ -104,31 +104,33 @@ export default function ProfileHeroOverlap({
       <div className={profilePageContainerClass('pt-2 sm:pt-3')}>
         <div
           className={cn(
-            'relative w-full overflow-hidden bg-gradient-to-br from-[var(--brand-color)] via-[var(--brand-color)] to-[var(--brand-accent)] shadow-sm',
+            'relative w-full bg-gradient-to-br from-[var(--brand-color)] via-[var(--brand-color)] to-[var(--brand-accent)] shadow-sm',
             'h-[180px] sm:h-[200px] md:h-[220px] rounded-2xl md:rounded-3xl'
           )}
         >
+          {/* Clip layer for image/gradient only — keeps the chrome menu from being clipped */}
+          <div className="absolute inset-0 overflow-hidden rounded-2xl md:rounded-3xl pointer-events-none" aria-hidden>
+            {hasImage && imageUrl ? (
+              <>
+                <img src={imageUrl} alt="" className="absolute inset-0 w-full h-full object-cover" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-black/25" />
+              </>
+            ) : null}
+          </div>
+
           {headerSlot && (
             <div
-              className="absolute top-0 inset-x-0 z-20"
+              className="absolute top-0 inset-x-0 z-40"
               style={{ paddingTop: 'max(env(safe-area-inset-top, 0px), 0.25rem)' }}
             >
               {headerSlot}
             </div>
           )}
 
-          {hasImage && imageUrl ? (
-            <>
-              <img src={imageUrl} alt="" className="absolute inset-0 w-full h-full object-cover" />
-              <div
-                className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-black/25"
-                aria-hidden
-              />
-            </>
-          ) : banner.mode === 'text' && banner.text?.content ? (
+          {!(hasImage && imageUrl) && banner.mode === 'text' && banner.text?.content ? (
             <div
               className={cn(
-                'absolute inset-0 flex items-center justify-center px-8',
+                'absolute inset-0 flex items-center justify-center px-8 z-10',
                 banner.text.align === 'left' && 'justify-start',
                 banner.text.align === 'right' && 'justify-end'
               )}
@@ -157,7 +159,7 @@ export default function ProfileHeroOverlap({
 
           {banner.fadeBottom === true && (
             <div
-              className="absolute bottom-0 inset-x-0 h-16 bg-gradient-to-t from-[var(--bg-secondary)] to-transparent pointer-events-none rounded-b-2xl md:rounded-b-3xl"
+              className="absolute bottom-0 inset-x-0 h-16 bg-gradient-to-t from-[var(--bg-secondary)] to-transparent pointer-events-none rounded-b-2xl md:rounded-b-3xl z-10"
               aria-hidden
             />
           )}

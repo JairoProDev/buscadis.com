@@ -188,12 +188,24 @@ export default function ProfileWireframeShell({
       typeof window !== 'undefined'
         ? window.location.href
         : getBusinessCanonicalUrl(profile.slug || '');
-    return [
-      {
+
+    const items: ProfileMenuItem[] = [];
+
+    if (!isEditor && editAccess === 'allowed') {
+      items.push({
         id: 'edit',
         label: 'Editar perfil',
-        onClick: onEditRequest,
-      },
+        onClick: () => onEditRequest?.(),
+      });
+    } else if (!isEditor && editAccess === 'login_required') {
+      items.push({
+        id: 'edit-login',
+        label: 'Inicia sesión para editar',
+        onClick: () => onEditRequest?.(),
+      });
+    }
+
+    items.push(
       {
         id: 'copy',
         label: 'Copiar enlace',
@@ -216,6 +228,7 @@ export default function ProfileWireframeShell({
         id: 'create',
         label: 'Crea tu perfil gratis',
         href: '/publicar?utm_source=profile_menu',
+        hidden: Boolean(isEditor || canEdit),
       },
       {
         id: 'help',
@@ -226,9 +239,12 @@ export default function ProfileWireframeShell({
         id: 'report',
         label: 'Reportar perfil',
         href: '/ayuda?topic=reportar-perfil',
-      },
-    ];
-  }, [profile.slug, onShare, onEditRequest]);
+        hidden: Boolean(canEdit || isEditor),
+      }
+    );
+
+    return items;
+  }, [profile.slug, onShare, onEditRequest, editAccess, isEditor, canEdit]);
 
   const defaultBannerCta = profile.contact_whatsapp
     ? { label: 'Contactar', action: 'whatsapp' as const }

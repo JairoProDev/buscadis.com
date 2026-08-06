@@ -90,6 +90,7 @@ export default function PublicBusinessPage({
 
     const [mounted, setMounted] = useState(false);
     const [isMember, setIsMember] = useState(false);
+    const [knownOwner, setKnownOwner] = useState(false);
     const [businessOptions, setBusinessOptions] = useState<BusinessWithRole[]>([]);
 
     const {
@@ -102,7 +103,7 @@ export default function PublicBusinessPage({
         isStale,
         reloadCatalog,
         updateBusiness,
-    } = useBusinessData(slug, isPlatformAdmin || isMember);
+    } = useBusinessData(slug, isPlatformAdmin || isMember || knownOwner);
 
     const viewTrackedRef = useRef(false);
 
@@ -113,18 +114,30 @@ export default function PublicBusinessPage({
     useEffect(() => {
         if (!user?.id) {
             setBusinessOptions([]);
+            setKnownOwner(false);
             return;
         }
-        listBusinessProfilesForUser(user.id).then(setBusinessOptions);
-    }, [user?.id, business?.id]);
+        listBusinessProfilesForUser(user.id).then((list) => {
+            setBusinessOptions(list);
+            const ownsThis = list.some(
+                (b) => b.profile.slug === slug || (business?.id && b.profile.id === business.id)
+            );
+            if (ownsThis) setKnownOwner(true);
+        });
+    }, [user?.id, business?.id, slug]);
 
     // Derived owner check — also works when user_id in business_profiles matches auth user
     // OR when the user is in business_members with a role >= editor
     const isOwner = mounted && Boolean(
-        user?.id &&
-        business &&
-        (business.user_id === user.id)
+        knownOwner ||
+        (user?.id && business && business.user_id === user.id)
     );
+
+    useEffect(() => {
+        if (user?.id && business?.user_id && user.id === business.user_id) {
+            setKnownOwner(true);
+        }
+    }, [user?.id, business?.user_id]);
 
     // Secondary check via membership (handles cases where user_id differs)
     useEffect(() => {

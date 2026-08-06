@@ -2,6 +2,8 @@
 
 import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react';
 import dynamic from 'next/dynamic';
+import { useToast } from '@/hooks/useToast';
+import { ToastContainer } from '@/components/Toast';
 
 const AuthModal = dynamic(() => import('@/components/AuthModal'), { ssr: false });
 const ChatDock = dynamic(() => import('@/components/ChatDock'), { ssr: false });
@@ -101,8 +103,14 @@ export function UIProvider({ children }: { children: ReactNode }) {
         onClose={closeChat}
         onToggleMinimize={toggleMinimize}
       />
+      <GlobalToastHost />
     </UIContext.Provider>
   );
+}
+
+function GlobalToastHost() {
+  const { toasts, removeToast } = useToast();
+  return <ToastContainer toasts={toasts} removeToast={removeToast} />;
 }
 
 export function useUI() {

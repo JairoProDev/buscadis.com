@@ -84,8 +84,18 @@ export function ProfileEditProvider({
 
   useEffect(() => {
     if (!isEditing) return;
-    setEditSurfaceState(readStoredSurface());
-    setSidebarCollapsed(readStoredSurface() === 'direct');
+    // Al abrir el editor siempre mostramos el panel: si quedaba en modo
+    // "direct"/colapsado, "Editar perfil" parecía no hacer nada.
+    const isMobile =
+      typeof window !== 'undefined' && window.matchMedia('(max-width: 1023px)').matches;
+    const stored = readStoredSurface();
+    if (isMobile && stored === 'direct') {
+      setEditSurfaceState('direct');
+      setSidebarCollapsed(true);
+    } else {
+      setEditSurfaceState('panel');
+      setSidebarCollapsed(false);
+    }
     if (typeof window !== 'undefined' && !localStorage.getItem(ONBOARDING_KEY)) {
       setShowEditOnboarding(true);
     }

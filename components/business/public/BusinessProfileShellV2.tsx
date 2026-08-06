@@ -137,7 +137,7 @@ export default function BusinessProfileShellV2({
 
   const isOwner = Boolean(mounted && user?.id && profile?.user_id && user.id === profile.user_id);
   const canManageProfile = Boolean(
-    canEditProp ?? (mounted && (isOwner || isTeamMember || isPlatformAdmin))
+    canEditProp || (mounted && (isOwner || isTeamMember || isPlatformAdmin))
   );
   const showEditControls = Boolean(canManageProfile && isEditor);
 
@@ -340,6 +340,7 @@ export default function BusinessProfileShellV2({
           businessSlug={profile.slug || ''}
           businessName={profile.name || 'Negocio'}
           engaged={engaged}
+          hideForEditor={canManageProfile}
           onDiscoveryClick={() => track('discovery_cta_click')}
         />
       )}
