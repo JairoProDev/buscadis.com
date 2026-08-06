@@ -25,8 +25,9 @@ import {
   type VisitorSortOption,
 } from '@/lib/catalog/sort-products';
 import { getCategoryIconDataUrl } from '@/lib/catalog/category-icons';
-import { listBusinessCategories, type BusinessCategory } from '@/lib/catalog/categories';
+import { listBusinessCategories, reorderBusinessCategories, type BusinessCategory } from '@/lib/catalog/categories';
 import CategoryManagerModal from '@/components/business/editor/CategoryManagerModal';
+import SortableCategoryStrip from '@/components/catalog/SortableCategoryStrip';
 import { useToast } from '@/hooks/useToast';
 
 function enrichAdisosForSort(
@@ -719,6 +720,41 @@ export default function BusinessCatalogTab({
 
                         {/* Categories — IG highlights style (squircle) */}
                         {(categories.length > 0 || showEditControls) && (
+                            showEditControls ? (
+                                <div className="space-y-2">
+                                    <SortableCategoryStrip
+                                        categories={categories}
+                                        selectedCategory={selectedCategory}
+                                        thumbs={categoryThumbs}
+                                        reorderableNames={storedCategories.map((c) => c.name)}
+                                        onSelect={setSelectedCategory}
+                                        onReorder={async (orderedNames) => {
+                                            // Rebuild full order: keep Clasificados first if present, then dragged names, then any leftover
+                                            const nameToId = new Map(storedCategories.map((c) => [c.name, c.id]));
+                                            const ids = orderedNames
+                                                .map((n) => nameToId.get(n))
+                                                .filter(Boolean) as string[];
+                                            if (ids.length === 0) return;
+                                            setStoredCategories((prev) => {
+                                                const byId = new Map(prev.map((c) => [c.id, c]));
+                                                return ids
+                                                    .map((id, i) => {
+                                                        const row = byId.get(id);
+                                                        return row ? { ...row, sort_order: i } : null;
+                                                    })
+                                                    .filter(Boolean) as BusinessCategory[];
+                                            });
+                                            const ok = await reorderBusinessCategories(ids);
+                                            if (!ok) toastError('No se pudo guardar el orden de categorías');
+                                            else toastSuccess('Orden de categorías actualizado');
+                                        }}
+                                        onEditClick={() => setCategoryManagerOpen(true)}
+                                    />
+                                    <p className="text-[11px] text-slate-400">
+                                        Arrastra las categorías para reordenar · toca Editar para renombrar o cambiar foto
+                                    </p>
+                                </div>
+                            ) : (
                             <div className="overflow-x-auto pb-1 -mx-4 px-4 md:mx-0 md:px-0 no-scrollbar">
                                 <div className="flex gap-4 snap-x snap-mandatory items-start">
                                     <button
@@ -782,23 +818,9 @@ export default function BusinessCatalogTab({
                                             </button>
                                         );
                                     })}
-                                    {showEditControls && (
-                                        <button
-                                            type="button"
-                                            onClick={() => setCategoryManagerOpen(true)}
-                                            className="flex flex-col items-center gap-1.5 shrink-0 snap-start"
-                                            title="Gestionar categorías"
-                                        >
-                                            <div className="w-[4.25rem] h-[4.25rem] rounded-[26%] border-2 border-dashed border-[var(--brand-color)]/40 flex items-center justify-center text-[var(--brand-color)] bg-[var(--brand-color)]/5">
-                                                <IconEdit size={22} />
-                                            </div>
-                                            <span className="text-[11px] font-medium truncate max-w-[4.5rem] text-center leading-tight text-[var(--brand-color)]">
-                                                Editar
-                                            </span>
-                                        </button>
-                                    )}
                                 </div>
                             </div>
+                            )
                         )}
                         {showEditControls && (searchQuery || selectedCategory) && (
                             <p className="text-xs text-amber-700 bg-amber-50 border border-amber-100 rounded-xl px-3 py-2">

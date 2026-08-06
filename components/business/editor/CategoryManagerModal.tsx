@@ -29,7 +29,7 @@ import {
   deleteBusinessCategory,
   reorderBusinessCategories,
 } from '@/lib/catalog/categories';
-import { IconCamera, IconCheck, IconStore, IconTrash, IconX } from '@/components/Icons';
+import { IconCamera, IconStore, IconTrash, IconX } from '@/components/Icons';
 import { cn } from '@/lib/utils';
 
 interface CategoryManagerModalProps {
@@ -38,6 +38,22 @@ interface CategoryManagerModalProps {
   autoThumbs: Map<string, string>;
   onClose: () => void;
   onChanged: () => void;
+}
+
+function asTempCategory(
+  businessProfileId: string,
+  name: string,
+  sortOrder: number,
+  imageUrl?: string | null
+): BusinessCategory {
+  return {
+    id: `temp:${name}`,
+    business_profile_id: businessProfileId,
+    name,
+    slug: name,
+    image_url: imageUrl || null,
+    sort_order: sortOrder,
+  };
 }
 
 export default function CategoryManagerModal({
@@ -53,6 +69,7 @@ export default function CategoryManagerModal({
   const [loading, setLoading] = useState(true);
   const [newName, setNewName] = useState('');
   const [busy, setBusy] = useState(false);
+  const [syncError, setSyncError] = useState<string | null>(null);
   const dirtyRef = useRef(false);
 
   const sensors = useSensors(
@@ -60,50 +77,108 @@ export default function CategoryManagerModal({
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
   );
 
-  // Materialize product-derived categories, then load the stored list.
+  // Materialize product-derived categories into business_categories, then load.
   useEffect(() => {
     let cancelled = false;
     (async () => {
       setLoading(true);
+      setSyncError(null);
+
+      // Show product categories immediately so the modal never looks empty
+      // while we sync to the DB (or if the write is denied by RLS).
+      const preview = productCategories
+        .filter((n) => n && n !== 'Clasificados')
+        .map((name, i) => asTempCategory(businessProfileId, name, i, autoThumbs.get(name)));
+      if (!cancelled && preview.length > 0) {
+        setItems(preview);
+      }
+
       const existing = await listBusinessCategories(businessProfileId);
-      const existingNames = new Set(existing.map((c) => c.name));
-      const missing = productCategories.filter((n) => n && !existingNames.has(n));
+      const existingNames = new Set(existing.map((c) => c.name.toLowerCase()));
+      const missing = productCategories.filter(
+        (n) => n && n !== 'Clasificados' && !existingNames.has(n.toLowerCase())
+      );
+
+      let createdCount = 0;
+      let failedCount = 0;
       if (missing.length > 0) {
         let order = existing.length;
         for (const name of missing) {
-          await createBusinessCategory(businessProfileId, {
+          const created = await createBusinessCategory(businessProfileId, {
             name,
             imageUrl: autoThumbs.get(name) || null,
             sortOrder: order++,
           });
+          if (created) {
+            createdCount += 1;
+            dirtyRef.current = true;
+          } else {
+            failedCount += 1;
+          }
         }
-        dirtyRef.current = true;
       }
+
       const fresh = await listBusinessCategories(businessProfileId);
-      if (!cancelled) {
+      if (cancelled) return;
+
+      if (fresh.length > 0) {
         setItems(fresh);
-        setLoading(false);
+      } else if (preview.length > 0) {
+        // DB still empty (likely RLS) — keep the product-derived preview
+        setItems(preview);
+        setSyncError(
+          'No se pudieron guardar las categorías en el servidor. Puedes verlas aquí, pero el orden/fotos no se persistirán hasta que se corrijan los permisos.'
+        );
+      } else {
+        setItems([]);
       }
+
+      if (failedCount > 0 && createdCount === 0 && fresh.length === 0) {
+        toastError('No tienes permiso para guardar categorías en este negocio.');
+      }
+
+      setLoading(false);
     })();
     return () => {
       cancelled = true;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [businessProfileId]);
+  }, [businessProfileId, productCategories.join('|')]);
 
   const handleClose = () => {
     if (dirtyRef.current) onChanged();
     onClose();
   };
 
+  const ensurePersisted = async (cat: BusinessCategory): Promise<BusinessCategory | null> => {
+    if (!cat.id.startsWith('temp:')) return cat;
+    const created = await createBusinessCategory(businessProfileId, {
+      name: cat.name,
+      imageUrl: cat.image_url || autoThumbs.get(cat.name) || null,
+      sortOrder: cat.sort_order,
+    });
+    if (!created) {
+      toastError('No se pudo guardar la categoría. Revisa tus permisos.');
+      return null;
+    }
+    dirtyRef.current = true;
+    setItems((prev) => prev.map((c) => (c.id === cat.id ? created : c)));
+    return created;
+  };
+
   const handleRename = async (cat: BusinessCategory, name: string) => {
     const trimmed = name.trim();
     if (!trimmed || trimmed === cat.name) return;
     setBusy(true);
-    const updated = await updateBusinessCategory(cat, { name: trimmed });
+    const persisted = await ensurePersisted(cat);
+    if (!persisted) {
+      setBusy(false);
+      return;
+    }
+    const updated = await updateBusinessCategory(persisted, { name: trimmed });
     setBusy(false);
     if (updated) {
-      setItems((prev) => prev.map((c) => (c.id === cat.id ? updated : c)));
+      setItems((prev) => prev.map((c) => (c.id === persisted.id || c.id === cat.id ? updated : c)));
       dirtyRef.current = true;
     } else {
       toastError('No se pudo renombrar la categoría');
@@ -114,10 +189,12 @@ export default function CategoryManagerModal({
     if (!user?.id) return;
     setBusy(true);
     try {
+      const persisted = await ensurePersisted(cat);
+      if (!persisted) return;
       const url = await uploadProductImage(file, user.id);
-      const updated = await updateBusinessCategory(cat, { imageUrl: url });
+      const updated = await updateBusinessCategory(persisted, { imageUrl: url });
       if (updated) {
-        setItems((prev) => prev.map((c) => (c.id === cat.id ? updated : c)));
+        setItems((prev) => prev.map((c) => (c.id === persisted.id || c.id === cat.id ? updated : c)));
         dirtyRef.current = true;
       }
     } catch (e) {
@@ -130,6 +207,11 @@ export default function CategoryManagerModal({
 
   const handleDelete = async (cat: BusinessCategory) => {
     setBusy(true);
+    if (cat.id.startsWith('temp:')) {
+      setItems((prev) => prev.filter((c) => c.id !== cat.id));
+      setBusy(false);
+      return;
+    }
     const ok = await deleteBusinessCategory(cat.id);
     setBusy(false);
     if (ok) {
@@ -158,6 +240,7 @@ export default function CategoryManagerModal({
       setNewName('');
       dirtyRef.current = true;
       toastSuccess('Categoría agregada');
+      setSyncError(null);
     } else {
       toastError('No se pudo agregar la categoría');
     }
@@ -170,10 +253,32 @@ export default function CategoryManagerModal({
     const oldIndex = ids.indexOf(String(active.id));
     const newIndex = ids.indexOf(String(over.id));
     if (oldIndex < 0 || newIndex < 0) return;
-    const next = arrayMove(items, oldIndex, newIndex);
+    const next = arrayMove(items, oldIndex, newIndex).map((c, i) => ({ ...c, sort_order: i }));
     setItems(next);
     dirtyRef.current = true;
-    await reorderBusinessCategories(next.map((c) => c.id));
+
+    // Persist only real rows; materialize temps first if needed.
+    const persisted: BusinessCategory[] = [];
+    for (const cat of next) {
+      if (cat.id.startsWith('temp:')) {
+        const created = await createBusinessCategory(businessProfileId, {
+          name: cat.name,
+          imageUrl: cat.image_url || autoThumbs.get(cat.name) || null,
+          sortOrder: cat.sort_order,
+        });
+        if (created) persisted.push(created);
+        else {
+          toastError('No se pudo guardar el nuevo orden (permisos).');
+          return;
+        }
+      } else {
+        persisted.push(cat);
+      }
+    }
+    setItems(persisted);
+    const ok = await reorderBusinessCategories(persisted.map((c) => c.id));
+    if (!ok) toastError('No se pudo guardar el orden de categorías');
+    else setSyncError(null);
   };
 
   return (
@@ -187,9 +292,14 @@ export default function CategoryManagerModal({
         onClick={(e) => e.stopPropagation()}
       >
         <div className="p-5 flex items-center justify-between border-b border-slate-100">
-          <h3 className="font-bold text-lg text-slate-800 flex items-center gap-2">
-            <IconStore size={18} className="text-[var(--brand-color)]" /> Categorías
-          </h3>
+          <div>
+            <h3 className="font-bold text-lg text-slate-800 flex items-center gap-2 m-0">
+              <IconStore size={18} className="text-[var(--brand-color)]" /> Categorías
+            </h3>
+            <p className="text-xs text-slate-400 mt-1 m-0">
+              Arrastra ⠿ para cambiar el orden que ven tus clientes.
+            </p>
+          </div>
           <button
             type="button"
             onClick={handleClose}
@@ -201,7 +311,12 @@ export default function CategoryManagerModal({
         </div>
 
         <div className="p-4 overflow-y-auto flex-1">
-          {loading ? (
+          {syncError && (
+            <p className="mb-3 rounded-xl bg-amber-50 border border-amber-100 px-3 py-2 text-xs text-amber-800">
+              {syncError}
+            </p>
+          )}
+          {loading && items.length === 0 ? (
             <div className="py-10 flex justify-center">
               <div className="w-6 h-6 border-2 border-slate-200 border-t-[var(--brand-color)] rounded-full animate-spin" />
             </div>
@@ -298,7 +413,8 @@ function CategoryRow({
       <button
         type="button"
         className="shrink-0 w-7 h-7 rounded-lg flex items-center justify-center text-slate-400 cursor-grab active:cursor-grabbing touch-none"
-        aria-label="Arrastrar"
+        aria-label="Arrastrar para reordenar"
+        title="Arrastrar"
         {...attributes}
         {...listeners}
       >
