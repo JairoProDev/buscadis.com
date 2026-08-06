@@ -214,7 +214,10 @@ export default function ContentHubFields({
                     disabled={deletingId === p.id}
                     onClick={async () => {
                       setDeletingId(p.id);
-                      await deleteCatalogProduct(p.id);
+                      const ok = await deleteCatalogProduct(p.id);
+                      if (!ok) {
+                        alert('No se pudo eliminar el producto. Revisa tus permisos e inténtalo de nuevo.');
+                      }
                       onRefreshCatalog?.();
                       setDeletingId(null);
                     }}
