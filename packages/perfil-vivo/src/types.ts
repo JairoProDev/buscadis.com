@@ -34,11 +34,85 @@ export type TipoModulo =
   | 'documentos'
   | 'ia';
 
+export type DiaSemana = 'lun' | 'mar' | 'mie' | 'jue' | 'vie' | 'sab' | 'dom';
+
+export type MetodoPago =
+  | 'efectivo'
+  | 'yape'
+  | 'plin'
+  | 'visa'
+  | 'mastercard'
+  | 'amex'
+  | 'transferencia'
+  | 'credito'
+  | 'cripto';
+
+export type EtiquetaProducto = 'nuevo' | 'mas_vendido' | 'oferta' | 'popular';
+
 export interface ConfigModulo {
   tipo: TipoModulo;
   visible: boolean;
   orden: number;
   titulo?: string;
+}
+
+export interface Franja {
+  desde: string;
+  hasta: string;
+}
+
+export interface Horario {
+  zona: 'America/Lima';
+  semana: Record<DiaSemana, Franja[]>;
+  excepciones?: { fecha: string; franjas: Franja[]; motivo?: string }[];
+}
+
+export interface ImagenProducto {
+  url: string;
+  ancho: number;
+  alto: number;
+  lqip?: string;
+  alt?: string;
+}
+
+export interface Producto {
+  id: string;
+  negocioId: string;
+  nombre: string;
+  descripcion?: string;
+  precio?: {
+    valor: number;
+    moneda: 'PEN' | 'USD';
+    tipo: 'exacto' | 'desde' | 'rango';
+    valorMax?: number;
+  };
+  precioAnterior?: number;
+  imagenes: ImagenProducto[];
+  disponibilidad: 'disponible' | 'agotado' | 'bajo_pedido' | 'ultimas_unidades';
+  destacado: boolean;
+  etiquetas: EtiquetaProducto[];
+  activo: boolean;
+}
+
+export interface MetricasVerificadas {
+  calificacion?: {
+    promedio: number;
+    total: number;
+    distribucion?: Partial<Record<1 | 2 | 3 | 4 | 5, number>>;
+  };
+  respuestaMedianaMin?: number;
+  contactos30d?: number;
+  antiguedadDesde: string;
+}
+
+export interface EstadoVivo {
+  abierto: boolean;
+  cierraEn?: string;
+  abreEn?: string;
+  porCerrar: boolean;
+  deliveryActivo?: boolean;
+  mensaje: string;
+  respuestaMedianaMin?: number;
 }
 
 export interface Negocio {
@@ -74,10 +148,11 @@ export interface Negocio {
     mostrarDireccionExacta: boolean;
     referencia?: string;
   };
+  horario?: Horario;
+  metodosPago?: MetodoPago[];
   verificacion: { nivel: NivelVerificacion; fecha?: string };
   metricasDeclaradas: { icono: string; valor: string; etiqueta: string }[];
   modulos: ConfigModulo[];
-  /** Conteos usados para filtrar módulos (Sprint 0: catalogo minDatos). */
   conteos?: {
     productos?: number;
     resenas?: number;
@@ -85,6 +160,28 @@ export interface Negocio {
   };
   creadoEn: string;
   actualizadoEn: string;
+}
+
+/** Payload de render del Perfil Vivo (un request = todo el HTML inicial). */
+export interface PerfilPayload {
+  negocio: Negocio;
+  productos: Producto[];
+  metricas?: MetricasVerificadas;
+  estadoVivo: EstadoVivo;
+  totalProductos: number;
+}
+
+export type CanalHandoff = 'whatsapp' | 'llamada' | 'ruta' | 'web';
+
+export interface HandoffPayload {
+  negocioId: string;
+  slug: string;
+  canal: CanalHandoff;
+  modulo: string;
+  productoId?: string;
+  mensaje?: string;
+  destino: string;
+  ts: number;
 }
 
 export type TemaModo = 'light' | 'dark';

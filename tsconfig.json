@@ -41,6 +41,9 @@
       "@buscadis/perfil-vivo": [
         "./packages/perfil-vivo/src/index.ts"
       ],
+      "@buscadis/perfil-vivo/server": [
+        "./packages/perfil-vivo/src/server.ts"
+      ],
       "@buscadis/perfil-vivo/chrome.css": [
         "./packages/perfil-vivo/src/tema/chrome.css"
       ]

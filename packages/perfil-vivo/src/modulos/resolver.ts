@@ -13,10 +13,14 @@ function datosDisponibles(negocio: Negocio, tipo: TipoModulo): number {
   const meta = MODULO_META[tipo];
   if (!meta.conteoKey) {
     if (tipo === 'ubicacion') return negocio.ubicacion ? 1 : 0;
+    if (tipo === 'horario') return negocio.horario ? 1 : 0;
+    if (tipo === 'pago') return negocio.metodosPago?.length ?? 0;
     if (tipo === 'canales') {
       const c = negocio.contacto;
-      return [c.whatsapp, c.telefono, c.email, c.web].filter(Boolean).length +
-        c.redes.filter((r) => r.activa).length;
+      return (
+        [c.whatsapp, c.telefono, c.email, c.web].filter(Boolean).length +
+        c.redes.filter((r) => r.activa).length
+      );
     }
     return 1;
   }
@@ -40,6 +44,9 @@ export function resolverModulos(negocio: Negocio): ModuloResuelto[] {
   for (const tipo of baseOrder) {
     const cfg = byTipo.get(tipo);
     if (!cfg || !cfg.visible) continue;
+
+    // Ubicación + horario se renderizan juntos en el módulo ubicacion
+    if (tipo === 'horario' && byTipo.get('ubicacion')?.visible) continue;
 
     const meta = MODULO_META[tipo];
     if (!planSuficiente(negocio.plan, meta.planMin)) continue;

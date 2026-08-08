@@ -161,3 +161,25 @@
   opacity: 0.55;
   cursor: not-allowed;
 }
+
+@keyframes pv-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.25);
+    opacity: 0.75;
+  }
+}
+
+.pv-estado-dot--on {
+  animation: pv-pulse 2s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pv-estado-dot--on {
+    animation: none;
+  }
+}

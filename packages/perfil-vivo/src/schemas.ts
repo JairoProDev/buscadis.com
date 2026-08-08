@@ -92,6 +92,38 @@ export const NegocioSchema = z.object({
       referencia: z.string().optional(),
     })
     .optional(),
+  horario: z
+    .object({
+      zona: z.literal('America/Lima'),
+      semana: z.record(
+        z.array(z.object({ desde: z.string(), hasta: z.string() }))
+      ),
+      excepciones: z
+        .array(
+          z.object({
+            fecha: z.string(),
+            franjas: z.array(z.object({ desde: z.string(), hasta: z.string() })),
+            motivo: z.string().optional(),
+          })
+        )
+        .optional(),
+    })
+    .optional(),
+  metodosPago: z
+    .array(
+      z.enum([
+        'efectivo',
+        'yape',
+        'plin',
+        'visa',
+        'mastercard',
+        'amex',
+        'transferencia',
+        'credito',
+        'cripto',
+      ])
+    )
+    .optional(),
   verificacion: z.object({
     nivel: z.union([z.literal(0), z.literal(1), z.literal(2), z.literal(3)]),
     fecha: z.string().optional(),

@@ -1,20 +1,34 @@
+'use client';
+
 import type { CSSProperties } from 'react';
-import type { Negocio } from '../types';
+import type { PerfilPayload } from '../types';
 import { derivarTema, temaToStyle } from '../tema/derivar-tema';
+import { PerfilProvider, type HandoffLinks } from './PerfilContext';
 import { RenderizadorModulos } from './RenderizadorModulos';
+import { BarraAccion } from './BarraAccion';
 
 function modoFromIdentidad(
-  tema: Negocio['identidad']['tema']
+  tema: PerfilPayload['negocio']['identidad']['tema']
 ): 'light' | 'dark' {
   if (tema === 'oscuro') return 'dark';
   return 'light';
 }
 
-export function PerfilVivoRoot({ negocio }: { negocio: Negocio }) {
+export function PerfilVivoRoot({
+  payload,
+  handoffs,
+}: {
+  payload: PerfilPayload;
+  handoffs: HandoffLinks;
+}) {
+  const { negocio } = payload;
   const modo = modoFromIdentidad(negocio.identidad.tema);
   const vars = derivarTema(negocio.identidad.colorSemilla, modo);
   const style = temaToStyle(vars) as CSSProperties;
-  const hasWa = Boolean(negocio.contacto.whatsapp);
+
+  const primaryLabel = payload.estadoVivo.abierto
+    ? 'Escribir por WhatsApp'
+    : 'Escribir (responden al abrir)';
 
   return (
     <div
@@ -23,16 +37,10 @@ export function PerfilVivoRoot({ negocio }: { negocio: Negocio }) {
       data-arquetipo={negocio.arquetipo}
       style={style}
     >
-      <RenderizadorModulos negocio={negocio} />
-      <div className="pv-barra-accion">
-        <button
-          type="button"
-          className="pv-barra-accion__primary"
-          disabled={!hasWa}
-        >
-          Escribir por WhatsApp
-        </button>
-      </div>
+      <PerfilProvider value={{ payload, handoffs }}>
+        <RenderizadorModulos />
+        <BarraAccion label={primaryLabel} />
+      </PerfilProvider>
     </div>
   );
 }

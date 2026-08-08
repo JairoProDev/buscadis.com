@@ -7,6 +7,14 @@ export type {
   Negocio,
   TemaModo,
   TemaMarcaVars,
+  Producto,
+  Horario,
+  EstadoVivo,
+  MetricasVerificadas,
+  MetodoPago,
+  PerfilPayload,
+  HandoffPayload,
+  CanalHandoff,
 } from './types';
 
 export {
@@ -27,6 +35,6 @@ export { resolverModulos } from './modulos/resolver';
 export type { ModuloResuelto } from './modulos/resolver';
 export { RenderizadorModulos } from './modulos/RenderizadorModulos';
 export { PerfilVivoRoot } from './modulos/PerfilVivoRoot';
+export type { HandoffLinks } from './modulos/PerfilContext';
 
-export { DEMO_RETAIL_NEGOCIO } from './fixtures/demo-retail';
-export { negocioFromBusinessProfile } from './bridge/from-business-profile';
+export { calcularEstadoVivo, formatPrecio } from './estado/calcular-estado';

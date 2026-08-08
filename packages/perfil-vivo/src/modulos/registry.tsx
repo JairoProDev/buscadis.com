@@ -1,22 +1,32 @@
+'use client';
+
 import type { ComponentType } from 'react';
 import type { Negocio, TipoModulo } from '../types';
 import type { ModuloResuelto } from './resolver';
 import { AccionesShell } from './shells/AccionesShell';
+import { CanalesShell } from './shells/CanalesShell';
 import { CatalogoShell } from './shells/CatalogoShell';
 import { EstadoShell } from './shells/EstadoShell';
 import { HeroShell } from './shells/HeroShell';
 import { MetricasShell } from './shells/MetricasShell';
+import { PagoShell } from './shells/PagoShell';
+import { UbicacionHorarioShell } from './shells/UbicacionHorarioShell';
 
-type ShellProps = { negocio: Negocio; modulo: ModuloResuelto };
+export type ShellProps = {
+  negocio: Negocio;
+  modulo: ModuloResuelto;
+};
 
-const REGISTRY: Partial<
-  Record<TipoModulo, ComponentType<ShellProps>>
-> = {
+const REGISTRY: Partial<Record<TipoModulo, ComponentType<ShellProps>>> = {
   hero: ({ negocio }) => <HeroShell negocio={negocio} />,
-  metricas: ({ negocio }) => <MetricasShell negocio={negocio} />,
+  metricas: () => <MetricasShell />,
   estado: () => <EstadoShell />,
-  acciones: ({ negocio }) => <AccionesShell negocio={negocio} />,
+  acciones: () => <AccionesShell />,
   catalogo: ({ modulo }) => <CatalogoShell titulo={modulo.titulo} />,
+  ubicacion: () => <UbicacionHorarioShell />,
+  horario: () => <UbicacionHorarioShell />,
+  pago: () => <PagoShell />,
+  canales: () => <CanalesShell />,
 };
 
 export function getModuloComponent(tipo: TipoModulo) {
