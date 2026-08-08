@@ -1,12 +1,15 @@
 'use client';
 
-import type { CSSProperties } from 'react';
+import { lazy, Suspense, type CSSProperties } from 'react';
 import type { PerfilPayload } from '../types';
 import { derivarTema, temaToStyle } from '../tema/derivar-tema';
 import { PerfilProvider, type HandoffLinks } from './PerfilContext';
 import { RenderizadorModulos } from './RenderizadorModulos';
 import { BarraAccion } from './BarraAccion';
-import { BarraSecciones } from './BarraSecciones';
+
+const BarraSecciones = lazy(() =>
+  import('./BarraSecciones').then((m) => ({ default: m.BarraSecciones }))
+);
 
 function modoFromIdentidad(
   tema: PerfilPayload['negocio']['identidad']['tema']
@@ -48,7 +51,9 @@ export function PerfilVivoRoot({
       style={style}
     >
       <PerfilProvider value={{ payload, handoffs }}>
-        <BarraSecciones />
+        <Suspense fallback={null}>
+          <BarraSecciones />
+        </Suspense>
         <RenderizadorModulos />
         <BarraAccion label={primaryLabel} />
       </PerfilProvider>

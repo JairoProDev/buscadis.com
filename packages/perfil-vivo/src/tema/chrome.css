@@ -32,10 +32,10 @@
   --bs-sol: #ffc300;
   --bs-ink: #131218;
 
-  /* Tipografía (fallbacks hasta self-host en P02) */
-  --ff-display: 'Bricolage Grotesque', ui-sans-serif, system-ui, sans-serif;
-  --ff-ui: 'Geist Sans', ui-sans-serif, system-ui, -apple-system, sans-serif;
-  --ff-data: 'Geist Mono', ui-monospace, 'SF Mono', monospace;
+  /* Tipografía: system-first (LCP). Webfonts opcionales vía .pv-fonts-loaded */
+  --ff-display: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --ff-ui: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --ff-data: ui-monospace, 'SF Mono', 'Cascadia Mono', Menlo, monospace;
 
   --ts-nombre: 700 26px/30px var(--ff-display);
   --ts-modulo: 600 17px/22px var(--ff-display);
@@ -124,8 +124,12 @@
 }
 
 .pv-modulo {
+  /* reserved — hero/above-fold no defer */
+}
+
+.pv-modulo--defer {
   content-visibility: auto;
-  contain-intrinsic-size: auto 120px;
+  contain-intrinsic-size: auto 160px;
 }
 
 .pv-barra-accion {

@@ -42,15 +42,31 @@ export function HeroShell({ negocio }: { negocio: Negocio }) {
         <div
           style={{
             height: 150,
-            background: portada
-              ? `center/cover url(${portada})`
-              : 'var(--mk-suave)',
+            background: portada ? undefined : 'var(--mk-suave)',
             backgroundImage: portada
               ? undefined
               : 'radial-gradient(circle at 20% 30%, rgba(19,18,24,.06), transparent 50%)',
             position: 'relative',
+            overflow: 'hidden',
           }}
         >
+          {portada ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={portada}
+              alt=""
+              width={480}
+              height={150}
+              fetchPriority="high"
+              decoding="async"
+              style={{
+                width: '100%',
+                height: 150,
+                objectFit: 'cover',
+                display: 'block',
+              }}
+            />
+          ) : null}
           <div
             aria-hidden
             style={{
@@ -76,18 +92,30 @@ export function HeroShell({ negocio }: { negocio: Negocio }) {
               height: 64,
               borderRadius: 'var(--rd-lg)',
               border: '2px solid var(--sf-elev)',
-              background: negocio.identidad.logoUrl
-                ? `center/cover url(${negocio.identidad.logoUrl})`
-                : 'var(--mk-accion)',
+              background: negocio.identidad.logoUrl ? undefined : 'var(--mk-accion)',
               color: 'var(--mk-sobre)',
               display: 'grid',
               placeItems: 'center',
               font: '700 22px/1 var(--ff-display)',
               flexShrink: 0,
+              overflow: 'hidden',
             }}
             aria-hidden
           >
-            {!negocio.identidad.logoUrl ? iniciales(negocio.nombre) : null}
+            {negocio.identidad.logoUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={negocio.identidad.logoUrl}
+                alt=""
+                width={64}
+                height={64}
+                fetchPriority="high"
+                decoding="async"
+                style={{ width: 64, height: 64, objectFit: 'cover' }}
+              />
+            ) : (
+              iniciales(negocio.nombre)
+            )}
           </div>
           <div style={{ paddingBottom: 8, minWidth: 0 }}>
             <h1
