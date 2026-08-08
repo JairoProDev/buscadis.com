@@ -15,6 +15,7 @@ export type {
   PerfilPayload,
   HandoffPayload,
   CanalHandoff,
+  Resena,
 } from './types';
 
 export {

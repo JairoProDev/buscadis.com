@@ -10,6 +10,11 @@ import type {
 import { safeParseNegocio } from '../schemas';
 import { calcularEstadoVivo } from '../estado/calcular-estado';
 import { negocioFromBusinessProfile } from './from-business-profile';
+import {
+  distribuirEstrellas,
+  promedioEstrellas,
+  resenaFromDbRow,
+} from '../resenas/helpers';
 
 const DAY_MAP: Record<string, DiaSemana> = {
   lun: 'lun',
@@ -198,10 +203,11 @@ const DEFAULT_MODULOS_RETAIL: Negocio['modulos'] = [
   { tipo: 'estado', visible: true, orden: 2 },
   { tipo: 'acciones', visible: true, orden: 3 },
   { tipo: 'catalogo', visible: true, orden: 4 },
-  { tipo: 'ubicacion', visible: true, orden: 5 },
-  { tipo: 'horario', visible: true, orden: 6 },
-  { tipo: 'pago', visible: true, orden: 7 },
-  { tipo: 'canales', visible: true, orden: 8 },
+  { tipo: 'resenas', visible: true, orden: 5 },
+  { tipo: 'ubicacion', visible: true, orden: 6 },
+  { tipo: 'horario', visible: true, orden: 7 },
+  { tipo: 'pago', visible: true, orden: 8 },
+  { tipo: 'canales', visible: true, orden: 9 },
 ];
 
 /**
@@ -210,7 +216,8 @@ const DEFAULT_MODULOS_RETAIL: Negocio['modulos'] = [
 export function enrichNegocioFromProfile(
   base: Negocio,
   row: Record<string, unknown>,
-  productCount: number
+  productCount: number,
+  reviewCount = 0
 ): Negocio {
   const horario = horarioFromBusinessHours(row.business_hours);
   const redes = redesFromProfile(row);
@@ -228,7 +235,7 @@ export function enrichNegocioFromProfile(
     modulos: DEFAULT_MODULOS_RETAIL,
     conteos: {
       productos: productCount,
-      resenas: base.conteos?.resenas ?? 0,
+      resenas: reviewCount,
       fotosGaleria: base.conteos?.fotosGaleria ?? 0,
     },
   };
@@ -240,6 +247,7 @@ export function enrichNegocioFromProfile(
 export function buildPerfilPayloadFromSources(opts: {
   profileRow: unknown;
   catalogRows: unknown[];
+  reviewRows?: unknown[];
   now?: Date;
 }): PerfilPayload | null {
   const base = negocioFromBusinessProfile(opts.profileRow);
@@ -251,22 +259,37 @@ export function buildPerfilPayloadFromSources(opts: {
     .map((r) => productoFromCatalogRow(r, base.id))
     .filter((p): p is Producto => p != null);
 
-  // Featured first; if none featured, take first 12 published
   const featured = published.filter((p) => p.destacado);
   const pool = featured.length >= 3 ? featured : published;
   const productos = pool.slice(0, 12).map((p) => ({ ...p, destacado: true }));
 
+  const resenas = (opts.reviewRows || [])
+    .filter((r): r is Record<string, unknown> => !!r && typeof r === 'object')
+    .map((r) => resenaFromDbRow(r))
+    .filter((r): r is NonNullable<typeof r> => r != null);
+
   const negocio = enrichNegocioFromProfile(
     base,
     opts.profileRow as Record<string, unknown>,
-    published.length
+    published.length,
+    resenas.length
   );
+
+  const dist = distribuirEstrellas(resenas);
+  const promedio = promedioEstrellas(resenas);
 
   return {
     negocio,
     productos,
+    resenas,
     totalProductos: published.length,
-    metricas: { antiguedadDesde: negocio.creadoEn },
+    metricas: {
+      antiguedadDesde: negocio.creadoEn,
+      calificacion:
+        resenas.length > 0
+          ? { promedio, total: resenas.length, distribucion: dist }
+          : undefined,
+    },
     estadoVivo: calcularEstadoVivo(negocio.horario, opts.now ?? new Date()),
   };
 }

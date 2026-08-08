@@ -1,6 +1,7 @@
-import type { Negocio, PerfilPayload, Producto } from '../types';
+import type { Negocio, PerfilPayload, Producto, Resena } from '../types';
 import { parseNegocio } from '../schemas';
 import { calcularEstadoVivo } from '../estado/calcular-estado';
+import { distribuirEstrellas, promedioEstrellas } from '../resenas/helpers';
 
 const horario = {
   zona: 'America/Lima' as const,
@@ -68,12 +69,13 @@ const rawNegocio = {
     { tipo: 'estado' as const, visible: true, orden: 2 },
     { tipo: 'acciones' as const, visible: true, orden: 3 },
     { tipo: 'catalogo' as const, visible: true, orden: 4 },
-    { tipo: 'ubicacion' as const, visible: true, orden: 5 },
-    { tipo: 'horario' as const, visible: true, orden: 6 },
-    { tipo: 'pago' as const, visible: true, orden: 7 },
-    { tipo: 'canales' as const, visible: true, orden: 8 },
+    { tipo: 'resenas' as const, visible: true, orden: 5 },
+    { tipo: 'ubicacion' as const, visible: true, orden: 6 },
+    { tipo: 'horario' as const, visible: true, orden: 7 },
+    { tipo: 'pago' as const, visible: true, orden: 8 },
+    { tipo: 'canales' as const, visible: true, orden: 9 },
   ],
-  conteos: { productos: 4, resenas: 0, fotosGaleria: 0 },
+  conteos: { productos: 4, resenas: 4, fotosGaleria: 0 },
   creadoEn: '2026-07-01T12:00:00.000Z',
   actualizadoEn: '2026-08-08T12:00:00.000Z',
 };
@@ -164,16 +166,67 @@ export const DEMO_RETAIL_PRODUCTOS: Producto[] = [
   },
 ];
 
+export const DEMO_RETAIL_RESENAS: Resena[] = [
+  {
+    id: 'rev-1',
+    autor: { nombre: 'María Quispe', iniciales: 'MQ' },
+    estrellas: 5,
+    texto: 'Llegué por WhatsApp y en 10 minutos ya tenía el cemento listo para recoger. Precios claros.',
+    contactoVerificado: true,
+    creadaEn: '2026-07-28T15:00:00.000Z',
+    respuesta: {
+      texto: '¡Gracias María! Te esperamos cuando armes la losa.',
+      fecha: '2026-07-28T18:00:00.000Z',
+    },
+  },
+  {
+    id: 'rev-2',
+    autor: { nombre: 'José Huamán', iniciales: 'JH' },
+    estrellas: 4,
+    texto: 'Buen surtido de PVC. El taladro estaba un poco caro pero la atención compensó.',
+    contactoVerificado: true,
+    creadaEn: '2026-07-20T11:00:00.000Z',
+  },
+  {
+    id: 'rev-3',
+    autor: { nombre: 'Ana Torres', iniciales: 'AT' },
+    estrellas: 5,
+    texto: 'Me ayudaron a armar la lista completa para una remodelación chica. Recomendados.',
+    contactoVerificado: false,
+    creadaEn: '2026-07-10T09:30:00.000Z',
+  },
+  {
+    id: 'rev-4',
+    autor: { nombre: 'Luis Paredes', iniciales: 'LP' },
+    estrellas: 3,
+    texto: 'Faltaba una medida de tubo ese día, pero me avisaron por WhatsApp cuando llegó.',
+    contactoVerificado: true,
+    creadaEn: '2026-06-22T16:00:00.000Z',
+    respuesta: {
+      texto: 'Luis, gracias por la paciencia. Ya reforzamos stock de esa medida.',
+      fecha: '2026-06-23T10:00:00.000Z',
+    },
+  },
+];
+
 export function buildDemoRetailPayload(now: Date = new Date()): PerfilPayload {
   const negocio = DEMO_RETAIL_NEGOCIO;
+  const resenas = DEMO_RETAIL_RESENAS;
+  const promedio = promedioEstrellas(resenas);
   return {
     negocio,
     productos: DEMO_RETAIL_PRODUCTOS,
+    resenas,
     totalProductos: DEMO_RETAIL_PRODUCTOS.length,
     metricas: {
       antiguedadDesde: negocio.creadoEn,
       respuestaMedianaMin: 8,
       contactos30d: 47,
+      calificacion: {
+        promedio,
+        total: resenas.length,
+        distribucion: distribuirEstrellas(resenas),
+      },
     },
     estadoVivo: calcularEstadoVivo(negocio.horario, now, {
       respuestaMedianaMin: 8,

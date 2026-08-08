@@ -105,6 +105,17 @@ export default function EditorTopBar({
           )}
           <SaveBadge saving={saving} lastSavedTime={lastSavedTime} />
           <PreviewButton onClick={onPreview} />
+          {editableProfile.slug ? (
+            <a
+              href={`/v/${encodeURIComponent(editableProfile.slug)}`}
+              target="_blank"
+              rel="noreferrer"
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-lg bg-[#131218] text-white hover:opacity-90 transition-opacity shrink-0"
+              title="Abrir Perfil Vivo (preview)"
+            >
+              Perfil Vivo
+            </a>
+          ) : null}
           {businessOptions.length > 0 && businessId && (
             <EditorChromeMenu
               businesses={businessOptions}
@@ -120,6 +131,18 @@ export default function EditorTopBar({
         <div className="md:hidden flex items-center gap-1 shrink-0">
           {editCtx && <EditSurfaceToggle value={editCtx.editSurface} onChange={editCtx.setEditSurface} />}
           <PreviewButton onClick={onPreview} iconOnly />
+          {editableProfile.slug ? (
+            <a
+              href={`/v/${encodeURIComponent(editableProfile.slug)}`}
+              target="_blank"
+              rel="noreferrer"
+              className="flex items-center justify-center h-9 w-9 rounded-lg bg-[#131218] text-white text-[10px] font-bold shrink-0"
+              title="Perfil Vivo"
+              aria-label="Abrir Perfil Vivo"
+            >
+              PV
+            </a>
+          ) : null}
           {businessOptions.length > 0 && businessId && (
             <EditorChromeMenu
               businesses={businessOptions}

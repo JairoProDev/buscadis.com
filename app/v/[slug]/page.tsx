@@ -12,6 +12,7 @@ import {
   getBusinessProfileBySlug,
 } from '@/lib/business';
 import { normalizeBusinessSlug } from '@/lib/business/normalize-slug';
+import { supabaseAdmin } from '@/lib/supabase-admin';
 
 export const revalidate = 60;
 
@@ -20,7 +21,7 @@ type PageProps = {
 };
 
 function jsonLdForPayload(payload: PerfilPayload) {
-  const { negocio, productos } = payload;
+  const { negocio, productos, resenas, metricas } = payload;
   const u = negocio.ubicacion;
   return {
     '@context': 'https://schema.org',
@@ -50,6 +51,15 @@ function jsonLdForPayload(payload: PerfilPayload) {
               longitude: u.lng,
             }
           : undefined,
+        ...(metricas?.calificacion && metricas.calificacion.total > 0
+          ? {
+              aggregateRating: {
+                '@type': 'AggregateRating',
+                ratingValue: metricas.calificacion.promedio,
+                reviewCount: metricas.calificacion.total,
+              },
+            }
+          : {}),
       },
       ...productos.slice(0, 8).map((p) => ({
         '@type': 'Product',
@@ -68,8 +78,36 @@ function jsonLdForPayload(payload: PerfilPayload) {
             }
           : undefined,
       })),
+      ...resenas.slice(0, 5).map((r) => ({
+        '@type': 'Review',
+        reviewRating: {
+          '@type': 'Rating',
+          ratingValue: r.estrellas,
+        },
+        author: { '@type': 'Person', name: r.autor.nombre },
+        reviewBody: r.texto,
+        datePublished: r.creadaEn,
+      })),
     ],
   };
+}
+
+async function fetchReviewRows(businessProfileId: string) {
+  if (!supabaseAdmin) return [];
+  const { data, error } = await supabaseAdmin
+    .from('business_reviews')
+    .select(
+      'id, rating, text, comment, verified_purchase, is_verified, created_at, customer_name'
+    )
+    .eq('business_profile_id', businessProfileId)
+    .or('is_visible.is.null,is_visible.eq.true')
+    .order('created_at', { ascending: false })
+    .limit(40);
+  if (error) {
+    console.error('[perfil-vivo] reviews', error.message);
+    return [];
+  }
+  return data || [];
 }
 
 async function payloadForSlug(slug: string): Promise<PerfilPayload | null> {
@@ -78,10 +116,15 @@ async function payloadForSlug(slug: string): Promise<PerfilPayload | null> {
   const profile = await getBusinessProfileBySlug(slug);
   if (!profile) return null;
 
-  const catalog = await getBusinessCatalog(profile.id);
+  const [catalog, reviews] = await Promise.all([
+    getBusinessCatalog(profile.id),
+    fetchReviewRows(profile.id),
+  ]);
+
   return buildPerfilPayloadFromSources({
     profileRow: profile,
     catalogRows: catalog,
+    reviewRows: reviews,
   });
 }
 

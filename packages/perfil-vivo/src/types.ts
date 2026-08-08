@@ -115,6 +115,16 @@ export interface EstadoVivo {
   respuestaMedianaMin?: number;
 }
 
+export interface Resena {
+  id: string;
+  autor: { nombre: string; iniciales: string };
+  estrellas: 1 | 2 | 3 | 4 | 5;
+  texto?: string;
+  contactoVerificado: boolean;
+  respuesta?: { texto: string; fecha: string };
+  creadaEn: string;
+}
+
 export interface Negocio {
   id: string;
   slug: string;
@@ -166,6 +176,7 @@ export interface Negocio {
 export interface PerfilPayload {
   negocio: Negocio;
   productos: Producto[];
+  resenas: Resena[];
   metricas?: MetricasVerificadas;
   estadoVivo: EstadoVivo;
   totalProductos: number;
