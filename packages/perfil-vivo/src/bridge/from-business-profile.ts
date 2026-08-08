@@ -1,8 +1,13 @@
 import type { Negocio } from '../types';
 import { safeParseNegocio } from '../schemas';
+import {
+  knownBusinessOverride,
+  normalizeWhatsappPe,
+  ubicacionFromAddress,
+} from './known-businesses';
 
 /**
- * Adaptador mínimo BusinessProfile → Negocio (Sprint 0).
+ * Adaptador BusinessProfile → Negocio.
  * Devuelve null si faltan campos esenciales; no lanza.
  */
 export function negocioFromBusinessProfile(row: unknown): Negocio | null {
@@ -12,6 +17,8 @@ export function negocioFromBusinessProfile(row: unknown): Negocio | null {
   const slug = typeof p.slug === 'string' ? p.slug : null;
   const name = typeof p.name === 'string' ? p.name : null;
   if (!slug || !name) return null;
+
+  const known = knownBusinessOverride(slug);
 
   const themeColor =
     typeof p.theme_color === 'string' && /^#[0-9A-Fa-f]{6}$/.test(p.theme_color)
@@ -34,14 +41,30 @@ export function negocioFromBusinessProfile(row: unknown): Negocio | null {
   else if (p.is_verified === true) nivel = 1;
 
   const address = typeof p.contact_address === 'string' ? p.contact_address : '';
+  const ubicacion = known?.ubicacion
+    ? known.ubicacion
+    : address
+      ? ubicacionFromAddress(address)
+      : undefined;
+
+  const eslogan =
+    known?.eslogan ||
+    (typeof p.tagline === 'string' ? p.tagline.slice(0, 90) : undefined);
+
+  const wa = normalizeWhatsappPe(
+    typeof p.contact_whatsapp === 'string' ? p.contact_whatsapp : undefined
+  );
+  const phone = normalizeWhatsappPe(
+    typeof p.contact_phone === 'string' ? p.contact_phone : undefined
+  );
 
   const candidate = {
     id: String(p.id ?? slug),
     slug,
     nombre: name.slice(0, 60),
-    eslogan: typeof p.tagline === 'string' ? p.tagline.slice(0, 90) : undefined,
-    categoria: { id: 'general', nombre: 'Negocio' },
-    arquetipo: 'retail' as const,
+    eslogan,
+    categoria: known?.categoria ?? { id: 'general', nombre: 'Negocio' },
+    arquetipo: known?.arquetipo ?? ('retail' as const),
     plan,
     estado: p.is_published === false ? ('pausado' as const) : ('activo' as const),
     identidad: {
@@ -52,24 +75,12 @@ export function negocioFromBusinessProfile(row: unknown): Negocio | null {
       formaCards: 'suave' as const,
     },
     contacto: {
-      whatsapp:
-        typeof p.contact_whatsapp === 'string' ? p.contact_whatsapp : undefined,
-      telefono:
-        typeof p.contact_phone === 'string' ? p.contact_phone : undefined,
+      whatsapp: wa,
+      telefono: phone || wa,
       email: typeof p.contact_email === 'string' ? p.contact_email : undefined,
       redes: [],
     },
-    ubicacion: address
-      ? {
-          direccion: address,
-          distrito: 'Cusco',
-          provincia: 'Cusco',
-          departamento: 'Cusco',
-          lat: -13.52,
-          lng: -71.96,
-          mostrarDireccionExacta: true,
-        }
-      : undefined,
+    ubicacion,
     verificacion: { nivel },
     metricasDeclaradas: [],
     modulos: [
@@ -90,10 +101,10 @@ export function negocioFromBusinessProfile(row: unknown): Negocio | null {
         : new Date().toISOString(),
   };
 
-  // Strip empty logo URLs that fail z.string().url()
   if (!candidate.identidad.logoUrl) delete candidate.identidad.logoUrl;
   if (!candidate.identidad.portadaUrl) delete candidate.identidad.portadaUrl;
   if (!candidate.contacto.email) delete candidate.contacto.email;
+  if (!candidate.eslogan) delete candidate.eslogan;
 
   const parsed = safeParseNegocio(candidate);
   return parsed.success ? (parsed.data as Negocio) : null;

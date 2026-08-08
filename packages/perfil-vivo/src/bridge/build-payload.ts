@@ -71,9 +71,32 @@ function emptySemana(): Horario['semana'] {
   };
 }
 
-/** BusinessHours (lunes|monday|…) → Horario Perfil Vivo */
+/** BusinessHours (lunes|monday|… o array {day,open,close}) → Horario Perfil Vivo */
 export function horarioFromBusinessHours(raw: unknown): Horario | undefined {
-  if (!raw || typeof raw !== 'object') return undefined;
+  if (!raw) return undefined;
+
+  // Formato array (Cristalimag seed): [{ day, open, close, closed }]
+  if (Array.isArray(raw)) {
+    const asObj: Record<string, unknown> = {};
+    for (const item of raw) {
+      if (!item || typeof item !== 'object') continue;
+      const h = item as {
+        day?: string;
+        open?: string;
+        close?: string;
+        closed?: boolean;
+      };
+      if (!h.day) continue;
+      asObj[h.day] = {
+        open: h.open,
+        close: h.close,
+        closed: h.closed,
+      };
+    }
+    return horarioFromBusinessHours(asObj);
+  }
+
+  if (typeof raw !== 'object') return undefined;
   const semana = emptySemana();
   let any = false;
 
@@ -86,7 +109,12 @@ export function horarioFromBusinessHours(raw: unknown): Horario | undefined {
       any = true;
       continue;
     }
-    if (typeof h.open === 'string' && typeof h.close === 'string' && h.open && h.close) {
+    if (
+      typeof h.open === 'string' &&
+      typeof h.close === 'string' &&
+      h.open.trim() &&
+      h.close.trim()
+    ) {
       semana[dia] = [{ desde: h.open.slice(0, 5), hasta: h.close.slice(0, 5) }];
       any = true;
     }
@@ -219,24 +247,12 @@ function redesFromProfile(p: Record<string, unknown>) {
     }));
 }
 
-const DEFAULT_MODULOS_RETAIL: Negocio['modulos'] = [
-  { tipo: 'hero', visible: true, orden: 0 },
-  { tipo: 'metricas', visible: true, orden: 1 },
-  { tipo: 'estado', visible: true, orden: 2 },
-  { tipo: 'acciones', visible: true, orden: 3 },
-  { tipo: 'catalogo', visible: true, orden: 4 },
-  { tipo: 'ia', visible: true, orden: 5 },
-  { tipo: 'promocion', visible: true, orden: 6 },
-  { tipo: 'resenas', visible: true, orden: 7 },
-  { tipo: 'ubicacion', visible: true, orden: 8 },
-  { tipo: 'horario', visible: true, orden: 9 },
-  { tipo: 'pago', visible: true, orden: 10 },
-  { tipo: 'novedades', visible: true, orden: 11 },
-  { tipo: 'canales', visible: true, orden: 12 },
-  { tipo: 'galeria', visible: true, orden: 13 },
-  { tipo: 'nosotros', visible: true, orden: 14 },
-  { tipo: 'faq', visible: true, orden: 15 },
-];
+import { ordenArquetipo } from '../modulos/orden-arquetipo';
+
+function modulosParaArquetipo(arquetipo: Negocio['arquetipo']): Negocio['modulos'] {
+  const order = ordenArquetipo(arquetipo);
+  return order.map((tipo, orden) => ({ tipo, visible: true, orden }));
+}
 
 /**
  * Enriquece Negocio con horario, redes y conteos; rellena módulos Retail.
@@ -267,7 +283,7 @@ export function enrichNegocioFromProfile(
       redes: redes.length ? redes : base.contacto.redes,
       web: base.contacto.web,
     },
-    modulos: DEFAULT_MODULOS_RETAIL,
+    modulos: modulosParaArquetipo(base.arquetipo),
     conteos: {
       productos: productCount,
       resenas: reviewCount,
