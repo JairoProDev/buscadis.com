@@ -45,7 +45,12 @@ export type MetodoPago =
   | 'amex'
   | 'transferencia'
   | 'credito'
-  | 'cripto';
+  | 'cripto'
+  | 'bcp'
+  | 'interbank'
+  | 'bbva'
+  | 'scotiabank'
+  | 'banbif';
 
 export type EtiquetaProducto = 'nuevo' | 'mas_vendido' | 'oferta' | 'popular';
 

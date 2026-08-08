@@ -313,7 +313,16 @@ export function faqsDerivadasDelPerfil(opts: {
           yape: 'Yape',
           plin: 'Plin',
           visa: 'Visa',
+          mastercard: 'Mastercard',
+          amex: 'Amex',
           transferencia: 'transferencia',
+          credito: 'crédito',
+          cripto: 'cripto',
+          bcp: 'BCP',
+          interbank: 'Interbank',
+          bbva: 'BBVA',
+          scotiabank: 'Scotiabank',
+          banbif: 'BanBif',
         };
         return map[m] || m;
       })

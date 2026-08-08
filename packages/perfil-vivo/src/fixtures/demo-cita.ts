@@ -49,6 +49,8 @@ const rawNegocio = {
     telefono: '+51988888001',
     redes: [
       { tipo: 'instagram', url: 'https://instagram.com/buscadis', activa: true },
+      { tipo: 'facebook', url: 'https://facebook.com/buscadis', activa: true },
+      { tipo: 'tiktok', url: 'https://tiktok.com/@buscadis', activa: true },
     ],
   },
   ubicacion: {
@@ -62,7 +64,16 @@ const rawNegocio = {
     mostrarDireccionExacta: true,
   },
   horario,
-  metodosPago: ['efectivo', 'yape', 'plin'] as const,
+  metodosPago: [
+    'visa',
+    'mastercard',
+    'amex',
+    'yape',
+    'plin',
+    'bcp',
+    'bbva',
+    'efectivo',
+  ] as const,
   verificacion: { nivel: 2 as const, fecha: '2026-05-01' },
   metricasDeclaradas: [{ icono: 'años', valor: '6', etiqueta: 'años en el rubro' }],
   modulos: [

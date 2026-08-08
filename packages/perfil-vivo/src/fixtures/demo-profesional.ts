@@ -46,6 +46,7 @@ const rawNegocio = {
     email: 'consulta@ejemplo.pe',
     redes: [
       { tipo: 'linkedin', url: 'https://linkedin.com', activa: true },
+      { tipo: 'instagram', url: 'https://instagram.com/buscadis', activa: true },
     ],
   },
   ubicacion: {
@@ -59,7 +60,17 @@ const rawNegocio = {
     mostrarDireccionExacta: true,
   },
   horario,
-  metodosPago: ['efectivo', 'yape', 'transferencia', 'visa'] as const,
+  metodosPago: [
+    'visa',
+    'mastercard',
+    'amex',
+    'yape',
+    'plin',
+    'bcp',
+    'interbank',
+    'bbva',
+    'efectivo',
+  ] as const,
   verificacion: { nivel: 3 as const, fecha: '2026-04-01' },
   metricasDeclaradas: [
     { icono: 'años', valor: '12', etiqueta: 'años de experiencia' },

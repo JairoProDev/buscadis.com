@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 80" role="img" aria-label="Plin">
+  <rect width="120" height="80" rx="10" fill="#E8FFFC"/>
+  <path d="M28 22h52c7.7 0 14 6.3 14 14v12c0 7.7-6.3 14-14 14H52l-12 10v-10H28c-7.7 0-14-6.3-14-14V36c0-7.7 6.3-14 14-14z" fill="#00C4B4"/>
+  <text x="60" y="48" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-weight="800" font-size="22" fill="#fff">plin</text>
+</svg>

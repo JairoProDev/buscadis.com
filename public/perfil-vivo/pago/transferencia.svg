@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 80" role="img" aria-label="Transferencia">
+  <rect width="120" height="80" rx="10" fill="#F3F4F6"/>
+  <path d="M30 52h60v4H30v-4zm4-6h52l-4 6H38l-4-6zm6-22h40l8 16H32l8-16zm16 4v8h8v-8h-8z" fill="#111827"/>
+  <rect x="48" y="56" width="24" height="4" rx="1" fill="#111827"/>
+</svg>

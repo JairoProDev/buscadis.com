@@ -121,6 +121,11 @@ export const NegocioSchema = z.object({
         'transferencia',
         'credito',
         'cripto',
+        'bcp',
+        'interbank',
+        'bbva',
+        'scotiabank',
+        'banbif',
       ])
     )
     .optional(),

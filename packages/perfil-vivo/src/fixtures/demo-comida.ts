@@ -48,6 +48,7 @@ const rawNegocio = {
     redes: [
       { tipo: 'instagram', url: 'https://instagram.com/buscadis', activa: true },
       { tipo: 'facebook', url: 'https://facebook.com/buscadis', activa: true },
+      { tipo: 'tiktok', url: 'https://tiktok.com/@buscadis', activa: true },
     ],
   },
   ubicacion: {
@@ -61,7 +62,18 @@ const rawNegocio = {
     mostrarDireccionExacta: true,
   },
   horario,
-  metodosPago: ['efectivo', 'yape', 'plin', 'visa'] as const,
+  metodosPago: [
+    'visa',
+    'mastercard',
+    'amex',
+    'yape',
+    'plin',
+    'bcp',
+    'interbank',
+    'bbva',
+    'efectivo',
+    'cripto',
+  ] as const,
   verificacion: { nivel: 1 as const, fecha: '2026-06-01' },
   metricasDeclaradas: [{ icono: 'años', valor: '4', etiqueta: 'años cocinando' }],
   modulos: [
