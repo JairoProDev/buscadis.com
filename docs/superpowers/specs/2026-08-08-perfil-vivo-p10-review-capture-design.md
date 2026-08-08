@@ -17,4 +17,8 @@ Enlace de **una pregunta** (estrellas) que el negocio manda por WhatsApp ~despu�
 
 ## Out of scope
 
-Cron 48h automático (necesita cola + número del cliente); respuesta del dueño en panel.
+SMS/WA automático al cliente (falta número); respuesta del dueño en panel.
+
+## Cron lite (hecho)
+
+`GET /api/cron/review-invite-nudge` (diario 14:00 UTC): si hubo `whatsapp_click` hace 48–72h y no hay reseña nueva → notificación `system` al dueño con `inviteUrl`.
