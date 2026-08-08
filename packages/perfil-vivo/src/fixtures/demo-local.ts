@@ -21,6 +21,7 @@ const rawNegocio = {
   slug: 'demo-local',
   nombre: 'Farmacia San Blas',
   eslogan: 'Medicinas y orientación cerca de tu casa',
+  etiquetas: ['Farmacia', 'Medicinas', 'San Blas'],
   categoria: { id: 'farmacia', nombre: 'Farmacia' },
   arquetipo: 'local' as const,
   plan: 'free' as const,

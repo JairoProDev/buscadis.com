@@ -44,7 +44,7 @@ function etiquetasHero(negocio: Negocio): string[] {
   };
   for (const e of negocio.etiquetas ?? []) push(e);
   push(negocio.categoria?.nombre);
-  return out.slice(0, 8);
+  return out.slice(0, 3);
 }
 
 export function HeroShell({ negocio }: { negocio: Negocio }) {
@@ -85,9 +85,35 @@ export function HeroShell({ negocio }: { negocio: Negocio }) {
           <div className="pv-hero__cover-shade" aria-hidden />
 
           <div className="pv-hero__overlay">
+            <div
+              className="pv-hero__logo"
+              style={{
+                background: negocio.identidad.logoUrl
+                  ? 'var(--sf-elev)'
+                  : 'var(--mk-accion)',
+                color: 'var(--mk-sobre)',
+              }}
+            >
+              {negocio.identidad.logoUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={negocio.identidad.logoUrl}
+                  alt={`Logo de ${negocio.nombre}`}
+                  width={88}
+                  height={88}
+                  fetchPriority="high"
+                  decoding="async"
+                />
+              ) : (
+                <span className="pv-hero__iniciales" aria-hidden>
+                  {iniciales(negocio.nombre)}
+                </span>
+              )}
+            </div>
+
             <div className="pv-hero__copy">
               <h1 className="pv-hero__name">
-                <span>{negocio.nombre}</span>
+                <span className="pv-hero__name-text">{negocio.nombre}</span>
                 {verificado ? (
                   <button
                     type="button"
@@ -113,35 +139,9 @@ export function HeroShell({ negocio }: { negocio: Negocio }) {
                   <span className="pv-hero__lugar-ico" aria-hidden>
                     ⌖
                   </span>
-                  <span>{ubicacionLabel}</span>
+                  <span className="pv-hero__lugar-text">{ubicacionLabel}</span>
                 </p>
               ) : null}
-            </div>
-
-            <div
-              className="pv-hero__logo"
-              style={{
-                background: negocio.identidad.logoUrl
-                  ? 'var(--sf-elev)'
-                  : 'var(--mk-accion)',
-                color: 'var(--mk-sobre)',
-              }}
-            >
-              {negocio.identidad.logoUrl ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={negocio.identidad.logoUrl}
-                  alt={`Logo de ${negocio.nombre}`}
-                  width={88}
-                  height={88}
-                  fetchPriority="high"
-                  decoding="async"
-                />
-              ) : (
-                <span className="pv-hero__iniciales" aria-hidden>
-                  {iniciales(negocio.nombre)}
-                </span>
-              )}
             </div>
           </div>
         </div>

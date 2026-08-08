@@ -35,9 +35,10 @@ const rawNegocio = {
   slug: 'demo-cita',
   nombre: 'Barbería Norte Cusco',
   eslogan: 'Corte limpio, barba a medida',
+  etiquetas: ['Barbería', 'Corte', 'Citas'],
   categoria: { id: 'barberia', nombre: 'Barbería' },
   arquetipo: 'cita' as const,
-  plan: 'free' as const,
+  plan: 'pro' as const,
   estado: 'activo' as const,
   identidad: {
     colorSemilla: '#1A3A2F',

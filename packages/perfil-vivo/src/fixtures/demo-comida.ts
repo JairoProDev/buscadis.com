@@ -33,6 +33,7 @@ const rawNegocio = {
   slug: 'demo-comida',
   nombre: 'Huatia Andina',
   eslogan: 'Comida cusqueña para llevar o pedir',
+  etiquetas: ['Restaurante', 'Comida criolla', 'Delivery'],
   categoria: { id: 'comida', nombre: 'Restaurante' },
   arquetipo: 'comida' as const,
   plan: 'max' as const,

@@ -90,7 +90,7 @@ export function PagoShell() {
     <section className="pv-modulo" id="pago">
       <div className="pv-panel">
         <h2 style={{ margin: '0 0 14px', font: 'var(--ts-modulo)', color: 'var(--tx-strong)' }}>
-          Métodos de pago
+          Cómo pagar
         </h2>
         <ul className="pv-pago">
           {metodos.map((m) => (

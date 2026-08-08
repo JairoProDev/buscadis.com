@@ -51,6 +51,20 @@ export function negocioFromBusinessProfile(row: unknown): Negocio | null {
     known?.eslogan ||
     (typeof p.tagline === 'string' ? p.tagline.slice(0, 90) : undefined);
 
+  const tagsRaw = Array.isArray(p.tags)
+    ? p.tags.map(String).filter(Boolean)
+    : Array.isArray(p.keywords)
+      ? p.keywords.map(String).filter(Boolean)
+      : [];
+  const etiquetas = [
+    ...tagsRaw,
+    known?.categoria?.nombre,
+  ]
+    .filter((t): t is string => typeof t === 'string' && t.trim().length > 0)
+    .map((t) => t.trim().slice(0, 40))
+    .filter((t, i, arr) => arr.findIndex((x) => x.toLowerCase() === t.toLowerCase()) === i)
+    .slice(0, 12);
+
   const wa = normalizeWhatsappPe(
     typeof p.contact_whatsapp === 'string' ? p.contact_whatsapp : undefined
   );
@@ -63,6 +77,7 @@ export function negocioFromBusinessProfile(row: unknown): Negocio | null {
     slug,
     nombre: name.slice(0, 60),
     eslogan,
+    etiquetas: etiquetas.length ? etiquetas : undefined,
     categoria: known?.categoria ?? { id: 'general', nombre: 'Negocio' },
     arquetipo: known?.arquetipo ?? ('retail' as const),
     plan,
@@ -105,6 +120,7 @@ export function negocioFromBusinessProfile(row: unknown): Negocio | null {
   if (!candidate.identidad.portadaUrl) delete candidate.identidad.portadaUrl;
   if (!candidate.contacto.email) delete candidate.contacto.email;
   if (!candidate.eslogan) delete candidate.eslogan;
+  if (!candidate.etiquetas?.length) delete candidate.etiquetas;
 
   const parsed = safeParseNegocio(candidate);
   return parsed.success ? (parsed.data as Negocio) : null;

@@ -193,8 +193,8 @@
   z-index: 1;
   display: flex;
   align-items: flex-end;
-  justify-content: space-between;
-  gap: 14px;
+  justify-content: flex-start;
+  gap: 12px;
   min-height: 280px;
   padding: calc(56px + env(safe-area-inset-top, 0px)) 16px 18px;
   box-sizing: border-box;
@@ -213,26 +213,41 @@
   letter-spacing: -0.03em;
   display: flex;
   align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
+  gap: 6px;
+  flex-wrap: nowrap;
+  min-width: 0;
+  max-width: 100%;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
 }
 
+.pv-hero__name-text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .pv-hero__eslogan {
-  margin: 0 0 10px;
+  margin: 0 0 8px;
   font: var(--ts-cuerpo);
   font-weight: 600;
   color: rgba(255, 255, 255, 0.92);
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .pv-hero__tags {
   list-style: none;
-  margin: 0 0 10px;
+  margin: 0 0 8px;
   padding: 0;
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: 6px;
+  max-width: 100%;
+  overflow: hidden;
 }
 
 .pv-hero__tags li {
@@ -244,16 +259,23 @@
   background: rgba(255, 255, 255, 0.16);
   border: 1px solid rgba(255, 255, 255, 0.28);
   backdrop-filter: blur(6px);
+  flex-shrink: 1;
+  min-width: 0;
+  max-width: 42%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .pv-hero__lugar {
   margin: 0;
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 6px;
   font: 500 12px/1.35 var(--ff-ui);
   color: rgba(255, 255, 255, 0.9);
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.28);
+  min-width: 0;
 }
 
 .pv-hero__lugar-ico {
@@ -261,9 +283,16 @@
   opacity: 0.9;
 }
 
+.pv-hero__lugar-text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .pv-hero__logo {
-  width: 88px;
-  height: 88px;
+  width: 72px;
+  height: 72px;
   border-radius: var(--rd-lg);
   border: 3px solid rgba(255, 255, 255, 0.95);
   box-shadow: var(--el-2);
@@ -272,17 +301,18 @@
   flex-shrink: 0;
   overflow: hidden;
   align-self: flex-end;
+  order: 0;
 }
 
 .pv-hero__logo img {
-  width: 88px;
-  height: 88px;
+  width: 72px;
+  height: 72px;
   object-fit: cover;
   display: block;
 }
 
 .pv-hero__iniciales {
-  font: 700 26px/1 var(--ff-display);
+  font: 700 22px/1 var(--ff-display);
 }
 
 .pv-hero__verif {

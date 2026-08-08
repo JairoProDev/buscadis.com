@@ -34,6 +34,7 @@ const rawNegocio = {
   slug: 'demo',
   nombre: 'Ferretería Demo Quival',
   eslogan: 'Todo para tu obra en Wanchaq',
+  etiquetas: ['Ferretería', 'Mayorista', 'Herramientas'],
   categoria: { id: 'ferreteria', nombre: 'Ferretería' },
   arquetipo: 'retail' as const,
   plan: 'max' as const,
@@ -308,7 +309,7 @@ export function buildDemoRetailPayload(now: Date = new Date()): PerfilPayload {
     nosotros: {
       eslogan: negocio.eslogan,
       texto:
-        'Somos una ferretería familiar en Wanchaq. Atendemos obra chica y maestros de zona con precios claros, stock real y entrega el mismo día cuando el pedido lo permite. El eslogan vive aquí, no en el hero: queremos que lo primero que veas sea qué vendemos y cómo contactarnos.',
+        'Somos una ferretería familiar en Wanchaq. Atendemos obra chica y maestros de zona con precios claros, stock real y entrega el mismo día cuando el pedido lo permite.',
     },
     totalProductos: DEMO_RETAIL_PRODUCTOS.length,
     metricas: {

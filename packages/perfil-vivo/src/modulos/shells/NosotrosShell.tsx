@@ -38,7 +38,7 @@ function similar(a: string, b: string): boolean {
   return union > 0 && inter / union >= 0.55;
 }
 
-/** §18 — Quiénes somos: eslogan aquí (no en hero); sin duplicar descripción. */
+/** §18 — Quiénes somos: historia del negocio (el eslogan vive en el hero). */
 export function NosotrosShell({ titulo }: { titulo: string }) {
   const { payload } = usePerfil();
   const nosotros = payload.nosotros;
@@ -46,7 +46,14 @@ export function NosotrosShell({ titulo }: { titulo: string }) {
   const [abierto, setAbierto] = useState(false);
 
   const textoRaw = nosotros?.texto?.trim() ?? '';
-  const esloganRaw = (nosotros?.eslogan || esloganNegocio)?.trim() ?? '';
+  // Evitar duplicar el eslogan del hero: solo mostrar eslogan aquí si es distinto
+  // al del negocio y aporta información (p. ej. variante editorial en nosotros).
+  const esloganNosotros = nosotros?.eslogan?.trim() ?? '';
+  const esloganRaw =
+    esloganNosotros &&
+    (!esloganNegocio || !similar(esloganNosotros, esloganNegocio))
+      ? esloganNosotros
+      : '';
 
   // Una sola voz: si eslogan ≈ descripción, mostrar solo el más completo
   let eslogan: string | null = null;

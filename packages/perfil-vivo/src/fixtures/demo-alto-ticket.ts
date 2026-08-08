@@ -36,6 +36,7 @@ const rawNegocio = {
   slug: 'demo-alto-ticket',
   nombre: 'Andes Solar Cusco',
   eslogan: 'Sistemas solares residenciales y comerciales',
+  etiquetas: ['Energía solar', 'Paneles', 'Instalación'],
   categoria: { id: 'energia', nombre: 'Energía solar' },
   arquetipo: 'alto_ticket' as const,
   plan: 'pro' as const,

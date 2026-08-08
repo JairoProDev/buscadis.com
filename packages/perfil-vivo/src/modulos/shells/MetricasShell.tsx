@@ -48,7 +48,7 @@ export function MetricasShell() {
     <section
       className="pv-modulo"
       id="metricas"
-      aria-label="Métricas de confianza"
+      aria-label="Valoraciones y datos del negocio"
       style={{ font: 'var(--ts-cuerpo)', color: 'var(--tx-base)' }}
     >
       <p style={{ margin: 0 }}>

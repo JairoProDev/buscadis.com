@@ -92,7 +92,7 @@ export function AccionesShell() {
   const waLabel = esCita ? 'Agendar' : esComida ? 'Pedir' : 'Escribir';
 
   return (
-    <section className="pv-modulo" id="acciones" aria-label="Acciones rápidas">
+    <section className="pv-modulo" id="acciones" aria-label="Contactar">
       <div className="pv-acciones-grid">
         <GridAction
           href={handoffs.llamada}

@@ -32,12 +32,23 @@ export function buildPerfilVivoShareMetadata(opts: {
     n.eslogan ||
     payload.nosotros?.texto?.slice(0, 160) ||
     `${n.categoria.nombre} en ${d}. Precios, horario y WhatsApp en Buscadis.`;
+  const keywords = [
+    ...(n.etiquetas ?? []),
+    n.categoria.nombre,
+    d,
+    n.ubicacion?.provincia,
+    'Perú',
+  ]
+    .filter((x): x is string => typeof x === 'string' && x.length > 0)
+    .filter((x, i, arr) => arr.findIndex((y) => y.toLowerCase() === x.toLowerCase()) === i)
+    .slice(0, 12);
   const url = `${getSiteUrl()}${canonicalPath}`;
   const imageUrl = perfilVivoOgImageUrl(n.slug);
 
   return {
     title,
     description,
+    keywords: keywords.join(', '),
     alternates: { canonical: url },
     robots: { index: indexable, follow: true },
     openGraph: {

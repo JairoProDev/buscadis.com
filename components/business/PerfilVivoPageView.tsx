@@ -47,8 +47,20 @@ export function buildPerfilVivoJsonLd(payload: PerfilPayload, canonicalPath: str
         payload.nosotros?.texto?.slice(0, 300) ??
         negocio.eslogan ??
         `${negocio.categoria.nombre} en ${u?.distrito ?? 'Cusco'}`,
+      ...(negocio.eslogan ? { slogan: negocio.eslogan } : {}),
+      ...(negocio.etiquetas?.length || negocio.categoria?.nombre
+        ? {
+            keywords: [
+              ...(negocio.etiquetas ?? []),
+              negocio.categoria.nombre,
+            ]
+              .filter(Boolean)
+              .join(', '),
+          }
+        : {}),
       url: base,
       telephone: negocio.contacto.telefono,
+      image: negocio.identidad.logoUrl || negocio.identidad.portadaUrl,
       address: u
         ? {
             '@type': 'PostalAddress',

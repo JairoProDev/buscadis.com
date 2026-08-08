@@ -248,7 +248,7 @@ export function CanalesShell() {
     <section className="pv-modulo" id="canales">
       <div className="pv-panel">
         <h2 style={{ margin: '0 0 12px', font: 'var(--ts-modulo)', color: 'var(--tx-strong)' }}>
-          Canales y redes
+          Redes y web
         </h2>
         <div className="pv-canales">
           {links.map((l) => (

@@ -31,6 +31,7 @@ const rawNegocio = {
   slug: 'demo-profesional',
   nombre: 'Dra. Elena Vargas',
   eslogan: 'Dermatología clínica en Cusco',
+  etiquetas: ['Dermatología', 'Consultorio', 'Salud'],
   categoria: { id: 'salud', nombre: 'Dermatología' },
   arquetipo: 'profesional' as const,
   plan: 'pro' as const,
