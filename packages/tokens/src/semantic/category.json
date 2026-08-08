@@ -1,0 +1,52 @@
+{
+  "cat": {
+    "empleos": {
+      "fg": { "value": "#0F766E", "type": "color" },
+      "fgDark": { "value": "#5EEAD4", "type": "color" },
+      "bg": { "value": "#F0FDFA", "type": "color" },
+      "bgDark": { "value": "#042F2E", "type": "color" }
+    },
+    "inmuebles": {
+      "fg": { "value": "#047857", "type": "color" },
+      "fgDark": { "value": "#6EE7B7", "type": "color" },
+      "bg": { "value": "#ECFDF5", "type": "color" },
+      "bgDark": { "value": "#022C22", "type": "color" }
+    },
+    "vehiculos": {
+      "fg": { "value": "#C2410C", "type": "color" },
+      "fgDark": { "value": "#FDBA74", "type": "color" },
+      "bg": { "value": "#FFF7ED", "type": "color" },
+      "bgDark": { "value": "#431407", "type": "color" }
+    },
+    "servicios": {
+      "fg": { "value": "#A16207", "type": "color" },
+      "fgDark": { "value": "#FCD34D", "type": "color" },
+      "bg": { "value": "#FFFBEB", "type": "color" },
+      "bgDark": { "value": "#422006", "type": "color" }
+    },
+    "productos": {
+      "fg": { "value": "#BE123C", "type": "color" },
+      "fgDark": { "value": "#FDA4AF", "type": "color" },
+      "bg": { "value": "#FFF1F2", "type": "color" },
+      "bgDark": { "value": "#4C0519", "type": "color" }
+    },
+    "eventos": {
+      "fg": { "value": "#7E22CE", "type": "color" },
+      "fgDark": { "value": "#D8B4FE", "type": "color" },
+      "bg": { "value": "#FAF5FF", "type": "color" },
+      "bgDark": { "value": "#3B0764", "type": "color" }
+    },
+    "negocios": {
+      "fg": { "value": "#4F46E5", "type": "color" },
+      "fgDark": { "value": "#A5B4FC", "type": "color" },
+      "bg": { "value": "#EEF2FF", "type": "color" },
+      "bgDark": { "value": "#1E1B4B", "type": "color" }
+    },
+    "comunidad": {
+      "fg": { "value": "#A21CAF", "type": "color" },
+      "fgDark": { "value": "#F0ABFC", "type": "color" },
+      "bg": { "value": "#FDF4FF", "type": "color" },
+      "bgDark": { "value": "#4A044E", "type": "color" }
+    }
+  }
+}

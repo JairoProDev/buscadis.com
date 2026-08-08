@@ -1,0 +1,59 @@
+{
+  "bs": {
+    "bg": {
+      "canvas": { "value": "#12171B", "type": "color" },
+      "surface": { "value": "#1A2126", "type": "color" },
+      "surface-2": { "value": "#232C33", "type": "color" },
+      "sunken": { "value": "#0E1317", "type": "color" },
+      "overlay": { "value": "rgba(0, 0, 0, 0.64)", "type": "color" }
+    },
+    "fg": {
+      "default": { "value": "#E9EEF2", "type": "color" },
+      "muted": { "value": "#A9B6BF", "type": "color" },
+      "subtle": { "value": "#8494A0", "type": "color" },
+      "disabled": { "value": "{color.neutral.500}", "type": "color" },
+      "on-action": { "value": "{color.ink.onActionDark}", "type": "color" },
+      "on-warm": { "value": "{color.ink.onWarm}", "type": "color" }
+    },
+    "border": {
+      "subtle": { "value": "rgba(255, 255, 255, 0.08)", "type": "color" },
+      "default": { "value": "rgba(255, 255, 255, 0.14)", "type": "color" },
+      "strong": { "value": "rgba(255, 255, 255, 0.22)", "type": "color" },
+      "focus": { "value": "{color.adis.300}", "type": "color" }
+    },
+    "action": {
+      "DEFAULT": { "value": "{color.adis.300}", "type": "color" },
+      "hover": { "value": "{color.adis.200}", "type": "color" },
+      "active": { "value": "{color.adis.100}", "type": "color" },
+      "subtle": { "value": "{color.adis.950}", "type": "color" }
+    },
+    "identity": {
+      "DEFAULT": { "value": "#6EC0D8", "type": "color" },
+      "warm": { "value": "{color.sol.300}", "type": "color" }
+    },
+    "publish": {
+      "bg": { "value": "{color.sol.400}", "type": "color" },
+      "fg": { "value": "{color.ink.onWarm}", "type": "color" }
+    },
+    "success": {
+      "fg": { "value": "{color.success.fgDark}", "type": "color" },
+      "bg": { "value": "{color.success.bgDark}", "type": "color" }
+    },
+    "warning": {
+      "fg": { "value": "{color.warning.fgDark}", "type": "color" },
+      "bg": { "value": "{color.warning.bgDark}", "type": "color" }
+    },
+    "danger": {
+      "fg": { "value": "{color.danger.fgDark}", "type": "color" },
+      "bg": { "value": "{color.danger.bgDark}", "type": "color" }
+    },
+    "info": {
+      "fg": { "value": "{color.adis.300}", "type": "color" },
+      "bg": { "value": "{color.adis.950}", "type": "color" }
+    },
+    "focus-ring": {
+      "value": "0 0 0 2px #1A2126, 0 0 0 4px {color.adis.300}",
+      "type": "shadow"
+    }
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "name": "@buscadis/tokens",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Buscadis design tokens — JSON source of truth, Style Dictionary build",
+  "type": "module",
+  "main": "./dist/tokens.ts",
+  "types": "./dist/tokens.ts",
+  "exports": {
+    ".": "./dist/tokens.ts",
+    "./tokens.css": "./dist/tokens.css",
+    "./tokens.json": "./dist/tokens.json",
+    "./tailwind-preset": "./dist/tailwind-preset.cjs",
+    "./tailwind-preset.js": "./dist/tailwind-preset.cjs",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "src",
+    "eslint-rules"
+  ],
+  "scripts": {
+    "build": "node ./scripts/build.mjs",
+    "tokens:build": "node ./scripts/build.mjs",
+    "verify": "node ./scripts/build.mjs"
+  },
+  "devDependencies": {
+    "culori": "^4.0.2",
+    "style-dictionary": "^5.5.1",
+    "wcag-contrast": "^3.0.0"
+  }
+}

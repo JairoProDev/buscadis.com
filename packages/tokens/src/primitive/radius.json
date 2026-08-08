@@ -1,0 +1,59 @@
+{
+  "radius": {
+    "xs": { "value": "4px", "type": "dimension" },
+    "sm": { "value": "8px", "type": "dimension" },
+    "md": { "value": "12px", "type": "dimension" },
+    "lg": { "value": "16px", "type": "dimension" },
+    "xl": { "value": "20px", "type": "dimension" },
+    "2xl": { "value": "28px", "type": "dimension" },
+    "full": { "value": "9999px", "type": "dimension" }
+  },
+  "elevation": {
+    "1": {
+      "value": "0 1px 2px rgba(16, 22, 26, 0.06)",
+      "type": "shadow"
+    },
+    "2": {
+      "value": "0 4px 12px rgba(16, 22, 26, 0.08)",
+      "type": "shadow"
+    },
+    "3": {
+      "value": "0 12px 32px rgba(16, 22, 26, 0.12)",
+      "type": "shadow"
+    },
+    "4": {
+      "value": "0 24px 64px rgba(16, 22, 26, 0.18)",
+      "type": "shadow"
+    }
+  },
+  "z": {
+    "base": { "value": "0", "type": "number" },
+    "raised": { "value": "10", "type": "number" },
+    "sticky": { "value": "100", "type": "number" },
+    "header": { "value": "200", "type": "number" },
+    "nav": { "value": "300", "type": "number" },
+    "dropdown": { "value": "400", "type": "number" },
+    "overlay": { "value": "500", "type": "number" },
+    "modal": { "value": "600", "type": "number" },
+    "toast": { "value": "700", "type": "number" },
+    "tooltip": { "value": "800", "type": "number" }
+  },
+  "motion": {
+    "duration": {
+      "instant": { "value": "100ms", "type": "duration" },
+      "fast": { "value": "150ms", "type": "duration" },
+      "normal": { "value": "250ms", "type": "duration" },
+      "slow": { "value": "400ms", "type": "duration" }
+    },
+    "ease": {
+      "out": { "value": "cubic-bezier(0, 0, 0.2, 1)", "type": "cubicBezier" },
+      "inout": { "value": "cubic-bezier(0.4, 0, 0.2, 1)", "type": "cubicBezier" },
+      "smooth": { "value": "cubic-bezier(0.16, 1, 0.3, 1)", "type": "cubicBezier" }
+    },
+    "spring": {
+      "stiffness": { "value": "260", "type": "number" },
+      "damping": { "value": "20", "type": "number" },
+      "mass": { "value": "1", "type": "number" }
+    }
+  }
+}

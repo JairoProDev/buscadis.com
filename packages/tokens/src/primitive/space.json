@@ -1,0 +1,42 @@
+{
+  "space": {
+    "0": { "value": "0", "type": "dimension" },
+    "1": { "value": "4px", "type": "dimension" },
+    "2": { "value": "8px", "type": "dimension" },
+    "3": { "value": "12px", "type": "dimension" },
+    "4": { "value": "16px", "type": "dimension" },
+    "5": { "value": "20px", "type": "dimension" },
+    "6": { "value": "24px", "type": "dimension" },
+    "8": { "value": "32px", "type": "dimension" },
+    "10": { "value": "40px", "type": "dimension" },
+    "12": { "value": "48px", "type": "dimension" },
+    "16": { "value": "64px", "type": "dimension" },
+    "20": { "value": "80px", "type": "dimension" }
+  },
+  "density": {
+    "compact": {
+      "gap": { "value": "8px", "type": "dimension" },
+      "pad": { "value": "12px", "type": "dimension" },
+      "row": { "value": "44px", "type": "dimension" }
+    },
+    "comfortable": {
+      "gap": { "value": "16px", "type": "dimension" },
+      "pad": { "value": "16px", "type": "dimension" },
+      "row": { "value": "52px", "type": "dimension" }
+    }
+  },
+  "container": {
+    "prose": { "value": "640px", "type": "dimension" },
+    "feed": { "value": "480px", "type": "dimension" },
+    "app": { "value": "1440px", "type": "dimension" },
+    "panel": { "value": "420px", "type": "dimension" }
+  },
+  "breakpoint": {
+    "base": { "value": "360px", "type": "dimension" },
+    "sm": { "value": "480px", "type": "dimension" },
+    "md": { "value": "768px", "type": "dimension" },
+    "lg": { "value": "1024px", "type": "dimension" },
+    "xl": { "value": "1280px", "type": "dimension" },
+    "2xl": { "value": "1536px", "type": "dimension" }
+  }
+}
