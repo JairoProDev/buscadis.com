@@ -91,6 +91,8 @@ export interface Producto {
   disponibilidad: 'disponible' | 'agotado' | 'bajo_pedido' | 'ultimas_unidades';
   destacado: boolean;
   etiquetas: EtiquetaProducto[];
+  /** Agrupación menú/catálogo (chips Categorías). */
+  grupo?: string;
   activo: boolean;
 }
 
@@ -154,6 +156,22 @@ export interface NosotrosContenido {
   texto: string;
 }
 
+export interface Novedad {
+  id: string;
+  titulo: string;
+  texto?: string;
+  imagenUrl?: string;
+  /** ISO */
+  publicadaEn: string;
+}
+
+export interface MiembroEquipo {
+  id: string;
+  nombre: string;
+  rol: string;
+  fotoUrl?: string;
+}
+
 export interface Negocio {
   id: string;
   slug: string;
@@ -199,6 +217,8 @@ export interface Negocio {
     faqs?: number;
     promociones?: number;
     tieneNosotros?: number;
+    novedades?: number;
+    equipo?: number;
   };
   creadoEn: string;
   actualizadoEn: string;
@@ -213,6 +233,8 @@ export interface PerfilPayload {
   galeria: FotoGaleria[];
   promocion: PromocionVigente | null;
   nosotros: NosotrosContenido | null;
+  novedades: Novedad[];
+  equipo: MiembroEquipo[];
   metricas?: MetricasVerificadas;
   estadoVivo: EstadoVivo;
   totalProductos: number;

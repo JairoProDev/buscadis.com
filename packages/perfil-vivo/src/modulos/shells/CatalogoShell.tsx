@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { Producto } from '../../types';
 import { formatPrecio } from '../../estado/calcular-estado';
 import { usePerfil } from '../PerfilContext';
@@ -262,12 +262,33 @@ function ProductoSheet({
 
 export function CatalogoShell({ titulo }: { titulo: string }) {
   const { payload, handoffs } = usePerfil();
-  const productos = payload.productos.filter((p) => p.activo && p.destacado).slice(0, 12);
+  const [grupo, setGrupo] = useState<string | null>(null);
+  const destacados = payload.productos.filter((p) => p.activo && p.destacado);
+  const productos = (
+    grupo ? destacados.filter((p) => p.grupo === grupo) : destacados
+  ).slice(0, 12);
   const [openId, setOpenId] = useState<string | null>(null);
   const open = productos.find((p) => p.id === openId) ?? null;
   const slug = payload.negocio.slug;
 
-  if (productos.length < 3) return null;
+  useEffect(() => {
+    const sync = () => {
+      try {
+        setGrupo(sessionStorage.getItem('pv-grupo'));
+      } catch {
+        setGrupo(null);
+      }
+    };
+    sync();
+    const onEvt = (e: Event) => {
+      const d = (e as CustomEvent<string>).detail;
+      setGrupo(d || null);
+    };
+    window.addEventListener('pv-grupo', onEvt);
+    return () => window.removeEventListener('pv-grupo', onEvt);
+  }, []);
+
+  if (destacados.length < 3) return null;
 
   return (
     <section className="pv-modulo" id="catalogo">
@@ -278,14 +299,42 @@ export function CatalogoShell({ titulo }: { titulo: string }) {
           alignItems: 'center',
           minHeight: 44,
           marginBottom: 12,
+          gap: 12,
         }}
       >
         <h2 style={{ margin: 0, font: 'var(--ts-modulo)', color: 'var(--tx-strong)' }}>
-          {titulo || 'Productos destacados'}
+          {titulo || 'Catálogo'}
+          {grupo ? (
+            <span style={{ font: 'var(--ts-meta)', color: 'var(--tx-muted)', fontWeight: 500 }}>
+              {' '}
+              · {grupo}
+            </span>
+          ) : null}
         </h2>
-        <span style={{ font: 'var(--ts-meta)', color: 'var(--mk-texto)' }}>
-          Ver los {payload.totalProductos} →
-        </span>
+        {grupo ? (
+          <button
+            type="button"
+            onClick={() => {
+              try {
+                sessionStorage.removeItem('pv-grupo');
+              } catch {
+                /* ignore */
+              }
+              setGrupo(null);
+            }}
+            style={{
+              border: 0,
+              background: 'transparent',
+              color: 'var(--mk-accion)',
+              font: 'var(--ts-meta)',
+              fontWeight: 700,
+              cursor: 'pointer',
+              minHeight: 44,
+            }}
+          >
+            Ver todos
+          </button>
+        ) : null}
       </div>
       <div
         style={{

@@ -28,7 +28,7 @@ export function PerfilVivoAnalytics({
 
   useEffect(() => {
     if (sent.current) return;
-    if (!businessProfileId || slug === 'demo') return;
+    if (!businessProfileId || slug === 'demo' || slug === 'demo-cita' || slug === 'demo-comida') return;
     sent.current = true;
 
     const origen = origenFromReferrer(typeof document !== 'undefined' ? document.referrer : '');
@@ -52,7 +52,7 @@ export function PerfilVivoAnalytics({
   }, [businessProfileId, slug, arquetipo]);
 
   useEffect(() => {
-    if (!businessProfileId || slug === 'demo') return;
+    if (!businessProfileId || slug === 'demo' || slug === 'demo-cita' || slug === 'demo-comida') return;
     const onClick = (ev: MouseEvent) => {
       const t = ev.target as HTMLElement | null;
       const a = t?.closest?.('a') as HTMLAnchorElement | null;

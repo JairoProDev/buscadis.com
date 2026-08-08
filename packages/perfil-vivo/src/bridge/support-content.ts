@@ -5,7 +5,9 @@
 import type {
   FotoGaleria,
   ItemFaq,
+  MiembroEquipo,
   NosotrosContenido,
+  Novedad,
   PromocionVigente,
 } from '../types';
 
@@ -174,6 +176,89 @@ export function galeriaFromProfile(
   }
 
   return out.slice(0, 12);
+}
+
+/** story_highlights + anuncio activo → novedades (P16 lite). */
+export function novedadesFromProfile(row: Record<string, unknown>): Novedad[] {
+  const out: Novedad[] = [];
+  const updated =
+    typeof row.updated_at === 'string' ? row.updated_at : new Date().toISOString();
+
+  if (row.announcement_active === true) {
+    const texto = String(row.announcement_text || '').trim();
+    if (texto) {
+      out.push({
+        id: 'announcement',
+        titulo: texto.slice(0, 80),
+        texto: texto.length > 80 ? texto.slice(0, 280) : undefined,
+        publicadaEn: updated,
+      });
+    }
+  }
+
+  if (Array.isArray(row.story_highlights)) {
+    for (const h of row.story_highlights) {
+      const hl = asRecord(h);
+      if (!hl) continue;
+      const titulo = String(hl.title || '').trim();
+      if (!titulo) continue;
+      const cover =
+        typeof hl.cover_url === 'string' && /^https?:\/\//.test(hl.cover_url)
+          ? hl.cover_url
+          : undefined;
+      const sub = String(hl.subtitle || hl.description || '').trim();
+      out.push({
+        id: String(hl.id || `nov-${out.length}`),
+        titulo: titulo.slice(0, 80),
+        texto: sub ? sub.slice(0, 280) : undefined,
+        imagenUrl: cover,
+        publicadaEn: updated,
+      });
+    }
+  }
+
+  return out.slice(0, 8);
+}
+
+/** profile_blocks type=team → miembros (si hay items). */
+export function equipoFromProfileBlocks(blocks: unknown): MiembroEquipo[] {
+  if (!Array.isArray(blocks)) return [];
+  const out: MiembroEquipo[] = [];
+  for (const b of blocks) {
+    const block = asRecord(b);
+    if (!block || block.type !== 'team' || block.visible === false) continue;
+    const cfg = asRecord(block.config) || {};
+    const items = Array.isArray(cfg.items)
+      ? cfg.items
+      : Array.isArray(cfg.members)
+        ? cfg.members
+        : Array.isArray(cfg.equipo)
+          ? cfg.equipo
+          : [];
+    for (let i = 0; i < items.length; i++) {
+      const it = asRecord(items[i]);
+      if (!it) continue;
+      const nombre = String(it.nombre || it.name || '').trim();
+      const rol = String(it.rol || it.role || it.title || '').trim();
+      if (!nombre || !rol) continue;
+      const foto =
+        typeof it.fotoUrl === 'string'
+          ? it.fotoUrl
+          : typeof it.photo_url === 'string'
+            ? it.photo_url
+            : typeof it.avatar_url === 'string'
+              ? it.avatar_url
+              : undefined;
+      out.push({
+        id: String(it.id || `eq-${out.length}`),
+        nombre: nombre.slice(0, 60),
+        rol: rol.slice(0, 60),
+        fotoUrl:
+          foto && /^https?:\/\//.test(foto) ? foto : undefined,
+      });
+    }
+  }
+  return out.slice(0, 8);
 }
 
 /**

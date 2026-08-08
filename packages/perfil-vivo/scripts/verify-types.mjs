@@ -13,6 +13,7 @@ const root = join(__dirname, '..');
 const typesSrc = readFileSync(join(root, 'src/types.ts'), 'utf8');
 const schemasSrc = readFileSync(join(root, 'src/schemas.ts'), 'utf8');
 const fixtureSrc = readFileSync(join(root, 'src/fixtures/demo-retail.ts'), 'utf8');
+const citaSrc = readFileSync(join(root, 'src/fixtures/demo-cita.ts'), 'utf8');
 
 let failed = 0;
 
@@ -21,6 +22,13 @@ if (!typesSrc.includes('export type TipoModulo')) {
   failed += 1;
 } else {
   console.log('OK: TipoModulo exported');
+}
+
+if (!typesSrc.includes('export interface Novedad')) {
+  console.error('FAIL: types.ts missing Novedad');
+  failed += 1;
+} else {
+  console.log('OK: Novedad exported');
 }
 
 if (!schemasSrc.includes('NegocioSchema')) {
@@ -35,6 +43,21 @@ if (!fixtureSrc.includes("slug: 'demo'")) {
   failed += 1;
 } else {
   console.log('OK: demo fixture slug');
+}
+
+if (!citaSrc.includes("slug: 'demo-cita'") || !citaSrc.includes("arquetipo: 'cita'")) {
+  console.error('FAIL: demo-cita fixture');
+  failed += 1;
+} else {
+  console.log('OK: demo-cita fixture');
+}
+
+const comidaSrc = readFileSync(join(root, 'src/fixtures/demo-comida.ts'), 'utf8');
+if (!comidaSrc.includes("slug: 'demo-comida'") || !comidaSrc.includes("arquetipo: 'comida'")) {
+  console.error('FAIL: demo-comida fixture');
+  failed += 1;
+} else {
+  console.log('OK: demo-comida fixture');
 }
 
 // Minimal structural check mirroring ConfigModulo

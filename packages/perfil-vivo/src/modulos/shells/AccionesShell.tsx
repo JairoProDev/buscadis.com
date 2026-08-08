@@ -103,6 +103,20 @@ function QuickAction({
 export function AccionesShell() {
   const { handoffs, payload } = usePerfil();
   const cerrado = !payload.estadoVivo.abierto;
+  const arq = payload.negocio.arquetipo;
+  const esCita = arq === 'cita' || arq === 'profesional';
+  const esComida = arq === 'comida';
+  const listaHref = esCita ? '#servicios' : '#catalogo';
+  const listaLabel = esCita ? 'Servicios' : esComida ? 'Carta' : 'Catálogo';
+  const waLabel = esCita
+    ? 'Agendar'
+    : esComida
+      ? cerrado
+        ? 'Pedir'
+        : 'Pedir'
+      : cerrado
+        ? 'Escribir'
+        : 'WhatsApp';
 
   return (
     <section className="pv-modulo" id="acciones" aria-label="Acciones rápidas">
@@ -127,15 +141,11 @@ export function AccionesShell() {
           icon={<IconPin />}
           disabled={!handoffs.ruta}
         />
-        <QuickAction href="#catalogo" label="Catálogo" icon={<IconBag />} />
+        <QuickAction href={listaHref} label={listaLabel} icon={<IconBag />} />
         {handoffs.whatsappPrimary ? (
-          <QuickAction
-            href={handoffs.whatsappPrimary}
-            label={cerrado ? 'Escribir' : 'WhatsApp'}
-            icon={<IconWa />}
-          />
+          <QuickAction href={handoffs.whatsappPrimary} label={waLabel} icon={<IconWa />} />
         ) : (
-          <QuickAction href={null} label="WhatsApp" icon={<IconWa />} disabled />
+          <QuickAction href={null} label={waLabel} icon={<IconWa />} disabled />
         )}
       </div>
     </section>

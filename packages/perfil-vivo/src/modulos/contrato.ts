@@ -15,6 +15,8 @@ export interface ModuloMeta {
     | 'faqs'
     | 'promociones'
     | 'tieneNosotros'
+    | 'novedades'
+    | 'equipo'
     | null;
   ancla: string;
   tituloDefault: string;
@@ -63,8 +65,8 @@ export const MODULO_META: Record<TipoModulo, ModuloMeta> = {
     tipo: 'novedades',
     fijo: false,
     minDatos: 1,
-    planMin: 'pro',
-    conteoKey: null,
+    planMin: 'free',
+    conteoKey: 'novedades',
     ancla: 'novedades',
     tituloDefault: 'Novedades',
   },
@@ -189,8 +191,8 @@ export const MODULO_META: Record<TipoModulo, ModuloMeta> = {
     tipo: 'equipo',
     fijo: false,
     minDatos: 1,
-    planMin: 'pro',
-    conteoKey: null,
+    planMin: 'free',
+    conteoKey: 'equipo',
     ancla: 'equipo',
     tituloDefault: 'Equipo',
   },

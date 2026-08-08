@@ -21,6 +21,8 @@ import {
   galeriaFromProfile,
   nosotrosFromProfile,
   promocionFromProfile,
+  novedadesFromProfile,
+  equipoFromProfileBlocks,
 } from './support-content';
 
 const DAY_MAP: Record<string, DiaSemana> = {
@@ -156,6 +158,17 @@ export function productoFromCatalogRow(
   if (stockStatus === 'out_of_stock') disponibilidad = 'agotado';
   else if (stockStatus === 'low_stock') disponibilidad = 'ultimas_unidades';
 
+  const asRec = (v: unknown) =>
+    v && typeof v === 'object' ? (v as Record<string, unknown>) : null;
+  const grupoRaw =
+    typeof row.category === 'string'
+      ? row.category
+      : typeof row.category_name === 'string'
+        ? row.category_name
+        : typeof asRec(row.category)?.name === 'string'
+          ? String(asRec(row.category)!.name)
+          : undefined;
+
   return {
     id,
     negocioId,
@@ -182,6 +195,7 @@ export function productoFromCatalogRow(
     disponibilidad,
     destacado: row.is_featured === true,
     etiquetas: etiquetasFromTags(row.tags, row.is_featured === true),
+    grupo: grupoRaw ? grupoRaw.trim().slice(0, 40) : undefined,
     activo: true,
   };
 }
@@ -215,10 +229,11 @@ const DEFAULT_MODULOS_RETAIL: Negocio['modulos'] = [
   { tipo: 'ubicacion', visible: true, orden: 7 },
   { tipo: 'horario', visible: true, orden: 8 },
   { tipo: 'pago', visible: true, orden: 9 },
-  { tipo: 'canales', visible: true, orden: 10 },
-  { tipo: 'galeria', visible: true, orden: 11 },
-  { tipo: 'nosotros', visible: true, orden: 12 },
-  { tipo: 'faq', visible: true, orden: 13 },
+  { tipo: 'novedades', visible: true, orden: 10 },
+  { tipo: 'canales', visible: true, orden: 11 },
+  { tipo: 'galeria', visible: true, orden: 12 },
+  { tipo: 'nosotros', visible: true, orden: 13 },
+  { tipo: 'faq', visible: true, orden: 14 },
 ];
 
 /**
@@ -234,6 +249,7 @@ export function enrichNegocioFromProfile(
     galeriaCount?: number;
     promoCount?: number;
     tieneNosotros?: boolean;
+    novedadesCount?: number;
   }
 ): Negocio {
   const horario = horarioFromBusinessHours(row.business_hours);
@@ -257,6 +273,7 @@ export function enrichNegocioFromProfile(
       faqs: extras?.faqCount ?? 0,
       promociones: extras?.promoCount ?? 0,
       tieneNosotros: extras?.tieneNosotros ? 1 : 0,
+      novedades: extras?.novedadesCount ?? 0,
     },
   };
 
@@ -313,13 +330,21 @@ export function buildPerfilPayloadFromSources(opts: {
     .flatMap((p) => p.imagenes.map((im) => im.url))
     .filter(Boolean);
   const galeria = galeriaFromProfile(row, productUrls);
+  const novedades = novedadesFromProfile(row);
+  const equipo = equipoFromProfileBlocks(row.profile_blocks);
 
   const negocio = enrichNegocioFromProfile(base, row, published.length, resenas.length, {
     faqCount: faqs.length,
     galeriaCount: galeria.length,
     promoCount: promocion ? 1 : 0,
     tieneNosotros: Boolean(nosotros),
+    novedadesCount: novedades.length,
   });
+
+  // Equipo conteo (sin romper firma de enrich)
+  if (negocio.conteos) {
+    negocio.conteos = { ...negocio.conteos, equipo: equipo.length };
+  }
 
   const dist = distribuirEstrellas(resenas);
   const promedio = promedioEstrellas(resenas);
@@ -332,6 +357,8 @@ export function buildPerfilPayloadFromSources(opts: {
     galeria,
     promocion,
     nosotros,
+    novedades,
+    equipo,
     totalProductos: published.length,
     metricas: {
       antiguedadDesde: negocio.creadoEn,

@@ -20,6 +20,18 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       robots: { index: false, follow: false },
     };
   }
+  if (slug === 'demo-cita') {
+    return {
+      title: 'Barbería Norte Cusco | Perfil Vivo',
+      robots: { index: false, follow: false },
+    };
+  }
+  if (slug === 'demo-comida') {
+    return {
+      title: 'Huatia Andina | Perfil Vivo',
+      robots: { index: false, follow: false },
+    };
+  }
   const profile = await getBusinessProfileBySlug(slug);
   if (profile && isPerfilVivoEnabled(profile)) {
     return {
@@ -42,7 +54,7 @@ export default async function PerfilVivoPreviewPage({ params }: PageProps) {
   const { slug: raw } = await params;
   const slug = normalizeBusinessSlug(raw) || raw.toLowerCase();
 
-  if (slug !== 'demo') {
+  if (slug !== 'demo' && slug !== 'demo-cita' && slug !== 'demo-comida') {
     const profile = await getBusinessProfileBySlug(slug);
     if (profile && isPerfilVivoEnabled(profile)) {
       permanentRedirect(`/@${slug}`);

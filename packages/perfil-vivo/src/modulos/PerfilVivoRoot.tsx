@@ -27,9 +27,18 @@ export function PerfilVivoRoot({
   const vars = derivarTema(negocio.identidad.colorSemilla, modo);
   const style = temaToStyle(vars) as CSSProperties;
 
-  const primaryLabel = payload.estadoVivo.abierto
-    ? 'Escribir por WhatsApp'
-    : 'Escribir (responden al abrir)';
+  const primaryLabel =
+    negocio.arquetipo === 'cita' || negocio.arquetipo === 'profesional'
+      ? payload.estadoVivo.abierto
+        ? 'Agendar por WhatsApp'
+        : 'Agendar (responden al abrir)'
+      : negocio.arquetipo === 'comida'
+        ? payload.estadoVivo.abierto
+          ? 'Pedir por WhatsApp'
+          : 'Pedir (responden al abrir)'
+        : payload.estadoVivo.abierto
+          ? 'Escribir por WhatsApp'
+          : 'Escribir (responden al abrir)';
 
   return (
     <div

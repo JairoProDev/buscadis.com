@@ -17,6 +17,16 @@ export {
   DEMO_RETAIL_PRODUCTOS,
   buildDemoRetailPayload,
 } from './fixtures/demo-retail';
+export {
+  DEMO_CITA_NEGOCIO,
+  DEMO_CITA_SERVICIOS,
+  buildDemoCitaPayload,
+} from './fixtures/demo-cita';
+export {
+  DEMO_COMIDA_NEGOCIO,
+  DEMO_COMIDA_PRODUCTOS,
+  buildDemoComidaPayload,
+} from './fixtures/demo-comida';
 export { calcularEstadoVivo, formatPrecio } from './estado/calcular-estado';
 export { negocioFromBusinessProfile } from './bridge/from-business-profile';
 export {
@@ -31,6 +41,8 @@ export {
   nosotrosFromProfile,
   promocionFromProfile,
   galeriaFromProfile,
+  novedadesFromProfile,
+  equipoFromProfileBlocks,
 } from './bridge/support-content';
 export type {
   PerfilPayload,

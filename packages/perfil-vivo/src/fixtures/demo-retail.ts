@@ -87,10 +87,11 @@ const rawNegocio = {
     { tipo: 'ubicacion' as const, visible: true, orden: 7 },
     { tipo: 'horario' as const, visible: true, orden: 8 },
     { tipo: 'pago' as const, visible: true, orden: 9 },
-    { tipo: 'canales' as const, visible: true, orden: 10 },
-    { tipo: 'galeria' as const, visible: true, orden: 11 },
-    { tipo: 'nosotros' as const, visible: true, orden: 12 },
-    { tipo: 'faq' as const, visible: true, orden: 13 },
+    { tipo: 'novedades' as const, visible: true, orden: 10 },
+    { tipo: 'canales' as const, visible: true, orden: 11 },
+    { tipo: 'galeria' as const, visible: true, orden: 12 },
+    { tipo: 'nosotros' as const, visible: true, orden: 13 },
+    { tipo: 'faq' as const, visible: true, orden: 14 },
   ],
   conteos: {
     productos: 4,
@@ -99,6 +100,8 @@ const rawNegocio = {
     faqs: 4,
     promociones: 1,
     tieneNosotros: 1,
+    novedades: 2,
+    equipo: 0,
   },
   creadoEn: '2026-07-01T12:00:00.000Z',
   actualizadoEn: '2026-08-08T12:00:00.000Z',
@@ -281,5 +284,20 @@ export function buildDemoRetailPayload(now: Date = new Date()): PerfilPayload {
     estadoVivo: calcularEstadoVivo(negocio.horario, now, {
       respuestaMedianaMin: 8,
     }),
+    novedades: [
+      {
+        id: 'nov-1',
+        titulo: 'Llegó cemento Sol y PVC ½"',
+        texto: 'Stock fresco esta semana',
+        publicadaEn: new Date(now.getTime() - 2 * 86400000).toISOString(),
+        imagenUrl: placeholder('Stock', 210),
+      },
+      {
+        id: 'nov-2',
+        titulo: 'Horario especial sábado feriado',
+        publicadaEn: new Date(now.getTime() - 5 * 86400000).toISOString(),
+      },
+    ],
+    equipo: [],
   };
 }
