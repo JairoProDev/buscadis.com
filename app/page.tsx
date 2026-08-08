@@ -1,7 +1,10 @@
 import type { Metadata } from 'next';
 import HomePageClient from '@/components/HomePageClient';
+import { CrawlableAdisoList } from '@/components/seo/CrawlableAdisoList';
+import { JsonLd } from '@/components/seo/JsonLd';
 import { buildAdisoMetadata } from '@/lib/seo/adiso-metadata';
-import { getBusinessProductAsAdiso } from '@/lib/business';
+import { buildAdisoItemListJsonLd } from '@/lib/seo/adiso-jsonld';
+import { getBusinessProductAsAdiso, getMarketplaceFeed } from '@/lib/business';
 import { getAdisoByIdFromSupabase } from '@/lib/supabase';
 import {
   buildCategoryShareMetadata,
@@ -10,8 +13,14 @@ import {
 
 export const dynamic = 'force-dynamic';
 
+const HOME_SSR_LIMIT = 24;
+
 type PageProps = {
-  searchParams: Promise<{ adiso?: string; categoria?: string; [key: string]: string | string[] | undefined }>;
+  searchParams: Promise<{
+    adiso?: string;
+    categoria?: string;
+    [key: string]: string | string[] | undefined;
+  }>;
 };
 
 export async function generateMetadata({ searchParams }: PageProps): Promise<Metadata> {
@@ -42,6 +51,39 @@ export async function generateMetadata({ searchParams }: PageProps): Promise<Met
   }
 }
 
-export default function Home() {
-  return <HomePageClient />;
+export default async function Home({ searchParams }: PageProps) {
+  const params = await searchParams;
+  const categoria =
+    typeof params.categoria === 'string' && isMarketplaceCategory(params.categoria)
+      ? params.categoria.trim().toLowerCase()
+      : undefined;
+
+  let ssrAdisos: Awaited<ReturnType<typeof getMarketplaceFeed>> = [];
+  try {
+    ssrAdisos = await getMarketplaceFeed({
+      limit: HOME_SSR_LIMIT,
+      offset: 0,
+      soloActivos: true,
+      categoria,
+    });
+  } catch (err) {
+    console.error('[home] SSR feed failed:', err);
+  }
+
+  const listPath = categoria ? `/?categoria=${categoria}` : '/';
+  const listName = categoria
+    ? `Avisos de ${categoria} en Buscadis`
+    : 'Avisos recientes en Buscadis';
+
+  return (
+    <>
+      <JsonLd data={buildAdisoItemListJsonLd(ssrAdisos, { name: listName, urlPath: listPath })} />
+      <CrawlableAdisoList
+        adisos={ssrAdisos}
+        heading={listName}
+        visuallyHidden
+      />
+      <HomePageClient />
+    </>
+  );
 }

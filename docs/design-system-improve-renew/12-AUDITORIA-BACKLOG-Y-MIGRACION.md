@@ -77,11 +77,12 @@ Reconstruir `AdisoCard` con anatomía fija y tres vistas; eliminar `styled-jsx`;
 **Hecho:** 2026-08-08 · anatomía body; Grilla Tailwind; `lib/listing-scroll-restore.ts`.
 *Terminado cuando:* una prueba de cinco segundos con tres personas recupera precio y ubicación.
 
-### Sprint 6 · Renderizado en servidor e indexación 🔜
+### Sprint 6 · Renderizado en servidor e indexación ✅
 Migrar home, listado, detalle de aviso y perfil de negocio a Server Components con datos en el HTML. Añadir paginación con enlaces. JSON-LD.
+**Hecho:** 2026-08-08 · ItemList/Product/LocalBusiness; listas crawlables; `npm run smoke:ssr`.
 *Terminado cuando:* `curl` de las cuatro rutas devuelve contenido real y Search Console empieza a indexar avisos.
 
-### Sprint 7 · Chrome y composer
+### Sprint 7 · Chrome y composer 🔜
 Header a 56/64, nav inferior a 56, composer con estados completos y accesible por teclado, barra de categorías con los colores nuevos, filtros migrados a CSS.
 *Terminado cuando:* el chrome permanente en móvil baja de 136px a 112px.
 

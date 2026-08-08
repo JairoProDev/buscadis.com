@@ -56,24 +56,45 @@ async function persistCatalog(businessId: string, publishedOnly: any[]): Promise
   await idbSetCatalog(businessId, publishedOnly);
 }
 
-export function useBusinessData(slug: string, isOwner: boolean) {
+export function useBusinessData(
+  slug: string,
+  isOwner: boolean,
+  initialBusiness?: BusinessProfile | null
+) {
   const normalizedSlug = normalizeBusinessSlug(slug);
   const { isOnline, justCameOnline } = useNetworkStatus();
   const revalidatingRef = useRef(false);
-  const businessRef = useRef<BusinessProfile | null>(null);
+  const businessRef = useRef<BusinessProfile | null>(
+    initialBusiness ? enrichBusinessProfile(initialBusiness) : null
+  );
 
-  const [state, setState] = useState<BusinessDataState>({
-    business: null,
-    adisos: [],
-    catalogProducts: [],
-    loading: true,
-    revalidating: false,
-    fromCache: false,
-    isStale: false,
-    error: null,
+  const [state, setState] = useState<BusinessDataState>(() => {
+    if (initialBusiness) {
+      const enriched = enrichBusinessProfile(initialBusiness);
+      return {
+        business: enriched,
+        adisos: [],
+        catalogProducts: [],
+        loading: false,
+        revalidating: false,
+        fromCache: false,
+        isStale: false,
+        error: null,
+      };
+    }
+    return {
+      business: null,
+      adisos: [],
+      catalogProducts: [],
+      loading: true,
+      revalidating: false,
+      fromCache: false,
+      isStale: false,
+      error: null,
+    };
   });
 
-  const [hydrated, setHydrated] = useState(false);
+  const [hydrated, setHydrated] = useState(Boolean(initialBusiness));
 
   useEffect(() => {
     let cancelled = false;

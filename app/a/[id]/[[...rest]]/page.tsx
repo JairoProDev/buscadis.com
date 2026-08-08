@@ -4,7 +4,9 @@ import { getAdisoByIdFromSupabase } from '@/lib/supabase';
 import { getBusinessProductAsAdiso } from '@/lib/business';
 import { getIdFromSlug, getAdisoUrl, createAdisoTitleSlug } from '@/lib/url';
 import ClientAdisoWrapper from '@/components/ClientAdisoWrapper';
+import { JsonLd } from '@/components/seo/JsonLd';
 import { buildAdisoMetadata } from '@/lib/seo/adiso-metadata';
+import { buildAdisoProductJsonLd } from '@/lib/seo/adiso-jsonld';
 import type { Adiso } from '@/types';
 
 export const revalidate = 3600;
@@ -50,5 +52,10 @@ export default async function AdisoShortPage(props: PageProps) {
     redirect(getAdisoUrl(adiso));
   }
 
-  return <ClientAdisoWrapper id={adiso.id} initialAdiso={adiso} />;
+  return (
+    <>
+      <JsonLd data={buildAdisoProductJsonLd(adiso)} />
+      <ClientAdisoWrapper id={adiso.id} initialAdiso={adiso} />
+    </>
+  );
 }

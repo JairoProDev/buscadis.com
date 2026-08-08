@@ -23,7 +23,8 @@
     "deals:seed": "node scripts/seed-deal-clips.mjs",
     "seed:buscadis": "npx tsx scripts/seed-buscadis-profile.ts",
     "demo:buscadis": "npm run seed:buscadis && npm run dev",
-    "test:envios": "npx tsx scripts/test-envios-status.ts"
+    "test:envios": "npx tsx scripts/test-envios-status.ts",
+    "smoke:ssr": "bash scripts/smoke-ssr-indexing.sh"
   },
   "dependencies": {
     "@ai-sdk/openai": "^4.0.0",

@@ -1,6 +1,6 @@
 # Design System Migration — Roadmap
 
-> **Estado:** Sprints 1–5 ✅ · Sprint 6 🔜 · Sprints 7–8 planificados  
+> **Estado:** Sprints 1–6 ✅ · Sprint 7 🔜 · Sprint 8 planificado  
 > **Fuente de verdad de diseño:** `docs/design-system-improve-renew/`  
 > **Fuente de verdad de tokens:** `packages/tokens/`  
 > **Actualizado:** 2026-08-08
@@ -23,8 +23,8 @@
 | **3** | Primitivas tanda 1 | ✅ Hecho | [sprint-3](./2026-08-08-sprint-3-ui-primitives.md) | Header/Auth/Publish usan Button/Input/Icon |
 | **4** | Primitivas tanda 2 | ✅ Hecho | [sprint-4](./2026-08-08-sprint-4-ui-primitives-2.md) | Modal + Toast migrados; resto exportado |
 | **5** | AdisoCard + rejilla | ✅ Hecho | [sprint-5](./2026-08-08-sprint-5-adisocard-rejilla.md) | Anatomía fija + Tailwind grid + scroll restore |
-| **6** | SSR + indexación | 🔜 Siguiente | [abajo §6](#sprint-6--ssr--indexación) | `curl` con contenido real en 4 rutas |
-| **7** | Chrome + composer | 📋 Blueprint | [abajo §7](#sprint-7--chrome--composer) | Chrome móvil 112px |
+| **6** | SSR + indexación | ✅ Hecho | [sprint-6](./2026-08-08-sprint-6-ssr-indexing.md) | HTML + JSON-LD en 4 rutas; `npm run smoke:ssr` |
+| **7** | Chrome + composer | 🔜 Siguiente | [abajo §7](#sprint-7--chrome--composer) | Chrome móvil 112px |
 | **8** | Storefront kit | 📋 Blueprint | [abajo §8](#sprint-8--storefront-kit) | Tenant extremo legible |
 
 ---
@@ -101,13 +101,15 @@ curl -sL https://buscadis.com | head -c 2000
 
 ---
 
-## Sprint 6 — SSR + indexación
+## Sprint 6 — SSR + indexación ✅
 
 **Goal:** Home, listado, detalle adiso, perfil negocio = Server Components con datos en HTML; paginación con `<a>`; JSON-LD.
 
-**Done:** `curl` sin JS muestra títulos/precios; Search Console empieza a ver URLs.
+**Hecho:** crawlable lists + ItemList/Product/LocalBusiness JSON-LD; category `?page=` + rel; business `initialProfile`; `scripts/smoke-ssr-indexing.sh`.
 
-**Nota:** esto es P0 de negocio (N1), no de “belleza”. Si el equipo es 1 persona, **considerar S6 en paralelo con S3**.
+**Done:** `npm run smoke:ssr` (contra server local o `SMOKE_BASE_URL`).
+
+**Nota:** Home SPA intacta; el feed SSR es lista `sr-only` + JSON-LD (hidratación completa de grilla = follow-up).
 
 ---
 

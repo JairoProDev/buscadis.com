@@ -1,20 +1,30 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { Categoria } from '@/types';
-import { getAdisosFromSupabase } from '@/lib/supabase';
+import { getMarketplaceFeed } from '@/lib/business';
 import CategoriaPageContent from './CategoriaPageContent';
-import { getSiteUrl } from '@/lib/seo/og-image';
+import { CrawlableAdisoList, ListingPagination } from '@/components/seo/CrawlableAdisoList';
+import { JsonLd } from '@/components/seo/JsonLd';
+import { buildAdisoItemListJsonLd } from '@/lib/seo/adiso-jsonld';
 import { buildCategoryShareMetadata } from '@/lib/seo/category-metadata';
 
-const siteUrl = getSiteUrl();
+const PAGE_SIZE = 24;
 
 interface CategoriaPageProps {
-  params: Promise<{
-    nombre: string;
-  }>;
+  params: Promise<{ nombre: string }>;
+  searchParams: Promise<{ page?: string }>;
 }
 
-const categoriasValidas: Categoria[] = ['empleos', 'inmuebles', 'vehiculos', 'servicios', 'productos', 'eventos', 'negocios', 'comunidad'];
+const categoriasValidas: Categoria[] = [
+  'empleos',
+  'inmuebles',
+  'vehiculos',
+  'servicios',
+  'productos',
+  'eventos',
+  'negocios',
+  'comunidad',
+];
 
 const categoriaLabels: Record<Categoria, string> = {
   empleos: 'Empleos',
@@ -27,65 +37,62 @@ const categoriaLabels: Record<Categoria, string> = {
   comunidad: 'Comunidad',
 };
 
-const categoriaDescriptions: Record<Categoria, string> = {
-  empleos: 'Encuentra oportunidades de trabajo y empleo en Perú',
-  inmuebles: 'Compra, vende o alquila propiedades en Perú',
-  vehiculos: 'Compra y vende vehículos nuevos y usados en Perú',
-  servicios: 'Encuentra servicios profesionales y personales',
-  productos: 'Compra y vende productos nuevos y usados',
-  eventos: 'Descubre eventos y actividades en tu ciudad',
-  negocios: 'Oportunidades de negocio y franquicias',
-  comunidad: 'Anuncios de la comunidad y clasificados generales',
-};
-
 export async function generateMetadata({ params }: CategoriaPageProps): Promise<Metadata> {
   const { nombre } = await params;
-  
+
   if (!categoriasValidas.includes(nombre as Categoria)) {
-    return {
-      title: 'Categoría no encontrada',
-    };
+    return { title: 'Categoría no encontrada' };
   }
 
-  const categoria = nombre as Categoria;
-
-  return buildCategoryShareMetadata(categoria, {
+  return buildCategoryShareMetadata(nombre as Categoria, {
     urlPath: `/categoria/${nombre}`,
   });
 }
 
-export default async function CategoriaPage({ params }: CategoriaPageProps) {
+export default async function CategoriaPage({ params, searchParams }: CategoriaPageProps) {
   const { nombre } = await params;
-  
+  const sp = await searchParams;
+
   if (!categoriasValidas.includes(nombre as Categoria)) {
     notFound();
   }
 
   const categoria = nombre as Categoria;
-  
-  try {
-    // Obtener adisos de esta categoría
-    const todosAdisos = await getAdisosFromSupabase();
-    const adisosCategoria = todosAdisos.filter(a => a.categoria === categoria);
+  const page = Math.max(1, Number.parseInt(sp.page || '1', 10) || 1);
+  const offset = (page - 1) * PAGE_SIZE;
 
-    return <CategoriaPageContent categoria={categoria} adisos={adisosCategoria} />;
+  try {
+    const adisosCategoria = await getMarketplaceFeed({
+      limit: PAGE_SIZE + 1,
+      offset,
+      soloActivos: true,
+      categoria,
+    });
+    const hasNext = adisosCategoria.length > PAGE_SIZE;
+    const pageAdisos = hasNext ? adisosCategoria.slice(0, PAGE_SIZE) : adisosCategoria;
+    const label = categoriaLabels[categoria];
+    const basePath = `/categoria/${nombre}`;
+
+    return (
+      <>
+        <JsonLd
+          data={buildAdisoItemListJsonLd(pageAdisos, {
+            name: `${label} en Buscadis`,
+            urlPath: page > 1 ? `${basePath}?page=${page}` : basePath,
+          })}
+        />
+        {/* Always in HTML for crawlers (client may redirect humans to /?categoria=) */}
+        <CrawlableAdisoList
+          adisos={pageAdisos}
+          heading={`${label} — página ${page}`}
+          visuallyHidden
+        />
+        <ListingPagination basePath={basePath} page={page} hasNext={hasNext} />
+        <CategoriaPageContent categoria={categoria} adisos={pageAdisos} />
+      </>
+    );
   } catch (error) {
     console.error('Error al cargar categoría:', error);
     notFound();
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
