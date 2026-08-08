@@ -2,6 +2,7 @@
 
 import { useMemo } from 'react';
 import { usePerfil } from '../PerfilContext';
+import { esPromocionVigente } from '../../promo/vigente';
 
 function msRestantes(venceEn?: string, now = Date.now()): number | null {
   if (!venceEn) return null;
@@ -32,8 +33,7 @@ export function PromocionShell({ titulo }: { titulo: string }) {
     [promo]
   );
 
-  if (!promo) return null;
-  if (restante != null && restante <= 0) return null;
+  if (!esPromocionVigente(promo)) return null;
 
   const showCountdown = restante != null && restante < 72 * 3_600_000;
   const href = handoffs.promocionWhatsapp || handoffs.whatsappPrimary;

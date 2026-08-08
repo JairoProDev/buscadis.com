@@ -24,6 +24,7 @@ import {
   novedadesFromProfile,
   equipoFromProfileBlocks,
 } from './support-content';
+import { promocionSiVigente } from '../promo/vigente';
 
 const DAY_MAP: Record<string, DiaSemana> = {
   lun: 'lun',
@@ -325,7 +326,8 @@ export function buildPerfilPayloadFromSources(opts: {
     faqs = faqs.slice(0, 6);
   }
   const nosotros = nosotrosFromProfile(row);
-  const promocion = promocionFromProfile(row, opts.dealRows || [], nowMs);
+  const promocionRaw = promocionFromProfile(row, opts.dealRows || [], nowMs);
+  const promocion = promocionSiVigente(promocionRaw, nowMs);
   const productUrls = published
     .flatMap((p) => p.imagenes.map((im) => im.url))
     .filter(Boolean);

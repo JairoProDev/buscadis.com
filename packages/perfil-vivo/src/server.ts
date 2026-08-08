@@ -46,6 +46,8 @@ export {
   buildDemoPerfilVivoPayload,
 } from './demos';
 export type { DemoPerfilVivoSlug } from './demos';
+export { sanitizePerfilPayload } from './sanitize';
+export { promocionSiVigente, esPromocionVigente } from './promo/vigente';
 export { calcularEstadoVivo, formatPrecio } from './estado/calcular-estado';
 export { negocioFromBusinessProfile } from './bridge/from-business-profile';
 export {

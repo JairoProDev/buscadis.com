@@ -1,6 +1,7 @@
 import type { PerfilPayload } from '../types';
 import type { HandoffLinks } from '../modulos/PerfilContext';
 import { formatPrecio } from '../estado/calcular-estado';
+import { esPromocionVigente } from '../promo/vigente';
 import {
   crearHandoffLlamada,
   crearHandoffRuta,
@@ -31,9 +32,7 @@ export function buildHandoffLinks(payload: PerfilPayload): HandoffLinks {
     });
   }
 
-  const promoViva =
-    promocion &&
-    (!promocion.venceEn || Date.parse(promocion.venceEn) > Date.now());
+  const promoViva = esPromocionVigente(promocion);
 
   return {
     whatsappPrimary: negocio.contacto.whatsapp

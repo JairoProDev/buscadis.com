@@ -4,7 +4,8 @@ import { getPublishedBusinessProfileBySlug } from '@/lib/business/get-public-pro
 import { buildLocalBusinessJsonLd } from '@/lib/business/seo';
 import { JsonLd } from '@/components/seo/JsonLd';
 import { isPerfilVivoEnabled } from '@/lib/business/perfil-vivo-flag';
-import { PerfilVivoPageView } from '@/components/business/PerfilVivoPageView';
+import { PerfilVivoPageView, loadPerfilVivoPayload } from '@/components/business/PerfilVivoPageView';
+import { buildPerfilVivoShareMetadata } from '@/lib/seo/perfil-vivo-metadata';
 import PublicBusinessPageClient from './PublicBusinessPageClient';
 
 export const revalidate = 60;
@@ -29,6 +30,15 @@ export async function generateMetadata({ params, searchParams }: PageProps): Pro
   const profile = await getPublishedBusinessProfileBySlug(slug);
   if (!profile || !isPerfilVivoEnabled(profile)) return {};
 
+  const payload = await loadPerfilVivoPayload(slug);
+  if (payload) {
+    return buildPerfilVivoShareMetadata({
+      payload,
+      canonicalPath: `/@${slug}`,
+      indexable: profile.is_published !== false,
+    });
+  }
+
   const distrito = profile.contact_address?.split(',').pop()?.trim() || 'Cusco';
   const title =
     profile.meta_title ||
@@ -46,14 +56,6 @@ export async function generateMetadata({ params, searchParams }: PageProps): Pro
     robots: {
       index: profile.is_published !== false,
       follow: true,
-    },
-    openGraph: {
-      title,
-      description,
-      url: `https://buscadis.com/@${slug}`,
-      images: profile.og_image_url || profile.logo_url
-        ? [profile.og_image_url || profile.logo_url!]
-        : undefined,
     },
   };
 }

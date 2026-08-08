@@ -6,7 +6,7 @@ import {
   isDemoPerfilVivoSlug,
   buildHandoffLinks,
   buildPerfilPayloadFromSources,
-  formatPrecio,
+  sanitizePerfilPayload,
 } from '@buscadis/perfil-vivo/server';
 import {
   getBusinessCatalog,
@@ -120,7 +120,7 @@ export async function loadPerfilVivoPayload(
   slug: string
 ): Promise<PerfilPayload | null> {
   const demo = buildDemoPerfilVivoPayload(slug);
-  if (demo) return demo;
+  if (demo) return sanitizePerfilPayload(demo);
 
   const profile = await getBusinessProfileBySlug(slug);
   if (!profile) return null;
@@ -130,17 +130,18 @@ export async function loadPerfilVivoPayload(
     fetchReviewRows(profile.id),
   ]);
 
-  return buildPerfilPayloadFromSources({
+  const payload = buildPerfilPayloadFromSources({
     profileRow: profile,
     catalogRows: catalog,
     reviewRows: reviews,
   });
+  return payload ? sanitizePerfilPayload(payload) : null;
 }
 
 /** Payload + producto concreto (aunque no esté en destacados del carrusel). */
 export async function loadProductoEnPerfil(slug: string, productoId: string) {
   if (isDemoPerfilVivoSlug(slug)) {
-    const payload = buildDemoPerfilVivoPayload(slug)!;
+    const payload = sanitizePerfilPayload(buildDemoPerfilVivoPayload(slug)!);
     const producto = payload.productos.find((p) => p.id === productoId) ?? null;
     return { payload, producto };
   }
@@ -159,17 +160,18 @@ export async function loadProductoEnPerfil(slug: string, productoId: string) {
     reviewRows: reviews,
   });
   if (!payload) return { payload: null, producto: null };
+  const sanitized = sanitizePerfilPayload(payload);
 
   const { productoFromCatalogRow } = await import('@buscadis/perfil-vivo/server');
   const row = (catalog as Record<string, unknown>[]).find(
     (r) => String(r.id) === productoId
   );
-  let producto = payload.productos.find((p) => p.id === productoId) ?? null;
+  let producto = sanitized.productos.find((p) => p.id === productoId) ?? null;
   if (!producto && row) {
-    producto = productoFromCatalogRow(row, payload.negocio.id);
+    producto = productoFromCatalogRow(row, sanitized.negocio.id);
   }
 
-  return { payload, producto };
+  return { payload: sanitized, producto };
 }
 
 /** Render compartido /v y cutover /@ */
@@ -207,10 +209,13 @@ export async function PerfilVivoPageView({
           overflow: 'hidden',
         }}
       >
-        {payload.negocio.nombre}
-        {payload.productos[0]?.precio
-          ? ` ${formatPrecio(payload.productos[0].precio.valor)}`
-          : ''}
+        {`${payload.negocio.nombre} es ${payload.negocio.categoria.nombre} en ${
+          payload.negocio.ubicacion?.distrito ?? 'Cusco'
+        }. ${
+          payload.nosotros?.texto?.slice(0, 120) ||
+          payload.negocio.eslogan ||
+          'Precios, horario y contacto por WhatsApp en Buscadis.'
+        }`}
       </span>
       <PerfilVivoAnalytics
         businessProfileId={payload.negocio.id}
