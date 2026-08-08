@@ -99,7 +99,14 @@ const nextConfig = {
       ],
     };
   },
-  transpilePackages: ['@buscadis/profile-engine', '@imgly/background-removal', 'onnxruntime-web'],
+  transpilePackages: [
+    '@buscadis/profile-engine',
+    '@buscadis/storefront-kit',
+    '@buscadis/ui',
+    '@buscadis/tokens',
+    '@imgly/background-removal',
+    'onnxruntime-web',
+  ],
   webpack: (config, { isServer }) => {
     if (!isServer) {
       config.resolve.alias = {

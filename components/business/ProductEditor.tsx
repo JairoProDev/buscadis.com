@@ -575,7 +575,7 @@ export function ProductEditor({ product, businessProfileId, userId, onSave, onCa
                                 value={formData.price}
                                 onChange={e => update('price', e.target.value)}
                                 className="w-full pl-8 pr-3 py-2.5 rounded-xl border-2 text-sm outline-none transition-colors"
-                                style={{ borderColor: formData.price ? 'var(--border-color)' : '#fbbf24', backgroundColor: 'var(--bg-secondary)', color: 'var(--text-primary)' }}
+                                style={{ borderColor: formData.price ? 'var(--border-color)' : 'var(--bs-color-sol-400)', backgroundColor: 'var(--bg-secondary)', color: 'var(--text-primary)' }}
                                 placeholder="0.00"
                                 disabled={loading}
                             />

@@ -9,109 +9,25 @@ import React from 'react';
 export default function SkeletonAdiso() {
   return (
     <div
+      className="animate-pulse flex flex-col gap-3 rounded-xl border p-4"
       style={{
         backgroundColor: 'var(--bg-secondary)',
-        borderRadius: '0.75rem',
-        padding: '1rem',
-        border: '1px solid var(--border-color)',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '0.75rem',
-        animation: 'pulse 1.5s ease-in-out infinite'
+        borderColor: 'var(--border-color)',
       }}
     >
-      {/* Título skeleton */}
       <div
-        style={{
-          height: '1.25rem',
-          backgroundColor: 'var(--border-color)',
-          borderRadius: '0.25rem',
-          width: '70%',
-          animation: 'shimmer 2s infinite'
-        }}
+        className="skeleton-shimmer h-5 w-[70%]"
       />
-      
-      {/* Descripción skeleton */}
-      <div
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '0.5rem'
-        }}
-      >
-        <div
-          style={{
-            height: '0.875rem',
-            backgroundColor: 'var(--border-color)',
-            borderRadius: '0.25rem',
-            width: '100%',
-            animation: 'shimmer 2s infinite',
-            animationDelay: '0.1s'
-          }}
-        />
-        <div
-          style={{
-            height: '0.875rem',
-            backgroundColor: 'var(--border-color)',
-            borderRadius: '0.25rem',
-            width: '85%',
-            animation: 'shimmer 2s infinite',
-            animationDelay: '0.2s'
-          }}
-        />
-      </div>
-      
-      {/* Footer skeleton */}
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginTop: '0.5rem'
-        }}
-      >
-        <div
-          style={{
-            height: '0.75rem',
-            backgroundColor: 'var(--border-color)',
-            borderRadius: '0.25rem',
-            width: '40%',
-            animation: 'shimmer 2s infinite',
-            animationDelay: '0.3s'
-          }}
-        />
-        <div
-          style={{
-            height: '0.75rem',
-            backgroundColor: 'var(--border-color)',
-            borderRadius: '0.25rem',
-            width: '30%',
-            animation: 'shimmer 2s infinite',
-            animationDelay: '0.4s'
-          }}
-        />
+
+      <div className="flex flex-col gap-2">
+        <div className="skeleton-shimmer h-3.5 w-full" />
+        <div className="skeleton-shimmer h-3.5 w-[85%]" />
       </div>
 
-      <style jsx>{`
-        @keyframes pulse {
-          0%, 100% {
-            opacity: 1;
-          }
-          50% {
-            opacity: 0.6;
-          }
-        }
-        @keyframes shimmer {
-          0% {
-            background: linear-gradient(90deg, var(--border-color) 0%, var(--bg-secondary) 50%, var(--border-color) 100%);
-            background-size: 200% 100%;
-            background-position: -200% 0;
-          }
-          100% {
-            background-position: 200% 0;
-          }
-        }
-      `}</style>
+      <div className="mt-2 flex items-center justify-between">
+        <div className="skeleton-shimmer h-3 w-[40%]" />
+        <div className="skeleton-shimmer h-3 w-[30%]" />
+      </div>
     </div>
   );
 }
@@ -124,17 +40,10 @@ export function SkeletonAdisosGrid({ count = 6 }: { count?: number }) {
   return (
     <>
       {Array.from({ length: count }).map((_, index) => (
-        <div
-          key={`skeleton-${index}`}
-          style={{
-            gridColumn: 'span 1',
-            gridRow: 'span 1'
-          }}
-        >
+        <div key={`skeleton-${index}`} className="col-span-1 row-span-1">
           <SkeletonAdiso />
         </div>
       ))}
     </>
   );
 }
-

@@ -25,6 +25,18 @@
     "paths": {
       "@/*": [
         "./*"
+      ],
+      "@buscadis/storefront-kit": [
+        "./packages/storefront-kit/src/index.ts"
+      ],
+      "@buscadis/ui": [
+        "./packages/ui/src/index.ts"
+      ],
+      "@buscadis/profile-engine": [
+        "./packages/profile-engine/src/index.ts"
+      ],
+      "@buscadis/tokens": [
+        "./packages/tokens/dist/tokens.ts"
       ]
     }
   },

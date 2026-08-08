@@ -211,60 +211,19 @@ export function ThinkingSkeleton({ message = 'Pensando...' }: { message?: string
 
 export function ListingCardSkeleton() {
   return (
-    <div style={{
-      background: 'var(--bg-secondary)',
-      border: '1px solid var(--border-color)',
-      borderRadius: '12px',
-      padding: '16px',
-      marginBottom: '12px',
-    }}>
-      <div style={{
-        height: '20px',
-        width: '70%',
-        background: 'var(--border-color)',
-        borderRadius: '4px',
-        marginBottom: '12px',
-        animation: 'pulse 1.5s ease-in-out infinite',
-      }} />
-      <div style={{
-        height: '40px',
-        width: '100%',
-        background: 'var(--border-color)',
-        borderRadius: '4px',
-        marginBottom: '12px',
-        animation: 'pulse 1.5s ease-in-out infinite',
-      }} />
-      <div style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-      }}>
-        <div style={{
-          height: '14px',
-          width: '40%',
-          background: 'var(--border-color)',
-          borderRadius: '4px',
-          animation: 'pulse 1.5s ease-in-out infinite',
-        }} />
-        <div style={{
-          height: '32px',
-          width: '80px',
-          background: 'var(--border-color)',
-          borderRadius: '8px',
-          animation: 'pulse 1.5s ease-in-out infinite',
-        }} />
+    <div
+      className="mb-3 rounded-xl border p-4"
+      style={{
+        background: 'var(--bg-secondary)',
+        borderColor: 'var(--border-color)',
+      }}
+    >
+      <div className="skeleton-shimmer mb-3 h-5 w-[70%]" />
+      <div className="skeleton-shimmer mb-3 h-10 w-full" />
+      <div className="flex items-center justify-between">
+        <div className="skeleton-shimmer h-3.5 w-[40%]" />
+        <div className="skeleton-shimmer h-8 w-20" />
       </div>
-
-      <style jsx global>{`
-        @keyframes pulse {
-          0%, 100% {
-            opacity: 1;
-          }
-          50% {
-            opacity: 0.5;
-          }
-        }
-      `}</style>
     </div>
   );
 }

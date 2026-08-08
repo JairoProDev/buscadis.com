@@ -65,7 +65,7 @@ body {
   -moz-osx-font-smoothing: grayscale;
   background-color: var(--bs-bg-canvas);
   background-image: var(--brand-mesh);
-  background-attachment: fixed;
+  background-attachment: scroll;
   color: var(--bs-fg-default);
   line-height: 1.6;
 }
@@ -201,6 +201,19 @@ a {
   border-radius: var(--bs-radius-xs);
 }
 
+@keyframes deal-kenburns {
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(1.12);
+  }
+}
+
+.deal-ken-burns img {
+  animation: deal-kenburns 12s ease-in-out infinite alternate;
+}
+
 .border-border-subtle {
   border-color: var(--bs-border-subtle);
 }
@@ -216,7 +229,7 @@ a {
 .brand-mesh-bg {
   background-color: var(--bs-bg-canvas);
   background-image: var(--brand-mesh);
-  background-attachment: fixed;
+  background-attachment: scroll;
 }
 
 .brand-mesh-glass {

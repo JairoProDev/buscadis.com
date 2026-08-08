@@ -237,20 +237,6 @@ export default function DealClipCard({
           puedeSiguiente={false}
         />
       )}
-
-      <style jsx>{`
-        .deal-ken-burns img {
-          animation: kenburns 12s ease-in-out infinite alternate;
-        }
-        @keyframes kenburns {
-          from {
-            transform: scale(1);
-          }
-          to {
-            transform: scale(1.12);
-          }
-        }
-      `}</style>
     </div>
   );
 }

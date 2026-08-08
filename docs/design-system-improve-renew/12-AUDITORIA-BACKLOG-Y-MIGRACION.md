@@ -1,49 +1,53 @@
 # 12 — Auditoría, backlog y migración
 
 > Actualiza el archivo 09 de la extracción original. La leyenda de prioridad cambia: **P0** bloquea o rompe accesibilidad/negocio · **P1** deuda visible · **P2** higiene.
+>
+> **Estado (2026-08-08):** Sprints 1–8 cerrados. Ver cierre en `docs/superpowers/plans/2026-08-08-design-system-complete.md`.
 
 ---
 
 ## 1. Hallazgos P0 (nuevos y heredados)
 
-| # | Hallazgo | Impacto | Acción |
-|---|---|---|---|
-| **N1** | El shell no se renderiza en servidor: buscadis.com entrega `Cargando…` | SEO y AEO nulos; ningún aviso indexable | Migrar rutas clave a Server Components con datos en el HTML |
-| **N2** | Blanco sobre `#53acc5` ≈ 2.3:1 | Falla AA; botones ilegibles con sol | Separar identidad (`adis-400`) de acción (`adis-600`) |
-| **N3** | CTA Publicar: celeste sobre amarillo ≈ 1.5:1 | El botón más importante del producto es inaccesible | Texto tinta `#10242B` sobre el amarillo |
-| **N4** | `logo.svg` de ~3 MB | Penaliza LCP en toda sesión | Optimizar a <15 KB |
-| B1 | Brand blue `#53acc5` vs `#38bdf8` en spec y PWA | Marca rota entre producto e instalación | Congelar `#53acc5`; actualizar manifests |
-| B2 | Brand yellow `#ffc24a` vs `#fbbf24` | Idem | Congelar `#ffc24a` |
-| B3 | Categorías divergentes CSS vs TS (`empleos`, `negocios`) | Acentos incorrectos según feature | Fuente única TS que genera CSS vars |
-| **N5** | Sin capa semántica de tokens | Causa raíz de casi toda la deuda | Paquete de tokens en 3 capas |
+| # | Hallazgo | Impacto | Acción | Estado |
+|---|---|---|---|---|
+| **N1** | El shell no se renderiza en servidor: buscadis.com entrega `Cargando…` | SEO y AEO nulos; ningún aviso indexable | Migrar rutas clave a Server Components con datos en el HTML | ✅ Sprint 6 (parcial: hidratación RSC de grilla home diferida) |
+| **N2** | Blanco sobre `#53acc5` ≈ 2.3:1 | Falla AA; botones ilegibles con sol | Separar identidad (`adis-400`) de acción (`adis-600`) | ✅ Sprint 2 |
+| **N3** | CTA Publicar: celeste sobre amarillo ≈ 1.5:1 | El botón más importante del producto es inaccesible | Texto tinta `#10242B` sobre el amarillo | ✅ Sprint 2 |
+| **N4** | `logo.svg` de ~3 MB | Penaliza LCP en toda sesión | Optimizar a <15 KB | ✅ Sprint 2 |
+| B1 | Brand blue `#53acc5` vs `#38bdf8` en spec y PWA | Marca rota entre producto e instalación | Congelar `#53acc5`; actualizar manifests | ✅ Sprint 2 |
+| B2 | Brand yellow `#ffc24a` vs `#fbbf24` | Idem | Congelar `#ffc24a` | ✅ Sprint 2 (+ leftover `ProductEditor` → `--bs-color-sol-400`) |
+| B3 | Categorías divergentes CSS vs TS (`empleos`, `negocios`) | Acentos incorrectos según feature | Fuente única TS que genera CSS vars | ✅ Sprint 2 |
+| **N5** | Sin capa semántica de tokens | Causa raíz de casi toda la deuda | Paquete de tokens en 3 capas | ✅ Sprint 1 |
 
 ## 2. Hallazgos P1
 
-| # | Hallazgo | Acción |
-|---|---|---|
-| B4 | `.light-mode` ≠ `:root` | Unificar; eliminar `.light-mode` |
-| B5 | Fuentes declaradas y no cargadas + `!important` | Decisión de `05`: system + Archivo |
-| B6 | Tailwind "Luminous Void" paralelo | Eliminar; migrar `BentoCard` |
-| B7 | `--brand-blue` vs `--brand-color` | Prefijo `--bs-` y contrato de tenant |
-| B8 | Fallback rosa `#ec4899` | Eliminar; fallback = `sol-400` |
-| B12 | `slate/zinc/gray` hardcodeados en features | Codemod a tokens semánticos |
-| **N6** | `backdrop-filter: blur(40px)` sin degradación | Limitar a 2 superficies; sustituto sólido |
-| **N7** | `background-attachment: fixed` en el mesh | Gradiente estático |
-| **N8** | Framer Motion en filtros | Migrar a transiciones CSS |
-| **N9** | 3 familias de íconos + 25 imports fuera del registry | Migrar a Lucide + regla de ESLint |
-| **N10** | Props booleanas acumuladas (`compact`/`embedded`/`isDesktop`) | Prop de variante + contexto de densidad |
-| **N11** | Scroll infinito sin enlaces de paginación | Añadir paginación real para crawlers |
-| **N12** | Vuelta al listado pierde scroll y filtros | Restaurar estado en la navegación |
+| # | Hallazgo | Acción | Estado |
+|---|---|---|---|
+| B4 | `.light-mode` ≠ `:root` | Unificar; eliminar `.light-mode` | ✅ Sprint 2 (alias residual en tokens dist = puente) |
+| B5 | Fuentes declaradas y no cargadas + `!important` | Decisión de `05`: system + Archivo | ✅ Sprint 2 |
+| B6 | Tailwind "Luminous Void" paralelo | Eliminar; migrar `BentoCard` | ✅ Sprint 2/3 |
+| B7 | `--brand-blue` vs `--brand-color` | Prefijo `--bs-` y contrato de tenant | ✅ Sprint 8 (`@buscadis/storefront-kit`) |
+| B8 | Fallback rosa `#ec4899` | Eliminar; fallback = `sol-400` | ✅ Sprint 2 (0× en `components/`) |
+| B12 | `slate/zinc/gray` hardcodeados en features | Codemod a tokens semánticos | parcial — codemod pendiente; no bloquea |
+| **N6** | `backdrop-filter: blur(40px)` sin degradación | Limitar a 2 superficies; sustituto sólido | ✅ (sin `blur(40px)` restante) |
+| **N7** | `background-attachment: fixed` en el mesh | Gradiente estático / `scroll` | ✅ (`globals.css` → `scroll`) |
+| **N8** | Framer Motion en filtros | Migrar a transiciones CSS | parcial — FilterSectionCard CSS; migración full diferida |
+| **N9** | 3 familias de íconos + 25 imports fuera del registry | Migrar a Lucide + regla de ESLint | parcial — `@buscadis/ui` Icon; migración full diferida |
+| **N10** | Props booleanas acumuladas (`compact`/`embedded`/`isDesktop`) | Prop de variante + contexto de densidad | parcial — AdisoCard anatomía; prop cleanup incremental |
+| **N11** | Scroll infinito sin enlaces de paginación | Añadir paginación real para crawlers | ✅ Sprint 6 |
+| **N12** | Vuelta al listado pierde scroll y filtros | Restaurar estado en la navegación | ✅ Sprint 5 (`listing-scroll-restore`) |
 
 ## 3. Hallazgos P2
 
-B9 (skip-link con color legacy) · B10 (placeholders oscuros de categoría colapsados) · B11 y **N13** (objetivos táctiles de 40px en header) · X3 (`logov2` sin política) · X5 (alias legacy sin documentar) · X7 (`styled-jsx` aislado) · **N14** (texto de 10–11px en métricas de perfil) · **N15** (`.text-gradient` azul→violeta contradice la regla anti-morado).
+B9 (skip-link con color legacy) · B10 (placeholders oscuros de categoría colapsados) · B11 y **N13** (objetivos táctiles de 40px en header) ✅ Sprint 2 · X3 (`logov2` sin política) · X5 (alias legacy sin documentar) · X7 (`styled-jsx` aislado) — **parcial:** skeletons/DealClip migrados; quedan map + chatbots · **N14** (texto de 10–11px en métricas de perfil) · **N15** (`.text-gradient` azul→violeta contradice la regla anti-morado).
 
 ---
 
 ## 4. Lo que se elimina
 
 Paleta Tailwind "Luminous Void" completa y sus `glow-*`. Utilidades `.text-gradient` y `.mesh-gradient` violeta. `.light-mode`. Declaraciones de fuentes fantasma. Spacing custom `18` y `88–144`. Alias `--color-secondary` y `--accent-color` (con puente de un ciclo). `styled-jsx` local. Hex `#38bdf8`, `#fbbf24`, `#ec4899`, `#3b82f6` en cualquier lugar del repo.
+
+**Hecho en UI:** 0× `#ec4899` / `#38bdf8` / `#fbbf24` en `components/`. `#3b82f6` y `styled-jsx` en map/chatbots = backlog residual.
 
 ---
 

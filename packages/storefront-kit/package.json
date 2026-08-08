@@ -3,7 +3,6 @@
   "version": "0.1.0",
   "private": true,
   "description": "Buscadis storefront tenant theming — closed 5-var contract + derived action tokens",
-  "type": "module",
   "main": "./src/index.ts",
   "types": "./src/index.ts",
   "exports": {
