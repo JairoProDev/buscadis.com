@@ -75,6 +75,15 @@ export function mensajeWhatsAppProducto(
   return `Hola, vi en Buscadis su ${nombreProducto}${p}. ¿Tienen stock?`;
 }
 
+export function mensajeWhatsAppPromo(
+  nombreNegocio: string,
+  tituloPromo: string,
+  codigo?: string
+): string {
+  const c = codigo ? ` Código: ${codigo}.` : '';
+  return `Hola, vi la promo "${tituloPromo}" de ${nombreNegocio} en Buscadis.${c} ¿Sigue vigente?`;
+}
+
 export function buildHandoffPath(token: string): string {
   return `/r/${encodeURIComponent(token)}`;
 }

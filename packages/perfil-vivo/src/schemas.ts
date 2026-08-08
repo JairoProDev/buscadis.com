@@ -143,6 +143,9 @@ export const NegocioSchema = z.object({
       productos: z.number().int().nonnegative().optional(),
       resenas: z.number().int().nonnegative().optional(),
       fotosGaleria: z.number().int().nonnegative().optional(),
+      faqs: z.number().int().nonnegative().optional(),
+      promociones: z.number().int().nonnegative().optional(),
+      tieneNosotros: z.number().int().nonnegative().optional(),
     })
     .optional(),
   creadoEn: z.string(),

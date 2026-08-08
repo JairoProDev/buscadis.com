@@ -15,6 +15,7 @@ import {
   createBusinessViaAPI,
   saveBusinessViaAPI,
   publishBusinessViaAPI,
+  getMyBusinessViaAPI,
 } from '@/lib/business-api';
 import { uploadBusinessImage, uploadProductImage } from '@/lib/business';
 import { presetHorario } from '@/lib/business/completitud-vivo';
@@ -146,6 +147,23 @@ export default function CreadorOnboarding() {
     let cancelled = false;
     (async () => {
       try {
+        const existing = await getMyBusinessViaAPI();
+        if (cancelled || !existing?.id) return;
+        setProfile(existing);
+        setSavedFlash(true);
+      } catch {
+        /* ignore */
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
         if (!supabase) return;
         const { data } = await supabase.auth.getSession();
         const token = data.session?.access_token;
@@ -165,6 +183,14 @@ export default function CreadorOnboarding() {
       cancelled = true;
     };
   }, []);
+
+  const retomarAvance = () => {
+    if (!profile.id) return;
+    if (profile.contact_whatsapp && profile.business_hours) go(5);
+    else if (profile.contact_whatsapp) go(4);
+    else if (profile.name && profile.name !== 'Mi negocio') go(2);
+    else go(1);
+  };
 
   const go = (next: PasoId) => {
     setError(null);
@@ -365,6 +391,12 @@ export default function CreadorOnboarding() {
           </div>
         )}
 
+        {paso > 0 && profile.slug && (
+          <p className="text-[15px] text-emerald-800 bg-emerald-50 border border-emerald-100 rounded-2xl px-4 py-3">
+            Guardamos tu avance. Sigue cuando quieras.
+          </p>
+        )}
+
         {/* Puerta 0 */}
         {paso === 0 && (
           <section className="space-y-4">
@@ -374,6 +406,16 @@ export default function CreadorOnboarding() {
             <p className="text-[17px] text-slate-600 leading-snug">
               Si ya tienes un aviso en Buscadis, lo convertimos en tu perfil en menos de un minuto.
             </p>
+
+            {profile.id && profile.slug && (
+              <button
+                type="button"
+                onClick={retomarAvance}
+                className="w-full min-h-[56px] rounded-2xl bg-slate-900 hover:bg-slate-800 text-white text-[17px] font-bold"
+              >
+                Continuar con {profile.name || 'tu perfil'}
+              </button>
+            )}
 
             {loadingAvisos ? (
               <div className="h-24 rounded-2xl bg-white border border-slate-200 animate-pulse" />

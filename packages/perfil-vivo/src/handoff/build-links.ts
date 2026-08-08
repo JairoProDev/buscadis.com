@@ -6,11 +6,12 @@ import {
   crearHandoffRuta,
   crearHandoffWhatsApp,
   mensajeWhatsAppProducto,
+  mensajeWhatsAppPromo,
 } from './token';
 
 /** Solo servidor / RSC — usa node:crypto vía token.ts */
 export function buildHandoffLinks(payload: PerfilPayload): HandoffLinks {
-  const { negocio, productos } = payload;
+  const { negocio, productos, promocion } = payload;
   const productoWhatsapp: Record<string, string> = {};
 
   for (const p of productos) {
@@ -29,6 +30,10 @@ export function buildHandoffLinks(payload: PerfilPayload): HandoffLinks {
       mensaje: mensajeWhatsAppProducto(negocio.nombre, p.nombre, precio),
     });
   }
+
+  const promoViva =
+    promocion &&
+    (!promocion.venceEn || Date.parse(promocion.venceEn) > Date.now());
 
   return {
     whatsappPrimary: negocio.contacto.whatsapp
@@ -58,5 +63,20 @@ export function buildHandoffLinks(payload: PerfilPayload): HandoffLinks {
         })
       : null,
     productoWhatsapp,
+    promocionWhatsapp:
+      promoViva && negocio.contacto.whatsapp && promocion
+        ? crearHandoffWhatsApp({
+            negocioId: negocio.id,
+            slug: negocio.slug,
+            phone: negocio.contacto.whatsapp,
+            nombre: negocio.nombre,
+            modulo: 'promocion',
+            mensaje: mensajeWhatsAppPromo(
+              negocio.nombre,
+              promocion.titulo,
+              promocion.codigo
+            ),
+          })
+        : null,
   };
 }

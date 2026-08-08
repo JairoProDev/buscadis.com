@@ -9,6 +9,8 @@ export type HandoffLinks = {
   ruta: string | null;
   /** productoId → /r/token para preguntar por producto */
   productoWhatsapp: Record<string, string>;
+  /** Promo vigente → WhatsApp con código en el mensaje */
+  promocionWhatsapp: string | null;
 };
 
 export type PerfilContextValue = {

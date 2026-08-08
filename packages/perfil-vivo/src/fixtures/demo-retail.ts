@@ -1,4 +1,12 @@
-import type { Negocio, PerfilPayload, Producto, Resena } from '../types';
+import type {
+  FotoGaleria,
+  ItemFaq,
+  Negocio,
+  PerfilPayload,
+  Producto,
+  PromocionVigente,
+  Resena,
+} from '../types';
 import { parseNegocio } from '../schemas';
 import { calcularEstadoVivo } from '../estado/calcular-estado';
 import { distribuirEstrellas, promedioEstrellas } from '../resenas/helpers';
@@ -15,6 +23,11 @@ const horario = {
     dom: [] as { desde: string; hasta: string }[],
   },
 };
+
+const placeholder = (label: string, hue: number) =>
+  `data:image/svg+xml,${encodeURIComponent(
+    `<svg xmlns="http://www.w3.org/2000/svg" width="600" height="600"><rect fill="hsl(${hue} 40% 88%)" width="600" height="600"/><text x="50%" y="50%" text-anchor="middle" dy=".3em" fill="#3A3843" font-family="sans-serif" font-size="28">${label}</text></svg>`
+  )}`;
 
 const rawNegocio = {
   id: 'demo-retail-001',
@@ -69,23 +82,29 @@ const rawNegocio = {
     { tipo: 'estado' as const, visible: true, orden: 2 },
     { tipo: 'acciones' as const, visible: true, orden: 3 },
     { tipo: 'catalogo' as const, visible: true, orden: 4 },
-    { tipo: 'resenas' as const, visible: true, orden: 5 },
-    { tipo: 'ubicacion' as const, visible: true, orden: 6 },
-    { tipo: 'horario' as const, visible: true, orden: 7 },
-    { tipo: 'pago' as const, visible: true, orden: 8 },
-    { tipo: 'canales' as const, visible: true, orden: 9 },
+    { tipo: 'promocion' as const, visible: true, orden: 5 },
+    { tipo: 'resenas' as const, visible: true, orden: 6 },
+    { tipo: 'ubicacion' as const, visible: true, orden: 7 },
+    { tipo: 'horario' as const, visible: true, orden: 8 },
+    { tipo: 'pago' as const, visible: true, orden: 9 },
+    { tipo: 'canales' as const, visible: true, orden: 10 },
+    { tipo: 'galeria' as const, visible: true, orden: 11 },
+    { tipo: 'nosotros' as const, visible: true, orden: 12 },
+    { tipo: 'faq' as const, visible: true, orden: 13 },
   ],
-  conteos: { productos: 4, resenas: 4, fotosGaleria: 0 },
+  conteos: {
+    productos: 4,
+    resenas: 4,
+    fotosGaleria: 4,
+    faqs: 4,
+    promociones: 1,
+    tieneNosotros: 1,
+  },
   creadoEn: '2026-07-01T12:00:00.000Z',
   actualizadoEn: '2026-08-08T12:00:00.000Z',
 };
 
 export const DEMO_RETAIL_NEGOCIO: Negocio = parseNegocio(rawNegocio);
-
-const placeholder = (label: string, hue: number) =>
-  `data:image/svg+xml,${encodeURIComponent(
-    `<svg xmlns="http://www.w3.org/2000/svg" width="600" height="600"><rect fill="hsl(${hue} 40% 88%)" width="600" height="600"/><text x="50%" y="50%" text-anchor="middle" dy=".3em" fill="#3A3843" font-family="sans-serif" font-size="28">${label}</text></svg>`
-  )}`;
 
 export const DEMO_RETAIL_PRODUCTOS: Producto[] = [
   {
@@ -96,12 +115,7 @@ export const DEMO_RETAIL_PRODUCTOS: Producto[] = [
     precio: { valor: 32.5, moneda: 'PEN', tipo: 'exacto' },
     precioAnterior: 36,
     imagenes: [
-      {
-        url: placeholder('Cemento', 210),
-        ancho: 600,
-        alto: 600,
-        alt: 'Cemento Sol',
-      },
+      { url: placeholder('Cemento', 210), ancho: 600, alto: 600, alt: 'Cemento Sol' },
     ],
     disponibilidad: 'disponible',
     destacado: true,
@@ -115,12 +129,7 @@ export const DEMO_RETAIL_PRODUCTOS: Producto[] = [
     descripcion: 'Acabado mate, alto cubrimiento.',
     precio: { valor: 48, moneda: 'PEN', tipo: 'exacto' },
     imagenes: [
-      {
-        url: placeholder('Pintura', 40),
-        ancho: 600,
-        alto: 600,
-        alt: 'Pintura látex',
-      },
+      { url: placeholder('Pintura', 40), ancho: 600, alto: 600, alt: 'Pintura látex' },
     ],
     disponibilidad: 'disponible',
     destacado: true,
@@ -134,12 +143,7 @@ export const DEMO_RETAIL_PRODUCTOS: Producto[] = [
     descripcion: 'Incluye maletín y juego de brocas.',
     precio: { valor: 189, moneda: 'PEN', tipo: 'exacto' },
     imagenes: [
-      {
-        url: placeholder('Taladro', 200),
-        ancho: 600,
-        alto: 600,
-        alt: 'Taladro',
-      },
+      { url: placeholder('Taladro', 200), ancho: 600, alto: 600, alt: 'Taladro' },
     ],
     disponibilidad: 'ultimas_unidades',
     destacado: true,
@@ -152,12 +156,7 @@ export const DEMO_RETAIL_PRODUCTOS: Producto[] = [
     nombre: 'Tubo PVC 1/2" × 3m',
     precio: { valor: 9.9, moneda: 'PEN', tipo: 'exacto' },
     imagenes: [
-      {
-        url: placeholder('PVC', 160),
-        ancho: 600,
-        alto: 600,
-        alt: 'Tubo PVC',
-      },
+      { url: placeholder('PVC', 160), ancho: 600, alto: 600, alt: 'Tubo PVC' },
     ],
     disponibilidad: 'disponible',
     destacado: true,
@@ -171,7 +170,8 @@ export const DEMO_RETAIL_RESENAS: Resena[] = [
     id: 'rev-1',
     autor: { nombre: 'María Quispe', iniciales: 'MQ' },
     estrellas: 5,
-    texto: 'Llegué por WhatsApp y en 10 minutos ya tenía el cemento listo para recoger. Precios claros.',
+    texto:
+      'Llegué por WhatsApp y en 10 minutos ya tenía el cemento listo para recoger. Precios claros.',
     contactoVerificado: true,
     creadaEn: '2026-07-28T15:00:00.000Z',
     respuesta: {
@@ -209,14 +209,64 @@ export const DEMO_RETAIL_RESENAS: Resena[] = [
   },
 ];
 
+export const DEMO_RETAIL_FAQS: ItemFaq[] = [
+  {
+    id: 'faq-1',
+    pregunta: '¿Hacen delivery en Cusco?',
+    respuesta:
+      'Sí, entregamos en Wanchaq, Cusco centro y San Sebastián. El costo depende del peso y la zona; confírmalo por WhatsApp.',
+  },
+  {
+    id: 'faq-2',
+    pregunta: '¿Atienden el sábado?',
+    respuesta: 'Abrimos de lunes a viernes 8:00–18:00 y sábado 8:00–14:00. Domingos cerramos.',
+  },
+  {
+    id: 'faq-3',
+    pregunta: '¿Aceptan Yape y tarjeta?',
+    respuesta: 'Aceptamos efectivo, Yape, Plin, Visa y transferencia. El crédito es solo para clientes frecuentes.',
+  },
+  {
+    id: 'faq-4',
+    pregunta: '¿Puedo reservar cemento?',
+    respuesta:
+      'Sí. Escribe por WhatsApp con la cantidad y el día de recojo. Reservamos hasta 48 horas con una seña.',
+  },
+];
+
+export const DEMO_RETAIL_GALERIA: FotoGaleria[] = [
+  { id: 'g1', url: placeholder('Local', 200), alt: 'Fachada del local', etiqueta: 'local' },
+  { id: 'g2', url: placeholder('Obra', 30), alt: 'Entrega en obra', etiqueta: 'trabajo' },
+  { id: 'g3', url: placeholder('Surtido', 160), alt: 'Pasillo de ferretería', etiqueta: 'local' },
+  { id: 'g4', url: placeholder('Equipo', 280), alt: 'Equipo de atención', etiqueta: 'resultado' },
+];
+
 export function buildDemoRetailPayload(now: Date = new Date()): PerfilPayload {
   const negocio = DEMO_RETAIL_NEGOCIO;
   const resenas = DEMO_RETAIL_RESENAS;
   const promedio = promedioEstrellas(resenas);
+  const vence = new Date(now.getTime() + 36 * 3_600_000).toISOString();
+  const promocion: PromocionVigente = {
+    id: 'promo-demo-1',
+    titulo: '3×2 en cemento Sol',
+    condicion: 'Lleva 3 bolsas y paga 2. Válido en tienda y recojo.',
+    codigo: 'CEMENTO3X2',
+    venceEn: vence,
+    ctaLabel: 'Pedir esta promo',
+  };
+
   return {
     negocio,
     productos: DEMO_RETAIL_PRODUCTOS,
     resenas,
+    faqs: DEMO_RETAIL_FAQS,
+    galeria: DEMO_RETAIL_GALERIA,
+    promocion,
+    nosotros: {
+      eslogan: negocio.eslogan,
+      texto:
+        'Somos una ferretería familiar en Wanchaq. Atendemos obra chica y maestros de zona con precios claros, stock real y entrega el mismo día cuando el pedido lo permite. El eslogan vive aquí, no en el hero: queremos que lo primero que veas sea qué vendemos y cómo contactarnos.',
+    },
     totalProductos: DEMO_RETAIL_PRODUCTOS.length,
     metricas: {
       antiguedadDesde: negocio.creadoEn,

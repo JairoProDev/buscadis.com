@@ -16,6 +16,10 @@ export type {
   HandoffPayload,
   CanalHandoff,
   Resena,
+  ItemFaq,
+  PromocionVigente,
+  FotoGaleria,
+  NosotrosContenido,
 } from './types';
 
 export {

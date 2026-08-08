@@ -8,6 +8,7 @@ export {
   buildHandoffPath,
   mensajeWhatsAppPerfil,
   mensajeWhatsAppProducto,
+  mensajeWhatsAppPromo,
   waMeUrl,
 } from './handoff/token';
 export { buildHandoffLinks } from './handoff/build-links';
@@ -24,6 +25,13 @@ export {
   productoFromCatalogRow,
   enrichNegocioFromProfile,
 } from './bridge/build-payload';
+export {
+  faqsFromProfileBlocks,
+  faqsDerivadasDelPerfil,
+  nosotrosFromProfile,
+  promocionFromProfile,
+  galeriaFromProfile,
+} from './bridge/support-content';
 export type {
   PerfilPayload,
   Negocio,

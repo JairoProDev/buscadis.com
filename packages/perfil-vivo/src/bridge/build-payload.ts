@@ -15,6 +15,13 @@ import {
   promedioEstrellas,
   resenaFromDbRow,
 } from '../resenas/helpers';
+import {
+  faqsFromProfileBlocks,
+  faqsDerivadasDelPerfil,
+  galeriaFromProfile,
+  nosotrosFromProfile,
+  promocionFromProfile,
+} from './support-content';
 
 const DAY_MAP: Record<string, DiaSemana> = {
   lun: 'lun',
@@ -203,11 +210,15 @@ const DEFAULT_MODULOS_RETAIL: Negocio['modulos'] = [
   { tipo: 'estado', visible: true, orden: 2 },
   { tipo: 'acciones', visible: true, orden: 3 },
   { tipo: 'catalogo', visible: true, orden: 4 },
-  { tipo: 'resenas', visible: true, orden: 5 },
-  { tipo: 'ubicacion', visible: true, orden: 6 },
-  { tipo: 'horario', visible: true, orden: 7 },
-  { tipo: 'pago', visible: true, orden: 8 },
-  { tipo: 'canales', visible: true, orden: 9 },
+  { tipo: 'promocion', visible: true, orden: 5 },
+  { tipo: 'resenas', visible: true, orden: 6 },
+  { tipo: 'ubicacion', visible: true, orden: 7 },
+  { tipo: 'horario', visible: true, orden: 8 },
+  { tipo: 'pago', visible: true, orden: 9 },
+  { tipo: 'canales', visible: true, orden: 10 },
+  { tipo: 'galeria', visible: true, orden: 11 },
+  { tipo: 'nosotros', visible: true, orden: 12 },
+  { tipo: 'faq', visible: true, orden: 13 },
 ];
 
 /**
@@ -217,7 +228,13 @@ export function enrichNegocioFromProfile(
   base: Negocio,
   row: Record<string, unknown>,
   productCount: number,
-  reviewCount = 0
+  reviewCount = 0,
+  extras?: {
+    faqCount?: number;
+    galeriaCount?: number;
+    promoCount?: number;
+    tieneNosotros?: boolean;
+  }
 ): Negocio {
   const horario = horarioFromBusinessHours(row.business_hours);
   const redes = redesFromProfile(row);
@@ -236,7 +253,10 @@ export function enrichNegocioFromProfile(
     conteos: {
       productos: productCount,
       resenas: reviewCount,
-      fotosGaleria: base.conteos?.fotosGaleria ?? 0,
+      fotosGaleria: extras?.galeriaCount ?? base.conteos?.fotosGaleria ?? 0,
+      faqs: extras?.faqCount ?? 0,
+      promociones: extras?.promoCount ?? 0,
+      tieneNosotros: extras?.tieneNosotros ? 1 : 0,
     },
   };
 
@@ -248,11 +268,14 @@ export function buildPerfilPayloadFromSources(opts: {
   profileRow: unknown;
   catalogRows: unknown[];
   reviewRows?: unknown[];
+  dealRows?: unknown[];
   now?: Date;
 }): PerfilPayload | null {
   const base = negocioFromBusinessProfile(opts.profileRow);
   if (!base) return null;
   if (!opts.profileRow || typeof opts.profileRow !== 'object') return null;
+  const row = opts.profileRow as Record<string, unknown>;
+  const nowMs = (opts.now ?? new Date()).getTime();
 
   const published = (opts.catalogRows || [])
     .filter((r): r is Record<string, unknown> => !!r && typeof r === 'object')
@@ -268,12 +291,35 @@ export function buildPerfilPayloadFromSources(opts: {
     .map((r) => resenaFromDbRow(r))
     .filter((r): r is NonNullable<typeof r> => r != null);
 
-  const negocio = enrichNegocioFromProfile(
-    base,
-    opts.profileRow as Record<string, unknown>,
-    published.length,
-    resenas.length
-  );
+  let faqs = faqsFromProfileBlocks(row.profile_blocks);
+  if (faqs.length < 2) {
+    const derived = faqsDerivadasDelPerfil({
+      nombre: base.nombre,
+      distrito: base.ubicacion?.distrito,
+      whatsapp: Boolean(base.contacto.whatsapp),
+      tieneHorario: Boolean(base.horario || row.business_hours),
+      metodosPago: (base.metodosPago as string[]) || ['efectivo', 'yape'],
+    });
+    const seen = new Set(faqs.map((f) => f.pregunta.toLowerCase()));
+    for (const d of derived) {
+      if (seen.has(d.pregunta.toLowerCase())) continue;
+      faqs.push(d);
+    }
+    faqs = faqs.slice(0, 6);
+  }
+  const nosotros = nosotrosFromProfile(row);
+  const promocion = promocionFromProfile(row, opts.dealRows || [], nowMs);
+  const productUrls = published
+    .flatMap((p) => p.imagenes.map((im) => im.url))
+    .filter(Boolean);
+  const galeria = galeriaFromProfile(row, productUrls);
+
+  const negocio = enrichNegocioFromProfile(base, row, published.length, resenas.length, {
+    faqCount: faqs.length,
+    galeriaCount: galeria.length,
+    promoCount: promocion ? 1 : 0,
+    tieneNosotros: Boolean(nosotros),
+  });
 
   const dist = distribuirEstrellas(resenas);
   const promedio = promedioEstrellas(resenas);
@@ -282,6 +328,10 @@ export function buildPerfilPayloadFromSources(opts: {
     negocio,
     productos,
     resenas,
+    faqs,
+    galeria,
+    promocion,
+    nosotros,
     totalProductos: published.length,
     metricas: {
       antiguedadDesde: negocio.creadoEn,

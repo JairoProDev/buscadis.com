@@ -13,6 +13,7 @@ import {
 } from '@/lib/business';
 import { normalizeBusinessSlug } from '@/lib/business/normalize-slug';
 import { supabaseAdmin } from '@/lib/supabase-admin';
+import { PerfilVivoAnalytics } from '@/components/business/PerfilVivoAnalytics';
 
 export const revalidate = 60;
 
@@ -21,16 +22,15 @@ type PageProps = {
 };
 
 function jsonLdForPayload(payload: PerfilPayload) {
-  const { negocio, productos, resenas, metricas } = payload;
+  const { negocio, productos, resenas, metricas, faqs } = payload;
   const u = negocio.ubicacion;
-  return {
-    '@context': 'https://schema.org',
-    '@graph': [
+  const graph: Record<string, unknown>[] = [
       {
         '@type': 'LocalBusiness',
         '@id': `https://buscadis.com/v/${negocio.slug}#negocio`,
         name: negocio.nombre,
         description:
+          payload.nosotros?.texto?.slice(0, 300) ??
           negocio.eslogan ??
           `${negocio.categoria.nombre} en ${u?.distrito ?? 'Cusco'}`,
         url: `https://buscadis.com/v/${negocio.slug}`,
@@ -88,7 +88,26 @@ function jsonLdForPayload(payload: PerfilPayload) {
         reviewBody: r.texto,
         datePublished: r.creadaEn,
       })),
-    ],
+  ];
+
+  if (faqs.length >= 2) {
+    graph.push({
+      '@type': 'FAQPage',
+      '@id': `https://buscadis.com/v/${negocio.slug}#faq`,
+      mainEntity: faqs.map((f) => ({
+        '@type': 'Question',
+        name: f.pregunta,
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: f.respuesta,
+        },
+      })),
+    });
+  }
+
+  return {
+    '@context': 'https://schema.org',
+    '@graph': graph,
   };
 }
 
@@ -158,6 +177,11 @@ export default async function PerfilVivoPreviewPage({ params }: PageProps) {
           ? ` ${formatPrecio(payload.productos[0].precio.valor)}`
           : ''}
       </span>
+      <PerfilVivoAnalytics
+        businessProfileId={payload.negocio.id}
+        slug={payload.negocio.slug}
+        arquetipo={payload.negocio.arquetipo}
+      />
       <PerfilVivoRoot payload={payload} handoffs={handoffs} />
     </>
   );

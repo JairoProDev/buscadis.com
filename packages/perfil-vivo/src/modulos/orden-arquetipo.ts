@@ -14,7 +14,9 @@ export const ORDEN_RETAIL: TipoModulo[] = [
   'pago',
   'novedades',
   'canales',
+  'galeria',
   'nosotros',
+  'faq',
 ];
 
 const ORDEN_POR_ARQUETIPO: Record<Arquetipo, TipoModulo[]> = {

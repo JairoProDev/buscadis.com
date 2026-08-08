@@ -8,7 +8,14 @@ export interface ModuloMeta {
   minDatos: number;
   planMin: Plan;
   /** Clave en negocio.conteos para evaluar minDatos; null = siempre con datos si fijo */
-  conteoKey: 'productos' | 'resenas' | 'fotosGaleria' | null;
+  conteoKey:
+    | 'productos'
+    | 'resenas'
+    | 'fotosGaleria'
+    | 'faqs'
+    | 'promociones'
+    | 'tieneNosotros'
+    | null;
   ancla: string;
   tituloDefault: string;
 }
@@ -92,8 +99,8 @@ export const MODULO_META: Record<TipoModulo, ModuloMeta> = {
     tipo: 'promocion',
     fijo: false,
     minDatos: 1,
-    planMin: 'pro',
-    conteoKey: null,
+    planMin: 'free',
+    conteoKey: 'promociones',
     ancla: 'promocion',
     tituloDefault: 'Promoción',
   },
@@ -163,9 +170,9 @@ export const MODULO_META: Record<TipoModulo, ModuloMeta> = {
   nosotros: {
     tipo: 'nosotros',
     fijo: false,
-    minDatos: 0,
+    minDatos: 1,
     planMin: 'free',
-    conteoKey: null,
+    conteoKey: 'tieneNosotros',
     ancla: 'nosotros',
     tituloDefault: 'Quiénes somos',
   },
@@ -173,8 +180,8 @@ export const MODULO_META: Record<TipoModulo, ModuloMeta> = {
     tipo: 'faq',
     fijo: false,
     minDatos: 2,
-    planMin: 'pro',
-    conteoKey: null,
+    planMin: 'free',
+    conteoKey: 'faqs',
     ancla: 'faq',
     tituloDefault: 'Preguntas frecuentes',
   },

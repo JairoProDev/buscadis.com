@@ -125,6 +125,35 @@ export interface Resena {
   creadaEn: string;
 }
 
+export interface ItemFaq {
+  id: string;
+  pregunta: string;
+  /** Texto plano; se renderiza en HTML (visible para SEO aunque el acordeón esté cerrado). */
+  respuesta: string;
+}
+
+export interface PromocionVigente {
+  id: string;
+  titulo: string;
+  condicion?: string;
+  codigo?: string;
+  /** ISO — si está vencida, el módulo no se muestra */
+  venceEn?: string;
+  ctaLabel?: string;
+}
+
+export interface FotoGaleria {
+  id: string;
+  url: string;
+  alt?: string;
+  etiqueta?: 'local' | 'trabajo' | 'resultado';
+}
+
+export interface NosotrosContenido {
+  eslogan?: string;
+  texto: string;
+}
+
 export interface Negocio {
   id: string;
   slug: string;
@@ -167,6 +196,9 @@ export interface Negocio {
     productos?: number;
     resenas?: number;
     fotosGaleria?: number;
+    faqs?: number;
+    promociones?: number;
+    tieneNosotros?: number;
   };
   creadoEn: string;
   actualizadoEn: string;
@@ -177,6 +209,10 @@ export interface PerfilPayload {
   negocio: Negocio;
   productos: Producto[];
   resenas: Resena[];
+  faqs: ItemFaq[];
+  galeria: FotoGaleria[];
+  promocion: PromocionVigente | null;
+  nosotros: NosotrosContenido | null;
   metricas?: MetricasVerificadas;
   estadoVivo: EstadoVivo;
   totalProductos: number;

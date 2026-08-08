@@ -173,14 +173,48 @@ export function HeroShell({ negocio }: { negocio: Negocio }) {
               id="pv-verif-title"
               style={{ margin: '0 0 8px', font: 'var(--ts-modulo)' }}
             >
-              {criterio.titulo}
+              Qué significa esta verificación
             </h2>
-            <p style={{ margin: '0 0 16px', font: 'var(--ts-cuerpo)', color: 'var(--tx-base)' }}>
-              {criterio.texto}
+            <p style={{ margin: '0 0 14px', font: 'var(--ts-cuerpo)', color: 'var(--tx-muted)' }}>
+              En Buscadis el sello solo aparece si se cumplió un criterio público. No es un badge
+              decorativo.
             </p>
+            <ul style={{ listStyle: 'none', margin: 0, padding: 0, display: 'grid', gap: 10 }}>
+              {([1, 2, 3] as const).map((n) => {
+                const c = CRITERIOS[n];
+                const activo = nivel >= n;
+                return (
+                  <li
+                    key={n}
+                    style={{
+                      padding: '12px 14px',
+                      borderRadius: 'var(--rd-md)',
+                      border: `1px solid ${activo ? 'var(--mk-borde)' : 'var(--sf-line)'}`,
+                      background: activo ? 'var(--mk-suave)' : 'var(--sf-base)',
+                      opacity: activo ? 1 : 0.72,
+                    }}
+                  >
+                    <p
+                      style={{
+                        margin: 0,
+                        font: 'var(--ts-cuerpo)',
+                        fontWeight: 700,
+                        color: 'var(--tx-strong)',
+                      }}
+                    >
+                      Nivel {n} · {c.titulo}
+                      {nivel === n ? ' · actual' : ''}
+                    </p>
+                    <p style={{ margin: '4px 0 0', font: 'var(--ts-meta)', color: 'var(--tx-muted)' }}>
+                      {c.texto}
+                    </p>
+                  </li>
+                );
+              })}
+            </ul>
             {negocio.verificacion.fecha ? (
-              <p style={{ margin: '0 0 16px', font: 'var(--ts-meta)', color: 'var(--tx-muted)' }}>
-                Desde{' '}
+              <p style={{ margin: '14px 0 0', font: 'var(--ts-meta)', color: 'var(--tx-muted)' }}>
+                Verificado desde{' '}
                 {new Date(negocio.verificacion.fecha).toLocaleDateString('es-PE', {
                   year: 'numeric',
                   month: 'long',
@@ -192,13 +226,15 @@ export function HeroShell({ negocio }: { negocio: Negocio }) {
               type="button"
               onClick={() => setOpen(false)}
               style={{
-                minHeight: 44,
+                marginTop: 16,
+                minHeight: 48,
                 width: '100%',
                 border: 'none',
                 borderRadius: 'var(--rd-md)',
                 background: 'var(--mk-accion)',
                 color: 'var(--mk-sobre)',
                 font: 'var(--ts-card)',
+                fontWeight: 700,
                 cursor: 'pointer',
               }}
             >
