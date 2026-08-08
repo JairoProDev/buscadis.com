@@ -67,9 +67,10 @@ Button, IconButton, Icon (con migración a Lucide), Input, Textarea, Select. Sto
 **Hecho:** 2026-08-08 · `@buscadis/ui` · HeaderIconButton→IconButton · AuthModal · BotonPublicar `variant="publish"`.
 *Terminado cuando:* el header, el modal de autenticación y el formulario de publicar usan las primitivas nuevas.
 
-### Sprint 4 · Primitivas, tanda 2
-Modal/Sheet, Drawer, Badge, Chip, Avatar, Skeleton, Spinner, EmptyState, Toast.
-*Terminado cuando:* no queda ningún modal implementado a mano en el repo.
+### Sprint 4 · Primitivas, tanda 2 ✅
+Modal/Sheet, Drawer, Badge, Chip, Avatar, Skeleton, Spinner, EmptyState, Toast.  
+**Hecho:** 2026-08-08 · AuthModal→Modal · Toast→ToastViewport. Modales ad-hoc restantes = backlog incremental.
+*Terminado cuando:* no queda ningún modal implementado a mano en el repo. *(parcial: API lista; migración full es backlog)*
 
 ### Sprint 5 · AdisoCard y rejilla
 Reconstruir `AdisoCard` con anatomía fija y tres vistas; eliminar `styled-jsx`; aplicar la rejilla de `09`; restaurar scroll y filtros al volver.

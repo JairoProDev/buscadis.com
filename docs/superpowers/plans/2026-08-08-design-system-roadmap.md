@@ -1,6 +1,6 @@
 # Design System Migration — Roadmap
 
-> **Estado:** Sprint 1 ✅ · Sprint 2 🔜 · Sprints 3–8 planificados  
+> **Estado:** Sprints 1–4 ✅ · Sprint 5 🔜 · Sprints 6–8 planificados  
 > **Fuente de verdad de diseño:** `docs/design-system-improve-renew/`  
 > **Fuente de verdad de tokens:** `packages/tokens/`  
 > **Actualizado:** 2026-08-08
@@ -21,8 +21,8 @@
 | **1** | Fundación `@buscadis/tokens` | ✅ Hecho (`ea4f2c0`) | — | 4 artifacts + contrast 0 violaciones |
 | **2** | P0 marca + accesibilidad | ✅ Hecho (`f9d2ed9`) | [sprint-2](./2026-08-08-sprint-2-brand-a11y.md) | CTA AA, PWA alineada, logo-mark &lt;15KB, cats unificadas, touch ≥44 |
 | **3** | Primitivas tanda 1 | ✅ Hecho | [sprint-3](./2026-08-08-sprint-3-ui-primitives.md) | Header/Auth/Publish usan Button/Input/Icon |
-| **4** | Primitivas tanda 2 | 🔜 Siguiente | [abajo §4](#sprint-4--primitivas-tanda-2) | Cero modales ad-hoc |
-| **5** | AdisoCard + rejilla | 📋 Blueprint | [abajo §5](#sprint-5--adisocard--rejilla) | 3 vistas + scroll restore |
+| **4** | Primitivas tanda 2 | ✅ Hecho | [sprint-4](./2026-08-08-sprint-4-ui-primitives-2.md) | Modal + Toast migrados; resto exportado |
+| **5** | AdisoCard + rejilla | 🔜 Siguiente | [abajo §5](#sprint-5--adisocard--rejilla) | 3 vistas + scroll restore |
 | **6** | SSR + indexación | 📋 Blueprint | [abajo §6](#sprint-6--ssr--indexación) | `curl` con contenido real en 4 rutas |
 | **7** | Chrome + composer | 📋 Blueprint | [abajo §7](#sprint-7--chrome--composer) | Chrome móvil 112px |
 | **8** | Storefront kit | 📋 Blueprint | [abajo §8](#sprint-8--storefront-kit) | Tenant extremo legible |
@@ -81,11 +81,13 @@ curl -sL https://buscadis.com | head -c 2000
 
 ---
 
-## Sprint 4 — Primitivas tanda 2
+## Sprint 4 — Primitivas tanda 2 ✅
 
 **Goal:** Modal/Sheet, Drawer, Badge, Chip, Avatar, Skeleton, Spinner, EmptyState, Toast.
 
-**Done:** grep de `fixed inset-0` / modales custom baja a wrappers del kit; Toast único.
+**Hecho:** AuthModal → Modal; Toast → ToastViewport; API exportada en `@buscadis/ui`. Migración completa de modales ad-hoc = backlog incremental.
+
+**Done (parcial):** Toast único vía kit; Modal listo; resto de `fixed inset-0` se migra al usar.
 
 ---
 
