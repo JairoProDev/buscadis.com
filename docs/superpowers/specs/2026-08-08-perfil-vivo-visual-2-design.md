@@ -44,6 +44,26 @@ QR en perfil, 4 stats inventadas, 20 elementos pelean do en viewport 1, pestaña
 - [ ] Dueño diría “esto lo paso por WhatsApp”
 - [ ] LCP no se rompe vs baseline demo
 
+## Patrones wow (de mockups + crítica Gemini) — qué sí / qué no
+
+Lo que **sí** hace “instagrameable” (transferible a cualquier rubro):
+
+1. **Identidad como pieza flotante** — logo + nombre en card elevada que solapa la portada (capa, no ficha pegada).
+2. **Atmósfera** — fondo con tinte suave de marca / gradiente; no blanco clínico infinito.
+3. **Acciones de igual peso visual** — 4 tiles táctiles (ícono + label) con borde/relleno; la jerarquía vive en la barra sticky, no en 3 botones gritando + 2 círculos fantasma.
+4. **Estado como pill** — “Abierto ahora · hasta 13:00” en pastilla semántica, no un punto suelto.
+5. **Cards de producto con vida** — foto `cover`, precio dominante, CTA corto en card; no caja blanca estéril.
+6. **Tipografía display con carácter** — Bricolage en nombre/títulos.
+7. **Redes outline** — círculos claros con borde; no blobs de color saturado.
+8. **Copy CTA directo** — “Pedir por WhatsApp”, no “Pedir (responden al abrir)” en el botón.
+
+Lo que **no** copiamos (sesgos / Gemini artisanal):
+
+- Cream + terracota + serif “lujo cacao” como default de plataforma
+- Mapas teñidos sepia custom (coste alto; enmarcamos el embed)
+- Texturas SVG de hojas/cacao en chrome (decoración de mockup, no sistema)
+- Stats inventadas / QR en perfil / bottom nav de app
+
 ## Archivos
 
 - Spec patches: `docs/tarjetadigitalbuscadis/01`, `05`, `06`

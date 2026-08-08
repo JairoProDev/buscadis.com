@@ -23,9 +23,11 @@ function precioLabel(p: Producto): string | null {
 function ProductCard({
   producto,
   onOpen,
+  cover,
 }: {
   producto: Producto;
   onOpen: () => void;
+  cover?: boolean;
 }) {
   const agotado = producto.disponibilidad === 'agotado';
   const img = producto.imagenes[0];
@@ -47,9 +49,10 @@ function ProductCard({
         <img
           src={img?.url}
           alt={img?.alt ?? producto.nombre}
-          width={156}
-          height={156}
+          width={168}
+          height={168}
           className="pv-card-producto__img"
+          style={{ objectFit: cover ? 'cover' : 'contain' }}
         />
         {etiqueta ? (
           <span className="pv-badge">{ETIQUETA[etiqueta] ?? etiqueta}</span>
@@ -82,6 +85,7 @@ function ProductCard({
             ) : null}
           </p>
         ) : null}
+        <span className="pv-card-producto__cta">Ver</span>
       </div>
     </button>
   );
@@ -225,6 +229,10 @@ export function CatalogoShell({ titulo }: { titulo: string }) {
   const [openId, setOpenId] = useState<string | null>(null);
   const open = productos.find((p) => p.id === openId) ?? null;
   const slug = payload.negocio.slug;
+  const coverImgs =
+    payload.negocio.arquetipo === 'comida' ||
+    payload.negocio.arquetipo === 'alto_ticket' ||
+    payload.negocio.arquetipo === 'local';
   const iaCfg = payload.negocio.modulos.find((m) => m.tipo === 'ia');
   const tieneIa =
     Boolean(iaCfg?.visible !== false) &&
@@ -312,7 +320,11 @@ export function CatalogoShell({ titulo }: { titulo: string }) {
       >
         {productos.map((p) => (
           <div key={p.id} style={{ scrollSnapAlign: 'start' }}>
-            <ProductCard producto={p} onOpen={() => setOpenId(p.id)} />
+            <ProductCard
+              producto={p}
+              onOpen={() => setOpenId(p.id)}
+              cover={coverImgs}
+            />
           </div>
         ))}
       </div>

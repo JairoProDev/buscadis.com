@@ -41,7 +41,7 @@ export function HeroShell({ negocio }: { negocio: Negocio }) {
               src={portada}
               alt=""
               width={480}
-              height={200}
+              height={220}
               fetchPriority="high"
               decoding="async"
               className="pv-hero__cover-img"

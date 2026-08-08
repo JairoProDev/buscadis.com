@@ -35,16 +35,10 @@ export function PerfilVivoRoot({
 
   const primaryLabel =
     negocio.arquetipo === 'cita' || negocio.arquetipo === 'profesional'
-      ? payload.estadoVivo.abierto
-        ? 'Agendar por WhatsApp'
-        : 'Agendar (responden al abrir)'
+      ? 'Agendar por WhatsApp'
       : negocio.arquetipo === 'comida'
-        ? payload.estadoVivo.abierto
-          ? 'Pedir por WhatsApp'
-          : 'Pedir (responden al abrir)'
-        : payload.estadoVivo.abierto
-          ? 'Escribir por WhatsApp'
-          : 'Escribir (responden al abrir)';
+        ? 'Pedir por WhatsApp'
+        : 'Escribir por WhatsApp';
 
   return (
     <div
