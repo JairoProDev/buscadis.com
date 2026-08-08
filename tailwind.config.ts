@@ -17,6 +17,7 @@ const config: Config = {
     './app/**/*.{js,ts,jsx,tsx,mdx}',
     './lib/**/*.{js,ts,jsx,tsx,mdx}',
     './packages/profile-engine/**/*.{js,ts,jsx,tsx}',
+    './packages/ui/src/**/*.{js,ts,jsx,tsx}',
   ],
   darkMode: 'class',
   theme: {

@@ -38,6 +38,9 @@
     "node_modules",
     "scripts",
     "sql",
-    "output"
+    "output",
+    "packages/ui/.storybook",
+    "packages/ui/src/**/*.stories.tsx",
+    "packages/ui/storybook-static"
   ]
 }

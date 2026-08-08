@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { signIn, signInWithMagicLink } from '@/lib/auth';
 import { useAuth } from '@/hooks/useAuth';
-import { IconClose } from './Icons';
+import { Button, Icon, IconButton, Input } from '@buscadis/ui';
 import GoogleGisButton from '@/components/auth/GoogleGisButton';
 
 interface AuthModalProps {
@@ -14,7 +14,9 @@ interface AuthModalProps {
 }
 
 export default function AuthModal({ abierto, onCerrar, modoInicial = 'signup' }: AuthModalProps) {
-  const [modo, setModo] = useState<'login' | 'signup' | 'legacy'>(modoInicial === 'login' ? 'login' : 'signup');
+  const [modo, setModo] = useState<'login' | 'signup' | 'legacy'>(
+    modoInicial === 'login' ? 'login' : 'signup'
+  );
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [cargando, setCargando] = useState(false);
@@ -79,9 +81,7 @@ export default function AuthModal({ abierto, onCerrar, modoInicial = 'signup' }:
   };
 
   const title =
-    modo === 'login' || modo === 'legacy'
-      ? 'Entrar con mi cuenta'
-      : 'Crear cuenta';
+    modo === 'login' || modo === 'legacy' ? 'Entrar con mi cuenta' : 'Crear cuenta';
 
   const subtitle =
     modo === 'signup'
@@ -90,71 +90,35 @@ export default function AuthModal({ abierto, onCerrar, modoInicial = 'signup' }:
 
   return createPortal(
     <div
-      style={{
-        position: 'fixed',
-        inset: 0,
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
-        display: 'flex',
-        alignItems: 'flex-start',
-        justifyContent: 'center',
-        zIndex: 10001,
-        padding: '1rem',
-        overflowY: 'auto',
-      }}
+      className="fixed inset-0 z-[10001] flex items-start justify-center overflow-y-auto bg-black/50 p-4"
       onClick={onCerrar}
     >
       <div
         role="dialog"
         aria-modal="true"
         aria-labelledby="auth-modal-title"
-        style={{
-          backgroundColor: 'var(--bg-primary)',
-          borderRadius: '12px',
-          padding: '1.75rem',
-          maxWidth: '400px',
-          width: '100%',
-          margin: 'auto',
-          position: 'relative',
-          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
-        }}
+        className="relative m-auto w-full max-w-[400px] rounded-[var(--bs-radius-md)] bg-[var(--bs-bg-surface)] p-7 shadow-[var(--bs-elevation-4)]"
         onClick={(e) => e.stopPropagation()}
       >
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
+        <div className="mb-4 flex items-start justify-between gap-3">
           <div>
-            <h2 id="auth-modal-title" style={{ fontSize: '1.35rem', fontWeight: 600, color: 'var(--text-primary)', margin: 0 }}>
+            <h2
+              id="auth-modal-title"
+              className="m-0 text-[1.35rem] font-semibold text-[var(--bs-fg-default)]"
+            >
               {title}
             </h2>
-            <p style={{ margin: '0.5rem 0 0', fontSize: '0.875rem', color: 'var(--text-secondary)', lineHeight: 1.4 }}>
-              {subtitle}
-            </p>
+            <p className="mt-2 mb-0 text-sm leading-snug text-[var(--bs-fg-muted)]">{subtitle}</p>
           </div>
-          <button
-            type="button"
-            onClick={onCerrar}
-            aria-label="Cerrar"
-            style={{
-              background: 'none',
-              border: 'none',
-              cursor: 'pointer',
-              color: 'var(--text-secondary)',
-              padding: '0.35rem',
-            }}
-          >
-            <IconClose size={20} />
-          </button>
+          <IconButton aria-label="Cerrar" variant="ghost" size="sm" onClick={onCerrar}>
+            <Icon name="x" size={20} />
+          </IconButton>
         </div>
 
         {error && (
           <div
-            style={{
-              padding: '0.75rem',
-              backgroundColor: 'rgba(239, 68, 68, 0.1)',
-              border: '1px solid rgba(239, 68, 68, 0.3)',
-              borderRadius: '6px',
-              color: '#ef4444',
-              fontSize: '0.875rem',
-              marginBottom: '1rem',
-            }}
+            className="mb-4 rounded-[var(--bs-radius-xs)] border border-[var(--bs-danger-fg)]/30 bg-[var(--bs-danger-bg)] p-3 text-sm text-[var(--bs-danger-fg)]"
+            role="alert"
           >
             {error}
           </div>
@@ -162,22 +126,15 @@ export default function AuthModal({ abierto, onCerrar, modoInicial = 'signup' }:
 
         {mensaje && (
           <div
-            style={{
-              padding: '0.75rem',
-              backgroundColor: 'rgba(34, 197, 94, 0.1)',
-              border: '1px solid rgba(34, 197, 94, 0.3)',
-              borderRadius: '6px',
-              color: '#22c55e',
-              fontSize: '0.875rem',
-              marginBottom: '1rem',
-            }}
+            className="mb-4 rounded-[var(--bs-radius-xs)] border border-[var(--bs-success-fg)]/30 bg-[var(--bs-success-bg)] p-3 text-sm text-[var(--bs-success-fg)]"
+            role="status"
           >
             {mensaje}
           </div>
         )}
 
         {modo !== 'legacy' && (
-          <div style={{ marginBottom: '1.25rem' }}>
+          <div className="mb-5">
             <GoogleGisButton
               label={modo === 'signup' ? 'Crear cuenta con Google' : 'Entrar con Google'}
               disabled={cargando}
@@ -191,121 +148,91 @@ export default function AuthModal({ abierto, onCerrar, modoInicial = 'signup' }:
         )}
 
         {modo === 'legacy' && (
-          <form onSubmit={handleLegacySubmit}>
-            <div style={{ marginBottom: '1rem' }}>
-              <label style={{ display: 'block', fontSize: '0.875rem', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>
+          <form onSubmit={handleLegacySubmit} className="flex flex-col gap-4">
+            <div>
+              <label htmlFor="auth-email" className="mb-2 block text-sm text-[var(--bs-fg-muted)]">
                 Email
               </label>
-              <input
+              <Input
+                id="auth-email"
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 autoComplete="email"
-                style={inputStyle}
+                error={Boolean(error)}
               />
             </div>
-            <div style={{ marginBottom: '1rem' }}>
-              <label style={{ display: 'block', fontSize: '0.875rem', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>
+            <div>
+              <label
+                htmlFor="auth-password"
+                className="mb-2 block text-sm text-[var(--bs-fg-muted)]"
+              >
                 Contraseña
               </label>
-              <input
+              <Input
+                id="auth-password"
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 minLength={6}
                 autoComplete="current-password"
-                style={inputStyle}
               />
             </div>
-            <button type="submit" disabled={cargando} style={primaryBtn(cargando)}>
-              {cargando ? 'Entrando…' : 'Entrar'}
-            </button>
+            <Button type="submit" variant="primary" fullWidth loading={cargando}>
+              Entrar
+            </Button>
           </form>
         )}
 
-        <div style={{ textAlign: 'center', fontSize: '0.875rem', color: 'var(--text-secondary)', marginTop: '1rem' }}>
+        <div className="mt-4 text-center text-sm text-[var(--bs-fg-muted)]">
           {modo === 'signup' ? (
-            <button type="button" onClick={() => setModo('login')} style={linkBtn}>
+            <Button type="button" variant="ghost" size="sm" onClick={() => setModo('login')}>
               ¿Ya tienes cuenta? Entrar con mi cuenta
-            </button>
+            </Button>
           ) : modo === 'login' ? (
             <>
-              <button type="button" onClick={() => setModo('signup')} style={linkBtn}>
+              <Button type="button" variant="ghost" size="sm" onClick={() => setModo('signup')}>
                 ¿No tienes cuenta? Crear cuenta
-              </button>
-              <div style={{ marginTop: '0.75rem' }}>
-                <button type="button" onClick={() => setModo('legacy')} style={{ ...linkBtn, color: 'var(--text-secondary)' }}>
+              </Button>
+              <div className="mt-3">
+                <Button type="button" variant="ghost" size="sm" onClick={() => setModo('legacy')}>
                   Usar email y contraseña (cuenta anterior)
-                </button>
+                </Button>
               </div>
-              <div style={{ marginTop: '0.5rem', display: 'flex', gap: '0.5rem', justifyContent: 'center', flexWrap: 'wrap' }}>
-                <input
+              <div className="mt-2 flex flex-wrap items-center justify-center gap-2">
+                <Input
                   type="email"
                   placeholder="Email para enlace mágico"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  style={{ ...inputStyle, maxWidth: 200, padding: '0.4rem 0.5rem' }}
+                  className="max-w-[200px]"
+                  aria-label="Email para enlace mágico"
                 />
-                <button type="button" onClick={handleMagicLink} disabled={cargando} style={linkBtn}>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="sm"
+                  onClick={handleMagicLink}
+                  loading={cargando}
+                >
                   Enviar enlace
-                </button>
+                </Button>
               </div>
             </>
           ) : (
-            <button type="button" onClick={() => setModo('login')} style={linkBtn}>
+            <Button type="button" variant="ghost" size="sm" onClick={() => setModo('login')}>
               Volver a Google
-            </button>
+            </Button>
           )}
         </div>
 
-        <p
-          style={{
-            marginTop: '1.25rem',
-            fontSize: '0.75rem',
-            color: 'var(--text-tertiary, var(--text-secondary))',
-            lineHeight: 1.45,
-            textAlign: 'center',
-          }}
-        >
+        <p className="mt-5 mb-0 text-center text-xs leading-snug text-[var(--bs-fg-subtle)]">
           Verificamos identidad (DNI) y WhatsApp para protegerte de fraudes.
         </p>
       </div>
     </div>,
     document.body
   );
-}
-
-const inputStyle: React.CSSProperties = {
-  width: '100%',
-  padding: '0.75rem',
-  border: '1px solid var(--border-color)',
-  borderRadius: '6px',
-  fontSize: '0.875rem',
-  backgroundColor: 'var(--bg-primary)',
-  color: 'var(--text-primary)',
-};
-
-const linkBtn: React.CSSProperties = {
-  background: 'none',
-  border: 'none',
-  color: 'var(--text-primary)',
-  cursor: 'pointer',
-  textDecoration: 'underline',
-  fontSize: '0.875rem',
-};
-
-function primaryBtn(disabled: boolean): React.CSSProperties {
-  return {
-    width: '100%',
-    padding: '0.75rem',
-    backgroundColor: disabled ? 'var(--text-tertiary)' : 'var(--text-primary)',
-    color: 'var(--bg-primary)',
-    border: 'none',
-    borderRadius: '6px',
-    fontSize: '0.875rem',
-    fontWeight: 600,
-    cursor: disabled ? 'not-allowed' : 'pointer',
-  };
 }

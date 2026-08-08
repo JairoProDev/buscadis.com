@@ -276,11 +276,12 @@ ${legacyLight}
 }
 
 function buildTs(lightResolved, primitivesResolved, categoriesResolved) {
-  const entries = [];
+  const map = new Map();
   for (const t of [...primitivesResolved.flat, ...lightResolved.flat, ...categoriesResolved.flat]) {
     const varName = cssVarName(t.path);
-    entries.push(`  '${varName}': '${t.resolved}'`);
+    map.set(varName, t.resolved);
   }
+  const entries = [...map.entries()].map(([k, v]) => `  '${k}': '${v}'`);
   return `/**
  * @buscadis/tokens — generated. Do not edit.
  * Rebuild: npm run tokens:build

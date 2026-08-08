@@ -62,8 +62,9 @@ Congelar la marca; aplicar la separación identidad/acción; corregir el CTA Pub
 **Hecho:** 2026-08-08 · commit `f9d2ed9` · CTA 9.98:1 · PWA `#53ACC5` · logo-mark 3.9KB · header 44px · 0× `ec4899`/`38bdf8` en UI.
 *Terminado cuando:* cero pares en uso por debajo del mínimo de contraste y el logo pesa menos de 15 KB.
 
-### Sprint 3 · Primitivas, tanda 1
-Button, IconButton, Icon (con migración a Lucide), Input, Textarea, Select. Storybook montado con addon de accesibilidad.
+### Sprint 3 · Primitivas, tanda 1 ✅
+Button, IconButton, Icon (con migración a Lucide), Input, Textarea, Select. Storybook montado con addon de accesibilidad.  
+**Hecho:** 2026-08-08 · `@buscadis/ui` · HeaderIconButton→IconButton · AuthModal · BotonPublicar `variant="publish"`.
 *Terminado cuando:* el header, el modal de autenticación y el formulario de publicar usan las primitivas nuevas.
 
 ### Sprint 4 · Primitivas, tanda 2
