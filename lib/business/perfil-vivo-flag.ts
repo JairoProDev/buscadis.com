@@ -12,12 +12,25 @@ const ENV_SLUGS = () =>
 export function isPerfilVivoEnabled(
   profile: Partial<BusinessProfile> | null | undefined
 ): boolean {
-  if (!profile) return false;
-  if (profile.slug && ENV_SLUGS().includes(profile.slug.toLowerCase())) return true;
-  const layout = profile.profile_layout as (ProfileLayoutSchema & {
-    perfil_vivo_enabled?: boolean;
-  }) | null | undefined;
-  return layout?.perfil_vivo_enabled === true;
+  return perfilVivoEnableSource(profile) !== 'off';
+}
+
+/** Cómo quedó activado el cutover (cohort env gana sobre el toggle). */
+export function perfilVivoEnableSource(
+  profile: Partial<BusinessProfile> | null | undefined
+): 'env' | 'layout' | 'off' {
+  if (!profile) return 'off';
+  if (profile.slug && ENV_SLUGS().includes(profile.slug.toLowerCase())) return 'env';
+  const layout = profile.profile_layout as
+    | (ProfileLayoutSchema & { perfil_vivo_enabled?: boolean })
+    | null
+    | undefined;
+  if (layout?.perfil_vivo_enabled === true) return 'layout';
+  return 'off';
+}
+
+export function listPerfilVivoEnvCohort(): string[] {
+  return ENV_SLUGS();
 }
 
 export function withPerfilVivoEnabled(

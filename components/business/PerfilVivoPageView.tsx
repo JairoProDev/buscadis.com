@@ -21,7 +21,7 @@ async function fetchReviewRows(businessProfileId: string) {
   const { data, error } = await supabaseAdmin
     .from('business_reviews')
     .select(
-      'id, rating, text, comment, verified_purchase, is_verified, created_at, customer_name'
+      'id, rating, text, comment, verified_purchase, is_verified, created_at, customer_name, response_text, responded_at'
     )
     .eq('business_profile_id', businessProfileId)
     .or('is_visible.is.null,is_visible.eq.true')

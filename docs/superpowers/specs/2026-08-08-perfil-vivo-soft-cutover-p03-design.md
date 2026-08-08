@@ -29,3 +29,9 @@ Toggle: editor → hub **Confianza** → “Perfil Vivo”.
 - Edge middleware flag without page-level branch (optional)
 - Analytics parity dashboard full P14
 - Remove legacy storefront when cohort &gt; threshold
+
+## Cohort
+
+- Toggle por negocio en Confianza → Perfil Vivo (`profile_layout.perfil_vivo_enabled`)
+- Override cohort: `PERFIL_VIVO_ENABLED_SLUGS=slug1,slug2` (no se puede apagar desde el toggle)
+- `perfilVivoEnableSource(profile)` → `env` | `layout` | `off`

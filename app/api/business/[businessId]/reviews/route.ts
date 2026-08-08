@@ -23,7 +23,9 @@ export async function GET(
   const [{ data: rawReviews }, { data: aggregate }] = await Promise.all([
     supabaseAdmin
       .from('business_reviews')
-      .select('id, rating, text, comment, verified_purchase, is_verified, created_at, user_id, customer_name')
+      .select(
+        'id, rating, text, comment, verified_purchase, is_verified, created_at, user_id, customer_name, response_text, responded_at'
+      )
       .eq('business_profile_id', profile.id)
       .or('is_visible.is.null,is_visible.eq.true')
       .order('created_at', { ascending: false })
@@ -43,6 +45,8 @@ export async function GET(
     created_at: r.created_at,
     user_id: r.user_id,
     customer_name: r.customer_name,
+    response_text: r.response_text || undefined,
+    responded_at: r.responded_at || undefined,
   }));
 
   return NextResponse.json({

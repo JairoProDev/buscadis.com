@@ -5,10 +5,12 @@ import type { BusinessProfile, BusinessHours, SocialLink } from '@/types/busines
 import FieldLabel from '@/components/business/editor/FieldLabel';
 import BusinessShareTools from '@/components/business/public/BusinessShareTools';
 import ProfileAnalyticsWidget from '@/components/business/editor/ProfileAnalyticsWidget';
+import { OwnerReviewsPanel } from '@/components/business/editor/OwnerReviewsPanel';
 import { canUseProQr } from '@/lib/business/subscription';
 import { isFieldComplete, type ProfileFieldStatus } from '@/lib/business/profile-progress';
 import {
   isPerfilVivoEnabled,
+  perfilVivoEnableSource,
   withPerfilVivoEnabled,
 } from '@/lib/business/perfil-vivo-flag';
 import { useAuth } from '@/hooks/useAuth';
@@ -276,13 +278,19 @@ export default function TrustHubFields({ profile, setProfile, fields }: TrustHub
             <span className="font-semibold">buscadis.com/@{profile.slug || 'tu-negocio'}</span>
             . El editor sigue igual.
           </p>
+          {perfilVivoEnableSource(profile) === 'env' ? (
+            <p className="text-[12px] font-semibold text-teal-800 bg-teal-50 rounded-lg px-2 py-1.5">
+              Activo por cohort (env PERFIL_VIVO_ENABLED_SLUGS). El toggle local no lo apaga.
+            </p>
+          ) : null}
           <button
             type="button"
+            disabled={perfilVivoEnableSource(profile) === 'env'}
             onClick={() => {
               const next = !isPerfilVivoEnabled(profile);
               setProfile(withPerfilVivoEnabled(profile, next));
             }}
-            className={`w-full min-h-[48px] rounded-xl text-[15px] font-bold transition-colors ${
+            className={`w-full min-h-[48px] rounded-xl text-[15px] font-bold transition-colors disabled:opacity-60 ${
               isPerfilVivoEnabled(profile)
                 ? 'bg-teal-600 text-white hover:bg-teal-700'
                 : 'bg-slate-100 text-slate-800 hover:bg-slate-200'
@@ -347,8 +355,15 @@ export default function TrustHubFields({ profile, setProfile, fields }: TrustHub
         </div>
       </div>
 
+      {profile.slug ? (
+        <div>
+          <FieldLabel number={8} label="Responder reseñas" complete={false} />
+          <OwnerReviewsPanel slug={profile.slug} />
+        </div>
+      ) : null}
+
       <div>
-        <FieldLabel number={8} label="Analítica" complete />
+        <FieldLabel number={9} label="Analítica" complete />
         <ProfileAnalyticsWidget businessProfileId={profile.id} />
       </div>
     </div>

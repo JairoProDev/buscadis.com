@@ -64,13 +64,19 @@ export function resenaFromDbRow(row: Record<string, unknown>): Resena | null {
     (typeof row.comment === 'string' && row.comment) ||
     undefined;
   const respuestaTexto =
-    typeof row.owner_reply === 'string'
-      ? row.owner_reply
-      : typeof row.respuesta === 'string'
-        ? row.respuesta
-        : undefined;
+    typeof row.response_text === 'string'
+      ? row.response_text
+      : typeof row.owner_reply === 'string'
+        ? row.owner_reply
+        : typeof row.respuesta === 'string'
+          ? row.respuesta
+          : undefined;
   const respuestaFecha =
-    typeof row.owner_reply_at === 'string' ? row.owner_reply_at : undefined;
+    typeof row.responded_at === 'string'
+      ? row.responded_at
+      : typeof row.owner_reply_at === 'string'
+        ? row.owner_reply_at
+        : undefined;
 
   return {
     id,
