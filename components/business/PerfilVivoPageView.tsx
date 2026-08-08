@@ -2,9 +2,8 @@ import { notFound } from 'next/navigation';
 import { PerfilVivoRoot } from '@buscadis/perfil-vivo';
 import type { PerfilPayload } from '@buscadis/perfil-vivo';
 import {
-  buildDemoRetailPayload,
-  buildDemoCitaPayload,
-  buildDemoComidaPayload,
+  buildDemoPerfilVivoPayload,
+  isDemoPerfilVivoSlug,
   buildHandoffLinks,
   buildPerfilPayloadFromSources,
   formatPrecio,
@@ -120,9 +119,8 @@ export function buildPerfilVivoJsonLd(payload: PerfilPayload, canonicalPath: str
 export async function loadPerfilVivoPayload(
   slug: string
 ): Promise<PerfilPayload | null> {
-  if (slug === 'demo') return buildDemoRetailPayload();
-  if (slug === 'demo-cita') return buildDemoCitaPayload();
-  if (slug === 'demo-comida') return buildDemoComidaPayload();
+  const demo = buildDemoPerfilVivoPayload(slug);
+  if (demo) return demo;
 
   const profile = await getBusinessProfileBySlug(slug);
   if (!profile) return null;
@@ -141,13 +139,8 @@ export async function loadPerfilVivoPayload(
 
 /** Payload + producto concreto (aunque no esté en destacados del carrusel). */
 export async function loadProductoEnPerfil(slug: string, productoId: string) {
-  if (slug === 'demo' || slug === 'demo-cita' || slug === 'demo-comida') {
-    const payload =
-      slug === 'demo-cita'
-        ? buildDemoCitaPayload()
-        : slug === 'demo-comida'
-          ? buildDemoComidaPayload()
-          : buildDemoRetailPayload();
+  if (isDemoPerfilVivoSlug(slug)) {
+    const payload = buildDemoPerfilVivoPayload(slug)!;
     const producto = payload.productos.find((p) => p.id === productoId) ?? null;
     return { payload, producto };
   }

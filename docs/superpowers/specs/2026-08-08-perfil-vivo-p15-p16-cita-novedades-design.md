@@ -15,3 +15,6 @@ Seis arquetipos completos, feed social, cron de novedades, mapeo automático ret
 | `/v/demo` | retail |
 | `/v/demo-cita` | cita |
 | `/v/demo-comida` | comida (+ Categorías) |
+| `/v/demo-profesional` | profesional (+ cert/pub/docs) |
+| `/v/demo-local` | local (ubicación primero) |
+| `/v/demo-alto-ticket` | alto_ticket (kits + servicios) |

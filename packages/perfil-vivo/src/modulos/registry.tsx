@@ -6,6 +6,8 @@ import type { ModuloResuelto } from './resolver';
 import { AccionesShell } from './shells/AccionesShell';
 import { CanalesShell } from './shells/CanalesShell';
 import { CatalogoShell } from './shells/CatalogoShell';
+import { CertificacionesShell } from './shells/CertificacionesShell';
+import { DocumentosShell } from './shells/DocumentosShell';
 import { EquipoShell } from './shells/EquipoShell';
 import { EstadoShell } from './shells/EstadoShell';
 import { FaqShell } from './shells/FaqShell';
@@ -16,6 +18,7 @@ import { NosotrosShell } from './shells/NosotrosShell';
 import { NovedadesShell } from './shells/NovedadesShell';
 import { PagoShell } from './shells/PagoShell';
 import { PromocionShell } from './shells/PromocionShell';
+import { PublicacionesShell } from './shells/PublicacionesShell';
 import { ResenasShell } from './shells/ResenasShell';
 import { ServiciosShell } from './shells/ServiciosShell';
 import { CategoriasShell } from './shells/CategoriasShell';
@@ -45,6 +48,9 @@ const REGISTRY: Partial<Record<TipoModulo, ComponentType<ShellProps>>> = {
   nosotros: ({ modulo }) => <NosotrosShell titulo={modulo.titulo} />,
   faq: ({ modulo }) => <FaqShell titulo={modulo.titulo} />,
   equipo: ({ modulo }) => <EquipoShell titulo={modulo.titulo} />,
+  certificaciones: ({ modulo }) => <CertificacionesShell titulo={modulo.titulo} />,
+  publicaciones: ({ modulo }) => <PublicacionesShell titulo={modulo.titulo} />,
+  documentos: ({ modulo }) => <DocumentosShell titulo={modulo.titulo} />,
 };
 
 export function getModuloComponent(tipo: TipoModulo) {

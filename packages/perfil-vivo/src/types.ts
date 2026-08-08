@@ -172,6 +172,30 @@ export interface MiembroEquipo {
   fotoUrl?: string;
 }
 
+export interface Certificacion {
+  id: string;
+  titulo: string;
+  emisor?: string;
+  /** Año o fecha corta visible */
+  anio?: string;
+}
+
+export interface Publicacion {
+  id: string;
+  titulo: string;
+  resumen?: string;
+  url?: string;
+  /** ISO */
+  publicadaEn: string;
+}
+
+export interface DocumentoPublico {
+  id: string;
+  titulo: string;
+  tipo: 'pdf' | 'link' | 'otro';
+  url: string;
+}
+
 export interface Negocio {
   id: string;
   slug: string;
@@ -219,6 +243,9 @@ export interface Negocio {
     tieneNosotros?: number;
     novedades?: number;
     equipo?: number;
+    certificaciones?: number;
+    publicaciones?: number;
+    documentos?: number;
   };
   creadoEn: string;
   actualizadoEn: string;
@@ -235,6 +262,9 @@ export interface PerfilPayload {
   nosotros: NosotrosContenido | null;
   novedades: Novedad[];
   equipo: MiembroEquipo[];
+  certificaciones: Certificacion[];
+  publicaciones: Publicacion[];
+  documentos: DocumentoPublico[];
   metricas?: MetricasVerificadas;
   estadoVivo: EstadoVivo;
   totalProductos: number;

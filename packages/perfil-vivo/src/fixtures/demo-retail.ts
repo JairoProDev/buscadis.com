@@ -299,5 +299,8 @@ export function buildDemoRetailPayload(now: Date = new Date()): PerfilPayload {
       },
     ],
     equipo: [],
+    certificaciones: [],
+    publicaciones: [],
+    documentos: [],
   };
 }

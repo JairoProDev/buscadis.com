@@ -208,6 +208,9 @@ export function buildDemoComidaPayload(now: Date = new Date()): PerfilPayload {
       },
     ],
     equipo: [],
+    certificaciones: [],
+    publicaciones: [],
+    documentos: [],
     totalProductos: DEMO_COMIDA_PRODUCTOS.length,
     metricas: {
       antiguedadDesde: negocio.creadoEn,

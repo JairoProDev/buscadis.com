@@ -17,6 +17,9 @@ export interface ModuloMeta {
     | 'tieneNosotros'
     | 'novedades'
     | 'equipo'
+    | 'certificaciones'
+    | 'publicaciones'
+    | 'documentos'
     | null;
   ancla: string;
   tituloDefault: string;
@@ -129,7 +132,7 @@ export const MODULO_META: Record<TipoModulo, ModuloMeta> = {
     fijo: false,
     minDatos: 1,
     planMin: 'pro',
-    conteoKey: null,
+    conteoKey: 'publicaciones',
     ancla: 'publicaciones',
     tituloDefault: 'Publicaciones',
   },
@@ -201,7 +204,7 @@ export const MODULO_META: Record<TipoModulo, ModuloMeta> = {
     fijo: false,
     minDatos: 1,
     planMin: 'pro',
-    conteoKey: null,
+    conteoKey: 'certificaciones',
     ancla: 'certificaciones',
     tituloDefault: 'Certificaciones',
   },
@@ -210,7 +213,7 @@ export const MODULO_META: Record<TipoModulo, ModuloMeta> = {
     fijo: false,
     minDatos: 1,
     planMin: 'pro',
-    conteoKey: null,
+    conteoKey: 'documentos',
     ancla: 'documentos',
     tituloDefault: 'Documentos',
   },

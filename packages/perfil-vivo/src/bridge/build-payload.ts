@@ -359,6 +359,9 @@ export function buildPerfilPayloadFromSources(opts: {
     nosotros,
     novedades,
     equipo,
+    certificaciones: [],
+    publicaciones: [],
+    documentos: [],
     totalProductos: published.length,
     metricas: {
       antiguedadDesde: negocio.creadoEn,

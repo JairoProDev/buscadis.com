@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
+import { isDemoPerfilVivoSlug } from '@buscadis/perfil-vivo';
 import { trackProfileView, trackProfileEvent } from '@/lib/business/analytics/track-profile-event';
 import { trackEvent } from '@/lib/events/track';
 
@@ -28,7 +29,7 @@ export function PerfilVivoAnalytics({
 
   useEffect(() => {
     if (sent.current) return;
-    if (!businessProfileId || slug === 'demo' || slug === 'demo-cita' || slug === 'demo-comida') return;
+    if (!businessProfileId || isDemoPerfilVivoSlug(slug)) return;
     sent.current = true;
 
     const origen = origenFromReferrer(typeof document !== 'undefined' ? document.referrer : '');
@@ -52,7 +53,7 @@ export function PerfilVivoAnalytics({
   }, [businessProfileId, slug, arquetipo]);
 
   useEffect(() => {
-    if (!businessProfileId || slug === 'demo' || slug === 'demo-cita' || slug === 'demo-comida') return;
+    if (!businessProfileId || isDemoPerfilVivoSlug(slug)) return;
     const onClick = (ev: MouseEvent) => {
       const t = ev.target as HTMLElement | null;
       const a = t?.closest?.('a') as HTMLAnchorElement | null;

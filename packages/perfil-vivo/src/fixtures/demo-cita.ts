@@ -232,6 +232,9 @@ export function buildDemoCitaPayload(now: Date = new Date()): PerfilPayload {
     },
     novedades: [] as Novedad[],
     equipo: DEMO_CITA_EQUIPO,
+    certificaciones: [],
+    publicaciones: [],
+    documentos: [],
     totalProductos: DEMO_CITA_SERVICIOS.length,
     metricas: {
       antiguedadDesde: negocio.creadoEn,

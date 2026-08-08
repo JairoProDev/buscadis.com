@@ -60,6 +60,17 @@ if (!comidaSrc.includes("slug: 'demo-comida'") || !comidaSrc.includes("arquetipo
   console.log('OK: demo-comida fixture');
 }
 
+const demosSrc = readFileSync(join(root, 'src/demos-slugs.ts'), 'utf8');
+for (const s of ['demo-profesional', 'demo-local', 'demo-alto-ticket']) {
+  if (!demosSrc.includes(`'${s}'`)) {
+    console.error(`FAIL: demos-slugs missing ${s}`);
+    failed += 1;
+  }
+}
+if (demosSrc.includes('demo-profesional')) {
+  console.log('OK: six demo slugs registered');
+}
+
 // Minimal structural check mirroring ConfigModulo
 const ConfigModuloSchema = z.object({
   tipo: z.string(),

@@ -27,6 +27,25 @@ export {
   DEMO_COMIDA_PRODUCTOS,
   buildDemoComidaPayload,
 } from './fixtures/demo-comida';
+export {
+  DEMO_PROFESIONAL_NEGOCIO,
+  buildDemoProfesionalPayload,
+} from './fixtures/demo-profesional';
+export {
+  DEMO_LOCAL_NEGOCIO,
+  buildDemoLocalPayload,
+} from './fixtures/demo-local';
+export {
+  DEMO_ALTO_TICKET_NEGOCIO,
+  buildDemoAltoTicketPayload,
+} from './fixtures/demo-alto-ticket';
+export {
+  DEMO_PERFIL_VIVO_SLUGS,
+  DEMO_META,
+  isDemoPerfilVivoSlug,
+  buildDemoPerfilVivoPayload,
+} from './demos';
+export type { DemoPerfilVivoSlug } from './demos';
 export { calcularEstadoVivo, formatPrecio } from './estado/calcular-estado';
 export { negocioFromBusinessProfile } from './bridge/from-business-profile';
 export {

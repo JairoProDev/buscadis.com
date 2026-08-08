@@ -43,3 +43,10 @@ export { PerfilVivoRoot } from './modulos/PerfilVivoRoot';
 export type { HandoffLinks } from './modulos/PerfilContext';
 
 export { calcularEstadoVivo, formatPrecio } from './estado/calcular-estado';
+
+export {
+  DEMO_PERFIL_VIVO_SLUGS,
+  DEMO_META,
+  isDemoPerfilVivoSlug,
+} from './demos-slugs';
+export type { DemoPerfilVivoSlug } from './demos-slugs';

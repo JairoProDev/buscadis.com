@@ -3,6 +3,7 @@ import type { Metadata } from 'next';
 import { normalizeBusinessSlug } from '@/lib/business/normalize-slug';
 import { getBusinessProfileBySlug } from '@/lib/business';
 import { isPerfilVivoEnabled } from '@/lib/business/perfil-vivo-flag';
+import { DEMO_META, isDemoPerfilVivoSlug } from '@buscadis/perfil-vivo/server';
 import { PerfilVivoPageView, loadPerfilVivoPayload } from '@/components/business/PerfilVivoPageView';
 
 export const revalidate = 60;
@@ -14,21 +15,9 @@ type PageProps = {
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug: raw } = await params;
   const slug = normalizeBusinessSlug(raw) || raw.toLowerCase();
-  if (slug === 'demo') {
+  if (isDemoPerfilVivoSlug(slug)) {
     return {
-      title: 'Ferretería Demo Quival | Perfil Vivo',
-      robots: { index: false, follow: false },
-    };
-  }
-  if (slug === 'demo-cita') {
-    return {
-      title: 'Barbería Norte Cusco | Perfil Vivo',
-      robots: { index: false, follow: false },
-    };
-  }
-  if (slug === 'demo-comida') {
-    return {
-      title: 'Huatia Andina | Perfil Vivo',
+      title: DEMO_META[slug].title,
       robots: { index: false, follow: false },
     };
   }
@@ -54,7 +43,7 @@ export default async function PerfilVivoPreviewPage({ params }: PageProps) {
   const { slug: raw } = await params;
   const slug = normalizeBusinessSlug(raw) || raw.toLowerCase();
 
-  if (slug !== 'demo' && slug !== 'demo-cita' && slug !== 'demo-comida') {
+  if (!isDemoPerfilVivoSlug(slug)) {
     const profile = await getBusinessProfileBySlug(slug);
     if (profile && isPerfilVivoEnabled(profile)) {
       permanentRedirect(`/@${slug}`);

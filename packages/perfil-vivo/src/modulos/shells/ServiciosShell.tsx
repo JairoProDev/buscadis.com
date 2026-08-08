@@ -11,7 +11,14 @@ import { usePerfil } from '../PerfilContext';
  */
 export function ServiciosShell({ titulo }: { titulo: string }) {
   const { payload, handoffs } = usePerfil();
-  const servicios = payload.productos.filter((p) => p.activo).slice(0, 12);
+  const arq = payload.negocio.arquetipo;
+  const servicios = payload.productos
+    .filter((p) => {
+      if (!p.activo) return false;
+      if (arq === 'alto_ticket') return p.grupo === 'Servicios';
+      return true;
+    })
+    .slice(0, 12);
   const [openId, setOpenId] = useState<string | null>(null);
   const open = servicios.find((p) => p.id === openId) ?? null;
 
