@@ -19,8 +19,8 @@
 | Sprint | Nombre | Estado | Plan detallado | Criterio de done |
 |--------|--------|--------|----------------|------------------|
 | **1** | Fundación `@buscadis/tokens` | ✅ Hecho (`ea4f2c0`) | — | 4 artifacts + contrast 0 violaciones |
-| **2** | P0 marca + accesibilidad | 🟡 En progreso | [sprint-2](./2026-08-08-sprint-2-brand-a11y.md) | CTA AA, PWA alineada, logo <15KB, cats unificadas, touch ≥44 |
-| **3** | Primitivas tanda 1 | 📋 Blueprint | [abajo §3](#sprint-3--primitivas-tanda-1) | Header/Auth/Publish usan Button/Input/Icon |
+| **2** | P0 marca + accesibilidad | ✅ Hecho (`f9d2ed9`) | [sprint-2](./2026-08-08-sprint-2-brand-a11y.md) | CTA AA, PWA alineada, logo-mark &lt;15KB, cats unificadas, touch ≥44 |
+| **3** | Primitivas tanda 1 | 🔜 Siguiente | [sprint-3](./2026-08-08-sprint-3-ui-primitives.md) | Header/Auth/Publish usan Button/Input/Icon |
 | **4** | Primitivas tanda 2 | 📋 Blueprint | [abajo §4](#sprint-4--primitivas-tanda-2) | Cero modales ad-hoc |
 | **5** | AdisoCard + rejilla | 📋 Blueprint | [abajo §5](#sprint-5--adisocard--rejilla) | 3 vistas + scroll restore |
 | **6** | SSR + indexación | 📋 Blueprint | [abajo §6](#sprint-6--ssr--indexación) | `curl` con contenido real en 4 rutas |

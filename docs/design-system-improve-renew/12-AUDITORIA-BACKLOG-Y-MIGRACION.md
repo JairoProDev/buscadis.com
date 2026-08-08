@@ -56,9 +56,10 @@ Crear `@buscadis/tokens` con las tres capas, el pipeline de Style Dictionary, la
 *Terminado cuando:* `npm run tokens:build` produce las cuatro salidas y el verificador de contraste corre en CI.  
 **Hecho:** 2026-08-08 · commit `ea4f2c0` · contrast gate 24/24 OK.
 
-### Sprint 2 · Correcciones P0 de marca y accesibilidad 🔜
+### Sprint 2 · Correcciones P0 de marca y accesibilidad ✅
 Congelar la marca; aplicar la separación identidad/acción; corregir el CTA Publicar; unificar `.light-mode`; unificar categorías; optimizar el logo; corregir objetivos táctiles del header.  
-**Plan:** `docs/superpowers/plans/2026-08-08-sprint-2-brand-a11y.md` · **Roadmap:** `docs/superpowers/plans/2026-08-08-design-system-roadmap.md`
+**Plan:** `docs/superpowers/plans/2026-08-08-sprint-2-brand-a11y.md` · **Roadmap:** `docs/superpowers/plans/2026-08-08-design-system-roadmap.md`  
+**Hecho:** 2026-08-08 · commit `f9d2ed9` · CTA 9.98:1 · PWA `#53ACC5` · logo-mark 3.9KB · header 44px · 0× `ec4899`/`38bdf8` en UI.
 *Terminado cuando:* cero pares en uso por debajo del mínimo de contraste y el logo pesa menos de 15 KB.
 
 ### Sprint 3 · Primitivas, tanda 1
