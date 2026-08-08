@@ -1,7 +1,6 @@
 'use client';
 
 import React from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { IconCheck, IconChevronDown } from '@/components/Icons';
 import { useFilterSectionCollapse } from './useFilterSectionCollapse';
 
@@ -18,6 +17,7 @@ interface FilterSectionCardProps {
   defaultOpen?: boolean;
 }
 
+/** Filter section — CSS expand/collapse (no Framer; Sprint 7). */
 export default function FilterSectionCard({
   sectionId,
   step,
@@ -31,10 +31,10 @@ export default function FilterSectionCard({
   defaultOpen = false,
 }: FilterSectionCardProps) {
   const { open, toggle } = useFilterSectionCollapse(sectionId, defaultOpen);
+  const expanded = collapsible ? open : true;
 
   return (
-    <motion.section
-      layout
+    <section
       id={`filter-section-${sectionId}`}
       className={`scroll-mt-3 rounded-2xl border p-3 transition-colors ${
         active
@@ -46,6 +46,7 @@ export default function FilterSectionCard({
         type="button"
         onClick={() => collapsible && toggle()}
         disabled={!collapsible}
+        aria-expanded={collapsible ? open : undefined}
         className={`mb-0 flex w-full items-center gap-2 text-left ${collapsible ? 'cursor-pointer' : 'cursor-default'}`}
       >
         <span
@@ -69,30 +70,25 @@ export default function FilterSectionCard({
           )}
         </span>
         {collapsible && (
-          <motion.span
-            animate={{ rotate: open ? 180 : 0 }}
-            transition={{ duration: 0.2 }}
-            className="shrink-0 text-[var(--text-tertiary)]"
+          <span
+            className={`shrink-0 text-[var(--text-tertiary)] transition-transform duration-200 ease-out ${
+              expanded ? 'rotate-180' : 'rotate-0'
+            }`}
           >
             <IconChevronDown size={12} />
-          </motion.span>
+          </span>
         )}
       </button>
 
-      <AnimatePresence initial={false}>
-        {open && (
-          <motion.div
-            key="content"
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.22, ease: [0.4, 0, 0.2, 1] }}
-            className="overflow-hidden"
-          >
-            <div className="space-y-2.5 pt-2.5">{children}</div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </motion.section>
+      <div
+        className={`grid transition-[grid-template-rows,opacity] duration-200 ease-out ${
+          expanded ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'
+        }`}
+      >
+        <div className="overflow-hidden">
+          <div className="space-y-2.5 pt-2.5">{children}</div>
+        </div>
+      </div>
+    </section>
   );
 }

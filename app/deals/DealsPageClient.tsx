@@ -17,7 +17,7 @@ export default function DealsPageClient() {
         <Header seccionActiva={'adiso' as SeccionSidebar} />
       </div>
 
-      <main className="relative min-h-0 flex-1 md:h-[calc(100dvh-72px)]">
+      <main className="relative min-h-0 flex-1 md:h-[calc(100dvh-var(--bs-header-height,64px))]">
         <DealsFeed initialClipId={clipId} />
       </main>
 

@@ -534,7 +534,7 @@ export default function AdisoLandingPage({ adiso, onVolver }: AdisoLandingPagePr
 
           {/* Panel de compra — sticky en desktop */}
           <div className="lg:col-span-5">
-            <div className="lg:sticky" style={{ top: 'calc(var(--header-height, 72px) + 1rem)' }}>
+            <div className="lg:sticky" style={{ top: 'calc(var(--header-height, var(--bs-header-height, 56px)) + 1rem)' }}>
               <div className="rounded-3xl border border-[var(--border-color)] bg-[var(--bg-primary)] p-5 shadow-sm lg:p-6">
                 <PurchasePanel />
               </div>

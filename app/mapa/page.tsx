@@ -50,7 +50,7 @@ export default function MapaPage() {
             />
 
             {/* Map Container - Full Height minus header */}
-            <main className="flex-1 relative w-full h-[calc(100vh-72px)]">
+            <main className="flex-1 relative w-full h-[calc(100vh-var(--bs-header-height,56px))]">
                 <MapaInteractivo
                     adisos={adisos}
                     onAbrirAdiso={(adiso) => {

@@ -107,11 +107,20 @@ export default function Header({
 
   useEffect(() => {
     if (!mounted) return;
-    document.documentElement.style.setProperty('--header-height', headerVisible ? '72px' : '0px');
+    const desktop = window.matchMedia('(min-width: 768px)').matches;
+    const visible = headerVisible
+      ? desktop
+        ? 'var(--bs-header-height-desktop, 64px)'
+        : 'var(--bs-header-height-mobile, 56px)'
+      : '0px';
+    document.documentElement.style.setProperty('--header-height', visible);
     return () => {
-      document.documentElement.style.setProperty('--header-height', '72px');
+      document.documentElement.style.setProperty(
+        '--header-height',
+        'var(--bs-header-height)'
+      );
     };
-  }, [headerVisible, mounted]);
+  }, [headerVisible, mounted, isDesktop]);
 
   const applyTheme = (mode: 'light' | 'dark' | 'auto') => {
     const root = document.documentElement;
@@ -166,7 +175,7 @@ export default function Header({
         alt=""
         aria-hidden
         style={{
-          height: isDesktop ? '36px' : '32px',
+          height: isDesktop ? '40px' : '32px',
           width: 'auto',
           objectFit: 'contain',
           flexShrink: 0,
@@ -344,7 +353,7 @@ export default function Header({
       style={{
         borderBottom: '1px solid var(--border-color)',
         borderRadius: '0 0 25px 25px',
-        height: '72px',
+        height: 'var(--bs-header-height, 56px)',
         position: 'sticky',
         top: 0,
         zIndex: 1000,

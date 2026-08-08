@@ -18,12 +18,12 @@ export default function ChatPage() {
     }, [setSidebarExpanded]);
 
     return (
-        <div className="min-h-screen bg-gray-50 dark:bg-zinc-900 flex flex-col pb-16 md:pb-0">
+        <div className="min-h-screen bg-gray-50 dark:bg-zinc-900 flex flex-col pb-[calc(var(--bs-nav-height,56px)+env(safe-area-inset-bottom,0px))] md:pb-0">
             <Header
                 onToggleLeftSidebar={() => setSidebarOpen(true)}
                 seccionActiva={'chatbot' as any}
             />
-            <main className="flex-1 flex flex-col relative h-[calc(100vh-72px-4rem)] md:h-[calc(100vh-72px)]">
+            <main className="flex-1 flex flex-col relative h-[calc(100vh-var(--bs-header-height,56px)-var(--bs-nav-height,56px))] md:h-[calc(100vh-var(--bs-header-height,64px))]">
                 <div className="flex-1 overflow-hidden h-full">
                     <ChatbotIANew
                         onMinimize={() => { }}

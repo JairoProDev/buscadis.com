@@ -37,7 +37,7 @@ interface SidebarDesktopProps {
 }
 
 const SIDEBAR_WIDTH = 420;
-const HEADER_HEIGHT = 'var(--header-height, 72px)';
+const HEADER_HEIGHT = 'var(--header-height, var(--bs-header-height, 56px))';
 
 const PANEL_TABS: {
   id: SeccionSidebar;

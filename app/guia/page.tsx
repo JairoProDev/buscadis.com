@@ -14,7 +14,7 @@ export default function GuidePage() {
     const router = useRouter();
 
     return (
-        <div className="min-h-screen bg-gray-50 dark:bg-zinc-900 flex flex-col pb-16 md:pb-0">
+        <div className="min-h-screen bg-gray-50 dark:bg-zinc-900 flex flex-col pb-[calc(var(--bs-nav-height,56px)+env(safe-area-inset-bottom,0px))] md:pb-0">
             <Header onToggleLeftSidebar={() => setSidebarOpen(true)} />
 
             <main className="flex-1 max-w-4xl mx-auto w-full p-6 py-12">

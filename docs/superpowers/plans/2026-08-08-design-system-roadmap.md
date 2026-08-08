@@ -1,6 +1,6 @@
 # Design System Migration — Roadmap
 
-> **Estado:** Sprints 1–6 ✅ · Sprint 7 🔜 · Sprint 8 planificado  
+> **Estado:** Sprints 1–7 ✅ · Sprint 8 🔜  
 > **Fuente de verdad de diseño:** `docs/design-system-improve-renew/`  
 > **Fuente de verdad de tokens:** `packages/tokens/`  
 > **Actualizado:** 2026-08-08
@@ -24,8 +24,8 @@
 | **4** | Primitivas tanda 2 | ✅ Hecho | [sprint-4](./2026-08-08-sprint-4-ui-primitives-2.md) | Modal + Toast migrados; resto exportado |
 | **5** | AdisoCard + rejilla | ✅ Hecho | [sprint-5](./2026-08-08-sprint-5-adisocard-rejilla.md) | Anatomía fija + Tailwind grid + scroll restore |
 | **6** | SSR + indexación | ✅ Hecho | [sprint-6](./2026-08-08-sprint-6-ssr-indexing.md) | HTML + JSON-LD en 4 rutas; `npm run smoke:ssr` |
-| **7** | Chrome + composer | 🔜 Siguiente | [abajo §7](#sprint-7--chrome--composer) | Chrome móvil 112px |
-| **8** | Storefront kit | 📋 Blueprint | [abajo §8](#sprint-8--storefront-kit) | Tenant extremo legible |
+| **7** | Chrome + composer | ✅ Hecho | [sprint-7](./2026-08-08-sprint-7-chrome-composer.md) | Chrome móvil 112px |
+| **8** | Storefront kit | 🔜 Siguiente | [abajo §8](#sprint-8--storefront-kit) | Tenant extremo legible |
 
 ---
 
@@ -113,9 +113,11 @@ curl -sL https://buscadis.com | head -c 2000
 
 ---
 
-## Sprint 7 — Chrome + composer
+## Sprint 7 — Chrome + composer ✅
 
 **Goal:** Header 56/64, nav 56, composer a11y teclado, categorías con colores nuevos, filtros a CSS (menos Framer).
+
+**Hecho:** `--bs-header-height` / `--bs-nav-height`; nav fija; CategoryBar acento 3px; ComposerModeToggle flechas; FilterSectionCard CSS.
 
 **Done:** chrome permanente móvil ≤112px.
 

@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useLayoutEffect, useRef, useState } from 'react';
+import { useCallback, useLayoutEffect, useRef, useState, type KeyboardEvent } from 'react';
 import { motion } from 'framer-motion';
 import { IconSearch, IconMegaphone } from './Icons';
 export type ComposerMode = 'search' | 'publish';
@@ -13,7 +13,14 @@ interface ComposerModeToggleProps {
   iconsOnly?: boolean;
 }
 
-export default function ComposerModeToggle({ mode, onChange, className = '', iconsOnly = false }: ComposerModeToggleProps) {
+const MODES: ComposerMode[] = ['search', 'publish'];
+
+export default function ComposerModeToggle({
+  mode,
+  onChange,
+  className = '',
+  iconsOnly = false,
+}: ComposerModeToggleProps) {
   const trackRef = useRef<HTMLDivElement>(null);
   const searchRef = useRef<HTMLButtonElement>(null);
   const publishRef = useRef<HTMLButtonElement>(null);
@@ -43,6 +50,29 @@ export default function ComposerModeToggle({ mode, onChange, className = '', ico
     return () => ro.disconnect();
   }, [measurePill]);
 
+  const focusMode = (next: ComposerMode) => {
+    onChange(next);
+    const el = next === 'search' ? searchRef.current : publishRef.current;
+    el?.focus();
+  };
+
+  const onTablistKeyDown = (e: KeyboardEvent) => {
+    const idx = MODES.indexOf(mode);
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+      e.preventDefault();
+      focusMode(MODES[(idx + 1) % MODES.length]);
+    } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+      e.preventDefault();
+      focusMode(MODES[(idx - 1 + MODES.length) % MODES.length]);
+    } else if (e.key === 'Home') {
+      e.preventDefault();
+      focusMode('search');
+    } else if (e.key === 'End') {
+      e.preventDefault();
+      focusMode('publish');
+    }
+  };
+
   const spring = { type: 'spring' as const, stiffness: 420, damping: 32, mass: 0.85 };
 
   return (
@@ -50,6 +80,7 @@ export default function ComposerModeToggle({ mode, onChange, className = '', ico
       ref={trackRef}
       role="tablist"
       aria-label="Buscar o publicar"
+      onKeyDown={onTablistKeyDown}
       className={`composer-mode-track relative flex shrink-0 items-center rounded-full bg-[var(--bg-tertiary)] p-0.5 ${
         iconsOnly ? 'mr-1.5' : 'mr-2.5 md:mr-3'
       } ${className}`}
@@ -60,7 +91,7 @@ export default function ComposerModeToggle({ mode, onChange, className = '', ico
         animate={{
           width: pill.width,
           x: pill.x,
-          backgroundColor: mode === 'search' ? 'var(--bg-primary)' : 'var(--bg-primary)',
+          backgroundColor: 'var(--bg-primary)',
           boxShadow:
             mode === 'search'
               ? '0 2px 8px rgba(var(--brand-primary-rgb), 0.22), 0 1px 2px rgba(0,0,0,0.06)'
@@ -73,6 +104,7 @@ export default function ComposerModeToggle({ mode, onChange, className = '', ico
         ref={searchRef}
         type="button"
         role="tab"
+        tabIndex={mode === 'search' ? 0 : -1}
         aria-selected={mode === 'search'}
         aria-label="Buscar"
         title="Buscar"
@@ -99,6 +131,7 @@ export default function ComposerModeToggle({ mode, onChange, className = '', ico
         ref={publishRef}
         type="button"
         role="tab"
+        tabIndex={mode === 'publish' ? 0 : -1}
         aria-selected={mode === 'publish'}
         aria-label="Publicar"
         title="Publicar"

@@ -33,7 +33,7 @@ interface FilterSidePanelProps {
 
 const COLLAPSED_WIDTH = 40;
 const EXPANDED_WIDTH = 308;
-const HEADER_VAR = 'var(--header-height, 72px)';
+const HEADER_VAR = 'var(--header-height, var(--bs-header-height, 56px))';
 
 const stickyStyle: React.CSSProperties = {
   position: 'sticky',

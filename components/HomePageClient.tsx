@@ -44,6 +44,7 @@ import {
   IconClose,
 } from '@/components/Icons';
 import { getCategoriaLabel } from '@/lib/adiso-display';
+import { getCategoriaThemeTokens } from '@/lib/categoria-theme';
 import {
   applyBrowseFilters,
   browseFiltersFromSearchParams,
@@ -1159,9 +1160,13 @@ function HomeContent() {
                 { id: 'eventos', label: 'Eventos', Icon: IconEventos },
                 { id: 'negocios', label: 'Negocios', Icon: IconNegocios },
                 { id: 'comunidad', label: 'Comunidad', Icon: IconComunidad },
-              ].map(({ id, label, Icon }) => (
+              ].map(({ id, label, Icon }) => {
+                const isActive = categoriaFiltro === id;
+                const catTheme = getCategoriaThemeTokens(id as Categoria);
+                return (
                 <button
                   key={id}
+                  type="button"
                   onClick={() => {
                     const nuevaCategoria = categoriaFiltro === id ? 'todos' : (id as Categoria);
                     setCategoriaFiltro(nuevaCategoria);
@@ -1193,48 +1198,57 @@ function HomeContent() {
                     flexShrink: 0,
                     padding: '2px',
                     borderRadius: '12px',
-                    opacity: categoriaFiltro === id ? 1 : 0.8,
-                    transform: categoriaFiltro === id ? 'scale(1.05)' : 'scale(1)',
-                    transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+                    opacity: isActive ? 1 : 0.85,
+                    transition: 'opacity 0.2s ease',
                   }}
                   className="group"
+                  aria-pressed={isActive}
                 >
                   <div
                     style={{
-                    width: isDesktop ? '52px' : '44px',
-                    height: isDesktop ? '52px' : '44px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    borderRadius: isDesktop ? '16px' : '14px',
-                    boxSizing: 'border-box',
-                    border: categoriaFiltro === id
-                      ? '2px solid var(--brand-yellow)'
-                      : '2px solid rgba(var(--brand-yellow-rgb), 0.65)',
-                    backgroundColor: categoriaFiltro === id ? 'var(--brand-blue)' : undefined,
-                    color: categoriaFiltro === id ? 'white' : 'var(--text-secondary)',
-                    boxShadow: categoriaFiltro === id
-                      ? '0 10px 20px -5px rgba(var(--brand-primary-rgb), 0.35), 0 0 0 1px rgba(var(--brand-yellow-rgb), 0.35)'
-                      : '0 4px 6px -1px rgba(0, 0, 0, 0.05)',
-                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                    position: 'relative',
-                    overflow: 'hidden'
-                  }}
-                    className={`group-hover:shadow-lg group-hover:-translate-y-1${categoriaFiltro !== id ? ' brand-category-tile' : ''}`}
+                      width: isDesktop ? '52px' : '44px',
+                      height: isDesktop ? '52px' : '44px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      borderRadius: isDesktop ? '16px' : '14px',
+                      boxSizing: 'border-box',
+                      border: `1.5px solid ${isActive ? catTheme.accent : 'var(--bs-border-default, var(--border-color))'}`,
+                      backgroundColor: isActive ? catTheme.placeholderBg : 'var(--bs-bg-sunken, var(--bg-tertiary))',
+                      color: isActive ? catTheme.accent : 'var(--text-secondary)',
+                      transition: 'border-color 0.2s ease, background-color 0.2s ease, color 0.2s ease',
+                      position: 'relative',
+                      overflow: 'hidden',
+                    }}
                   >
-                    <Icon size={isDesktop ? 26 : 22} color={categoriaFiltro === id ? 'white' : undefined} />
+                    <Icon size={isDesktop ? 26 : 22} color={isActive ? catTheme.accent : undefined} />
+                    {/* Active: 3px bottom bar — never full blue fill (doc 08) */}
+                    <span
+                      aria-hidden
+                      style={{
+                        position: 'absolute',
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        height: '3px',
+                        backgroundColor: catTheme.accent,
+                        opacity: isActive ? 1 : 0,
+                        transition: 'opacity 0.2s ease',
+                      }}
+                    />
                   </div>
                   <span style={{
                     fontSize: isDesktop ? '0.8125rem' : '0.6875rem',
-                    fontWeight: categoriaFiltro === id ? 700 : 500,
+                    fontWeight: isActive ? 600 : 500,
                     textAlign: 'center',
                     whiteSpace: 'nowrap',
-                    color: categoriaFiltro === id ? 'var(--brand-blue)' : 'var(--text-secondary)'
+                    color: isActive ? catTheme.accent : 'var(--text-secondary)',
                   }}>
                     {label}
                   </span>
                 </button>
-              ))}
+                );
+              })}
             </div>
             <div
               className="no-scrollbar"
@@ -1250,7 +1264,7 @@ function HomeContent() {
               data-sticky-search
               style={{
                 position: 'sticky',
-                top: 'var(--header-height, 72px)',
+                top: 'var(--header-height, var(--bs-header-height, 56px))',
                 zIndex: 900,
                 paddingBottom: inlineFiltersVisible ? '0.5rem' : '0.25rem',
               }}
@@ -1320,7 +1334,9 @@ function HomeContent() {
               minWidth: 0,
               padding: '1rem',
               paddingTop: browseScrolled ? '0.5rem' : '0.25rem',
-              paddingBottom: isDesktop ? '1rem' : '5rem',
+              paddingBottom: isDesktop
+                ? '1rem'
+                : 'calc(var(--bs-nav-height, 56px) + env(safe-area-inset-bottom, 0px) + 0.75rem)',
               width: '100%',
               transition: 'padding-bottom 0.3s ease, padding-top 0.3s ease',
             }}>

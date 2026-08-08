@@ -18,7 +18,7 @@ export default function GratuitosPage() {
     }, [setSidebarExpanded]);
 
     return (
-        <div className="min-h-screen bg-gray-50 dark:bg-zinc-900 flex flex-col pb-16 md:pb-0">
+        <div className="min-h-screen bg-gray-50 dark:bg-zinc-900 flex flex-col pb-[calc(var(--bs-nav-height,56px)+env(safe-area-inset-bottom,0px))] md:pb-0">
             <Header
                 onToggleLeftSidebar={() => setSidebarOpen(true)}
                 seccionActiva={'gratuitos' as any}

@@ -6,6 +6,24 @@
 @tailwind utilities;
 
 /* =========================================================
+   Chrome layout — Sprint 7 (header 56/64 + nav 56)
+   ========================================================= */
+:root {
+  --bs-header-height-mobile: 56px;
+  --bs-header-height-desktop: 64px;
+  --bs-header-height: var(--bs-header-height-mobile);
+  --bs-nav-height: 56px;
+  --header-height: var(--bs-header-height);
+}
+
+@media (min-width: 768px) {
+  :root {
+    --bs-header-height: var(--bs-header-height-desktop);
+    --header-height: var(--bs-header-height-desktop);
+  }
+}
+
+/* =========================================================
    Base — typography & resets
    Color / space / elevation live in @buscadis/tokens
    ========================================================= */
@@ -346,6 +364,19 @@ html.dark .brand-search-shell {
     var(--bs-identity)
   );
   animation: search-glow-rotate 5s linear infinite;
+}
+
+/* Doc 08: conical glow only on desktop; off on mobile + reduced motion */
+@media (max-width: 767px), (prefers-reduced-motion: reduce) {
+  .brand-search-glow,
+  .brand-search-glow.composer-mode-publish {
+    animation: none;
+    background: linear-gradient(
+      135deg,
+      var(--bs-identity),
+      var(--bs-identity-warm)
+    );
+  }
 }
 
 .dark-mode .brand-search-glow,
