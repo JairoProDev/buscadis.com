@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import type { BusinessProfile, BusinessHours, SocialLink } from '@/types/business';
 import FieldLabel from '@/components/business/editor/FieldLabel';
 import BusinessShareTools from '@/components/business/public/BusinessShareTools';
@@ -10,6 +11,7 @@ import {
   isPerfilVivoEnabled,
   withPerfilVivoEnabled,
 } from '@/lib/business/perfil-vivo-flag';
+import { useAuth } from '@/hooks/useAuth';
 import {
   IconPhone, IconMapMarkerAlt, IconEnvelope, IconInstagram, IconFacebook, IconTiktok, IconGlobe,
 } from '@/components/Icons';
@@ -32,6 +34,38 @@ interface TrustHubFieldsProps {
 export default function TrustHubFields({ profile, setProfile, fields }: TrustHubFieldsProps) {
   const done = (id: string) => isFieldComplete(id, fields);
   const links = profile.social_links || [];
+  const { session } = useAuth();
+  const [inviteBusy, setInviteBusy] = useState(false);
+  const [inviteMsg, setInviteMsg] = useState<string | null>(null);
+
+  const pedirResena = async () => {
+    if (!profile.slug || !session?.access_token) {
+      setInviteMsg('Guarda el perfil e inicia sesión');
+      return;
+    }
+    setInviteBusy(true);
+    setInviteMsg(null);
+    try {
+      const res = await fetch(
+        `/api/business/${encodeURIComponent(profile.slug)}/review-invite`,
+        {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${session.access_token}` },
+        }
+      );
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || 'No se pudo crear el enlace');
+      await navigator.clipboard.writeText(json.url);
+      setInviteMsg('Enlace copiado. Pégalo en WhatsApp a tu cliente.');
+      if (json.waShare) {
+        window.open(json.waShare, '_blank');
+      }
+    } catch (e) {
+      setInviteMsg(e instanceof Error ? e.message : 'Error');
+    } finally {
+      setInviteBusy(false);
+    }
+  };
 
   const updateSocial = (network: SocialLink['network'], url: string) => {
     const others = links.filter((l) => l.network !== network);
@@ -261,7 +295,36 @@ export default function TrustHubFields({ profile, setProfile, fields }: TrustHub
       </div>
 
       <div>
-        <FieldLabel number={7} label="Analítica" complete />
+        <FieldLabel number={7} label="Pedir reseñas" complete={false} />
+        <div className="rounded-xl border border-slate-200 bg-white p-3 space-y-2">
+          <p className="text-[15px] text-slate-700 leading-snug">
+            Después de atender a un cliente, mándale este enlace. Califica en 5 segundos — una sola
+            pregunta.
+          </p>
+          <button
+            type="button"
+            disabled={inviteBusy || !profile.slug}
+            onClick={() => void pedirResena()}
+            className="w-full min-h-[48px] rounded-xl bg-amber-500 hover:bg-amber-600 disabled:opacity-50 text-white text-[15px] font-bold"
+          >
+            {inviteBusy ? 'Creando…' : 'Copiar enlace y abrir WhatsApp'}
+          </button>
+          <a
+            href="/resena/demo"
+            target="_blank"
+            rel="noreferrer"
+            className="block text-center text-sm font-semibold text-slate-600 py-1"
+          >
+            Probar cómo se ve ↗
+          </a>
+          {inviteMsg && (
+            <p className="text-sm font-semibold text-emerald-700">{inviteMsg}</p>
+          )}
+        </div>
+      </div>
+
+      <div>
+        <FieldLabel number={8} label="Analítica" complete />
         <ProfileAnalyticsWidget businessProfileId={profile.id} />
       </div>
     </div>
