@@ -33,9 +33,11 @@ export function PerfilVivoAnalytics({
     sent.current = true;
 
     const origen = origenFromReferrer(typeof document !== 'undefined' ? document.referrer : '');
+    const sp = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
     const fromQr =
-      typeof window !== 'undefined' &&
-      new URLSearchParams(window.location.search).get('src') === 'qr';
+      sp?.get('src') === 'qr' ||
+      sp?.get('from_qr') === '1' ||
+      sp?.get('utm_source') === 'qr';
 
     void trackProfileView({ businessProfileId, fromQr });
     void trackProfileEvent(businessProfileId, 'profile_view');

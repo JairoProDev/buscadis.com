@@ -98,6 +98,7 @@ export function getProfileRedirectUrl(slug: string, fromQr = true): string {
   const base = `${getCanonicalSiteOrigin()}${getBusinessProfilePath(slug)}`;
   if (!fromQr) return base;
   const params = new URLSearchParams({
+    src: 'qr',
     utm_source: 'qr',
     utm_medium: 'scan',
     from_qr: '1',

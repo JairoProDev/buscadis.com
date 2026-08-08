@@ -207,14 +207,25 @@ export default function TrustHubFields({ profile, setProfile, fields }: TrustHub
             businessName={profile.name || 'Mi negocio'}
             isPro={canUseProQr(profile)}
             themeColor={profile.theme_color}
+            ownerWhatsapp={profile.contact_whatsapp}
             embedded
             onShare={async () => {
-              const url = typeof window !== 'undefined' ? window.location.href : '';
+              const path = profile.slug ? `/@${profile.slug}` : '';
+              const url =
+                typeof window !== 'undefined'
+                  ? `${window.location.origin}${path}`
+                  : path;
               if (navigator.share) {
                 try {
-                  await navigator.share({ title: profile.name || '', url });
-                } catch { /* */ }
-              } else {
+                  await navigator.share({
+                    title: profile.name || 'Mi negocio',
+                    text: `Mira el perfil de ${profile.name || 'mi negocio'} en Buscadis`,
+                    url,
+                  });
+                } catch {
+                  /* */
+                }
+              } else if (url) {
                 await navigator.clipboard.writeText(url);
               }
             }}
@@ -291,6 +302,19 @@ export default function TrustHubFields({ profile, setProfile, fields }: TrustHub
               Vista previa en /v/{profile.slug} ↗
             </a>
           )}
+          <details className="rounded-lg border border-slate-100 bg-slate-50 px-3 py-2">
+            <summary className="text-[13px] font-semibold text-slate-700 cursor-pointer min-h-[44px] flex items-center">
+              Guion de venta (5 min en el mostrador)
+            </summary>
+            <ol className="mt-2 mb-1 pl-4 list-decimal text-[13px] text-slate-600 space-y-1.5 leading-snug">
+              <li>Pregunta: «¿Cómo te contactan hoy tus clientes nuevos?»</li>
+              <li>Muéstrale su perfil en el teléfono (vista previa /v).</li>
+              <li>Señala el estado en vivo: abierto / responde rápido.</li>
+              <li>Abre el panel: visitas y clics a WhatsApp.</li>
+              <li>Compara con Instagram o web que nadie actualiza.</li>
+              <li>Cierra imprimiendo el sticker QR y pégalo en el mostrador.</li>
+            </ol>
+          </details>
         </div>
       </div>
 
