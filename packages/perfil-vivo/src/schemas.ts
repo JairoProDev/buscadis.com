@@ -53,6 +53,7 @@ export const NegocioSchema = z.object({
     .regex(/^[a-z0-9-]+$/),
   nombre: z.string().min(1).max(60),
   eslogan: z.string().max(90).optional(),
+  etiquetas: z.array(z.string().min(1).max(40)).max(12).optional(),
   categoria: z.object({
     id: z.string(),
     nombre: z.string(),

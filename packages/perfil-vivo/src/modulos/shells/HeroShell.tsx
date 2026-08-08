@@ -10,7 +10,7 @@ const CRITERIOS: Record<number, { titulo: string; texto: string }> = {
   },
   2: {
     titulo: 'Verificado',
-    texto: 'Identidad de negocio validada (RUC / domicilio comprobado).',
+    texto: 'Negocio validado (RUC / domicilio comprobado).',
   },
   3: {
     titulo: 'Verificado en local',
@@ -18,13 +18,46 @@ const CRITERIOS: Record<number, { titulo: string; texto: string }> = {
   },
 };
 
+/** Sello visible solo si el plan es de pago y hay verificación de negocio. */
+function mostrarSelloVerificado(negocio: Negocio): boolean {
+  const pago = negocio.plan === 'pro' || negocio.plan === 'max';
+  return pago && negocio.verificacion.nivel >= 2;
+}
+
+function formatUbicacion(u: NonNullable<Negocio['ubicacion']>): string {
+  const calle = u.mostrarDireccionExacta ? u.direccion?.trim() : null;
+  const ciudad = [u.distrito, u.provincia].filter(Boolean).join(', ');
+  const bits = [calle, ciudad || null, 'Perú'].filter(Boolean);
+  return bits.join(' · ');
+}
+
+function etiquetasHero(negocio: Negocio): string[] {
+  const seen = new Set<string>();
+  const out: string[] = [];
+  const push = (raw?: string) => {
+    const t = raw?.trim();
+    if (!t) return;
+    const key = t.toLowerCase();
+    if (seen.has(key)) return;
+    seen.add(key);
+    out.push(t);
+  };
+  for (const e of negocio.etiquetas ?? []) push(e);
+  push(negocio.categoria?.nombre);
+  return out.slice(0, 8);
+}
+
 export function HeroShell({ negocio }: { negocio: Negocio }) {
   const [open, setOpen] = useState(false);
-  const distrito = negocio.ubicacion?.distrito ?? 'Cusco';
-  const meta = [negocio.categoria.nombre, distrito].filter(Boolean).join(' · ');
   const nivel = negocio.verificacion.nivel;
   const portada = negocio.identidad.portadaUrl;
-  const criterio = CRITERIOS[nivel];
+  const criterio = CRITERIOS[Math.max(nivel, 2)] ?? CRITERIOS[2];
+  const verificado = mostrarSelloVerificado(negocio);
+  const tags = etiquetasHero(negocio);
+  const ubicacionLabel = negocio.ubicacion
+    ? formatUbicacion(negocio.ubicacion)
+    : null;
+  const eslogan = negocio.eslogan?.trim() || null;
 
   function iniciales(nombre: string): string {
     const parts = nombre.trim().split(/\s+/).slice(0, 2);
@@ -41,7 +74,7 @@ export function HeroShell({ negocio }: { negocio: Negocio }) {
               src={portada}
               alt=""
               width={480}
-              height={220}
+              height={280}
               fetchPriority="high"
               decoding="async"
               className="pv-hero__cover-img"
@@ -50,52 +83,66 @@ export function HeroShell({ negocio }: { negocio: Negocio }) {
             <div className="pv-hero__cover-fallback" aria-hidden />
           )}
           <div className="pv-hero__cover-shade" aria-hidden />
-        </div>
 
-        <div className="pv-hero__identity">
-          <div
-            className="pv-hero__logo"
-            style={{
-              background: negocio.identidad.logoUrl
-                ? 'var(--sf-elev)'
-                : 'var(--mk-accion)',
-              color: 'var(--mk-sobre)',
-            }}
-            aria-hidden
-          >
-            {negocio.identidad.logoUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={negocio.identidad.logoUrl}
-                alt=""
-                width={72}
-                height={72}
-                fetchPriority="high"
-                decoding="async"
-              />
-            ) : (
-              <span className="pv-hero__iniciales">{iniciales(negocio.nombre)}</span>
-            )}
-          </div>
-          <div className="pv-hero__titles">
-            <h1>
-              <span>{negocio.nombre}</span>
-              {nivel >= 1 ? (
-                <button
-                  type="button"
-                  onClick={() => setOpen(true)}
-                  title={criterio?.titulo}
-                  aria-label={`Verificación: ${criterio?.titulo}`}
-                  className="pv-hero__verif"
-                  style={{
-                    background: nivel >= 2 ? 'var(--bs-chicha)' : 'var(--tx-muted)',
-                  }}
-                >
-                  ✓
-                </button>
+          <div className="pv-hero__overlay">
+            <div className="pv-hero__copy">
+              <h1 className="pv-hero__name">
+                <span>{negocio.nombre}</span>
+                {verificado ? (
+                  <button
+                    type="button"
+                    onClick={() => setOpen(true)}
+                    title={criterio?.titulo}
+                    aria-label={`Negocio verificado: ${criterio?.titulo}`}
+                    className="pv-hero__verif"
+                  >
+                    ✓
+                  </button>
+                ) : null}
+              </h1>
+              {eslogan ? <p className="pv-hero__eslogan">{eslogan}</p> : null}
+              {tags.length > 0 ? (
+                <ul className="pv-hero__tags" aria-label="Rubro y clasificación">
+                  {tags.map((t) => (
+                    <li key={t}>{t}</li>
+                  ))}
+                </ul>
               ) : null}
-            </h1>
-            <p className="pv-hero__meta">{meta}</p>
+              {ubicacionLabel ? (
+                <p className="pv-hero__lugar">
+                  <span className="pv-hero__lugar-ico" aria-hidden>
+                    ⌖
+                  </span>
+                  <span>{ubicacionLabel}</span>
+                </p>
+              ) : null}
+            </div>
+
+            <div
+              className="pv-hero__logo"
+              style={{
+                background: negocio.identidad.logoUrl
+                  ? 'var(--sf-elev)'
+                  : 'var(--mk-accion)',
+                color: 'var(--mk-sobre)',
+              }}
+            >
+              {negocio.identidad.logoUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={negocio.identidad.logoUrl}
+                  alt={`Logo de ${negocio.nombre}`}
+                  width={88}
+                  height={88}
+                  fetchPriority="high"
+                  decoding="async"
+                />
+              ) : (
+                <span className="pv-hero__iniciales" aria-hidden>
+                  {iniciales(negocio.nombre)}
+                </span>
+              )}
+            </div>
           </div>
         </div>
       </div>
@@ -112,10 +159,10 @@ export function HeroShell({ negocio }: { negocio: Negocio }) {
           }}
         >
           <div className="pv-hero__dialog" onClick={(e) => e.stopPropagation()}>
-            <h2 id="pv-verif-title">Qué significa esta verificación</h2>
+            <h2 id="pv-verif-title">Negocio verificado en Buscadis</h2>
             <p className="pv-hero__dialog-lead">
-              En Buscadis el sello solo aparece si se cumplió un criterio público. No es un badge
-              decorativo.
+              El check solo aparece cuando el negocio tiene plan de pago y pasó una
+              verificación real. No es un adorno.
             </p>
             <ul className="pv-hero__criterios">
               {([1, 2, 3] as const).map((n) => {

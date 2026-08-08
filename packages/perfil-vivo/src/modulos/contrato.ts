@@ -35,7 +35,7 @@ export const MODULO_META: Record<TipoModulo, ModuloMeta> = {
     planMin: 'free',
     conteoKey: null,
     ancla: 'identidad',
-    tituloDefault: 'Identidad',
+    tituloDefault: 'Inicio',
   },
   metricas: {
     tipo: 'metricas',
@@ -44,7 +44,7 @@ export const MODULO_META: Record<TipoModulo, ModuloMeta> = {
     planMin: 'free',
     conteoKey: null,
     ancla: 'metricas',
-    tituloDefault: 'Confianza',
+    tituloDefault: 'Valoraciones',
   },
   estado: {
     tipo: 'estado',
@@ -53,7 +53,7 @@ export const MODULO_META: Record<TipoModulo, ModuloMeta> = {
     planMin: 'free',
     conteoKey: null,
     ancla: 'estado',
-    tituloDefault: 'Estado',
+    tituloDefault: 'Abierto ahora',
   },
   acciones: {
     tipo: 'acciones',
@@ -62,7 +62,7 @@ export const MODULO_META: Record<TipoModulo, ModuloMeta> = {
     planMin: 'free',
     conteoKey: null,
     ancla: 'acciones',
-    tituloDefault: 'Acciones',
+    tituloDefault: 'Contactar',
   },
   novedades: {
     tipo: 'novedades',
@@ -89,7 +89,7 @@ export const MODULO_META: Record<TipoModulo, ModuloMeta> = {
     planMin: 'free',
     conteoKey: 'productos',
     ancla: 'catalogo',
-    tituloDefault: 'Catálogo',
+    tituloDefault: 'Productos',
   },
   servicios: {
     tipo: 'servicios',
@@ -98,7 +98,7 @@ export const MODULO_META: Record<TipoModulo, ModuloMeta> = {
     planMin: 'free',
     conteoKey: 'productos',
     ancla: 'servicios',
-    tituloDefault: 'Servicios y precios',
+    tituloDefault: 'Servicios',
   },
   promocion: {
     tipo: 'promocion',
@@ -107,7 +107,7 @@ export const MODULO_META: Record<TipoModulo, ModuloMeta> = {
     planMin: 'free',
     conteoKey: 'promociones',
     ancla: 'promocion',
-    tituloDefault: 'Promoción',
+    tituloDefault: 'Ofertas',
   },
   resenas: {
     tipo: 'resenas',
@@ -116,7 +116,7 @@ export const MODULO_META: Record<TipoModulo, ModuloMeta> = {
     planMin: 'free',
     conteoKey: 'resenas',
     ancla: 'resenas',
-    tituloDefault: 'Reseñas',
+    tituloDefault: 'Opiniones',
   },
   galeria: {
     tipo: 'galeria',
@@ -125,7 +125,7 @@ export const MODULO_META: Record<TipoModulo, ModuloMeta> = {
     planMin: 'free',
     conteoKey: 'fotosGaleria',
     ancla: 'galeria',
-    tituloDefault: 'Galería',
+    tituloDefault: 'Fotos',
   },
   publicaciones: {
     tipo: 'publicaciones',
@@ -143,7 +143,7 @@ export const MODULO_META: Record<TipoModulo, ModuloMeta> = {
     planMin: 'free',
     conteoKey: null,
     ancla: 'pago',
-    tituloDefault: 'Métodos de pago',
+    tituloDefault: 'Cómo pagar',
   },
   canales: {
     tipo: 'canales',
@@ -152,7 +152,7 @@ export const MODULO_META: Record<TipoModulo, ModuloMeta> = {
     planMin: 'free',
     conteoKey: null,
     ancla: 'canales',
-    tituloDefault: 'Canales',
+    tituloDefault: 'Redes y web',
   },
   horario: {
     tipo: 'horario',
@@ -170,7 +170,7 @@ export const MODULO_META: Record<TipoModulo, ModuloMeta> = {
     planMin: 'free',
     conteoKey: null,
     ancla: 'ubicacion',
-    tituloDefault: 'Ubicación',
+    tituloDefault: 'Cómo llegar',
   },
   nosotros: {
     tipo: 'nosotros',
@@ -188,7 +188,7 @@ export const MODULO_META: Record<TipoModulo, ModuloMeta> = {
     planMin: 'free',
     conteoKey: 'faqs',
     ancla: 'faq',
-    tituloDefault: 'Preguntas frecuentes',
+    tituloDefault: 'Preguntas',
   },
   equipo: {
     tipo: 'equipo',
@@ -206,7 +206,7 @@ export const MODULO_META: Record<TipoModulo, ModuloMeta> = {
     planMin: 'pro',
     conteoKey: 'certificaciones',
     ancla: 'certificaciones',
-    tituloDefault: 'Certificaciones',
+    tituloDefault: 'Certificados',
   },
   documentos: {
     tipo: 'documentos',
@@ -224,7 +224,7 @@ export const MODULO_META: Record<TipoModulo, ModuloMeta> = {
     planMin: 'max',
     conteoKey: 'productos',
     ancla: 'ia',
-    tituloDefault: 'Pregúntale al negocio',
+    tituloDefault: 'Preguntar',
   },
 };
 

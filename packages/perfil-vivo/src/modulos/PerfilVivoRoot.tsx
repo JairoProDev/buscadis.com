@@ -5,8 +5,10 @@ import type { PerfilPayload } from '../types';
 import { derivarTema, temaToStyle } from '../tema/derivar-tema';
 import { usePerfilFonts } from '../tema/load-fonts';
 import { PerfilProvider, type HandoffLinks } from './PerfilContext';
+import { ChromeUIProvider } from './ChromeUIContext';
 import { RenderizadorModulos } from './RenderizadorModulos';
 import { BarraAccion } from './BarraAccion';
+import { ChromeSuperior } from './ChromeSuperior';
 
 const BarraSecciones = lazy(() =>
   import('./BarraSecciones').then((m) => ({ default: m.BarraSecciones }))
@@ -50,11 +52,14 @@ export function PerfilVivoRoot({
       style={style}
     >
       <PerfilProvider value={{ payload, handoffs }}>
-        <Suspense fallback={null}>
-          <BarraSecciones />
-        </Suspense>
-        <RenderizadorModulos />
-        <BarraAccion label={primaryLabel} />
+        <ChromeUIProvider>
+          <ChromeSuperior />
+          <Suspense fallback={null}>
+            <BarraSecciones />
+          </Suspense>
+          <RenderizadorModulos />
+          <BarraAccion label={primaryLabel} />
+        </ChromeUIProvider>
       </PerfilProvider>
     </div>
   );

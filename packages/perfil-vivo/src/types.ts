@@ -206,6 +206,8 @@ export interface Negocio {
   slug: string;
   nombre: string;
   eslogan?: string;
+  /** Rubro / industria / clasificación visible en hero (SEO local). */
+  etiquetas?: string[];
   categoria: { id: string; nombre: string };
   arquetipo: Arquetipo;
   plan: Plan;

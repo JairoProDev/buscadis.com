@@ -1,6 +1,7 @@
 'use client';
 
 import { usePerfil } from './PerfilContext';
+import { useChromeUI } from './ChromeUIContext';
 
 function IconShare() {
   return (
@@ -30,29 +31,9 @@ function IconHeart() {
 }
 
 export function BarraAccion({ label }: { label: string }) {
-  const { handoffs, payload } = usePerfil();
+  const { handoffs } = usePerfil();
+  const { openMas } = useChromeUI();
   const href = handoffs.whatsappPrimary;
-  const sharePath = `/@${payload.negocio.slug}`;
-
-  async function onShare() {
-    const title = payload.negocio.nombre;
-    const text = `Mira el perfil de ${title} en Buscadis`;
-    const url =
-      typeof window !== 'undefined' ? window.location.href : `https://buscadis.com${sharePath}`;
-    try {
-      if (typeof navigator !== 'undefined' && navigator.share) {
-        await navigator.share({ title, text, url });
-        return;
-      }
-    } catch {
-      /* cancelled */
-    }
-    try {
-      await navigator.clipboard.writeText(url);
-    } catch {
-      /* ignore */
-    }
-  }
 
   return (
     <div className="pv-barra-accion">
@@ -78,8 +59,8 @@ export function BarraAccion({ label }: { label: string }) {
       <button
         type="button"
         className="pv-barra-accion__icon"
-        aria-label="Compartir perfil"
-        onClick={onShare}
+        aria-label="Compartir y más opciones"
+        onClick={openMas}
       >
         <IconShare />
       </button>

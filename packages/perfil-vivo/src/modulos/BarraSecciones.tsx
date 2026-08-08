@@ -52,57 +52,21 @@ export function BarraSecciones() {
     <nav
       aria-label="Secciones del perfil"
       className="pv-barra-secciones"
-      style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        zIndex: 30,
-        height: 44,
-        background: 'color-mix(in srgb, var(--sf-elev) 92%, transparent)',
-        backdropFilter: 'blur(8px)',
-        borderBottom: '1px solid var(--bd-hair)',
-        maxWidth: 480,
-        margin: '0 auto',
-      }}
     >
-      <div
-        style={{
-          display: 'flex',
-          gap: 4,
-          overflowX: 'auto',
-          height: '100%',
-          alignItems: 'center',
-          padding: '0 16px',
-          WebkitOverflowScrolling: 'touch',
-        }}
-      >
+      <div className="pv-barra-secciones__scroller">
         {modulos.map((m) => {
           const isActive = active === m.ancla;
           return (
             <a
               key={m.tipo}
               href={`#${m.ancla}`}
+              className={`pv-barra-secciones__chip${isActive ? ' is-active' : ''}`}
               onClick={(e) => {
                 e.preventDefault();
                 document
                   .getElementById(m.ancla)
                   ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 history.replaceState(null, '', `#${m.ancla}`);
-              }}
-              style={{
-                flex: '0 0 auto',
-                minHeight: 44,
-                display: 'grid',
-                placeItems: 'center',
-                padding: '0 12px',
-                font: 'var(--ts-meta)',
-                textDecoration: 'none',
-                color: isActive ? 'var(--mk-texto)' : 'var(--tx-muted)',
-                borderBottom: isActive
-                  ? '2px solid var(--mk-accion)'
-                  : '2px solid transparent',
-                whiteSpace: 'nowrap',
               }}
             >
               {m.titulo}
