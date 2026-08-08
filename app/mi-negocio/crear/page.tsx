@@ -1,20 +1,24 @@
 'use client';
 
 /**
- * AI-first business creation — magical zero-to-one entry.
+ * Experiencia creador — Perfil Vivo (P04)
  * Route: /mi-negocio/crear
+ * ?modo=adis → chat IA legado como atajo
  */
-import { useCallback, useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useCallback, useState, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/hooks/useAuth';
 import AuthModal from '@/components/AuthModal';
 import AiProfileBuilder from '@/components/business/builder/AiProfileBuilder';
+import CreadorOnboarding from '@/components/business/creator/CreadorOnboarding';
 import type { BusinessProfile } from '@/types/business';
 import BusinessPublicView from '@/components/business/BusinessPublicView';
 
-export default function CrearNegocioConIAPage() {
+function CrearInner() {
   const router = useRouter();
+  const search = useSearchParams();
+  const modoAdis = search.get('modo') === 'adis';
   const { user, loading: authLoading } = useAuth();
   const [profile, setProfile] = useState<Partial<BusinessProfile>>({
     name: '',
@@ -37,10 +41,6 @@ export default function CrearNegocioConIAPage() {
     }
   }, [profile.slug, router]);
 
-  useEffect(() => {
-    // After first real build with a slug, soft-offer editor (don't auto-redirect mid-chat).
-  }, []);
-
   if (authLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-50">
@@ -55,11 +55,15 @@ export default function CrearNegocioConIAPage() {
         <AuthModal abierto modoInicial="login" onCerrar={() => router.push('/')} />
         <div className="min-h-screen flex items-center justify-center bg-slate-50 p-6">
           <p className="text-slate-500 text-sm text-center">
-            Inicia sesión para crear tu presencia digital con IA
+            Inicia sesión para crear tu presencia digital
           </p>
         </div>
       </>
     );
+  }
+
+  if (!modoAdis) {
+    return <CreadorOnboarding />;
   }
 
   return (
@@ -67,14 +71,14 @@ export default function CrearNegocioConIAPage() {
       <header className="border-b border-slate-200/80 bg-white/80 backdrop-blur sticky top-0 z-20">
         <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
           <div>
-            <Link href="/" className="text-xs font-bold text-teal-700 hover:underline">
-              Buscadis
+            <Link href="/mi-negocio/crear" className="text-xs font-bold text-teal-700 hover:underline">
+              ← Volver al guía paso a paso
             </Link>
             <h1 className="text-lg font-black text-slate-900 tracking-tight">
-              Crea tu página en segundos
+              Habla con Adis
             </h1>
             <p className="text-xs text-slate-500">
-              Habla con Adis — ella arma tu tarjeta digital, catálogo y canal de ventas.
+              Atajo con IA. También puedes armar tu perfil pregunta por pregunta.
             </p>
           </div>
           {profile.slug && (
@@ -103,21 +107,22 @@ export default function CrearNegocioConIAPage() {
               }));
             }}
           />
-          <p className="text-[11px] text-slate-400 text-center px-2">
-            Crear y editar es gratis. Solo pagas S/30 al mes cuando quieras publicar.
-          </p>
         </section>
 
         <section className="lg:sticky lg:top-20">
           <div className="rounded-3xl border border-slate-200 bg-white shadow-lg overflow-hidden">
             <div className="px-4 py-2.5 border-b border-slate-100 flex items-center justify-between bg-slate-50">
-              <p className="text-xs font-bold text-slate-600 uppercase tracking-wide">Vista previa en vivo</p>
-              {hasBuilt ? (
-                <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">
-                  Actualizándose
-                </span>
-              ) : (
-                <span className="text-[10px] text-slate-400">Esperando tu info…</span>
+              <p className="text-xs font-bold text-slate-600 uppercase tracking-wide">
+                Vista previa
+              </p>
+              {profile.slug && (
+                <Link
+                  href={`/v/${encodeURIComponent(profile.slug)}`}
+                  target="_blank"
+                  className="text-[10px] font-bold text-teal-700"
+                >
+                  Perfil Vivo ↗
+                </Link>
               )}
             </div>
             <div className="max-h-[min(640px,70vh)] overflow-y-auto bg-white">
@@ -134,35 +139,27 @@ export default function CrearNegocioConIAPage() {
                 </div>
               ) : (
                 <div className="p-10 text-center space-y-3">
-                  <div className="mx-auto w-16 h-16 rounded-2xl bg-teal-50 flex items-center justify-center text-2xl font-black text-teal-600">
-                    A
-                  </div>
                   <p className="text-sm font-bold text-slate-800">Tu página aparecerá aquí</p>
-                  <p className="text-xs text-slate-500 max-w-xs mx-auto leading-relaxed">
-                    Envía un audio, fotos de tus productos o escribe qué vendes. En segundos verás tu
-                    presencia digital tomando forma.
-                  </p>
                 </div>
               )}
             </div>
           </div>
-
-          {profile.slug && hasBuilt && (
-            <div className="mt-4 rounded-2xl border border-teal-200 bg-teal-50 p-4 text-center space-y-2">
-              <p className="text-sm font-bold text-teal-900">
-                Tu enlace: buscadis.com/@{profile.slug}
-              </p>
-              <button
-                type="button"
-                onClick={goToEditor}
-                className="w-full py-3 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-sm font-bold"
-              >
-                Seguir editando o publicar
-              </button>
-            </div>
-          )}
         </section>
       </main>
     </div>
+  );
+}
+
+export default function CrearNegocioPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center bg-slate-50">
+          <div className="w-10 h-10 border-4 border-slate-200 border-t-teal-500 rounded-full animate-spin" />
+        </div>
+      }
+    >
+      <CrearInner />
+    </Suspense>
   );
 }

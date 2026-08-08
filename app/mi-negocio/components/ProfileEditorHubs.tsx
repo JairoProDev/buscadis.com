@@ -4,6 +4,7 @@ import type { BusinessProfile } from '@/types/business';
 import type { Adiso } from '@/types';
 import type { ProfileHubId } from '@/lib/business/profile-progress';
 import { computeProfileProgress } from '@/lib/business/profile-progress';
+import CompletitudMeter from '@/components/business/creator/CompletitudMeter';
 import IdentityHubFields from '@/components/business/editor/hubs/IdentityHubFields';
 import AppearanceHubFields from '@/components/business/editor/hubs/AppearanceHubFields';
 import ContentHubFields from '@/components/business/editor/hubs/ContentHubFields';
@@ -55,6 +56,28 @@ export function ProfileEditorHubs({
   return (
     <div className="flex flex-col h-full bg-white relative">
       <div className="flex-1 overflow-y-auto custom-scrollbar">
+        <div className="px-4 pt-4 pb-2 sticky top-0 z-10 bg-white/95 backdrop-blur border-b border-slate-100">
+          <CompletitudMeter
+            profile={profile}
+            productCount={catalogProducts.length}
+            slug={profile.slug}
+            onAction={(destino) => {
+              if (destino === 'catalogo') {
+                onAddProduct?.();
+                return;
+              }
+              const hub =
+                destino === 'appearance'
+                  ? 'appearance'
+                  : destino === 'trust'
+                    ? 'trust'
+                    : destino === 'content'
+                      ? 'content'
+                      : 'identity';
+              setActiveHub(hub);
+            }}
+          />
+        </div>
         <div className="flex flex-col divide-y divide-slate-100">
           {HUBS.map((hub) => {
             const isActive = activeHub === hub.id;
