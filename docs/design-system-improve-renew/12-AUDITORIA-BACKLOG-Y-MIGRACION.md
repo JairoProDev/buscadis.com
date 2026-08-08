@@ -72,11 +72,12 @@ Modal/Sheet, Drawer, Badge, Chip, Avatar, Skeleton, Spinner, EmptyState, Toast.
 **Hecho:** 2026-08-08 · AuthModal→Modal · Toast→ToastViewport. Modales ad-hoc restantes = backlog incremental.
 *Terminado cuando:* no queda ningún modal implementado a mano en el repo. *(parcial: API lista; migración full es backlog)*
 
-### Sprint 5 · AdisoCard y rejilla
+### Sprint 5 · AdisoCard y rejilla ✅
 Reconstruir `AdisoCard` con anatomía fija y tres vistas; eliminar `styled-jsx`; aplicar la rejilla de `09`; restaurar scroll y filtros al volver.
+**Hecho:** 2026-08-08 · anatomía body; Grilla Tailwind; `lib/listing-scroll-restore.ts`.
 *Terminado cuando:* una prueba de cinco segundos con tres personas recupera precio y ubicación.
 
-### Sprint 6 · Renderizado en servidor e indexación
+### Sprint 6 · Renderizado en servidor e indexación 🔜
 Migrar home, listado, detalle de aviso y perfil de negocio a Server Components con datos en el HTML. Añadir paginación con enlaces. JSON-LD.
 *Terminado cuando:* `curl` de las cuatro rutas devuelve contenido real y Search Console empieza a indexar avisos.
 

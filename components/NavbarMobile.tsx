@@ -58,26 +58,7 @@ export default function NavbarMobile({
   if (isDesktop) return null;
 
   return (
-    <>
-      <style jsx>{`
-        @keyframes fadeIn {
-          from {
-            opacity: 0;
-            transform: translateY(10px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-        .navbar-item--cta:active > span:first-child {
-          transform: scale(0.94);
-        }
-        .navbar-item--cta > span:first-child {
-          transition: transform 0.15s ease, box-shadow 0.15s ease;
-        }
-      `}</style>
-      <nav
+    <nav
         className="brand-nav-sheen"
         style={{
           position: 'fixed',
@@ -141,17 +122,14 @@ export default function NavbarMobile({
                 className="navbar-item navbar-item--cta"
               >
                 <span
+                  className="flex items-center justify-center transition-transform duration-150 ease-out active:scale-[0.94]"
                   style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
                     width: '52px',
                     height: '52px',
                     marginTop: '-18px',
                     borderRadius: '50%',
                     background: estaActiva ? publishCta.backgroundActive : publishCta.background,
                     boxShadow: estaActiva ? publishCta.shadowActive : publishCta.shadow,
-                    transition: 'transform 0.2s ease, box-shadow 0.2s ease',
                   }}
                 >
                   <IconMegaphone size={26} color={publishCta.iconColor} />
@@ -239,7 +217,6 @@ export default function NavbarMobile({
             </button>
           );
         })}
-      </nav>
-    </>
+    </nav>
   );
 }

@@ -1,6 +1,6 @@
 # Design System Migration — Roadmap
 
-> **Estado:** Sprints 1–4 ✅ · Sprint 5 🔜 · Sprints 6–8 planificados  
+> **Estado:** Sprints 1–5 ✅ · Sprint 6 🔜 · Sprints 7–8 planificados  
 > **Fuente de verdad de diseño:** `docs/design-system-improve-renew/`  
 > **Fuente de verdad de tokens:** `packages/tokens/`  
 > **Actualizado:** 2026-08-08
@@ -22,8 +22,8 @@
 | **2** | P0 marca + accesibilidad | ✅ Hecho (`f9d2ed9`) | [sprint-2](./2026-08-08-sprint-2-brand-a11y.md) | CTA AA, PWA alineada, logo-mark &lt;15KB, cats unificadas, touch ≥44 |
 | **3** | Primitivas tanda 1 | ✅ Hecho | [sprint-3](./2026-08-08-sprint-3-ui-primitives.md) | Header/Auth/Publish usan Button/Input/Icon |
 | **4** | Primitivas tanda 2 | ✅ Hecho | [sprint-4](./2026-08-08-sprint-4-ui-primitives-2.md) | Modal + Toast migrados; resto exportado |
-| **5** | AdisoCard + rejilla | 🔜 Siguiente | [abajo §5](#sprint-5--adisocard--rejilla) | 3 vistas + scroll restore |
-| **6** | SSR + indexación | 📋 Blueprint | [abajo §6](#sprint-6--ssr--indexación) | `curl` con contenido real en 4 rutas |
+| **5** | AdisoCard + rejilla | ✅ Hecho | [sprint-5](./2026-08-08-sprint-5-adisocard-rejilla.md) | Anatomía fija + Tailwind grid + scroll restore |
+| **6** | SSR + indexación | 🔜 Siguiente | [abajo §6](#sprint-6--ssr--indexación) | `curl` con contenido real en 4 rutas |
 | **7** | Chrome + composer | 📋 Blueprint | [abajo §7](#sprint-7--chrome--composer) | Chrome móvil 112px |
 | **8** | Storefront kit | 📋 Blueprint | [abajo §8](#sprint-8--storefront-kit) | Tenant extremo legible |
 
@@ -91,11 +91,13 @@ curl -sL https://buscadis.com | head -c 2000
 
 ---
 
-## Sprint 5 — AdisoCard + rejilla
+## Sprint 5 — AdisoCard + rejilla ✅
 
 **Goal:** Reconstruir card con anatomía fija (grid/list/feed); quitar styled-jsx; rejilla de doc 09; restore scroll/filtros.
 
-**Done:** prueba informal 5s (precio+ubicación); sin styled-jsx en Grilla/Card.
+**Hecho:** anatomía title/price/meta/signal; rejilla Tailwind 2–5 cols; scroll via `listing-scroll-restore`; filtros siguen en URL.
+
+**Done:** sin styled-jsx en Grilla/NavbarMobile; precio+ubicación legibles en body.
 
 ---
 

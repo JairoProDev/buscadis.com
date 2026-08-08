@@ -71,6 +71,11 @@ import NavbarMobile from '@/components/NavbarMobile';
 import LeftSidebar from '@/components/LeftSidebar';
 import PullToRefresh from '@/components/pwa/PullToRefresh';
 import { getMarketplacePulse } from '@/lib/social-proof';
+import {
+  saveListingScroll,
+  peekListingScroll,
+  takeListingScroll,
+} from '@/lib/listing-scroll-restore';
 
 // Lazy load componentes pesados
 const ModalAdiso = dynamicImport(() => import('@/components/ModalAdiso'), {
@@ -202,6 +207,7 @@ function HomeContent() {
     [router, searchParams]
   );
   const [vista, setVista] = useState<'grid' | 'list' | 'feed'>('grid');
+  const listingRestoreDoneRef = useRef(false);
   const [browseScrolled, setBrowseScrolled] = useState(false);
   const [filterSidebarCollapsed, setFilterSidebarCollapsed] = useState(true);
   const [inlineFiltersVisible, setInlineFiltersVisible] = useState(false);
@@ -238,6 +244,25 @@ function HomeContent() {
     onScroll();
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
+
+  // Restore listing scroll/vista after hard nav back (filters already in URL)
+  useEffect(() => {
+    if (listingRestoreDoneRef.current || cargando) return;
+    listingRestoreDoneRef.current = true;
+    const snap = peekListingScroll();
+    if (!snap) return;
+    if (adisoId) {
+      setVisibleCount((c) => Math.max(c, snap.visibleCount));
+      return;
+    }
+    const taken = takeListingScroll();
+    if (!taken) return;
+    setVisibleCount((c) => Math.max(c, taken.visibleCount));
+    if (taken.vista) setVista(taken.vista);
+    requestAnimationFrame(() => {
+      window.scrollTo({ top: taken.y, behavior: 'auto' });
+    });
+  }, [cargando, adisoId]);
 
   useEffect(() => {
     adisosRef.current = adisos;
@@ -756,6 +781,11 @@ function HomeContent() {
 
   const handleAbrirAdiso = useCallback((adiso: Adiso) => {
     trackViewHistory({ adisoId: adiso.id, source: 'feed' }, session?.access_token);
+    saveListingScroll({
+      y: typeof window !== 'undefined' ? window.scrollY : 0,
+      visibleCount,
+      vista,
+    });
     const indice = adisosFiltrados.findIndex(a => a.id === adiso.id);
     setIndiceAdisoActual(indice >= 0 ? indice : 0);
     adisoAperturaPendienteRef.current = adiso.id;
@@ -778,7 +808,7 @@ function HomeContent() {
     const params = new URLSearchParams(searchParams.toString());
     params.set('adiso', adiso.id);
     router.replace(`/?${params.toString()}`, { scroll: false });
-  }, [adisosFiltrados, isDesktop, router, searchParams, session?.access_token]);
+  }, [adisosFiltrados, isDesktop, router, searchParams, session?.access_token, visibleCount, vista]);
 
   const handleAbrirAdisoById = useCallback(
     (id: string) => {
@@ -853,6 +883,15 @@ function HomeContent() {
     const params = new URLSearchParams(searchParams.toString());
     params.delete('adiso');
     router.replace(params.toString() ? `/?${params.toString()}` : '/', { scroll: false });
+
+    const snap = takeListingScroll();
+    if (snap) {
+      setVisibleCount((c) => Math.max(c, snap.visibleCount));
+      if (snap.vista) setVista(snap.vista);
+      requestAnimationFrame(() => {
+        window.scrollTo({ top: snap.y, behavior: 'auto' });
+      });
+    }
   };
 
   const handleAnterior = () => {
@@ -1613,6 +1652,7 @@ function HomeContent() {
                   cargandoMas={cargandoMas}
                   sentinelRef={sentinelRef}
                   vista={vista}
+                  withPanel={isDesktop && !isSidebarMinimizado}
                 />
                 </>
               )}
