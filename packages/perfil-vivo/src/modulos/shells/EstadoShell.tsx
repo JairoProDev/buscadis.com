@@ -2,14 +2,27 @@
 
 import { usePerfil } from '../PerfilContext';
 
+/**
+ * Pastilla de estado — complementa el “Abierto ahora” del hero
+ * con horario / respuesta / delivery.
+ */
 export function EstadoShell() {
   const { payload } = usePerfil();
   const e = payload.estadoVivo;
   const tone = e.abierto ? (e.porCerrar ? 'warn' : 'ok') : 'err';
-  const color =
-    tone === 'ok' ? 'var(--ok)' : tone === 'warn' ? 'var(--warn)' : 'var(--err)';
 
-  const bits = [e.mensaje];
+  const bits: string[] = [];
+  // Evitar repetir solo “Abierto/Cerrado” si el hero ya lo muestra
+  if (e.mensaje && !/^(abierto|cerrado)\b/i.test(e.mensaje.trim())) {
+    bits.push(e.mensaje);
+  } else if (e.abierto && e.cierraEn) {
+    bits.push(`Hasta las ${e.cierraEn}`);
+  } else if (!e.abierto && e.abreEn) {
+    bits.push(`Abre a las ${e.abreEn}`);
+  } else {
+    bits.push(e.mensaje);
+  }
+
   if (e.respuestaMedianaMin != null && e.respuestaMedianaMin > 0) {
     bits.push(`Responde en ~${e.respuestaMedianaMin} min`);
   }
@@ -21,13 +34,6 @@ export function EstadoShell() {
         <span
           aria-hidden
           className={e.abierto ? 'pv-estado-dot pv-estado-dot--on' : 'pv-estado-dot'}
-          style={{
-            width: 8,
-            height: 8,
-            borderRadius: '50%',
-            background: color,
-            flexShrink: 0,
-          }}
         />
         <span>
           {bits.map((b, i) => (

@@ -153,7 +153,7 @@
 
 .pv-hero__cover {
   position: relative;
-  min-height: 280px;
+  min-height: 300px;
   overflow: hidden;
   background: var(--mk-suave);
   border-radius: 0 0 var(--rd-xl) var(--rd-xl);
@@ -162,29 +162,31 @@
 .pv-hero__cover-img {
   width: 100%;
   height: 100%;
-  min-height: 280px;
+  min-height: 300px;
   object-fit: cover;
   display: block;
   position: absolute;
   inset: 0;
+  transform: scale(1.04);
+  filter: saturate(1.05) contrast(1.02);
 }
 
 .pv-hero__cover-fallback {
   position: absolute;
   inset: 0;
-  min-height: 280px;
+  min-height: 300px;
   background:
-    radial-gradient(circle at 22% 28%, rgba(255, 255, 255, 0.35), transparent 45%),
-    linear-gradient(145deg, var(--mk-suave), var(--mk-accion));
-  opacity: 0.9;
+    radial-gradient(circle at 18% 20%, rgba(255, 255, 255, 0.28), transparent 42%),
+    radial-gradient(circle at 82% 70%, color-mix(in srgb, var(--mk-accion) 35%, transparent), transparent 50%),
+    linear-gradient(155deg, var(--mk-suave), var(--mk-accion));
 }
 
 .pv-hero__cover-shade {
   position: absolute;
   inset: 0;
   background:
-    linear-gradient(180deg, rgba(0, 0, 0, 0.15) 0%, transparent 28%),
-    linear-gradient(180deg, transparent 35%, rgba(0, 0, 0, 0.72) 100%);
+    linear-gradient(180deg, rgba(0, 0, 0, 0.28) 0%, transparent 32%),
+    linear-gradient(180deg, transparent 28%, rgba(0, 0, 0, 0.78) 100%);
   pointer-events: none;
 }
 
@@ -194,10 +196,34 @@
   display: flex;
   align-items: flex-end;
   justify-content: flex-start;
-  gap: 12px;
-  min-height: 280px;
-  padding: calc(56px + env(safe-area-inset-top, 0px)) 16px 18px;
+  gap: 14px;
+  min-height: 300px;
+  padding: calc(56px + env(safe-area-inset-top, 0px)) 16px 20px;
   box-sizing: border-box;
+}
+
+.pv-hero__logo {
+  width: 84px;
+  height: 84px;
+  border-radius: 50%;
+  border: 3px solid rgba(255, 255, 255, 0.95);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28);
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  overflow: hidden;
+  align-self: flex-end;
+}
+
+.pv-hero__logo img {
+  width: 84px;
+  height: 84px;
+  object-fit: cover;
+  display: block;
+}
+
+.pv-hero__iniciales {
+  font: 700 24px/1 var(--ff-display);
 }
 
 .pv-hero__copy {
@@ -206,10 +232,37 @@
   color: #fff;
 }
 
+.pv-hero__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 0 8px;
+  padding: 4px 10px 4px 6px;
+  border-radius: var(--rd-full);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  background: rgba(255, 255, 255, 0.14);
+  color: #fff;
+  font: 600 11px/1 var(--ff-ui);
+  backdrop-filter: blur(8px);
+  cursor: pointer;
+}
+
+.pv-hero__badge-check {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--bs-chicha);
+  color: #fff;
+  display: grid;
+  place-items: center;
+  font-size: 10px;
+  line-height: 1;
+}
+
 .pv-hero__name {
   font: var(--ts-nombre);
   color: #fff;
-  margin: 0 0 6px;
+  margin: 0 0 4px;
   letter-spacing: -0.03em;
   display: flex;
   align-items: center;
@@ -217,7 +270,7 @@
   flex-wrap: nowrap;
   min-width: 0;
   max-width: 100%;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
 }
 
 .pv-hero__name-text {
@@ -227,55 +280,50 @@
   white-space: nowrap;
 }
 
-.pv-hero__eslogan {
-  margin: 0 0 8px;
-  font: var(--ts-cuerpo);
-  font-weight: 600;
-  color: rgba(255, 255, 255, 0.92);
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-.pv-hero__tags {
-  list-style: none;
-  margin: 0 0 8px;
+.pv-hero__verif {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2px solid #fff;
   padding: 0;
-  display: flex;
-  flex-wrap: nowrap;
-  gap: 6px;
-  max-width: 100%;
-  overflow: hidden;
+  color: #fff;
+  background: var(--bs-chicha);
+  font-size: 11px;
+  line-height: 16px;
+  cursor: pointer;
+  box-shadow: var(--el-1);
+  flex-shrink: 0;
 }
 
-.pv-hero__tags li {
-  margin: 0;
-  padding: 4px 10px;
-  border-radius: var(--rd-full);
-  font: 600 11px/1.2 var(--ff-ui);
-  color: #fff;
-  background: rgba(255, 255, 255, 0.16);
-  border: 1px solid rgba(255, 255, 255, 0.28);
-  backdrop-filter: blur(6px);
-  flex-shrink: 1;
-  min-width: 0;
-  max-width: 42%;
+.pv-hero__eslogan {
+  margin: 0 0 6px;
+  font: 600 13px/1.3 var(--ff-ui);
+  color: rgba(255, 255, 255, 0.92);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+  white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.pv-hero__meta {
+  margin: 0 0 6px;
+  font: 500 12px/1.3 var(--ff-ui);
+  color: rgba(255, 255, 255, 0.88);
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 .pv-hero__lugar {
   margin: 0;
   display: flex;
   align-items: center;
-  gap: 6px;
-  font: 500 12px/1.35 var(--ff-ui);
+  gap: 5px;
+  font: 500 12px/1.3 var(--ff-ui);
   color: rgba(255, 255, 255, 0.9);
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.28);
   min-width: 0;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 .pv-hero__lugar-ico {
@@ -290,44 +338,26 @@
   white-space: nowrap;
 }
 
-.pv-hero__logo {
-  width: 72px;
-  height: 72px;
-  border-radius: var(--rd-lg);
-  border: 3px solid rgba(255, 255, 255, 0.95);
-  box-shadow: var(--el-2);
-  display: grid;
-  place-items: center;
+.pv-hero__sep {
+  opacity: 0.55;
   flex-shrink: 0;
-  overflow: hidden;
-  align-self: flex-end;
-  order: 0;
 }
 
-.pv-hero__logo img {
-  width: 72px;
-  height: 72px;
-  object-fit: cover;
-  display: block;
-}
-
-.pv-hero__iniciales {
-  font: 700 22px/1 var(--ff-display);
-}
-
-.pv-hero__verif {
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  border: 2px solid #fff;
-  padding: 0;
-  color: #fff;
-  background: var(--bs-chicha);
-  font-size: 12px;
-  line-height: 18px;
-  cursor: pointer;
-  box-shadow: var(--el-1);
+.pv-hero__open {
   flex-shrink: 0;
+  font-weight: 700;
+}
+
+.pv-hero__open--ok {
+  color: #7dffa8;
+}
+
+.pv-hero__open--warn {
+  color: #ffd37a;
+}
+
+.pv-hero__open--err {
+  color: #ff9aa8;
 }
 
 .pv-hero__dialog-scrim {
@@ -416,6 +446,67 @@
   cursor: pointer;
 }
 
+/* Stats strip (datos reales) */
+.pv-stats {
+  margin-top: 4px;
+}
+
+.pv-stats__row {
+  list-style: none;
+  margin: 0;
+  padding: 12px 8px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(72px, 1fr));
+  gap: 4px;
+  background: var(--sf-elev);
+  border: 1px solid var(--bd-hair);
+  border-radius: var(--rd-xl);
+  box-shadow: var(--el-1);
+}
+
+.pv-stats__item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 2px;
+  min-width: 0;
+  padding: 4px 2px;
+  position: relative;
+}
+
+.pv-stats__item + .pv-stats__item::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 18%;
+  bottom: 18%;
+  width: 1px;
+  background: var(--bd-hair);
+}
+
+.pv-stats__icon {
+  color: var(--mk-accion);
+  display: grid;
+  place-items: center;
+  margin-bottom: 2px;
+}
+
+.pv-stats__valor {
+  font: 700 15px/1.15 var(--ff-ui);
+  color: var(--tx-strong);
+  letter-spacing: -0.02em;
+}
+
+.pv-stats__label {
+  font: 500 10px/1.25 var(--ff-ui);
+  color: var(--tx-muted);
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 /* —— Acciones Visual 2.0 — fila de 4 tiles iguales —— */
 .pv-acciones-grid {
   display: grid;
@@ -424,21 +515,21 @@
 }
 
 .pv-acciones-grid__btn {
-  min-height: 72px;
-  border-radius: var(--rd-lg);
+  min-height: 76px;
+  border-radius: var(--rd-xl);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 6px;
   text-decoration: none;
-  font: 600 11px/13px var(--ff-ui);
+  font: 700 11px/13px var(--ff-ui);
   color: var(--tx-strong);
   background: var(--sf-elev);
-  border: 1.5px solid color-mix(in srgb, var(--mk-accion) 28%, var(--bd-soft));
-  box-shadow: var(--el-1);
+  border: 1px solid var(--bd-hair);
+  box-shadow: var(--el-2);
   cursor: pointer;
-  transition: transform var(--mo-rapido), background var(--mo-rapido);
+  transition: transform var(--mo-rapido), box-shadow var(--mo-rapido);
 }
 
 .pv-acciones-grid__btn:active {
@@ -455,12 +546,14 @@
 }
 
 .pv-acciones-grid__btn--wa {
-  background: color-mix(in srgb, var(--wa) 10%, var(--sf-elev));
-  border-color: color-mix(in srgb, var(--wa) 45%, var(--bd-soft));
+  background: var(--wa);
+  border-color: transparent;
+  color: #fff;
+  box-shadow: 0 8px 18px color-mix(in srgb, var(--wa) 35%, transparent);
 }
 
 .pv-acciones-grid__btn--wa svg {
-  color: var(--wa);
+  color: #fff;
 }
 
 /* legacy secondary row kept for compat */
@@ -905,6 +998,14 @@
   background: var(--err-sf);
   border-color: color-mix(in srgb, var(--err) 25%, transparent);
   color: var(--err);
+}
+
+.pv-estado-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: currentColor;
 }
 
 /* Reseña cards */

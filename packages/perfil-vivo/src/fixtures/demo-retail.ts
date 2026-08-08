@@ -43,6 +43,7 @@ const rawNegocio = {
     colorSemilla: '#1F4FD8',
     tema: 'claro' as const,
     formaCards: 'suave' as const,
+    portadaUrl: '/perfil-vivo/demos/retail-cover.jpg',
   },
   contacto: {
     whatsapp: '+51999999001',

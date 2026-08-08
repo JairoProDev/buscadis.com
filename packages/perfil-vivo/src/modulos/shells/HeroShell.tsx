@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import type { Negocio } from '../../types';
+import { usePerfil } from '../PerfilContext';
 
 const CRITERIOS: Record<number, { titulo: string; texto: string }> = {
   1: {
@@ -24,13 +25,6 @@ function mostrarSelloVerificado(negocio: Negocio): boolean {
   return pago && negocio.verificacion.nivel >= 2;
 }
 
-function formatUbicacion(u: NonNullable<Negocio['ubicacion']>): string {
-  const calle = u.mostrarDireccionExacta ? u.direccion?.trim() : null;
-  const ciudad = [u.distrito, u.provincia].filter(Boolean).join(', ');
-  const bits = [calle, ciudad || null, 'Perú'].filter(Boolean);
-  return bits.join(' · ');
-}
-
 function etiquetasHero(negocio: Negocio): string[] {
   const seen = new Set<string>();
   const out: string[] = [];
@@ -47,17 +41,42 @@ function etiquetasHero(negocio: Negocio): string[] {
   return out.slice(0, 3);
 }
 
+function lugarCorto(u: NonNullable<Negocio['ubicacion']>): string {
+  const ciudad = u.distrito || u.provincia;
+  if (ciudad && u.provincia && ciudad !== u.provincia) {
+    return `${ciudad}, ${u.provincia}`;
+  }
+  if (ciudad) return `${ciudad}, Perú`;
+  return 'Perú';
+}
+
 export function HeroShell({ negocio }: { negocio: Negocio }) {
+  const { payload } = usePerfil();
   const [open, setOpen] = useState(false);
   const nivel = negocio.verificacion.nivel;
   const portada = negocio.identidad.portadaUrl;
   const criterio = CRITERIOS[Math.max(nivel, 2)] ?? CRITERIOS[2];
   const verificado = mostrarSelloVerificado(negocio);
   const tags = etiquetasHero(negocio);
-  const ubicacionLabel = negocio.ubicacion
-    ? formatUbicacion(negocio.ubicacion)
-    : null;
   const eslogan = negocio.eslogan?.trim() || null;
+  const estado = payload.estadoVivo;
+  const lugar = negocio.ubicacion ? lugarCorto(negocio.ubicacion) : null;
+  const direccion =
+    negocio.ubicacion?.mostrarDireccionExacta && negocio.ubicacion.direccion
+      ? negocio.ubicacion.direccion.trim()
+      : null;
+
+  const metaRubro = tags.join(' • ');
+  const estadoCorto = estado.abierto
+    ? estado.porCerrar
+      ? 'Por cerrar'
+      : 'Abierto ahora'
+    : 'Cerrado';
+  const estadoTone = estado.abierto
+    ? estado.porCerrar
+      ? 'warn'
+      : 'ok'
+    : 'err';
 
   function iniciales(nombre: string): string {
     const parts = nombre.trim().split(/\s+/).slice(0, 2);
@@ -74,7 +93,7 @@ export function HeroShell({ negocio }: { negocio: Negocio }) {
               src={portada}
               alt=""
               width={480}
-              height={280}
+              height={300}
               fetchPriority="high"
               decoding="async"
               className="pv-hero__cover-img"
@@ -89,7 +108,7 @@ export function HeroShell({ negocio }: { negocio: Negocio }) {
               className="pv-hero__logo"
               style={{
                 background: negocio.identidad.logoUrl
-                  ? 'var(--sf-elev)'
+                  ? '#fff'
                   : 'var(--mk-accion)',
                 color: 'var(--mk-sobre)',
               }}
@@ -99,8 +118,8 @@ export function HeroShell({ negocio }: { negocio: Negocio }) {
                 <img
                   src={negocio.identidad.logoUrl}
                   alt={`Logo de ${negocio.nombre}`}
-                  width={88}
-                  height={88}
+                  width={96}
+                  height={96}
                   fetchPriority="high"
                   decoding="async"
                 />
@@ -112,6 +131,20 @@ export function HeroShell({ negocio }: { negocio: Negocio }) {
             </div>
 
             <div className="pv-hero__copy">
+              {verificado ? (
+                <button
+                  type="button"
+                  className="pv-hero__badge"
+                  onClick={() => setOpen(true)}
+                  aria-label={`Negocio verificado: ${criterio?.titulo}`}
+                >
+                  <span className="pv-hero__badge-check" aria-hidden>
+                    ✓
+                  </span>
+                  Negocio verificado
+                </button>
+              ) : null}
+
               <h1 className="pv-hero__name">
                 <span className="pv-hero__name-text">{negocio.nombre}</span>
                 {verificado ? (
@@ -126,22 +159,37 @@ export function HeroShell({ negocio }: { negocio: Negocio }) {
                   </button>
                 ) : null}
               </h1>
+
               {eslogan ? <p className="pv-hero__eslogan">{eslogan}</p> : null}
-              {tags.length > 0 ? (
-                <ul className="pv-hero__tags" aria-label="Rubro y clasificación">
-                  {tags.map((t) => (
-                    <li key={t}>{t}</li>
-                  ))}
-                </ul>
+
+              {metaRubro ? (
+                <p className="pv-hero__meta">{metaRubro}</p>
               ) : null}
-              {ubicacionLabel ? (
-                <p className="pv-hero__lugar">
-                  <span className="pv-hero__lugar-ico" aria-hidden>
-                    ⌖
+
+              <p className="pv-hero__lugar">
+                {direccion || lugar ? (
+                  <>
+                    <span className="pv-hero__lugar-ico" aria-hidden>
+                      ⌖
+                    </span>
+                    <span className="pv-hero__lugar-text">
+                      {direccion ? `${direccion}` : null}
+                      {direccion && lugar ? ' · ' : null}
+                      {lugar}
+                    </span>
+                  </>
+                ) : null}
+                {(direccion || lugar) && estado ? (
+                  <span className="pv-hero__sep" aria-hidden>
+                    ·
                   </span>
-                  <span className="pv-hero__lugar-text">{ubicacionLabel}</span>
-                </p>
-              ) : null}
+                ) : null}
+                <span
+                  className={`pv-hero__open pv-hero__open--${estadoTone}`}
+                >
+                  {estadoCorto}
+                </span>
+              </p>
             </div>
           </div>
         </div>
