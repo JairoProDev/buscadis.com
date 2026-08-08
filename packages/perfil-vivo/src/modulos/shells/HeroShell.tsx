@@ -1,22 +1,35 @@
+'use client';
+
+import { useState } from 'react';
 import type { Negocio } from '../../types';
 
-function iniciales(nombre: string): string {
-  const parts = nombre.trim().split(/\s+/).slice(0, 2);
-  return parts.map((p) => p[0]?.toUpperCase() ?? '').join('') || 'B';
-}
-
-const NIVEL_LABEL: Record<number, string> = {
-  0: '',
-  1: 'Registrado',
-  2: 'Verificado',
-  3: 'Verificado en local',
+const CRITERIOS: Record<number, { titulo: string; texto: string }> = {
+  1: {
+    titulo: 'Registrado',
+    texto: 'Email o teléfono confirmados en Buscadis.',
+  },
+  2: {
+    titulo: 'Verificado',
+    texto: 'Identidad de negocio validada (RUC / domicilio comprobado).',
+  },
+  3: {
+    titulo: 'Verificado en local',
+    texto: 'Alguien del equipo ADIS visitó el local y tomó evidencia.',
+  },
 };
 
 export function HeroShell({ negocio }: { negocio: Negocio }) {
+  const [open, setOpen] = useState(false);
   const distrito = negocio.ubicacion?.distrito ?? 'Cusco';
   const meta = `${negocio.categoria.nombre} · ${distrito}`;
   const nivel = negocio.verificacion.nivel;
   const portada = negocio.identidad.portadaUrl;
+  const criterio = CRITERIOS[nivel];
+
+  function iniciales(nombre: string): string {
+    const parts = nombre.trim().split(/\s+/).slice(0, 2);
+    return parts.map((p) => p[0]?.toUpperCase() ?? '').join('') || 'B';
+  }
 
   return (
     <header className="pv-modulo" id="identidad">
@@ -93,8 +106,9 @@ export function HeroShell({ negocio }: { negocio: Negocio }) {
               {nivel >= 1 ? (
                 <button
                   type="button"
-                  title={NIVEL_LABEL[nivel]}
-                  aria-label={`Verificación: ${NIVEL_LABEL[nivel]}`}
+                  onClick={() => setOpen(true)}
+                  title={criterio?.titulo}
+                  aria-label={`Verificación: ${criterio?.titulo}`}
                   style={{
                     width: 18,
                     height: 18,
@@ -124,6 +138,75 @@ export function HeroShell({ negocio }: { negocio: Negocio }) {
           </div>
         </div>
       </div>
+
+      {open && criterio ? (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="pv-verif-title"
+          style={{
+            position: 'fixed',
+            inset: 0,
+            zIndex: 70,
+            background: 'rgba(19,18,24,.45)',
+            display: 'flex',
+            alignItems: 'flex-end',
+            justifyContent: 'center',
+          }}
+          onClick={() => setOpen(false)}
+          onKeyDown={(e) => {
+            if (e.key === 'Escape') setOpen(false);
+          }}
+        >
+          <div
+            style={{
+              width: '100%',
+              maxWidth: 480,
+              background: 'var(--sf-elev)',
+              borderRadius: 'var(--rd-xl) var(--rd-xl) 0 0',
+              padding: 20,
+              paddingBottom: 32,
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h2
+              id="pv-verif-title"
+              style={{ margin: '0 0 8px', font: 'var(--ts-modulo)' }}
+            >
+              {criterio.titulo}
+            </h2>
+            <p style={{ margin: '0 0 16px', font: 'var(--ts-cuerpo)', color: 'var(--tx-base)' }}>
+              {criterio.texto}
+            </p>
+            {negocio.verificacion.fecha ? (
+              <p style={{ margin: '0 0 16px', font: 'var(--ts-meta)', color: 'var(--tx-muted)' }}>
+                Desde{' '}
+                {new Date(negocio.verificacion.fecha).toLocaleDateString('es-PE', {
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric',
+                })}
+              </p>
+            ) : null}
+            <button
+              type="button"
+              onClick={() => setOpen(false)}
+              style={{
+                minHeight: 44,
+                width: '100%',
+                border: 'none',
+                borderRadius: 'var(--rd-md)',
+                background: 'var(--mk-accion)',
+                color: 'var(--mk-sobre)',
+                font: 'var(--ts-card)',
+                cursor: 'pointer',
+              }}
+            >
+              Entendido
+            </button>
+          </div>
+        </div>
+      ) : null}
     </header>
   );
 }

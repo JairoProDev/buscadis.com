@@ -30,12 +30,27 @@ export function middleware(req: NextRequest) {
     }
   }
 
-  // /@slug → app interna /negocio/slug
+  // /@slug → Perfil Vivo si ?vivo=1 (soft cutover P03); si no, storefront actual
   const atMatch = pathname.match(/^\/@([^/?#]+)\/?$/);
   if (atMatch) {
     const slug = normalizeBusinessSlug(atMatch[1]);
     if (slug) {
-      return NextResponse.rewrite(new URL(`/negocio/${encodeURIComponent(slug)}${search}`, req.url));
+      const vivo =
+        req.nextUrl.searchParams.get('vivo') === '1' ||
+        req.nextUrl.searchParams.get('perfilVivo') === '1';
+      if (vivo) {
+        const url = new URL(`/v/${encodeURIComponent(slug)}`, req.url);
+        url.searchParams.delete('vivo');
+        url.searchParams.delete('perfilVivo');
+        // Preserve other query params
+        req.nextUrl.searchParams.forEach((v, k) => {
+          if (k !== 'vivo' && k !== 'perfilVivo') url.searchParams.set(k, v);
+        });
+        return NextResponse.rewrite(url);
+      }
+      return NextResponse.rewrite(
+        new URL(`/negocio/${encodeURIComponent(slug)}${search}`, req.url)
+      );
     }
   }
 

@@ -4,11 +4,13 @@ import type { PerfilPayload } from '@buscadis/perfil-vivo';
 import {
   buildDemoRetailPayload,
   buildHandoffLinks,
-  negocioFromBusinessProfile,
-  calcularEstadoVivo,
+  buildPerfilPayloadFromSources,
   formatPrecio,
 } from '@buscadis/perfil-vivo/server';
-import { getBusinessProfileBySlug } from '@/lib/business';
+import {
+  getBusinessCatalog,
+  getBusinessProfileBySlug,
+} from '@/lib/business';
 import { normalizeBusinessSlug } from '@/lib/business/normalize-slug';
 
 export const revalidate = 60;
@@ -24,7 +26,7 @@ function jsonLdForPayload(payload: PerfilPayload) {
     '@context': 'https://schema.org',
     '@graph': [
       {
-        '@type': 'HardwareStore',
+        '@type': 'LocalBusiness',
         '@id': `https://buscadis.com/v/${negocio.slug}#negocio`,
         name: negocio.nombre,
         description:
@@ -70,31 +72,25 @@ function jsonLdForPayload(payload: PerfilPayload) {
   };
 }
 
-function payloadFromBridge(profile: unknown): PerfilPayload | null {
-  const negocio = negocioFromBusinessProfile(profile);
-  if (!negocio) return null;
-  return {
-    negocio,
-    productos: [],
-    totalProductos: 0,
-    metricas: { antiguedadDesde: negocio.creadoEn },
-    estadoVivo: calcularEstadoVivo(negocio.horario, new Date()),
-  };
+async function payloadForSlug(slug: string): Promise<PerfilPayload | null> {
+  if (slug === 'demo') return buildDemoRetailPayload();
+
+  const profile = await getBusinessProfileBySlug(slug);
+  if (!profile) return null;
+
+  const catalog = await getBusinessCatalog(profile.id);
+  return buildPerfilPayloadFromSources({
+    profileRow: profile,
+    catalogRows: catalog,
+  });
 }
 
 export default async function PerfilVivoPreviewPage({ params }: PageProps) {
   const { slug: raw } = await params;
   const slug = normalizeBusinessSlug(raw) || raw.toLowerCase();
 
-  let payload: PerfilPayload;
-  if (slug === 'demo') {
-    payload = buildDemoRetailPayload();
-  } else {
-    const profile = await getBusinessProfileBySlug(slug);
-    const bridged = profile ? payloadFromBridge(profile) : null;
-    if (!bridged) notFound();
-    payload = bridged;
-  }
+  const payload = await payloadForSlug(slug);
+  if (!payload) notFound();
 
   const handoffs = buildHandoffLinks(payload);
   const ld = jsonLdForPayload(payload);

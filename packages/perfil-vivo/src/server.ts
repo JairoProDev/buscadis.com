@@ -18,6 +18,12 @@ export {
 } from './fixtures/demo-retail';
 export { calcularEstadoVivo, formatPrecio } from './estado/calcular-estado';
 export { negocioFromBusinessProfile } from './bridge/from-business-profile';
+export {
+  buildPerfilPayloadFromSources,
+  horarioFromBusinessHours,
+  productoFromCatalogRow,
+  enrichNegocioFromProfile,
+} from './bridge/build-payload';
 export type {
   PerfilPayload,
   Negocio,
