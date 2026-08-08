@@ -44,10 +44,8 @@ export function EstadoShell() {
       />
       <span>
         {bits.map((b, i) => (
-          <span key={b}>
-            {i > 0 ? (
-              <span style={{ color: 'var(--tx-faint)' }}> · </span>
-            ) : null}
+          <span key={`${i}-${b}`}>
+            {i > 0 ? <span style={{ color: 'var(--tx-faint)' }}> · </span> : null}
             {b}
           </span>
         ))}

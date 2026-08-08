@@ -13,42 +13,17 @@ export function FaqShell({ titulo }: { titulo: string }) {
       <h2 style={{ margin: '0 0 12px', font: 'var(--ts-modulo)', color: 'var(--tx-strong)' }}>
         {titulo || 'Preguntas frecuentes'}
       </h2>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <div className="pv-faq">
         {faqs.map((item) => (
-          <details
-            key={item.id}
-            style={{
-              borderRadius: 'var(--rd-md)',
-              border: '1px solid var(--sf-line)',
-              background: 'var(--sf-elev)',
-              padding: '0 14px',
-            }}
-          >
-            <summary
-              style={{
-                minHeight: 52,
-                display: 'flex',
-                alignItems: 'center',
-                cursor: 'pointer',
-                font: 'var(--ts-cuerpo)',
-                fontWeight: 700,
-                color: 'var(--tx-strong)',
-                listStyle: 'none',
-              }}
-            >
-              {item.pregunta}
+          <details key={item.id} className="pv-faq__item">
+            <summary className="pv-faq__q">
+              <span>{item.pregunta}</span>
+              <span className="pv-faq__chev" aria-hidden>
+                ▾
+              </span>
             </summary>
             {/* Respuesta siempre en el DOM (aunque details esté cerrado) */}
-            <p
-              style={{
-                margin: '0 0 14px',
-                font: 'var(--ts-cuerpo)',
-                color: 'var(--tx-muted)',
-                lineHeight: 1.45,
-              }}
-            >
-              {item.respuesta}
-            </p>
+            <p className="pv-faq__a">{item.respuesta}</p>
           </details>
         ))}
       </div>

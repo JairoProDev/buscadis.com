@@ -47,8 +47,33 @@ export function faqsFromProfileBlocks(blocks: unknown): ItemFaq[] {
 export function nosotrosFromProfile(row: Record<string, unknown>): NosotrosContenido | null {
   const texto = String(row.description || '').trim();
   if (texto.length < 20) return null;
-  const eslogan = String(row.tagline || '').trim() || undefined;
+  const rawEslogan = String(row.tagline || '').trim();
+  // Eslogan en payload; el shell deduplica contra descripción / known.eslogan
+  const sameish =
+    rawEslogan &&
+    (texto.toLowerCase().startsWith(rawEslogan.toLowerCase()) ||
+      rawEslogan.toLowerCase() === texto.toLowerCase() ||
+      similarText(rawEslogan, texto));
+  // Si tagline ≈ descripción, no anexar eslogan duplicado en el objeto
+  const eslogan = rawEslogan && !sameish ? rawEslogan.slice(0, 90) : undefined;
   return { texto: texto.slice(0, 2000), eslogan };
+}
+
+function similarText(a: string, b: string): boolean {
+  const na = a.toLowerCase().replace(/\W+/g, '');
+  const nb = b.toLowerCase().replace(/\W+/g, '');
+  if (!na || !nb) return false;
+  if (na.includes(nb) || nb.includes(na) || na === nb) return true;
+  const STOP = new Set(['de', 'del', 'la', 'las', 'el', 'los', 'por', 'para', 'y', 'en', 'un', 'una']);
+  const tokens = (s: string) =>
+    new Set(s.toLowerCase().split(/\W+/).filter((t) => t.length > 2 && !STOP.has(t)));
+  const ta = tokens(a);
+  const tb = tokens(b);
+  if (!ta.size || !tb.size) return false;
+  let inter = 0;
+  for (const t of ta) if (tb.has(t)) inter += 1;
+  const union = ta.size + tb.size - inter;
+  return union > 0 && inter / union >= 0.55;
 }
 
 /** Mejor promo no vencida desde deals o un campo promocional. */
@@ -142,7 +167,7 @@ export function promocionFromProfile(
 
 export function galeriaFromProfile(
   row: Record<string, unknown>,
-  productImageUrls: string[] = []
+  _productImageUrls: string[] = []
 ): FotoGaleria[] {
   const out: FotoGaleria[] = [];
   const gallery = row.gallery_images || row.profile_gallery;
@@ -165,16 +190,8 @@ export function galeriaFromProfile(
     }
   }
 
-  // Fallback: fotos de productos (resultado de obra / surtido)
-  if (out.length < 3) {
-    for (let i = 0; i < productImageUrls.length && out.length < 12; i++) {
-      const url = productImageUrls[i];
-      if (!url || url.startsWith('data:')) continue;
-      if (out.some((f) => f.url === url)) continue;
-      out.push({ id: `prod-gal-${i}`, url, etiqueta: 'resultado' });
-    }
-  }
-
+  // Solo galería real del perfil. No rellenar con fotos de catálogo
+  // (collages de producto se ven como basura en Galería).
   return out.slice(0, 12);
 }
 

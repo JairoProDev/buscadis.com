@@ -34,7 +34,6 @@ export const KNOWN_BUSINESSES: Record<string, KnownBusinessOverride> = {
       lat: -13.522,
       lng: -71.967,
       mostrarDireccionExacta: true,
-      referencia: 'Cusco',
     },
   },
   villachaco: {

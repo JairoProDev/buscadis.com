@@ -21,7 +21,7 @@ const CRITERIOS: Record<number, { titulo: string; texto: string }> = {
 export function HeroShell({ negocio }: { negocio: Negocio }) {
   const [open, setOpen] = useState(false);
   const distrito = negocio.ubicacion?.distrito ?? 'Cusco';
-  const meta = `${negocio.categoria.nombre} · ${distrito}`;
+  const meta = [negocio.categoria.nombre, distrito].filter(Boolean).join(' · ');
   const nivel = negocio.verificacion.nivel;
   const portada = negocio.identidad.portadaUrl;
   const criterio = CRITERIOS[nivel];
@@ -32,24 +32,9 @@ export function HeroShell({ negocio }: { negocio: Negocio }) {
   }
 
   return (
-    <header className="pv-modulo" id="identidad">
-      <div
-        style={{
-          marginLeft: 'calc(-1 * var(--sp-4))',
-          marginRight: 'calc(-1 * var(--sp-4))',
-        }}
-      >
-        <div
-          style={{
-            height: 150,
-            background: portada ? undefined : 'var(--mk-suave)',
-            backgroundImage: portada
-              ? undefined
-              : 'radial-gradient(circle at 20% 30%, rgba(19,18,24,.06), transparent 50%)',
-            position: 'relative',
-            overflow: 'hidden',
-          }}
-        >
+    <header className="pv-modulo pv-hero" id="identidad">
+      <div className="pv-hero__bleed">
+        <div className="pv-hero__cover">
           {portada ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
@@ -59,46 +44,22 @@ export function HeroShell({ negocio }: { negocio: Negocio }) {
               height={150}
               fetchPriority="high"
               decoding="async"
-              style={{
-                width: '100%',
-                height: 150,
-                objectFit: 'cover',
-                display: 'block',
-              }}
+              className="pv-hero__cover-img"
             />
-          ) : null}
-          <div
-            aria-hidden
-            style={{
-              position: 'absolute',
-              inset: 0,
-              background:
-                'linear-gradient(180deg, transparent 0%, rgba(0,0,0,.55) 85%)',
-            }}
-          />
+          ) : (
+            <div className="pv-hero__cover-fallback" aria-hidden />
+          )}
+          <div className="pv-hero__cover-shade" aria-hidden />
         </div>
-        <div
-          style={{
-            padding: '0 var(--sp-4)',
-            marginTop: -32,
-            display: 'flex',
-            gap: 12,
-            alignItems: 'flex-end',
-          }}
-        >
+
+        <div className="pv-hero__identity">
           <div
+            className="pv-hero__logo"
             style={{
-              width: 64,
-              height: 64,
-              borderRadius: 'var(--rd-lg)',
-              border: '2px solid var(--sf-elev)',
-              background: negocio.identidad.logoUrl ? undefined : 'var(--mk-accion)',
+              background: negocio.identidad.logoUrl
+                ? 'var(--sf-elev)'
+                : 'var(--mk-accion)',
               color: 'var(--mk-sobre)',
-              display: 'grid',
-              placeItems: 'center',
-              font: '700 22px/1 var(--ff-display)',
-              flexShrink: 0,
-              overflow: 'hidden',
             }}
             aria-hidden
           >
@@ -111,25 +72,13 @@ export function HeroShell({ negocio }: { negocio: Negocio }) {
                 height={64}
                 fetchPriority="high"
                 decoding="async"
-                style={{ width: 64, height: 64, objectFit: 'cover' }}
               />
             ) : (
-              iniciales(negocio.nombre)
+              <span className="pv-hero__iniciales">{iniciales(negocio.nombre)}</span>
             )}
           </div>
-          <div style={{ paddingBottom: 8, minWidth: 0 }}>
-            <h1
-              style={{
-                font: 'var(--ts-nombre)',
-                color: 'var(--tx-strong)',
-                margin: '0 0 4px',
-                letterSpacing: '-0.02em',
-                display: 'flex',
-                alignItems: 'center',
-                gap: 6,
-                flexWrap: 'wrap',
-              }}
-            >
+          <div className="pv-hero__titles">
+            <h1>
               <span>{negocio.nombre}</span>
               {nivel >= 1 ? (
                 <button
@@ -137,32 +86,16 @@ export function HeroShell({ negocio }: { negocio: Negocio }) {
                   onClick={() => setOpen(true)}
                   title={criterio?.titulo}
                   aria-label={`Verificación: ${criterio?.titulo}`}
+                  className="pv-hero__verif"
                   style={{
-                    width: 18,
-                    height: 18,
-                    borderRadius: '50%',
-                    border: 'none',
-                    padding: 0,
                     background: nivel >= 2 ? 'var(--bs-chicha)' : 'var(--tx-muted)',
-                    color: '#fff',
-                    fontSize: 11,
-                    lineHeight: '18px',
-                    cursor: 'pointer',
                   }}
                 >
                   ✓
                 </button>
               ) : null}
             </h1>
-            <p
-              style={{
-                font: 'var(--ts-meta)',
-                color: 'var(--tx-muted)',
-                margin: 0,
-              }}
-            >
-              {meta}
-            </p>
+            <p className="pv-hero__meta">{meta}</p>
           </div>
         </div>
       </div>
@@ -172,76 +105,41 @@ export function HeroShell({ negocio }: { negocio: Negocio }) {
           role="dialog"
           aria-modal="true"
           aria-labelledby="pv-verif-title"
-          style={{
-            position: 'fixed',
-            inset: 0,
-            zIndex: 70,
-            background: 'rgba(19,18,24,.45)',
-            display: 'flex',
-            alignItems: 'flex-end',
-            justifyContent: 'center',
-          }}
+          className="pv-hero__dialog-scrim"
           onClick={() => setOpen(false)}
           onKeyDown={(e) => {
             if (e.key === 'Escape') setOpen(false);
           }}
         >
           <div
-            style={{
-              width: '100%',
-              maxWidth: 480,
-              background: 'var(--sf-elev)',
-              borderRadius: 'var(--rd-xl) var(--rd-xl) 0 0',
-              padding: 20,
-              paddingBottom: 32,
-            }}
+            className="pv-hero__dialog"
             onClick={(e) => e.stopPropagation()}
           >
-            <h2
-              id="pv-verif-title"
-              style={{ margin: '0 0 8px', font: 'var(--ts-modulo)' }}
-            >
-              Qué significa esta verificación
-            </h2>
-            <p style={{ margin: '0 0 14px', font: 'var(--ts-cuerpo)', color: 'var(--tx-muted)' }}>
+            <h2 id="pv-verif-title">Qué significa esta verificación</h2>
+            <p className="pv-hero__dialog-lead">
               En Buscadis el sello solo aparece si se cumplió un criterio público. No es un badge
               decorativo.
             </p>
-            <ul style={{ listStyle: 'none', margin: 0, padding: 0, display: 'grid', gap: 10 }}>
+            <ul className="pv-hero__criterios">
               {([1, 2, 3] as const).map((n) => {
                 const c = CRITERIOS[n];
                 const activo = nivel >= n;
                 return (
                   <li
                     key={n}
-                    style={{
-                      padding: '12px 14px',
-                      borderRadius: 'var(--rd-md)',
-                      border: `1px solid ${activo ? 'var(--mk-borde)' : 'var(--sf-line)'}`,
-                      background: activo ? 'var(--mk-suave)' : 'var(--sf-base)',
-                      opacity: activo ? 1 : 0.72,
-                    }}
+                    className={activo ? 'is-activo' : undefined}
                   >
-                    <p
-                      style={{
-                        margin: 0,
-                        font: 'var(--ts-cuerpo)',
-                        fontWeight: 700,
-                        color: 'var(--tx-strong)',
-                      }}
-                    >
+                    <p className="pv-hero__criterio-titulo">
                       Nivel {n} · {c.titulo}
                       {nivel === n ? ' · actual' : ''}
                     </p>
-                    <p style={{ margin: '4px 0 0', font: 'var(--ts-meta)', color: 'var(--tx-muted)' }}>
-                      {c.texto}
-                    </p>
+                    <p className="pv-hero__criterio-texto">{c.texto}</p>
                   </li>
                 );
               })}
             </ul>
             {negocio.verificacion.fecha ? (
-              <p style={{ margin: '14px 0 0', font: 'var(--ts-meta)', color: 'var(--tx-muted)' }}>
+              <p className="pv-hero__fecha">
                 Verificado desde{' '}
                 {new Date(negocio.verificacion.fecha).toLocaleDateString('es-PE', {
                   year: 'numeric',
@@ -253,18 +151,7 @@ export function HeroShell({ negocio }: { negocio: Negocio }) {
             <button
               type="button"
               onClick={() => setOpen(false)}
-              style={{
-                marginTop: 16,
-                minHeight: 48,
-                width: '100%',
-                border: 'none',
-                borderRadius: 'var(--rd-md)',
-                background: 'var(--mk-accion)',
-                color: 'var(--mk-sobre)',
-                font: 'var(--ts-card)',
-                fontWeight: 700,
-                cursor: 'pointer',
-              }}
+              className="pv-hero__dialog-close"
             >
               Entendido
             </button>

@@ -1,6 +1,6 @@
 'use client';
 
-import type { CSSProperties, ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import { usePerfil } from '../PerfilContext';
 
 function IconPhone() {
@@ -58,77 +58,38 @@ function QuickAction({
   icon: ReactNode;
   disabled?: boolean;
 }) {
-  const style: CSSProperties = {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'center',
-    minWidth: 64,
-    minHeight: 44,
-    gap: 4,
-    textDecoration: 'none',
-    color: 'var(--tx-base)',
-    font: 'var(--ts-etiqueta)',
-    textTransform: 'uppercase',
-    letterSpacing: '0.04em',
-    opacity: disabled ? 0.45 : 1,
-    pointerEvents: disabled ? 'none' : 'auto',
-  };
-  const iconBox: CSSProperties = {
-    width: 44,
-    height: 44,
-    borderRadius: 'var(--rd-md)',
-    border: '1px solid var(--bd-soft)',
-    display: 'grid',
-    placeItems: 'center',
-    color: 'var(--mk-texto)',
-    background: 'var(--sf-elev)',
-  };
+  const body = (
+    <>
+      <span className="pv-acciones__icon">{icon}</span>
+      <span>{label}</span>
+    </>
+  );
   if (!href || disabled) {
     return (
-      <span style={style} aria-disabled>
-        <span style={{ ...iconBox, color: 'var(--tx-faint)' }}>{icon}</span>
-        {label}
+      <span className="pv-acciones__item" aria-disabled="true">
+        {body}
       </span>
     );
   }
   return (
-    <a href={href} style={style}>
-      <span style={iconBox}>{icon}</span>
-      {label}
+    <a href={href} className="pv-acciones__item">
+      {body}
     </a>
   );
 }
 
 export function AccionesShell() {
   const { handoffs, payload } = usePerfil();
-  const cerrado = !payload.estadoVivo.abierto;
   const arq = payload.negocio.arquetipo;
   const esCita = arq === 'cita' || arq === 'profesional';
   const esComida = arq === 'comida';
   const listaHref = esCita ? '#servicios' : '#catalogo';
   const listaLabel = esCita ? 'Servicios' : esComida ? 'Carta' : 'Catálogo';
-  const waLabel = esCita
-    ? 'Agendar'
-    : esComida
-      ? cerrado
-        ? 'Pedir'
-        : 'Pedir'
-      : cerrado
-        ? 'Escribir'
-        : 'WhatsApp';
+  const waLabel = esCita ? 'Agendar' : esComida ? 'Pedir' : 'Escribir';
 
   return (
     <section className="pv-modulo" id="acciones" aria-label="Acciones rápidas">
-      <div
-        style={{
-          display: 'flex',
-          gap: 16,
-          overflowX: 'auto',
-          paddingBottom: 4,
-          WebkitOverflowScrolling: 'touch',
-        }}
-      >
+      <div className="pv-acciones">
         <QuickAction
           href={handoffs.llamada}
           label="Llamar"
@@ -142,11 +103,12 @@ export function AccionesShell() {
           disabled={!handoffs.ruta}
         />
         <QuickAction href={listaHref} label={listaLabel} icon={<IconBag />} />
-        {handoffs.whatsappPrimary ? (
-          <QuickAction href={handoffs.whatsappPrimary} label={waLabel} icon={<IconWa />} />
-        ) : (
-          <QuickAction href={null} label={waLabel} icon={<IconWa />} disabled />
-        )}
+        <QuickAction
+          href={handoffs.whatsappPrimary}
+          label={waLabel}
+          icon={<IconWa />}
+          disabled={!handoffs.whatsappPrimary}
+        />
       </div>
     </section>
   );

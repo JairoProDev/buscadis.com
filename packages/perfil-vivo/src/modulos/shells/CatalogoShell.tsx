@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import type { Producto } from '../../types';
 import { formatPrecio } from '../../estado/calcular-estado';
 import { usePerfil } from '../PerfilContext';
+import { MODULO_META, planSuficiente } from '../contrato';
 
 const ETIQUETA: Record<string, string> = {
   nuevo: 'Nuevo',
@@ -57,9 +58,10 @@ function ProductCard({
           style={{
             width: 156,
             height: 156,
-            objectFit: 'cover',
+            objectFit: 'contain',
             borderRadius: 'var(--rd-md)',
             background: 'var(--sf-sunk)',
+            border: '1px solid var(--bd-hair)',
           }}
         />
         {etiqueta ? (
@@ -103,10 +105,13 @@ function ProductCard({
           font: 'var(--ts-card)',
           color: 'var(--tx-strong)',
           display: '-webkit-box',
-          WebkitLineClamp: 2,
+          WebkitLineClamp: 3,
           WebkitBoxOrient: 'vertical',
           overflow: 'hidden',
-          minHeight: 38,
+          minHeight: 48,
+          lineHeight: '16px',
+          fontSize: 13,
+          fontWeight: 600,
         }}
       >
         {producto.nombre}
@@ -270,6 +275,12 @@ export function CatalogoShell({ titulo }: { titulo: string }) {
   const [openId, setOpenId] = useState<string | null>(null);
   const open = productos.find((p) => p.id === openId) ?? null;
   const slug = payload.negocio.slug;
+  const iaCfg = payload.negocio.modulos.find((m) => m.tipo === 'ia');
+  const tieneIa =
+    Boolean(iaCfg?.visible !== false) &&
+    planSuficiente(payload.negocio.plan, MODULO_META.ia.planMin) &&
+    (payload.negocio.conteos?.productos ?? payload.productos.length) >=
+      MODULO_META.ia.minDatos;
 
   useEffect(() => {
     const sync = () => {
@@ -355,22 +366,24 @@ export function CatalogoShell({ titulo }: { titulo: string }) {
           </div>
         ))}
       </div>
-      <p style={{ margin: '12px 0 0', textAlign: 'center' }}>
-        <a
-          href="#ia"
-          style={{
-            font: 'var(--ts-meta)',
-            fontWeight: 700,
-            color: 'var(--mk-accion)',
-            textDecoration: 'none',
-            minHeight: 44,
-            display: 'inline-flex',
-            alignItems: 'center',
-          }}
-        >
-          Pregúntale al negocio →
-        </a>
-      </p>
+      {tieneIa ? (
+        <p style={{ margin: '12px 0 0', textAlign: 'center' }}>
+          <a
+            href="#ia"
+            style={{
+              font: 'var(--ts-meta)',
+              fontWeight: 700,
+              color: 'var(--mk-accion)',
+              textDecoration: 'none',
+              minHeight: 44,
+              display: 'inline-flex',
+              alignItems: 'center',
+            }}
+          >
+            Pregúntale al negocio →
+          </a>
+        </p>
+      ) : null}
       {open ? (
         <ProductoSheet
           producto={open}

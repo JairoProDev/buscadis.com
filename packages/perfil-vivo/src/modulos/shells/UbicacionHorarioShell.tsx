@@ -22,12 +22,29 @@ export function UbicacionHorarioShell() {
   const u = negocio.ubicacion;
   const h = negocio.horario;
   const [openWeek, setOpenWeek] = useState(false);
+  const [mapFailed, setMapFailed] = useState(false);
 
   if (!u && !h) return null;
 
-  const staticMap =
+  const osmEmbed =
     u &&
-    `https://staticmap.openstreetmap.de/staticmap.php?center=${u.lat},${u.lng}&zoom=15&size=440x160&markers=${u.lat},${u.lng},red-pushpin`;
+    `https://www.openstreetmap.org/export/embed.html?bbox=${u.lng - 0.01}%2C${u.lat - 0.008}%2C${u.lng + 0.01}%2C${u.lat + 0.008}&layer=mapnik&marker=${u.lat}%2C${u.lng}`;
+
+  const horarioDetalle = (() => {
+    if (!h) return null;
+    if (estadoVivo.abierto && estadoVivo.cierraEn) {
+      return `Hoy hasta las ${estadoVivo.cierraEn}`;
+    }
+    if (!estadoVivo.abierto) {
+      const rest = estadoVivo.mensaje.replace(/^Cerrado(\s*·\s*)?/i, '').trim();
+      // Evitar "Cerrado · Cerrado"
+      if (!rest || /^cerrado$/i.test(rest)) {
+        return estadoVivo.abreEn ? `abre ${estadoVivo.abreEn}` : null;
+      }
+      return rest;
+    }
+    return null;
+  })();
 
   return (
     <section className="pv-modulo" id="ubicacion">
@@ -36,34 +53,62 @@ export function UbicacionHorarioShell() {
           <h2 style={{ margin: '0 0 12px', font: 'var(--ts-modulo)', color: 'var(--tx-strong)' }}>
             Ubicación
           </h2>
-          {staticMap ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={staticMap}
-              alt={`Mapa de ${u.direccion}`}
-              width={440}
-              height={160}
+          {!mapFailed && osmEmbed ? (
+            <div
               style={{
                 width: '100%',
                 height: 160,
-                objectFit: 'cover',
                 borderRadius: 'var(--rd-md)',
-                background: 'var(--sf-sunk)',
+                overflow: 'hidden',
+                border: '1px solid var(--bd-hair)',
                 marginBottom: 12,
+                background: 'var(--sf-sunk)',
               }}
-            />
-          ) : null}
+            >
+              <iframe
+                title={`Mapa de ${u.direccion}`}
+                src={osmEmbed}
+                width="100%"
+                height="160"
+                style={{ border: 0, display: 'block' }}
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+                onError={() => setMapFailed(true)}
+              />
+            </div>
+          ) : (
+            <div
+              style={{
+                width: '100%',
+                height: 120,
+                borderRadius: 'var(--rd-md)',
+                marginBottom: 12,
+                background: 'var(--sf-sunk)',
+                border: '1px solid var(--bd-hair)',
+                display: 'grid',
+                placeItems: 'center',
+                font: 'var(--ts-meta)',
+                color: 'var(--tx-muted)',
+                padding: 16,
+                textAlign: 'center',
+              }}
+            >
+              {u.distrito}, {u.provincia}
+            </div>
+          )}
           <p style={{ margin: '0 0 4px', font: 'var(--ts-cuerpo)', color: 'var(--tx-strong)' }}>
             {u.mostrarDireccionExacta ? u.direccion : `${u.distrito}, ${u.provincia}`}
           </p>
-          {u.referencia ? (
-            <p style={{ margin: '0 0 12px', font: 'var(--ts-meta)', color: 'var(--tx-muted)' }}>
-              {u.referencia}
-            </p>
-          ) : (
-            <div style={{ height: 12 }} />
-          )}
-          <div style={{ display: 'flex', gap: 8, marginBottom: 20 }}>
+          <p style={{ margin: '0 0 12px', font: 'var(--ts-meta)', color: 'var(--tx-muted)' }}>
+            {[u.distrito, u.provincia].filter(Boolean).join(', ')}
+            {u.referencia &&
+            u.referencia !== u.distrito &&
+            u.referencia !== u.provincia &&
+            !u.direccion.toLowerCase().includes(u.referencia.toLowerCase())
+              ? ` · ${u.referencia}`
+              : ''}
+          </p>
+          <div style={{ display: 'flex', gap: 8, marginBottom: h ? 20 : 0 }}>
             {handoffs.ruta ? (
               <a
                 href={handoffs.ruta}
@@ -77,31 +122,31 @@ export function UbicacionHorarioShell() {
                   color: 'var(--mk-sobre)',
                   textDecoration: 'none',
                   font: 'var(--ts-card)',
+                  fontWeight: 700,
                 }}
               >
                 Cómo llegar
               </a>
             ) : null}
-            {u ? (
-              <a
-                href={`https://www.openstreetmap.org/?mlat=${u.lat}&mlon=${u.lng}#map=17/${u.lat}/${u.lng}`}
-                target="_blank"
-                rel="noreferrer"
-                style={{
-                  flex: 1,
-                  minHeight: 44,
-                  display: 'grid',
-                  placeItems: 'center',
-                  borderRadius: 'var(--rd-md)',
-                  border: '1px solid var(--bd-soft)',
-                  color: 'var(--tx-base)',
-                  textDecoration: 'none',
-                  font: 'var(--ts-card)',
-                }}
-              >
-                Ver en mapa
-              </a>
-            ) : null}
+            <a
+              href={`https://www.openstreetmap.org/?mlat=${u.lat}&mlon=${u.lng}#map=17/${u.lat}/${u.lng}`}
+              target="_blank"
+              rel="noreferrer"
+              style={{
+                flex: 1,
+                minHeight: 44,
+                display: 'grid',
+                placeItems: 'center',
+                borderRadius: 'var(--rd-md)',
+                border: '1px solid var(--bd-soft)',
+                color: 'var(--tx-base)',
+                textDecoration: 'none',
+                font: 'var(--ts-card)',
+                fontWeight: 600,
+              }}
+            >
+              Ver en mapa
+            </a>
           </div>
         </>
       ) : null}
@@ -120,8 +165,12 @@ export function UbicacionHorarioShell() {
             >
               {estadoVivo.abierto ? 'Abierto ahora' : 'Cerrado'}
             </span>
-            <span style={{ color: 'var(--tx-faint)' }}> · </span>
-            {estadoVivo.mensaje}
+            {horarioDetalle ? (
+              <>
+                <span style={{ color: 'var(--tx-faint)' }}> · </span>
+                <span style={{ color: 'var(--tx-base)' }}>{horarioDetalle}</span>
+              </>
+            ) : null}
           </p>
           <button
             type="button"
@@ -132,6 +181,7 @@ export function UbicacionHorarioShell() {
               background: 'transparent',
               color: 'var(--mk-texto)',
               font: 'var(--ts-meta)',
+              fontWeight: 600,
               padding: 0,
               cursor: 'pointer',
             }}
