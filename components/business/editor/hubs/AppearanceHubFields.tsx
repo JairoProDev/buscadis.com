@@ -261,7 +261,7 @@ export default function AppearanceHubFields({
         <div>
           <FieldLabel number={6} label="Color secundario" complete={done('theme_accent')} />
           <div className="flex flex-wrap gap-2">
-            {['#ffc24a', '#f97316', '#ec4899', '#10b981'].map((c) => (
+            {['#FFC24A', '#F97316', '#7E22CE', '#0F766E'].map((c) => (
               <button
                 key={c}
                 type="button"

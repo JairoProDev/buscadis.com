@@ -83,7 +83,7 @@ export default function DealActionRail({
       </RailBtn>
 
       <RailBtn label={formatCount(clip.save_count)} onClick={onSave} active={clip.saved}>
-        <svg width="22" height="22" viewBox="0 0 24 24" fill={clip.saved ? '#fbbf24' : 'none'} stroke="#fff" strokeWidth="2">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill={clip.saved ? '#FFC24A' : 'none'} stroke="#fff" strokeWidth="2">
           <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
         </svg>
       </RailBtn>

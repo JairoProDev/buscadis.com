@@ -6,47 +6,50 @@ export interface CategoriaThemeTokens {
   placeholderBgDark: string;
 }
 
-/** Acento 3px + fondos placeholder neutros (spec §2.2) */
+/**
+ * Category accents — synced with packages/tokens/src/semantic/category.json
+ * Single runtime source; CSS --bs-cat-* generated from the same values at token build.
+ */
 export const CATEGORIA_THEME: Record<Categoria, CategoriaThemeTokens> = {
   empleos: {
-    accent: '#0f766e',
-    placeholderBg: '#f0fdfa',
-    placeholderBgDark: '#283038',
+    accent: '#0F766E',
+    placeholderBg: '#F0FDFA',
+    placeholderBgDark: '#042F2E',
   },
   inmuebles: {
-    accent: '#059669',
-    placeholderBg: '#ecfdf5',
-    placeholderBgDark: '#283038',
+    accent: '#047857',
+    placeholderBg: '#ECFDF5',
+    placeholderBgDark: '#022C22',
   },
   vehiculos: {
-    accent: '#0284c7',
-    placeholderBg: '#f0f9ff',
-    placeholderBgDark: '#283038',
+    accent: '#C2410C',
+    placeholderBg: '#FFF7ED',
+    placeholderBgDark: '#431407',
   },
   servicios: {
-    accent: '#d97706',
-    placeholderBg: '#fffbeb',
-    placeholderBgDark: '#283038',
+    accent: '#A16207',
+    placeholderBg: '#FFFBEB',
+    placeholderBgDark: '#422006',
   },
   productos: {
-    accent: '#e11d48',
-    placeholderBg: '#fff1f2',
-    placeholderBgDark: '#283038',
+    accent: '#BE123C',
+    placeholderBg: '#FFF1F2',
+    placeholderBgDark: '#4C0519',
   },
   eventos: {
-    accent: '#7c3aed',
-    placeholderBg: '#f5f3ff',
-    placeholderBgDark: '#283038',
+    accent: '#7E22CE',
+    placeholderBg: '#FAF5FF',
+    placeholderBgDark: '#3B0764',
   },
   negocios: {
-    accent: '#1d4ed8',
-    placeholderBg: '#eff6ff',
-    placeholderBgDark: '#283038',
+    accent: '#4F46E5',
+    placeholderBg: '#EEF2FF',
+    placeholderBgDark: '#1E1B4B',
   },
   comunidad: {
-    accent: '#0891b2',
-    placeholderBg: '#ecfeff',
-    placeholderBgDark: '#283038',
+    accent: '#A21CAF',
+    placeholderBg: '#FDF4FF',
+    placeholderBgDark: '#4A044E',
   },
 };
 

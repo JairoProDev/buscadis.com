@@ -33,8 +33,9 @@ Este documento define el **estado objetivo (Target)** y marca **gaps vs. hoy (Cu
 
 | Token | Light | Dark | Uso |
 |-------|-------|------|-----|
-| `--brand-blue` | `#38bdf8` | `#38bdf8` | CTA, links, estado activo |
-| `--brand-yellow` | `#fbbf24` | `#fbbf24` | Destacados, alertas suaves |
+| `--brand-blue` / `--bs-identity` | `#53ACC5` | `#6EC0D8` | Logo, acentos decorativos (no texto sobre sí mismo) |
+| `--bs-action` | `#2A7C94` | `#8AD3E4` | CTA, links, estado activo (AA con on-action) |
+| `--brand-yellow` / `--bs-identity-warm` | `#FFC24A` | `#FFD06A` | Destacados, CTA Publicar (texto = `--bs-fg-on-warm`) |
 | `--text-primary` | `#0f172a` | `#f8fafc` | Títulos, cuerpo principal |
 | `--text-secondary` | `#475569` | `#94a3b8` | Metadata, descripciones |
 | `--text-tertiary` | `#94a3b8` | `#64748b` | Hints, placeholders |
@@ -89,7 +90,7 @@ Este documento define el **estado objetivo (Target)** y marca **gaps vs. hoy (Cu
 |----------|--------|----------------|
 | Card | 16px | `0 1px 3px rgba(0,0,0,0.06), 0 4px 12px rgba(0,0,0,0.04)` |
 | Card hover | 16px | `0 8px 24px rgba(0,0,0,0.08)` |
-| Card selected | 16px | `ring 2px #38bdf8` · sin scale |
+| Card selected | 16px | `ring 2px var(--bs-action)` · sin scale |
 | Pill / chip | 999px | none |
 | Button icon | 12px | none |
 | Search bar | 999px | `0 4px 20px rgba(0,0,0,0.06)` |

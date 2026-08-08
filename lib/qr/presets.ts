@@ -101,8 +101,8 @@ export const QR_PRESETS: QrPreset[] = [
         type: 'linear',
         rotation: 45,
         colorStops: [
-          { offset: 0, color: '#3b82f6' },
-          { offset: 1, color: '#ec4899' },
+          { offset: 0, color: '#53ACC5' },
+          { offset: 1, color: '#FFC24A' },
         ],
       },
       hideBackgroundDots: true,

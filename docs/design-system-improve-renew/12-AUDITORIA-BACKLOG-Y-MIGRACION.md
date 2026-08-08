@@ -51,12 +51,14 @@ Paleta Tailwind "Luminous Void" completa y sus `glow-*`. Utilidades `.text-gradi
 
 **El orden es por riesgo, no por dificultad.** Primero lo que, si está mal, obliga a rehacer.
 
-### Sprint 1 · Fundación de tokens
+### Sprint 1 · Fundación de tokens ✅
 Crear `@buscadis/tokens` con las tres capas, el pipeline de Style Dictionary, la generación de rampas en OKLCH y el verificador de contraste. Generar el preset de Tailwind. **Sin tocar ningún componente todavía.**
-*Terminado cuando:* `npm run tokens:build` produce las cuatro salidas y el verificador de contraste corre en CI.
+*Terminado cuando:* `npm run tokens:build` produce las cuatro salidas y el verificador de contraste corre en CI.  
+**Hecho:** 2026-08-08 · commit `ea4f2c0` · contrast gate 24/24 OK.
 
-### Sprint 2 · Correcciones P0 de marca y accesibilidad
-Congelar la marca; aplicar la separación identidad/acción; corregir el CTA Publicar; unificar `.light-mode`; unificar categorías; optimizar el logo; corregir objetivos táctiles del header.
+### Sprint 2 · Correcciones P0 de marca y accesibilidad 🔜
+Congelar la marca; aplicar la separación identidad/acción; corregir el CTA Publicar; unificar `.light-mode`; unificar categorías; optimizar el logo; corregir objetivos táctiles del header.  
+**Plan:** `docs/superpowers/plans/2026-08-08-sprint-2-brand-a11y.md` · **Roadmap:** `docs/superpowers/plans/2026-08-08-design-system-roadmap.md`
 *Terminado cuando:* cero pares en uso por debajo del mínimo de contraste y el logo pesa menos de 15 KB.
 
 ### Sprint 3 · Primitivas, tanda 1

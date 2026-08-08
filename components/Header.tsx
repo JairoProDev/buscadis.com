@@ -162,7 +162,7 @@ export default function Header({
       aria-label="Cambiar ubicación y contexto de búsqueda"
     >
       <img
-        src="/logo.png"
+        src="/logo-mark.png"
         alt=""
         aria-hidden
         style={{
@@ -172,7 +172,7 @@ export default function Header({
           flexShrink: 0,
         }}
         onError={(e) => {
-          e.currentTarget.style.display = 'none';
+          e.currentTarget.src = '/logo.png';
         }}
       />
       <div style={{ minWidth: 0, flex: 1 }}>

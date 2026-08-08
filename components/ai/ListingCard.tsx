@@ -50,17 +50,16 @@ export function ListingCard({
 
   const getCategoriaColor = (categoria: string): string => {
     const colors: Record<string, string> = {
-      empleos: '#3b82f6',
-      inmuebles: '#8b5cf6',
-      vehiculos: '#ef4444',
-      servicios: '#10b981',
-      productos: '#f59e0b',
-      eventos: '#ec4899',
-      negocios: '#6366f1',
-      comunidad: '#14b8a6',
-
+      empleos: '#0F766E',
+      inmuebles: '#047857',
+      vehiculos: '#C2410C',
+      servicios: '#A16207',
+      productos: '#BE123C',
+      eventos: '#7E22CE',
+      negocios: '#4F46E5',
+      comunidad: '#A21CAF',
     };
-    return colors[categoria] || '#6b7280';
+    return colors[categoria] || '#55666F';
   };
 
   const handleView = () => {

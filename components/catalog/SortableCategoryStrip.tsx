@@ -69,7 +69,7 @@ export default function SortableCategoryStrip({
             className={cn(
               'w-[4.25rem] h-[4.25rem] p-[2px] rounded-[28%] transition-all',
               !selectedCategory
-                ? 'bg-gradient-to-tr from-[var(--brand-color)] to-[var(--brand-accent,#ec4899)]'
+                ? 'bg-gradient-to-tr from-[var(--brand-color)] to-[var(--brand-accent,var(--bs-identity-warm))]'
                 : 'bg-slate-200'
             )}
           >
@@ -171,7 +171,7 @@ function CategoryChip({
         className={cn(
           'w-[4.25rem] h-[4.25rem] p-[2px] rounded-[28%] transition-all',
           selected
-            ? 'bg-gradient-to-tr from-[var(--brand-color)] to-[var(--brand-accent,#ec4899)]'
+            ? 'bg-gradient-to-tr from-[var(--brand-color)] to-[var(--brand-accent,var(--bs-identity-warm))]'
             : 'bg-slate-200'
         )}
       >

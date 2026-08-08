@@ -35,7 +35,7 @@ export default function ProfileStoryHighlights({
 
           const inner = (
             <>
-              <div className="w-16 h-16 sm:w-[4.5rem] sm:h-[4.5rem] rounded-full p-[2px] bg-gradient-to-tr from-[var(--brand-color)] to-[var(--brand-accent,#ec4899)]">
+              <div className="w-16 h-16 sm:w-[4.5rem] sm:h-[4.5rem] rounded-full p-[2px] bg-gradient-to-tr from-[var(--brand-color)] to-[var(--brand-accent,var(--bs-identity-warm))]">
                 <div className="w-full h-full rounded-full border-2 border-[var(--bg-secondary)] overflow-hidden bg-[var(--bg-secondary)]">
                   {!useInitial && h.coverUrl ? (
                     <img src={h.coverUrl} alt="" className="w-full h-full object-cover" />

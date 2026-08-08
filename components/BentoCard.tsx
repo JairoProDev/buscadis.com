@@ -144,7 +144,7 @@ export default function BentoCard({ adiso, isSelected, onClick, icon, className,
         <motion.div
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
-          className="absolute top-2 right-2 w-2 h-2 rounded-full bg-electric-500 shadow-glow-electric"
+          className="absolute top-2 right-2 w-2 h-2 rounded-full bg-adis-600"
         />
       )}
     </motion.button>
