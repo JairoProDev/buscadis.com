@@ -132,19 +132,7 @@ export function ResenasShell({ titulo }: { titulo: string }) {
         }}
       >
         {resenas.slice(0, 12).map((r) => (
-          <article
-            key={r.id}
-            style={{
-              flex: '0 0 282px',
-              width: 282,
-              scrollSnapAlign: 'start',
-              background: 'var(--sf-elev)',
-              border: '1px solid var(--bd-hair)',
-              borderRadius: 'var(--rd-md)',
-              padding: 14,
-              boxShadow: 'var(--el-1)',
-            }}
-          >
+          <article key={r.id} className="pv-resena-card">
             <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
               <div
                 aria-hidden

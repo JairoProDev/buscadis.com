@@ -12,7 +12,7 @@ El perfil tiene dos capas visuales que nunca se mezclan:
 
 **La marca del negocio** (color de acento, portada, logo) pertenece al cliente. Ocupa poco espacio pero en los lugares de máxima atención: la acción primaria, los acentos, los badges, la portada.
 
-La proporción es aproximadamente 85% chrome / 15% marca. Invertirla es lo que arruina la mayoría de los constructores de perfiles: cuando todo se tiñe del color del negocio, el resultado se ve amateur y además ilegible.
+La proporción es aproximadamente **70% chrome / 30% marca** (Visual 2.0; antes 85/15). La marca gana superficie en hero inmersivo, CTAs táctiles y anillos de highlight — no en fondos de sección ni en texto de cuerpo. Pintar todo del color del negocio sigue siendo amateur e ilegible.
 
 **El acento de plataforma** — el color con que se marca lo que es de Buscadis (verificación, sello, ADIS AI, elementos del feed) — es un magenta fluorescente. La razón no es estética sino cultural: el rosa fluorescente sobre negro es la vernácula gráfica de la publicidad popular peruana, el afiche chicha que se pega en los postes y en los muros. Buscadis digitaliza exactamente eso. Es un color que en Perú significa "aquí se anuncia algo", y ninguna plataforma internacional lo va a usar. Se emplea con extrema restricción: nunca en superficies grandes, solo en sellos, indicadores y en el punto vivo del estado.
 

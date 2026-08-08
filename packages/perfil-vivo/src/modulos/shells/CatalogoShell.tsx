@@ -36,103 +36,53 @@ function ProductCard({
     <button
       type="button"
       onClick={onOpen}
+      className="pv-card-producto"
       style={{
-        flex: '0 0 156px',
-        width: 156,
-        textAlign: 'left',
-        border: 'none',
-        background: 'transparent',
-        padding: 0,
-        cursor: 'pointer',
         opacity: agotado ? 0.6 : 1,
         filter: agotado ? 'grayscale(1)' : undefined,
       }}
     >
-      <div style={{ position: 'relative', width: 156, height: 156 }}>
+      <div className="pv-card-producto__img-wrap">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={img?.url}
           alt={img?.alt ?? producto.nombre}
           width={156}
           height={156}
-          style={{
-            width: 156,
-            height: 156,
-            objectFit: 'contain',
-            borderRadius: 'var(--rd-md)',
-            background: 'var(--sf-sunk)',
-            border: '1px solid var(--bd-hair)',
-          }}
+          className="pv-card-producto__img"
         />
         {etiqueta ? (
-          <span
-            style={{
-              position: 'absolute',
-              top: 8,
-              left: 8,
-              background: 'var(--sf-elev)',
-              color: 'var(--tx-strong)',
-              font: 'var(--ts-etiqueta)',
-              textTransform: 'uppercase',
-              letterSpacing: '0.04em',
-              padding: '2px 6px',
-              borderRadius: 4,
-            }}
-          >
-            {ETIQUETA[etiqueta] ?? etiqueta}
-          </span>
+          <span className="pv-badge">{ETIQUETA[etiqueta] ?? etiqueta}</span>
         ) : null}
         {agotado ? (
           <span
-            style={{
-              position: 'absolute',
-              bottom: 8,
-              left: 8,
-              background: 'var(--err)',
-              color: '#fff',
-              font: 'var(--ts-etiqueta)',
-              padding: '2px 6px',
-              borderRadius: 4,
-            }}
+            className="pv-badge"
+            style={{ top: 'auto', bottom: 8, background: 'var(--err)', color: '#fff' }}
           >
             Agotado
           </span>
         ) : null}
       </div>
-      <p
-        style={{
-          margin: '8px 0 4px',
-          font: 'var(--ts-card)',
-          color: 'var(--tx-strong)',
-          display: '-webkit-box',
-          WebkitLineClamp: 3,
-          WebkitBoxOrient: 'vertical',
-          overflow: 'hidden',
-          minHeight: 48,
-          lineHeight: '16px',
-          fontSize: 13,
-          fontWeight: 600,
-        }}
-      >
-        {producto.nombre}
-      </p>
-      {precio ? (
-        <p style={{ margin: 0, font: 'var(--ts-precio)', color: 'var(--tx-strong)' }}>
-          {precio}
-          {producto.precioAnterior ? (
-            <span
-              style={{
-                marginLeft: 6,
-                font: 'var(--ts-meta)',
-                color: 'var(--tx-faint)',
-                textDecoration: 'line-through',
-              }}
-            >
-              {formatPrecio(producto.precioAnterior)}
-            </span>
-          ) : null}
-        </p>
-      ) : null}
+      <div className="pv-card-producto__body">
+        <p className="pv-card-producto__nombre">{producto.nombre}</p>
+        {precio ? (
+          <p className="pv-card-producto__precio">
+            {precio}
+            {producto.precioAnterior != null && producto.precio ? (
+              <span
+                style={{
+                  marginLeft: 6,
+                  font: 'var(--ts-meta)',
+                  color: 'var(--tx-faint)',
+                  textDecoration: 'line-through',
+                }}
+              >
+                {formatPrecio(producto.precioAnterior, producto.precio.moneda)}
+              </span>
+            ) : null}
+          </p>
+        ) : null}
+      </div>
     </button>
   );
 }

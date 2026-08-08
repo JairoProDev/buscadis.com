@@ -22,16 +22,18 @@ export function PagoShell() {
 
   return (
     <section className="pv-modulo" id="pago">
-      <h2 style={{ margin: '0 0 12px', font: 'var(--ts-modulo)', color: 'var(--tx-strong)' }}>
-        Métodos de pago
-      </h2>
-      <ul className="pv-pago">
-        {metodos.map((m) => (
-          <li key={m} className="pv-pago__chip">
-            {LABELS[m]}
-          </li>
-        ))}
-      </ul>
+      <div className="pv-panel">
+        <h2 style={{ margin: '0 0 12px', font: 'var(--ts-modulo)', color: 'var(--tx-strong)' }}>
+          Métodos de pago
+        </h2>
+        <ul className="pv-pago">
+          {metodos.map((m) => (
+            <li key={m} className="pv-pago__chip">
+              {LABELS[m]}
+            </li>
+          ))}
+        </ul>
+      </div>
     </section>
   );
 }

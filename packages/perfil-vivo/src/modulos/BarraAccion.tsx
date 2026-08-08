@@ -2,23 +2,72 @@
 
 import { usePerfil } from './PerfilContext';
 
+function IconShare() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden>
+      <path
+        d="M14 5l7 7-7 7M21 12H9M9 5H5a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h4"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+function IconHeart() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden>
+      <path
+        d="M12 21s-7-4.5-9.5-9A5.5 5.5 0 0 1 12 5.5 5.5 5.5 0 0 1 21.5 12C19 16.5 12 21 12 21z"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
 export function BarraAccion({ label }: { label: string }) {
-  const { handoffs } = usePerfil();
+  const { handoffs, payload } = usePerfil();
   const href = handoffs.whatsappPrimary;
+  const sharePath = `/@${payload.negocio.slug}`;
+
+  async function onShare() {
+    const title = payload.negocio.nombre;
+    const text = `Mira el perfil de ${title} en Buscadis`;
+    const url =
+      typeof window !== 'undefined' ? window.location.href : `https://buscadis.com${sharePath}`;
+    try {
+      if (typeof navigator !== 'undefined' && navigator.share) {
+        await navigator.share({ title, text, url });
+        return;
+      }
+    } catch {
+      /* cancelled */
+    }
+    try {
+      await navigator.clipboard.writeText(url);
+    } catch {
+      /* ignore */
+    }
+  }
 
   return (
     <div className="pv-barra-accion">
+      <button
+        type="button"
+        className="pv-barra-accion__icon"
+        aria-label="Guardar en favoritos"
+        onClick={() => {
+          /* favoritos: UI feedback only until account hook exists */
+        }}
+      >
+        <IconHeart />
+      </button>
       {href ? (
-        <a
-          href={href}
-          className="pv-barra-accion__primary"
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            textDecoration: 'none',
-          }}
-        >
+        <a href={href} className="pv-barra-accion__primary">
           {label}
         </a>
       ) : (
@@ -26,6 +75,14 @@ export function BarraAccion({ label }: { label: string }) {
           {label}
         </button>
       )}
+      <button
+        type="button"
+        className="pv-barra-accion__icon"
+        aria-label="Compartir perfil"
+        onClick={onShare}
+      >
+        <IconShare />
+      </button>
     </div>
   );
 }

@@ -37,7 +37,6 @@ export function UbicacionHorarioShell() {
     }
     if (!estadoVivo.abierto) {
       const rest = estadoVivo.mensaje.replace(/^Cerrado(\s*·\s*)?/i, '').trim();
-      // Evitar "Cerrado · Cerrado"
       if (!rest || /^cerrado$/i.test(rest)) {
         return estadoVivo.abreEn ? `abre ${estadoVivo.abreEn}` : null;
       }
@@ -49,27 +48,17 @@ export function UbicacionHorarioShell() {
   return (
     <section className="pv-modulo" id="ubicacion">
       {u ? (
-        <>
+        <div className="pv-panel">
           <h2 style={{ margin: '0 0 12px', font: 'var(--ts-modulo)', color: 'var(--tx-strong)' }}>
             Ubicación
           </h2>
           {!mapFailed && osmEmbed ? (
-            <div
-              style={{
-                width: '100%',
-                height: 160,
-                borderRadius: 'var(--rd-md)',
-                overflow: 'hidden',
-                border: '1px solid var(--bd-hair)',
-                marginBottom: 12,
-                background: 'var(--sf-sunk)',
-              }}
-            >
+            <div className="pv-map">
               <iframe
                 title={`Mapa de ${u.direccion}`}
                 src={osmEmbed}
                 width="100%"
-                height="160"
+                height="168"
                 style={{ border: 0, display: 'block' }}
                 loading="lazy"
                 referrerPolicy="no-referrer-when-downgrade"
@@ -78,19 +67,13 @@ export function UbicacionHorarioShell() {
             </div>
           ) : (
             <div
+              className="pv-map"
               style={{
-                width: '100%',
-                height: 120,
-                borderRadius: 'var(--rd-md)',
-                marginBottom: 12,
-                background: 'var(--sf-sunk)',
-                border: '1px solid var(--bd-hair)',
                 display: 'grid',
                 placeItems: 'center',
                 font: 'var(--ts-meta)',
                 color: 'var(--tx-muted)',
-                padding: 16,
-                textAlign: 'center',
+                height: 120,
               }}
             >
               {u.distrito}, {u.provincia}
@@ -108,23 +91,9 @@ export function UbicacionHorarioShell() {
               ? ` · ${u.referencia}`
               : ''}
           </p>
-          <div style={{ display: 'flex', gap: 8, marginBottom: h ? 20 : 0 }}>
+          <div className="pv-btn-row">
             {handoffs.ruta ? (
-              <a
-                href={handoffs.ruta}
-                style={{
-                  flex: 1,
-                  minHeight: 44,
-                  display: 'grid',
-                  placeItems: 'center',
-                  borderRadius: 'var(--rd-md)',
-                  background: 'var(--mk-accion)',
-                  color: 'var(--mk-sobre)',
-                  textDecoration: 'none',
-                  font: 'var(--ts-card)',
-                  fontWeight: 700,
-                }}
-              >
+              <a href={handoffs.ruta} className="pv-btn-row__primary">
                 Cómo llegar
               </a>
             ) : null}
@@ -132,27 +101,16 @@ export function UbicacionHorarioShell() {
               href={`https://www.openstreetmap.org/?mlat=${u.lat}&mlon=${u.lng}#map=17/${u.lat}/${u.lng}`}
               target="_blank"
               rel="noreferrer"
-              style={{
-                flex: 1,
-                minHeight: 44,
-                display: 'grid',
-                placeItems: 'center',
-                borderRadius: 'var(--rd-md)',
-                border: '1px solid var(--bd-soft)',
-                color: 'var(--tx-base)',
-                textDecoration: 'none',
-                font: 'var(--ts-card)',
-                fontWeight: 600,
-              }}
+              className="pv-btn-row__ghost"
             >
               Ver en mapa
             </a>
           </div>
-        </>
+        </div>
       ) : null}
 
       {h ? (
-        <div id="horario">
+        <div className="pv-panel" id="horario" style={{ marginTop: u ? 12 : 0 }}>
           <h2 style={{ margin: '0 0 8px', font: 'var(--ts-modulo)', color: 'var(--tx-strong)' }}>
             Horario
           </h2>

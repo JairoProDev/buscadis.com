@@ -1,8 +1,9 @@
 'use client';
 
-import { lazy, Suspense, type CSSProperties } from 'react';
+import { lazy, Suspense, useRef, type CSSProperties } from 'react';
 import type { PerfilPayload } from '../types';
 import { derivarTema, temaToStyle } from '../tema/derivar-tema';
+import { usePerfilFonts } from '../tema/load-fonts';
 import { PerfilProvider, type HandoffLinks } from './PerfilContext';
 import { RenderizadorModulos } from './RenderizadorModulos';
 import { BarraAccion } from './BarraAccion';
@@ -29,6 +30,8 @@ export function PerfilVivoRoot({
   const modo = modoFromIdentidad(negocio.identidad.tema);
   const vars = derivarTema(negocio.identidad.colorSemilla, modo);
   const style = temaToStyle(vars) as CSSProperties;
+  const rootRef = useRef<HTMLDivElement>(null);
+  usePerfilFonts(rootRef);
 
   const primaryLabel =
     negocio.arquetipo === 'cita' || negocio.arquetipo === 'profesional'
@@ -45,9 +48,11 @@ export function PerfilVivoRoot({
 
   return (
     <div
+      ref={rootRef}
       className="pv-root"
       data-theme={modo === 'dark' ? 'dark' : 'light'}
       data-arquetipo={negocio.arquetipo}
+      data-visual="2"
       style={style}
     >
       <PerfilProvider value={{ payload, handoffs }}>

@@ -23,7 +23,7 @@ function formatCountdown(ms: number): string {
   return `${Math.max(1, m)} min`;
 }
 
-/** §9 — Una sola promoción vigente; contador solo si faltan &lt;72 h. */
+/** §9 — Una sola promoción vigente; banner Visual 2.0. */
 export function PromocionShell({ titulo }: { titulo: string }) {
   const { payload, handoffs } = usePerfil();
   const promo = payload.promocion;
@@ -40,41 +40,15 @@ export function PromocionShell({ titulo }: { titulo: string }) {
 
   return (
     <section className="pv-modulo" id="promocion">
-      <div
-        style={{
-          borderRadius: 'var(--rd-lg)',
-          border: '1px solid var(--mk-borde)',
-          background: 'var(--mk-suave)',
-          padding: '16px 16px 14px',
-        }}
-      >
-        <p
-          style={{
-            margin: 0,
-            font: 'var(--ts-meta)',
-            fontWeight: 700,
-            color: 'var(--mk-texto)',
-            textTransform: 'uppercase',
-            letterSpacing: '0.04em',
-          }}
-        >
-          {titulo || 'Promoción'}
-        </p>
-        <h2
-          style={{
-            margin: '6px 0 0',
-            font: 'var(--ts-modulo)',
-            color: 'var(--tx-strong)',
-          }}
-        >
-          {promo.titulo}
-        </h2>
-        {promo.condicion && (
+      <div className="pv-promo">
+        <p className="pv-promo__eyebrow">{titulo || 'Promoción'}</p>
+        <h2 className="pv-promo__title">{promo.titulo}</h2>
+        {promo.condicion ? (
           <p style={{ margin: '8px 0 0', font: 'var(--ts-cuerpo)', color: 'var(--tx-muted)' }}>
             {promo.condicion}
           </p>
-        )}
-        {promo.codigo && (
+        ) : null}
+        {promo.codigo ? (
           <p
             style={{
               margin: '10px 0 0',
@@ -85,8 +59,8 @@ export function PromocionShell({ titulo }: { titulo: string }) {
           >
             Código: <strong>{promo.codigo}</strong>
           </p>
-        )}
-        {showCountdown && restante != null && (
+        ) : null}
+        {showCountdown && restante != null ? (
           <p
             style={{
               margin: '8px 0 0',
@@ -97,27 +71,12 @@ export function PromocionShell({ titulo }: { titulo: string }) {
           >
             Termina en {formatCountdown(restante)}
           </p>
-        )}
-        {href && (
-          <a
-            href={href}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              marginTop: 14,
-              minHeight: 48,
-              borderRadius: 'var(--rd-md)',
-              background: 'var(--mk-accion)',
-              color: 'var(--mk-sobre)',
-              font: 'var(--ts-cuerpo)',
-              fontWeight: 700,
-              textDecoration: 'none',
-            }}
-          >
+        ) : null}
+        {href ? (
+          <a href={href} className="pv-promo__cta">
             {promo.ctaLabel || 'Pedir esta promo'}
           </a>
-        )}
+        ) : null}
       </div>
     </section>
   );

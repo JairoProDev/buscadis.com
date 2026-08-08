@@ -12,9 +12,9 @@
 
 **Qué resuelve.** Identidad, categoría, lugar y legitimidad, en un bloque que debe ocupar lo mínimo posible. El error central de los mockups actuales es tratar el hero como una portada de revista: portada grande, logo enorme, eslogan, categoría, ciudad y una fila de estadísticas, todo antes de que exista una sola acción posible. Eso consume la mitad de la pantalla de un teléfono para decir algo que se resuelve en cuatro líneas.
 
-**Dónde va y por qué ahí.** Primero, obviamente, pero comprimido. La regla de oro es que en un viewport de 375×667 debe verse el hero **completo más la primera acción**. Si la barra de acción fija está siempre presente, esa condición se cumple por construcción, pero el hero igual no puede exceder ~200px, porque el módulo siguiente (estado o catálogo) necesita asomar: el contenido cortado en el borde inferior es lo que le dice al usuario que hay más y provoca el scroll.
+**Dónde va y por qué ahí.** Primero. Visual 2.0: portada más inmersiva (~200px) + identidad con tipografía display; la barra sticky garantiza acción primaria siempre visible. El módulo siguiente debe asomar para invitar al scroll.
 
-**Qué debe contener.** Una portada de 16:9 recortada a ~150px de alto con degradado de legibilidad. El logo en 64px, cuadrado con radio grande — no circular: el círculo recorta logos rectangulares, que son la mayoría de los logos reales de negocios peruanos, y obliga al dueño a recortar mal su propia marca. El nombre en display 26px. Una sola línea de metadatos: `Categoría · Distrito`. El sello de verificación al lado del nombre, no flotando sobre la portada. Y nada más: el eslogan baja al módulo "Quiénes somos", porque el eslogan es del negocio, no del cliente.
+**Qué debe contener.** Portada 16:9 recortada a ~200px con degradado de legibilidad. Logo **72px**, cuadrado con radio grande — no circular (recorta logos rectangulares). Nombre en display 26–28px. Meta: `Categoría · Distrito`. Sello de verificación al lado del nombre. Eslogan baja a "Quiénes somos".
 
 **Qué nunca debe hacer.** No debe llevar carrusel de portadas ni video con autoplay: multiplica el peso, mueve el LCP por encima del presupuesto y no aporta información. No debe apilar badges ("Premium", "Top Seller", "24/7", "Pet Friendly"): cuando hay cinco insignias, ninguna significa nada. Máximo dos, y solo si son verificables. No debe contener el botón de compartir sobre la portada, donde compite con la identidad: va en la barra de acción.
 
@@ -22,8 +22,8 @@
 
 **Especificación técnica.**
 ```
-Alto total: 196–208px (portada 150 + solapa 46)
-Logo: 64×64, radius --rd-lg, borde 2px --sf-elev, solapado -32px sobre la portada
+Alto total: ~248–268px (portada 200 + solapa ~56) — Visual 2.0
+Logo: 72×72, radius --rd-lg, borde 2px --sf-elev, solapado -36px sobre la portada
 Nombre: --ts-nombre, máx 2 líneas, elipsis
 Meta: --ts-meta, --tx-muted, formato "Categoría · Distrito"
 Verificación: 18px, --bs-chicha (nivel 2-3) o --tx-muted (nivel 1), abre hoja
@@ -98,7 +98,7 @@ Animación: pulso 2s en el punto, solo si estado = abierto; respeta reduced-moti
 
 **Qué debe contener.** La barra fija: un botón a ancho casi completo con el color de marca, más dos íconos pequeños a la izquierda (favorito y compartir). La fila de acciones rápidas: llamar, cómo llegar, catálogo, cotizar, agendar — según arquetipo, máximo cinco, con ícono de 24px y etiqueta de 12px debajo, en scroll horizontal si excede el ancho.
 
-**Qué nunca debe hacer.** Nunca dos botones de color saturado juntos. Nunca un enlace de WhatsApp sin mensaje pre-armado. Nunca redirigir sin registrar el evento. Nunca ocultar la barra al hacer scroll hacia abajo: es un patrón que ahorra 64px y cuesta conversiones.
+**Qué nunca debe hacer.** Visual 2.0 permite **hasta tres** CTAs táctiles en la fila (WA verde semántico, llamar con `--mk-accion`, llegar outline) — no cuatro saturados iguales. Nunca un enlace de WhatsApp sin mensaje pre-armado. Nunca redirigir sin registrar el evento. Nunca ocultar la barra al hacer scroll hacia abajo.
 
 **Cómo se hace excelente.** Con el contexto en el handoff. Un mensaje pre-armado convierte una conversación fría en una venta empezada: *"Hola, vi en Buscadis su Pomada Mate (S/45). ¿Tienen stock?"*. Y cada redirección pasa por `/r/{token}`, lo que permite decirle al negocio "12 personas te escribieron esta semana desde tu perfil, 7 desde la ficha de ese producto". Ese informe es lo que renueva la suscripción. Además: fuera del horario, el texto cambia a "Escribir (responden mañana 9:00 a. m.)", que sube la tasa de contacto porque elimina la sensación de estar hablándole a una pared.
 
@@ -107,7 +107,9 @@ Animación: pulso 2s en el punto, solo si estado = abierto; respeta reduced-moti
 Barra fija: alto 64 + env(safe-area-inset-bottom), fondo --sf-elev, borde superior --bd-hair
 Botón primario: alto 48, --rd-lg, fondo --mk-accion, texto --mk-sobre, --ts-cuerpo 600
 Iconos izquierda: 44×44 cada uno, sin color de marca
-Acciones rápidas: ícono 24 en contenedor 44, etiqueta --ts-etiqueta, gap --sp-4
+Acciones rápidas Visual 2.0:
+  Fila A (3 CTAs): min-height 48, --rd-lg, WA #128C7E, llamar --mk-accion, llegar outline
+  Fila B (secundarias): ícono 22 en círculo 48 --mk-suave, etiqueta 12px
 Handoff: siempre /r/{token} → 302 → destino
   WhatsApp: https://wa.me/{tel}?text={mensaje contextual urlencoded}
   Teléfono: tel:{e164}   ·   Ruta: geo: en móvil, Google Maps en escritorio

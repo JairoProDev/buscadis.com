@@ -2,6 +2,26 @@
 
 import { usePerfil } from '../PerfilContext';
 
+function canalClass(label: string): string {
+  const l = label.toLowerCase();
+  if (l.includes('instagram') || l === 'ig') return 'pv-canales__item pv-canales__item--ig';
+  if (l.includes('facebook') || l === 'fb') return 'pv-canales__item pv-canales__item--fb';
+  if (l.includes('tiktok') || l === 'tt') return 'pv-canales__item pv-canales__item--tt';
+  if (l.includes('youtube') || l === 'yt') return 'pv-canales__item pv-canales__item--yt';
+  if (l === 'web') return 'pv-canales__item pv-canales__item--web';
+  return 'pv-canales__item';
+}
+
+function canalShort(label: string): string {
+  const l = label.toLowerCase();
+  if (l.includes('instagram')) return 'IG';
+  if (l.includes('facebook')) return 'Fb';
+  if (l.includes('tiktok')) return 'TT';
+  if (l.includes('youtube')) return 'YT';
+  if (l === 'web') return 'Web';
+  return label.slice(0, 2).toUpperCase();
+}
+
 export function CanalesShell() {
   const { payload } = usePerfil();
   const { contacto } = payload.negocio;
@@ -20,32 +40,25 @@ export function CanalesShell() {
 
   return (
     <section className="pv-modulo" id="canales">
-      <h2 style={{ margin: '0 0 12px', font: 'var(--ts-modulo)', color: 'var(--tx-strong)' }}>
-        Canales y redes
-      </h2>
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12 }}>
-        {links.map((l) => (
-          <a
-            key={l.href + l.label}
-            href={l.href}
-            target="_blank"
-            rel="noreferrer"
-            style={{
-              minWidth: 44,
-              minHeight: 44,
-              padding: '0 12px',
-              display: 'grid',
-              placeItems: 'center',
-              borderRadius: 'var(--rd-full)',
-              border: '1px solid var(--bd-soft)',
-              textDecoration: 'none',
-              color: 'var(--mk-texto)',
-              font: 'var(--ts-meta)',
-            }}
-          >
-            {l.label}
-          </a>
-        ))}
+      <div className="pv-panel">
+        <h2 style={{ margin: '0 0 12px', font: 'var(--ts-modulo)', color: 'var(--tx-strong)' }}>
+          Canales y redes
+        </h2>
+        <div className="pv-canales">
+          {links.map((l) => (
+            <a
+              key={l.href + l.label}
+              href={l.href}
+              target="_blank"
+              rel="noreferrer"
+              className={canalClass(l.label)}
+              title={l.label}
+              aria-label={l.label}
+            >
+              {canalShort(l.label)}
+            </a>
+          ))}
+        </div>
       </div>
     </section>
   );

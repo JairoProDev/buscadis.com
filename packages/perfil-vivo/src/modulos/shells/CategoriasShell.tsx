@@ -51,13 +51,14 @@ export function CategoriasShell({ titulo }: { titulo: string }) {
               minHeight: 44,
               padding: '10px 16px',
               borderRadius: 999,
-              border: '1px solid var(--sf-line)',
+              border: '1px solid var(--bd-hair)',
               background: 'var(--sf-elev)',
               color: 'var(--tx-strong)',
               font: 'var(--ts-meta)',
               fontWeight: 600,
               textDecoration: 'none',
               whiteSpace: 'nowrap',
+              boxShadow: 'var(--el-1)',
             }}
           >
             {g}

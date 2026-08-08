@@ -41,7 +41,7 @@ export function HeroShell({ negocio }: { negocio: Negocio }) {
               src={portada}
               alt=""
               width={480}
-              height={150}
+              height={200}
               fetchPriority="high"
               decoding="async"
               className="pv-hero__cover-img"
@@ -68,8 +68,8 @@ export function HeroShell({ negocio }: { negocio: Negocio }) {
               <img
                 src={negocio.identidad.logoUrl}
                 alt=""
-                width={64}
-                height={64}
+                width={72}
+                height={72}
                 fetchPriority="high"
                 decoding="async"
               />
@@ -111,10 +111,7 @@ export function HeroShell({ negocio }: { negocio: Negocio }) {
             if (e.key === 'Escape') setOpen(false);
           }}
         >
-          <div
-            className="pv-hero__dialog"
-            onClick={(e) => e.stopPropagation()}
-          >
+          <div className="pv-hero__dialog" onClick={(e) => e.stopPropagation()}>
             <h2 id="pv-verif-title">Qué significa esta verificación</h2>
             <p className="pv-hero__dialog-lead">
               En Buscadis el sello solo aparece si se cumplió un criterio público. No es un badge
@@ -125,10 +122,7 @@ export function HeroShell({ negocio }: { negocio: Negocio }) {
                 const c = CRITERIOS[n];
                 const activo = nivel >= n;
                 return (
-                  <li
-                    key={n}
-                    className={activo ? 'is-activo' : undefined}
-                  >
+                  <li key={n} className={activo ? 'is-activo' : undefined}>
                     <p className="pv-hero__criterio-titulo">
                       Nivel {n} · {c.titulo}
                       {nivel === n ? ' · actual' : ''}

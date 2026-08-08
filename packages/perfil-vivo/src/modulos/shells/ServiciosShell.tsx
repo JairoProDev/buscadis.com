@@ -40,10 +40,11 @@ export function ServiciosShell({ titulo }: { titulo: string }) {
                 textAlign: 'left',
                 minHeight: 72,
                 padding: '14px 16px',
-                borderRadius: 'var(--rd-md)',
-                border: '1px solid var(--sf-line)',
+                borderRadius: 'var(--rd-lg)',
+                border: '1px solid var(--bd-hair)',
                 background: 'var(--sf-elev)',
                 cursor: 'pointer',
+                boxShadow: 'var(--el-1)',
               }}
             >
               <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12 }}>

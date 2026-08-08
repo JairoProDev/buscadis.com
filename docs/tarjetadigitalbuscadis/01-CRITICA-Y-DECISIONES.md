@@ -102,6 +102,18 @@ Y siempre **peek**: el siguiente card debe quedar cortado a la vista (mostrar en
 
 ---
 
+## Addendum Visual 2.0 (2026-08-08)
+
+Feedback de clientes: el perfil 1.0 se veía “feito” frente a mockups IA. **No** reabrimos D2/D6/D9/D10/D14. Sí matizamos A3–A4:
+
+- Hero puede ser **más inmersivo** (~200px de portada + identidad con tipografía display fuerte) siempre que la barra sticky siga mostrando la acción primaria sin scroll.
+- La fila de acciones puede tener **hasta 3 CTAs táctiles de color** (WA semántico + marca + outline); la barra inferior sigue siendo *la* primaria y no compite con tres botones iguales.
+- Highlights circulares (68px) sí, cuando hay datos; no stats de vanidad.
+
+Detalle: `docs/superpowers/specs/2026-08-08-perfil-vivo-visual-2-design.md`.
+
+---
+
 ## Parte B — Las 14 decisiones irreversibles
 
 Estas son las que no se re-discuten en cada sprint. Si algo las contradice, se rechaza el cambio.
