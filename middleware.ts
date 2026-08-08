@@ -1,16 +1,33 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { normalizeBusinessSlug } from '@/lib/business/normalize-slug';
+import {
+  isPerfilVivoEnvCohortSlug,
+  isPerfilVivoHardCutover,
+  listPerfilVivoEnvCohort,
+} from '@/lib/business/perfil-vivo-flag';
 
 /**
  * Rutas canónicas de perfil Buscadis:
  * - Canónica: /@{slug}
  * - Alias legacy: /p/{slug} → redirect 308 a /@{slug}
- * - Alias corto: /{slug} → redirect vía catch-all si el negocio está publicado
- * - Perfil Vivo preview: /v/{slug} y /v/@{slug} (paralelo hasta cutover)
- *
- * Publicadis vive en publicadis.com — solo enlace desde botón Web del perfil.
+ * - Perfil Vivo preview: /v/{slug} y /v/@{slug}
+ * - Edge flag: cohort env / hard cutover → header x-perfil-vivo para /negocio
  */
 const LEGACY_QR_HOSTS = new Set(['market.adis.lat', 'www.adis.lat', 'adis.lat']);
+
+function withPerfilVivoHeader(res: NextResponse, slug: string): NextResponse {
+  const edgeOn =
+    isPerfilVivoHardCutover() || isPerfilVivoEnvCohortSlug(slug);
+  if (edgeOn) {
+    res.headers.set('x-perfil-vivo', '1');
+    res.headers.set('x-perfil-vivo-source', isPerfilVivoHardCutover() ? 'hard' : 'env');
+  }
+  // Evita cachear HTML distinto por cohort entre edge nodes
+  if (listPerfilVivoEnvCohort().length > 0 || isPerfilVivoHardCutover()) {
+    res.headers.set('Vary', 'x-perfil-vivo');
+  }
+  return res;
+}
 
 export function middleware(req: NextRequest) {
   const host = req.headers.get('host')?.split(':')[0] ?? '';
@@ -21,7 +38,6 @@ export function middleware(req: NextRequest) {
     return NextResponse.redirect(`${canonical}${pathname}${search}`, 308);
   }
 
-  // Alias legacy /p/slug → canónico /@slug (sin redirigir a Publicadis)
   const pMatch = pathname.match(/^\/p\/([^/?#]+)\/?$/);
   if (pMatch) {
     const slug = normalizeBusinessSlug(pMatch[1]);
@@ -30,7 +46,6 @@ export function middleware(req: NextRequest) {
     }
   }
 
-  // /@slug → Perfil Vivo si ?vivo=1 (soft cutover P03); si no, storefront actual
   const atMatch = pathname.match(/^\/@([^/?#]+)\/?$/);
   if (atMatch) {
     const slug = normalizeBusinessSlug(atMatch[1]);
@@ -47,13 +62,13 @@ export function middleware(req: NextRequest) {
         });
         return NextResponse.rewrite(url);
       }
-      return NextResponse.rewrite(
+      const rewritten = NextResponse.rewrite(
         new URL(`/negocio/${encodeURIComponent(slug)}${search}`, req.url)
       );
+      return withPerfilVivoHeader(rewritten, slug);
     }
   }
 
-  // /@slug/producto/id → landing producto Perfil Vivo (SEO)
   const atProdMatch = pathname.match(/^\/@([^/?#]+)\/producto\/([^/?#]+)\/?$/);
   if (atProdMatch) {
     const slug = normalizeBusinessSlug(atProdMatch[1]);
@@ -68,7 +83,6 @@ export function middleware(req: NextRequest) {
     }
   }
 
-  // Perfil Vivo preview: /v/@slug → /v/slug (paralelo hasta cutover P03)
   const vAtMatch = pathname.match(/^\/v\/@([^/?#]+)\/?$/);
   if (vAtMatch) {
     const slug = normalizeBusinessSlug(vAtMatch[1]);

@@ -36,7 +36,7 @@ const rawNegocio = {
   eslogan: 'Todo para tu obra en Wanchaq',
   categoria: { id: 'ferreteria', nombre: 'Ferretería' },
   arquetipo: 'retail' as const,
-  plan: 'free' as const,
+  plan: 'max' as const,
   estado: 'activo' as const,
   identidad: {
     colorSemilla: '#1F4FD8',

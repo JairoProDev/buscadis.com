@@ -1,11 +1,14 @@
 'use client';
 
 import { useMemo, useState } from 'react';
+import { isDemoPerfilVivoSlug } from '../../demos-slugs';
 import { usePerfil } from '../PerfilContext';
 import {
   responderPreguntaIa,
   sugerenciasDesdePerfil,
 } from '../../ia/sugerencias';
+
+export const PV_IA_UNANSWERED_EVENT = 'pv:ia-unanswered';
 
 function waMeFromPhone(phone: string, text: string): string {
   const digits = phone.replace(/\D/g, '');
@@ -13,8 +16,8 @@ function waMeFromPhone(phone: string, text: string): string {
 }
 
 /**
- * §23 lite — Pregúntale al negocio (ADIS AI).
- * Respuestas solo con datos del perfil; si no sabe → WhatsApp con la pregunta.
+ * §23 — Pregúntale al negocio (ADIS AI).
+ * Respuestas solo con datos del perfil; si no sabe → WhatsApp + evento corpus.
  */
 export function IaShell({ titulo }: { titulo: string }) {
   const { payload, handoffs } = usePerfil();
@@ -29,8 +32,20 @@ export function IaShell({ titulo }: { titulo: string }) {
 
   const sug = sugerencias.find((s) => s.id === activa) ?? null;
   const phone = payload.negocio.contacto.whatsapp;
+  const businessId = payload.negocio.id;
+  const isDemo = isDemoPerfilVivoSlug(payload.negocio.slug);
 
-  const preguntarPorWa = (pregunta: string, sugId?: string) => {
+  const logUnanswered = (pregunta: string) => {
+    if (isDemo || !businessId || typeof window === 'undefined') return;
+    window.dispatchEvent(
+      new CustomEvent(PV_IA_UNANSWERED_EVENT, {
+        detail: { businessProfileId: businessId, pregunta: pregunta.trim().slice(0, 280) },
+      })
+    );
+  };
+
+  const preguntarPorWa = (pregunta: string, sugId?: string, unanswered = false) => {
+    if (unanswered) logUnanswered(pregunta);
     const href =
       (sugId && handoffs.iaSugerencias?.[sugId]) ||
       (phone
@@ -98,7 +113,7 @@ export function IaShell({ titulo }: { titulo: string }) {
           )}
           <button
             type="button"
-            onClick={() => preguntarPorWa(sug.pregunta, sug.id)}
+            onClick={() => preguntarPorWa(sug.pregunta, sug.id, !sug.respuesta)}
             style={{
               marginTop: 12,
               width: '100%',
@@ -126,7 +141,7 @@ export function IaShell({ titulo }: { titulo: string }) {
           const r = responderPreguntaIa(payload, q);
           setActiva(null);
           setRespuestaCustom(r);
-          if (r === null) preguntarPorWa(q);
+          if (r === null) preguntarPorWa(q, undefined, true);
         }}
       >
         <label style={{ font: 'var(--ts-meta)', color: 'var(--tx-muted)' }} htmlFor="pv-ia-q">

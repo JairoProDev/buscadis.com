@@ -14,6 +14,9 @@ import {
   withPerfilVivoEnabled,
 } from '@/lib/business/perfil-vivo-flag';
 import { useAuth } from '@/hooks/useAuth';
+import { OwnerIaPreguntasPanel } from '@/components/business/editor/OwnerIaPreguntasPanel';
+import { PerfilVivoPlanesPanel } from '@/components/business/editor/PerfilVivoPlanesPanel';
+import PublishGateModal from '@/components/business/builder/PublishGateModal';
 import {
   IconPhone, IconMapMarkerAlt, IconEnvelope, IconInstagram, IconFacebook, IconTiktok, IconGlobe,
 } from '@/components/Icons';
@@ -39,6 +42,7 @@ export default function TrustHubFields({ profile, setProfile, fields }: TrustHub
   const { session } = useAuth();
   const [inviteBusy, setInviteBusy] = useState(false);
   const [inviteMsg, setInviteMsg] = useState<string | null>(null);
+  const [publishOpen, setPublishOpen] = useState(false);
 
   const pedirResena = async () => {
     if (!profile.slug || !session?.access_token) {
@@ -283,9 +287,18 @@ export default function TrustHubFields({ profile, setProfile, fields }: TrustHub
               Activo por cohort (env PERFIL_VIVO_ENABLED_SLUGS). El toggle local no lo apaga.
             </p>
           ) : null}
+          {perfilVivoEnableSource(profile) === 'hard' ? (
+            <p className="text-[12px] font-semibold text-teal-800 bg-teal-50 rounded-lg px-2 py-1.5">
+              Hard cutover global (PERFIL_VIVO_HARD_CUTOVER). Todos los perfiles públicos usan
+              Perfil Vivo.
+            </p>
+          ) : null}
           <button
             type="button"
-            disabled={perfilVivoEnableSource(profile) === 'env'}
+            disabled={
+              perfilVivoEnableSource(profile) === 'env' ||
+              perfilVivoEnableSource(profile) === 'hard'
+            }
             onClick={() => {
               const next = !isPerfilVivoEnabled(profile);
               setProfile(withPerfilVivoEnabled(profile, next));
@@ -299,8 +312,7 @@ export default function TrustHubFields({ profile, setProfile, fields }: TrustHub
             {isPerfilVivoEnabled(profile)
               ? 'Perfil Vivo activo — tocar para desactivar'
               : 'Activar Perfil Vivo en mi enlace'}
-          </button>
-          {profile.slug && (
+          </button>          {profile.slug && (
             <a
               href={`/v/${encodeURIComponent(profile.slug)}`}
               target="_blank"
@@ -363,9 +375,42 @@ export default function TrustHubFields({ profile, setProfile, fields }: TrustHub
       ) : null}
 
       <div>
-        <FieldLabel number={9} label="Analítica" complete />
+        <FieldLabel number={9} label="Preguntas sin respuesta (IA)" complete={false} />
+        <OwnerIaPreguntasPanel businessProfileId={profile.id} />
+      </div>
+
+      <div>
+        <FieldLabel number={10} label="Planes Free / Pro / Max" complete />
+        <div className="rounded-xl border border-slate-200 bg-white p-3">
+          <PerfilVivoPlanesPanel
+            profile={profile}
+            onUpgradePro={() => {
+              if (profile.id) setPublishOpen(true);
+            }}
+          />
+        </div>
+      </div>
+
+      <div>
+        <FieldLabel number={11} label="Analítica" complete />
         <ProfileAnalyticsWidget businessProfileId={profile.id} />
       </div>
+
+      {profile.id ? (
+        <PublishGateModal
+          open={publishOpen}
+          businessId={profile.id}
+          profile={profile}
+          onClose={() => setPublishOpen(false)}
+          onActivated={() => {
+            setPublishOpen(false);
+            setProfile({
+              ...profile,
+              subscription_tier: 'pro',
+            } as Partial<BusinessProfile>);
+          }}
+        />
+      ) : null}
     </div>
   );
 }

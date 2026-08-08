@@ -35,7 +35,7 @@ const rawNegocio = {
   eslogan: 'Comida cusqueña para llevar o pedir',
   categoria: { id: 'comida', nombre: 'Restaurante' },
   arquetipo: 'comida' as const,
-  plan: 'free' as const,
+  plan: 'max' as const,
   estado: 'activo' as const,
   identidad: {
     colorSemilla: '#B85C38',

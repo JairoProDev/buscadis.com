@@ -86,4 +86,4 @@ The `tarjetadigitalbuscadis` package specifies a different product: a modular, i
 
 ## Next
 
-P01 Sprint 0 design + implementation (foundation package, `/v` route, empty module renderer, contrast + Lighthouse CI).
+**Done.** See [`2026-08-08-perfil-vivo-master-closeout.md`](./2026-08-08-perfil-vivo-master-closeout.md). Ops: activate `PERFIL_VIVO_HARD_CUTOVER=1` when cron reports ready.

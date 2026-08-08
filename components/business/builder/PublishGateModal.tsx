@@ -118,6 +118,9 @@ export default function PublishGateModal({
         </div>
 
         <div className="p-6 space-y-3">
+          <p className="text-xs font-semibold text-slate-500 text-center uppercase tracking-wide">
+            Plan Pro · Free sigue disponible para editar
+          </p>
           {PROFILE_PUBLISH_FEATURES.map((title) => (
             <div key={title} className="flex items-start gap-3">
               <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-teal-100 text-teal-700 text-xs font-bold">
@@ -133,7 +136,7 @@ export default function PublishGateModal({
               <span className="text-sm font-semibold text-slate-500">/mes</span>
             </p>
             <p className="text-xs text-slate-500 mt-1">
-              Crear y editar es gratis. Solo pagas al publicar.
+              o S/300/año. Max (S/300/mes) incluye ADIS AI — con el equipo Buscadis.
             </p>
           </div>
 

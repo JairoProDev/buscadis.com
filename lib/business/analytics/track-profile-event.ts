@@ -8,7 +8,8 @@ export type ProfileAnalyticsEvent =
   | 'signup_from_profile'
   | 'share_click'
   | 'add_to_cart'
-  | 'qr_scan';
+  | 'qr_scan'
+  | 'ia_unanswered';
 
 export function getAnalyticsSessionId(): string {
   if (typeof sessionStorage === 'undefined') return 'ssr-session';
@@ -64,19 +65,33 @@ export async function trackProfileView({
 export async function trackProfileEvent(
   businessProfileId: string,
   eventType: ProfileAnalyticsEvent,
-  productId?: string
+  productId?: string,
+  metadata?: Record<string, unknown>
 ): Promise<void> {
   if (!businessProfileId || typeof navigator === 'undefined') return;
   try {
     await supabase!.from('page_analytics').insert({
       business_profile_id: businessProfileId,
       event_type: eventType,
-      product_id: productId,
+      product_id: productId || null,
       session_id: getAnalyticsSessionId(),
       user_agent: navigator.userAgent,
       referrer: document.referrer || '',
+      metadata: metadata ?? {},
     });
   } catch {
     /* offline or RLS */
   }
+}
+
+/** Pregunta que la IA del perfil no pudo responder → corpus para el dueño. */
+export async function trackIaUnanswered(
+  businessProfileId: string,
+  pregunta: string
+): Promise<void> {
+  const q = pregunta.trim().slice(0, 280);
+  if (!q) return;
+  await trackProfileEvent(businessProfileId, 'ia_unanswered', undefined, {
+    pregunta: q,
+  });
 }

@@ -2,8 +2,14 @@
 
 import { useEffect, useRef } from 'react';
 import { isDemoPerfilVivoSlug } from '@buscadis/perfil-vivo';
-import { trackProfileView, trackProfileEvent } from '@/lib/business/analytics/track-profile-event';
+import {
+  trackProfileView,
+  trackProfileEvent,
+  trackIaUnanswered,
+} from '@/lib/business/analytics/track-profile-event';
 import { trackEvent } from '@/lib/events/track';
+
+const PV_IA_UNANSWERED_EVENT = 'pv:ia-unanswered';
 
 function origenFromReferrer(ref: string): string {
   const r = ref.toLowerCase();
@@ -15,7 +21,7 @@ function origenFromReferrer(ref: string): string {
   return 'directo';
 }
 
-/** Emite perfil_visto + captura clics a /r/ (WhatsApp handoff). */
+/** Emite perfil_visto + captura clics a /r/ + corpus IA sin respuesta. */
 export function PerfilVivoAnalytics({
   businessProfileId,
   slug,
@@ -66,6 +72,21 @@ export function PerfilVivoAnalytics({
     };
     document.addEventListener('click', onClick, true);
     return () => document.removeEventListener('click', onClick, true);
+  }, [businessProfileId, slug]);
+
+  useEffect(() => {
+    if (!businessProfileId || isDemoPerfilVivoSlug(slug)) return;
+    const onIa = (ev: Event) => {
+      const detail = (ev as CustomEvent).detail as
+        | { businessProfileId?: string; pregunta?: string }
+        | undefined;
+      const pregunta = detail?.pregunta?.trim();
+      const id = detail?.businessProfileId || businessProfileId;
+      if (!pregunta || !id) return;
+      void trackIaUnanswered(id, pregunta);
+    };
+    window.addEventListener(PV_IA_UNANSWERED_EVENT, onIa);
+    return () => window.removeEventListener(PV_IA_UNANSWERED_EVENT, onIa);
   }, [businessProfileId, slug]);
 
   return null;

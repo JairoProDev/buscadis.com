@@ -23,7 +23,8 @@ export function negocioFromBusinessProfile(row: unknown): Negocio | null {
     themeMode === 'dark' ? 'oscuro' : themeMode === 'system' ? 'auto' : 'claro';
 
   const planRaw = p.subscription_tier;
-  const plan = planRaw === 'pro' || planRaw === 'enterprise' ? 'pro' : 'free';
+  const plan: 'free' | 'pro' | 'max' =
+    planRaw === 'enterprise' ? 'max' : planRaw === 'pro' ? 'pro' : 'free';
 
   const tier = p.verification_tier;
   let nivel: 0 | 1 | 2 | 3 = 0;
@@ -41,7 +42,7 @@ export function negocioFromBusinessProfile(row: unknown): Negocio | null {
     eslogan: typeof p.tagline === 'string' ? p.tagline.slice(0, 90) : undefined,
     categoria: { id: 'general', nombre: 'Negocio' },
     arquetipo: 'retail' as const,
-    plan: plan as 'free' | 'pro',
+    plan,
     estado: p.is_published === false ? ('pausado' as const) : ('activo' as const),
     identidad: {
       logoUrl: typeof p.logo_url === 'string' ? p.logo_url : undefined,
