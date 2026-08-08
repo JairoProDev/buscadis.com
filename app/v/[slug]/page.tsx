@@ -1,19 +1,9 @@
-import { notFound } from 'next/navigation';
-import { PerfilVivoRoot } from '@buscadis/perfil-vivo';
-import type { PerfilPayload } from '@buscadis/perfil-vivo';
-import {
-  buildDemoRetailPayload,
-  buildHandoffLinks,
-  buildPerfilPayloadFromSources,
-  formatPrecio,
-} from '@buscadis/perfil-vivo/server';
-import {
-  getBusinessCatalog,
-  getBusinessProfileBySlug,
-} from '@/lib/business';
+import { permanentRedirect } from 'next/navigation';
+import type { Metadata } from 'next';
 import { normalizeBusinessSlug } from '@/lib/business/normalize-slug';
-import { supabaseAdmin } from '@/lib/supabase-admin';
-import { PerfilVivoAnalytics } from '@/components/business/PerfilVivoAnalytics';
+import { getBusinessProfileBySlug } from '@/lib/business';
+import { isPerfilVivoEnabled } from '@/lib/business/perfil-vivo-flag';
+import { PerfilVivoPageView, loadPerfilVivoPayload } from '@/components/business/PerfilVivoPageView';
 
 export const revalidate = 60;
 
@@ -21,168 +11,45 @@ type PageProps = {
   params: Promise<{ slug: string }>;
 };
 
-function jsonLdForPayload(payload: PerfilPayload) {
-  const { negocio, productos, resenas, metricas, faqs } = payload;
-  const u = negocio.ubicacion;
-  const graph: Record<string, unknown>[] = [
-      {
-        '@type': 'LocalBusiness',
-        '@id': `https://buscadis.com/v/${negocio.slug}#negocio`,
-        name: negocio.nombre,
-        description:
-          payload.nosotros?.texto?.slice(0, 300) ??
-          negocio.eslogan ??
-          `${negocio.categoria.nombre} en ${u?.distrito ?? 'Cusco'}`,
-        url: `https://buscadis.com/v/${negocio.slug}`,
-        telephone: negocio.contacto.telefono,
-        address: u
-          ? {
-              '@type': 'PostalAddress',
-              streetAddress: u.direccion,
-              addressLocality: u.distrito,
-              addressRegion: u.provincia,
-              addressCountry: 'PE',
-            }
-          : undefined,
-        geo: u
-          ? {
-              '@type': 'GeoCoordinates',
-              latitude: u.lat,
-              longitude: u.lng,
-            }
-          : undefined,
-        ...(metricas?.calificacion && metricas.calificacion.total > 0
-          ? {
-              aggregateRating: {
-                '@type': 'AggregateRating',
-                ratingValue: metricas.calificacion.promedio,
-                reviewCount: metricas.calificacion.total,
-              },
-            }
-          : {}),
-      },
-      ...productos.slice(0, 8).map((p) => ({
-        '@type': 'Product',
-        name: p.nombre,
-        description: p.descripcion,
-        image: p.imagenes[0]?.url,
-        offers: p.precio
-          ? {
-              '@type': 'Offer',
-              priceCurrency: p.precio.moneda,
-              price: p.precio.valor,
-              availability:
-                p.disponibilidad === 'agotado'
-                  ? 'https://schema.org/OutOfStock'
-                  : 'https://schema.org/InStock',
-            }
-          : undefined,
-      })),
-      ...resenas.slice(0, 5).map((r) => ({
-        '@type': 'Review',
-        reviewRating: {
-          '@type': 'Rating',
-          ratingValue: r.estrellas,
-        },
-        author: { '@type': 'Person', name: r.autor.nombre },
-        reviewBody: r.texto,
-        datePublished: r.creadaEn,
-      })),
-  ];
-
-  if (faqs.length >= 2) {
-    graph.push({
-      '@type': 'FAQPage',
-      '@id': `https://buscadis.com/v/${negocio.slug}#faq`,
-      mainEntity: faqs.map((f) => ({
-        '@type': 'Question',
-        name: f.pregunta,
-        acceptedAnswer: {
-          '@type': 'Answer',
-          text: f.respuesta,
-        },
-      })),
-    });
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { slug: raw } = await params;
+  const slug = normalizeBusinessSlug(raw) || raw.toLowerCase();
+  if (slug === 'demo') {
+    return {
+      title: 'Ferretería Demo Quival | Perfil Vivo',
+      robots: { index: false, follow: false },
+    };
   }
-
-  return {
-    '@context': 'https://schema.org',
-    '@graph': graph,
-  };
-}
-
-async function fetchReviewRows(businessProfileId: string) {
-  if (!supabaseAdmin) return [];
-  const { data, error } = await supabaseAdmin
-    .from('business_reviews')
-    .select(
-      'id, rating, text, comment, verified_purchase, is_verified, created_at, customer_name'
-    )
-    .eq('business_profile_id', businessProfileId)
-    .or('is_visible.is.null,is_visible.eq.true')
-    .order('created_at', { ascending: false })
-    .limit(40);
-  if (error) {
-    console.error('[perfil-vivo] reviews', error.message);
-    return [];
-  }
-  return data || [];
-}
-
-async function payloadForSlug(slug: string): Promise<PerfilPayload | null> {
-  if (slug === 'demo') return buildDemoRetailPayload();
-
   const profile = await getBusinessProfileBySlug(slug);
-  if (!profile) return null;
-
-  const [catalog, reviews] = await Promise.all([
-    getBusinessCatalog(profile.id),
-    fetchReviewRows(profile.id),
-  ]);
-
-  return buildPerfilPayloadFromSources({
-    profileRow: profile,
-    catalogRows: catalog,
-    reviewRows: reviews,
-  });
+  if (profile && isPerfilVivoEnabled(profile)) {
+    return {
+      robots: { index: false, follow: true },
+      alternates: { canonical: `https://buscadis.com/@${slug}` },
+    };
+  }
+  const payload = await loadPerfilVivoPayload(slug);
+  if (!payload) return { robots: { index: false, follow: false } };
+  const n = payload.negocio;
+  const d = n.ubicacion?.distrito ?? 'Cusco';
+  return {
+    title: `${n.nombre} — ${n.categoria.nombre} en ${d} | Preview`,
+    description: n.eslogan || `${n.categoria.nombre} en ${d}. Precios y WhatsApp en Buscadis.`,
+    robots: { index: false, follow: false },
+  };
 }
 
 export default async function PerfilVivoPreviewPage({ params }: PageProps) {
   const { slug: raw } = await params;
   const slug = normalizeBusinessSlug(raw) || raw.toLowerCase();
 
-  const payload = await payloadForSlug(slug);
-  if (!payload) notFound();
-
-  const handoffs = buildHandoffLinks(payload);
-  const ld = jsonLdForPayload(payload);
+  if (slug !== 'demo') {
+    const profile = await getBusinessProfileBySlug(slug);
+    if (profile && isPerfilVivoEnabled(profile)) {
+      permanentRedirect(`/@${slug}`);
+    }
+  }
 
   return (
-    <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(ld) }}
-      />
-      <span
-        className="sr-only"
-        style={{
-          position: 'absolute',
-          width: 1,
-          height: 1,
-          overflow: 'hidden',
-        }}
-      >
-        {payload.negocio.nombre}
-        {payload.productos[0]?.precio
-          ? ` ${formatPrecio(payload.productos[0].precio.valor)}`
-          : ''}
-      </span>
-      <PerfilVivoAnalytics
-        businessProfileId={payload.negocio.id}
-        slug={payload.negocio.slug}
-        arquetipo={payload.negocio.arquetipo}
-      />
-      <PerfilVivoRoot payload={payload} handoffs={handoffs} />
-    </>
+    <PerfilVivoPageView slug={slug} canonicalPath={`/v/${slug}`} indexable={false} />
   );
 }

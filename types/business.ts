@@ -43,6 +43,8 @@ export interface ProfileLayoutSchema {
         variant?: string;
         config?: Record<string, unknown>;
     }>;
+    /** Soft→hard cutover: servir Perfil Vivo en /@slug */
+    perfil_vivo_enabled?: boolean;
 }
 
 export interface ProfileStyleSchema {

@@ -1,30 +1,31 @@
-# Perfil Vivo — Soft Cutover P03 (opt-in)
+# Perfil Vivo — Soft→Hard Cutover P03
 
 **Date:** 2026-08-08  
-**Status:** Partial — preview opt-in only  
-**Depends on:** P02 Retail nucleus
+**Status:** Hard cutover opt-in shipped  
+**Depends on:** P02 Retail + bridge + P11 modules
 
 ## Decision
 
-Full canonical cutover of `/@slug` → Perfil Vivo is **deferred** until real businesses look better on `/v` than on the legacy storefront (catalog bridge + polish). Premature cutover would regress production.
+Canonical URL stays **`/@{slug}`**. Opted-in businesses serve Perfil Vivo HTML at that URL. Preview `/v/{slug}` remains for non-opted and `demo`; opted-in get **308** `/v` → `/@`.
 
-## Shipped in this wave
+## Flag
 
-1. **Bridge real data:** `buildPerfilPayloadFromSources` maps `business_profiles` + `catalog_products` → `PerfilPayload` (horario, redes, productos, módulos Retail).
-2. **Soft opt-in:** `/@slug?vivo=1` rewrites to `/v/{slug}` (middleware). Legacy `/@slug` unchanged.
-3. **UX polish:** sticky section bar, verification explain sheet, icon acciones.
+Stored in `profile_layout.perfil_vivo_enabled` (no DB migration).  
+Env override: `PERFIL_VIVO_ENABLED_SLUGS=slug1,slug2`.
 
-## Still required for hard P03
+Toggle: editor → hub **Confianza** → “Perfil Vivo”.
 
-- [ ] Owner toggle `perfil_vivo_enabled` on `business_profiles`
-- [ ] Middleware: if flag, rewrite `/@` → `/v` without query
-- [ ] Canonical URL + `robots` index on cutover; `noindex` on `/v` duplicates OR reverse
-- [ ] 308 `/v/{slug}` → `/@{slug}` after cutover for opted-in
-- [ ] Analytics parity with legacy page
+## Behavior
 
-## How to preview a real business
+| Surface | Opted-in | Not opted-in |
+|---------|----------|--------------|
+| `/@slug` public | Perfil Vivo (indexable if published) | Legacy storefront |
+| `/@slug?edit=true` | Legacy editor | Legacy editor |
+| `/@slug?vivo=1` | rewrite `/v` (middleware) | rewrite `/v` |
+| `/v/slug` | 308 → `/@slug` | Preview `noindex` |
 
-```
-https://buscadis.com/@{slug}?vivo=1
-https://buscadis.com/v/{slug}
-```
+## Still later
+
+- Edge middleware flag without page-level branch (optional)
+- Analytics parity dashboard full P14
+- Remove legacy storefront when cohort &gt; threshold

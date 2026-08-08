@@ -7,6 +7,10 @@ import ProfileAnalyticsWidget from '@/components/business/editor/ProfileAnalytic
 import { canUseProQr } from '@/lib/business/subscription';
 import { isFieldComplete, type ProfileFieldStatus } from '@/lib/business/profile-progress';
 import {
+  isPerfilVivoEnabled,
+  withPerfilVivoEnabled,
+} from '@/lib/business/perfil-vivo-flag';
+import {
   IconPhone, IconMapMarkerAlt, IconEnvelope, IconInstagram, IconFacebook, IconTiktok, IconGlobe,
 } from '@/components/Icons';
 
@@ -220,7 +224,44 @@ export default function TrustHubFields({ profile, setProfile, fields }: TrustHub
       </div>
 
       <div>
-        <FieldLabel number={6} label="Analítica" complete />
+        <FieldLabel number={6} label="Perfil Vivo" complete={isPerfilVivoEnabled(profile)} />
+        <div className="rounded-xl border border-slate-200 bg-white p-3 space-y-2">
+          <p className="text-[15px] text-slate-700 leading-snug">
+            Cuando lo activas, tus clientes ven el perfil nuevo en{' '}
+            <span className="font-semibold">buscadis.com/@{profile.slug || 'tu-negocio'}</span>
+            . El editor sigue igual.
+          </p>
+          <button
+            type="button"
+            onClick={() => {
+              const next = !isPerfilVivoEnabled(profile);
+              setProfile(withPerfilVivoEnabled(profile, next));
+            }}
+            className={`w-full min-h-[48px] rounded-xl text-[15px] font-bold transition-colors ${
+              isPerfilVivoEnabled(profile)
+                ? 'bg-teal-600 text-white hover:bg-teal-700'
+                : 'bg-slate-100 text-slate-800 hover:bg-slate-200'
+            }`}
+          >
+            {isPerfilVivoEnabled(profile)
+              ? 'Perfil Vivo activo — tocar para desactivar'
+              : 'Activar Perfil Vivo en mi enlace'}
+          </button>
+          {profile.slug && (
+            <a
+              href={`/v/${encodeURIComponent(profile.slug)}`}
+              target="_blank"
+              rel="noreferrer"
+              className="block text-center text-sm font-semibold text-teal-700 py-2"
+            >
+              Vista previa en /v/{profile.slug} ↗
+            </a>
+          )}
+        </div>
+      </div>
+
+      <div>
+        <FieldLabel number={7} label="Analítica" complete />
         <ProfileAnalyticsWidget businessProfileId={profile.id} />
       </div>
     </div>
