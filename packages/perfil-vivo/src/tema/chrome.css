@@ -1,0 +1,163 @@
+/* Perfil Vivo — chrome tokens (docs/tarjetadigitalbuscadis/05-DESIGN-SYSTEM.md) */
+.pv-root {
+  /* Superficies — claro */
+  --sf-base: #fbfafc;
+  --sf-elev: #ffffff;
+  --sf-sunk: #f1f0f4;
+  --sf-inverse: #131218;
+
+  /* Texto */
+  --tx-strong: #131218;
+  --tx-base: #3a3843;
+  --tx-muted: #6e6b78;
+  --tx-faint: #9c99a6;
+  --tx-inverse: #fbfafc;
+
+  /* Bordes */
+  --bd-hair: rgba(19, 18, 24, 0.08);
+  --bd-soft: rgba(19, 18, 24, 0.14);
+  --bd-strong: rgba(19, 18, 24, 0.24);
+
+  /* Semánticos */
+  --ok: #0e7a4f;
+  --ok-sf: #e4f5ec;
+  --warn: #a66a00;
+  --warn-sf: #fdf2dc;
+  --err: #c0243b;
+  --err-sf: #fceaed;
+
+  /* Plataforma Buscadis */
+  --bs-chicha: #ff0a78;
+  --bs-chicha-sf: #ffe7f0;
+  --bs-sol: #ffc300;
+  --bs-ink: #131218;
+
+  /* Tipografía (fallbacks hasta self-host en P02) */
+  --ff-display: 'Bricolage Grotesque', ui-sans-serif, system-ui, sans-serif;
+  --ff-ui: 'Geist Sans', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --ff-data: 'Geist Mono', ui-monospace, 'SF Mono', monospace;
+
+  --ts-nombre: 700 26px/30px var(--ff-display);
+  --ts-modulo: 600 17px/22px var(--ff-display);
+  --ts-cuerpo: 400 15px/22px var(--ff-ui);
+  --ts-card: 500 14px/19px var(--ff-ui);
+  --ts-precio: 600 16px/20px var(--ff-data);
+  --ts-precio-lg: 600 22px/26px var(--ff-data);
+  --ts-meta: 400 13px/18px var(--ff-ui);
+  --ts-etiqueta: 600 11px/14px var(--ff-ui);
+
+  /* Espaciado / radios / elevación / movimiento */
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 20px;
+  --sp-6: 24px;
+  --sp-8: 32px;
+  --sp-10: 40px;
+  --sp-12: 48px;
+
+  --rd-sm: 8px;
+  --rd-md: 12px;
+  --rd-lg: 16px;
+  --rd-xl: 20px;
+  --rd-full: 999px;
+
+  --el-0: none;
+  --el-1: 0 1px 2px rgba(19, 18, 24, 0.06), 0 0 0 1px var(--bd-hair);
+  --el-2: 0 4px 12px rgba(19, 18, 24, 0.08), 0 0 0 1px var(--bd-hair);
+  --el-3: 0 12px 32px rgba(19, 18, 24, 0.14);
+
+  --mo-rapido: 120ms cubic-bezier(0.2, 0, 0.2, 1);
+  --mo-medio: 200ms cubic-bezier(0.2, 0, 0.2, 1);
+  --mo-hoja: 280ms cubic-bezier(0.32, 0.72, 0, 1);
+
+  /* Defaults marca (sobrescritos por derivarTema) */
+  --mk-accion: #1f4fd8;
+  --mk-accion-hover: #1a44b8;
+  --mk-sobre: #ffffff;
+  --mk-suave: #eef2ff;
+  --mk-texto: #1f4fd8;
+  --mk-borde: #d6defa;
+
+  background: var(--sf-base);
+  color: var(--tx-base);
+  font: var(--ts-cuerpo);
+  min-height: 100dvh;
+  padding-bottom: 72px;
+}
+
+.pv-root[data-theme='dark'] {
+  --sf-base: #0e0d12;
+  --sf-elev: #191820;
+  --sf-sunk: #23212c;
+  --tx-strong: #f7f6fa;
+  --tx-base: #cfccd8;
+  --tx-muted: #9794a2;
+  --tx-faint: #6a6775;
+  --bd-hair: rgba(255, 255, 255, 0.1);
+  --bd-soft: rgba(255, 255, 255, 0.16);
+  --ok: #3dd68c;
+  --ok-sf: #0f2a1e;
+  --warn: #f0b429;
+  --warn-sf: #2c2210;
+  --err: #ff6b81;
+  --err-sf: #2e1218;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pv-root *,
+  .pv-root *::before,
+  .pv-root *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+.pv-stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-8);
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 0 var(--sp-4);
+}
+
+.pv-modulo {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 120px;
+}
+
+.pv-barra-accion {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 40;
+  height: 64px;
+  padding: var(--sp-2) var(--sp-4);
+  background: var(--sf-elev);
+  border-top: 1px solid var(--bd-hair);
+  display: flex;
+  align-items: center;
+  max-width: 480px;
+  margin: 0 auto;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.pv-barra-accion__primary {
+  flex: 1;
+  min-height: 44px;
+  border: none;
+  border-radius: var(--rd-md);
+  background: var(--mk-accion);
+  color: var(--mk-sobre);
+  font: var(--ts-card);
+  cursor: pointer;
+}
+
+.pv-barra-accion__primary:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}

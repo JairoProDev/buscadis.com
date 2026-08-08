@@ -6,6 +6,7 @@ import { normalizeBusinessSlug } from '@/lib/business/normalize-slug';
  * - Canónica: /@{slug}
  * - Alias legacy: /p/{slug} → redirect 308 a /@{slug}
  * - Alias corto: /{slug} → redirect vía catch-all si el negocio está publicado
+ * - Perfil Vivo preview: /v/{slug} y /v/@{slug} (paralelo hasta cutover)
  *
  * Publicadis vive en publicadis.com — solo enlace desde botón Web del perfil.
  */
@@ -35,6 +36,17 @@ export function middleware(req: NextRequest) {
     const slug = normalizeBusinessSlug(atMatch[1]);
     if (slug) {
       return NextResponse.rewrite(new URL(`/negocio/${encodeURIComponent(slug)}${search}`, req.url));
+    }
+  }
+
+  // Perfil Vivo preview: /v/@slug → /v/slug (paralelo hasta cutover P03)
+  const vAtMatch = pathname.match(/^\/v\/@([^/?#]+)\/?$/);
+  if (vAtMatch) {
+    const slug = normalizeBusinessSlug(vAtMatch[1]);
+    if (slug) {
+      return NextResponse.rewrite(
+        new URL(`/v/${encodeURIComponent(slug)}${search}`, req.url)
+      );
     }
   }
 

@@ -1,0 +1,93 @@
+import type { Arquetipo, TipoModulo } from '../types';
+
+/** Orden por defecto Retail (04 §3 A) — Sprint 0 usa este arquetipo. */
+export const ORDEN_RETAIL: TipoModulo[] = [
+  'hero',
+  'estado',
+  'acciones',
+  'catalogo',
+  'promocion',
+  'categorias',
+  'resenas',
+  'ubicacion',
+  'horario',
+  'pago',
+  'novedades',
+  'canales',
+  'nosotros',
+];
+
+const ORDEN_POR_ARQUETIPO: Record<Arquetipo, TipoModulo[]> = {
+  retail: ORDEN_RETAIL,
+  cita: [
+    'hero',
+    'estado',
+    'acciones',
+    'servicios',
+    'galeria',
+    'resenas',
+    'equipo',
+    'horario',
+    'ubicacion',
+    'promocion',
+    'canales',
+    'faq',
+  ],
+  comida: [
+    'hero',
+    'estado',
+    'acciones',
+    'catalogo',
+    'categorias',
+    'promocion',
+    'resenas',
+    'ubicacion',
+    'horario',
+    'pago',
+    'novedades',
+    'canales',
+  ],
+  profesional: [
+    'hero',
+    'metricas',
+    'acciones',
+    'servicios',
+    'certificaciones',
+    'resenas',
+    'equipo',
+    'publicaciones',
+    'documentos',
+    'faq',
+    'ubicacion',
+    'horario',
+    'canales',
+  ],
+  alto_ticket: [
+    'hero',
+    'metricas',
+    'acciones',
+    'catalogo',
+    'servicios',
+    'resenas',
+    'publicaciones',
+    'certificaciones',
+    'documentos',
+    'equipo',
+    'ubicacion',
+    'canales',
+  ],
+  local: [
+    'hero',
+    'estado',
+    'ubicacion',
+    'acciones',
+    'promocion',
+    'horario',
+    'pago',
+    'canales',
+  ],
+};
+
+export function ordenArquetipo(arquetipo: Arquetipo): TipoModulo[] {
+  return ORDEN_POR_ARQUETIPO[arquetipo] ?? ORDEN_RETAIL;
+}

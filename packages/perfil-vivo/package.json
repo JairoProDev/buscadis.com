@@ -1,0 +1,28 @@
+{
+  "name": "@buscadis/perfil-vivo",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Perfil Vivo — contracts, theme engine, and module renderer foundation",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./chrome.css": "./src/tema/chrome.css"
+  },
+  "scripts": {
+    "verify:tema": "node ./scripts/verify-tema-contrast.mjs",
+    "verify:types": "node ./scripts/verify-types.mjs"
+  },
+  "dependencies": {
+    "culori": "^4.0.2",
+    "wcag-contrast": "^3.0.0",
+    "zod": "^3.24.1"
+  },
+  "peerDependencies": {
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3"
+  }
+}

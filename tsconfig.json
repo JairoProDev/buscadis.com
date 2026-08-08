@@ -37,6 +37,12 @@
       ],
       "@buscadis/tokens": [
         "./packages/tokens/dist/tokens.ts"
+      ],
+      "@buscadis/perfil-vivo": [
+        "./packages/perfil-vivo/src/index.ts"
+      ],
+      "@buscadis/perfil-vivo/chrome.css": [
+        "./packages/perfil-vivo/src/tema/chrome.css"
       ]
     }
   },
