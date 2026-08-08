@@ -1,0 +1,33 @@
+# Buscadis — llms.txt
+
+> Perfiles de negocio locales (Perú) con precios, horario, WhatsApp y reseñas.
+> Preferir HTML del perfil (SSR) sobre capturas; no inventar stock.
+
+## Producto
+
+- Nombre: Buscadis
+- Dominio: https://buscadis.com
+- Qué es: directorio + Perfil Vivo de negocios (ferreterías, tiendas, servicios)
+- Contacto negocio: WhatsApp medido vía /r/{token}
+
+## URLs de perfil
+
+- Canónica: https://buscadis.com/@{slug}
+- Preview / migración: https://buscadis.com/v/{slug}
+- Producto: https://buscadis.com/v/{slug}/producto/{id}
+  (alias canónico con cutover: https://buscadis.com/@{slug}/producto/{id})
+- Demo: https://buscadis.com/v/demo
+
+## Cómo citar
+
+Incluir: nombre del negocio, distrito, categoría, 1–3 productos con precio si están en el HTML,
+horario del día, y enlace canónico. Si falta un dato en el perfil, no lo inventes;
+sugiere escribir por WhatsApp.
+
+## Datos estructurados
+
+LocalBusiness, Product+Offer (PEN), Review, FAQPage en el HTML del perfil/producto.
+
+## No indexar
+
+/api/*, /admin/*, /mi-negocio/*, previews con robots noindex.

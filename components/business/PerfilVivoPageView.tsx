@@ -135,6 +135,41 @@ export async function loadPerfilVivoPayload(
   });
 }
 
+/** Payload + producto concreto (aunque no esté en destacados del carrusel). */
+export async function loadProductoEnPerfil(slug: string, productoId: string) {
+  if (slug === 'demo') {
+    const payload = buildDemoRetailPayload();
+    const producto = payload.productos.find((p) => p.id === productoId) ?? null;
+    return { payload, producto };
+  }
+
+  const profile = await getBusinessProfileBySlug(slug);
+  if (!profile) return { payload: null, producto: null };
+
+  const [catalog, reviews] = await Promise.all([
+    getBusinessCatalog(profile.id),
+    fetchReviewRows(profile.id),
+  ]);
+
+  const payload = buildPerfilPayloadFromSources({
+    profileRow: profile,
+    catalogRows: catalog,
+    reviewRows: reviews,
+  });
+  if (!payload) return { payload: null, producto: null };
+
+  const { productoFromCatalogRow } = await import('@buscadis/perfil-vivo/server');
+  const row = (catalog as Record<string, unknown>[]).find(
+    (r) => String(r.id) === productoId
+  );
+  let producto = payload.productos.find((p) => p.id === productoId) ?? null;
+  if (!producto && row) {
+    producto = productoFromCatalogRow(row, payload.negocio.id);
+  }
+
+  return { payload, producto };
+}
+
 /** Render compartido /v y cutover /@ */
 export async function PerfilVivoPageView({
   slug,

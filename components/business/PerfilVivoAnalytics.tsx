@@ -14,7 +14,7 @@ function origenFromReferrer(ref: string): string {
   return 'directo';
 }
 
-/** Emite perfil_visto una vez por montaje (P14 lite). */
+/** Emite perfil_visto + captura clics a /r/ (WhatsApp handoff). */
 export function PerfilVivoAnalytics({
   businessProfileId,
   slug,
@@ -50,6 +50,20 @@ export function PerfilVivoAnalytics({
       },
     });
   }, [businessProfileId, slug, arquetipo]);
+
+  useEffect(() => {
+    if (!businessProfileId || slug === 'demo') return;
+    const onClick = (ev: MouseEvent) => {
+      const t = ev.target as HTMLElement | null;
+      const a = t?.closest?.('a') as HTMLAnchorElement | null;
+      if (!a?.href) return;
+      if (a.pathname.startsWith('/r/') || a.href.includes('/r/')) {
+        void trackProfileEvent(businessProfileId, 'whatsapp_click');
+      }
+    };
+    document.addEventListener('click', onClick, true);
+    return () => document.removeEventListener('click', onClick, true);
+  }, [businessProfileId, slug]);
 
   return null;
 }

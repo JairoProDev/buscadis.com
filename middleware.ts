@@ -42,7 +42,6 @@ export function middleware(req: NextRequest) {
         const url = new URL(`/v/${encodeURIComponent(slug)}`, req.url);
         url.searchParams.delete('vivo');
         url.searchParams.delete('perfilVivo');
-        // Preserve other query params
         req.nextUrl.searchParams.forEach((v, k) => {
           if (k !== 'vivo' && k !== 'perfilVivo') url.searchParams.set(k, v);
         });
@@ -50,6 +49,21 @@ export function middleware(req: NextRequest) {
       }
       return NextResponse.rewrite(
         new URL(`/negocio/${encodeURIComponent(slug)}${search}`, req.url)
+      );
+    }
+  }
+
+  // /@slug/producto/id → landing producto Perfil Vivo (SEO)
+  const atProdMatch = pathname.match(/^\/@([^/?#]+)\/producto\/([^/?#]+)\/?$/);
+  if (atProdMatch) {
+    const slug = normalizeBusinessSlug(atProdMatch[1]);
+    const productoId = atProdMatch[2];
+    if (slug && productoId) {
+      return NextResponse.rewrite(
+        new URL(
+          `/v/${encodeURIComponent(slug)}/producto/${encodeURIComponent(productoId)}${search}`,
+          req.url
+        )
       );
     }
   }

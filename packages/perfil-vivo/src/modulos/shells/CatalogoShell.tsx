@@ -135,10 +135,12 @@ function ProductCard({
 function ProductoSheet({
   producto,
   handoffUrl,
+  productoHref,
   onClose,
 }: {
   producto: Producto;
   handoffUrl: string | null;
+  productoHref: string;
   onClose: () => void;
 }) {
   const precio = precioLabel(producto);
@@ -208,6 +210,18 @@ function ProductoSheet({
             {producto.descripcion}
           </p>
         ) : null}
+        <a
+          href={productoHref}
+          style={{
+            display: 'inline-block',
+            marginTop: 12,
+            font: 'var(--ts-meta)',
+            fontWeight: 700,
+            color: 'var(--mk-accion)',
+          }}
+        >
+          Ver página del producto →
+        </a>
         <div
           style={{
             position: 'fixed',
@@ -251,6 +265,7 @@ export function CatalogoShell({ titulo }: { titulo: string }) {
   const productos = payload.productos.filter((p) => p.activo && p.destacado).slice(0, 12);
   const [openId, setOpenId] = useState<string | null>(null);
   const open = productos.find((p) => p.id === openId) ?? null;
+  const slug = payload.negocio.slug;
 
   if (productos.length < 3) return null;
 
@@ -295,6 +310,7 @@ export function CatalogoShell({ titulo }: { titulo: string }) {
         <ProductoSheet
           producto={open}
           handoffUrl={handoffs.productoWhatsapp[open.id] ?? null}
+          productoHref={`/v/${encodeURIComponent(slug)}/producto/${encodeURIComponent(open.id)}`}
           onClose={() => setOpenId(null)}
         />
       ) : null}
