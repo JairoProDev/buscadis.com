@@ -45,6 +45,12 @@ export type { HandoffLinks } from './modulos/PerfilContext';
 export { calcularEstadoVivo, formatPrecio } from './estado/calcular-estado';
 
 export {
+  sugerenciasDesdePerfil,
+  responderPreguntaIa,
+} from './ia/sugerencias';
+export type { SugerenciaIa } from './ia/sugerencias';
+
+export {
   DEMO_PERFIL_VIVO_SLUGS,
   DEMO_META,
   isDemoPerfilVivoSlug,

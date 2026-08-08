@@ -26,7 +26,7 @@
     "test:envios": "npx tsx scripts/test-envios-status.ts",
     "smoke:ssr": "bash scripts/smoke-ssr-indexing.sh",
     "smoke:storefront": "npm run verify --workspace=@buscadis/storefront-kit",
-    "verify:perfil-vivo": "npm run verify:tema --workspace=@buscadis/perfil-vivo && npm run verify:types --workspace=@buscadis/perfil-vivo && npm run verify:promo --workspace=@buscadis/perfil-vivo",
+    "verify:perfil-vivo": "npm run verify:tema --workspace=@buscadis/perfil-vivo && npm run verify:types --workspace=@buscadis/perfil-vivo && npm run verify:promo --workspace=@buscadis/perfil-vivo && npm run verify:ia --workspace=@buscadis/perfil-vivo",
     "lhci:perfil-vivo": "npx --yes @lhci/cli@0.14.0 autorun --config=./.lighthouserc.cjs"
   },
   "dependencies": {

@@ -355,6 +355,22 @@ export function CatalogoShell({ titulo }: { titulo: string }) {
           </div>
         ))}
       </div>
+      <p style={{ margin: '12px 0 0', textAlign: 'center' }}>
+        <a
+          href="#ia"
+          style={{
+            font: 'var(--ts-meta)',
+            fontWeight: 700,
+            color: 'var(--mk-accion)',
+            textDecoration: 'none',
+            minHeight: 44,
+            display: 'inline-flex',
+            alignItems: 'center',
+          }}
+        >
+          Pregúntale al negocio →
+        </a>
+      </p>
       {open ? (
         <ProductoSheet
           producto={open}

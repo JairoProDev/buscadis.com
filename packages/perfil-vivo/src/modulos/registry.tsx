@@ -13,6 +13,7 @@ import { EstadoShell } from './shells/EstadoShell';
 import { FaqShell } from './shells/FaqShell';
 import { GaleriaShell } from './shells/GaleriaShell';
 import { HeroShell } from './shells/HeroShell';
+import { IaShell } from './shells/IaShell';
 import { MetricasShell } from './shells/MetricasShell';
 import { NosotrosShell } from './shells/NosotrosShell';
 import { NovedadesShell } from './shells/NovedadesShell';
@@ -35,6 +36,7 @@ const REGISTRY: Partial<Record<TipoModulo, ComponentType<ShellProps>>> = {
   estado: () => <EstadoShell />,
   acciones: () => <AccionesShell />,
   catalogo: ({ modulo }) => <CatalogoShell titulo={modulo.titulo} />,
+  ia: ({ modulo }) => <IaShell titulo={modulo.titulo} />,
   categorias: ({ modulo }) => <CategoriasShell titulo={modulo.titulo} />,
   servicios: ({ modulo }) => <ServiciosShell titulo={modulo.titulo} />,
   promocion: ({ modulo }) => <PromocionShell titulo={modulo.titulo} />,

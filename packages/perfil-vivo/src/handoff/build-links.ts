@@ -3,6 +3,10 @@ import type { HandoffLinks } from '../modulos/PerfilContext';
 import { formatPrecio } from '../estado/calcular-estado';
 import { esPromocionVigente } from '../promo/vigente';
 import {
+  mensajeWhatsAppPreguntaIa,
+  sugerenciasDesdePerfil,
+} from '../ia/sugerencias';
+import {
   crearHandoffLlamada,
   crearHandoffRuta,
   crearHandoffWhatsApp,
@@ -33,6 +37,19 @@ export function buildHandoffLinks(payload: PerfilPayload): HandoffLinks {
   }
 
   const promoViva = esPromocionVigente(promocion);
+  const iaSugerencias: Record<string, string> = {};
+  if (negocio.contacto.whatsapp) {
+    for (const s of sugerenciasDesdePerfil(payload)) {
+      iaSugerencias[s.id] = crearHandoffWhatsApp({
+        negocioId: negocio.id,
+        slug: negocio.slug,
+        phone: negocio.contacto.whatsapp,
+        nombre: negocio.nombre,
+        modulo: 'ia',
+        mensaje: mensajeWhatsAppPreguntaIa(negocio.nombre, s.pregunta),
+      });
+    }
+  }
 
   return {
     whatsappPrimary: negocio.contacto.whatsapp
@@ -77,5 +94,6 @@ export function buildHandoffLinks(payload: PerfilPayload): HandoffLinks {
             ),
           })
         : null,
+    iaSugerencias,
   };
 }

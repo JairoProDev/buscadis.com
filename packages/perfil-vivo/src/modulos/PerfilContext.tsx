@@ -11,6 +11,8 @@ export type HandoffLinks = {
   productoWhatsapp: Record<string, string>;
   /** Promo vigente → WhatsApp con código en el mensaje */
   promocionWhatsapp: string | null;
+  /** sugerenciaIa.id → /r/token con la pregunta preescrita */
+  iaSugerencias: Record<string, string>;
 };
 
 export type PerfilContextValue = {

@@ -220,8 +220,8 @@ export const MODULO_META: Record<TipoModulo, ModuloMeta> = {
   ia: {
     tipo: 'ia',
     fijo: false,
-    minDatos: 10,
-    planMin: 'max',
+    minDatos: 3,
+    planMin: 'free',
     conteoKey: 'productos',
     ancla: 'ia',
     tituloDefault: 'Pregúntale al negocio',

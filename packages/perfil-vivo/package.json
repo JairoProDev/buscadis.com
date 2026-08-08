@@ -13,7 +13,8 @@
   "scripts": {
     "verify:tema": "node ./scripts/verify-tema-contrast.mjs",
     "verify:types": "node ./scripts/verify-types.mjs",
-    "verify:promo": "node ./scripts/verify-promo.mjs"
+    "verify:promo": "node ./scripts/verify-promo.mjs",
+    "verify:ia": "node ./scripts/verify-ia.mjs"
   },
   "dependencies": {
     "culori": "^4.0.2",
