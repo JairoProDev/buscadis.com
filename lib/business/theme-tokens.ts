@@ -1,4 +1,9 @@
 import type { ProfileThemePreset } from '@/types/business';
+import {
+  getTenantPreset,
+  normalizeTenantPresetId,
+  type TenantPreset,
+} from '@buscadis/storefront-kit';
 
 export interface ThemeTokens {
   color: string;
@@ -9,46 +14,32 @@ export interface ThemeTokens {
   accentStyle: 'solid' | 'gradient' | 'outline';
 }
 
+function presetToTokens(p: TenantPreset): ThemeTokens {
+  return {
+    color: p.seed,
+    mode: p.mode,
+    fontFamily: p.fontFamily,
+    radius: p.radius,
+    density: p.density,
+    accentStyle: p.accent,
+  };
+}
+
+/** @deprecated Prefer TENANT_PRESETS from @buscadis/storefront-kit — kept for app call sites. */
 export const THEME_TOKEN_PRESETS: Record<ProfileThemePreset, ThemeTokens> = {
-  executive: {
-    color: '#1e3a5f',
-    mode: 'light',
-    fontFamily: 'sans',
-    radius: 'rounded',
-    density: 'comfortable',
-    accentStyle: 'solid',
-  },
-  minimal: {
-    color: '#171717',
-    mode: 'light',
-    fontFamily: 'serif',
-    radius: 'sharp',
-    density: 'compact',
-    accentStyle: 'outline',
-  },
-  organic: {
-    color: '#2d6a4f',
-    mode: 'light',
-    fontFamily: 'sans',
-    radius: 'pill',
-    density: 'comfortable',
-    accentStyle: 'gradient',
-  },
-  cyberpunk: {
-    color: '#a855f7',
-    mode: 'dark',
-    fontFamily: 'display',
-    radius: 'rounded',
-    density: 'comfortable',
-    accentStyle: 'gradient',
-  },
+  executive: presetToTokens(getTenantPreset('executive')),
+  minimal: presetToTokens(getTenantPreset('minimal')),
+  organic: presetToTokens(getTenantPreset('organic')),
+  nocturno: presetToTokens(getTenantPreset('nocturno')),
+  cyberpunk: presetToTokens(getTenantPreset('nocturno')),
 };
 
 export function resolveThemeTokens(
   preset?: ProfileThemePreset | null,
   overrides?: Partial<ThemeTokens>
 ): ThemeTokens {
-  const base = THEME_TOKEN_PRESETS[preset || 'executive'];
+  const id = normalizeTenantPresetId(preset);
+  const base = presetToTokens(getTenantPreset(id));
   return { ...base, ...overrides };
 }
 

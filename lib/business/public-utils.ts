@@ -3,7 +3,10 @@ import type { BusinessProfile } from '@/types/business';
 import type { Adiso } from '@/types';
 import { resolveThemeTokens, themeFontClass } from '@/lib/business/theme-tokens';
 import type { ProfileThemePreset } from '@/types/business';
-import { buildBusinessThemeVars } from '@/lib/business/theme-css-vars';
+import {
+  buildBusinessThemeDataAttrs,
+  buildBusinessThemeVars,
+} from '@/lib/business/theme-css-vars';
 
 import { getBusinessProfilePath } from '@/lib/seo/business-metadata';
 
@@ -48,6 +51,10 @@ export function getCartWhatsappUrl(
 
 export function businessThemeStyle(profile: Partial<BusinessProfile>): CSSProperties {
   return buildBusinessThemeVars(profile);
+}
+
+export function businessThemeDataAttrs(profile: Partial<BusinessProfile>) {
+  return buildBusinessThemeDataAttrs(profile);
 }
 
 export function businessThemeClassName(profile: Partial<BusinessProfile>): string {

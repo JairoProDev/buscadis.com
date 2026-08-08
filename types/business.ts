@@ -103,7 +103,14 @@ export interface ProfileBlock {
     config: Record<string, unknown>;
 }
 
-export type ProfileThemePreset = 'executive' | 'minimal' | 'organic' | 'cyberpunk';
+export type ProfileThemePreset =
+  | 'executive'
+  | 'minimal'
+  | 'organic'
+  | 'nocturno'
+  /** @deprecated Use nocturno */
+  | 'cyberpunk';
+
 
 export type PageTemplateId =
     | 'modern_tabs'

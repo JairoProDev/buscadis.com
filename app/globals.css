@@ -23,6 +23,21 @@
   }
 }
 
+/*
+ * Storefront bridge (Sprint 8): legacy --bg-* / --text-* inside [data-tenant]
+ * resolve to --bp-* surfaces — JS no longer invents marketplace globals.
+ */
+[data-tenant] {
+  --bg-primary: var(--bp-surface);
+  --bg-secondary: var(--bp-canvas);
+  --bg-tertiary: var(--bp-surface-elevated);
+  --text-primary: var(--bp-text);
+  --text-secondary: var(--bp-text-muted);
+  --text-tertiary: var(--bp-text-muted);
+  --border-color: var(--bp-border);
+  --border-subtle: var(--bp-border);
+}
+
 /* =========================================================
    Base — typography & resets
    Color / space / elevation live in @buscadis/tokens

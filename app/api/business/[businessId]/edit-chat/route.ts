@@ -64,12 +64,20 @@ function runTools(message: string, profile: Partial<BusinessProfile>): ToolResul
     const type = lower.includes('deal') ? 'deals' : lower.includes('rese') ? 'reviews' : 'catalog';
     patch.profile_blocks = blocks.map((b) => (b.type === type ? { ...b, visible: true } : b));
     reply = `Bloque ${type} visible.`;
-  } else if (/(tema|theme)\s*(ejecutivo|minimal|org[aá]nico|cyber)/.test(lower)) {
-    const presets = { ejecutivo: 'executive', minimal: 'minimal', orgánico: 'organic', organico: 'organic', cyber: 'cyberpunk' } as const;
+  } else if (/(tema|theme)\s*(ejecutivo|minimal|org[aá]nico|nocturno|cyber)/.test(lower)) {
+    const presets = {
+      ejecutivo: 'executive',
+      minimal: 'minimal',
+      orgánico: 'organic',
+      organico: 'organic',
+      nocturno: 'nocturno',
+      cyber: 'nocturno',
+      cyberpunk: 'nocturno',
+    } as const;
     const key = Object.keys(presets).find((k) => lower.includes(k)) as keyof typeof presets | undefined;
     if (key) {
       patch.theme_preset = presets[key];
-      patch.theme_mode = presets[key] === 'cyberpunk' ? 'dark' : 'light';
+      patch.theme_mode = presets[key] === 'nocturno' ? 'dark' : 'light';
       reply = `Tema ${presets[key]} aplicado.`;
     }
   } else if (/(nombre|name)/.test(lower)) {

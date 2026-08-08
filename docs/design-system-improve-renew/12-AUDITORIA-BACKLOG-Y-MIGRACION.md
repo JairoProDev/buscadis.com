@@ -87,8 +87,9 @@ Header a 56/64, nav inferior a 56, composer con estados completos y accesible po
 **Hecho:** 2026-08-08 · `--bs-header-height` / `--bs-nav-height`; nav fija; categorías S2; FilterSectionCard CSS.
 *Terminado cuando:* el chrome permanente en móvil baja de 136px a 112px.
 
-### Sprint 8 · Storefront kit 🔜
+### Sprint 8 · Storefront kit ✅
 Separar el kit, implementar el contrato de tema de tenant, migrar los presets, eliminar la sobrescritura de variables globales.
+**Hecho:** 2026-08-08 · `@buscadis/storefront-kit`; `cyberpunk`→`nocturno`; `smoke:storefront`.
 *Terminado cuando:* un tema de negocio con un color extremo (verde neón, negro) sigue siendo legible sin intervención manual.
 
 ---

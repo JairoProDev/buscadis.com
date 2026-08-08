@@ -13,7 +13,7 @@ const bodySchema = z.object({
 function suggestTemplate(input: z.infer<typeof bodySchema>) {
   const reasons: string[] = [];
   let templateId = 'modern_tabs';
-  let themePreset: 'executive' | 'minimal' | 'organic' | 'cyberpunk' = 'executive';
+  let themePreset: 'executive' | 'minimal' | 'organic' | 'nocturno' = 'executive';
 
   const cat = (input.dominantCategory || '').toLowerCase();
   const photoRatio = input.productsWithPhotoRatio ?? 0;
@@ -25,7 +25,7 @@ function suggestTemplate(input: z.infer<typeof bodySchema>) {
     reasons.push('Categoría gastronómica detectada');
   } else if (cat.includes('belleza') || cat.includes('salon') || cat.includes('spa')) {
     templateId = 'pack_belleza';
-    themePreset = 'cyberpunk';
+    themePreset = 'nocturno';
     reasons.push('Sector belleza / bienestar');
   } else if (cat.includes('ferret') || cat.includes('construc') || cat.includes('herramient')) {
     templateId = 'pack_ferreteria';

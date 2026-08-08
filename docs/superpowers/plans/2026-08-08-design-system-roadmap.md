@@ -1,6 +1,6 @@
 # Design System Migration — Roadmap
 
-> **Estado:** Sprints 1–7 ✅ · Sprint 8 🔜  
+> **Estado:** Sprints 1–8 ✅ (roadmap design system cerrado)  
 > **Fuente de verdad de diseño:** `docs/design-system-improve-renew/`  
 > **Fuente de verdad de tokens:** `packages/tokens/`  
 > **Actualizado:** 2026-08-08
@@ -25,7 +25,7 @@
 | **5** | AdisoCard + rejilla | ✅ Hecho | [sprint-5](./2026-08-08-sprint-5-adisocard-rejilla.md) | Anatomía fija + Tailwind grid + scroll restore |
 | **6** | SSR + indexación | ✅ Hecho | [sprint-6](./2026-08-08-sprint-6-ssr-indexing.md) | HTML + JSON-LD en 4 rutas; `npm run smoke:ssr` |
 | **7** | Chrome + composer | ✅ Hecho | [sprint-7](./2026-08-08-sprint-7-chrome-composer.md) | Chrome móvil 112px |
-| **8** | Storefront kit | 🔜 Siguiente | [abajo §8](#sprint-8--storefront-kit) | Tenant extremo legible |
+| **8** | Storefront kit | ✅ Hecho | [sprint-8](./2026-08-08-sprint-8-storefront-kit.md) | Tenant extremo legible; sin `--bg-*` en JS |
 
 ---
 
@@ -123,9 +123,11 @@ curl -sL https://buscadis.com | head -c 2000
 
 ---
 
-## Sprint 8 — Storefront kit
+## Sprint 8 — Storefront kit ✅
 
 **Goal:** `@buscadis/storefront-kit`; contrato tenant (5 vars); presets como semillas; dejar de pisar `--bg-*` globales.
+
+**Hecho:** `derivarTemaTenant` + presets (nocturno); shell `data-tenant`; bridge CSS; `npm run smoke:storefront`.
 
 **Done:** seed neón/negro sigue AA sin intervención.
 

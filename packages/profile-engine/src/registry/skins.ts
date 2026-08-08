@@ -42,9 +42,20 @@ export const STYLE_SKINS: StyleSkinTokens[] = [
     accentStyle: 'gradient',
   },
   {
+    id: 'nocturno',
+    label: 'Nocturno',
+    color: '#7C3AED',
+    mode: 'dark',
+    fontFamily: 'display',
+    radius: 'rounded',
+    density: 'comfortable',
+    accentStyle: 'gradient',
+  },
+  /** @deprecated alias for nocturno — keep id for existing engine docs */
+  {
     id: 'cyberpunk',
-    label: 'Cyber',
-    color: '#a855f7',
+    label: 'Nocturno',
+    color: '#7C3AED',
     mode: 'dark',
     fontFamily: 'display',
     radius: 'rounded',
@@ -54,5 +65,8 @@ export const STYLE_SKINS: StyleSkinTokens[] = [
 ];
 
 export function getStyleSkin(id: string): StyleSkinTokens {
+  if (id === 'cyberpunk') {
+    return STYLE_SKINS.find((s) => s.id === 'nocturno') ?? STYLE_SKINS[0];
+  }
   return STYLE_SKINS.find((s) => s.id === id) ?? STYLE_SKINS[0];
 }

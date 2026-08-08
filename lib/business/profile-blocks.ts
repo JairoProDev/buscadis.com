@@ -16,10 +16,12 @@ export const PROFILE_THEME_PRESETS: Record<
   ProfileThemePreset,
   { label: string; color: string; mode: 'light' | 'dark' }
 > = {
-  executive: { label: 'Ejecutivo', color: '#1e3a5f', mode: 'light' },
+  executive: { label: 'Ejecutivo', color: '#1E3A5F', mode: 'light' },
   minimal: { label: 'Minimal', color: '#171717', mode: 'light' },
-  organic: { label: 'Orgánico', color: '#2d6a4f', mode: 'light' },
-  cyberpunk: { label: 'Cyberpunk', color: '#a855f7', mode: 'dark' },
+  organic: { label: 'Orgánico', color: '#2D6A4F', mode: 'light' },
+  nocturno: { label: 'Nocturno', color: '#7C3AED', mode: 'dark' },
+  /** @deprecated alias → nocturno */
+  cyberpunk: { label: 'Nocturno', color: '#7C3AED', mode: 'dark' },
 };
 
 // normalizeProfileBlocks lives in lib/business/blocks/normalize.ts

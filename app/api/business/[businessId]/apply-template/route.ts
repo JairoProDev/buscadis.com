@@ -15,7 +15,7 @@ const supabaseAdmin = createClient(
 const bodySchema = z.object({
   templateId: z.string(),
   policy: z.enum(['merge', 'replace']).optional(),
-  themePreset: z.enum(['executive', 'minimal', 'organic', 'cyberpunk']).optional(),
+  themePreset: z.enum(['executive', 'minimal', 'organic', 'nocturno', 'cyberpunk']).optional(),
 });
 
 export async function POST(

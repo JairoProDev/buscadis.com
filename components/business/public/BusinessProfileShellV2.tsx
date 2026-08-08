@@ -15,7 +15,7 @@ import BlockRendererEngine from '@/components/business/public/BlockRendererEngin
 import CommerceDock from '@/components/business/public/CommerceDock';
 import { usesWireframeLayout } from '@/lib/profile/adapters/business-adapter';
 import BuscadisDiscovery from '@/components/business/public/BuscadisDiscovery';
-import { businessThemeStyle, businessThemeClassName } from '@/lib/business/public-utils';
+import { businessThemeStyle, businessThemeClassName, businessThemeDataAttrs } from '@/lib/business/public-utils';
 import { normalizeProfileBlocks } from '@/lib/business/blocks/normalize';
 import { getTemplateById } from '@/lib/business/templates/registry';
 import type { BlockRenderContext } from '@/lib/business/blocks/types';
@@ -268,8 +268,9 @@ export default function BusinessProfileShellV2({
   return (
     <div
       id={isPreviewMode ? undefined : 'printable-content'}
+      {...businessThemeDataAttrs(profile)}
       className={cn(
-        'bg-[var(--bg-secondary)] text-[var(--text-primary)]',
+        'bg-[var(--bp-canvas,var(--bs-bg-canvas))] text-[var(--bp-text,var(--bs-fg-default))]',
         isPreviewMode ? 'min-h-0 relative isolate' : 'min-h-screen',
         dockBottomPad,
         businessThemeClassName(profile),

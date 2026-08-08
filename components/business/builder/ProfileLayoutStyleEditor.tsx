@@ -35,8 +35,8 @@ export default function ProfileLayoutStyleEditor({
 
   const applySkin = (skinId: string) => {
     const skin = STYLE_SKINS.find((s) => s.id === skinId) ?? STYLE_SKINS[0];
-    const preset = ['executive', 'minimal', 'organic', 'cyberpunk'].includes(skinId)
-      ? (skinId as BusinessProfile['theme_preset'])
+    const preset = ['executive', 'minimal', 'organic', 'nocturno', 'cyberpunk'].includes(skinId)
+      ? ((skinId === 'cyberpunk' ? 'nocturno' : skinId) as BusinessProfile['theme_preset'])
       : profile.theme_preset;
     onUpdate({
       profile_style: { skinId, overrides: profile.profile_style?.overrides },
@@ -115,14 +115,14 @@ export default function ProfileLayoutStyleEditor({
 
       {panel === 'style' && (
         <div className="grid grid-cols-2 gap-2">
-          {STYLE_SKINS.map((skin) => (
+          {STYLE_SKINS.filter((skin) => skin.id !== 'cyberpunk').map((skin) => (
             <button
               key={skin.id}
               type="button"
               onClick={() => applySkin(skin.id)}
               className={cn(
                 'flex items-center gap-2 rounded-xl border p-2 text-left text-xs font-semibold',
-                styleId === skin.id
+                styleId === skin.id || (styleId === 'cyberpunk' && skin.id === 'nocturno')
                   ? 'border-[var(--brand-color)] bg-[var(--brand-color)]/5'
                   : 'border-slate-200'
               )}
