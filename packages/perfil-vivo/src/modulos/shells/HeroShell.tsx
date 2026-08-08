@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import type { Negocio } from '../../types';
-import { usePerfil } from '../PerfilContext';
 
 const CRITERIOS: Record<number, { titulo: string; texto: string }> = {
   1: {
@@ -25,58 +24,36 @@ function mostrarSelloVerificado(negocio: Negocio): boolean {
   return pago && negocio.verificacion.nivel >= 2;
 }
 
-function etiquetasHero(negocio: Negocio): string[] {
+function metaLine(negocio: Negocio): string {
   const seen = new Set<string>();
-  const out: string[] = [];
+  const bits: string[] = [];
   const push = (raw?: string) => {
     const t = raw?.trim();
     if (!t) return;
     const key = t.toLowerCase();
     if (seen.has(key)) return;
     seen.add(key);
-    out.push(t);
+    bits.push(t);
   };
-  for (const e of negocio.etiquetas ?? []) push(e);
+  for (const e of (negocio.etiquetas ?? []).slice(0, 2)) push(e);
   push(negocio.categoria?.nombre);
-  return out.slice(0, 3);
+  const ciudad = negocio.ubicacion?.distrito || negocio.ubicacion?.provincia;
+  if (ciudad) push(ciudad);
+  return bits.slice(0, 3).join(' • ');
 }
 
-function lugarCorto(u: NonNullable<Negocio['ubicacion']>): string {
-  const ciudad = u.distrito || u.provincia;
-  if (ciudad && u.provincia && ciudad !== u.provincia) {
-    return `${ciudad}, ${u.provincia}`;
-  }
-  if (ciudad) return `${ciudad}, Perú`;
-  return 'Perú';
-}
-
+/**
+ * Hybrid 3.0 — masthead limpio: portada corta + identidad flotante
+ * (logo circular solapado). Dirección exacta vive en Ubicación (SEO).
+ */
 export function HeroShell({ negocio }: { negocio: Negocio }) {
-  const { payload } = usePerfil();
   const [open, setOpen] = useState(false);
   const nivel = negocio.verificacion.nivel;
   const portada = negocio.identidad.portadaUrl;
   const criterio = CRITERIOS[Math.max(nivel, 2)] ?? CRITERIOS[2];
   const verificado = mostrarSelloVerificado(negocio);
-  const tags = etiquetasHero(negocio);
   const eslogan = negocio.eslogan?.trim() || null;
-  const estado = payload.estadoVivo;
-  const lugar = negocio.ubicacion ? lugarCorto(negocio.ubicacion) : null;
-  const direccion =
-    negocio.ubicacion?.mostrarDireccionExacta && negocio.ubicacion.direccion
-      ? negocio.ubicacion.direccion.trim()
-      : null;
-
-  const metaRubro = tags.join(' • ');
-  const estadoCorto = estado.abierto
-    ? estado.porCerrar
-      ? 'Por cerrar'
-      : 'Abierto ahora'
-    : 'Cerrado';
-  const estadoTone = estado.abierto
-    ? estado.porCerrar
-      ? 'warn'
-      : 'ok'
-    : 'err';
+  const meta = metaLine(negocio);
 
   function iniciales(nombre: string): string {
     const parts = nombre.trim().split(/\s+/).slice(0, 2);
@@ -93,7 +70,7 @@ export function HeroShell({ negocio }: { negocio: Negocio }) {
               src={portada}
               alt=""
               width={480}
-              height={300}
+              height={210}
               fetchPriority="high"
               decoding="async"
               className="pv-hero__cover-img"
@@ -102,95 +79,50 @@ export function HeroShell({ negocio }: { negocio: Negocio }) {
             <div className="pv-hero__cover-fallback" aria-hidden />
           )}
           <div className="pv-hero__cover-shade" aria-hidden />
+        </div>
 
-          <div className="pv-hero__overlay">
-            <div
-              className="pv-hero__logo"
-              style={{
-                background: negocio.identidad.logoUrl
-                  ? '#fff'
-                  : 'var(--mk-accion)',
-                color: 'var(--mk-sobre)',
-              }}
-            >
-              {negocio.identidad.logoUrl ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={negocio.identidad.logoUrl}
-                  alt={`Logo de ${negocio.nombre}`}
-                  width={96}
-                  height={96}
-                  fetchPriority="high"
-                  decoding="async"
-                />
-              ) : (
-                <span className="pv-hero__iniciales" aria-hidden>
-                  {iniciales(negocio.nombre)}
-                </span>
-              )}
-            </div>
+        <div className="pv-hero__identity">
+          <div
+            className="pv-hero__logo"
+            style={{
+              background: negocio.identidad.logoUrl ? '#fff' : 'var(--mk-accion)',
+              color: 'var(--mk-sobre)',
+            }}
+          >
+            {negocio.identidad.logoUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={negocio.identidad.logoUrl}
+                alt={`Logo de ${negocio.nombre}`}
+                width={72}
+                height={72}
+                fetchPriority="high"
+                decoding="async"
+              />
+            ) : (
+              <span className="pv-hero__iniciales" aria-hidden>
+                {iniciales(negocio.nombre)}
+              </span>
+            )}
+          </div>
 
-            <div className="pv-hero__copy">
+          <div className="pv-hero__copy">
+            <h1 className="pv-hero__name">
+              <span className="pv-hero__name-text">{negocio.nombre}</span>
               {verificado ? (
                 <button
                   type="button"
-                  className="pv-hero__badge"
                   onClick={() => setOpen(true)}
+                  title={criterio?.titulo}
                   aria-label={`Negocio verificado: ${criterio?.titulo}`}
+                  className="pv-hero__verif"
                 >
-                  <span className="pv-hero__badge-check" aria-hidden>
-                    ✓
-                  </span>
-                  Negocio verificado
+                  ✓
                 </button>
               ) : null}
-
-              <h1 className="pv-hero__name">
-                <span className="pv-hero__name-text">{negocio.nombre}</span>
-                {verificado ? (
-                  <button
-                    type="button"
-                    onClick={() => setOpen(true)}
-                    title={criterio?.titulo}
-                    aria-label={`Negocio verificado: ${criterio?.titulo}`}
-                    className="pv-hero__verif"
-                  >
-                    ✓
-                  </button>
-                ) : null}
-              </h1>
-
-              {eslogan ? <p className="pv-hero__eslogan">{eslogan}</p> : null}
-
-              {metaRubro ? (
-                <p className="pv-hero__meta">{metaRubro}</p>
-              ) : null}
-
-              <p className="pv-hero__lugar">
-                {direccion || lugar ? (
-                  <>
-                    <span className="pv-hero__lugar-ico" aria-hidden>
-                      ⌖
-                    </span>
-                    <span className="pv-hero__lugar-text">
-                      {direccion ? `${direccion}` : null}
-                      {direccion && lugar ? ' · ' : null}
-                      {lugar}
-                    </span>
-                  </>
-                ) : null}
-                {(direccion || lugar) && estado ? (
-                  <span className="pv-hero__sep" aria-hidden>
-                    ·
-                  </span>
-                ) : null}
-                <span
-                  className={`pv-hero__open pv-hero__open--${estadoTone}`}
-                >
-                  {estadoCorto}
-                </span>
-              </p>
-            </div>
+            </h1>
+            {eslogan ? <p className="pv-hero__eslogan">{eslogan}</p> : null}
+            {meta ? <p className="pv-hero__meta">{meta}</p> : null}
           </div>
         </div>
       </div>

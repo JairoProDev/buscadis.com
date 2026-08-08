@@ -9,6 +9,7 @@ import { CategoriasShell } from './shells/CategoriasShell';
 import { EstadoShell } from './shells/EstadoShell';
 import { HeroShell } from './shells/HeroShell';
 import { MetricasShell } from './shells/MetricasShell';
+import { NovedadesShell } from './shells/NovedadesShell';
 import { ServiciosShell } from './shells/ServiciosShell';
 
 export type ShellProps = {
@@ -22,6 +23,7 @@ const REGISTRY: Partial<Record<TipoModulo, ComponentType<ShellProps>>> = {
   metricas: () => <MetricasShell />,
   estado: () => <EstadoShell />,
   acciones: () => <AccionesShell />,
+  novedades: ({ modulo }) => <NovedadesShell titulo={modulo.titulo} />,
   catalogo: ({ modulo }) => <CatalogoShell titulo={modulo.titulo} />,
   categorias: ({ modulo }) => <CategoriasShell titulo={modulo.titulo} />,
   servicios: ({ modulo }) => <ServiciosShell titulo={modulo.titulo} />,

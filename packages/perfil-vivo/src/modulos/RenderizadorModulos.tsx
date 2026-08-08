@@ -13,6 +13,7 @@ const EAGER: ReadonlySet<TipoModulo> = new Set([
   'metricas',
   'estado',
   'acciones',
+  'novedades',
   'catalogo',
   'servicios',
   'categorias',

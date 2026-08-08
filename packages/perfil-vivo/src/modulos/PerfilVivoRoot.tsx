@@ -21,6 +21,33 @@ function modoFromIdentidad(
   return 'light';
 }
 
+function formatActualizado(iso: string): string {
+  try {
+    const d = new Date(iso);
+    if (Number.isNaN(d.getTime())) return '';
+    return d.toLocaleDateString('es-PE', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+    });
+  } catch {
+    return '';
+  }
+}
+
+function PieDeConfianza({ actualizadoEn }: { actualizadoEn: string }) {
+  const fecha = formatActualizado(actualizadoEn);
+  return (
+    <footer className="pv-pie" id="pie-confianza">
+      <p className="pv-pie__brand">Buscadis</p>
+      <p className="pv-pie__meta">
+        Perfil del negocio
+        {fecha ? ` · Actualizado ${fecha}` : ''}
+      </p>
+    </footer>
+  );
+}
+
 export function PerfilVivoRoot({
   payload,
   handoffs,
@@ -48,7 +75,7 @@ export function PerfilVivoRoot({
       className="pv-root"
       data-theme={modo === 'dark' ? 'dark' : 'light'}
       data-arquetipo={negocio.arquetipo}
-      data-visual="2"
+      data-visual="3"
       style={style}
     >
       <PerfilProvider value={{ payload, handoffs }}>
@@ -58,6 +85,7 @@ export function PerfilVivoRoot({
             <BarraSecciones />
           </Suspense>
           <RenderizadorModulos />
+          <PieDeConfianza actualizadoEn={negocio.actualizadoEn} />
           <BarraAccion label={primaryLabel} />
         </ChromeUIProvider>
       </PerfilProvider>

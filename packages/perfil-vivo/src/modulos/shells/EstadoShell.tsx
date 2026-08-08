@@ -3,8 +3,8 @@
 import { usePerfil } from '../PerfilContext';
 
 /**
- * Pastilla de estado — complementa el “Abierto ahora” del hero
- * con horario / respuesta / delivery.
+ * Hybrid 3.0 — única pastilla de estado vivo
+ * (Abierto · hasta / Responde / Delivery). No duplicar en hero.
  */
 export function EstadoShell() {
   const { payload } = usePerfil();
@@ -12,19 +12,15 @@ export function EstadoShell() {
   const tone = e.abierto ? (e.porCerrar ? 'warn' : 'ok') : 'err';
 
   const bits: string[] = [];
-  // Evitar repetir solo “Abierto/Cerrado” si el hero ya lo muestra
-  if (e.mensaje && !/^(abierto|cerrado)\b/i.test(e.mensaje.trim())) {
-    bits.push(e.mensaje);
-  } else if (e.abierto && e.cierraEn) {
-    bits.push(`Hasta las ${e.cierraEn}`);
-  } else if (!e.abierto && e.abreEn) {
-    bits.push(`Abre a las ${e.abreEn}`);
+  if (e.abierto) {
+    bits.push(e.porCerrar ? 'Por cerrar' : 'Abierto ahora');
+    if (e.cierraEn) bits.push(`hasta ${e.cierraEn}`);
   } else {
-    bits.push(e.mensaje);
+    bits.push('Cerrado');
+    if (e.abreEn) bits.push(`abre ${e.abreEn}`);
   }
-
   if (e.respuestaMedianaMin != null && e.respuestaMedianaMin > 0) {
-    bits.push(`Responde en ~${e.respuestaMedianaMin} min`);
+    bits.push(`Responde ~${e.respuestaMedianaMin} min`);
   }
   if (e.deliveryActivo) bits.push('Delivery activo');
 
@@ -38,7 +34,7 @@ export function EstadoShell() {
         <span>
           {bits.map((b, i) => (
             <span key={`${i}-${b}`}>
-              {i > 0 ? <span style={{ opacity: 0.55 }}> · </span> : null}
+              {i > 0 ? <span className="pv-estado__sep"> · </span> : null}
               {b}
             </span>
           ))}

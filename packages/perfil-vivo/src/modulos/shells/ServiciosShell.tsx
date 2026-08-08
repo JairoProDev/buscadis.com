@@ -1,13 +1,14 @@
 'use client';
 
-import { useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import type { Producto } from '../../types';
 import { formatPrecio } from '../../estado/calcular-estado';
 import { usePerfil } from '../PerfilContext';
 
+const SHEET_KEY = 'pv-servicio';
+
 /**
- * §7b — Servicios y precios (arquetipo cita / profesional).
- * Card sin foto obligatoria; "Desde S/"; duración; CTA agendar por WA.
+ * Hybrid 3.0 — servicios tipo tienda: precio dominante + sheet con history.
  */
 export function ServiciosShell({ titulo }: { titulo: string }) {
   const { payload, handoffs } = usePerfil();
@@ -21,75 +22,57 @@ export function ServiciosShell({ titulo }: { titulo: string }) {
     .slice(0, 12);
   const [openId, setOpenId] = useState<string | null>(null);
   const open = servicios.find((p) => p.id === openId) ?? null;
+  const total = servicios.length;
+
+  const closeSheet = useCallback(() => {
+    if (typeof window !== 'undefined' && window.history.state?.pvSheet === SHEET_KEY) {
+      window.history.back();
+      return;
+    }
+    setOpenId(null);
+  }, []);
+
+  const openSheet = useCallback((id: string) => {
+    setOpenId(id);
+    if (typeof window === 'undefined') return;
+    window.history.pushState({ pvSheet: SHEET_KEY, id }, '');
+  }, []);
+
+  useEffect(() => {
+    const onPop = () => setOpenId(null);
+    window.addEventListener('popstate', onPop);
+    return () => window.removeEventListener('popstate', onPop);
+  }, []);
 
   if (servicios.length < 2) return null;
 
   return (
     <section className="pv-modulo" id="servicios">
-      <h2 style={{ margin: '0 0 12px', font: 'var(--ts-modulo)', color: 'var(--tx-strong)' }}>
-        {titulo || 'Servicios y precios'}
-      </h2>
-      <ul style={{ listStyle: 'none', margin: 0, padding: 0, display: 'grid', gap: 10 }}>
+      <div className="pv-store-head">
+        <h2 className="pv-store-head__title">{titulo || 'Servicios'}</h2>
+        <a className="pv-store-head__link" href="#servicios">
+          Ver los {total} →
+        </a>
+      </div>
+      <ul className="pv-servicios-list">
         {servicios.map((s) => (
           <li key={s.id}>
-            <button
-              type="button"
-              onClick={() => setOpenId(s.id)}
-              style={{
-                width: '100%',
-                textAlign: 'left',
-                minHeight: 72,
-                padding: '14px 16px',
-                borderRadius: 'var(--rd-lg)',
-                border: '1px solid var(--bd-hair)',
-                background: 'var(--sf-elev)',
-                cursor: 'pointer',
-                boxShadow: 'var(--el-1)',
-              }}
-            >
-              <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12 }}>
-                <div style={{ minWidth: 0 }}>
-                  <p
-                    style={{
-                      margin: 0,
-                      font: 'var(--ts-cuerpo)',
-                      fontWeight: 700,
-                      color: 'var(--tx-strong)',
-                    }}
-                  >
-                    {s.nombre}
-                  </p>
-                  {s.descripcion ? (
-                    <p
-                      style={{
-                        margin: '4px 0 0',
-                        font: 'var(--ts-meta)',
-                        color: 'var(--tx-muted)',
-                        display: '-webkit-box',
-                        WebkitLineClamp: 1,
-                        WebkitBoxOrient: 'vertical',
-                        overflow: 'hidden',
-                      }}
-                    >
-                      {s.descripcion}
-                    </p>
-                  ) : null}
-                </div>
-                {s.precio ? (
-                  <p
-                    style={{
-                      margin: 0,
-                      flexShrink: 0,
-                      font: 'var(--ts-precio)',
-                      fontFamily: 'var(--ff-data)',
-                      color: 'var(--tx-strong)',
-                    }}
-                  >
-                    {s.precio.tipo === 'desde' ? 'Desde ' : ''}
-                    {formatPrecio(s.precio.valor, s.precio.moneda)}
-                  </p>
+            <button type="button" className="pv-servicio-row" onClick={() => openSheet(s.id)}>
+              <div style={{ minWidth: 0 }}>
+                <p className="pv-servicio-row__nombre">{s.nombre}</p>
+                {s.descripcion ? (
+                  <p className="pv-servicio-row__desc">{s.descripcion}</p>
                 ) : null}
+                <span className="pv-card-producto__cta" style={{ marginTop: 8 }}>
+                  Consultar
+                </span>
               </div>
+              {s.precio ? (
+                <p className="pv-servicio-row__precio">
+                  {s.precio.tipo === 'desde' ? 'Desde ' : ''}
+                  {formatPrecio(s.precio.valor, s.precio.moneda)}
+                </p>
+              ) : null}
             </button>
           </li>
         ))}
@@ -99,7 +82,7 @@ export function ServiciosShell({ titulo }: { titulo: string }) {
         <ServicioSheet
           servicio={open}
           handoffUrl={handoffs.productoWhatsapp[open.id] ?? handoffs.whatsappPrimary}
-          onClose={() => setOpenId(null)}
+          onClose={closeSheet}
         />
       ) : null}
     </section>
@@ -120,53 +103,34 @@ function ServicioSheet({
       role="dialog"
       aria-modal="true"
       aria-label={servicio.nombre}
+      className="pv-sheet-scrim"
       onClick={onClose}
-      style={{
-        position: 'fixed',
-        inset: 0,
-        zIndex: 60,
-        background: 'rgba(19,18,24,.45)',
-        display: 'flex',
-        alignItems: 'flex-end',
-        justifyContent: 'center',
-      }}
     >
-      <div
-        onClick={(e) => e.stopPropagation()}
-        style={{
-          width: '100%',
-          maxWidth: 480,
-          background: 'var(--sf-elev)',
-          borderRadius: 'var(--rd-xl) var(--rd-xl) 0 0',
-          padding: 20,
-          paddingBottom: 28,
-        }}
-      >
-        <h3 style={{ margin: '0 0 8px', font: 'var(--ts-modulo)' }}>{servicio.nombre}</h3>
+      <div className="pv-sheet" onClick={(e) => e.stopPropagation()} style={{ paddingBottom: 28 }}>
+        <h3 className="pv-sheet__title" style={{ marginTop: 4 }}>
+          {servicio.nombre}
+        </h3>
         {servicio.precio ? (
-          <p style={{ margin: '0 0 12px', font: 'var(--ts-precio-lg)' }}>
+          <p className="pv-sheet__precio">
             {servicio.precio.tipo === 'desde' ? 'Desde ' : ''}
             {formatPrecio(servicio.precio.valor, servicio.precio.moneda)}
           </p>
         ) : null}
         {servicio.descripcion ? (
-          <p style={{ margin: '0 0 16px', font: 'var(--ts-cuerpo)', color: 'var(--tx-muted)' }}>
+          <p className="pv-sheet__desc" style={{ color: 'var(--tx-muted)', marginBottom: 16 }}>
             {servicio.descripcion}
           </p>
         ) : null}
         {handoffUrl ? (
           <a
             href={handoffUrl}
+            className="pv-barra-accion__primary"
             style={{
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              minHeight: 52,
-              borderRadius: 'var(--rd-md)',
-              background: 'var(--mk-accion)',
-              color: 'var(--mk-sobre)',
-              fontWeight: 700,
               textDecoration: 'none',
+              minHeight: 52,
             }}
           >
             Agendar por WhatsApp

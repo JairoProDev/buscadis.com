@@ -63,36 +63,6 @@ function IconClose() {
   );
 }
 
-async function buildQrDataUrl(url: string): Promise<string> {
-  try {
-    // Resuelve desde el app host (dependencia `qrcode` en monorepo).
-    const mod = (await import('qrcode')) as {
-      default?: {
-        toDataURL: (
-          text: string,
-          opts?: Record<string, unknown>
-        ) => Promise<string>;
-      };
-      toDataURL?: (
-        text: string,
-        opts?: Record<string, unknown>
-      ) => Promise<string>;
-    };
-    const toDataURL = mod.default?.toDataURL ?? mod.toDataURL;
-    if (toDataURL) {
-      return await toDataURL(url, {
-        width: 280,
-        margin: 2,
-        errorCorrectionLevel: 'M',
-        color: { dark: '#111827', light: '#ffffff' },
-      });
-    }
-  } catch {
-    /* fallback abajo */
-  }
-  return `https://api.qrserver.com/v1/create-qr-code/?size=280x280&data=${encodeURIComponent(url)}`;
-}
-
 function Sheet({
   open,
   title,
@@ -230,7 +200,7 @@ function MenuSecciones() {
 
 function MenuMas() {
   const { payload } = usePerfil();
-  const { panel, close, openQr } = useChromeUI();
+  const { panel, close } = useChromeUI();
   const slug = payload.negocio.slug;
   const [copied, setCopied] = useState(false);
   const [following, setFollowing] = useState(false);
@@ -310,16 +280,6 @@ function MenuMas() {
         <button
           type="button"
           className="pv-menu-mas__btn"
-          onClick={() => {
-            openQr();
-          }}
-        >
-          <span className="pv-menu-mas__title">Mostrar código QR</span>
-          <span className="pv-menu-mas__hint">Para imprimir o escanear</span>
-        </button>
-        <button
-          type="button"
-          className="pv-menu-mas__btn"
           onClick={onToggleFollow}
           aria-pressed={following}
         >
@@ -336,61 +296,7 @@ function MenuMas() {
   );
 }
 
-function ModalQr() {
-  const { payload } = usePerfil();
-  const { panel, close, openMas } = useChromeUI();
-  const [src, setSrc] = useState<string | null>(null);
-  const url = perfilPublicUrl(payload.negocio.slug);
-
-  useEffect(() => {
-    if (panel !== 'qr') return;
-    let cancelled = false;
-    void buildQrDataUrl(
-      `${url}${url.includes('?') ? '&' : '?'}src=qr&utm_source=qr&utm_medium=offline`
-    ).then((data) => {
-      if (!cancelled) setSrc(data);
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, [panel, url]);
-
-  return (
-    <Sheet
-      open={panel === 'qr'}
-      title="Código QR"
-      onClose={() => {
-        setSrc(null);
-        close();
-      }}
-    >
-      <div className="pv-qr">
-        {src ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={src} alt={`QR de ${payload.negocio.nombre}`} width={280} height={280} />
-        ) : (
-          <p className="pv-qr__loading">Generando QR…</p>
-        )}
-        <p className="pv-qr__url">{url}</p>
-        <button type="button" className="pv-qr__back" onClick={() => openMas()}>
-          Volver a opciones
-        </button>
-        <button
-          type="button"
-          className="pv-qr__done"
-          onClick={() => {
-            setSrc(null);
-            close();
-          }}
-        >
-          Listo
-        </button>
-      </div>
-    </Sheet>
-  );
-}
-
-/** Chrome superior: atrás + hamburguesa + más (compartir / QR / avisos). */
+/** Chrome superior: atrás + hamburguesa + más (compartir / copiar / avisos). */
 export function ChromeSuperior() {
   const { payload } = usePerfil();
   const { openSecciones, openMas } = useChromeUI();
@@ -451,7 +357,6 @@ export function ChromeSuperior() {
       </header>
       <MenuSecciones />
       <MenuMas />
-      <ModalQr />
     </>
   );
 }

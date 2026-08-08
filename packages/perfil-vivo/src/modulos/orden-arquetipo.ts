@@ -1,10 +1,15 @@
 import type { Arquetipo, TipoModulo } from '../types';
 
-/** Orden por defecto Retail (04 §3 A) — Sprint 0 usa este arquetipo. */
+/**
+ * Hybrid 3.0 — fold: hero → trust → estado → acciones → stories → oferta.
+ * Las novedades van temprano (si hay datos) para híbrido social.
+ */
 export const ORDEN_RETAIL: TipoModulo[] = [
   'hero',
+  'metricas',
   'estado',
   'acciones',
+  'novedades',
   'catalogo',
   'ia',
   'promocion',
@@ -13,7 +18,6 @@ export const ORDEN_RETAIL: TipoModulo[] = [
   'ubicacion',
   'horario',
   'pago',
-  'novedades',
   'canales',
   'galeria',
   'nosotros',
@@ -24,8 +28,10 @@ const ORDEN_POR_ARQUETIPO: Record<Arquetipo, TipoModulo[]> = {
   retail: ORDEN_RETAIL,
   cita: [
     'hero',
+    'metricas',
     'estado',
     'acciones',
+    'novedades',
     'servicios',
     'galeria',
     'resenas',
@@ -38,8 +44,10 @@ const ORDEN_POR_ARQUETIPO: Record<Arquetipo, TipoModulo[]> = {
   ],
   comida: [
     'hero',
+    'metricas',
     'estado',
     'acciones',
+    'novedades',
     'catalogo',
     'categorias',
     'ia',
@@ -48,13 +56,13 @@ const ORDEN_POR_ARQUETIPO: Record<Arquetipo, TipoModulo[]> = {
     'ubicacion',
     'horario',
     'pago',
-    'novedades',
     'canales',
   ],
   profesional: [
     'hero',
     'metricas',
     'acciones',
+    'nosotros',
     'servicios',
     'certificaciones',
     'resenas',
@@ -70,6 +78,7 @@ const ORDEN_POR_ARQUETIPO: Record<Arquetipo, TipoModulo[]> = {
     'hero',
     'metricas',
     'acciones',
+    'nosotros',
     'catalogo',
     'servicios',
     'resenas',
@@ -82,6 +91,7 @@ const ORDEN_POR_ARQUETIPO: Record<Arquetipo, TipoModulo[]> = {
   ],
   local: [
     'hero',
+    'metricas',
     'estado',
     'ubicacion',
     'acciones',

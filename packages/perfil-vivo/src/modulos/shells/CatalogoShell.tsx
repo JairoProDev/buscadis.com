@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import type { Producto } from '../../types';
 import { formatPrecio } from '../../estado/calcular-estado';
 import { usePerfil } from '../PerfilContext';
@@ -13,6 +13,8 @@ const ETIQUETA: Record<string, string> = {
   popular: 'Popular',
 };
 
+const SHEET_KEY = 'pv-producto';
+
 function precioLabel(p: Producto): string | null {
   if (!p.precio) return null;
   const base = formatPrecio(p.precio.valor, p.precio.moneda);
@@ -24,10 +26,12 @@ function ProductCard({
   producto,
   onOpen,
   cover,
+  ctaLabel,
 }: {
   producto: Producto;
   onOpen: () => void;
   cover?: boolean;
+  ctaLabel: string;
 }) {
   const agotado = producto.disponibilidad === 'agotado';
   const img = producto.imagenes[0];
@@ -38,54 +42,41 @@ function ProductCard({
     <button
       type="button"
       onClick={onOpen}
-      className="pv-card-producto"
-      style={{
-        opacity: agotado ? 0.6 : 1,
-        filter: agotado ? 'grayscale(1)' : undefined,
-      }}
+      className={`pv-card-producto${agotado ? ' is-agotado' : ''}`}
     >
       <div className="pv-card-producto__img-wrap">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={img?.url}
           alt={img?.alt ?? producto.nombre}
-          width={168}
-          height={168}
-          className="pv-card-producto__img"
-          style={{ objectFit: cover ? 'cover' : 'contain' }}
+          width={156}
+          height={156}
+          className={
+            cover
+              ? 'pv-card-producto__img'
+              : 'pv-card-producto__img pv-card-producto__img--contain'
+          }
         />
         {etiqueta ? (
           <span className="pv-badge">{ETIQUETA[etiqueta] ?? etiqueta}</span>
         ) : null}
         {agotado ? (
-          <span
-            className="pv-badge"
-            style={{ top: 'auto', bottom: 8, background: 'var(--err)', color: '#fff' }}
-          >
-            Agotado
-          </span>
+          <span className="pv-badge pv-badge--agotado">Agotado</span>
         ) : null}
       </div>
       <div className="pv-card-producto__body">
-        <p className="pv-card-producto__nombre">{producto.nombre}</p>
         {precio ? (
           <p className="pv-card-producto__precio">
             {precio}
             {producto.precioAnterior != null && producto.precio ? (
-              <span
-                style={{
-                  marginLeft: 6,
-                  font: 'var(--ts-meta)',
-                  color: 'var(--tx-faint)',
-                  textDecoration: 'line-through',
-                }}
-              >
+              <span className="pv-card-producto__precio-old">
                 {formatPrecio(producto.precioAnterior, producto.precio.moneda)}
               </span>
             ) : null}
           </p>
         ) : null}
-        <span className="pv-card-producto__cta">Ver</span>
+        <p className="pv-card-producto__nombre">{producto.nombre}</p>
+        <span className="pv-card-producto__cta">{ctaLabel}</span>
       </div>
     </button>
   );
@@ -96,11 +87,13 @@ function ProductoSheet({
   handoffUrl,
   productoHref,
   onClose,
+  ctaLabel,
 }: {
   producto: Producto;
   handoffUrl: string | null;
   productoHref: string;
   onClose: () => void;
+  ctaLabel: string;
 }) {
   const precio = precioLabel(producto);
   const img = producto.imagenes[0];
@@ -110,90 +103,30 @@ function ProductoSheet({
       role="dialog"
       aria-modal="true"
       aria-label={producto.nombre}
-      style={{
-        position: 'fixed',
-        inset: 0,
-        zIndex: 60,
-        background: 'rgba(19,18,24,.45)',
-        display: 'flex',
-        alignItems: 'flex-end',
-        justifyContent: 'center',
-      }}
+      className="pv-sheet-scrim"
       onClick={onClose}
       onKeyDown={(ev) => {
         if (ev.key === 'Escape') onClose();
       }}
     >
-      <div
-        style={{
-          width: '100%',
-          maxWidth: 480,
-          maxHeight: '92vh',
-          overflow: 'auto',
-          background: 'var(--sf-elev)',
-          borderRadius: 'var(--rd-xl) var(--rd-xl) 0 0',
-          padding: 16,
-          paddingBottom: 88,
-        }}
-        onClick={(e) => e.stopPropagation()}
-      >
+      <div className="pv-sheet" onClick={(e) => e.stopPropagation()}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={img?.url}
           alt={img?.alt ?? producto.nombre}
           width={480}
           height={320}
-          style={{
-            width: '100%',
-            height: 'auto',
-            aspectRatio: '1 / 1',
-            objectFit: 'cover',
-            borderRadius: 'var(--rd-md)',
-            background: 'var(--sf-sunk)',
-          }}
+          className="pv-sheet__img"
         />
-        <h3
-          style={{
-            margin: '16px 0 8px',
-            font: 'var(--ts-modulo)',
-            color: 'var(--tx-strong)',
-          }}
-        >
-          {producto.nombre}
-        </h3>
-        {precio ? (
-          <p style={{ margin: '0 0 12px', font: 'var(--ts-precio-lg)' }}>{precio}</p>
-        ) : null}
+        <h3 className="pv-sheet__title">{producto.nombre}</h3>
+        {precio ? <p className="pv-sheet__precio">{precio}</p> : null}
         {producto.descripcion ? (
-          <p style={{ margin: 0, font: 'var(--ts-cuerpo)', color: 'var(--tx-base)' }}>
-            {producto.descripcion}
-          </p>
+          <p className="pv-sheet__desc">{producto.descripcion}</p>
         ) : null}
-        <a
-          href={productoHref}
-          style={{
-            display: 'inline-block',
-            marginTop: 12,
-            font: 'var(--ts-meta)',
-            fontWeight: 700,
-            color: 'var(--mk-accion)',
-          }}
-        >
+        <a href={productoHref} className="pv-sheet__link">
           Ver página del producto →
         </a>
-        <div
-          style={{
-            position: 'fixed',
-            left: 0,
-            right: 0,
-            bottom: 0,
-            maxWidth: 480,
-            margin: '0 auto',
-            padding: 12,
-            background: 'var(--sf-elev)',
-            borderTop: '1px solid var(--bd-hair)',
-          }}
-        >
+        <div className="pv-sheet__bar">
           {handoffUrl ? (
             <a
               href={handoffUrl}
@@ -206,11 +139,11 @@ function ProductoSheet({
                 minHeight: 48,
               }}
             >
-              Preguntar por este producto
+              {ctaLabel}
             </a>
           ) : (
             <button type="button" className="pv-barra-accion__primary" disabled>
-              Preguntar por este producto
+              {ctaLabel}
             </button>
           )}
         </div>
@@ -223,22 +156,45 @@ export function CatalogoShell({ titulo }: { titulo: string }) {
   const { payload, handoffs } = usePerfil();
   const [grupo, setGrupo] = useState<string | null>(null);
   const destacados = payload.productos.filter((p) => p.activo && p.destacado);
+  const totalActivos = payload.productos.filter((p) => p.activo).length;
   const productos = (
     grupo ? destacados.filter((p) => p.grupo === grupo) : destacados
   ).slice(0, 12);
   const [openId, setOpenId] = useState<string | null>(null);
   const open = productos.find((p) => p.id === openId) ?? null;
   const slug = payload.negocio.slug;
+  const arq = payload.negocio.arquetipo;
   const coverImgs =
-    payload.negocio.arquetipo === 'comida' ||
-    payload.negocio.arquetipo === 'alto_ticket' ||
-    payload.negocio.arquetipo === 'local';
+    arq === 'comida' || arq === 'alto_ticket' || arq === 'local';
+  const ctaCard = arq === 'comida' ? 'Pedir' : 'Consultar';
+  const ctaSheet =
+    arq === 'comida' ? 'Pedir por WhatsApp' : 'Preguntar por este producto';
   const iaCfg = payload.negocio.modulos.find((m) => m.tipo === 'ia');
   const tieneIa =
     Boolean(iaCfg?.visible !== false) &&
     planSuficiente(payload.negocio.plan, MODULO_META.ia.planMin) &&
     (payload.negocio.conteos?.productos ?? payload.productos.length) >=
       MODULO_META.ia.minDatos;
+
+  const closeSheet = useCallback(() => {
+    if (typeof window !== 'undefined' && window.history.state?.pvSheet === SHEET_KEY) {
+      window.history.back();
+      return;
+    }
+    setOpenId(null);
+  }, []);
+
+  const openSheet = useCallback((id: string) => {
+    setOpenId(id);
+    if (typeof window === 'undefined') return;
+    window.history.pushState({ pvSheet: SHEET_KEY, id }, '');
+  }, []);
+
+  useEffect(() => {
+    const onPop = () => setOpenId(null);
+    window.addEventListener('popstate', onPop);
+    return () => window.removeEventListener('popstate', onPop);
+  }, []);
 
   useEffect(() => {
     const sync = () => {
@@ -259,20 +215,13 @@ export function CatalogoShell({ titulo }: { titulo: string }) {
 
   if (destacados.length < 3) return null;
 
+  const verN = Math.max(totalActivos, destacados.length);
+
   return (
     <section className="pv-modulo" id="catalogo">
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          minHeight: 44,
-          marginBottom: 12,
-          gap: 12,
-        }}
-      >
-        <h2 style={{ margin: 0, font: 'var(--ts-modulo)', color: 'var(--tx-strong)' }}>
-          {titulo || 'Catálogo'}
+      <div className="pv-store-head">
+        <h2 className="pv-store-head__title">
+          {titulo || 'Productos'}
           {grupo ? (
             <span style={{ font: 'var(--ts-meta)', color: 'var(--tx-muted)', fontWeight: 500 }}>
               {' '}
@@ -283,6 +232,8 @@ export function CatalogoShell({ titulo }: { titulo: string }) {
         {grupo ? (
           <button
             type="button"
+            className="pv-store-head__link"
+            style={{ border: 0, background: 'transparent', cursor: 'pointer' }}
             onClick={() => {
               try {
                 sessionStorage.removeItem('pv-grupo');
@@ -291,57 +242,32 @@ export function CatalogoShell({ titulo }: { titulo: string }) {
               }
               setGrupo(null);
             }}
-            style={{
-              border: 0,
-              background: 'transparent',
-              color: 'var(--mk-accion)',
-              font: 'var(--ts-meta)',
-              fontWeight: 700,
-              cursor: 'pointer',
-              minHeight: 44,
-            }}
           >
             Ver todos
           </button>
-        ) : null}
+        ) : (
+          <a
+            className="pv-store-head__link"
+            href={`/v/${encodeURIComponent(slug)}#catalogo`}
+          >
+            Ver los {verN} →
+          </a>
+        )}
       </div>
-      <div
-        style={{
-          display: 'flex',
-          gap: 12,
-          overflowX: 'auto',
-          scrollSnapType: 'x mandatory',
-          marginLeft: 'calc(-1 * var(--sp-4))',
-          marginRight: 'calc(-1 * var(--sp-4))',
-          paddingLeft: 'var(--sp-4)',
-          paddingRight: 48,
-          WebkitOverflowScrolling: 'touch',
-        }}
-      >
+      <div className="pv-store-rail">
         {productos.map((p) => (
-          <div key={p.id} style={{ scrollSnapAlign: 'start' }}>
-            <ProductCard
-              producto={p}
-              onOpen={() => setOpenId(p.id)}
-              cover={coverImgs}
-            />
-          </div>
+          <ProductCard
+            key={p.id}
+            producto={p}
+            onOpen={() => openSheet(p.id)}
+            cover={coverImgs}
+            ctaLabel={ctaCard}
+          />
         ))}
       </div>
       {tieneIa ? (
         <p style={{ margin: '12px 0 0', textAlign: 'center' }}>
-          <a
-            href="#ia"
-            style={{
-              font: 'var(--ts-meta)',
-              fontWeight: 700,
-              color: 'var(--mk-accion)',
-              textDecoration: 'none',
-              minHeight: 44,
-              display: 'inline-flex',
-              alignItems: 'center',
-            }}
-          >
+          <a href="#ia" className="pv-store-head__link">
             Pregúntale al negocio →
           </a>
         </p>
@@ -351,7 +277,8 @@ export function CatalogoShell({ titulo }: { titulo: string }) {
           producto={open}
           handoffUrl={handoffs.productoWhatsapp[open.id] ?? null}
           productoHref={`/v/${encodeURIComponent(slug)}/producto/${encodeURIComponent(open.id)}`}
-          onClose={() => setOpenId(null)}
+          onClose={closeSheet}
+          ctaLabel={ctaSheet}
         />
       ) : null}
     </section>

@@ -38,16 +38,15 @@ function similar(a: string, b: string): boolean {
   return union > 0 && inter / union >= 0.55;
 }
 
-/** §18 — Quiénes somos: historia del negocio (el eslogan vive en el hero). */
+/** Hybrid 3.0 — Quiénes somos editorial (tipografía de sitio, no panel genérico). */
 export function NosotrosShell({ titulo }: { titulo: string }) {
   const { payload } = usePerfil();
   const nosotros = payload.nosotros;
   const esloganNegocio = payload.negocio.eslogan?.trim();
   const [abierto, setAbierto] = useState(false);
+  const foto = nosotros?.fotoUrl?.trim();
 
   const textoRaw = nosotros?.texto?.trim() ?? '';
-  // Evitar duplicar el eslogan del hero: solo mostrar eslogan aquí si es distinto
-  // al del negocio y aporta información (p. ej. variante editorial en nosotros).
   const esloganNosotros = nosotros?.eslogan?.trim() ?? '';
   const esloganRaw =
     esloganNosotros &&
@@ -55,7 +54,6 @@ export function NosotrosShell({ titulo }: { titulo: string }) {
       ? esloganNosotros
       : '';
 
-  // Una sola voz: si eslogan ≈ descripción, mostrar solo el más completo
   let eslogan: string | null = null;
   let texto: string | null = null;
   if (esloganRaw && textoRaw && similar(esloganRaw, textoRaw)) {
@@ -66,58 +64,36 @@ export function NosotrosShell({ titulo }: { titulo: string }) {
   }
 
   if (!eslogan && !texto) return null;
-  // Evitar módulo vacío de una sola frase corta idéntica al meta
   if (!eslogan && texto && texto.length < 28) return null;
 
   const cuerpo = texto ?? '';
-  const corto = !cuerpo || cuerpo.length <= 160;
+  const corto = !cuerpo || cuerpo.length <= 220;
   const visible =
-    !cuerpo ? '' : abierto || corto ? cuerpo : `${cuerpo.slice(0, 160).trim()}…`;
+    !cuerpo ? '' : abierto || corto ? cuerpo : `${cuerpo.slice(0, 220).trim()}…`;
 
   return (
-    <section className="pv-modulo" id="nosotros">
-      <h2 style={{ margin: '0 0 10px', font: 'var(--ts-modulo)', color: 'var(--tx-strong)' }}>
+    <section className="pv-modulo pv-nosotros" id="nosotros">
+      <h2 className="pv-store-head__title" style={{ marginBottom: 12 }}>
         {titulo || 'Quiénes somos'}
       </h2>
-      {eslogan ? (
-        <p
-          style={{
-            margin: texto ? '0 0 8px' : 0,
-            font: 'var(--ts-cuerpo)',
-            fontWeight: 600,
-            color: 'var(--tx-base)',
-          }}
-        >
-          {eslogan}
-        </p>
+      {foto ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={foto}
+          alt=""
+          className="pv-nosotros__foto"
+          width={480}
+          height={240}
+          loading="lazy"
+        />
       ) : null}
-      {visible ? (
-        <p
-          style={{
-            margin: 0,
-            font: 'var(--ts-cuerpo)',
-            color: 'var(--tx-muted)',
-            lineHeight: 1.45,
-          }}
-        >
-          {visible}
-        </p>
-      ) : null}
+      {eslogan ? <p className="pv-nosotros__lead">{eslogan}</p> : null}
+      {visible ? <p className="pv-nosotros__body">{visible}</p> : null}
       {texto && !corto ? (
         <button
           type="button"
+          className="pv-nosotros__more"
           onClick={() => setAbierto((v) => !v)}
-          style={{
-            marginTop: 8,
-            minHeight: 44,
-            padding: '0 4px',
-            border: 'none',
-            background: 'transparent',
-            color: 'var(--mk-accion)',
-            font: 'var(--ts-meta)',
-            fontWeight: 700,
-            cursor: 'pointer',
-          }}
         >
           {abierto ? 'Ver menos' : 'Leer más'}
         </button>

@@ -159,6 +159,8 @@ export interface FotoGaleria {
 export interface NosotrosContenido {
   eslogan?: string;
   texto: string;
+  /** Foto editorial opcional (Hybrid 3.0). */
+  fotoUrl?: string;
 }
 
 export interface Novedad {
