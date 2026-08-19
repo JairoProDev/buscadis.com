@@ -1,0 +1,129 @@
+{
+  "business": {
+    "slug": "lacasadetay",
+    "name": "La Casa de Tay",
+    "tagline": "Bungalows entre girasoles, en el corazón del Valle Sagrado",
+    "description": "Casa de campo familiar en Urubamba, Valle Sagrado de los Incas. Bungalows y habitaciones con jardín, fogata y parrilla. A 2.870 m — casi 600 más abajo que Cusco — acá no da mal de altura. Desayuno, WiFi y estacionamiento incluidos. Te recibe Tay. Base para Maras, Moray, Salineras, Ollantaytambo y el tren a Machu Picchu.",
+    "contact_whatsapp": "+51984622809",
+    "contact_phone": "+51984622809",
+    "contact_address": "Larespampa, Urubamba, Cusco, Perú",
+    "theme_color": "#2F4A3C",
+    "theme_accent_color": "#E8A33D",
+    "template_id": "modern_tabs",
+    "site_tier": "both",
+    "subscription_tier": "pro",
+    "publicadis_site_url": "https://lacasadetay.adis.lat/",
+    "social_instagram": "https://www.instagram.com/casadetay/",
+    "logo_file": "exterior-bungalow-porche-jardin.jpg",
+    "banner_file": "exterior-fachada-verde-andes.jpg",
+    "og_image_file": "exterior-fachada-verde-andes.jpg",
+    "meta_title": "La Casa de Tay — bungalows en Urubamba, Valle Sagrado",
+    "meta_description": "Casa de campo familiar en Urubamba. Bungalows entre girasoles, jardín, fogata y parrilla. A 2.870 m: sin mal de altura. Desayuno, WiFi y parking. Reserva por WhatsApp."
+  },
+  "products": [
+    {
+      "sku": "TAY-BUNGALOW-ANDINO",
+      "title": "Bungalow Andino — 60 m², 2 dormitorios, entrada independiente",
+      "description": "Un espacio propio dentro del jardín de La Casa de Tay, en Urubamba. 2 dormitorios, estar, cocina y baño. Puerta independiente: sales al jardín, a la parrilla y a la fogata. Duerme hasta 5. Desayuno, WiFi y estacionamiento incluidos. A 2.870 m: acá no da mal de altura. Ideal para familias con niños.",
+      "category": "Alojamiento",
+      "tags": ["bungalow", "urubamba", "valle-sagrado", "2-dormitorios", "familias", "entrada-independiente", "girasoles"],
+      "brand": "La Casa de Tay",
+      "attributes": {
+        "tipo": "Bungalow",
+        "superficie": "60 m²",
+        "capacidad": "Hasta 5 personas",
+        "dormitorios": "2",
+        "entrada": "Independiente",
+        "incluye": "Desayuno, WiFi, estacionamiento",
+        "zona": "Urubamba, Valle Sagrado"
+      },
+      "images": [
+        { "file": "exterior-bungalow-porche-jardin.jpg", "is_primary": true, "alt": "Bungalow Andino con porche de piedra y jardín — La Casa de Tay, Urubamba" },
+        { "file": "entrada-ladrillo-porche.jpg", "is_primary": false, "alt": "Entrada del bungalow de ladrillo con sillones en el porche" },
+        { "file": "cama-azul-pared-piedra.jpg", "is_primary": false, "alt": "Dormitorio del bungalow con cama azul y muro de piedra" },
+        { "file": "sillones-piedra.jpg", "is_primary": false, "alt": "Estar del bungalow con sillones y pared de piedra" },
+        { "file": "piedra-bungalow.jpg", "is_primary": false, "alt": "Cocina rústica del bungalow" },
+        { "file": "piedra-ventana-jardin.jpg", "is_primary": false, "alt": "Cocina del bungalow con ventana al jardín" },
+        { "file": "lavabo-tronco.jpg", "is_primary": false, "alt": "Baño con lavabo sobre tronco de madera" }
+      ],
+      "sort_order": 1,
+      "is_featured": true
+    },
+    {
+      "sku": "TAY-SUITE-FAMILIAR",
+      "title": "Suite Familiar Jardín — 100 m², hasta 6 personas",
+      "description": "La unidad para cuando viajan varios. 100 m² con salida al jardín, en La Casa de Tay (Urubamba, Valle Sagrado). Desayuno, WiFi y estacionamiento incluidos. Fogata y parrilla para las noches. A 2.870 m: los niños y los abuelos se aclimatan mejor que en Cusco.",
+      "category": "Alojamiento",
+      "tags": ["suite-familiar", "urubamba", "valle-sagrado", "familias", "100m2", "jardin", "hospedaje"],
+      "brand": "La Casa de Tay",
+      "attributes": {
+        "tipo": "Suite familiar",
+        "superficie": "100 m²",
+        "capacidad": "Hasta 6 personas",
+        "incluye": "Desayuno, WiFi, estacionamiento",
+        "zona": "Urubamba, Valle Sagrado"
+      },
+      "images": [
+        { "file": "cama-azul-pared-piedra.jpg", "is_primary": true, "alt": "Suite Familiar Jardín: cama azul contra muro de piedra" },
+        { "file": "cama-azul-closet.jpg", "is_primary": false, "alt": "Suite familiar con closet y cama azul" },
+        { "file": "sofa-vista-jardin.jpg", "is_primary": false, "alt": "Estar con vista al jardín" },
+        { "file": "fachada-verde-frutal.jpg", "is_primary": false, "alt": "Fachada verde de La Casa de Tay junto a un árbol frutal" },
+        { "file": "ducha-agua-caliente.jpg", "is_primary": false, "alt": "Ducha con agua caliente" }
+      ],
+      "sort_order": 2,
+      "is_featured": true
+    },
+    {
+      "sku": "TAY-DOBLE-GIRASOL",
+      "title": "Habitación Doble Girasol — 45 m² con vista al jardín",
+      "description": "Habitación amplia en el jardín de La Casa de Tay, Urubamba. Techo de vigas, textil andino y vista al verde. Duermen 2 con holgura, hasta 3. Incluye desayuno, WiFi y estacionamiento. Fogata y parrilla a unos pasos. Ideal para parejas que quieren el Valle Sagrado sin mal de altura (2.870 m).",
+      "category": "Alojamiento",
+      "tags": ["habitacion-doble", "urubamba", "valle-sagrado", "parejas", "jardin", "girasoles", "bungalows"],
+      "brand": "La Casa de Tay",
+      "attributes": {
+        "tipo": "Habitación doble",
+        "superficie": "45 m²",
+        "capacidad": "2–3 personas",
+        "camas": "1 queen + 1 twin",
+        "incluye": "Desayuno, WiFi, estacionamiento",
+        "zona": "Urubamba, Valle Sagrado"
+      },
+      "images": [
+        { "file": "doble-terracotta-textil.jpg", "is_primary": true, "alt": "Habitación Doble Girasol con textil andino y paredes de tierra" },
+        { "file": "doble-ventana-cortinas.jpg", "is_primary": false, "alt": "Habitación doble con ventana y cortinas" },
+        { "file": "exterior-bungalow-porche-jardin.jpg", "is_primary": false, "alt": "Porche y jardín de La Casa de Tay" },
+        { "file": "detalle-desayuno.jpg", "is_primary": false, "alt": "Detalle de cocina para el desayuno" },
+        { "file": "lavabo-tronco.jpg", "is_primary": false, "alt": "Lavabo rústico sobre tronco" }
+      ],
+      "sort_order": 3,
+      "is_featured": true
+    },
+    {
+      "sku": "TAY-CASA-COMPLETA",
+      "title": "Casa completa — hasta 13 personas, jardín y fogata exclusivos",
+      "description": "Toda La Casa de Tay, en Urubamba. Jardín, parrilla y fogata solo para ustedes. Familias grandes, grupos, celebraciones tranquilas. Base para Maras, Moray, Salineras, Ollantaytambo y Machu Picchu. A 2.870 m: acá no da mal de altura. Desayuno, WiFi y estacionamiento incluidos. Te recibe Tay.",
+      "category": "Alojamiento",
+      "tags": ["casa-completa", "grupos", "13-personas", "urubamba", "valle-sagrado", "fogata", "alquiler-casa"],
+      "brand": "La Casa de Tay",
+      "attributes": {
+        "tipo": "Propiedad completa",
+        "capacidad": "Hasta 13 personas",
+        "dormitorios": "4",
+        "banos": "3",
+        "incluye": "Jardín, parrilla, fogata, desayuno, WiFi, parking",
+        "zona": "Urubamba, Valle Sagrado"
+      },
+      "images": [
+        { "file": "exterior-fachada-verde-andes.jpg", "is_primary": true, "alt": "La Casa de Tay con los Andes al fondo, Urubamba" },
+        { "file": "exterior-bungalow-porche-jardin.jpg", "is_primary": false, "alt": "Bungalow y jardín de La Casa de Tay" },
+        { "file": "bungalow-madera-valle.jpg", "is_primary": false, "alt": "Bungalow de madera con el valle al fondo" },
+        { "file": "vista-valle-cabana.jpg", "is_primary": false, "alt": "Vista de la cabaña sobre el Valle Sagrado" },
+        { "file": "cama-azul-pared-piedra.jpg", "is_primary": false, "alt": "Dormitorio principal" },
+        { "file": "doble-terracotta-textil.jpg", "is_primary": false, "alt": "Habitación doble" },
+        { "file": "sofa-vista-jardin.jpg", "is_primary": false, "alt": "Estar con vista al jardín" }
+      ],
+      "sort_order": 4,
+      "is_featured": true
+    }
+  ]
+}

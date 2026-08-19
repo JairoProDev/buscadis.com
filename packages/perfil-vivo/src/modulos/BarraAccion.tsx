@@ -2,6 +2,8 @@
 
 import { usePerfil } from './PerfilContext';
 import { useChromeUI } from './ChromeUIContext';
+import { usePvCartOptional } from '../commerce/CartContext';
+import { emitPvCommerceEvent } from '../commerce/cart';
 
 function IconShare() {
   return (
@@ -17,38 +19,72 @@ function IconShare() {
   );
 }
 
-function IconHeart() {
+function IconCart() {
   return (
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden>
       <path
-        d="M12 21s-7-4.5-9.5-9A5.5 5.5 0 0 1 12 5.5 5.5 5.5 0 0 1 21.5 12C19 16.5 12 21 12 21z"
+        d="M6 6h15l-1.5 9h-12z"
         stroke="currentColor"
         strokeWidth="1.8"
         strokeLinejoin="round"
       />
+      <circle cx="9" cy="20" r="1.4" fill="currentColor" />
+      <circle cx="17" cy="20" r="1.4" fill="currentColor" />
+      <path d="M6 6L5 3H2" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
     </svg>
   );
 }
 
 export function BarraAccion({ label }: { label: string }) {
-  const { handoffs } = usePerfil();
+  const { handoffs, payload } = usePerfil();
   const { openMas } = useChromeUI();
+  const cart = usePvCartOptional();
   const href = handoffs.whatsappPrimary;
+  const count = cart?.count ?? 0;
 
   return (
     <div className="pv-barra-accion">
       <button
         type="button"
         className="pv-barra-accion__icon"
-        aria-label="Guardar en favoritos"
-        onClick={() => {
-          /* favoritos: UI feedback only until account hook exists */
-        }}
+        aria-label={count ? `Pedido (${count})` : 'Ver pedido'}
+        onClick={() => cart?.setOpen(true)}
       >
-        <IconHeart />
+        <IconCart />
+        {count > 0 ? (
+          <span
+            style={{
+              position: 'absolute',
+              top: 4,
+              right: 4,
+              minWidth: 16,
+              height: 16,
+              borderRadius: 8,
+              background: 'var(--wa, #25d366)',
+              color: '#fff',
+              fontSize: 10,
+              fontWeight: 700,
+              lineHeight: '16px',
+              textAlign: 'center',
+              padding: '0 4px',
+            }}
+          >
+            {count > 9 ? '9+' : count}
+          </span>
+        ) : null}
       </button>
       {href ? (
-        <a href={href} className="pv-barra-accion__primary">
+        <a
+          href={href}
+          className="pv-barra-accion__primary"
+          onClick={() => {
+            emitPvCommerceEvent({
+              businessProfileId: payload.negocio.id,
+              eventType: 'purchase_intent',
+              metadata: { surface: 'sticky_wa' },
+            });
+          }}
+        >
           {label}
         </a>
       ) : (

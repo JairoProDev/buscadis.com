@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/hooks/useAuth';
 
@@ -11,12 +12,17 @@ interface ProfileAnalyticsWidgetProps {
 type Period = 7 | 30;
 
 /**
- * P14/P18 lite — 7 o 30 días + tip de conversión.
- * El dueño entiende el informe sin explicación.
+ * Commerce OS — visitas + intents + pedidos (no solo vanity).
  */
 export default function ProfileAnalyticsWidget({ businessProfileId }: ProfileAnalyticsWidgetProps) {
   const [period, setPeriod] = useState<Period>(7);
-  const [stats, setStats] = useState({ views: 0, whatsapp: 0, qrScans: 0 });
+  const [stats, setStats] = useState({
+    views: 0,
+    whatsapp: 0,
+    qrScans: 0,
+    intents: 0,
+    orders: 0,
+  });
   const [loading, setLoading] = useState(true);
   const { session } = useAuth();
 
@@ -39,6 +45,18 @@ export default function ProfileAnalyticsWidget({ businessProfileId }: ProfileAna
             .length,
           whatsapp: rows.filter((r) => r.event_type === 'whatsapp_click').length,
           qrScans: rows.filter((r) => r.event_type === 'qr_scan').length,
+          intents: rows.filter(
+            (r) =>
+              r.event_type === 'purchase_intent' ||
+              r.event_type === 'add_to_cart' ||
+              r.event_type === 'product_view'
+          ).length,
+          orders: rows.filter(
+            (r) =>
+              r.event_type === 'order_created' ||
+              r.event_type === 'order_paid' ||
+              r.event_type === 'order_confirmed'
+          ).length,
         });
       } catch {
         /* RLS or offline */
@@ -78,48 +96,23 @@ export default function ProfileAnalyticsWidget({ businessProfileId }: ProfileAna
   if (!businessProfileId) return null;
 
   const cards = [
-    {
-      label: 'Visitas',
-      value: stats.views,
-      hint: 'Personas que abrieron tu perfil',
-    },
-    {
-      label: 'WhatsApp',
-      value: stats.whatsapp,
-      hint: 'Clics para escribirte',
-    },
-    {
-      label: 'QR',
-      value: stats.qrScans,
-      hint: 'Escaneos de tu código',
-    },
+    { label: 'Visitas', value: stats.views, hint: 'Personas que abrieron tu vitrina' },
+    { label: 'Intents', value: stats.intents, hint: 'Vieron producto / agregaron / pidieron' },
+    { label: 'Pedidos', value: stats.orders, hint: 'Pedidos creados o pagados' },
+    { label: 'WhatsApp', value: stats.whatsapp, hint: 'Clics al handoff' },
   ];
 
-  const conv =
-    stats.views > 0 ? Math.round((stats.whatsapp / stats.views) * 100) : null;
-
-  let tip =
-    'Si las visitas suben pero WhatsApp no, revisa que tu número esté bien y que el botón diga algo claro (“Escribir por WhatsApp”).';
-  if (stats.whatsapp >= 3 && stats.views > 0) {
-    tip =
-      'Tuviste contactos por WhatsApp. En Confianza → Pedir reseñas, mándales el enlace de 5 segundos (o espera el aviso a las ~48 h).';
-  } else if (stats.qrScans > stats.whatsapp && stats.qrScans > 0) {
-    tip =
-      'El QR trae visitas. Asegúrate de que el perfil muestre precios y el botón de WhatsApp bien visible.';
-  } else if (conv != null && conv < 5 && stats.views >= 10) {
-    tip =
-      'Hay visitas pero pocos clics a WhatsApp. Prueba una promo vigente o un producto con precio claro arriba.';
-  }
-
-  const informe =
-    period === 30
-      ? `En 30 días: ${stats.views} visitas, ${stats.whatsapp} WhatsApp, ${stats.qrScans} QR.`
-      : `Esta semana: ${stats.views} visitas, ${stats.whatsapp} WhatsApp, ${stats.qrScans} QR.`;
+  const tip =
+    stats.orders > 0
+      ? 'Ya tienes pedidos medibles. Revisa /mi-negocio/pedidos y marca los pagados (Yape/Plin).'
+      : stats.intents > 0 && stats.orders === 0
+        ? 'Hay interés (intents) pero aún no pedidos. Asegura precios claros y el botón Agregar al pedido.'
+        : 'Completa 3 productos con precio + WhatsApp para abrir la vitrina que vende.';
 
   return (
     <div className="rounded-2xl border border-slate-200 bg-white p-3 space-y-3">
       <div className="flex items-center justify-between gap-2">
-        <p className="text-[15px] font-bold text-slate-800">Tu informe</p>
+        <p className="text-[15px] font-bold text-slate-800">Tu vitrina</p>
         <div className="flex rounded-lg border border-slate-200 p-0.5">
           {([7, 30] as Period[]).map((d) => (
             <button
@@ -136,7 +129,7 @@ export default function ProfileAnalyticsWidget({ businessProfileId }: ProfileAna
         </div>
       </div>
       {loading && <span className="text-[11px] text-slate-400">Cargando…</span>}
-      <div className="grid grid-cols-3 gap-2">
+      <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
         {cards.map((c) => (
           <div
             key={c.label}
@@ -148,13 +141,13 @@ export default function ProfileAnalyticsWidget({ businessProfileId }: ProfileAna
           </div>
         ))}
       </div>
-      {conv != null ? (
-        <p className="text-[12px] font-semibold text-slate-700">
-          Conversión visita → WhatsApp: {conv}%
-        </p>
-      ) : null}
-      <p className="text-[12px] text-slate-600 leading-snug">{informe}</p>
-      <p className="text-[12px] text-slate-500 leading-snug">{tip}</p>
+      <p className="text-[12px] text-slate-600 leading-snug">{tip}</p>
+      <Link
+        href="/mi-negocio/pedidos"
+        className="inline-flex text-[13px] font-bold text-teal-800 min-h-10 items-center"
+      >
+        Ver pedidos →
+      </Link>
     </div>
   );
 }

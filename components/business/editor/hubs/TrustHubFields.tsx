@@ -16,6 +16,7 @@ import {
 import { useAuth } from '@/hooks/useAuth';
 import { OwnerIaPreguntasPanel } from '@/components/business/editor/OwnerIaPreguntasPanel';
 import { PerfilVivoPlanesPanel } from '@/components/business/editor/PerfilVivoPlanesPanel';
+import { VitrinaOnboardingChecklist } from '@/components/business/editor/VitrinaOnboardingChecklist';
 import PublishGateModal from '@/components/business/builder/PublishGateModal';
 import {
   IconPhone, IconMapMarkerAlt, IconEnvelope, IconInstagram, IconFacebook, IconTiktok, IconGlobe,
@@ -84,6 +85,22 @@ export default function TrustHubFields({ profile, setProfile, fields }: TrustHub
 
   return (
     <div className="space-y-6">
+      {profile.id ? (
+        <VitrinaOnboardingChecklist
+          profile={{
+            id: profile.id,
+            slug: profile.slug,
+            name: profile.name || 'Tu negocio',
+            logo_url: profile.logo_url,
+            banner_url: profile.banner_url,
+            contact_whatsapp: profile.contact_whatsapp,
+            is_published: profile.is_published,
+          }}
+          productCount={0}
+          productsWithPrice={0}
+        />
+      ) : null}
+
       <div>
         <FieldLabel number={1} label="Redes sociales" complete={done('social')} />
         <div className="space-y-2">
@@ -376,7 +393,7 @@ export default function TrustHubFields({ profile, setProfile, fields }: TrustHub
 
       <div>
         <FieldLabel number={9} label="Preguntas sin respuesta (IA)" complete={false} />
-        <OwnerIaPreguntasPanel businessProfileId={profile.id} />
+        <OwnerIaPreguntasPanel businessProfileId={profile.id} businessSlug={profile.slug} />
       </div>
 
       <div>

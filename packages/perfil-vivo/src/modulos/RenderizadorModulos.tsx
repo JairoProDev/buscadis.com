@@ -7,6 +7,18 @@ import { getModuloComponent } from './registry';
 import { resolverModulos } from './resolver';
 import { usePerfil } from './PerfilContext';
 
+const LazyReserva = lazy(() =>
+  import('./shells/ReservaShell').then((m) => ({
+    default: ({ titulo }: { titulo: string }) => <m.ReservaShell titulo={titulo} />,
+  }))
+);
+
+const LazyCotizacion = lazy(() =>
+  import('./shells/CotizacionShell').then((m) => ({
+    default: ({ titulo }: { titulo: string }) => <m.CotizacionShell titulo={titulo} />,
+  }))
+);
+
 /** Encima del pliegue: bundle eager. Resto: lazy + content-visibility. */
 const EAGER: ReadonlySet<TipoModulo> = new Set([
   'hero',
@@ -125,6 +137,7 @@ function getLazyComp(tipo: TipoModulo) {
 export function RenderizadorModulos() {
   const { payload } = usePerfil();
   const modulos = resolverModulos(payload.negocio);
+  const arq = payload.negocio.arquetipo;
 
   return (
     <div className="pv-stack">
@@ -155,6 +168,16 @@ export function RenderizadorModulos() {
           </div>
         );
       })}
+      {arq === 'cita' || arq === 'profesional' ? (
+        <Suspense fallback={null}>
+          <LazyReserva titulo="Agendar cita" />
+        </Suspense>
+      ) : null}
+      {arq === 'alto_ticket' ? (
+        <Suspense fallback={null}>
+          <LazyCotizacion titulo="Pedir cotización" />
+        </Suspense>
+      ) : null}
     </div>
   );
 }

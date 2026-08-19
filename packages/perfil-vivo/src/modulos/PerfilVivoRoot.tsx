@@ -9,6 +9,8 @@ import { ChromeUIProvider } from './ChromeUIContext';
 import { RenderizadorModulos } from './RenderizadorModulos';
 import { BarraAccion } from './BarraAccion';
 import { ChromeSuperior } from './ChromeSuperior';
+import { PvCartProvider } from '../commerce/CartContext';
+import { PvCartDrawer } from '../commerce/CartDrawer';
 
 const BarraSecciones = lazy(() =>
   import('./BarraSecciones').then((m) => ({ default: m.BarraSecciones }))
@@ -41,11 +43,25 @@ function PieDeConfianza({ actualizadoEn }: { actualizadoEn: string }) {
     <footer className="pv-pie" id="pie-confianza">
       <p className="pv-pie__brand">Buscadis</p>
       <p className="pv-pie__meta">
-        Perfil del negocio
+        Vitrina del centro comercial digital
         {fecha ? ` · Actualizado ${fecha}` : ''}
       </p>
     </footer>
   );
+}
+
+function stickyLabel(arquetipo: PerfilPayload['negocio']['arquetipo']): string {
+  switch (arquetipo) {
+    case 'cita':
+    case 'profesional':
+      return 'Agendar por WhatsApp';
+    case 'comida':
+      return 'Pedir por WhatsApp';
+    case 'alto_ticket':
+      return 'Cotizar por WhatsApp';
+    default:
+      return 'Consultar por WhatsApp';
+  }
 }
 
 export function PerfilVivoRoot({
@@ -62,13 +78,6 @@ export function PerfilVivoRoot({
   const rootRef = useRef<HTMLDivElement>(null);
   usePerfilFonts(rootRef);
 
-  const primaryLabel =
-    negocio.arquetipo === 'cita' || negocio.arquetipo === 'profesional'
-      ? 'Agendar por WhatsApp'
-      : negocio.arquetipo === 'comida'
-        ? 'Pedir por WhatsApp'
-        : 'Escribir por WhatsApp';
-
   return (
     <div
       ref={rootRef}
@@ -76,18 +85,22 @@ export function PerfilVivoRoot({
       data-theme={modo === 'dark' ? 'dark' : 'light'}
       data-arquetipo={negocio.arquetipo}
       data-visual="3"
+      data-commerce="1"
       style={style}
     >
       <PerfilProvider value={{ payload, handoffs }}>
-        <ChromeUIProvider>
-          <ChromeSuperior />
-          <Suspense fallback={null}>
-            <BarraSecciones />
-          </Suspense>
-          <RenderizadorModulos />
-          <PieDeConfianza actualizadoEn={negocio.actualizadoEn} />
-          <BarraAccion label={primaryLabel} />
-        </ChromeUIProvider>
+        <PvCartProvider businessId={negocio.id}>
+          <ChromeUIProvider>
+            <ChromeSuperior />
+            <Suspense fallback={null}>
+              <BarraSecciones />
+            </Suspense>
+            <RenderizadorModulos />
+            <PieDeConfianza actualizadoEn={negocio.actualizadoEn} />
+            <BarraAccion label={stickyLabel(negocio.arquetipo)} />
+            <PvCartDrawer />
+          </ChromeUIProvider>
+        </PvCartProvider>
       </PerfilProvider>
     </div>
   );

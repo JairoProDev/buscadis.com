@@ -30,13 +30,15 @@ Eso invierte el orden habitual: **primero vendemos una herramienta, después con
 
 ## 3. Precios
 
-Manteniendo la estructura ya definida, con ajustes que responden a lo que pesa el producto:
+Narrativa **centro comercial digital**: Free = pasillo/muestra; Pro = alquiler de vitrina (S/30); Max = local ancla + personal digital (S/300). Norte = transacciones (pedidos/citas/cotizaciones), no vanity.
 
 | Plan | Precio | Incluye |
 |---|---|---|
-| **Free** | S/0 | Perfil completo con módulos base, 10 productos, indexable en Google, 1 aviso clasificado, métricas básicas |
-| **Pro** | **S/30/mes** o S/300/año | Catálogo ilimitado, novedades y publicaciones, promociones, personalización completa, prioridad en buscador y mapa, panel completo, publicación en Deals, verificación nivel 2 |
-| **Max** | **S/300/mes** | Todo Publicadis: ADIS AI en el perfil, gestión de contenido y pauta, verificación nivel 3, informes y acompañamiento |
+| **Free** | S/0 | Muestra: hasta 10 productos (tope duro), indexable, lead WA básico, métricas básicas |
+| **Pro** | **S/30/mes** o S/300/año | Vitrina: catálogo ilimitado, pedidos estructurados, novedades/promos, prioridad search/mapa, Deals, verif. 2 |
+| **Max** | **S/300/mes** | Local ancla: ADIS AI del negocio, checkout en línea, contenido/pauta, verif. 3, acompañamiento |
+
+Spec: `docs/superpowers/specs/2026-08-08-buscadis-commerce-os-design.md`.
 
 **Por qué el plan free debe tener perfil real y no una versión mutilada.** Un perfil free feo no se comparte, y si no se comparte no genera el bucle 1, que es el motor entero. El free debe ser bueno y sentirse limitado por *volumen* (10 productos) y por *alcance* (no aparece destacado, no publica en Deals), no por dignidad. Un negocio que se avergüenza de su perfil gratis no se convierte a Pro: se va.
 

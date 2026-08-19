@@ -138,10 +138,37 @@ export function IaShell({ titulo }: { titulo: string }) {
           e.preventDefault();
           const q = custom.trim();
           if (!q) return;
-          const r = responderPreguntaIa(payload, q);
           setActiva(null);
-          setRespuestaCustom(r);
-          if (r === null) preguntarPorWa(q, undefined, true);
+          void (async () => {
+            if (payload.negocio.plan === 'max' && !isDemo) {
+              try {
+                const res = await fetch(
+                  `/api/business/${encodeURIComponent(payload.negocio.slug)}/local-ai`,
+                  {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ pregunta: q }),
+                  }
+                );
+                const data = await res.json();
+                if (res.ok && data.answered && data.respuesta) {
+                  setRespuestaCustom(data.respuesta);
+                  return;
+                }
+                if (data.waUrl && !data.answered) {
+                  setRespuestaCustom(null);
+                  logUnanswered(q);
+                  window.location.href = data.waUrl;
+                  return;
+                }
+              } catch {
+                /* fallback rules */
+              }
+            }
+            const r = responderPreguntaIa(payload, q);
+            setRespuestaCustom(r);
+            if (r === null) preguntarPorWa(q, undefined, true);
+          })();
         }}
       >
         <label style={{ font: 'var(--ts-meta)', color: 'var(--tx-muted)' }} htmlFor="pv-ia-q">

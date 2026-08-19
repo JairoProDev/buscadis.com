@@ -5,6 +5,8 @@ import type { Producto } from '../../types';
 import { formatPrecio } from '../../estado/calcular-estado';
 import { usePerfil } from '../PerfilContext';
 import { MODULO_META, planSuficiente } from '../contrato';
+import { usePvCartOptional } from '../../commerce/CartContext';
+import { emitPvCommerceEvent } from '../../commerce/cart';
 
 const ETIQUETA: Record<string, string> = {
   nuevo: 'Nuevo',
@@ -88,12 +90,16 @@ function ProductoSheet({
   productoHref,
   onClose,
   ctaLabel,
+  onAdd,
+  addLabel,
 }: {
   producto: Producto;
   handoffUrl: string | null;
   productoHref: string;
   onClose: () => void;
   ctaLabel: string;
+  onAdd?: () => void;
+  addLabel?: string;
 }) {
   const precio = precioLabel(producto);
   const img = producto.imagenes[0];
@@ -126,7 +132,25 @@ function ProductoSheet({
         <a href={productoHref} className="pv-sheet__link">
           Ver página del producto →
         </a>
-        <div className="pv-sheet__bar">
+        <div className="pv-sheet__bar" style={{ display: 'flex', gap: 8, flexDirection: 'column' }}>
+          {onAdd ? (
+            <button
+              type="button"
+              className="pv-barra-accion__primary"
+              style={{
+                minHeight: 48,
+                border: 'none',
+                cursor: 'pointer',
+                background: 'var(--mk-accion)',
+              }}
+              onClick={() => {
+                onAdd();
+                onClose();
+              }}
+            >
+              {addLabel || 'Agregar al pedido'}
+            </button>
+          ) : null}
           {handoffUrl ? (
             <a
               href={handoffUrl}
@@ -137,6 +161,12 @@ function ProductoSheet({
                 justifyContent: 'center',
                 textDecoration: 'none',
                 minHeight: 48,
+                background: onAdd ? 'transparent' : undefined,
+                color: onAdd ? 'var(--mk-accion)' : undefined,
+                border: onAdd ? '1.5px solid var(--mk-accion)' : undefined,
+              }}
+              onClick={() => {
+                /* purchase_intent tracked by parent open + handoff analytics */
               }}
             >
               {ctaLabel}
@@ -154,6 +184,7 @@ function ProductoSheet({
 
 export function CatalogoShell({ titulo }: { titulo: string }) {
   const { payload, handoffs } = usePerfil();
+  const cart = usePvCartOptional();
   const [grupo, setGrupo] = useState<string | null>(null);
   const destacados = payload.productos.filter((p) => p.activo && p.destacado);
   const totalActivos = payload.productos.filter((p) => p.activo).length;
@@ -168,7 +199,8 @@ export function CatalogoShell({ titulo }: { titulo: string }) {
     arq === 'comida' || arq === 'alto_ticket' || arq === 'local';
   const ctaCard = arq === 'comida' ? 'Pedir' : 'Consultar';
   const ctaSheet =
-    arq === 'comida' ? 'Pedir por WhatsApp' : 'Preguntar por este producto';
+    arq === 'comida' ? 'Pedir solo este' : 'Consultar por WhatsApp';
+  const addLabel = arq === 'comida' ? 'Agregar al pedido' : 'Agregar al pedido';
   const iaCfg = payload.negocio.modulos.find((m) => m.tipo === 'ia');
   const tieneIa =
     Boolean(iaCfg?.visible !== false) &&
@@ -184,11 +216,25 @@ export function CatalogoShell({ titulo }: { titulo: string }) {
     setOpenId(null);
   }, []);
 
-  const openSheet = useCallback((id: string) => {
-    setOpenId(id);
-    if (typeof window === 'undefined') return;
-    window.history.pushState({ pvSheet: SHEET_KEY, id }, '');
-  }, []);
+  const openSheet = useCallback(
+    (id: string) => {
+      setOpenId(id);
+      emitPvCommerceEvent({
+        businessProfileId: payload.negocio.id,
+        eventType: 'product_view',
+        productId: id,
+      });
+      emitPvCommerceEvent({
+        businessProfileId: payload.negocio.id,
+        eventType: 'purchase_intent',
+        productId: id,
+        metadata: { surface: 'catalogo_sheet' },
+      });
+      if (typeof window === 'undefined') return;
+      window.history.pushState({ pvSheet: SHEET_KEY, id }, '');
+    },
+    [payload.negocio.id]
+  );
 
   useEffect(() => {
     const onPop = () => setOpenId(null);
@@ -279,6 +325,19 @@ export function CatalogoShell({ titulo }: { titulo: string }) {
           productoHref={`/v/${encodeURIComponent(slug)}/producto/${encodeURIComponent(open.id)}`}
           onClose={closeSheet}
           ctaLabel={ctaSheet}
+          addLabel={addLabel}
+          onAdd={
+            cart
+              ? () => {
+                  cart.addItem({
+                    productId: open.id,
+                    title: open.nombre,
+                    price: open.precio?.valor,
+                    imageUrl: open.imagenes[0]?.url,
+                  });
+                }
+              : undefined
+          }
         />
       ) : null}
     </section>

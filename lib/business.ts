@@ -155,15 +155,16 @@ export async function listPublishedBusinessProfiles(options?: {
 
     let query = supabase
         .from(BUSINESS_TABLE)
-        .select('id, slug, name, description, tagline, logo_url, banner_url, theme_color, is_verified, contact_address, created_at, updated_at')
+        .select('id, slug, name, description, tagline, logo_url, banner_url, theme_color, is_verified, contact_address, created_at, updated_at, subscription_tier, view_count')
         .eq('is_published', true)
         .order('updated_at', { ascending: false });
 
     if (options?.limit) {
         const from = options.offset || 0;
-        query = query.range(from, from + options.limit - 1);
+        // fetch extra then rank (Pro/Max boost)
+        query = query.range(from, from + Math.max(options.limit * 2, options.limit) - 1);
     } else {
-        query = query.limit(50);
+        query = query.limit(80);
     }
 
     const { data, error } = await query;
@@ -172,7 +173,11 @@ export async function listPublishedBusinessProfiles(options?: {
         return [];
     }
 
-    return (data || []).map((row) => normalizeBusinessProfile(row as BusinessProfile) as BusinessProfile);
+    const { rankBusinessesForDiscovery } = await import('@/lib/business/discovery-rank');
+    const ranked = rankBusinessesForDiscovery(
+        (data || []).map((row) => normalizeBusinessProfile(row as BusinessProfile) as BusinessProfile)
+    );
+    return options?.limit ? ranked.slice(0, options.limit) : ranked.slice(0, 50);
 }
 
 export async function createBusinessProfile(profile: Partial<BusinessProfile>): Promise<BusinessProfile | null> {

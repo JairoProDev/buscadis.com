@@ -3,13 +3,30 @@ import { supabase } from '@/lib/supabase';
 export type ProfileAnalyticsEvent =
   | 'page_view'
   | 'profile_view'
+  | 'product_view'
   | 'whatsapp_click'
   | 'discovery_cta_click'
   | 'signup_from_profile'
   | 'share_click'
   | 'add_to_cart'
+  | 'purchase_intent'
+  | 'order_created'
+  | 'order_paid'
+  | 'order_confirmed'
   | 'qr_scan'
   | 'ia_unanswered';
+
+/** Eventos del funnel Commerce OS (centro comercial digital). */
+export const COMMERCE_FUNNEL_EVENTS = [
+  'profile_view',
+  'product_view',
+  'purchase_intent',
+  'add_to_cart',
+  'order_created',
+  'order_confirmed',
+  'order_paid',
+  'whatsapp_click',
+] as const;
 
 export function getAnalyticsSessionId(): string {
   if (typeof sessionStorage === 'undefined') return 'ssr-session';

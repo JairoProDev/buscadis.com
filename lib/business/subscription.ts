@@ -20,15 +20,15 @@ export const PROFILE_PUBLISH_MONTHLY_PEN = 30;
 export const PROFILE_PUBLISH_YEARLY_PEN = 300;
 export const PROFILE_MAX_MONTHLY_PEN = 300;
 
-/** @deprecated Use PROFILE_PUBLISH_MONTHLY_PEN */
-export const PRO_QR_MONTHLY_PRICE_PEN = PROFILE_PUBLISH_MONTHLY_PEN;
+/** Free: pasillo / muestra — tope duro de productos activos. */
+export const FREE_PRODUCT_CAP = 10;
 
 export const PROFILE_PUBLISH_FEATURES = [
-  'Tu tarjeta de presentación digital pública',
-  'Catálogo interactivo y canal de ventas',
-  'Enlace único para redes, WhatsApp y QR',
+  'Tu vitrina pública en el centro comercial Buscadis',
+  'Catálogo interactivo y canal de pedidos',
+  'Enlace único para redes, WhatsApp y QR (dueño)',
   'Edición ilimitada (IA, formulario y tocar)',
-  'QR Pro, analítica y kits para imprimir',
+  'QR Pro, analítica de pedidos e intents',
 ] as const;
 
 export const PRO_QR_FEATURES = PROFILE_PUBLISH_FEATURES;
@@ -41,8 +41,8 @@ export const PERFIL_VIVO_PLANS: readonly PerfilVivoPlan[] = [
     precioAnualPen: null,
     tier: 'free',
     incluye: [
-      'Perfil completo con módulos base',
-      'Hasta 10 productos',
+      'Muestra en el pasillo (perfil básico)',
+      `Hasta ${FREE_PRODUCT_CAP} productos`,
       'Indexable en Google',
       '1 aviso clasificado',
       'Métricas básicas',
@@ -55,14 +55,15 @@ export const PERFIL_VIVO_PLANS: readonly PerfilVivoPlan[] = [
     precioAnualPen: PROFILE_PUBLISH_YEARLY_PEN,
     tier: 'pro',
     incluye: [
-      'Catálogo ilimitado',
+      'Alquiler de vitrina (local digital)',
+      'Catálogo ilimitado + pedidos por WhatsApp',
       'Novedades, promociones y publicaciones',
-      'Personalización completa',
       'Prioridad en buscador y mapa',
-      'Panel completo + Deals',
+      'Panel de pedidos + Deals',
       'Verificación nivel 2',
     ],
-    ancla: 'Un programador local cobra ~S/3,000 por una web. El anual es el 10%.',
+    ancla:
+      'Como alquilar un local: vitrina + pasillos (mapa/search) + vendedor (pedidos). Un site a medida cuesta miles.',
   },
   {
     id: 'max',
@@ -71,12 +72,14 @@ export const PERFIL_VIVO_PLANS: readonly PerfilVivoPlan[] = [
     precioAnualPen: null,
     tier: 'enterprise',
     incluye: [
-      'Todo Publicadis',
-      'ADIS AI en el perfil',
+      'Local ancla + personal digital 24/7',
+      'ADIS AI recepcionista/vendedor en el perfil',
+      'Checkout en línea y autoservicio',
       'Gestión de contenido y pauta',
-      'Verificación nivel 3',
-      'Informes y acompañamiento',
+      'Verificación nivel 3 + acompañamiento',
     ],
+    ancla:
+      'Reemplaza vitrina + recepcionista + volanteo: la IA atiende, cotiza y toma pedidos.',
   },
 ] as const;
 
@@ -114,3 +117,36 @@ export function canUsePerfilVivoIa(profile: {
 }): boolean {
   return getSubscriptionTier(profile) === 'enterprise';
 }
+
+/** Pedidos / carrito / reservas estructurados — Pro+. */
+export function canUseCommerceOrders(profile: {
+  subscription_tier?: SubscriptionTier;
+}): boolean {
+  const tier = getSubscriptionTier(profile);
+  return tier === 'pro' || tier === 'enterprise';
+}
+
+/** Checkout MP / agente LLM del local — Max. */
+export function canUseCommerceCheckout(profile: {
+  subscription_tier?: SubscriptionTier;
+}): boolean {
+  return getSubscriptionTier(profile) === 'enterprise';
+}
+
+/** Prioridad en search/mapa — Pro+. */
+export function hasSearchMapPriority(profile: {
+  subscription_tier?: SubscriptionTier;
+}): boolean {
+  return canUseCommerceOrders(profile);
+}
+
+export function freeProductCapReached(
+  profile: { subscription_tier?: SubscriptionTier },
+  activeProductCount: number
+): boolean {
+  if (getSubscriptionTier(profile) !== 'free') return false;
+  return activeProductCount >= FREE_PRODUCT_CAP;
+}
+
+/** @deprecated Use PROFILE_PUBLISH_MONTHLY_PEN */
+export const PRO_QR_MONTHLY_PRICE_PEN = PROFILE_PUBLISH_MONTHLY_PEN;

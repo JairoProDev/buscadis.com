@@ -89,5 +89,33 @@ export function PerfilVivoAnalytics({
     return () => window.removeEventListener(PV_IA_UNANSWERED_EVENT, onIa);
   }, [businessProfileId, slug]);
 
+  useEffect(() => {
+    if (!businessProfileId || isDemoPerfilVivoSlug(slug)) return;
+    const onCommerce = (ev: Event) => {
+      const detail = (ev as CustomEvent).detail as
+        | {
+            businessProfileId?: string;
+            eventType?: string;
+            productId?: string;
+            metadata?: Record<string, unknown>;
+          }
+        | undefined;
+      const id = detail?.businessProfileId || businessProfileId;
+      const type = detail?.eventType;
+      if (!id || !type) return;
+      if (
+        type === 'product_view' ||
+        type === 'purchase_intent' ||
+        type === 'add_to_cart' ||
+        type === 'order_created' ||
+        type === 'order_paid'
+      ) {
+        void trackProfileEvent(id, type, detail.productId, detail.metadata);
+      }
+    };
+    window.addEventListener('pv:commerce-event', onCommerce);
+    return () => window.removeEventListener('pv:commerce-event', onCommerce);
+  }, [businessProfileId, slug]);
+
   return null;
 }

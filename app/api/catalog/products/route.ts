@@ -156,6 +156,39 @@ export async function POST(request: NextRequest) {
             );
         }
 
+        const { data: bpRow } = await supabase
+            .from('business_profiles')
+            .select('subscription_tier')
+            .eq('id', profile.id)
+            .maybeSingle();
+
+        const { count: activeCount } = await supabase
+            .from('catalog_products')
+            .select('id', { count: 'exact', head: true })
+            .eq('business_profile_id', profile.id)
+            .is('deleted_at', null)
+            .neq('status', 'archived');
+
+        const { freeProductCapReached, FREE_PRODUCT_CAP } = await import(
+            '@/lib/business/subscription'
+        );
+        if (
+            freeProductCapReached(
+                { subscription_tier: bpRow?.subscription_tier },
+                activeCount ?? 0
+            )
+        ) {
+            return NextResponse.json(
+                {
+                    success: false,
+                    error: `En Free puedes tener hasta ${FREE_PRODUCT_CAP} productos. Activa Pro (S/30) para catálogo ilimitado.`,
+                    upgrade: 'pro',
+                    code: 'FREE_PRODUCT_CAP',
+                },
+                { status: 402 }
+            );
+        }
+
         const { data: product, error } = await supabase
             .from('catalog_products')
             .insert({
