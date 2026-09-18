@@ -40,6 +40,7 @@ export { resolverModulos } from './modulos/resolver';
 export type { ModuloResuelto } from './modulos/resolver';
 export { RenderizadorModulos } from './modulos/RenderizadorModulos';
 export { PerfilVivoRoot } from './modulos/PerfilVivoRoot';
+export { TikTokPerfilShell } from './skins/tiktok/TikTokPerfilShell';
 export type { HandoffLinks } from './modulos/PerfilContext';
 
 export { calcularEstadoVivo, formatPrecio } from './estado/calcular-estado';

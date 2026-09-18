@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation';
-import { PerfilVivoRoot } from '@buscadis/perfil-vivo';
+import { PerfilVivoRoot, TikTokPerfilShell } from '@buscadis/perfil-vivo';
 import type { PerfilPayload } from '@buscadis/perfil-vivo';
 import {
   buildDemoPerfilVivoPayload,
@@ -234,7 +234,13 @@ export async function PerfilVivoPageView({
         slug={payload.negocio.slug}
         arquetipo={payload.negocio.arquetipo}
       />
-      <PerfilVivoRoot payload={payload} handoffs={handoffs} />
+      {payload.negocio.slug === 'demo-tiktok' ||
+      payload.negocio.slug === 'demo-buscadis' ||
+      payload.negocio.slug === 'buscadis' ? (
+        <TikTokPerfilShell payload={payload} handoffs={handoffs} />
+      ) : (
+        <PerfilVivoRoot payload={payload} handoffs={handoffs} />
+      )}
     </>
   );
 }

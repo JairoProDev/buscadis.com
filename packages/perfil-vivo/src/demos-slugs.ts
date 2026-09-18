@@ -6,6 +6,8 @@ export const DEMO_PERFIL_VIVO_SLUGS = [
   'demo-profesional',
   'demo-local',
   'demo-alto-ticket',
+  'demo-tiktok',
+  'demo-buscadis',
 ] as const;
 
 export type DemoPerfilVivoSlug = (typeof DEMO_PERFIL_VIVO_SLUGS)[number];
@@ -29,5 +31,13 @@ export const DEMO_META: Record<
   'demo-alto-ticket': {
     title: 'Andes Solar Cusco | Perfil Vivo',
     arquetipo: 'alto_ticket',
+  },
+  'demo-tiktok': {
+    title: 'Huatia Andina | Perfil estilo TikTok',
+    arquetipo: 'comida',
+  },
+  'demo-buscadis': {
+    title: 'Buscadis | Perfil social',
+    arquetipo: 'retail',
   },
 };

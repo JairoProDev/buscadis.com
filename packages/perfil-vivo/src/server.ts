@@ -39,6 +39,8 @@ export {
   DEMO_ALTO_TICKET_NEGOCIO,
   buildDemoAltoTicketPayload,
 } from './fixtures/demo-alto-ticket';
+export { buildDemoTikTokPayload } from './fixtures/demo-tiktok';
+export { buildDemoBuscadisPayload } from './fixtures/demo-buscadis';
 export {
   DEMO_PERFIL_VIVO_SLUGS,
   DEMO_META,

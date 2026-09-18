@@ -1,0 +1,1297 @@
+/* Perfil Vivo — TikTok skin (redesign v2)
+   2-col catalog, trust metrics, sticky WhatsApp, chips nav */
+
+.tt-root {
+  --tt-bg: #ffffff;
+  --tt-text: #161823;
+  --tt-muted: #8a8b91;
+  --tt-btn: #f1f1f2;
+  --tt-btn-hover: #e7e7e9;
+  --tt-accent: #53acc5;
+  --tt-accent-hover: color-mix(in srgb, var(--tt-accent) 85%, #000);
+  --tt-wa: #128c7e;
+  --tt-wa-hover: #0f7368;
+  --tt-border: #ebebeb;
+  --tt-safe-top: env(safe-area-inset-top, 0px);
+  --tt-safe-bottom: env(safe-area-inset-bottom, 0px);
+  --tt-font-display: 'Bricolage Grotesque', 'Geist', system-ui, -apple-system, sans-serif;
+  --tt-font: 'Geist', 'Segoe UI', system-ui, -apple-system, sans-serif;
+
+  min-height: 100dvh;
+  background: var(--tt-bg);
+  color: var(--tt-text);
+  font-family: var(--tt-font);
+  -webkit-font-smoothing: antialiased;
+  max-width: 480px;
+  margin: 0 auto;
+  position: relative;
+  padding-bottom: calc(72px + var(--tt-safe-bottom));
+}
+
+.tt-root *,
+.tt-root *::before,
+.tt-root *::after {
+  box-sizing: border-box;
+}
+
+/* —— Top bar —— */
+.tt-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: calc(8px + var(--tt-safe-top)) 12px 8px 8px;
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  z-index: 20;
+  background: transparent;
+}
+
+.tt-top__left {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  min-width: 0;
+}
+
+.tt-top__brand {
+  font-family: var(--tt-font-display);
+  font-size: 17px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: #fff;
+  text-decoration: none;
+  line-height: 1;
+  padding-right: 4px;
+  text-shadow: 0 1px 3px rgb(0 0 0 / 0.45);
+  opacity: 0;
+  transform: translateY(-4px);
+  pointer-events: none;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.tt-top__brand--show {
+  opacity: 1;
+  transform: none;
+  pointer-events: auto;
+}
+
+.tt-top__btn {
+  width: 36px;
+  height: 36px;
+  border: 0;
+  background: rgb(0 0 0 / 0.32);
+  color: #fff;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  border-radius: 999px;
+  padding: 0;
+  flex-shrink: 0;
+  backdrop-filter: blur(8px);
+  transition: background 0.15s ease;
+}
+
+.tt-top__btn:hover {
+  background: rgb(0 0 0 / 0.48);
+}
+
+.tt-top__right {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+/* Sin banner: top sólido claro */
+.tt-root[data-banner='0'] .tt-top {
+  position: sticky;
+  background: color-mix(in srgb, var(--tt-bg) 92%, transparent);
+  backdrop-filter: blur(10px);
+}
+.tt-root[data-banner='0'] .tt-top__brand {
+  color: var(--tt-text);
+  text-shadow: none;
+}
+.tt-root[data-banner='0'] .tt-top__btn {
+  background: transparent;
+  color: var(--tt-text);
+}
+.tt-root[data-banner='0'] .tt-top__btn:hover {
+  background: var(--tt-btn);
+}
+
+/* —— Hero banner ——
+   Kept short on purpose. Target: <420px to first product card on 390×844.
+   Any bump here directly pushes the catalog below the fold. */
+.tt-hero {
+  position: relative;
+  height: calc(120px + var(--tt-safe-top));
+  overflow: hidden;
+  background: var(--tt-btn);
+}
+
+.tt-banner {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  height: auto;
+  overflow: hidden;
+}
+
+.tt-banner img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 30%;
+  display: block;
+}
+
+.tt-banner__fade {
+  position: absolute;
+  inset: auto 0 0;
+  height: 36%;
+  background: linear-gradient(transparent, var(--tt-bg));
+  pointer-events: none;
+}
+
+.tt-banner__scrim {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    rgb(0 0 0 / 0.38) 0%,
+    rgb(0 0 0 / 0.18) 40%,
+    transparent 72%
+  );
+  pointer-events: none;
+}
+
+.tt-root[data-banner='1'] .tt-identity {
+  padding-top: 4px;
+  margin-top: -22px;
+  position: relative;
+  z-index: 2;
+}
+
+/* —— Identity —— */
+.tt-identity {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 8px 12px;
+  align-items: start;
+  padding: 0 16px;
+}
+
+.tt-identity__text {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0;
+}
+
+.tt-name-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.tt-name {
+  margin: 0;
+  font-family: var(--tt-font-display);
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+  line-height: 1.12;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tt-verified {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  color: #20d5ec;
+  display: grid;
+  place-items: center;
+}
+
+.tt-category-chip {
+  display: inline-flex;
+  align-self: flex-start;
+  margin-top: 4px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--tt-btn);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--tt-muted);
+  line-height: 1.4;
+}
+
+.tt-handle {
+  margin: 4px 0 0;
+  font-size: 14px;
+  color: var(--tt-muted);
+  font-weight: 500;
+  line-height: 1.25;
+}
+
+.tt-avatar {
+  width: 84px;
+  height: 84px;
+  border-radius: 22px;
+  overflow: hidden;
+  background: #fff;
+  flex-shrink: 0;
+  border: 3px solid #fff;
+  box-shadow: 0 2px 10px rgb(0 0 0 / 0.12);
+  align-self: center;
+}
+
+.tt-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.tt-avatar__fallback {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  font-size: 40px;
+  font-weight: 800;
+  background: linear-gradient(145deg, var(--tt-accent), color-mix(in srgb, var(--tt-accent) 55%, #111));
+  color: #fff;
+}
+
+.tt-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* —— Trust metrics —— */
+.tt-trust {
+  display: flex;
+  gap: 14px;
+  margin-top: 6px;
+  padding: 0;
+  flex-wrap: wrap;
+}
+
+.tt-trust__item {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
+  font: inherit;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  color: inherit;
+  cursor: default;
+  text-decoration: none;
+}
+
+button.tt-trust__item {
+  cursor: pointer;
+}
+
+button.tt-trust__item:hover .tt-trust__val {
+  color: var(--tt-accent);
+}
+
+.tt-trust__val {
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+  transition: color 0.15s ease;
+}
+
+.tt-trust__label {
+  font-size: 12px;
+  color: var(--tt-muted);
+  font-weight: 400;
+}
+
+/* —— Bio —— */
+.tt-bio {
+  padding: 6px 16px 0;
+}
+
+.tt-bio__eslogan {
+  margin: 0 0 2px;
+  font-family: var(--tt-font-display);
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.3;
+  letter-spacing: -0.005em;
+}
+
+.tt-bio__text {
+  margin: 0;
+  font-size: 13.5px;
+  line-height: 1.4;
+  white-space: pre-wrap;
+  color: color-mix(in srgb, var(--tt-text) 82%, transparent);
+}
+
+.tt-bio__more {
+  border: 0;
+  background: transparent;
+  color: var(--tt-text);
+  font: inherit;
+  font-weight: 700;
+  padding: 0;
+  cursor: pointer;
+}
+
+.tt-live {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 8px 0 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  font-size: 13px;
+  color: var(--tt-muted);
+  font-weight: 500;
+  cursor: pointer;
+  text-align: left;
+}
+
+.tt-live:hover {
+  color: var(--tt-text);
+}
+
+.tt-live__hint {
+  margin-left: 2px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--tt-accent);
+}
+
+.tt-live__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #c4c4c8;
+  flex-shrink: 0;
+}
+
+.tt-live__dot--on {
+  background: #22c55e;
+  box-shadow: 0 0 0 3px rgb(34 197 94 / 0.2);
+}
+
+/* —— Actions (CTAs) —— */
+.tt-actions {
+  display: flex;
+  gap: 8px;
+  padding: 12px 16px 0;
+  align-items: center;
+}
+
+.tt-btn {
+  height: 40px;
+  border: 0;
+  border-radius: 10px;
+  background: var(--tt-btn);
+  color: var(--tt-text);
+  font: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  text-decoration: none;
+  transition: background 0.15s ease, transform 0.1s ease;
+}
+
+.tt-btn:hover {
+  background: var(--tt-btn-hover);
+}
+
+.tt-btn:active {
+  transform: scale(0.98);
+}
+
+.tt-btn--primary {
+  flex: 1 1 70%;
+}
+
+.tt-btn--icon {
+  width: 42px;
+  flex: 0 0 42px;
+  padding: 0;
+}
+
+.tt-btn--accent {
+  background: var(--tt-wa);
+  color: #fff;
+  box-shadow: 0 1px 2px rgb(18 140 126 / 0.28);
+}
+
+.tt-btn--accent:hover {
+  background: var(--tt-wa-hover);
+}
+
+.tt-btn--saved {
+  color: var(--tt-accent);
+}
+
+.tt-btn__glyph {
+  display: inline-grid;
+  place-items: center;
+  line-height: 0;
+  color: currentColor;
+  opacity: 0.98;
+}
+
+/* —— Recursos (Buscadis-owned quick links, only shown inside Info tab
+   for the Buscadis profile itself — never above-the-fold) —— */
+.tt-recursos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.tt-recurso {
+  flex: 0 0 auto;
+  height: 34px;
+  padding: 0 14px;
+  border-radius: 999px;
+  border: 1px solid var(--tt-border);
+  background: #fff;
+  display: inline-flex;
+  align-items: center;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 650;
+  color: var(--tt-text);
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.tt-recurso:hover {
+  background: var(--tt-btn);
+  border-color: color-mix(in srgb, var(--tt-accent) 40%, var(--tt-border));
+}
+
+/* —— Tabs (sticky, ≥44px touch target) —— */
+.tt-tabs {
+  margin-top: 10px;
+  border-bottom: 1px solid var(--tt-border);
+  display: flex;
+  justify-content: space-around;
+  position: sticky;
+  top: 0;
+  z-index: 15;
+  background: var(--tt-bg);
+  padding: 0 2px;
+}
+
+.tt-tab {
+  flex: 1;
+  min-width: 0;
+  height: 44px;
+  border: 0;
+  background: transparent;
+  color: var(--tt-muted);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+  cursor: pointer;
+  position: relative;
+  padding: 3px 2px 4px;
+  transition: color 0.15s ease;
+}
+
+.tt-tab__icon {
+  display: grid;
+  place-items: center;
+  line-height: 0;
+}
+
+.tt-tab__label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 1.1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.tt-tab__count {
+  font-size: 10px;
+  font-weight: 800;
+  color: inherit;
+  opacity: 0.75;
+}
+
+.tt-tab[aria-selected='true'] {
+  color: var(--tt-accent);
+}
+
+.tt-tab[aria-selected='true']::after {
+  content: '';
+  position: absolute;
+  left: 14%;
+  right: 14%;
+  bottom: 0;
+  height: 2.5px;
+  background: var(--tt-accent);
+  border-radius: 2px 2px 0 0;
+}
+
+/* —— Catalog bar & search —— */
+.tt-catalog-bar {
+  padding: 12px 16px 0;
+}
+
+.tt-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 40px;
+  padding: 0 12px;
+  border-radius: 10px;
+  background: var(--tt-btn);
+  color: var(--tt-muted);
+}
+
+.tt-search input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  font-size: 14px;
+  color: var(--tt-text);
+  outline: none;
+}
+
+.tt-search input::placeholder {
+  color: var(--tt-muted);
+}
+
+/* —— Folders / pills —— */
+.tt-folders {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 8px 16px 10px;
+  scrollbar-width: none;
+}
+
+.tt-folders::-webkit-scrollbar {
+  display: none;
+}
+
+.tt-folder {
+  flex: 0 0 auto;
+  height: 30px;
+  padding: 0 12px;
+  border-radius: 999px;
+  border: 1px solid var(--tt-border);
+  background: #fff;
+  display: inline-flex;
+  align-items: center;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 650;
+  color: var(--tt-text);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.tt-folder--on {
+  border-color: var(--tt-accent);
+  background: var(--tt-accent);
+  color: #fff;
+}
+
+/* —— Grid catálogo (2 columns, card layout) —— */
+.tt-grid-wrap {
+  position: relative;
+}
+
+.tt-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  padding: 0 16px 16px;
+}
+
+.tt-cell {
+  position: relative;
+  background: #fff;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  text-decoration: none;
+  color: var(--tt-text);
+  border-radius: 14px;
+  border: 1px solid color-mix(in srgb, var(--tt-border) 70%, transparent);
+  box-shadow: 0 1px 2px rgb(17 24 39 / 0.04);
+  transition: box-shadow 0.2s ease, transform 0.15s ease, border-color 0.2s ease;
+}
+
+.tt-cell:hover {
+  box-shadow: 0 8px 24px rgb(17 24 39 / 0.10);
+  border-color: color-mix(in srgb, var(--tt-text) 12%, transparent);
+  transform: translateY(-1px);
+}
+
+.tt-cell__img {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+  background: #f5f5f7;
+}
+
+.tt-cell__img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.4s ease;
+}
+
+.tt-cell:hover .tt-cell__img img {
+  transform: scale(1.05);
+}
+
+/* Destacado pin — one per grid, dark & premium (not accent). */
+.tt-cell__pin {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  z-index: 2;
+  background: rgb(17 24 39 / 0.88);
+  color: #fff;
+  font-family: var(--tt-font-display);
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1;
+  padding: 5px 8px;
+  border-radius: 999px;
+  letter-spacing: 0.02em;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+.tt-cell__info {
+  padding: 10px 12px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.tt-cell__name {
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.25;
+  color: color-mix(in srgb, var(--tt-text) 78%, transparent);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+/* Price is typographically dominant. Near-black, tabular numerals,
+   Bricolage display so it feels premium — never the washed accent. */
+.tt-cell__price {
+  font-family: var(--tt-font-display);
+  font-size: 16px;
+  font-weight: 800;
+  color: #111827;
+  letter-spacing: -0.015em;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+
+.tt-cell__price--free {
+  color: var(--tt-wa);
+}
+
+/* —— Panel (info / reviews) —— */
+.tt-panel {
+  padding: 8px 16px 24px;
+}
+
+.tt-block {
+  padding: 16px 0;
+  border-bottom: 1px solid var(--tt-border);
+}
+
+.tt-block:last-child {
+  border-bottom: 0;
+}
+
+.tt-block__title {
+  margin: 0 0 8px;
+  font-size: 15px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tt-block__body {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.tt-block__muted {
+  margin: 6px 0 0;
+  font-size: 13px;
+  color: var(--tt-muted);
+}
+
+.tt-link-btn {
+  display: inline-flex;
+  margin-top: 12px;
+  height: 34px;
+  padding: 0 14px;
+  align-items: center;
+  border-radius: 8px;
+  background: var(--tt-btn);
+  color: var(--tt-text);
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+  transition: background 0.15s ease;
+}
+
+.tt-link-btn:hover {
+  background: var(--tt-btn-hover);
+}
+
+/* —— Hours —— */
+.tt-hours {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.tt-hours li {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 14px;
+}
+
+.tt-hours li span:first-child {
+  font-weight: 700;
+  min-width: 36px;
+}
+
+.tt-hours li span:last-child {
+  color: var(--tt-muted);
+  text-align: right;
+}
+
+/* —— Pagos —— */
+.tt-pagos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.tt-pago {
+  width: 52px;
+  height: 36px;
+  border-radius: 8px;
+  border: 1px solid var(--tt-border);
+  background: #fff;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.tt-pago img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  padding: 4px;
+}
+
+/* —— Canales (in Info tab) —— */
+.tt-canales {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.tt-canal {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 44px;
+  padding: 0 14px 0 6px;
+  border-radius: 12px;
+  border: 1px solid var(--tt-border);
+  background: #fff;
+  text-decoration: none;
+  color: var(--tt-text);
+  font-size: 13px;
+  font-weight: 650;
+  transition: background 0.15s ease, transform 0.12s ease;
+}
+
+.tt-canal:hover {
+  background: var(--tt-btn);
+  transform: scale(1.02);
+}
+
+.tt-canal img {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  object-fit: contain;
+}
+
+/* —— Novedades cards (in Info tab) —— */
+.tt-novedades-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.tt-novedad-card {
+  display: flex;
+  gap: 12px;
+  border: 1px solid var(--tt-border);
+  border-radius: 12px;
+  overflow: hidden;
+  background: #fff;
+  text-decoration: none;
+  color: inherit;
+  transition: background 0.15s ease, box-shadow 0.15s ease;
+}
+
+.tt-novedad-card:hover {
+  background: var(--tt-btn);
+  box-shadow: 0 2px 8px rgb(0 0 0 / 0.06);
+}
+
+.tt-novedad-card__img {
+  width: 80px;
+  flex-shrink: 0;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  display: block;
+  background: var(--tt-btn);
+}
+
+.tt-novedad-card__body {
+  padding: 10px 12px 10px 0;
+  min-width: 0;
+}
+
+.tt-novedad-card__body h3 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.tt-novedad-card__body p {
+  margin: 4px 0 0;
+  font-size: 12px;
+  line-height: 1.35;
+  color: var(--tt-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+/* —— FAQ —— */
+.tt-faq__item {
+  border-bottom: 1px solid var(--tt-border);
+}
+
+.tt-faq__q {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  text-align: left;
+  cursor: pointer;
+  color: var(--tt-text);
+}
+
+.tt-faq__a {
+  margin: 0 0 12px;
+  font-size: 14px;
+  line-height: 1.45;
+  color: var(--tt-muted);
+}
+
+/* —— Rating —— */
+.tt-rating {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 8px 0 12px;
+}
+
+.tt-rating strong {
+  font-size: 32px;
+  letter-spacing: -0.04em;
+}
+
+.tt-rating span {
+  font-size: 13px;
+  color: var(--tt-muted);
+}
+
+/* —— Histogram —— */
+.tt-histogram {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 0 0 16px;
+}
+
+.tt-histogram__row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tt-histogram__star {
+  width: 28px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--tt-muted);
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.tt-histogram__bar {
+  flex: 1;
+  height: 8px;
+  border-radius: 4px;
+  background: var(--tt-btn);
+  overflow: hidden;
+}
+
+.tt-histogram__fill {
+  height: 100%;
+  border-radius: 4px;
+  background: #f5a524;
+  min-width: 0;
+  transition: width 0.3s ease;
+}
+
+.tt-histogram__count {
+  width: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--tt-muted);
+  text-align: left;
+  flex-shrink: 0;
+}
+
+/* —— Reviews —— */
+.tt-reviews {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.tt-review__head {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+.tt-review__av {
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+  background: var(--tt-btn);
+  display: grid;
+  place-items: center;
+  font-size: 11px;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+
+.tt-review__meta {
+  flex: 1;
+  min-width: 0;
+}
+
+.tt-review__name {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.tt-review__verified {
+  font-weight: 500;
+  color: var(--tt-accent);
+  font-size: 12px;
+}
+
+.tt-review__stars {
+  margin: 2px 0 0;
+  font-size: 12px;
+  color: #f5a524;
+  letter-spacing: 1px;
+}
+
+.tt-review__date {
+  font-size: 11px;
+  color: var(--tt-muted);
+  font-weight: 500;
+  white-space: nowrap;
+  flex-shrink: 0;
+  margin-left: auto;
+  padding-top: 2px;
+}
+
+.tt-review__text {
+  margin: 8px 0 0;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+/* —— Menu —— */
+.tt-menu {
+  position: absolute;
+  right: 12px;
+  top: calc(52px + var(--tt-safe-top));
+  z-index: 30;
+  background: #fff;
+  border: 1px solid var(--tt-border);
+  border-radius: 12px;
+  box-shadow: 0 8px 28px rgb(0 0 0 / 0.12);
+  min-width: 200px;
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+}
+
+.tt-menu a,
+.tt-menu button {
+  display: block;
+  width: 100%;
+  text-align: left;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 10px 12px;
+  border-radius: 8px;
+  color: var(--tt-text);
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.tt-menu a:hover,
+.tt-menu button:hover {
+  background: var(--tt-btn);
+}
+
+/* —— Empty state —— */
+.tt-empty {
+  padding: 48px 24px;
+  text-align: center;
+  color: var(--tt-muted);
+  font-size: 14px;
+}
+
+/* —— Footer —— */
+.tt-foot {
+  padding: 24px 16px 8px;
+  text-align: center;
+}
+
+.tt-foot p {
+  margin: 0;
+  font-size: 11px;
+  color: var(--tt-muted);
+}
+
+/* —— Sticky WhatsApp bar —— */
+.tt-sticky {
+  position: fixed;
+  left: 50%;
+  bottom: 0;
+  z-index: 25;
+  width: 100%;
+  max-width: 480px;
+  transform: translateX(-50%) translateY(100%);
+  padding: 8px 16px calc(8px + var(--tt-safe-bottom));
+  background: var(--tt-bg);
+  border-top: 1px solid var(--tt-border);
+  transition: transform 0.25s ease;
+  pointer-events: none;
+}
+
+.tt-sticky--show {
+  transform: translateX(-50%) translateY(0);
+  pointer-events: auto;
+}
+
+.tt-sticky__btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  height: 46px;
+  border-radius: 12px;
+  /* WA green #128c7e per Visual 2.0 doctrine. */
+  background: var(--tt-wa);
+  color: #fff;
+  font: inherit;
+  font-size: 16px;
+  font-weight: 700;
+  text-decoration: none;
+  box-shadow: 0 2px 8px rgb(18 140 126 / 0.28);
+  transition: background 0.15s ease, box-shadow 0.15s ease;
+}
+
+.tt-sticky__btn:hover {
+  background: var(--tt-wa-hover);
+  box-shadow: 0 4px 14px rgb(18 140 126 / 0.32);
+}
+
+.tt-sticky__glyph {
+  display: inline-grid;
+  place-items: center;
+  line-height: 0;
+}
+
+/* —— Toast —— */
+.tt-toast {
+  position: fixed;
+  left: 50%;
+  bottom: calc(80px + var(--tt-safe-bottom));
+  transform: translateX(-50%);
+  z-index: 50;
+  background: rgb(22 24 35 / 0.92);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 650;
+  padding: 10px 16px;
+  border-radius: 999px;
+  pointer-events: none;
+  animation: tt-toast 1.8s ease forwards;
+}
+
+@keyframes tt-toast {
+  0% {
+    opacity: 0;
+    transform: translateX(-50%) translateY(8px);
+  }
+  12%,
+  78% {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-4px);
+  }
+}
+
+/* —— Reduced motion —— */
+@media (prefers-reduced-motion: reduce) {
+  .tt-toast {
+    animation: none;
+    opacity: 1;
+  }
+
+  .tt-top__brand {
+    transition: none;
+  }
+
+  .tt-sticky {
+    transition: none;
+  }
+
+  .tt-cell__img img {
+    transition: none;
+  }
+
+  .tt-cell:hover .tt-cell__img img {
+    transform: none;
+  }
+
+  .tt-cell {
+    transition: none;
+  }
+
+  .tt-cell:hover {
+    transform: none;
+  }
+
+  .tt-histogram__fill {
+    transition: none;
+  }
+
+  .tt-folder,
+  .tt-chip,
+  .tt-btn,
+  .tt-tab,
+  .tt-link-btn,
+  .tt-canal,
+  .tt-novedad-card {
+    transition: none;
+  }
+}

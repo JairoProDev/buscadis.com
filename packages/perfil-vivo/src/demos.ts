@@ -12,6 +12,8 @@ import { buildDemoComidaPayload } from './fixtures/demo-comida';
 import { buildDemoProfesionalPayload } from './fixtures/demo-profesional';
 import { buildDemoLocalPayload } from './fixtures/demo-local';
 import { buildDemoAltoTicketPayload } from './fixtures/demo-alto-ticket';
+import { buildDemoTikTokPayload } from './fixtures/demo-tiktok';
+import { buildDemoBuscadisPayload } from './fixtures/demo-buscadis';
 
 export {
   DEMO_PERFIL_VIVO_SLUGS,
@@ -27,6 +29,8 @@ const BUILDERS: Record<DemoPerfilVivoSlug, (now?: Date) => PerfilPayload> = {
   'demo-profesional': buildDemoProfesionalPayload,
   'demo-local': buildDemoLocalPayload,
   'demo-alto-ticket': buildDemoAltoTicketPayload,
+  'demo-tiktok': buildDemoTikTokPayload,
+  'demo-buscadis': buildDemoBuscadisPayload,
 };
 
 export function buildDemoPerfilVivoPayload(
