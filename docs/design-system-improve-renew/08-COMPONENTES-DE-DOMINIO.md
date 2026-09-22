@@ -66,7 +66,11 @@ Ver spec completa: `docs/superpowers/specs/2026-09-22-buscador-ux-design.md`.
 
 ## 3. PublishCta
 
-Botón amarillo con texto tinta. Es el único elemento de la interfaz autorizado a usar el amarillo como relleno grande. Aparece **una vez** por pantalla: en el composer, en el header de escritorio, o como acción flotante en móvil — nunca en dos a la vez.
+Botón de acción **azul de marca** (`--bs-action` / brand-blue) con ícono y label blancos en nav (Header / NavbarMobile). El amarillo sol queda reservado solo para **upsell promocionado / Destacar**, nunca como fill del tab Publicar.
+
+En `/publicar` no hay nav: shell inmersivo con X, full-bleed, captura foto+voz primero. Ver `docs/superpowers/specs/2026-09-22-publish-studio-immersive-design.md`.
+
+Aparece **una vez** por pantalla de navegación (header o tab bar), nunca duplicado con el studio inmersivo.
 
 ---
 

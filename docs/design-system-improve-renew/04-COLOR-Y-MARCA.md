@@ -7,7 +7,8 @@
 | Rol | Valor | Dónde vive |
 |---|---|---|
 | Celeste de identidad | `#53ACC5` (`adis-400`) | logo, acentos decorativos, mesh |
-| Amarillo de identidad | `#FFC24A` (`sol-400`) | CTA Publicar, acento de energía |
+| Amarillo de identidad | `#FFC24A` (`sol-400`) | Upsell Destacar / promocionado, badges, anillo historias |
+| Azul de acción | brand-blue / `--bs-action` | CTA Publicar en nav, botones primarios de flujo |
 | Celeste de acción | `#2A7C94` (`adis-600`) | botones, enlaces, foco |
 | Tinta sobre cálido | `#10242B` | texto sobre amarillo |
 
@@ -36,8 +37,10 @@ Objetivo 90/10: aproximadamente 90% neutros y contenido, 10% marca. El amarillo 
 
 El amarillo es tu diferenciador real (casi ningún marketplace lo usa como acento primario) y también tu mayor riesgo: es el color más difícil de usar bien porque nunca admite texto claro.
 
-**Permitido:** fondo de CTA Publicar con texto tinta; badge "Destacado"; anillo de historias; subrayado de elemento activo; acento en el mesh.
-**Prohibido:** texto amarillo sobre blanco (falla contraste en cualquier paso claro); dos superficies amarillas grandes en la misma pantalla; amarillo como color de estado (se confunde con advertencia).
+**Permitido:** fondo de CTA “Destacar / promocionado” con texto tinta; badge "Destacado"; anillo de historias; subrayado de elemento activo; acento en el mesh.
+**Prohibido:** fill del tab/nav Publicar (usar azul de acción); texto amarillo sobre blanco; dos superficies amarillas grandes en la misma pantalla; amarillo como color de estado (se confunde con advertencia).
+
+El CTA de navegación **Publicar** usa azul de acción + blanco (ver `lib/publish-cta-styles.ts`).
 
 ---
 

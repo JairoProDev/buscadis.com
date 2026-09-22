@@ -1,34 +1,29 @@
 'use client';
 
 import React, { useEffect, useState, Suspense } from 'react';
-import Header from '@/components/Header';
-import NavbarMobile from '@/components/NavbarMobile';
-import LeftSidebar from '@/components/LeftSidebar';
-import { useNavigation } from '@/contexts/NavigationContext';
+import { useRouter, useSearchParams } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import { ToastContainer } from '@/components/Toast';
 import { useToast } from '@/hooks/useToast';
-import FeedbackButton from '@/components/FeedbackButton';
-import { useSearchParams } from 'next/navigation';
+import { IconClose } from '@/components/Icons';
 
 const PublishStudioShell = dynamic(() => import('@/components/publish/PublishStudioShell'), {
-  loading: () => <div className="p-6 text-center text-sm text-[var(--text-secondary)]">Cargando Publish Studio…</div>,
+  loading: () => (
+    <div className="flex flex-1 items-center justify-center p-6 text-sm text-[var(--text-secondary)]">
+      Cargando Publish Studio…
+    </div>
+  ),
   ssr: false,
 });
 
 function PublicarHubContent() {
+  const router = useRouter();
   const searchParams = useSearchParams();
-  const { setSidebarExpanded } = useNavigation();
   const { toasts, removeToast, success, error } = useToast();
-  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [initialText, setInitialText] = useState('');
   const [initialImageUrl, setInitialImageUrl] = useState<string | null>(null);
   const [initialContacto, setInitialContacto] = useState<string | undefined>();
   const [seedKey, setSeedKey] = useState(0);
-
-  useEffect(() => {
-    setSidebarExpanded(false);
-  }, [setSidebarExpanded]);
 
   useEffect(() => {
     const titulo = searchParams.get('titulo');
@@ -50,45 +45,55 @@ function PublicarHubContent() {
     else if (type === 'success') success(msg);
   };
 
+  const handleExit = () => {
+    if (typeof window !== 'undefined' && window.history.length > 1) {
+      router.back();
+    } else {
+      router.push('/');
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-[var(--bg-secondary)] flex flex-col pb-[calc(var(--bs-nav-height,56px)+env(safe-area-inset-bottom,0px))] md:pb-0">
-      <Header onToggleLeftSidebar={() => setSidebarOpen(true)} seccionActiva="publicar" />
-      <main className="flex-1 w-full flex flex-col min-h-0">
-        <div className="container mx-auto px-3 py-3 md:py-5 max-w-xl flex-1 flex flex-col min-h-0 w-full">
-          <h1 className="text-lg md:text-xl font-bold text-center mb-0.5 text-[var(--text-primary)] shrink-0">
-            Publica tu oferta u oportunidad en Buscadis
-          </h1>
+    <div className="fixed inset-0 z-[100] flex flex-col bg-[var(--bg-primary)]">
+      <header className="flex shrink-0 items-center justify-between px-3 pt-[max(0.75rem,env(safe-area-inset-top))] pb-2">
+        <button
+          type="button"
+          onClick={handleExit}
+          className="flex h-11 w-11 items-center justify-center rounded-full bg-[var(--bg-secondary)] text-[var(--text-primary)] transition-colors hover:bg-[var(--hover-bg)]"
+          aria-label="Cerrar y salir"
+          title="Salir"
+        >
+          <IconClose size={20} />
+        </button>
+        <span className="text-sm font-bold text-[var(--text-primary)]">Publicar</span>
+        <span className="w-11" aria-hidden />
+      </header>
 
-
-          <div className="flex-1 flex flex-col min-h-[min(680px,calc(100vh-180px))]">
-            <PublishStudioShell
-              key={seedKey}
-              variant="page"
-              initialText={initialText}
-              initialImageUrl={initialImageUrl}
-              initialContacto={initialContacto}
-              onNotify={notify}
-              onPublished={() => {
-                setInitialText('');
-                setInitialImageUrl(null);
-              }}
-            />
-          </div>
-        </div>
+      <main className="flex min-h-0 flex-1 flex-col">
+        <PublishStudioShell
+          key={seedKey}
+          variant="page"
+          immersive
+          initialText={initialText}
+          initialImageUrl={initialImageUrl}
+          initialContacto={initialContacto}
+          onNotify={notify}
+          onPublished={() => {
+            setInitialText('');
+            setInitialImageUrl(null);
+          }}
+          onClose={handleExit}
+        />
       </main>
-      <LeftSidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
-      <div className="block md:hidden">
-        <NavbarMobile seccionActiva="publicar" tieneAdisoAbierto={false} onCambiarSeccion={() => {}} />
-      </div>
+
       <ToastContainer toasts={toasts} removeToast={removeToast} />
-      <FeedbackButton />
     </div>
   );
 }
 
 export default function PublicarPage() {
   return (
-    <Suspense fallback={<div className="p-8 text-center">Cargando…</div>}>
+    <Suspense fallback={<div className="flex min-h-screen items-center justify-center p-8">Cargando…</div>}>
       <PublicarHubContent />
     </Suspense>
   );

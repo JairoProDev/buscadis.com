@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useUI } from '@/contexts/UIContext';
+import { useSpeechRecognition } from '@/hooks/useSpeechRecognition';
 import {
   usePublishDraft,
   loadStudioStep,
@@ -17,11 +18,13 @@ import PublishReviewStep from './PublishReviewStep';
 import PublishCheckoutPanel from './PublishCheckoutPanel';
 import PublishFixedChatBar from './PublishFixedChatBar';
 import PublishStepIndicator from './PublishStepIndicator';
+import PublishAIQuestions from './PublishAIQuestions';
+import PublishModeSwitcher, { type PublishStudioMode } from './PublishModeSwitcher';
 import type { PublisherPreview } from './PublishPreviewCard';
 import { PublishDraft } from '@/lib/publish/publish-draft-types';
 import { hasMinimumContent } from '@/lib/publish/publish-draft-types';
 import { publishPrimaryBtn, publishSecondaryBtn, publishCard } from './publish-ui';
-import { IconAdis } from '@/components/Icons';
+import { IconCamera, IconMicrophone } from '@/components/Icons';
 import type { Adiso } from '@/types';
 import { defaultFlyerForCategory } from '@/lib/flyer/templates';
 import { exportAndUploadFlyer } from '@/lib/flyer/export-client';
@@ -29,6 +32,8 @@ import type { FlyerConfig, FlyerTemplateId } from '@/lib/flyer/types';
 import FlyerCanvas from '@/components/flyer/FlyerCanvas';
 import { buildFlyerContent } from '@/lib/flyer/layout';
 import { resolveFlyerConfig } from '@/lib/flyer/templates';
+import { downloadCoverImage } from '@/lib/publish/download-cover';
+import FlyerTemplatePicker from '@/components/flyer/FlyerTemplatePicker';
 
 export const STORIES_REFRESH_EVENT = 'buscadis:stories-refresh';
 
@@ -37,6 +42,7 @@ interface PublishStudioProps {
   initialImageUrl?: string | null;
   initialContacto?: string;
   compact?: boolean;
+  immersive?: boolean;
   onNotify?: (msg: string, type?: 'info' | 'error' | 'success') => void;
   onPublished?: (adiso: Adiso) => void;
   onClose?: () => void;
@@ -58,6 +64,7 @@ export default function PublishStudio({
   initialImageUrl = null,
   initialContacto,
   compact = false,
+  immersive = false,
   onNotify,
   onPublished,
   onClose,
@@ -83,6 +90,7 @@ export default function PublishStudio({
 
   const { uploadPublishImage, uploadingImage } = usePublishActions(onNotify);
   const [step, setStepState] = useState<StudioStep>(() => loadStudioStep());
+  const [mode, setMode] = useState<PublishStudioMode>('capture');
   const [analyzing, setAnalyzing] = useState(false);
   const [chatStatus, setChatStatus] = useState<string | null>(null);
   const [publishing, setPublishing] = useState(false);
@@ -90,7 +98,12 @@ export default function PublishStudio({
   const [publishedOrderId, setPublishedOrderId] = useState<string | null>(null);
   const [publishedAdisoId, setPublishedAdisoId] = useState<string | null>(null);
   const [publisher, setPublisher] = useState<PublisherPreview | null>(null);
+  const [autoDownload, setAutoDownload] = useState(true);
+  const [showUpsell, setShowUpsell] = useState(false);
   const flyerExportRef = useRef<HTMLDivElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
+  const galleryInputRef = useRef<HTMLInputElement>(null);
+  const { isListening, isSupported, start: startVoice, stop: stopVoice } = useSpeechRecognition('es-PE');
 
   useEffect(() => {
     if (draft.flyerTemplateId) return;
@@ -122,7 +135,7 @@ export default function PublishStudio({
   }, []);
 
   const runAnalyze = useCallback(
-    async (opts: { text?: string; imageUrl?: string; source: 'chat' | 'photo' }) => {
+    async (opts: { text?: string; imageUrl?: string; source: 'chat' | 'photo' | 'voice' }) => {
       const text = opts.text?.trim();
       const imageUrl = opts.imageUrl;
       if (!text && !imageUrl) return false;
@@ -145,6 +158,12 @@ export default function PublishStudio({
           body: JSON.stringify({
             text: text || undefined,
             imageUrls,
+            currentDraft: {
+              categoria: draft.categoria,
+              titulo: draft.titulo,
+              descripcion: draft.descripcion,
+              atributos: draft.atributos,
+            },
           }),
         });
         const data = await res.json();
@@ -159,16 +178,17 @@ export default function PublishStudio({
           mergeDraft(data.draft, data.confidence);
           const msg =
             opts.source === 'photo'
-              ? 'Listo: extraje datos de tu foto y rellené el formulario.'
-              : 'Listo, actualicé tu aviso con lo que compartiste.';
+              ? 'Listo: extraje datos de tu foto.'
+              : opts.source === 'voice'
+                ? 'Listo: convertí tu audio en aviso.'
+                : 'Listo, actualicé tu aviso.';
           addChatMessage('assistant', msg);
           setChatStatus(msg);
           onNotify?.('Aviso actualizado por ADIS', 'success');
           return true;
         }
 
-        const emptyMsg =
-          'No pude extraer suficiente info. Escribe un título o describe el aviso en el chat.';
+        const emptyMsg = 'No pude extraer suficiente info. Prueba otra foto o dicta más detalles.';
         addChatMessage('assistant', emptyMsg);
         setChatStatus(emptyMsg);
         onNotify?.(emptyMsg, 'info');
@@ -182,7 +202,17 @@ export default function PublishStudio({
         setAnalyzing(false);
       }
     },
-    [draft.imagenes, mergeDraft, addChatMessage, onNotify, session?.access_token]
+    [
+      draft.imagenes,
+      draft.categoria,
+      draft.titulo,
+      draft.descripcion,
+      draft.atributos,
+      mergeDraft,
+      addChatMessage,
+      onNotify,
+      session?.access_token,
+    ]
   );
 
   const handleChatSend = useCallback(
@@ -198,12 +228,86 @@ export default function PublishStudio({
   const handlePhotoAdded = useCallback(
     (url: string) => {
       addImage(url);
-      if (!draft.titulo?.trim()) {
-        void runAnalyze({ imageUrl: url, source: 'photo' });
+      void runAnalyze({ imageUrl: url, source: 'photo' });
+    },
+    [addImage, runAnalyze]
+  );
+
+  const handleFilePick = async (files: FileList | null) => {
+    const file = files?.[0];
+    if (!file) return;
+    const url = await uploadPublishImage(file);
+    if (url) handlePhotoAdded(url);
+  };
+
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const mediaChunksRef = useRef<Blob[]>([]);
+  const [recordingAudio, setRecordingAudio] = useState(false);
+
+  const transcribeViaServer = useCallback(
+    async (blob: Blob) => {
+      setAnalyzing(true);
+      try {
+        const fd = new FormData();
+        fd.append('audio', blob, `dictado-${Date.now()}.webm`);
+        const res = await fetch('/api/publish/stt', { method: 'POST', body: fd });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'STT falló');
+        const text = String(data.text || '').trim();
+        if (!text) throw new Error('Audio vacío');
+        addChatMessage('user', text);
+        await runAnalyze({ text, source: 'voice' });
+      } catch (e) {
+        onNotify?.(e instanceof Error ? e.message : 'No se pudo transcribir', 'error');
+        setAnalyzing(false);
       }
     },
-    [addImage, draft.titulo, runAnalyze]
+    [addChatMessage, runAnalyze, onNotify]
   );
+
+  const handleVoiceCapture = async () => {
+    if (isListening) {
+      stopVoice();
+      return;
+    }
+    if (recordingAudio && mediaRecorderRef.current) {
+      mediaRecorderRef.current.stop();
+      setRecordingAudio(false);
+      return;
+    }
+
+    if (isSupported) {
+      startVoice(
+        (transcript) => {
+          addChatMessage('user', transcript);
+          void runAnalyze({ text: transcript, source: 'voice' });
+        },
+        (message) => onNotify?.(message, 'error')
+      );
+      return;
+    }
+
+    // Fallback: MediaRecorder → /api/publish/stt
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const recorder = new MediaRecorder(stream);
+      mediaChunksRef.current = [];
+      mediaRecorderRef.current = recorder;
+      recorder.ondataavailable = (e) => {
+        if (e.data.size > 0) mediaChunksRef.current.push(e.data);
+      };
+      recorder.onstop = () => {
+        stream.getTracks().forEach((t) => t.stop());
+        const blob = new Blob(mediaChunksRef.current, { type: 'audio/webm' });
+        void transcribeViaServer(blob);
+      };
+      recorder.start();
+      setRecordingAudio(true);
+      onNotify?.('Grabando… toca de nuevo para terminar', 'info');
+    } catch {
+      onNotify?.('No se pudo acceder al micrófono', 'error');
+    }
+  };
 
   const handleEnhanceImage = useCallback(
     async (url: string, action: string) => {
@@ -274,21 +378,19 @@ export default function PublishStudio({
         let imagenes = [...publishDraft.imagenes];
         let flyerTemplateId = publishDraft.flyerTemplateId;
         let flyerConfig = publishDraft.flyerConfig;
+        let coverForDownload: string | null = imagenes[0] || null;
 
         if (imagenes.length === 0) {
           const defaults = defaultFlyerForCategory(publishDraft.categoria);
           flyerTemplateId = flyerTemplateId || defaults.templateId;
           flyerConfig = flyerConfig || defaults.config;
-          // Wait a frame so export node has latest paint
           await new Promise((r) => requestAnimationFrame(() => r(null)));
           const coverUrl = await exportAndUploadFlyer(flyerExportRef.current);
           if (coverUrl) {
             imagenes = [coverUrl];
+            coverForDownload = coverUrl;
           } else {
-            onNotify?.(
-              'No se pudo generar la portada; el aviso usará el flyer en pantalla.',
-              'info'
-            );
+            onNotify?.('No se pudo generar la portada; el aviso usará el flyer en pantalla.', 'info');
           }
         }
 
@@ -308,55 +410,76 @@ export default function PublishStudio({
             dailyRate: publishDraft.dailyRate ?? 5,
           }),
         });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Error al publicar');
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Error al publicar');
 
-      const created = data.adiso as Adiso | undefined;
-      if (created) {
-        // Enriquecer con logo/nombre del negocio para que el card del feed se vea completo
-        if (publisher && !created.vendedor) {
-          created.vendedor = {
-            id: created.user_id || created.usuario_id || 'me',
-            nombre: publisher.name || 'Tu negocio',
-            avatarUrl: publisher.logoUrl,
-            esVerificado: true,
-            nivelVerificacion: 'negocio',
-          };
+        const created = data.adiso as Adiso | undefined;
+        if (created) {
+          if (publisher && !created.vendedor) {
+            created.vendedor = {
+              id: created.user_id || created.usuario_id || 'me',
+              nombre: publisher.name || 'Tu negocio',
+              avatarUrl: publisher.logoUrl,
+              esVerificado: true,
+              nivelVerificacion: 'negocio',
+            };
+          }
+          onPublished?.(created);
+          if (typeof window !== 'undefined') {
+            window.dispatchEvent(new CustomEvent(STORIES_REFRESH_EVENT));
+          }
         }
-        onPublished?.(created);
-        if (typeof window !== 'undefined') {
-          window.dispatchEvent(new CustomEvent(STORIES_REFRESH_EVENT));
-        }
-      }
 
-      if (plan === 'paid') {
-        setPublishedAdisoId(data.adiso?.id);
-        setPublishedOrderId(data.orderId);
-        onNotify?.('¡Ya está en el feed! Verifica tu pago Yape para activar el contacto.', 'success');
-      } else {
-        onNotify?.('¡Publicado! Ya aparece arriba en el feed (gratis 24h).', 'success');
-        resetDraft();
-        setStep('compose');
-      }
+        if (autoDownload && coverForDownload) {
+          void downloadCoverImage(coverForDownload, `buscadis-${created?.id || 'aviso'}.jpg`);
+        }
+
+        if (plan === 'paid') {
+          setPublishedAdisoId(data.adiso?.id);
+          setPublishedOrderId(data.orderId);
+          setStep('pay');
+          onNotify?.('¡Ya está en el feed! Verifica tu pago Yape para activar el contacto.', 'success');
+        } else {
+          onNotify?.('¡Publicado! Ya aparece en el feed (gratis 24h).', 'success');
+          setShowUpsell(true);
+          setPublishedAdisoId(data.adiso?.id || null);
+          resetDraft();
+          setStep('compose');
+        }
       } catch (e) {
         onNotify?.(e instanceof Error ? e.message : 'Error al publicar', 'error');
       } finally {
         setPublishing(false);
       }
     },
-    [user?.id, draft, session?.access_token, openAuthModal, onNotify, resetDraft, onPublished, setStep, publisher]
+    [
+      user?.id,
+      draft,
+      session?.access_token,
+      openAuthModal,
+      onNotify,
+      resetDraft,
+      onPublished,
+      setStep,
+      publisher,
+      autoDownload,
+    ]
   );
 
-  const goToReview = () => {
-    if (!hasMinimumContent(draft)) {
-      onNotify?.('Agrega título, descripción o al menos una imagen', 'error');
-      return;
+  const handleAiAnswer = (fieldId: string, value: string | number | boolean) => {
+    if (fieldId === 'titulo' || fieldId === 'descripcion' || fieldId === 'contacto') {
+      setDraft({ [fieldId]: String(value) });
+    } else if (fieldId === 'precio') {
+      setDraft({ precio: typeof value === 'number' ? value : Number(value) || undefined });
+    } else if (fieldId === 'categoria') {
+      setDraft({ categoria: value as PublishDraft['categoria'] });
+    } else {
+      setAtributo(fieldId, value);
     }
-    setStep('review');
   };
 
   const stepNumber = step === 'compose' ? 1 : step === 'review' ? 2 : 3;
-  const chatPadding = step === 'compose' && !publishedOrderId && !compact ? 'pb-[120px]' : '';
+  const showChat = !immersive || mode === 'form';
 
   const flyerDefaults = defaultFlyerForCategory(draft.categoria);
   const exportTemplateId = draft.flyerTemplateId || flyerDefaults.templateId;
@@ -374,14 +497,17 @@ export default function PublishStudio({
     categoria: draft.categoria,
   });
 
+  const heroUrl = draft.imagenes[0];
+  const canPublish = hasMinimumContent(draft) && !analyzing && !publishing;
+
   return (
-    <div className={`flex flex-col ${compact ? 'h-full min-h-0 relative' : 'min-h-0'} ${chatPadding}`}>
-      {/* Always-mounted export target (offscreen) when no photos */}
+    <div
+      className={`flex flex-col ${
+        immersive || compact ? 'h-full min-h-0' : 'min-h-0'
+      } ${showChat && step === 'compose' && !compact && !immersive ? 'pb-[120px]' : ''}`}
+    >
       {draft.imagenes.length === 0 && (
-        <div
-          aria-hidden
-          className="pointer-events-none fixed left-[-9999px] top-0 w-[1080px] opacity-0"
-        >
+        <div aria-hidden className="pointer-events-none fixed left-[-9999px] top-0 w-[1080px] opacity-0">
           <FlyerCanvas
             templateId={exportTemplateId}
             config={exportConfig}
@@ -390,13 +516,14 @@ export default function PublishStudio({
           />
         </div>
       )}
+
       {onClose && (
-        <div className="flex items-center justify-between shrink-0 mb-2 px-1">
-          <h2 className="text-base font-bold m-0 text-[var(--text-primary)]">Publicar aviso</h2>
+        <div className="mb-2 flex shrink-0 items-center justify-between px-1">
+          <h2 className="m-0 text-base font-bold text-[var(--text-primary)]">Publicar aviso</h2>
           <button
             type="button"
             onClick={onClose}
-            className="p-2 rounded-lg text-[var(--text-tertiary)] hover:bg-[var(--hover-bg)] transition-colors"
+            className="rounded-lg p-2 text-[var(--text-tertiary)] transition-colors hover:bg-[var(--hover-bg)]"
             aria-label="Cerrar"
           >
             ✕
@@ -404,84 +531,253 @@ export default function PublishStudio({
         </div>
       )}
 
-      <PublishStepIndicator step={stepNumber} />
+      {!immersive && <PublishStepIndicator step={stepNumber} />}
 
       {step === 'compose' && (
-        <div className="flex flex-col flex-1 min-h-0">
-          <div className={`${publishCard} p-3.5 mb-3 flex items-center gap-3 shrink-0 mx-0`}>
-            <div className="w-9 h-9 rounded-full bg-[rgba(var(--brand-primary-rgb),0.12)] ring-1 ring-[rgba(var(--brand-primary-rgb),0.2)] flex items-center justify-center shrink-0">
-              <IconAdis size={18} color="var(--brand-blue)" />
-            </div>
-            <div className="min-w-0">
-              <p className="text-sm font-semibold text-[var(--text-primary)] m-0">Crea tu aviso</p>
-              <p className="text-xs text-[var(--text-secondary)] m-0 mt-0.5 leading-snug">
-                Sube una foto o escribe abajo: ADIS rellena título y descripción.
-              </p>
-            </div>
-          </div>
+        <div className="flex min-h-0 flex-1 flex-col">
+          <PublishModeSwitcher mode={mode} onChange={setMode} />
 
-          <div className={`${publishCard} flex-1 min-h-0 overflow-y-auto p-4 space-y-4`}>
-            <PublishPhotoZone
-              images={draft.imagenes}
-              onAdd={handlePhotoAdded}
-              onRemove={removeImage}
-              onUpload={uploadPublishImage}
-              onEnhance={handleEnhanceImage}
-              uploading={uploadingImage}
-              maxImages={10}
-              allowEnhance
-              flyerExportRef={undefined}
-              flyerTemplateId={draft.flyerTemplateId}
-              flyerConfig={draft.flyerConfig}
-              onFlyerChange={(next: { templateId: FlyerTemplateId; config: FlyerConfig }) =>
-                setDraft({ flyerTemplateId: next.templateId, flyerConfig: next.config })
-              }
-              draftPreview={{
-                titulo: draft.titulo,
-                precio: draft.precio,
-                moneda: draft.moneda,
-                tipoPrecio: draft.tipoPrecio,
-                ubicacion: draft.ubicacion,
-                categoria: draft.categoria,
+          <div className="min-h-0 flex-1 overflow-y-auto px-3 pb-3">
+            {(mode === 'capture' || mode === 'template' || mode === 'design') && (
+              <div className="relative mb-3 aspect-square w-full overflow-hidden rounded-2xl bg-[var(--bg-secondary)]">
+                {heroUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={heroUrl} alt="" className="h-full w-full object-cover" />
+                ) : (
+                  <div className="absolute inset-0">
+                    <FlyerCanvas
+                      templateId={exportTemplateId}
+                      config={exportConfig}
+                      content={exportContent}
+                      className="h-full w-full"
+                    />
+                  </div>
+                )}
+
+                {mode === 'capture' && (
+                  <div className="absolute inset-x-0 bottom-0 flex items-center justify-center gap-4 bg-gradient-to-t from-black/70 to-transparent p-4 pt-12">
+                    <button
+                      type="button"
+                      onClick={() => galleryInputRef.current?.click()}
+                      disabled={uploadingImage || analyzing}
+                      className="flex h-12 w-12 items-center justify-center rounded-full bg-white/20 text-white backdrop-blur"
+                      aria-label="Galería"
+                      title="Galería"
+                    >
+                      <IconCamera size={22} />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => cameraInputRef.current?.click()}
+                      disabled={uploadingImage || analyzing}
+                      className="flex h-16 w-16 items-center justify-center rounded-full border-4 border-white bg-[var(--brand-blue)] text-white shadow-lg"
+                      aria-label="Tomar foto"
+                      title="Tomar foto"
+                    >
+                      <IconCamera size={28} />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => void handleVoiceCapture()}
+                      disabled={analyzing}
+                      className={`flex h-12 w-12 items-center justify-center rounded-full backdrop-blur ${
+                        isListening || recordingAudio
+                          ? 'animate-pulse bg-red-500 text-white'
+                          : 'bg-white/20 text-white'
+                      }`}
+                      aria-label={
+                        isListening || recordingAudio ? 'Detener dictado' : 'Dictar aviso'
+                      }
+                      aria-pressed={isListening || recordingAudio}
+                      title={isListening || recordingAudio ? 'Detener' : 'Dictar'}
+                    >
+                      <IconMicrophone size={22} />
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+
+            <input
+              ref={cameraInputRef}
+              type="file"
+              accept="image/*"
+              capture="environment"
+              className="hidden"
+              onChange={(e) => {
+                void handleFilePick(e.target.files);
+                e.target.value = '';
+              }}
+            />
+            <input
+              ref={galleryInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={(e) => {
+                void handleFilePick(e.target.files);
+                e.target.value = '';
               }}
             />
 
-            <PublishFormCompact
-              draft={draft}
-              onChange={setDraft}
-              onSetAtributo={setAtributo}
-              showAdvanced={showAdvanced}
-              onToggleAdvanced={() => setShowAdvanced(!showAdvanced)}
-              onEnhanceField={handleEnhanceField}
-              enhancingField={enhancingField}
-              analyzing={analyzing}
-            />
+            {(analyzing || chatStatus) && (
+              <p className="mb-2 text-center text-xs font-medium text-[var(--text-secondary)]" aria-live="polite">
+                {analyzing ? 'ADIS está analizando…' : chatStatus}
+              </p>
+            )}
+
+            {mode === 'capture' && draft.missingFields.length > 0 && (
+              <div className="mb-3">
+                <PublishAIQuestions draft={draft} onAnswer={handleAiAnswer} />
+              </div>
+            )}
+
+            {mode === 'capture' && (draft.titulo || draft.descripcion) && (
+              <div className={`${publishCard} mb-3 space-y-1 p-3`}>
+                {draft.titulo && (
+                  <p className="m-0 text-sm font-bold text-[var(--text-primary)] line-clamp-2">{draft.titulo}</p>
+                )}
+                {draft.descripcion && (
+                  <p className="m-0 text-xs text-[var(--text-secondary)] line-clamp-3">{draft.descripcion}</p>
+                )}
+              </div>
+            )}
+
+            {mode === 'form' && (
+              <div className="space-y-4">
+                <PublishPhotoZone
+                  images={draft.imagenes}
+                  onAdd={handlePhotoAdded}
+                  onRemove={removeImage}
+                  onUpload={uploadPublishImage}
+                  onEnhance={handleEnhanceImage}
+                  uploading={uploadingImage}
+                  maxImages={10}
+                  allowEnhance
+                  flyerEnabled={false}
+                  draftPreview={{
+                    titulo: draft.titulo,
+                    precio: draft.precio,
+                    moneda: draft.moneda,
+                    tipoPrecio: draft.tipoPrecio,
+                    ubicacion: draft.ubicacion,
+                    categoria: draft.categoria,
+                  }}
+                />
+                <PublishFormCompact
+                  draft={draft}
+                  onChange={setDraft}
+                  onSetAtributo={setAtributo}
+                  showAdvanced={showAdvanced}
+                  onToggleAdvanced={() => setShowAdvanced(!showAdvanced)}
+                  onEnhanceField={handleEnhanceField}
+                  enhancingField={enhancingField}
+                  analyzing={analyzing}
+                />
+                {draft.missingFields.length > 0 && (
+                  <PublishAIQuestions draft={draft} onAnswer={handleAiAnswer} />
+                )}
+              </div>
+            )}
+
+            {(mode === 'template' || mode === 'design') && (
+              <FlyerTemplatePicker
+                templateId={exportTemplateId}
+                config={exportConfig}
+                content={exportContent}
+                onChange={(next) =>
+                  setDraft({ flyerTemplateId: next.templateId, flyerConfig: next.config })
+                }
+                compact={mode === 'template'}
+              />
+            )}
+
+            {mode === 'form' && (
+              <PublishFixedChatBar
+                onSend={handleChatSend}
+                onUploadImage={uploadPublishImage}
+                sending={analyzing}
+                embedded
+                statusMessage={chatStatus}
+              />
+            )}
           </div>
 
-          <div className={`shrink-0 pt-3 ${compact ? 'mb-0' : ''}`}>
-            <button type="button" onClick={goToReview} className={publishPrimaryBtn} disabled={analyzing}>
-              Revisar aviso
+          <div className="shrink-0 space-y-2 border-t border-[var(--border-color)] bg-[var(--bg-primary)] px-3 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+            <label className="flex items-center gap-2 text-xs text-[var(--text-secondary)]">
+              <input
+                type="checkbox"
+                checked={autoDownload}
+                onChange={(e) => setAutoDownload(e.target.checked)}
+                className="rounded border-[var(--border-color)]"
+              />
+              Descargar portada al publicar
+            </label>
+            <button
+              type="button"
+              onClick={() => void publish('free')}
+              className={publishPrimaryBtn}
+              disabled={!canPublish}
+            >
+              {publishing ? 'Publicando…' : 'Publicar gratis'}
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                if (!hasMinimumContent(draft)) {
+                  onNotify?.('Agrega título, descripción o al menos una imagen', 'error');
+                  return;
+                }
+                setStep('review');
+              }}
+              className={publishSecondaryBtn}
+              disabled={analyzing}
+            >
+              Revisar o destacar
             </button>
           </div>
 
-          <PublishFixedChatBar
-            onSend={handleChatSend}
-            onUploadImage={uploadPublishImage}
-            sending={analyzing}
-            embedded={compact}
-            statusMessage={chatStatus}
-          />
+          {showUpsell && (
+            <div className="fixed inset-0 z-[1300] flex items-end justify-center bg-black/40 p-4 sm:items-center">
+              <div className={`${publishCard} w-full max-w-md space-y-3 p-4`}>
+                <p className="m-0 text-base font-bold text-[var(--text-primary)]">¡Publicado!</p>
+                <p className="m-0 text-sm text-[var(--text-secondary)]">
+                  Tu aviso ya está en el feed. ¿Quieres más fotos, más días o más visibilidad?
+                </p>
+                <button
+                  type="button"
+                  className={publishPrimaryBtn}
+                  onClick={() => {
+                    setShowUpsell(false);
+                    setStep('pay');
+                  }}
+                >
+                  Ver beneficios extra
+                </button>
+                <button
+                  type="button"
+                  className={publishSecondaryBtn}
+                  onClick={() => setShowUpsell(false)}
+                >
+                  Seguir gratis
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       )}
 
       {step === 'review' && (
-        <div className="flex flex-col flex-1 min-h-0">
-          <div className="flex-1 min-h-0 overflow-y-auto pb-3">
+        <div className="flex min-h-0 flex-1 flex-col px-3">
+          <div className="min-h-0 flex-1 overflow-y-auto pb-3">
             <PublishReviewStep draft={draft} publisher={publisher} />
           </div>
-          <div className="shrink-0 space-y-2 pt-2 border-t border-[var(--border-color)]">
-            <button type="button" onClick={() => setStep('pay')} className={publishPrimaryBtn}>
-              Elegir plan y publicar
+          <div className="shrink-0 space-y-2 border-t border-[var(--border-color)] pt-2 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+            <button type="button" onClick={() => void publish('free')} className={publishPrimaryBtn} disabled={publishing}>
+              {publishing ? 'Publicando…' : 'Publicar gratis'}
+            </button>
+            <button type="button" onClick={() => setStep('pay')} className={publishSecondaryBtn}>
+              Destacar (beneficios extra)
             </button>
             <button type="button" onClick={() => setStep('compose')} className={publishSecondaryBtn}>
               ← Volver a editar
@@ -491,8 +787,8 @@ export default function PublishStudio({
       )}
 
       {step === 'pay' && (
-        <div className="flex flex-col flex-1 min-h-0">
-          <div className="flex-1 min-h-0 overflow-y-auto pb-3">
+        <div className="flex min-h-0 flex-1 flex-col px-3">
+          <div className="min-h-0 flex-1 overflow-y-auto pb-3">
             <PublishCheckoutPanel
               draft={draft}
               onChange={setDraft}
@@ -505,9 +801,9 @@ export default function PublishStudio({
             />
           </div>
           {!publishedOrderId && (
-            <div className="shrink-0 pt-2 border-t border-[var(--border-color)]">
-              <button type="button" onClick={() => setStep('review')} className={publishSecondaryBtn}>
-                ← Volver a revisar
+            <div className="shrink-0 border-t border-[var(--border-color)] pt-2 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+              <button type="button" onClick={() => setStep('compose')} className={publishSecondaryBtn}>
+                ← Volver
               </button>
             </div>
           )}

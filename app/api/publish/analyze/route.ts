@@ -76,20 +76,36 @@ export async function POST(request: NextRequest) {
         const { object } = await generateObject({
           model: openai(AI_MODELS.REASONING),
           schema: AnalyzeSchema,
-          prompt: `Analiza este texto de aviso clasificado peruano y extrae datos estructurados. Texto:\n${text}`,
+          prompt: `Analiza este texto de aviso clasificado peruano y extrae datos estructurados.
+
+IMPORTANTE — atributos:
+- Si la categoría es empleos: modalidad (presencial/remoto/híbrido), jornada, sueldo aproximado → keys empleos_modalidad, empleos_jornada, empleos_sueldo
+- inmuebles: operación (venta/alquiler), habitaciones, área → inmuebles_operacion, inmuebles_habitaciones, inmuebles_area
+- vehiculos: condición, combustible, año, km → vehiculos_condicion, vehiculos_combustible, vehiculos_anio, vehiculos_km
+- productos: condición, entrega → productos_condicion, productos_entrega
+- servicios: modalidad → servicios_modalidad
+- eventos: tipo, fecha → eventos_tipo, eventos_fecha
+- negocios: rubro → negocios_rubro
+- comunidad: tipo → comunidad_tipo
+
+Devuelve solo lo que puedas inferir con confianza. Texto:
+${text}`,
         });
         const categoria = (object.categoria || inferCategoryFromText(text)) as Categoria;
         result = {
           ...object,
           categoria,
           subcategoria: object.subcategoria || inferSubcategoryFromText(categoria, text),
-          confidence: {
+            confidence: {
             categoria: 0.9,
             titulo: object.titulo ? 0.9 : 0,
             descripcion: object.descripcion ? 0.9 : 0,
             subcategoria: object.subcategoria ? 0.85 : 0.7,
             precio: object.precio ? 0.85 : 0,
             contacto: object.contacto ? 0.9 : 0,
+            ...Object.fromEntries(
+              Object.keys(object.atributos || {}).map((k) => [k, 0.8]),
+            ),
           },
         };
       } catch {

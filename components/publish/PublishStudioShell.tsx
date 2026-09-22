@@ -14,6 +14,8 @@ export type PublishStudioVariant = 'page' | 'modal' | 'sidebar';
 
 interface PublishStudioShellProps {
   variant?: PublishStudioVariant;
+  /** Full-bleed immersive page (no max-width gutters) */
+  immersive?: boolean;
   initialText?: string;
   initialImageUrl?: string | null;
   initialContacto?: string;
@@ -24,6 +26,7 @@ interface PublishStudioShellProps {
 
 export default function PublishStudioShell({
   variant = 'page',
+  immersive = false,
   initialText,
   initialImageUrl,
   initialContacto,
@@ -76,13 +79,15 @@ export default function PublishStudioShell({
   }
 
   return (
-    <div className="max-w-xl mx-auto w-full">
+    <div className={`flex h-full min-h-0 w-full flex-1 flex-col ${immersive ? '' : 'mx-auto max-w-xl'}`}>
       <PublishStudio
+        immersive={immersive}
         initialText={initialText}
         initialImageUrl={initialImageUrl}
         initialContacto={initialContacto}
         onNotify={onNotify}
         onPublished={onPublished}
+        onClose={immersive ? undefined : onClose}
       />
     </div>
   );
