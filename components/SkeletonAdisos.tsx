@@ -23,7 +23,7 @@ export function SkeletonCard() {
         className="skeleton-shimmer"
         style={{
           width: '100%',
-          aspectRatio: '4 / 3',
+          aspectRatio: '1 / 1',
           borderRadius: 'var(--card-radius, 16px)',
           backgroundColor: 'var(--bg-tertiary)',
         }}

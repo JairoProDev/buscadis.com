@@ -70,8 +70,8 @@ function getMediaAspectClass(vista: AdisoCardVista, isCatalogProduct: boolean): 
       ? 'h-[112px] w-[112px] shrink-0'
       : 'h-24 w-24 shrink-0 md:h-24 md:w-24';
   }
-  // Doc 08: imagen 4:3
-  return 'aspect-[4/3] w-full';
+  // Marketplace: imagen cuadrada (1:1) en grid y feed
+  return 'aspect-square w-full';
 }
 
 const AdisoCard = forwardRef<HTMLDivElement, AdisoCardProps>(
