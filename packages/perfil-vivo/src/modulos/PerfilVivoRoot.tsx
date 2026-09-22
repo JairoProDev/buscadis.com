@@ -10,7 +10,8 @@ import { RenderizadorModulos } from './RenderizadorModulos';
 import { BarraAccion } from './BarraAccion';
 import { ChromeSuperior } from './ChromeSuperior';
 import { PvCartProvider } from '../commerce/CartContext';
-import { PvCartDrawer } from '../commerce/CartDrawer';
+import { PvCartDrawer, PvCartToast } from '../commerce/CartDrawer';
+import { PedidoDeepLink } from '../commerce/PedidoDeepLink';
 
 const BarraSecciones = lazy(() =>
   import('./BarraSecciones').then((m) => ({ default: m.BarraSecciones }))
@@ -43,7 +44,7 @@ function PieDeConfianza({ actualizadoEn }: { actualizadoEn: string }) {
     <footer className="pv-pie" id="pie-confianza">
       <p className="pv-pie__brand">Buscadis</p>
       <p className="pv-pie__meta">
-        Vitrina del centro comercial digital
+        Vitrina en Buscadis
         {fecha ? ` · Actualizado ${fecha}` : ''}
       </p>
     </footer>
@@ -98,7 +99,9 @@ export function PerfilVivoRoot({
             <RenderizadorModulos />
             <PieDeConfianza actualizadoEn={negocio.actualizadoEn} />
             <BarraAccion label={stickyLabel(negocio.arquetipo)} />
+            <PvCartToast />
             <PvCartDrawer />
+            <PedidoDeepLink />
           </ChromeUIProvider>
         </PvCartProvider>
       </PerfilProvider>

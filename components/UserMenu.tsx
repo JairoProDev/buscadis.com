@@ -73,7 +73,7 @@ function UserMenuContent({ onProgressClick }: UserMenuProps) {
       },
     },
     {
-      icon: <IconMotorcycle size={16} color="var(--brand-blue)" />,
+      icon: <IconMotorcycle size={20} color="var(--brand-blue)" />,
       iconBg: 'bg-[rgba(var(--brand-primary-rgb),0.12)]',
       label: 'Hacer delivery',
       onClick: () => {

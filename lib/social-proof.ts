@@ -69,8 +69,7 @@ export function getViewSignal(adiso: ViewSignalInput): SocialSignal | null {
 
 export function getInterestSignal(contacts?: number): SocialSignal | null {
   const total = Math.max(0, contacts || 0);
-  if (total <= 0) return null;
-  if (total < 3) return { label: 'Interesados recientes', tone: 'neutral' };
+  if (total < 3) return null;
   if (total < 10) return { label: 'Alta demanda', tone: 'positive' };
   return { label: `+${Math.floor(total / 10) * 10} interesados`, tone: 'positive' };
 }
@@ -105,13 +104,6 @@ function getNuevoSignal(adiso: Adiso): CardSignal | null {
 }
 
 function getCategorySignal(adiso: Adiso): CardSignal | null {
-  const ageHours = getAgeInHours(adiso);
-  const isFresh = ageHours !== null && ageHours <= 168;
-
-  if (adiso.categoria === 'empleos' && isFresh && !isImportedHistoricAdiso(adiso)) {
-    return { type: 'empleo_destacado', label: 'Oportunidad activa', tone: 'positive' };
-  }
-
   if (adiso.categoria === 'inmuebles') {
     const hasPrice = Boolean(adiso.precio && adiso.precio > 0);
     if (hasPrice && (adiso.vistas ?? 0) >= 30) {
@@ -138,14 +130,10 @@ function getTrustSignals(adiso: Adiso): CardSignal | null {
   return null;
 }
 
-function hasPhotos(adiso: Adiso): boolean {
-  if (adiso.imagenUrl?.trim()) return true;
-  return (adiso.imagenesUrls?.filter((u) => u?.trim()).length ?? 0) > 0;
-}
-
 /**
  * Una sola señal por card, priorizada (estilo Airbnb).
  * Se muestra junto al avatar del anunciante.
+ * Sin relleno vacío: no "Con fotos", "Oportunidad disponible" ni "Interesados recientes".
  */
 export function pickCardSignal(adiso: Adiso): CardSignal | null {
   if (adiso.esDestacado) {
@@ -168,21 +156,6 @@ export function pickCardSignal(adiso: Adiso): CardSignal | null {
 
   const categoria = getCategorySignal(adiso);
   if (categoria) return categoria;
-
-  // Importados antiguos: señales neutras de confianza/categoría, nunca edición ni fuente interna.
-  if (isImportedHistoricAdiso(adiso)) {
-    if (adiso.categoria === 'empleos') {
-      return { type: 'empleo_destacado', label: 'Oportunidad disponible', tone: 'neutral' };
-    }
-    if (hasPhotos(adiso)) {
-      return { type: 'con_fotos', label: 'Con fotos', tone: 'neutral' };
-    }
-    return null;
-  }
-
-  if (hasPhotos(adiso) && !isImportedHistoricAdiso(adiso)) {
-    return { type: 'con_fotos', label: 'Con fotos', tone: 'neutral' };
-  }
 
   return null;
 }

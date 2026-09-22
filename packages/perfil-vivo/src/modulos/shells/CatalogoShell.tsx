@@ -101,81 +101,91 @@ function ProductoSheet({
   onAdd?: () => void;
   addLabel?: string;
 }) {
+  const { payload } = usePerfil();
   const precio = precioLabel(producto);
   const img = producto.imagenes[0];
 
   return (
-    <div
-      role="dialog"
-      aria-modal="true"
-      aria-label={producto.nombre}
-      className="pv-sheet-scrim"
-      onClick={onClose}
-      onKeyDown={(ev) => {
-        if (ev.key === 'Escape') onClose();
-      }}
-    >
-      <div className="pv-sheet" onClick={(e) => e.stopPropagation()}>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={img?.url}
-          alt={img?.alt ?? producto.nombre}
-          width={480}
-          height={320}
-          className="pv-sheet__img"
-        />
-        <h3 className="pv-sheet__title">{producto.nombre}</h3>
-        {precio ? <p className="pv-sheet__precio">{precio}</p> : null}
-        {producto.descripcion ? (
-          <p className="pv-sheet__desc">{producto.descripcion}</p>
-        ) : null}
-        <a href={productoHref} className="pv-sheet__link">
-          Ver página del producto →
-        </a>
-        <div className="pv-sheet__bar" style={{ display: 'flex', gap: 8, flexDirection: 'column' }}>
-          {onAdd ? (
-            <button
-              type="button"
-              className="pv-barra-accion__primary"
-              style={{
-                minHeight: 48,
-                border: 'none',
-                cursor: 'pointer',
-                background: 'var(--mk-accion)',
-              }}
-              onClick={() => {
-                onAdd();
-                onClose();
-              }}
-            >
-              {addLabel || 'Agregar al pedido'}
-            </button>
+    <div className="pv-sheet" role="presentation">
+      <button
+        type="button"
+        className="pv-sheet__scrim"
+        aria-label="Cerrar"
+        onClick={onClose}
+      />
+      <div
+        className="pv-sheet__panel"
+        role="dialog"
+        aria-modal="true"
+        aria-label={producto.nombre}
+        onKeyDown={(ev) => {
+          if (ev.key === 'Escape') onClose();
+        }}
+      >
+        <div className="pv-sheet__head">
+          <h3 className="pv-sheet__title">{producto.nombre}</h3>
+          <button type="button" className="pv-sheet__close" aria-label="Cerrar" onClick={onClose}>
+            ×
+          </button>
+        </div>
+        <div className="pv-sheet__body">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={img?.url}
+            alt={img?.alt ?? producto.nombre}
+            width={480}
+            height={320}
+            className="pv-sheet__img"
+          />
+          {precio ? <p className="pv-sheet__precio">{precio}</p> : null}
+          {producto.descripcion ? (
+            <p className="pv-sheet__desc">{producto.descripcion}</p>
           ) : null}
-          {handoffUrl ? (
-            <a
-              href={handoffUrl}
-              className="pv-barra-accion__primary"
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                textDecoration: 'none',
-                minHeight: 48,
-                background: onAdd ? 'transparent' : undefined,
-                color: onAdd ? 'var(--mk-accion)' : undefined,
-                border: onAdd ? '1.5px solid var(--mk-accion)' : undefined,
-              }}
-              onClick={() => {
-                /* purchase_intent tracked by parent open + handoff analytics */
-              }}
-            >
-              {ctaLabel}
-            </a>
-          ) : (
-            <button type="button" className="pv-barra-accion__primary" disabled>
-              {ctaLabel}
-            </button>
-          )}
+          <a href={productoHref} className="pv-sheet__link">
+            Ver página del producto →
+          </a>
+          <div className="pv-sheet__actions">
+            {onAdd ? (
+              <button
+                type="button"
+                className="pv-barra-accion__primary"
+                style={{ border: 'none', width: '100%' }}
+                onClick={() => {
+                  onAdd();
+                  onClose();
+                }}
+              >
+                {addLabel || 'Agregar al pedido'}
+              </button>
+            ) : null}
+            {handoffUrl ? (
+              <a
+                href={handoffUrl}
+                className={onAdd ? 'pv-sheet__secondary' : 'pv-barra-accion__primary'}
+                style={
+                  onAdd
+                    ? undefined
+                    : {
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        textDecoration: 'none',
+                        width: '100%',
+                      }
+                }
+                onClick={() => {
+                  emitPvCommerceEvent({
+                    businessProfileId: payload.negocio.id,
+                    eventType: 'purchase_intent',
+                    productId: producto.id,
+                    metadata: { surface: 'sheet_wa' },
+                  });
+                }}
+              >
+                {ctaLabel}
+              </a>
+            ) : null}
+          </div>
         </div>
       </div>
     </div>
@@ -197,10 +207,10 @@ export function CatalogoShell({ titulo }: { titulo: string }) {
   const arq = payload.negocio.arquetipo;
   const coverImgs =
     arq === 'comida' || arq === 'alto_ticket' || arq === 'local';
-  const ctaCard = arq === 'comida' ? 'Pedir' : 'Consultar';
+  const ctaCard = arq === 'comida' ? 'Pedir' : 'Ver';
   const ctaSheet =
-    arq === 'comida' ? 'Pedir solo este' : 'Consultar por WhatsApp';
-  const addLabel = arq === 'comida' ? 'Agregar al pedido' : 'Agregar al pedido';
+    arq === 'comida' ? 'Solo este por WhatsApp' : 'Consultar por WhatsApp';
+  const addLabel = 'Agregar al pedido';
   const iaCfg = payload.negocio.modulos.find((m) => m.tipo === 'ia');
   const tieneIa =
     Boolean(iaCfg?.visible !== false) &&
@@ -219,16 +229,11 @@ export function CatalogoShell({ titulo }: { titulo: string }) {
   const openSheet = useCallback(
     (id: string) => {
       setOpenId(id);
+      // Solo product_view al abrir; purchase_intent al agregar o escribir WA.
       emitPvCommerceEvent({
         businessProfileId: payload.negocio.id,
         eventType: 'product_view',
         productId: id,
-      });
-      emitPvCommerceEvent({
-        businessProfileId: payload.negocio.id,
-        eventType: 'purchase_intent',
-        productId: id,
-        metadata: { surface: 'catalogo_sheet' },
       });
       if (typeof window === 'undefined') return;
       window.history.pushState({ pvSheet: SHEET_KEY, id }, '');

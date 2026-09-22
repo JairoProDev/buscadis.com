@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import Header from '@/components/Header';
-import { IconBox, IconMotorcycle, IconUser } from '@/components/Icons';
+import { IconBox, IconMotorcycle } from '@/components/Icons';
 import { PILOT_LAUNCH } from '@/lib/envios';
 
 export default function DeliveryHubPage() {
@@ -26,14 +26,7 @@ export default function DeliveryHubPage() {
             className="flex min-h-[120px] flex-col items-center justify-center gap-3 rounded-3xl border border-[var(--border-color)] bg-[var(--bg-secondary)] px-6 py-8 transition hover:border-[var(--brand-blue)] hover:bg-[rgba(var(--brand-primary-rgb),0.08)] active:scale-[0.99]"
           >
             <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[rgba(var(--brand-primary-rgb),0.14)]">
-              <span className="relative inline-flex">
-                <IconUser size={28} color="var(--brand-blue)" />
-                <IconBox
-                  size={16}
-                  color="var(--brand-blue)"
-                  className="absolute -bottom-1 -right-2"
-                />
-              </span>
+              <IconBox size={28} color="var(--brand-blue)" />
             </span>
             <span className="text-xl font-bold text-[var(--text-primary)]">Pedir</span>
             <span className="text-center text-xs text-[var(--text-secondary)]">
@@ -46,7 +39,7 @@ export default function DeliveryHubPage() {
             className="flex min-h-[120px] flex-col items-center justify-center gap-3 rounded-3xl border border-[var(--border-color)] bg-[var(--bg-secondary)] px-6 py-8 transition hover:border-[var(--brand-blue)] hover:bg-[rgba(var(--brand-primary-rgb),0.08)] active:scale-[0.99]"
           >
             <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[rgba(var(--brand-primary-rgb),0.14)]">
-              <IconMotorcycle size={30} color="var(--brand-blue)" />
+              <IconMotorcycle size={34} color="var(--brand-blue)" />
             </span>
             <span className="text-xl font-bold text-[var(--text-primary)]">Llevar</span>
             <span className="text-center text-xs text-[var(--text-secondary)]">

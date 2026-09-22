@@ -15,11 +15,11 @@ interface CrawlableAdisoListProps {
   visuallyHidden?: boolean;
 }
 
-function priceFor(adiso: Adiso): string {
+function priceFor(adiso: Adiso): string | null {
   if (adiso.categoria === 'empleos') {
-    return getJobSalaryLabel(adiso) || formatPrecioDisplay(adiso) || 'A convenir';
+    return getJobSalaryLabel(adiso) || formatPrecioDisplay(adiso);
   }
-  return formatPrecioDisplay(adiso) || 'A convenir';
+  return formatPrecioDisplay(adiso);
 }
 
 /**
@@ -66,8 +66,12 @@ export function CrawlableAdisoList({
                 <span className="font-semibold text-[var(--bs-fg-default,var(--text-primary))]">
                   {title}
                 </span>
-                {' — '}
-                <span className="tabular-nums font-bold">{price}</span>
+                {price ? (
+                  <>
+                    {' — '}
+                    <span className="tabular-nums font-bold">{price}</span>
+                  </>
+                ) : null}
                 {loc ? (
                   <>
                     {' · '}

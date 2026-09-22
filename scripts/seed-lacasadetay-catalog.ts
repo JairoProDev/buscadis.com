@@ -134,7 +134,7 @@ function buildCustomBlocks(seed: CatalogSeedFile['business']) {
       type: 'text' as const,
       label: 'Sin mal de altura',
       content:
-        'Urubamba está a 2.870 m — casi 600 más abajo que Cusco. Muchos huéspedes bajan directo del aeropuerto para aclimatarse acá, entre girasoles, y al día siguiente salen a Maras, Moray o Ollantaytambo.',
+        'Urubamba está a 2.870 m — casi 600 más abajo que Cusco. Muchos huéspedes bajan para aclimatarse en el jardín. A la plaza o al terminal: unos 7 minutos en motito.',
       style: 'default' as const,
     },
     {
@@ -142,7 +142,7 @@ function buildCustomBlocks(seed: CatalogSeedFile['business']) {
       type: 'text' as const,
       label: 'Qué incluye',
       content:
-        'Desayuno · WiFi · Estacionamiento privado · Jardín · Fogata · Parrilla · Juegos para niños · Cocina. Check-in 14:00 · check-out 13:00. Te recibe Tay.',
+        'WiFi en los 3 bungalows · Garage incluido · Agua caliente en las 3 duchas · Cocina propia. Check-in 14:00 · check-out 13:00. Desayuno aparte. Tania arma el Valle si le preguntas. Mototaxi S/ 4 desde la plaza.',
       style: 'default' as const,
     },
   ];
@@ -253,12 +253,12 @@ async function main() {
     custom_blocks: buildCustomBlocks(seed.business),
     story_highlights: buildStoryHighlights(uploaded),
     profile_hashtags: [
-      'girasoles',
       'valle sagrado',
       'urubamba',
-      'bungalows',
+      'casitas',
       'sin mal de altura',
       'casa de campo',
+      'jardín orgánico',
     ],
     business_hours: businessHours,
     announcement_text: 'Reserva directa por WhatsApp. Desayuno, WiFi y parking incluidos.',
@@ -316,11 +316,12 @@ async function main() {
 
     if (dryRun) continue;
 
+    const skuAliases = product.sku === 'TAY-DOBLE' ? ['TAY-DOBLE', 'TAY-DOBLE-GIRASOL'] : [product.sku];
     const { data: existingProduct } = await supabaseAdmin
       .from('catalog_products')
       .select('id')
       .eq('business_profile_id', businessId)
-      .eq('sku', product.sku)
+      .in('sku', skuAliases)
       .maybeSingle();
 
     if (existingProduct?.id) {

@@ -11,10 +11,11 @@ import {
   FaFileExcel, FaDownload, FaLightbulb, FaSyncAlt, FaBolt, FaTag, FaEyeSlash, FaLayerGroup, FaSquare,
   FaSort, FaSortAmountDown, FaSortAmountUp, FaVideo, FaPaperPlane, FaBell, FaMoon, FaSun, FaUser, FaHandPointUp,
   FaCog, FaSignOutAlt, FaCompass, FaUserTie, FaUserCog, FaUserEdit, FaEllipsisV,
-  FaMotorcycle, FaHandshake, FaUserPlus
+  FaHandshake, FaUserPlus
 } from 'react-icons/fa';
 import { FcGoogle } from 'react-icons/fc';
 import { MdCenterFocusWeak } from 'react-icons/md';
+import { RiMotorbikeFill } from 'react-icons/ri';
 import QrMinimalIcon from '@/components/icons/QrMinimalIcon';
 
 /**
@@ -60,7 +61,11 @@ export const IconBell = (p: IconProps) => <FaBell size={getSize(p)} color={p.col
 export const IconMoon = (p: IconProps) => <FaMoon size={getSize(p)} color={p.color || 'currentColor'} className={p.className} onClick={p.onClick} />;
 export const IconSun = (p: IconProps) => <FaSun size={getSize(p)} color={p.color || 'currentColor'} className={p.className} onClick={p.onClick} />;
 export const IconUser = (p: IconProps) => <FaUser size={getSize(p)} color={p.color || 'currentColor'} className={p.className} onClick={p.onClick} />;
-export const IconMotorcycle = (p: IconProps) => <FaMotorcycle size={getSize(p)} color={p.color || 'currentColor'} className={p.className} onClick={p.onClick} />;
+/** Silueta rellena gruesa — legible a distancia en móvil */
+export const IconMotorcycle = (p: IconProps) => (
+  <RiMotorbikeFill size={getSize(p)} color={p.color || 'currentColor'} className={p.className} onClick={p.onClick} />
+);
+export const IconDelivery = IconMotorcycle;
 export const IconInfluencer = (p: IconProps) => <FaHandshake size={getSize(p)} color={p.color || 'currentColor'} className={p.className} onClick={p.onClick} />;
 export const IconUserPlus = (p: IconProps) => <FaUserPlus size={getSize(p)} color={p.color || 'currentColor'} className={p.className} onClick={p.onClick} />;
 export const IconSettings = (p: IconProps) => <FaCog size={getSize(p)} color={p.color || 'currentColor'} className={p.className} onClick={p.onClick} />;

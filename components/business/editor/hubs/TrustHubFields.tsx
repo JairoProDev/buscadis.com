@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { BusinessProfile, BusinessHours, SocialLink } from '@/types/business';
 import FieldLabel from '@/components/business/editor/FieldLabel';
 import BusinessShareTools from '@/components/business/public/BusinessShareTools';
@@ -18,6 +18,7 @@ import { OwnerIaPreguntasPanel } from '@/components/business/editor/OwnerIaPregu
 import { PerfilVivoPlanesPanel } from '@/components/business/editor/PerfilVivoPlanesPanel';
 import { VitrinaOnboardingChecklist } from '@/components/business/editor/VitrinaOnboardingChecklist';
 import PublishGateModal from '@/components/business/builder/PublishGateModal';
+import { supabase } from '@/lib/supabase';
 import {
   IconPhone, IconMapMarkerAlt, IconEnvelope, IconInstagram, IconFacebook, IconTiktok, IconGlobe,
 } from '@/components/Icons';
@@ -44,6 +45,27 @@ export default function TrustHubFields({ profile, setProfile, fields }: TrustHub
   const [inviteBusy, setInviteBusy] = useState(false);
   const [inviteMsg, setInviteMsg] = useState<string | null>(null);
   const [publishOpen, setPublishOpen] = useState(false);
+  const [productCount, setProductCount] = useState(0);
+  const [productsWithPrice, setProductsWithPrice] = useState(0);
+
+  useEffect(() => {
+    if (!profile.id) return;
+    void (async () => {
+      try {
+        const { data } = await supabase!
+          .from('catalog_products')
+          .select('id, price, status')
+          .eq('business_profile_id', profile.id)
+          .is('deleted_at', null)
+          .neq('status', 'archived');
+        const rows = data || [];
+        setProductCount(rows.length);
+        setProductsWithPrice(rows.filter((r) => r.price != null && Number(r.price) > 0).length);
+      } catch {
+        /* ignore */
+      }
+    })();
+  }, [profile.id]);
 
   const pedirResena = async () => {
     if (!profile.slug || !session?.access_token) {
@@ -89,15 +111,15 @@ export default function TrustHubFields({ profile, setProfile, fields }: TrustHub
         <VitrinaOnboardingChecklist
           profile={{
             id: profile.id,
-            slug: profile.slug,
+            slug: profile.slug || undefined,
             name: profile.name || 'Tu negocio',
             logo_url: profile.logo_url,
             banner_url: profile.banner_url,
             contact_whatsapp: profile.contact_whatsapp,
-            is_published: profile.is_published,
+            is_published: Boolean(profile.is_published),
           }}
-          productCount={0}
-          productsWithPrice={0}
+          productCount={productCount}
+          productsWithPrice={productsWithPrice}
         />
       ) : null}
 

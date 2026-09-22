@@ -5,7 +5,6 @@ import Image from 'next/image';
 import { Badge } from '@buscadis/ui';
 import { Adiso, Categoria } from '@/types';
 import {
-  IconEye,
   IconLocation,
   IconEmpleos,
   IconInmuebles,
@@ -31,7 +30,6 @@ import {
   formatRelativePublishedAt,
   getJobSalaryLabel,
 } from '@/lib/adiso-display';
-import { pickCardSignal } from '@/lib/social-proof';
 import FlyerCanvas from '@/components/flyer/FlyerCanvas';
 import { buildFlyerContentFromAdiso, flyerStateFromPrivateData } from '@/lib/flyer/layout';
 import { adisoUsesGeneratedCover, resolveFlyerConfig } from '@/lib/flyer/templates';
@@ -96,10 +94,8 @@ const AdisoCard = forwardRef<HTMLDivElement, AdisoCardProps>(
       : '';
     const priceLabel = formatPrecioDisplay(adiso);
     const salaryLabel = adiso.categoria === 'empleos' ? getJobSalaryLabel(adiso) : null;
-    const priceDisplay = salaryLabel || priceLabel || 'A convenir';
-    const priceIsMuted = !salaryLabel && !priceLabel;
+    const priceDisplay = salaryLabel || priceLabel;
     const relativeTime = formatRelativePublishedAt(adiso);
-    const cardSignal = pickCardSignal(adiso);
     const sellerName = getSellerDisplayName(adiso);
     const isCatalogProduct = adiso.privateData?.source === 'catalog_product';
     const isPaused = adiso.estaActivo === false;
@@ -151,19 +147,16 @@ const AdisoCard = forwardRef<HTMLDivElement, AdisoCardProps>(
           }
         }}
         className={[
-          'group relative flex min-w-[156px] cursor-pointer items-stretch overflow-hidden text-left font-sans outline-none',
+          'group relative flex min-w-[156px] cursor-pointer items-stretch text-left font-sans outline-none',
           vista === 'list' ? 'flex-row gap-3' : 'h-full flex-col',
           vista === 'feed' ? 'w-full' : '',
-          'rounded-[var(--bs-radius-lg,var(--card-radius))] border bg-[var(--bs-bg-surface,var(--bg-primary))]',
-          isDestacado
-            ? 'border-[var(--bs-color-sol-400)]'
-            : 'border-[var(--bs-border-default,var(--border-color))]',
-          'shadow-[var(--card-shadow)] transition-shadow duration-300',
-          'hover:-translate-y-0.5 hover:shadow-[var(--card-shadow-hover)]',
+          'bg-transparent',
+          'transition-transform duration-300',
+          'hover:-translate-y-0.5',
           'motion-reduce:transform-none motion-reduce:transition-none motion-reduce:hover:translate-y-0',
           'focus-visible:ring-2 focus-visible:ring-[var(--bs-action,var(--brand-blue))] focus-visible:ring-offset-2',
           estaSeleccionado
-            ? 'z-10 ring-2 ring-[var(--bs-action,var(--brand-blue))] shadow-[var(--card-shadow-hover)]'
+            ? 'z-10 ring-2 ring-[var(--bs-action,var(--brand-blue))] rounded-[var(--bs-radius-lg,var(--card-radius))]'
             : '',
           isPaused ? 'opacity-60' : '',
         ]
@@ -177,7 +170,7 @@ const AdisoCard = forwardRef<HTMLDivElement, AdisoCardProps>(
         }}
       >
         {vista === 'feed' && (
-          <div className="flex w-full items-center justify-between border-b border-[var(--bs-border-default,var(--border-color))] p-3">
+          <div className="mb-2 flex w-full items-center justify-between pb-2">
             <div className="flex min-w-0 items-center gap-2">
               <div className="relative flex h-10 w-10 flex-shrink-0 items-center justify-center overflow-hidden rounded-full border border-[var(--bs-border-default,var(--border-color))] bg-[var(--bs-bg-sunken,var(--bg-tertiary))]">
                 {adiso.vendedor?.avatarUrl ? (
@@ -208,50 +201,40 @@ const AdisoCard = forwardRef<HTMLDivElement, AdisoCardProps>(
           </div>
         )}
 
-        {/* Fav / dismiss — interaction only, not status badge */}
+        {/* Fav / dismiss — on media only */}
         <div
-          className={`absolute z-30 flex items-center gap-0 ${
-            vista === 'list' ? 'right-1 top-1' : 'right-1.5 top-1.5'
+          className={`relative flex-shrink-0 overflow-hidden rounded-[var(--bs-radius-lg,var(--card-radius))] ${getMediaAspectClass(vista, isCatalogProduct)} ${
+            isDestacado ? 'ring-2 ring-[var(--bs-color-sol-400)]' : ''
           }`}
-        >
-          <button
-            type="button"
-            onClick={(e) => toggleFav(e)}
-            className={`flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full border-0 bg-transparent transition-transform hover:scale-110 active:scale-95 ${
-              showUserPhoto && vista !== 'list'
-                ? 'text-white drop-shadow-[0_1px_4px_rgba(0,0,0,0.85)]'
-                : 'text-[var(--bs-fg-muted,var(--text-secondary))]'
-            }`}
-            title={isFavorite ? 'Quitar de favoritos' : 'Guardar para más tarde'}
-            aria-label={isFavorite ? 'Quitar de favoritos' : 'Guardar para más tarde'}
-          >
-            {isFavorite ? (
-              <IconHeart size={18} className="text-red-500 drop-shadow-sm" />
-            ) : (
-              <IconHeartOutline size={18} />
-            )}
-          </button>
-          <button
-            type="button"
-            onClick={(e) => markNotInterested(e)}
-            className={`flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full border-0 bg-transparent transition-transform hover:scale-110 active:scale-95 ${
-              showUserPhoto && vista !== 'list'
-                ? 'text-white drop-shadow-[0_1px_4px_rgba(0,0,0,0.85)]'
-                : 'text-[var(--bs-fg-subtle,var(--text-tertiary))]'
-            }`}
-            title="No me interesa (Ocultar)"
-            aria-label="No me interesa"
-          >
-            <IconDismiss size={18} />
-          </button>
-        </div>
-
-        <div
-          className={`relative flex-shrink-0 overflow-hidden ${getMediaAspectClass(vista, isCatalogProduct)}`}
           style={{
             backgroundColor: showUserPhoto ? 'var(--bs-bg-sunken, var(--bg-secondary))' : placeholderBg,
           }}
         >
+          <div className="absolute right-1 top-1 z-30 flex items-center gap-0">
+            <button
+              type="button"
+              onClick={(e) => toggleFav(e)}
+              className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full border-0 bg-transparent text-white drop-shadow-[0_1px_4px_rgba(0,0,0,0.85)] transition-transform hover:scale-110 active:scale-95"
+              title={isFavorite ? 'Quitar de favoritos' : 'Guardar para más tarde'}
+              aria-label={isFavorite ? 'Quitar de favoritos' : 'Guardar para más tarde'}
+            >
+              {isFavorite ? (
+                <IconHeart size={18} className="text-red-500 drop-shadow-sm" />
+              ) : (
+                <IconHeartOutline size={18} />
+              )}
+            </button>
+            <button
+              type="button"
+              onClick={(e) => markNotInterested(e)}
+              className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full border-0 bg-transparent text-white drop-shadow-[0_1px_4px_rgba(0,0,0,0.85)] transition-transform hover:scale-110 active:scale-95"
+              title="No me interesa (Ocultar)"
+              aria-label="No me interesa"
+            >
+              <IconDismiss size={18} />
+            </button>
+          </div>
+
           {/* Category accent — 3px bar, never full fill */}
           <div
             className="absolute inset-x-0 top-0 z-20 h-[3px]"
@@ -309,40 +292,29 @@ const AdisoCard = forwardRef<HTMLDivElement, AdisoCardProps>(
           )}
         </div>
 
-        {/* Body — fixed anatomy: title, price, meta, one signal */}
+        {/* Body suelto — sin caja; estilo marketplace */}
         <div
-          className={`flex min-w-0 flex-col ${
-            vista === 'feed' ? 'p-4' : vista === 'list' ? 'flex-1 py-2 pr-2' : 'flex-1 p-3'
+          className={`flex min-w-0 flex-col bg-transparent ${
+            vista === 'feed' ? 'pt-3' : vista === 'list' ? 'flex-1 py-1 pr-1' : 'flex-1 pt-2'
           }`}
         >
-          <h3 className="min-h-[2.5rem] text-[15px] font-semibold leading-snug line-clamp-2 text-[var(--bs-fg-default,var(--text-primary))]">
+          <h3 className="text-[15px] font-semibold leading-snug line-clamp-2 text-[var(--bs-fg-default,var(--text-primary))]">
             {displayTitle}
           </h3>
 
-          <p
-            className={`mt-1 text-base font-bold tabular-nums ${
-              priceIsMuted
-                ? 'text-[var(--bs-fg-muted,var(--text-secondary))]'
-                : 'text-[var(--bs-fg-default,var(--text-primary))]'
-            }`}
-          >
-            {priceDisplay}
-          </p>
+          {priceDisplay && (
+            <p className="mt-0.5 text-base font-bold tabular-nums text-[var(--bs-fg-default,var(--text-primary))]">
+              {priceDisplay}
+            </p>
+          )}
 
           {metaLine && (
             <p
-              className="mt-1 truncate text-xs font-medium text-[var(--bs-fg-muted,var(--text-secondary))]"
+              className="mt-0.5 truncate text-xs font-medium text-[var(--bs-fg-muted,var(--text-secondary))]"
               suppressHydrationWarning
             >
               {metaLine}
             </p>
-          )}
-
-          {cardSignal && (
-            <div className="mt-auto flex items-center gap-1.5 pt-2 text-xs font-medium text-[var(--bs-fg-subtle,var(--text-tertiary))]">
-              {cardSignal.type === 'popular' && <IconEye size={12} />}
-              <span className="truncate">{cardSignal.label}</span>
-            </div>
           )}
         </div>
       </div>

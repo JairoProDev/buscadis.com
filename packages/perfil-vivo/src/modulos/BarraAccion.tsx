@@ -35,45 +35,57 @@ function IconCart() {
   );
 }
 
+/**
+ * Sticky: 1 primaria.
+ * Si hay ítems en el carrito → “Enviar pedido (N)” abre el drawer (cierre de venta).
+ * Si no → WhatsApp genérico por arquetipo.
+ */
 export function BarraAccion({ label }: { label: string }) {
   const { handoffs, payload } = usePerfil();
   const { openMas } = useChromeUI();
   const cart = usePvCartOptional();
   const href = handoffs.whatsappPrimary;
   const count = cart?.count ?? 0;
+  const hasCart = count > 0;
+
+  const primaryLabel = hasCart
+    ? payload.negocio.arquetipo === 'comida'
+      ? `Enviar pedido (${count})`
+      : `Enviar consulta (${count})`
+    : label;
 
   return (
     <div className="pv-barra-accion">
       <button
         type="button"
-        className="pv-barra-accion__icon"
-        aria-label={count ? `Pedido (${count})` : 'Ver pedido'}
+        className={`pv-barra-accion__icon${hasCart ? ' is-active' : ''}`}
+        aria-label={hasCart ? `Pedido con ${count} productos` : 'Ver pedido'}
         onClick={() => cart?.setOpen(true)}
       >
         <IconCart />
-        {count > 0 ? (
-          <span
-            style={{
-              position: 'absolute',
-              top: 4,
-              right: 4,
-              minWidth: 16,
-              height: 16,
-              borderRadius: 8,
-              background: 'var(--wa, #25d366)',
-              color: '#fff',
-              fontSize: 10,
-              fontWeight: 700,
-              lineHeight: '16px',
-              textAlign: 'center',
-              padding: '0 4px',
-            }}
-          >
+        {hasCart ? (
+          <span className="pv-barra-accion__badge" aria-hidden>
             {count > 9 ? '9+' : count}
           </span>
         ) : null}
       </button>
-      {href ? (
+
+      {hasCart ? (
+        <button
+          type="button"
+          className="pv-barra-accion__primary"
+          onClick={() => {
+            emitPvCommerceEvent({
+              businessProfileId: payload.negocio.id,
+              eventType: 'purchase_intent',
+              metadata: { surface: 'sticky_cart' },
+            });
+            cart?.setOpen(true);
+          }}
+        >
+          {primaryLabel}
+        </button>
+      ) : href ? (
         <a
           href={href}
           className="pv-barra-accion__primary"
@@ -85,13 +97,14 @@ export function BarraAccion({ label }: { label: string }) {
             });
           }}
         >
-          {label}
+          {primaryLabel}
         </a>
       ) : (
         <button type="button" className="pv-barra-accion__primary" disabled>
-          {label}
+          {primaryLabel}
         </button>
       )}
+
       <button
         type="button"
         className="pv-barra-accion__icon"

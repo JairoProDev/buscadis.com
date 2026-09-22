@@ -250,7 +250,7 @@ export default function Header({
         aria-label="Delivery"
       >
         <IconMotorcycle
-          size={17}
+          size={24}
           color={enviosActive ? 'var(--brand-blue)' : 'var(--text-secondary)'}
         />
       </HeaderIconButton>

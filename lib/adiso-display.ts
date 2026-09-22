@@ -137,7 +137,7 @@ export function formatPrecioDisplay(adiso: Adiso): string | null {
     const suffix = adiso.categoria === 'empleos' ? '/mes' : '';
     return `S/ ${adiso.precio.toLocaleString('es-PE')}${suffix}`;
   }
-  if (adiso.tipoPrecio === 'a_convenir') return 'A convenir';
+  // Sin precio: no inventar "A convenir" — el vacío es más claro
   return null;
 }
 

@@ -7,32 +7,30 @@
  * seamless light/dark mode support.
  */
 
-// Single card skeleton - matches AdisoCard layout 1:1
+// Single card skeleton - matches AdisoCard marketplace layout (media + loose text)
 export function SkeletonCard() {
   return (
     <div
       className="skeleton-card"
       style={{
-        backgroundColor: 'var(--bg-primary)',
-        border: '1px solid var(--border-color)',
-        borderRadius: 'var(--card-radius, 16px)',
-        overflow: 'hidden',
+        backgroundColor: 'transparent',
         display: 'flex',
         flexDirection: 'column',
       }}
     >
-      {/* Image placeholder — square matching the card */}
+      {/* Image placeholder */}
       <div
         className="skeleton-shimmer"
         style={{
           width: '100%',
-          aspectRatio: '1 / 1',
+          aspectRatio: '4 / 3',
+          borderRadius: 'var(--card-radius, 16px)',
           backgroundColor: 'var(--bg-tertiary)',
         }}
       />
 
-      {/* Content area — title only (meta lives on the image) */}
-      <div style={{ padding: '0.75rem', display: 'flex', flexDirection: 'column' }}>
+      {/* Loose text — no content box */}
+      <div style={{ paddingTop: '0.5rem', display: 'flex', flexDirection: 'column', gap: '6px' }}>
         <div
           className="skeleton-shimmer"
           style={{
@@ -40,14 +38,13 @@ export function SkeletonCard() {
             width: '92%',
             borderRadius: '6px',
             backgroundColor: 'var(--bg-tertiary)',
-            marginBottom: '6px',
           }}
         />
         <div
           className="skeleton-shimmer"
           style={{
             height: '13px',
-            width: '68%',
+            width: '40%',
             borderRadius: '6px',
             backgroundColor: 'var(--bg-tertiary)',
           }}

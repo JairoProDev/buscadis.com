@@ -1,13 +1,17 @@
 'use client';
 
 import Link from 'next/link';
-import type { BusinessProfile } from '@/types/business';
 
 type Props = {
-  profile: Pick<
-    BusinessProfile,
-    'id' | 'slug' | 'name' | 'logo_url' | 'banner_url' | 'contact_whatsapp' | 'is_published'
-  >;
+  profile: {
+    id: string;
+    slug?: string | null;
+    name: string;
+    logo_url?: string | null;
+    banner_url?: string | null;
+    contact_whatsapp?: string | null;
+    is_published?: boolean | null;
+  };
   productCount: number;
   productsWithPrice: number;
 };
@@ -67,7 +71,7 @@ export function VitrinaOnboardingChecklist({
         </h2>
         <p className="text-sm text-slate-600 mt-1">
           {ready
-            ? 'Comparte tu enlace y revisa pedidos en /mi-negocio/pedidos.'
+            ? 'Comparte tu enlace y revisa pedidos cuando lleguen clientes.'
             : `Checklist ${done}/${steps.length}: foto, 3 productos, precio, WhatsApp y publicar.`}
         </p>
       </div>

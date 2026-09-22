@@ -25,8 +25,17 @@ type CartCtx = {
   total: number;
   open: boolean;
   setOpen: (v: boolean) => void;
+  /** Último producto agregado — para toast sin interrumpir browse */
+  toast: string | null;
+  clearToast: () => void;
+  /** Nota traída por deep link `?pedido=` */
+  pendingNote: string | null;
+  setPendingNote: (n: string | null) => void;
   addItem: (item: Omit<PvCartItem, 'qty'> & { qty?: number }) => void;
   setQty: (productId: string, qty: number) => void;
+  removeItem: (productId: string) => void;
+  /** Reemplaza el carrito (deep link / compartir). */
+  replaceItems: (items: PvCartItem[]) => void;
   clear: () => void;
 };
 
@@ -41,10 +50,18 @@ export function PvCartProvider({
 }) {
   const [items, setItems] = useState<PvCartItem[]>([]);
   const [open, setOpen] = useState(false);
+  const [toast, setToast] = useState<string | null>(null);
+  const [pendingNote, setPendingNote] = useState<string | null>(null);
 
   useEffect(() => {
     setItems(loadPvCart(businessId));
   }, [businessId]);
+
+  useEffect(() => {
+    if (!toast) return;
+    const t = window.setTimeout(() => setToast(null), 2800);
+    return () => window.clearTimeout(t);
+  }, [toast]);
 
   const persist = useCallback(
     (next: PvCartItem[]) => {
@@ -74,26 +91,56 @@ export function PvCartProvider({
           productId: item.productId,
           metadata: { title: item.title, qty },
         });
+        emitPvCommerceEvent({
+          businessProfileId: businessId,
+          eventType: 'purchase_intent',
+          productId: item.productId,
+          metadata: { surface: 'add_to_cart' },
+        });
         window.dispatchEvent(new CustomEvent(PV_CART_EVENT));
         return next;
       });
-      setOpen(true);
+      // No abrir drawer: el visitante sigue comprando; toast + badge lo confirman.
+      setToast(item.title);
     },
     [businessId]
   );
 
   const setQty = useCallback(
     (productId: string, qty: number) => {
-      persist(
-        qty <= 0
-          ? items.filter((i) => i.productId !== productId)
-          : items.map((i) => (i.productId === productId ? { ...i, qty } : i))
-      );
+      setItems((prev) => {
+        const next =
+          qty <= 0
+            ? prev.filter((i) => i.productId !== productId)
+            : prev.map((i) => (i.productId === productId ? { ...i, qty } : i));
+        savePvCart(businessId, next);
+        window.dispatchEvent(new CustomEvent(PV_CART_EVENT));
+        return next;
+      });
     },
-    [items, persist]
+    [businessId]
+  );
+
+  const removeItem = useCallback(
+    (productId: string) => {
+      setItems((prev) => {
+        const next = prev.filter((i) => i.productId !== productId);
+        savePvCart(businessId, next);
+        window.dispatchEvent(new CustomEvent(PV_CART_EVENT));
+        return next;
+      });
+    },
+    [businessId]
   );
 
   const clear = useCallback(() => persist([]), [persist]);
+  const clearToast = useCallback(() => setToast(null), []);
+  const replaceItems = useCallback(
+    (next: PvCartItem[]) => {
+      persist(next);
+    },
+    [persist]
+  );
 
   const value = useMemo(
     () => ({
@@ -102,11 +149,28 @@ export function PvCartProvider({
       total: pvCartTotal(items),
       open,
       setOpen,
+      toast,
+      clearToast,
+      pendingNote,
+      setPendingNote,
       addItem,
       setQty,
+      removeItem,
+      replaceItems,
       clear,
     }),
-    [items, open, addItem, setQty, clear]
+    [
+      items,
+      open,
+      toast,
+      clearToast,
+      pendingNote,
+      addItem,
+      setQty,
+      removeItem,
+      replaceItems,
+      clear,
+    ]
   );
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;

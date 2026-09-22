@@ -12,6 +12,8 @@ import {
 import { canUseCommerceOrders } from '@/lib/business/subscription';
 import { resolveBusinessForUser } from '@/lib/business-server-auth';
 import { hasPermission } from '@/lib/business-access';
+import { notifyBusinessOwnerOfOrder } from '@/lib/business/notify-order';
+import { getSiteUrl } from '@/lib/seo/og-image';
 
 const itemSchema = z.object({
   productId: z.string().min(1),
@@ -95,6 +97,21 @@ export async function POST(
     });
   }
 
+  const site = getSiteUrl();
+  const sharePath = `/@${profile.slug}?pedido=${encodeURIComponent(order.id)}`;
+  const shareUrl = `${site}${sharePath}`;
+  const manageUrl = `${site}/mi-negocio/pedidos?orden=${encodeURIComponent(order.id)}`;
+
+  void notifyBusinessOwnerOfOrder({
+    ownerUserId: profile.user_id,
+    businessName: profile.name,
+    orderId: order.id,
+    orderNumber: order.order_number,
+    total: Number(order.total),
+    itemCount: items.reduce((s, i) => s + i.qty, 0),
+    slug: profile.slug,
+  }).catch((err) => console.error('[orders] notify', err));
+
   const phone = profile.contact_whatsapp || profile.contact_phone;
   const text = buildWhatsappOrderMessage({
     businessName: profile.name,
@@ -102,6 +119,8 @@ export async function POST(
     items,
     total: Number(order.total),
     note: parsed.data.note,
+    shareUrl,
+    manageUrl,
   });
 
   return NextResponse.json({
@@ -109,6 +128,8 @@ export async function POST(
     orderId: order.id,
     orderNumber: order.order_number,
     waUrl: phone ? waMeUrl(phone, text) : null,
+    shareUrl,
+    sharePath,
     persisted: true,
   });
 }

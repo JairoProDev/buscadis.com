@@ -37,6 +37,10 @@ export function buildWhatsappOrderMessage(params: {
   items: CommerceOrderItem[];
   total: number;
   note?: string;
+  /** Enlace público para reabrir el pedido en la vitrina */
+  shareUrl?: string;
+  /** Enlace del dueño para gestionar en Buscadis */
+  manageUrl?: string;
 }): string {
   const lines = params.items.map(
     (i) =>
@@ -45,12 +49,20 @@ export function buildWhatsappOrderMessage(params: {
       }`
   );
   const note = params.note?.trim() ? `\nNota: ${params.note.trim()}` : '';
+  const share = params.shareUrl?.trim()
+    ? `\nVer pedido: ${params.shareUrl.trim()}`
+    : '';
+  const manage = params.manageUrl?.trim()
+    ? `\nGestionar en Buscadis: ${params.manageUrl.trim()}`
+    : '';
   return [
     `Hola, quiero hacer un pedido en ${params.businessName} (Buscadis).`,
     `Pedido ${params.orderNumber}:`,
     ...lines,
     `Total: S/ ${params.total.toFixed(2)}`,
     note,
+    share,
+    manage,
   ]
     .filter(Boolean)
     .join('\n');
