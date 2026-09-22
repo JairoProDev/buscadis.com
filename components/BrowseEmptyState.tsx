@@ -27,6 +27,8 @@ interface BrowseEmptyStateProps {
   categoria?: Categoria | 'todos';
   ubicacion?: BrowseLocationFilter;
   activeFilterCount?: number;
+  alternativeQueries?: string[];
+  onTryQuery?: (query: string) => void;
   onClearFilters?: () => void;
   onChangeLocation?: () => void;
 }
@@ -37,6 +39,8 @@ export default function BrowseEmptyState({
   categoria = 'todos',
   ubicacion,
   activeFilterCount = 0,
+  alternativeQueries = [],
+  onTryQuery,
   onClearFilters,
   onChangeLocation,
 }: BrowseEmptyStateProps) {
@@ -106,6 +110,24 @@ export default function BrowseEmptyState({
       <p className="mx-auto mb-5 max-w-[420px] text-[0.92rem] leading-relaxed text-[var(--text-secondary)]">
         {subline}
       </p>
+
+      {alternativeQueries.length > 0 && onTryQuery && (
+        <div className="mb-4 flex flex-wrap justify-center gap-2">
+          <span className="w-full text-[11px] font-semibold uppercase tracking-wide text-[var(--text-tertiary)]">
+            Prueba con
+          </span>
+          {alternativeQueries.slice(0, 5).map((q) => (
+            <button
+              key={q}
+              type="button"
+              onClick={() => onTryQuery(q)}
+              className="rounded-full border border-[var(--border-color)] bg-[var(--bg-primary)] px-3 py-1.5 text-sm font-semibold text-[var(--brand-blue)] transition-colors hover:border-[var(--brand-blue)]"
+            >
+              {q}
+            </button>
+          ))}
+        </div>
+      )}
 
       <div className="flex flex-col items-stretch gap-2.5">
         {(hasSearch || variant === 'filtered' || variant === 'location') && (

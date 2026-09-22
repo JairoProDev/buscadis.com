@@ -4,7 +4,14 @@ import { useRef, useState, useEffect, useCallback, type KeyboardEvent } from 're
 import { FaSearch } from 'react-icons/fa';
 import { useTranslation } from '@/hooks/useTranslation';
 import { useSpeechRecognition } from '@/hooks/useSpeechRecognition';
-import { IconMicrophone, IconGoogleLens, IconFilterFunnel, IconSearch, IconMegaphone, IconImage } from './Icons';
+import {
+  IconMicrophone,
+  IconGoogleLens,
+  IconSearch,
+  IconMegaphone,
+  IconImage,
+  IconClose,
+} from './Icons';
 import ComposerModeToggle, { type ComposerMode } from './ComposerModeToggle';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Categoria } from '@/types';
@@ -19,7 +26,9 @@ interface BuscadorProps {
   minimal?: boolean;
   onCategoryDetected?: (categoria: Categoria) => void;
   onNotify?: (message: string, type?: 'info' | 'error' | 'success') => void;
-  /** Muestra el botón de embudo en la barra de acciones (solo buscador principal) */
+  /**
+   * @deprecated El embudo vive en la toolbar de home. Props conservadas por compat.
+   */
   showFilterToggle?: boolean;
   filtersVisible?: boolean;
   onToggleFilters?: () => void;
@@ -45,6 +54,14 @@ interface BuscadorProps {
   forceModeToggleIconsOnly?: boolean;
   /** Solo búsqueda: oculta alternador y modo publicar (evita CTA duplicado con nav) */
   searchOnly?: boolean;
+  /**
+   * Tras voz o búsqueda visual exitosa: el padre debe fill+submit.
+   * Si no se pasa, solo se rellena el campo (comportamiento legacy).
+   */
+  onModalityQuery?: (query: string) => void;
+  /** Combobox a11y */
+  suggestionsExpanded?: boolean;
+  suggestionsListboxId?: string;
 }
 
 function readFileAsDataUrl(file: File): Promise<string> {
@@ -63,10 +80,10 @@ export default function Buscador({
   minimal = false,
   onCategoryDetected,
   onNotify,
-  showFilterToggle = false,
-  filtersVisible = false,
-  onToggleFilters,
-  activeFiltersCount = 0,
+  showFilterToggle: _showFilterToggle = false,
+  filtersVisible: _filtersVisible = false,
+  onToggleFilters: _onToggleFilters,
+  activeFiltersCount: _activeFiltersCount = 0,
   composerMode = 'search',
   onComposerModeChange,
   placeholder: placeholderProp,
@@ -81,6 +98,9 @@ export default function Buscador({
   primaryIconOnly = false,
   forceModeToggleIconsOnly = false,
   searchOnly = false,
+  onModalityQuery,
+  suggestionsExpanded = false,
+  suggestionsListboxId = 'search-suggestions',
 }: BuscadorProps) {
   const { t } = useTranslation();
   const { isListening, isSupported, start: startVoice, stop: stopVoice } = useSpeechRecognition('es-PE');
@@ -111,8 +131,7 @@ export default function Buscador({
     const el = textareaRef.current;
     if (!el) return;
 
-    const singleLine =
-      singleLineHeightRef.current || measureSingleLineHeight() || 24;
+    const singleLine = singleLineHeightRef.current || measureSingleLineHeight() || 24;
 
     el.style.height = `${singleLine}px`;
     const contentHeight = el.scrollHeight;
@@ -145,6 +164,15 @@ export default function Buscador({
     onNotify?.(message, type);
   };
 
+  const applyModalityQuery = (query: string) => {
+    const q = query.trim();
+    if (!q) return;
+    onChange(q);
+    if (onModalityQuery) {
+      onModalityQuery(q);
+    }
+  };
+
   const handleVoiceSearch = () => {
     if (isListening) {
       stopVoice();
@@ -158,7 +186,7 @@ export default function Buscador({
 
     startVoice(
       (transcript) => {
-        onChange(transcript);
+        applyModalityQuery(transcript);
         notify(`Buscando: "${transcript}"`, 'success');
       },
       (message) => notify(message, 'error')
@@ -200,11 +228,12 @@ export default function Buscador({
       }
 
       if (data.query) {
-        onChange(String(data.query));
+        const q = String(data.query);
         if (data.category && onCategoryDetected) {
           onCategoryDetected(data.category as Categoria);
         }
-        notify(`Búsqueda visual: "${data.query}"`, 'success');
+        applyModalityQuery(q);
+        notify(`Búsqueda visual: "${q}"`, 'success');
         return;
       }
 
@@ -237,6 +266,9 @@ export default function Buscador({
   const shellAlign = flat ? 'items-center' : fieldMultiline && isPublishMode ? 'items-start' : 'items-center';
   const fieldMinH = flat ? 'h-8' : 'min-h-[36px] md:min-h-[40px]';
   const showPrimaryAction = Boolean(onPrimaryAction) && (showComposerToggle || searchOnly);
+  // Una sola lupa: nunca decorativa izquierda si hay CTA de buscar
+  const showLeadingSearchIcon = !showComposerToggle && !showPrimaryAction && !isPublishMode;
+  const hasClearableText = value.trim().length > 0 && !isPublishMode;
 
   const handleFieldKeyDown = (e: KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     if (!onPrimaryAction || e.key !== 'Enter') return;
@@ -262,13 +294,24 @@ export default function Buscador({
   const flatFieldClass =
     'brand-search-input w-full min-w-0 flex-1 border-none outline-none bg-transparent truncate text-sm h-8 leading-8 py-0';
 
+  const comboboxA11y = !isPublishMode
+    ? {
+        role: 'combobox' as const,
+        'aria-expanded': suggestionsExpanded,
+        'aria-controls': suggestionsListboxId,
+        'aria-autocomplete': 'list' as const,
+      }
+    : {};
+
   const shellInner = (
     <>
       {modeToggle}
 
       <div className={`composer-field-wrap flex-1 min-w-0 flex items-center overflow-hidden ${fieldMinH}`}>
-        {!showComposerToggle && (
-          <FaSearch className={`${searchIconClass} text-[var(--brand-blue)] flex-shrink-0 transition-transform group-focus-within:scale-110`} />
+        {showLeadingSearchIcon && (
+          <FaSearch
+            className={`${searchIconClass} text-[var(--brand-blue)] flex-shrink-0 transition-transform group-focus-within:scale-110`}
+          />
         )}
 
         <AnimatePresence mode="wait" initial={false}>
@@ -313,7 +356,10 @@ export default function Buscador({
           ) : (
             <motion.input
               key="search-field"
-              type="search"
+              type="text"
+              inputMode="search"
+              enterKeyHint="search"
+              autoComplete="off"
               initial={{ opacity: 0, y: 5 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -5 }}
@@ -325,9 +371,22 @@ export default function Buscador({
               className={`brand-search-input flex-1 min-w-0 w-full border-none outline-none bg-transparent truncate ${fieldMinH} ${
                 minimal || flat ? 'text-sm py-0' : 'text-[16px] py-0 h-9 md:h-10'
               }`}
+              {...comboboxA11y}
             />
           )}
         </AnimatePresence>
+
+        {hasClearableText && (
+          <button
+            type="button"
+            onClick={() => onChange('')}
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-[var(--text-tertiary)] hover:bg-[var(--hover-bg)] hover:text-[var(--text-primary)]"
+            title="Borrar búsqueda"
+            aria-label="Borrar búsqueda"
+          >
+            <IconClose size={14} />
+          </button>
+        )}
       </div>
 
       {!minimal && (
@@ -338,26 +397,6 @@ export default function Buscador({
           } ${isPublishMode && fieldMultiline && !flat ? 'self-start mt-1' : ''}`}
           transition={{ type: 'spring', stiffness: 400, damping: 30 }}
         >
-          {showFilterToggle && onToggleFilters && composerMode === 'search' && (
-            <button
-              type="button"
-              onClick={onToggleFilters}
-              className={`${actionBtnClass} relative ${
-                filtersVisible
-                  ? 'text-[var(--brand-blue)] bg-[var(--hover-bg)]'
-                  : 'text-[var(--text-secondary)] hover:text-[var(--brand-blue)] hover:bg-[var(--hover-bg)]'
-              }`}
-              title={filtersVisible ? 'Ocultar filtros' : 'Mostrar filtros'}
-              aria-label={filtersVisible ? 'Ocultar filtros' : 'Mostrar filtros'}
-              aria-pressed={filtersVisible}
-            >
-              <IconFilterFunnel size={iconSize} />
-              {activeFiltersCount > 0 && (
-                <span className="absolute top-1 right-1 w-1.5 h-1.5 bg-[var(--brand-blue)] border border-[var(--search-bg,var(--bg-primary))] rounded-full" />
-              )}
-            </button>
-          )}
-
           <button
             type="button"
             onClick={handleVoiceSearch}
@@ -373,6 +412,9 @@ export default function Buscador({
           >
             <IconMicrophone size={iconSize} />
           </button>
+          <span className="sr-only" aria-live="polite">
+            {isListening ? 'Escuchando…' : ''}
+          </span>
 
           {isPublishMode && onPublishImageSelected ? (
             <button
@@ -396,7 +438,8 @@ export default function Buscador({
             <button
               type="button"
               onClick={() => {
-                const isMobile = typeof window !== 'undefined' && window.matchMedia('(max-width: 767px)').matches;
+                const isMobile =
+                  typeof window !== 'undefined' && window.matchMedia('(max-width: 767px)').matches;
                 if (isMobile && cameraInputRef.current) {
                   cameraInputRef.current.click();
                 } else if (fileInputRef.current) {

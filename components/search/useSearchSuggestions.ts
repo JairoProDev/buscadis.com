@@ -13,28 +13,30 @@ export interface SuggestionsState {
   queries: string[];
   completion: string | null;
   loading: boolean;
+  popular: string[];
 }
 
 const cache = new Map<string, SuggestionsState>();
 const CACHE_MAX = 40;
+const EMPTY_KEY = '__popular__';
 
-export function useSearchSuggestions(query: string, enabled = true): SuggestionsState {
-  const [state, setState] = useState<SuggestionsState>({
+function emptyState(): SuggestionsState {
+  return {
     adisos: [],
     queries: [],
     completion: null,
     loading: false,
-  });
+    popular: [],
+  };
+}
+
+export function useSearchSuggestions(query: string, enabled = true) {
+  const [state, setState] = useState<SuggestionsState>(emptyState);
   const abortRef = useRef<AbortController | null>(null);
 
-  const fetchSuggestions = useCallback(async (q: string) => {
-    const trimmed = q.trim();
-    if (trimmed.length < 2) {
-      setState({ adisos: [], queries: [], completion: null, loading: false });
-      return;
-    }
-
-    const cached = cache.get(trimmed.toLowerCase());
+  const fetchSuggestions = useCallback(async (q: string, mode: 'prefix' | 'popular') => {
+    const cacheKey = mode === 'popular' ? EMPTY_KEY : q.toLowerCase();
+    const cached = cache.get(cacheKey);
     if (cached) {
       setState({ ...cached, loading: false });
       return;
@@ -46,40 +48,69 @@ export function useSearchSuggestions(query: string, enabled = true): Suggestions
     setState((s) => ({ ...s, loading: true }));
 
     try {
-      const res = await fetch(
-        `/api/search/suggest?q=${encodeURIComponent(trimmed)}&limit=8`,
-        { signal: controller.signal },
-      );
+      const url =
+        mode === 'popular'
+          ? `/api/search/suggest?q=&limit=6`
+          : `/api/search/suggest?q=${encodeURIComponent(q)}&limit=8`;
+      const res = await fetch(url, { signal: controller.signal });
       if (!res.ok) throw new Error('suggest failed');
-      const data = (await res.json()) as SuggestionsState;
-      const next = {
-        adisos: data.adisos ?? [],
-        queries: data.queries ?? [],
-        completion: data.completion ?? null,
-        loading: false,
+      const data = (await res.json()) as {
+        adisos?: SuggestAdiso[];
+        queries?: string[];
+        completion?: string | null;
       };
+      const next: SuggestionsState =
+        mode === 'popular'
+          ? {
+              adisos: [],
+              queries: [],
+              completion: null,
+              loading: false,
+              popular: data.queries ?? [],
+            }
+          : {
+              adisos: data.adisos ?? [],
+              queries: data.queries ?? [],
+              completion: data.completion ?? null,
+              loading: false,
+              popular: [],
+            };
       if (cache.size >= CACHE_MAX) {
         const first = cache.keys().next().value;
         if (first) cache.delete(first);
       }
-      cache.set(trimmed.toLowerCase(), next);
+      cache.set(cacheKey, next);
       setState(next);
     } catch (err) {
       if ((err as Error).name === 'AbortError') return;
-      setState({ adisos: [], queries: [], completion: null, loading: false });
+      setState(emptyState());
     }
   }, []);
 
   useEffect(() => {
     if (!enabled) return;
     const trimmed = query.trim();
-    if (trimmed.length < 2) {
-      setState({ adisos: [], queries: [], completion: null, loading: false });
+    if (trimmed.length === 0) {
+      setState((s) => ({
+        adisos: [],
+        queries: [],
+        completion: null,
+        loading: false,
+        popular: s.popular,
+      }));
       return;
     }
-    const t = window.setTimeout(() => void fetchSuggestions(trimmed), 120);
+    if (trimmed.length < 2) {
+      setState(emptyState());
+      return;
+    }
+    const t = window.setTimeout(() => void fetchSuggestions(trimmed, 'prefix'), 120);
     return () => window.clearTimeout(t);
   }, [query, enabled, fetchSuggestions]);
 
-  return state;
+  const loadPopular = useCallback(() => {
+    void fetchSuggestions('', 'popular');
+  }, [fetchSuggestions]);
+
+  return { ...state, loadPopular };
 }

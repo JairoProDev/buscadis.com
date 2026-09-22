@@ -11,6 +11,12 @@ import SearchSuggestionsDropdown from './SearchSuggestionsDropdown';
 import { useSearchSuggestions } from './useSearchSuggestions';
 import type { SuggestAdiso } from './useSearchSuggestions';
 import { trackSearchEvent } from '@/lib/search/analytics';
+import {
+  addRecentSearch,
+  clearRecentSearches,
+  getRecentSearches,
+  removeRecentSearch,
+} from '@/lib/search/recent-searches';
 
 interface MarketplaceSearchComposerProps {
   value: string;
@@ -31,6 +37,14 @@ interface MarketplaceSearchComposerProps {
   /** En home browse: solo buscar (Publicar vive en nav/sidebar) */
   searchOnly?: boolean;
 }
+
+type SuggestItem =
+  | { type: 'recent'; query: string }
+  | { type: 'popular'; query: string }
+  | { type: 'adiso'; adiso: SuggestAdiso }
+  | { type: 'query'; query: string };
+
+const LISTBOX_ID = 'search-suggestions';
 
 export default function MarketplaceSearchComposer({
   value,
@@ -55,20 +69,63 @@ export default function MarketplaceSearchComposer({
   const [toggleExpanded, setToggleExpanded] = useState(false);
   const [activeSuggestIndex, setActiveSuggestIndex] = useState(-1);
   const [suggestionsOpen, setSuggestionsOpen] = useState(false);
+  const [recent, setRecent] = useState<string[]>([]);
+  const impressionKeyRef = useRef<string>('');
   const wrapperRef = useRef<HTMLDivElement>(null);
 
   const isSearchMode = composerMode === 'search';
   const isTyping = value.trim().length >= 2;
+  const isEmptyQuery = value.trim().length === 0;
   const collapseToggle = isTyping && !toggleExpanded;
 
-  const suggestions = useSearchSuggestions(value, isSearchMode);
+  const {
+    adisos: suggestAdisos,
+    queries: suggestQueries,
+    completion: suggestCompletion,
+    popular: suggestPopular,
+    loadPopular,
+  } = useSearchSuggestions(value, isSearchMode);
 
-  const suggestItems = useMemo(() => {
-    const items: Array<{ type: 'adiso'; adiso: SuggestAdiso } | { type: 'query'; query: string }> = [];
-    for (const a of suggestions.adisos) items.push({ type: 'adiso', adiso: a });
-    for (const q of suggestions.queries) items.push({ type: 'query', query: q });
+  useEffect(() => {
+    setRecent(getRecentSearches());
+  }, []);
+
+  const suggestItems = useMemo((): SuggestItem[] => {
+    const items: SuggestItem[] = [];
+    if (isEmptyQuery) {
+      for (const q of recent) items.push({ type: 'recent', query: q });
+      for (const q of suggestPopular) {
+        if (!recent.some((r) => r.toLowerCase() === q.toLowerCase())) {
+          items.push({ type: 'popular', query: q });
+        }
+      }
+      return items;
+    }
+    for (const a of suggestAdisos) items.push({ type: 'adiso', adiso: a });
+    for (const q of suggestQueries) items.push({ type: 'query', query: q });
     return items;
-  }, [suggestions.adisos, suggestions.queries]);
+  }, [isEmptyQuery, recent, suggestPopular, suggestAdisos, suggestQueries]);
+
+  const dropdownVisible =
+    suggestionsOpen &&
+    isSearchMode &&
+    (isEmptyQuery
+      ? recent.length > 0 || suggestPopular.length > 0
+      : isTyping && (suggestAdisos.length > 0 || suggestQueries.length > 0));
+
+  useEffect(() => {
+    if (!dropdownVisible || suggestItems.length === 0) return;
+    const key = suggestItems
+      .map((i) => (i.type === 'adiso' ? i.adiso.id : `${i.type}:${i.query}`))
+      .join('|');
+    if (impressionKeyRef.current === key) return;
+    impressionKeyRef.current = key;
+    trackSearchEvent('search.suggest_impression', {
+      query: value.trim() || undefined,
+      count: suggestItems.length,
+      emptyFocus: isEmptyQuery,
+    });
+  }, [dropdownVisible, suggestItems, value, isEmptyQuery]);
 
   const {
     publishImageUrl,
@@ -88,10 +145,17 @@ export default function MarketplaceSearchComposer({
   }, []);
 
   const openSuggestions = useCallback(() => {
-    if (composerMode === 'search' && value.trim().length >= 2) {
+    if (composerMode !== 'search') return;
+    if (value.trim().length === 0) {
+      setRecent(getRecentSearches());
+      loadPopular();
+      setSuggestionsOpen(true);
+      return;
+    }
+    if (value.trim().length >= 2) {
       setSuggestionsOpen(true);
     }
-  }, [composerMode, value]);
+  }, [composerMode, value, loadPopular]);
 
   useEffect(() => {
     const onPointerDown = (event: MouseEvent | TouchEvent) => {
@@ -112,7 +176,11 @@ export default function MarketplaceSearchComposer({
   const handleComposerChange = (next: string) => {
     setActiveSuggestIndex(-1);
     if (composerMode !== 'publish') {
-      if (next.trim().length >= 2) {
+      if (next.trim().length === 0) {
+        setRecent(getRecentSearches());
+        loadPopular();
+        setSuggestionsOpen(true);
+      } else if (next.trim().length >= 2) {
         setSuggestionsOpen(true);
       } else {
         closeSuggestions();
@@ -128,16 +196,20 @@ export default function MarketplaceSearchComposer({
   const hasText = publishText.length > 0;
   const searchHasText = value.trim().length > 0;
 
-  const handleSearchSubmit = useCallback(async () => {
-    const q = value.trim();
-    if (!q) {
-      onNotify?.('Escribe qué buscas', 'info');
-      return;
-    }
-    closeSuggestions();
-    await onSearchSubmit(q);
-    trackSearchEvent('search.submit', { query: q });
-  }, [value, onSearchSubmit, onNotify, closeSuggestions]);
+  const handleSearchSubmit = useCallback(
+    async (explicitQuery?: string) => {
+      const q = (explicitQuery ?? value).trim();
+      if (!q) {
+        onNotify?.('Escribe qué buscas', 'info');
+        return;
+      }
+      closeSuggestions();
+      setRecent(addRecentSearch(q));
+      await onSearchSubmit(q);
+      trackSearchEvent('search.submit', { query: q });
+    },
+    [value, onSearchSubmit, onNotify, closeSuggestions],
+  );
 
   const handlePublishFree = async () => {
     const ok = await publishFree(publishText, undefined, undefined, publishImageUrl || undefined);
@@ -169,28 +241,45 @@ export default function MarketplaceSearchComposer({
     void handleSearchSubmit();
   };
 
+  const handleModalityQuery = useCallback(
+    (q: string) => {
+      void handleSearchSubmit(q);
+    },
+    [handleSearchSubmit],
+  );
+
   const selectSuggestion = (index: number) => {
     const item = suggestItems[index];
     if (!item) return;
     if (item.type === 'adiso') {
+      trackSearchEvent('search.suggest_click', {
+        query: value.trim() || undefined,
+        kind: 'adiso',
+        adisoId: item.adiso.id,
+      });
       if (onOpenAdiso) {
         onOpenAdiso(item.adiso.id);
       } else {
         onChange(item.adiso.titulo);
-        void handleSearchSubmit();
+        void handleSearchSubmit(item.adiso.titulo);
       }
       closeSuggestions();
       return;
     }
+    trackSearchEvent('search.suggest_click', {
+      query: item.query,
+      kind: item.type,
+    });
     onChange(item.query);
     closeSuggestions();
+    void handleSearchSubmit(item.query);
   };
 
   const handleKeyDown = (e: KeyboardEvent) => {
     if (!isSearchMode || suggestItems.length === 0) {
-      if (e.key === 'Tab' && suggestions.completion && isSearchMode) {
+      if (e.key === 'Tab' && suggestCompletion && isSearchMode) {
         e.preventDefault();
-        onChange(value + suggestions.completion);
+        onChange(value + suggestCompletion);
       }
       return;
     }
@@ -210,9 +299,9 @@ export default function MarketplaceSearchComposer({
       selectSuggestion(activeSuggestIndex);
       return;
     }
-    if (e.key === 'Tab' && suggestions.completion) {
+    if (e.key === 'Tab' && suggestCompletion) {
       e.preventDefault();
-      onChange(value + suggestions.completion);
+      onChange(value + suggestCompletion);
       return;
     }
     if (e.key === 'Escape') {
@@ -273,31 +362,42 @@ export default function MarketplaceSearchComposer({
           publishImageAttached={Boolean(publishImageUrl)}
           publishImageUploading={uploadingImage}
           forceModeToggleIconsOnly={collapseToggle}
+          onModalityQuery={isSearchMode ? handleModalityQuery : undefined}
+          suggestionsExpanded={dropdownVisible}
+          suggestionsListboxId={LISTBOX_ID}
         />
       </div>
 
       <SearchSuggestionsDropdown
-        adisos={suggestions.adisos}
-        queries={suggestions.queries}
+        listboxId={LISTBOX_ID}
+        adisos={isEmptyQuery ? [] : suggestAdisos}
+        queries={isEmptyQuery ? [] : suggestQueries}
+        recent={isEmptyQuery ? recent : []}
+        popular={isEmptyQuery ? suggestPopular : []}
         activeIndex={activeSuggestIndex}
         onSelectAdiso={(adiso) => {
-          closeSuggestions();
-          if (onOpenAdiso) onOpenAdiso(adiso.id);
-          else {
-            onChange(adiso.titulo);
-            void handleSearchSubmit();
-          }
+          const index = suggestItems.findIndex(
+            (i) => i.type === 'adiso' && i.adiso.id === adiso.id,
+          );
+          if (index >= 0) selectSuggestion(index);
         }}
         onSelectQuery={(q) => {
-          onChange(q);
-          closeSuggestions();
+          const index = suggestItems.findIndex(
+            (i) => (i.type === 'query' || i.type === 'recent' || i.type === 'popular') && i.query === q,
+          );
+          if (index >= 0) selectSuggestion(index);
+          else {
+            onChange(q);
+            closeSuggestions();
+            void handleSearchSubmit(q);
+          }
         }}
-        visible={
-          suggestionsOpen &&
-          isSearchMode &&
-          isTyping &&
-          (suggestions.adisos.length > 0 || suggestions.queries.length > 0)
-        }
+        onRemoveRecent={(q) => setRecent(removeRecentSearch(q))}
+        onClearRecent={() => {
+          clearRecentSearches();
+          setRecent([]);
+        }}
+        visible={dropdownVisible}
       />
 
       {composerMode === 'publish' && publishImageUrl && (

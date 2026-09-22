@@ -39,13 +39,28 @@ distrito · hace 2 h ─── 12/500 fg-muted
 
 ## 2. SearchComposer — la firma del producto
 
-**Razón de ser.** Es tu idea de producto más original: un solo control que alterna entre buscar y publicar. Comunica en un gesto que Buscadis es de dos lados, y elimina la búsqueda del botón "publicar" que en todos los clasificados está escondido en un menú.
+**Razón de ser.** Es tu idea de producto más original: un solo control que alterna entre buscar y publicar. Comunica en un gesto que Buscadis es de dos lados. En **home browse** el composer es `searchOnly` (Publicar vive en nav) para no duplicar CTAs.
+
+**Anatomía chrome (modo buscar, 2026-09-22):**
+
+```
+[ campo …  (X si hay texto)  | mic | lens | CTA lupa ]
+```
+
+- **Una sola lupa** = CTA de ejecutar (derecha). Nunca lupa decorativa a la izquierda si hay CTA.
+- Mic y lens = modalidades de entrada, no “buscar otra vez”.
+- Embudo de filtros **fuera** de la barra (toolbar junto al conteo / vistas).
+- Focus vacío: recientes (localStorage) + populares (API).
+- Tap en sugerencia de query / voz / visual → **submit** automático.
+- Zero-results: chips con `alternativeQueries` del API.
 
 **Riesgo que hay que gestionar.** Un control que cambia de función es un patrón poco común y viola la ley de Jakob. Se compensa con tres cosas: el modo por defecto siempre es buscar (la acción del 95% de las sesiones); el cambio de modo es explícito y visible, nunca automático; y el modo activo se distingue por color, texto del placeholder y forma del botón, no solo por posición del pill.
 
-**Especificación:** alto 52 móvil / 56 escritorio. Modo buscar usa el celeste de acción; modo publicar usa el amarillo con texto tinta. El borde cónico animado se conserva **solo en escritorio** y se desactiva en móvil y con `prefers-reduced-motion`: es una animación de propiedad personalizada que repinta continuamente y en gama media cuesta fotogramas.
+**Especificación:** alto 52 móvil / 56 escritorio. Modo buscar usa el celeste de acción; modo publicar usa el amarillo con texto tinta. El borde cónico animado se conserva **solo en escritorio** y se desactiva en móvil y con `prefers-reduced-motion`.
 
-**Estados:** vacío con sugerencias, escribiendo con autocompletado, con resultados, sin resultados con sugerencia de ampliar. El autocompletado se navega con flechas y se confirma con Enter (hoy falta en varios composers).
+**Estados:** vacío con recientes/populares, escribiendo con autocompletado, con resultados, sin resultados con alternativas. El autocompletado se navega con flechas y se confirma con Enter.
+
+Ver spec completa: `docs/superpowers/specs/2026-09-22-buscador-ux-design.md`.
 
 ---
 

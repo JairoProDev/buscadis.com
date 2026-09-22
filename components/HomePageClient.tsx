@@ -24,6 +24,7 @@ import { registrarBusqueda } from '@/lib/analytics';
 import { getUserInterestProfile, getInteraccionesUsuario, UserInterestProfile } from '@/lib/interactions';
 import { persistDemandIntent } from '@/lib/demand-intents/client';
 import { trackEvent } from '@/lib/events';
+import { trackSearchEvent } from '@/lib/search/analytics';
 import { onOnlineStatusChange, getOfflineMessage } from '@/lib/offline';
 import dynamicImport from 'next/dynamic';
 import Header from '@/components/Header';
@@ -42,6 +43,7 @@ import {
   IconList,
   IconEye,
   IconClose,
+  IconFilterFunnel,
 } from '@/components/Icons';
 import { getCategoriaLabel } from '@/lib/adiso-display';
 import { getCategoriaThemeTokens } from '@/lib/categoria-theme';
@@ -151,6 +153,7 @@ function HomeContent() {
   const [busqueda, setBusqueda] = useState(buscarUrl);
   const [committedQuery, setCommittedQuery] = useState(buscarUrl);
   const [searchResults, setSearchResults] = useState<Adiso[] | null>(null);
+  const [alternativeQueries, setAlternativeQueries] = useState<string[]>([]);
   const [searchLoading, setSearchLoading] = useState(false);
   const initialSearchDone = useRef(false);
   const [categoriaFiltro, setCategoriaFiltro] = useState<Categoria | 'todos'>(categoriaUrl && ['empleos', 'inmuebles', 'vehiculos', 'servicios', 'productos', 'eventos', 'negocios', 'comunidad'].includes(categoriaUrl) ? categoriaUrl : 'todos');
@@ -219,6 +222,7 @@ function HomeContent() {
     setBusqueda('');
     setCommittedQuery('');
     setSearchResults(null);
+    setAlternativeQueries([]);
     setHayMasAdisos(true);
     setVisibleCount(ITEMS_POR_PAGINA);
     const params = new URLSearchParams(searchParams.toString());
@@ -596,11 +600,20 @@ function HomeContent() {
       });
       const results = Array.from(merged.values());
       setSearchResults(results);
+      const alts = Array.isArray(data.alternativeQueries)
+        ? (data.alternativeQueries as string[]).filter((s) => typeof s === 'string' && s.trim())
+        : [];
+      setAlternativeQueries(alts);
       setHayMasAdisos(false);
       setVisibleCount(ITEMS_POR_PAGINA);
       registrarBusqueda(user?.id, q, results.length);
 
       if (results.length === 0) {
+        trackSearchEvent('search.zero_results', {
+          query: q,
+          userId: user?.id,
+          alternatives: alts.length,
+        });
         void persistDemandIntent({
           queryText: q,
           categoria: categoriaFiltro !== 'todos' ? categoriaFiltro : data.normalized?.category,
@@ -619,6 +632,7 @@ function HomeContent() {
     } catch {
       error('No pudimos completar la búsqueda');
       setSearchResults([]);
+      setAlternativeQueries([]);
     } finally {
       setSearchLoading(false);
       setFiltrando(false);
@@ -1284,10 +1298,6 @@ function HomeContent() {
                     searchLoading={searchLoading}
                     compact={browseScrolled}
                     searchOnly
-                    showFilterToggle
-                    filtersVisible={inlineFiltersVisible}
-                    onToggleFilters={() => setInlineFiltersVisible((v) => !v)}
-                    activeFiltersCount={activeFiltersCount}
                     onCategoryDetected={(categoria) => {
                       setCategoriaFiltro(categoria);
                       const params = new URLSearchParams(searchParams.toString());
@@ -1491,6 +1501,27 @@ function HomeContent() {
                         {getBrowseCountLabel(categoriaFiltro, browseFilters.ubicacion)}
                       </span>
 
+                      <button
+                        type="button"
+                        onClick={() => setInlineFiltersVisible((v) => !v)}
+                        className="relative flex h-[26px] w-[26px] shrink-0 items-center justify-center rounded-full border-0 transition-colors"
+                        style={{
+                          marginLeft: '2px',
+                          backgroundColor: inlineFiltersVisible
+                            ? 'rgba(var(--brand-primary-rgb), 0.18)'
+                            : 'rgba(var(--brand-primary-rgb), 0.12)',
+                          color: 'var(--brand-blue)',
+                        }}
+                        title={inlineFiltersVisible ? 'Ocultar filtros' : 'Mostrar filtros'}
+                        aria-label={inlineFiltersVisible ? 'Ocultar filtros' : 'Mostrar filtros'}
+                        aria-pressed={inlineFiltersVisible}
+                      >
+                        <IconFilterFunnel size={14} />
+                        {activeFiltersCount > 0 && (
+                          <span className="absolute right-0.5 top-0.5 h-1.5 w-1.5 rounded-full border border-white bg-[var(--brand-blue)]" />
+                        )}
+                      </button>
+
                       {!cargando && (
                         <button
                           className="hidden lg:flex hover:opacity-90"
@@ -1638,6 +1669,11 @@ function HomeContent() {
                   categoria={categoriaFiltro}
                   ubicacion={browseFilters.ubicacion}
                   activeFilterCount={countActiveFilters(browseFilters, categoriaFiltro)}
+                  alternativeQueries={alternativeQueries}
+                  onTryQuery={(q) => {
+                    setBusqueda(q);
+                    void handleSearchSubmit(q);
+                  }}
                   onClearFilters={() => {
                     trackEvent('filter.cleared', {
                       entityType: 'filter',
@@ -1648,6 +1684,7 @@ function HomeContent() {
                     setBusqueda('');
                     setCommittedQuery('');
                     setSearchResults(null);
+                    setAlternativeQueries([]);
                     setHayMasAdisos(true);
                     setCategoriaFiltro('todos');
                   }}

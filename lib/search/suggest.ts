@@ -46,8 +46,31 @@ async function postgresSuggest(prefix: string, limit: number): Promise<SuggestRe
   return { adisos, queries, completion, hits };
 }
 
+/** Populares globales (focus vacío del buscador). */
+export async function getPopularQueries(limit = 6): Promise<SuggestResponse> {
+  if (!supabaseAdmin) {
+    return { adisos: [], queries: [], completion: null, hits: [] };
+  }
+
+  const { data: popular } = await supabaseAdmin
+    .from('search_query_popularity')
+    .select('query')
+    .order('count', { ascending: false })
+    .limit(limit);
+
+  const queries = (popular ?? [])
+    .map((r: { query: string }) => r.query?.trim())
+    .filter((q): q is string => Boolean(q));
+
+  const hits: SuggestHit[] = queries.map((q) => ({ type: 'query' as const, query: q }));
+  return { adisos: [], queries, completion: null, hits };
+}
+
 export async function getSearchSuggestions(prefix: string, limit = 8): Promise<SuggestResponse> {
   const trimmed = prefix.trim();
+  if (trimmed.length === 0) {
+    return getPopularQueries(limit);
+  }
   if (trimmed.length < 2) {
     return { adisos: [], queries: [], completion: null, hits: [] };
   }
