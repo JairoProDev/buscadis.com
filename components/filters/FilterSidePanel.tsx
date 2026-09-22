@@ -29,6 +29,7 @@ interface FilterSidePanelProps {
   totalPool: number;
   ordenamiento: TipoOrdenamiento;
   onSortChange: (sort: TipoOrdenamiento) => void;
+  sortNote?: string;
 }
 
 const COLLAPSED_WIDTH = 40;
@@ -60,6 +61,7 @@ export default function FilterSidePanel({
   totalPool,
   ordenamiento,
   onSortChange,
+  sortNote,
 }: FilterSidePanelProps) {
   const [linkCopied, setLinkCopied] = useState(false);
   const activeCount = countActiveFilters(filters, categoria);
@@ -181,7 +183,7 @@ export default function FilterSidePanel({
 
       <div className="no-scrollbar flex-1 overflow-y-auto px-3 py-3 space-y-3">
         <div className="xl:hidden">
-          <FilterSortPanel value={ordenamiento} onChange={onSortChange} />
+          <FilterSortPanel value={ordenamiento} onChange={onSortChange} note={sortNote} />
         </div>
 
         <FilterControlFields

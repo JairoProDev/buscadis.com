@@ -21,7 +21,7 @@ export function getPackageRank(tamaño: TamañoPaquete | undefined): number {
   return PACKAGE_RANK[tamaño] ?? PACKAGE_RANK.miniatura;
 }
 
-function parsePublishedTimestamp(adiso: Adiso): number {
+export function getPublishedTimestamp(adiso: Adiso): number {
   if (!adiso.fechaPublicacion) return 0;
   try {
     const raw = String(adiso.fechaPublicacion).trim();
@@ -76,7 +76,7 @@ export function getFeedEffectiveTimestamp(
   adiso: Adiso,
   interestProfile?: UserInterestProfile | null,
 ): number {
-  return parsePublishedTimestamp(adiso)
+  return getPublishedTimestamp(adiso)
     + personalizationFreshnessBoostMs(adiso, interestProfile)
     + getFeedVisualBoostMs(adiso);
 }

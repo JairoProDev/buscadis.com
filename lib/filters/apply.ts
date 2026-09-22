@@ -4,31 +4,11 @@ import { BrowseFilterState } from './types';
 import { adisoMatchesFacets, adisoPublicadoDentroDe, adisoTieneImagen } from './matchers';
 import { personalizeAdisos } from '@/lib/ai/personalization';
 import { compareRecientesFeed, injectFeedExploration } from '@/lib/feed/ranking';
+import { compareCercanos, compareConFotos, comparePrecio, compareVistos } from './sort-compare';
 import type { UserInterestProfile } from '@/lib/interactions';
 import { getCountryByCode, DEFAULT_COUNTRY_CODE } from '@/lib/geo/countries-data';
 
 const TEST_REGEX = /toyota test|test adiso|test anuncio/i;
-
-function parsearFecha(fechaPublicacion: string, horaPublicacion: string): number {
-  if (!fechaPublicacion) return 0;
-  try {
-    const raw = String(fechaPublicacion).trim();
-    if (raw.includes('T') || raw.endsWith('Z')) {
-      const iso = new Date(raw);
-      if (!Number.isNaN(iso.getTime())) return iso.getTime();
-    }
-
-    let hora = (horaPublicacion || '00:00').trim();
-    if (hora.length === 4) hora = `${hora.substring(0, 2)}:${hora.substring(2)}`;
-    else if (hora.length >= 8) hora = hora.slice(0, 5);
-    else if (hora.length !== 5) hora = '00:00';
-
-    const date = new Date(`${raw}T${hora}:00`);
-    return Number.isNaN(date.getTime()) ? 0 : date.getTime();
-  } catch {
-    return 0;
-  }
-}
 
 function calcularDistanciaKm(lat1: number, lon1: number, lat2: number, lon2: number): number {
   const R = 6371;
@@ -236,28 +216,18 @@ export function applyBrowseFilters({
     switch (ordenamiento) {
     case 'recientes':
       return compareRecientesFeed(a, b, interestProfile);
-    case 'antiguos': {
-      const fa = parsearFecha(a.fechaPublicacion, a.horaPublicacion);
-      const fb = parsearFecha(b.fechaPublicacion, b.horaPublicacion);
-      const c = fa - fb;
-      return c !== 0 ? c : a.id.localeCompare(b.id);
-    }
-    case 'precio-asc': {
-      const pa = a.precio && a.precio > 0 ? a.precio : Number.MAX_SAFE_INTEGER;
-      const pb = b.precio && b.precio > 0 ? b.precio : Number.MAX_SAFE_INTEGER;
-      return pa - pb || a.id.localeCompare(b.id);
-    }
-    case 'precio-desc': {
-      const pa = a.precio ?? 0;
-      const pb = b.precio ?? 0;
-      return pb - pa || a.id.localeCompare(b.id);
-    }
-    case 'titulo-asc':
-      return a.titulo.localeCompare(b.titulo, 'es', { sensitivity: 'base' });
-    case 'titulo-desc':
-      return b.titulo.localeCompare(a.titulo, 'es', { sensitivity: 'base' });
+    case 'precio-asc':
+      return comparePrecio(a, b, 'asc');
+    case 'precio-desc':
+      return comparePrecio(a, b, 'desc');
+    case 'cercanos':
+      return compareCercanos(a, b, userLat, userLng);
+    case 'vistos':
+      return compareVistos(a, b);
+    case 'con-fotos':
+      return compareConFotos(a, b);
     default:
-      return 0;
+      return compareRecientesFeed(a, b, interestProfile);
     }
   });
 

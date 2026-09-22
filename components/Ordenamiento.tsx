@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useRef, useEffect, useMemo } from 'react';
-import { IconSort, IconSortDown, IconSortUp, IconChevronDown } from './Icons';
+import { IconSort, IconSortDown, IconSortUp, IconChevronDown, IconLocation, IconEye, IconImage } from './Icons';
 import { useTranslation } from '@/hooks/useTranslation';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
 import { BROWSE_SORT_OPTIONS, type TipoOrdenamiento } from '@/lib/filters/sort-options';
@@ -30,15 +30,17 @@ interface OrdenamientoProps<V extends string = TipoOrdenamiento> {
   /** `icon` = solo icono fijo, sin pill ni etiqueta */
   variant?: 'pill' | 'icon';
   triggerIcon?: SortIconComponent;
+  /** Aviso bajo la lista, por ejemplo si falta la ubicación para "Más cercanos". */
+  note?: string;
 }
 
 const SORT_ICONS: Record<TipoOrdenamiento, SortIconComponent> = {
   recientes: IconSortDown,
-  antiguos: IconSortUp,
-  'titulo-asc': IconSort,
-  'titulo-desc': IconSort,
   'precio-asc': IconSortUp,
   'precio-desc': IconSortDown,
+  cercanos: IconLocation,
+  vistos: IconEye,
+  'con-fotos': IconImage,
 };
 
 function getOptionLabel<V extends string>(
@@ -58,6 +60,7 @@ export default function Ordenamiento<V extends string = TipoOrdenamiento>({
   sheetTitle,
   variant = 'pill',
   triggerIcon: TriggerIconProp,
+  note,
 }: OrdenamientoProps<V>) {
   const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
@@ -114,6 +117,19 @@ export default function Ordenamiento<V extends string = TipoOrdenamiento>({
     onChange(nuevoValor);
     setIsOpen(false);
   };
+
+  const noteBlock = note ? (
+    <p
+      style={{
+        margin: '4px 8px 8px',
+        fontSize: '0.75rem',
+        lineHeight: 1.4,
+        color: 'var(--text-tertiary)',
+      }}
+    >
+      {note}
+    </p>
+  ) : null;
 
   const optionList = opcionesOrdenamiento.map((opcion) => {
     const OptionIcon = opcion.icon;
@@ -221,6 +237,7 @@ export default function Ordenamiento<V extends string = TipoOrdenamiento>({
           }}
         >
           {optionList}
+          {noteBlock}
         </div>
       )}
 
@@ -265,6 +282,7 @@ export default function Ordenamiento<V extends string = TipoOrdenamiento>({
               {sortSheetTitle}
             </div>
             {optionList}
+            {noteBlock}
           </div>
         </>
       )}

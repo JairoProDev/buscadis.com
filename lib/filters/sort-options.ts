@@ -1,10 +1,10 @@
 export type TipoOrdenamiento =
   | 'recientes'
-  | 'antiguos'
-  | 'titulo-asc'
-  | 'titulo-desc'
   | 'precio-asc'
-  | 'precio-desc';
+  | 'precio-desc'
+  | 'cercanos'
+  | 'vistos'
+  | 'con-fotos';
 
 export interface SortOptionDef {
   value: TipoOrdenamiento;
@@ -19,11 +19,11 @@ export interface SortOptionDef {
 /** Fuente única de verdad para ordenamiento en toolbar y panel de filtros */
 export const BROWSE_SORT_OPTIONS: SortOptionDef[] = [
   { value: 'recientes', labelKey: 'sort.recent', label: 'Más recientes', panelOrder: 0 },
-  { value: 'antiguos', labelKey: 'sort.oldest', label: 'Más antiguos', panelOrder: 3 },
-  { value: 'titulo-asc', labelKey: 'sort.titleAsc', label: 'Título A-Z', panelOrder: 4 },
-  { value: 'titulo-desc', labelKey: 'sort.titleDesc', label: 'Título Z-A', panelOrder: 5 },
   { value: 'precio-asc', labelKey: 'sort.priceAsc', label: 'Menor precio', panelOrder: 1 },
   { value: 'precio-desc', labelKey: 'sort.priceDesc', label: 'Mayor precio', panelOrder: 2 },
+  { value: 'cercanos', labelKey: 'sort.nearest', label: 'Más cercanos', panelOrder: 3 },
+  { value: 'vistos', labelKey: 'sort.viewed', label: 'Lo más visto', panelOrder: 4 },
+  { value: 'con-fotos', labelKey: 'sort.withPhotos', label: 'Con fotos', panelOrder: 5 },
 ];
 
 export const PANEL_SORT_OPTIONS = [...BROWSE_SORT_OPTIONS].sort(

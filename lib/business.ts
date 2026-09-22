@@ -478,6 +478,12 @@ function catalogMarketplaceCategory(categoria?: string): boolean {
     return categoria === 'productos';
 }
 
+function isTransientFetchError(error: { message?: string; details?: string } | null): boolean {
+    if (!error) return false;
+    const blob = `${error.message ?? ''}\n${error.details ?? ''}`;
+    return /fetch failed|ConnectTimeout|UND_ERR_|ECONNRESET|ETIMEDOUT|socket hang up|network/i.test(blob);
+}
+
 function catalogProductHasImages(product: any): boolean {
     return (
         Array.isArray(product.images) &&
@@ -537,6 +543,7 @@ export async function getCatalogProductsAsAdisos(options?: {
     preferImages?: boolean;
 }): Promise<Adiso[]> {
     if (!supabase) return [];
+    const client = supabase;
 
     try {
         const preferImages = options?.preferImages !== false;
@@ -548,56 +555,61 @@ export async function getCatalogProductsAsAdisos(options?: {
             200,
         );
 
-        let query = supabase
-            .from('catalog_products')
-            .select(`
-                *,
-                business_profiles (
-                    id,
-                    user_id,
-                    name,
-                    slug,
-                    logo_url,
-                    contact_phone,
-                    contact_whatsapp,
-                    contact_email,
-                    contact_address,
-                    is_verified,
-                    is_published
-                )
-            `)
-            .eq('status', 'published')
-            .is('deleted_at', null);
+        const load = () => {
+            let query = client
+                .from('catalog_products')
+                .select(`
+                    id, title, description, price, currency, images, category,
+                    view_count, click_count, status, updated_at, created_at,
+                    business_profile_id, ai_metadata,
+                    business_profiles (
+                        id, user_id, name, slug, logo_url,
+                        contact_phone, contact_whatsapp, contact_email, contact_address,
+                        is_verified, is_published
+                    )
+                `)
+                .eq('status', 'published')
+                .is('deleted_at', null);
 
-        // Filtrar sin foto en SQL: evita que bulk updates sin imagen llenen el pool.
-        if (preferImages) {
-            query = query.neq('images', '[]');
-        }
-
-        const marketplaceCategoria = options?.categoria;
-        if (
-            marketplaceCategoria &&
-            marketplaceCategoria !== 'todos' &&
-            !catalogMarketplaceCategory(marketplaceCategoria)
-        ) {
-            query = query.ilike('category', `%${marketplaceCategoria}%`);
-        }
-
-        if (options?.busqueda) {
-            const q = options.busqueda.trim();
-            if (q) {
-                query = query.or(`title.ilike.%${q}%,description.ilike.%${q}%`);
+            // Filtrar sin foto en SQL: evita que bulk updates sin imagen llenen el pool.
+            if (preferImages) {
+                query = query.neq('images', '[]');
             }
+
+            const marketplaceCategoria = options?.categoria;
+            if (
+                marketplaceCategoria &&
+                marketplaceCategoria !== 'todos' &&
+                !catalogMarketplaceCategory(marketplaceCategoria)
+            ) {
+                query = query.ilike('category', `%${marketplaceCategoria}%`);
+            }
+
+            if (options?.busqueda) {
+                const q = options.busqueda.trim();
+                if (q) {
+                    query = query.or(`title.ilike.%${q}%,description.ilike.%${q}%`);
+                }
+            }
+
+            return query
+                .order('updated_at', { ascending: false })
+                .order('created_at', { ascending: false })
+                .range(0, poolSize - 1);
+        };
+
+        let { data, error } = await load();
+        // WSL y Cloudflare a veces no completan el TCP en 10s. Un segundo intento suele entrar.
+        if (isTransientFetchError(error)) {
+            await new Promise((resolve) => setTimeout(resolve, 700));
+            ({ data, error } = await load());
         }
-
-        query = query
-            .order('updated_at', { ascending: false })
-            .order('created_at', { ascending: false })
-            .range(0, poolSize - 1);
-
-        const { data, error } = await query;
         if (error) {
-            console.error('Error fetching catalog products for marketplace:', error);
+            console.error(
+                'Error fetching catalog products for marketplace:',
+                error.message || 'sin mensaje',
+                error.details || '',
+            );
             return [];
         }
 

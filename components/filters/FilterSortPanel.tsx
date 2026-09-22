@@ -3,25 +3,26 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { TipoOrdenamiento } from '@/components/Ordenamiento';
-import { IconChevronDown, IconSortDown, IconSortUp, IconSort } from '@/components/Icons';
+import { IconChevronDown, IconSortDown, IconSortUp, IconLocation, IconEye, IconImage } from '@/components/Icons';
 import { useFilterSectionCollapse } from './useFilterSectionCollapse';
 import { PANEL_SORT_OPTIONS } from '@/lib/filters/sort-options';
 
 const SORT_ICONS: Record<TipoOrdenamiento, React.ReactNode> = {
   recientes: <IconSortDown size={11} />,
-  antiguos: <IconSortUp size={11} />,
-  'titulo-asc': <IconSort size={11} />,
-  'titulo-desc': <IconSort size={11} />,
   'precio-asc': <IconSortUp size={11} />,
   'precio-desc': <IconSortDown size={11} />,
+  cercanos: <IconLocation size={11} />,
+  vistos: <IconEye size={11} />,
+  'con-fotos': <IconImage size={11} />,
 };
 
 interface FilterSortPanelProps {
   value: TipoOrdenamiento;
   onChange: (value: TipoOrdenamiento) => void;
+  note?: string;
 }
 
-export default function FilterSortPanel({ value, onChange }: FilterSortPanelProps) {
+export default function FilterSortPanel({ value, onChange, note }: FilterSortPanelProps) {
   const { open, toggle } = useFilterSectionCollapse('ordenar', false);
   const current = PANEL_SORT_OPTIONS.find((o) => o.value === value) ?? PANEL_SORT_OPTIONS[0];
 
@@ -34,7 +35,7 @@ export default function FilterSortPanel({ value, onChange }: FilterSortPanelProp
         <span className="min-w-0 flex-1">
           <span className="block text-xs font-bold text-[var(--text-primary)]">Ordenar resultados</span>
           <span className="block truncate text-[10px] text-[var(--text-tertiary)]">
-            {open ? 'Elige cómo ver los avisos' : `Actual: ${current.label}`}
+            {note && !open ? note : open ? 'Elige cómo ver los avisos' : `Actual: ${current.label}`}
           </span>
         </span>
         <motion.span
@@ -78,6 +79,9 @@ export default function FilterSortPanel({ value, onChange }: FilterSortPanelProp
                 );
               })}
             </div>
+            {note && (
+              <p className="px-0.5 pt-2 text-[10px] leading-snug text-[var(--text-tertiary)]">{note}</p>
+            )}
           </motion.div>
         )}
       </AnimatePresence>

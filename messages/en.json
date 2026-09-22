@@ -51,11 +51,11 @@
   "sort": {
     "label": "Sort by:",
     "recent": "Most recent",
-    "oldest": "Oldest",
-    "titleAsc": "Title A-Z",
-    "titleDesc": "Title Z-A",
-    "priceAsc": "Price: low to high",
-    "priceDesc": "Price: high to low"
+    "priceAsc": "Lowest price",
+    "priceDesc": "Highest price",
+    "nearest": "Nearest",
+    "viewed": "Most viewed",
+    "withPhotos": "With photos"
   },
   "adiso": {
     "published": "Published",

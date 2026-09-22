@@ -158,6 +158,8 @@ function HomeContent() {
   const initialSearchDone = useRef(false);
   const [categoriaFiltro, setCategoriaFiltro] = useState<Categoria | 'todos'>(categoriaUrl && ['empleos', 'inmuebles', 'vehiculos', 'servicios', 'productos', 'eventos', 'negocios', 'comunidad'].includes(categoriaUrl) ? categoriaUrl : 'todos');
   const [ordenamiento, setOrdenamiento] = useState<TipoOrdenamiento>('recientes');
+  const [geoOrigen, setGeoOrigen] = useState<{ lat: number; lng: number } | null>(null);
+  const [geoEstado, setGeoEstado] = useState<'idle' | 'pending' | 'ready' | 'denied'>('idle');
   const [interestProfile, setInterestProfile] = useState<UserInterestProfile | null>(null);
   const [hiddenAdIds, setHiddenAdIds] = useState<Set<string>>(new Set());
 
@@ -652,6 +654,49 @@ function HomeContent() {
     void handleSearchSubmit(buscarUrl);
   }, [buscarUrl, cargando, handleSearchSubmit]);
 
+  const tieneUbicacionPerfil = profile?.latitud != null && profile?.longitud != null;
+  const userLat = profile?.latitud ?? geoOrigen?.lat;
+  const userLng = profile?.longitud ?? geoOrigen?.lng;
+  const notaCercanos =
+    ordenamiento !== 'cercanos' || tieneUbicacionPerfil || geoEstado === 'ready'
+      ? undefined
+      : geoEstado === 'pending'
+        ? 'Buscando tu ubicación para poner primero lo que está cerca.'
+        : 'Activa la ubicación del navegador para ordenar por cercanía. Mientras tanto ves lo más nuevo.';
+
+  // "Más cercanos" necesita un punto de origen. El perfil manda; si no hay, pedimos el navegador.
+  useEffect(() => {
+    if (ordenamiento !== 'cercanos') return;
+    if (tieneUbicacionPerfil || geoOrigen) return;
+    if (typeof navigator === 'undefined' || !navigator.geolocation) {
+      setGeoEstado('denied');
+      return;
+    }
+    setGeoEstado('pending');
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setGeoOrigen({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+        setGeoEstado('ready');
+      },
+      () => {
+        setGeoEstado('denied');
+        error('Activa la ubicación para ver primero los avisos cercanos.');
+      },
+      { enableHighAccuracy: false, maximumAge: 5 * 60 * 1000, timeout: 8000 },
+    );
+  }, [ordenamiento, tieneUbicacionPerfil, geoOrigen]);
+
+  // Al cambiar el orden, volver al inicio de la lista para ver el nuevo criterio.
+  const ordenInicial = useRef(true);
+  useEffect(() => {
+    if (ordenInicial.current) {
+      ordenInicial.current = false;
+      return;
+    }
+    setVisibleCount(ITEMS_POR_PAGINA);
+    document.getElementById('feed-adisos')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, [ordenamiento]);
+
   // Filtrado y ordenamiento (sistema unificado)
   useEffect(() => {
     if (adisos.length === 0) {
@@ -668,14 +713,14 @@ function HomeContent() {
       filters: browseFilters,
       ordenamiento,
       preserveOrder: searchResults !== null && ordenamiento === 'recientes',
-      userLat: profile?.latitud,
-      userLng: profile?.longitud,
+      userLat,
+      userLng,
       interestProfile,
       hiddenAdIds,
     });
 
     setAdisosFiltrados(filtrados);
-  }, [committedQuery, searchResults, categoriaFiltro, ordenamiento, adisos, browseFilters, profile?.latitud, profile?.longitud, interestProfile, hiddenAdIds]);
+  }, [committedQuery, searchResults, categoriaFiltro, ordenamiento, adisos, browseFilters, userLat, userLng, interestProfile, hiddenAdIds]);
 
   // Breve skeleton al cambiar filtros (no en carga inicial)
   useEffect(() => {
@@ -1133,11 +1178,12 @@ function HomeContent() {
                 collapsed={filterSidebarCollapsed}
                 onToggleCollapse={() => setFilterSidebarCollapsed((c) => !c)}
                 onOpenUbicacion={() => setMostrarFiltroUbicacion(true)}
-                userLat={profile?.latitud}
-                userLng={profile?.longitud}
+                userLat={userLat}
+                userLng={userLng}
                 resultCount={adisosFiltrados.length}
                 totalPool={browseTotalPool}
                 ordenamiento={ordenamiento}
+                sortNote={notaCercanos}
                 onSortChange={(v) => {
                   setOrdenamiento(v);
                   trackEvent('filter.applied', {
@@ -1331,8 +1377,8 @@ function HomeContent() {
                   busqueda={committedQuery}
                   isDesktop={isDesktop}
                   visible={inlineFiltersVisible}
-                  userLat={profile?.latitud}
-                  userLng={profile?.longitud}
+                  userLat={userLat}
+                  userLng={userLng}
                   onOpenUbicacion={() => setMostrarFiltroUbicacion(true)}
                   onOpenSidebar={() => setFilterSidebarCollapsed(false)}
                   onOpenMobileFilters={() => setIsMobileFiltersOpen(true)}
@@ -1400,15 +1446,15 @@ function HomeContent() {
                       </div>
                     </div>
                     <div className="flex-1 space-y-3 overflow-y-auto no-scrollbar p-4">
-                      <FilterSortPanel value={ordenamiento} onChange={setOrdenamiento} />
+                      <FilterSortPanel value={ordenamiento} onChange={setOrdenamiento} note={notaCercanos} />
                       <FilterControlFields
                         categoria={categoriaFiltro}
                         filters={browseFilters}
                         onChange={setBrowseFilters}
                         adisos={adisos}
                         busqueda={committedQuery}
-                        userLat={profile?.latitud}
-                        userLng={profile?.longitud}
+                        userLat={userLat}
+                        userLng={userLng}
                         onOpenUbicacion={() => {
                           setMostrarFiltroUbicacion(true);
                           setIsMobileFiltersOpen(false);
@@ -1583,6 +1629,7 @@ function HomeContent() {
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
                   <Ordenamiento
                     valor={ordenamiento}
+                    note={notaCercanos}
                     onChange={(v) => {
                       setOrdenamiento(v);
                       trackEvent('filter.applied', {
