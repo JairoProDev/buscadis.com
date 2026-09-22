@@ -115,6 +115,7 @@ export default function SimilarAdisos({ currentAdiso }: SimilarAdisosProps) {
                       templateId={flyer.templateId}
                       config={resolveFlyerConfig(ad.categoria, flyer.templateId, flyer.config)}
                       content={buildFlyerContentFromAdiso(ad)}
+                      density="compact"
                       className="h-full w-full"
                     />
                   );

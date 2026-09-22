@@ -265,6 +265,7 @@ const AdisoCard = forwardRef<HTMLDivElement, AdisoCardProps>(
                     templateId={flyer.templateId}
                     config={cfg}
                     content={content}
+                    density="compact"
                     className="h-full w-full"
                   />
                 </div>

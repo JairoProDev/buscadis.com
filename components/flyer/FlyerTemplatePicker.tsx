@@ -69,6 +69,7 @@ export default function FlyerTemplatePicker({
                     ...t.defaultConfig,
                   })}
                   content={content}
+                  density="compact"
                   className="pointer-events-none"
                 />
                 <span className="block truncate bg-[var(--bg-secondary)] px-1 py-0.5 text-center text-[9px] font-semibold text-[var(--text-secondary)]">
