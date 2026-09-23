@@ -29,7 +29,8 @@ export default function NavbarMobile({
 
   React.useEffect(() => {
     setMounted(true);
-  }, []);
+    router.prefetch('/publicar');
+  }, [router]);
 
   if (!mounted) return null;
   if (isDesktop) return null;
@@ -64,6 +65,10 @@ export default function NavbarMobile({
         const tieneNotificacion = seccion.id === 'inicio' && tieneAdisoAbierto && !estaActiva;
 
         const handleClick = () => {
+          if (esPublicar) {
+            router.push('/publicar');
+            return;
+          }
           router.push(seccion.href);
           if (seccion.sidebarId && pathname === '/') {
             onCambiarSeccion(seccion.sidebarId);

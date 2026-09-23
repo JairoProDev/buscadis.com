@@ -24,7 +24,7 @@ export interface MainNavItem {
 export const MAIN_NAV_ITEMS: readonly MainNavItem[] = [
   { id: 'inicio', icon: IconHome, labelKey: 'nav.home', href: '/', sidebarId: 'adiso' },
   { id: 'deals', icon: IconShorts, labelKey: 'nav.deals', href: '/deals' },
-  { id: 'publicar', icon: IconMegaphone, labelKey: 'nav.publish', href: '/publicar', sidebarId: 'publicar' },
+  { id: 'publicar', icon: IconMegaphone, labelKey: 'nav.publish', href: '/publicar' },
   { id: 'chatbot', icon: IconSearch, labelKey: 'nav.search', href: '/chat', sidebarId: 'chatbot' },
   { id: 'mapa', icon: IconMap, labelKey: 'nav.map', href: '/mapa', sidebarId: 'mapa' },
 ] as const;

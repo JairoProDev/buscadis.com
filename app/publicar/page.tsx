@@ -2,19 +2,10 @@
 
 import React, { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import dynamic from 'next/dynamic';
 import { ToastContainer } from '@/components/Toast';
 import { useToast } from '@/hooks/useToast';
 import { IconClose } from '@/components/Icons';
-
-const PublishStudioShell = dynamic(() => import('@/components/publish/PublishStudioShell'), {
-  loading: () => (
-    <div className="flex flex-1 items-center justify-center p-6 text-sm text-[var(--text-secondary)]">
-      Cargando Publish Studio…
-    </div>
-  ),
-  ssr: false,
-});
+import PublishStudio from '@/components/publish/PublishStudio';
 
 function PublicarHubContent() {
   const router = useRouter();
@@ -54,7 +45,7 @@ function PublicarHubContent() {
   };
 
   return (
-    <div className="fixed inset-0 z-[100] flex flex-col bg-[var(--bg-primary)]">
+    <div className="fixed inset-0 z-[2100] flex flex-col bg-[var(--bg-primary)]">
       <header className="flex shrink-0 items-center justify-between px-3 pt-[max(0.75rem,env(safe-area-inset-top))] pb-2">
         <button
           type="button"
@@ -70,9 +61,8 @@ function PublicarHubContent() {
       </header>
 
       <main className="flex min-h-0 flex-1 flex-col">
-        <PublishStudioShell
+        <PublishStudio
           key={seedKey}
-          variant="page"
           immersive
           initialText={initialText}
           initialImageUrl={initialImageUrl}
@@ -82,7 +72,6 @@ function PublicarHubContent() {
             setInitialText('');
             setInitialImageUrl(null);
           }}
-          onClose={handleExit}
         />
       </main>
 
