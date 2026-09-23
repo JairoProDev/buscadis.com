@@ -20,10 +20,11 @@ import PublishFixedChatBar from './PublishFixedChatBar';
 import PublishStepIndicator from './PublishStepIndicator';
 import PublishAIQuestions from './PublishAIQuestions';
 import type { PublisherPreview } from './PublishPreviewCard';
-import { PublishDraft } from '@/lib/publish/publish-draft-types';
+import { EMPTY_COVER_OVERLAY, PublishDraft } from '@/lib/publish/publish-draft-types';
+import { getSubscriptionTier } from '@/lib/business/subscription';
 import { hasMinimumContent } from '@/lib/publish/publish-draft-types';
 import { publishPrimaryBtn, publishSecondaryBtn, publishCard } from './publish-ui';
-import { IconCamera, IconImage, IconLayers, IconMegaphone, IconMicrophone, IconX } from '@/components/Icons';
+import { IconCamera, IconImage, IconLayers, IconMegaphone, IconMicrophone, IconVerified, IconX } from '@/components/Icons';
 import type { Adiso } from '@/types';
 import { FLYER_TEMPLATES, defaultFlyerForCategory, resolveFlyerConfig } from '@/lib/flyer/templates';
 import { exportAndUploadFlyer } from '@/lib/flyer/export-client';
@@ -149,7 +150,10 @@ export default function PublishStudio({
         draft.flyerTemplateId !== defaultFlyerForCategory(draft.categoria).templateId) ||
       (draft.flyerConfig &&
         JSON.stringify(draft.flyerConfig) !==
-          JSON.stringify(defaultFlyerForCategory(draft.categoria).config))
+          JSON.stringify(defaultFlyerForCategory(draft.categoria).config)) ||
+      (draft.coverOverlay?.texts.some((mark) => mark.text.trim()) ||
+        (draft.coverOverlay?.stickers.length || 0) > 0 ||
+        (draft.coverOverlay?.strokes.length || 0) > 0)
   );
 
   const requestLeave = () => {
@@ -174,6 +178,7 @@ export default function PublishStudio({
         setPublisher({
           name: profile.name || undefined,
           logoUrl: profile.logo_url || undefined,
+          subscribed: getSubscriptionTier(profile) !== 'free',
         });
       })
       .catch(() => {
@@ -189,6 +194,7 @@ export default function PublishStudio({
       const text = opts.text?.trim();
       const imageUrl = opts.imageUrl;
       if (!text && !imageUrl) return false;
+      if (draft.plan === 'free') return false;
 
       setAnalyzing(true);
       setChatStatus(null);
@@ -258,6 +264,7 @@ export default function PublishStudio({
       draft.titulo,
       draft.descripcion,
       draft.atributos,
+      draft.plan,
       mergeDraft,
       addChatMessage,
       onNotify,
@@ -400,7 +407,7 @@ export default function PublishStudio({
       }
 
       const publishDraft: PublishDraft =
-        plan === 'free' ? { ...draft, imagenes: draft.imagenes.slice(0, 1) } : draft;
+        plan === 'free' ? { ...draft, plan: 'free', imagenes: [] } : draft;
 
       setPublishing(true);
       try {
@@ -410,7 +417,7 @@ export default function PublishStudio({
         let coverForDownload: string | null = imagenes[0] || null;
 
         const editor = coverEditorRef.current;
-        if (editor && (editor.hasEdits() || editor.cropPending())) {
+        if (plan !== 'free' && editor && (editor.hasEdits() || editor.cropPending())) {
           const blob = await editor.exportJpeg();
           if (blob) {
             const baked = await uploadPublishImage(
@@ -613,12 +620,37 @@ export default function PublishStudio({
                   setCoverTool(next);
                   if (next) setShowTemplates(false);
                 }}
+                overlay={draft.coverOverlay || EMPTY_COVER_OVERLAY}
+                onOverlayChange={(next, options) => setDraft({ coverOverlay: next }, options)}
+                canUndo={canUndo}
+                canRedo={canRedo}
+                onUndo={undo}
+                onRedo={redo}
+                paidTools={draft.plan === 'paid'}
+                above={
+                  <div className="mb-2 flex items-center gap-2">
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[var(--bg-secondary)] text-sm font-bold text-[var(--brand-blue)] ring-1 ring-[var(--border-color)]">
+                      {publisher?.logoUrl ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={publisher.logoUrl} alt="" className="h-full w-full object-cover" />
+                      ) : (
+                        (publisher?.name || 'T').charAt(0).toUpperCase()
+                      )}
+                    </div>
+                    <p className="m-0 min-w-0 truncate text-sm font-bold text-[var(--text-primary)]">
+                      {publisher?.name || 'Tu negocio'}
+                    </p>
+                    {publisher?.subscribed && <IconVerified size={15} color="var(--brand-blue)" />}
+                  </div>
+                }
                 below={
                   <>
                     <PublishListingPreview
                       draft={draft}
                       onChange={setDraft}
-                      onOpenForm={() => setShowForm(true)}
+                      onSetAtributo={setAtributo}
+                      flyerConfig={exportConfig}
+                      onFlyer={(patch) => setDraft({ flyerConfig: { ...exportConfig, ...patch } })}
                     />
                     {showForm && (
                       <div ref={formAnchorRef} className="px-3 pb-8">
@@ -639,7 +671,7 @@ export default function PublishStudio({
                   </>
                 }
               >
-                {heroUrl ? (
+                {heroUrl && draft.plan === 'paid' ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img src={heroUrl} alt="" crossOrigin="anonymous" className="h-full w-full object-cover" />
                 ) : (
@@ -816,6 +848,23 @@ export default function PublishStudio({
             )}
             <div className="shrink-0 bg-[var(--bg-primary)] pb-[max(0.35rem,env(safe-area-inset-bottom))]">
             {immersive ? (
+              <>
+              <div className="flex justify-center gap-2 px-3 pt-1">
+                <button
+                  type="button"
+                  onClick={() => setDraft({ plan: 'free' })}
+                  className={`rounded-full px-3 py-1 text-xs font-bold ${draft.plan !== 'paid' ? 'bg-[var(--brand-blue)] text-white' : 'text-[var(--text-secondary)]'}`}
+                >
+                  Gratis
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setDraft({ plan: 'paid' })}
+                  className={`rounded-full px-3 py-1 text-xs font-bold ${draft.plan === 'paid' ? 'bg-[var(--brand-blue)] text-white' : 'text-[var(--text-secondary)]'}`}
+                >
+                  De pago
+                </button>
+              </div>
               <form
                 className="flex items-center gap-1.5 px-2 pt-1"
                 onSubmit={(event) => {
@@ -823,10 +872,17 @@ export default function PublishStudio({
                   const text = composerText.trim();
                   if (text) {
                     setComposerText('');
-                    void handleChatSend(text);
+                    if (draft.plan === 'paid') {
+                      void handleChatSend(text);
+                    } else {
+                      setDraft({
+                        titulo: draft.titulo?.trim() ? draft.titulo : text.slice(0, 80),
+                        descripcion: draft.descripcion?.trim() ? `${draft.descripcion}\n${text}` : text,
+                      });
+                    }
                     return;
                   }
-                  void publish('free');
+                  void publish(draft.plan === 'paid' ? 'paid' : 'free');
                 }}
               >
                 <div className="flex min-w-0 flex-1 items-center rounded-full bg-[var(--bg-secondary)] pl-4 pr-1">
@@ -837,27 +893,32 @@ export default function PublishStudio({
                     className="h-11 min-w-0 flex-1 bg-transparent text-sm text-[var(--text-primary)] outline-none placeholder:text-[var(--text-tertiary)]"
                     aria-label="Mensaje"
                   />
-                  <button
-                    type="button"
-                    onClick={() => cameraInputRef.current?.click()}
-                    disabled={uploadingImage || analyzing}
-                    className="flex h-10 w-10 items-center justify-center text-[var(--text-secondary)] disabled:opacity-40"
-                    aria-label="Tomar foto"
-                    title="Tomar foto"
-                  >
-                    <IconCamera size={20} />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => galleryInputRef.current?.click()}
-                    disabled={uploadingImage || analyzing}
-                    className="flex h-10 w-10 items-center justify-center text-[var(--text-secondary)] disabled:opacity-40"
-                    aria-label="Enviar foto"
-                    title="Enviar foto"
-                  >
-                    <IconImage size={18} />
-                  </button>
+                  {draft.plan === 'paid' && (
+                    <button
+                      type="button"
+                      onClick={() => cameraInputRef.current?.click()}
+                      disabled={uploadingImage || analyzing}
+                      className="flex h-10 w-10 items-center justify-center text-[var(--text-secondary)] disabled:opacity-40"
+                      aria-label="Tomar foto"
+                      title="Tomar foto"
+                    >
+                      <IconCamera size={20} />
+                    </button>
+                  )}
+                  {draft.plan === 'paid' && (
+                    <button
+                      type="button"
+                      onClick={() => galleryInputRef.current?.click()}
+                      disabled={uploadingImage || analyzing}
+                      className="flex h-10 w-10 items-center justify-center text-[var(--text-secondary)] disabled:opacity-40"
+                      aria-label="Enviar foto"
+                      title="Enviar foto"
+                    >
+                      <IconImage size={18} />
+                    </button>
+                  )}
                 </div>
+                {draft.plan === 'paid' && (
                 <button
                   type="button"
                   onClick={() => void handleVoiceCapture()}
@@ -872,6 +933,7 @@ export default function PublishStudio({
                 >
                   <IconMicrophone size={18} />
                 </button>
+                )}
                 <button
                   type="submit"
                   disabled={publishing || analyzing}
@@ -882,6 +944,7 @@ export default function PublishStudio({
                   <IconMegaphone size={18} />
                 </button>
               </form>
+              </>
             ) : (
             <div className="flex items-center justify-between px-4 py-2">
               <button

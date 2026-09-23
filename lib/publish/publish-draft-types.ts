@@ -36,7 +36,32 @@ export interface PublishDraft {
   /** Flyer cover when no real photos */
   flyerTemplateId?: FlyerTemplateId;
   flyerConfig?: FlyerConfig;
+
+  /** Texto, stickers y trazos sobre la portada. Entra en deshacer/rehacer. */
+  coverOverlay?: PublishCoverOverlay;
 }
+
+export interface PublishCoverOverlay {
+  texts: Array<{
+    id: string;
+    text: string;
+    x: number;
+    y: number;
+    color: string;
+    font: string;
+    size: number;
+    align: 'left' | 'center' | 'right';
+    bg: 'none' | 'solid' | 'soft';
+  }>;
+  stickers: Array<{ id: string; emoji: string; x: number; y: number }>;
+  strokes: Array<{ color: string; width: number; points: Array<{ x: number; y: number }> }>;
+}
+
+export const EMPTY_COVER_OVERLAY: PublishCoverOverlay = {
+  texts: [],
+  stickers: [],
+  strokes: [],
+};
 
 export const EMPTY_PUBLISH_DRAFT: PublishDraft = {
   imagenes: [],
@@ -44,7 +69,7 @@ export const EMPTY_PUBLISH_DRAFT: PublishDraft = {
   aiConfidence: {},
   missingFields: [],
   chatHistory: [],
-  plan: 'paid',
+  plan: 'free',
   paidDays: 7,
   dailyRate: 5,
 };

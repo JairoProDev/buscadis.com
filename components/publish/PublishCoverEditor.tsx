@@ -10,7 +10,8 @@ import {
   type PointerEvent as ReactPointerEvent,
   type ReactNode,
 } from 'react';
-import { IconChevronLeft, IconCrop, IconForms, IconLayers, IconPen, IconSmile, IconText, IconUndo } from '@/components/Icons';
+import { IconChevronLeft, IconCrop, IconForms, IconLayers, IconPen, IconRedo, IconSmile, IconText, IconUndo } from '@/components/Icons';
+import { EMPTY_COVER_OVERLAY, type PublishCoverOverlay } from '@/lib/publish/publish-draft-types';
 
 export type CoverTool = 'crop' | 'sticker' | 'text' | 'draw' | null;
 
@@ -80,6 +81,14 @@ interface PublishCoverEditorProps {
   onToggleForm: () => void;
   tool: CoverTool;
   onTool: (tool: CoverTool) => void;
+  overlay?: PublishCoverOverlay;
+  onOverlayChange: (next: PublishCoverOverlay, options?: { history?: boolean }) => void;
+  canUndo: boolean;
+  canRedo: boolean;
+  onUndo: () => void;
+  onRedo: () => void;
+  paidTools?: boolean;
+  above?: ReactNode;
   below?: ReactNode;
   children: ReactNode;
 }
@@ -172,15 +181,23 @@ const PublishCoverEditor = forwardRef<PublishCoverEditorHandle, PublishCoverEdit
       onToggleForm,
       tool,
       onTool,
+      overlay,
+      onOverlayChange,
+      canUndo,
+      canRedo,
+      onUndo,
+      onRedo,
+      paidTools = false,
+      above,
       below,
       children,
     },
     ref,
   ) {
     const stageRef = useRef<HTMLDivElement>(null);
-    const [texts, setTexts] = useState<TextMark[]>([]);
-    const [stickers, setStickers] = useState<StickerMark[]>([]);
-    const [strokes, setStrokes] = useState<Stroke[]>([]);
+    const texts = (overlay?.texts || []) as TextMark[];
+    const stickers = overlay?.stickers || [];
+    const strokes = overlay?.strokes || [];
     const [draftStroke, setDraftStroke] = useState<Stroke | null>(null);
     const draftStrokeRef = useRef<Stroke | null>(null);
     const [penColor, setPenColor] = useState('#ffffff');
@@ -190,16 +207,22 @@ const PublishCoverEditor = forwardRef<PublishCoverEditorHandle, PublishCoverEdit
     const [cropPan, setCropPan] = useState({ x: 0, y: 0 });
     const [photoSize, setPhotoSize] = useState<{ w: number; h: number } | null>(null);
     const [stageSize, setStageSize] = useState(0);
-    const dragRef = useRef<{ id: string; kind: 'text' | 'sticker'; px: number; py: number; x: number; y: number; moved: boolean } | null>(null);
+    const dragRef = useRef<{ id: string; kind: 'text' | 'sticker'; px: number; py: number; x: number; y: number; moved: boolean; recorded: boolean } | null>(null);
     const resizeRef = useRef<{ id: string; py: number; size: number } | null>(null);
     const textEls = useRef<Record<string, HTMLTextAreaElement | null>>({});
     const cropDrag = useRef<{ px: number; py: number; x: number; y: number } | null>(null);
 
     const hasEdits = () => texts.some((mark) => mark.text.trim()) || stickers.length > 0 || strokes.length > 0;
 
+    const writeOverlay = (next: PublishCoverOverlay, options?: { history?: boolean }) => {
+      onOverlayChange(next, options);
+    };
+
     useEffect(() => {
-      if (tool !== 'text') return;
-      setTexts((list) => (list.length > 0 ? list : [blankText()]));
+      if (tool !== 'text' || texts.length > 0) return;
+      writeOverlay({ ...EMPTY_COVER_OVERLAY, ...overlay, texts: [blankText()] });
+      // Solo al abrir la herramienta, para dejar un texto listo para escribir.
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [tool]);
 
     useEffect(() => {
@@ -361,16 +384,19 @@ const PublishCoverEditor = forwardRef<PublishCoverEditorHandle, PublishCoverEdit
     ) => {
       event.stopPropagation();
       holdPointer(event);
-      dragRef.current = { id, kind, px: event.clientX, py: event.clientY, x, y, moved: false };
+      dragRef.current = { id, kind, px: event.clientX, py: event.clientY, x, y, moved: false, recorded: false };
     };
 
-    const patchText = (id: string, patch: Partial<TextMark>) => {
-      setTexts((list) => list.map((item) => (item.id === id ? { ...item, ...patch } : item)));
+    const patchText = (id: string, patch: Partial<TextMark>, options?: { history?: boolean }) => {
+      writeOverlay(
+        { texts: texts.map((item) => (item.id === id ? { ...item, ...patch } : item)), stickers, strokes },
+        options,
+      );
     };
 
     const addText = () => {
       const mark = blankText();
-      setTexts((list) => [...list, mark]);
+      writeOverlay({ texts: [...texts, mark], stickers, strokes });
       setSelectedTextId(mark.id);
     };
 
@@ -428,17 +454,25 @@ const PublishCoverEditor = forwardRef<PublishCoverEditorHandle, PublishCoverEdit
       const rect = stageRef.current.getBoundingClientRect();
       const x = Math.min(0.92, Math.max(0.08, drag.x + dx / rect.width));
       const y = Math.min(0.92, Math.max(0.08, drag.y + dy / rect.height));
+      const history = !drag.recorded;
+      drag.recorded = true;
       if (drag.kind === 'text') {
-        setTexts((list) => list.map((item) => (item.id === drag.id ? { ...item, x, y } : item)));
+        writeOverlay(
+          { texts: texts.map((item) => (item.id === drag.id ? { ...item, x, y } : item)), stickers, strokes },
+          { history },
+        );
       } else {
-        setStickers((list) => list.map((item) => (item.id === drag.id ? { ...item, x, y } : item)));
+        writeOverlay(
+          { texts, stickers: stickers.map((item) => (item.id === drag.id ? { ...item, x, y } : item)), strokes },
+          { history },
+        );
       }
     };
 
     const onStagePointerUp = () => {
       const stroke = draftStrokeRef.current;
       if (stroke && stroke.points.length > 1) {
-        setStrokes((list) => [...list, stroke]);
+        writeOverlay({ texts, stickers, strokes: [...strokes, stroke] });
       }
       draftStrokeRef.current = null;
       setDraftStroke(null);
@@ -467,8 +501,28 @@ const PublishCoverEditor = forwardRef<PublishCoverEditorHandle, PublishCoverEdit
           >
             <IconChevronLeft size={18} />
           </button>
+          <button
+            type="button"
+            onClick={onUndo}
+            disabled={!canUndo}
+            className="flex h-10 w-10 items-center justify-center text-[var(--text-primary)] disabled:opacity-30"
+            aria-label="Deshacer"
+            title="Deshacer"
+          >
+            <IconUndo size={16} />
+          </button>
+          <button
+            type="button"
+            onClick={onRedo}
+            disabled={!canRedo}
+            className="flex h-10 w-10 items-center justify-center text-[var(--text-primary)] disabled:opacity-30"
+            aria-label="Rehacer"
+            title="Rehacer"
+          >
+            <IconRedo size={16} />
+          </button>
           <div className="ml-auto flex items-center gap-0.5 rounded-2xl bg-[var(--bg-secondary)] p-1 ring-1 ring-[var(--border-color)]">
-            {heroUrl && (
+            {paidTools && heroUrl && (
               <button
                 type="button"
                 className={toolButton(tool === 'crop')}
@@ -488,52 +542,58 @@ const PublishCoverEditor = forwardRef<PublishCoverEditorHandle, PublishCoverEdit
             >
               <IconLayers size={16} />
             </button>
+            {paidTools && (
+              <button
+                type="button"
+                className={toolButton(tool === 'sticker')}
+                onClick={() => toggle('sticker')}
+                aria-label="Stickers"
+                title="Stickers"
+              >
+                <IconSmile size={16} />
+              </button>
+            )}
+            {paidTools && (
+              <button
+                type="button"
+                className={toolButton(tool === 'text')}
+                onClick={() => toggle('text')}
+                aria-label="Texto"
+                title="Texto"
+              >
+                <IconText size={16} />
+              </button>
+            )}
+            {paidTools && (
+              <button
+                type="button"
+                className={toolButton(tool === 'draw')}
+                onClick={() => toggle('draw')}
+                aria-label="Dibujar"
+                title="Dibujar"
+              >
+                <IconPen size={16} />
+              </button>
+            )}
             <button
               type="button"
-              className={toolButton(tool === 'sticker')}
-              onClick={() => toggle('sticker')}
-              aria-label="Stickers"
-              title="Stickers"
+              className={toolButton(formOpen)}
+              onClick={onToggleForm}
+              aria-label="Formulario"
+              aria-pressed={formOpen}
+              title="Formulario"
             >
-              <IconSmile size={16} />
-            </button>
-            <button
-              type="button"
-              className={toolButton(tool === 'text')}
-              onClick={() => toggle('text')}
-              aria-label="Texto"
-              title="Texto"
-            >
-              <IconText size={16} />
-            </button>
-            <button
-              type="button"
-              className={toolButton(tool === 'draw')}
-              onClick={() => toggle('draw')}
-              aria-label="Dibujar"
-              title="Dibujar"
-            >
-              <IconPen size={16} />
+              <IconForms size={16} />
             </button>
           </div>
-          <button
-            type="button"
-            className={toolButton(formOpen)}
-            onClick={onToggleForm}
-            aria-label="Formulario"
-            aria-pressed={formOpen}
-            title="Formulario"
-          >
-            <IconForms size={16} />
-          </button>
         </div>
 
         <div className="min-h-0 flex-1 overflow-y-auto px-4 pt-1 [container-type:size]">
-          <div className="flex justify-center">
+          <div className="mx-auto flex flex-col" style={{ width: 'min(100%, 58cqh)' }}>
+          {above}
           <div
             ref={stageRef}
-            className="relative aspect-square shrink-0 touch-none overflow-hidden rounded-2xl bg-[var(--bg-secondary)]"
-            style={{ width: 'min(100%, 58cqh)' }}
+            className="relative aspect-square w-full shrink-0 touch-none overflow-hidden rounded-2xl bg-[var(--bg-secondary)]"
             onPointerDown={onStagePointerDown}
             onPointerMove={onStagePointerMove}
             onPointerUp={onStagePointerUp}
@@ -669,12 +729,12 @@ const PublishCoverEditor = forwardRef<PublishCoverEditorHandle, PublishCoverEdit
                 key={emoji}
                 type="button"
                 className="shrink-0 text-2xl"
-                onClick={() => setStickers((list) => [...list, { id: uid(), emoji, x: 0.5, y: 0.5 }])}
+                onClick={() => writeOverlay({ texts, stickers: [...stickers, { id: uid(), emoji, x: 0.5, y: 0.5 }], strokes })}
               >
                 {emoji}
               </button>
             ))}
-            <button type="button" className="shrink-0 text-xs font-semibold text-red-600" onClick={() => setStickers((list) => list.slice(0, -1))} disabled={!stickers.length}>
+            <button type="button" className="shrink-0 text-xs font-semibold text-red-600" onClick={() => writeOverlay({ texts, stickers: stickers.slice(0, -1), strokes })} disabled={!stickers.length}>
               Quitar
             </button>
           </div>
@@ -755,7 +815,7 @@ const PublishCoverEditor = forwardRef<PublishCoverEditorHandle, PublishCoverEdit
                 type="button"
                 className="shrink-0 text-xs font-semibold text-red-600"
                 onClick={() => {
-                  setTexts((list) => list.filter((item) => item.id !== selectedMark.id));
+                  writeOverlay({ texts: texts.filter((item) => item.id !== selectedMark.id), stickers, strokes });
                   setSelectedTextId(null);
                 }}
               >
@@ -770,7 +830,7 @@ const PublishCoverEditor = forwardRef<PublishCoverEditorHandle, PublishCoverEdit
             {COLORS.map((color) => (
               <button key={color} type="button" className="h-6 w-6 rounded-full ring-1 ring-black/10" style={{ background: color, outline: penColor === color ? '2px solid var(--brand-blue)' : undefined }} onClick={() => setPenColor(color)} aria-label={color} />
             ))}
-            <button type="button" className="ml-auto flex items-center gap-1 text-xs font-semibold" onClick={() => setStrokes((list) => list.slice(0, -1))} disabled={!strokes.length}>
+            <button type="button" className="ml-auto flex items-center gap-1 text-xs font-semibold" onClick={() => writeOverlay({ texts, stickers, strokes: strokes.slice(0, -1) })} disabled={!strokes.length}>
               <IconUndo size={12} /> Deshacer
             </button>
           </div>

@@ -55,24 +55,6 @@ export const CATEGORY_TREE: Record<Categoria, CategoryNode> = {
           { value: 'alquiler', label: 'Alquiler' },
         ],
       },
-      {
-        id: 'inmuebles_habitaciones',
-        label: 'Habitaciones',
-        type: 'chips',
-        group: 'Inmueble',
-        options: [
-          { value: '1', label: '1' },
-          { value: '2', label: '2' },
-          { value: '3plus', label: '3+' },
-        ],
-      },
-      {
-        id: 'inmuebles_area',
-        label: 'Área (m²)',
-        type: 'number',
-        group: 'Inmueble',
-        placeholder: 'Ej. 80',
-      },
     ],
   },
   vehiculos: {
@@ -97,32 +79,6 @@ export const CATEGORY_TREE: Record<Categoria, CategoryNode> = {
           { value: 'nuevo', label: 'Nuevo' },
           { value: 'usado', label: 'Usado' },
         ],
-      },
-      {
-        id: 'vehiculos_combustible',
-        label: 'Combustible',
-        type: 'chips',
-        group: 'Vehículo',
-        options: [
-          { value: 'gasolina', label: 'Gasolina' },
-          { value: 'diesel', label: 'Diésel' },
-          { value: 'gnv_glp', label: 'GNV / GLP' },
-          { value: 'electrico_hibrido', label: 'Eléctrico / Híbrido' },
-        ],
-      },
-      {
-        id: 'vehiculos_anio',
-        label: 'Año',
-        type: 'number',
-        group: 'Vehículo',
-        placeholder: 'Ej. 2020',
-      },
-      {
-        id: 'vehiculos_km',
-        label: 'Kilometraje',
-        type: 'number',
-        group: 'Vehículo',
-        placeholder: 'Ej. 45000',
       },
     ],
   },
@@ -332,7 +288,207 @@ export function getPublishFieldsForCategory(
   const base = node?.publishFields ?? [];
   const sub = node?.children?.find((s) => s.id === subcategoria);
   const subFields = sub?.publishFields ?? [];
-  return [...base, ...subFields];
+  const extra = subcategoria ? SUBCATEGORY_FIELDS[`${categoria}:${subcategoria}`] ?? [] : [];
+  return [...base, ...subFields, ...extra];
+}
+
+const chip = (id: string, label: string, group: string, options: PublishFieldOption[]): PublishFieldDefinition => ({
+  id, label, type: 'chips', group, options,
+});
+const num = (id: string, label: string, group: string, placeholder: string): PublishFieldDefinition => ({
+  id, label, type: 'number', group, placeholder,
+});
+const toggle = (id: string, label: string, group: string): PublishFieldDefinition => ({
+  id, label, type: 'toggle', group,
+});
+
+/** Campos que cambian dentro de la misma categoría. */
+export const SUBCATEGORY_FIELDS: Record<string, PublishFieldDefinition[]> = {
+  'inmuebles:habitaciones': [
+    toggle('hab_amoblado', 'Amoblado', 'Habitación'),
+    toggle('hab_bano_privado', 'Baño privado', 'Habitación'),
+    chip('hab_servicios', 'Servicios', 'Habitación', [
+      { value: 'wifi', label: 'Wifi' },
+      { value: 'agua_luz', label: 'Agua y luz' },
+      { value: 'cocina', label: 'Cocina' },
+    ]),
+  ],
+  'inmuebles:apartamentos': [
+    num('apto_dormitorios', 'Dormitorios', 'Apartamento', 'Ej. 2'),
+    num('apto_banos', 'Baños', 'Apartamento', 'Ej. 1'),
+    num('apto_area', 'Área (m²)', 'Apartamento', 'Ej. 70'),
+    num('apto_piso', 'Piso', 'Apartamento', 'Ej. 4'),
+    toggle('apto_estacionamiento', 'Estacionamiento', 'Apartamento'),
+  ],
+  'inmuebles:casas': [
+    num('casa_dormitorios', 'Dormitorios', 'Casa', 'Ej. 3'),
+    num('casa_banos', 'Baños', 'Casa', 'Ej. 2'),
+    num('casa_area', 'Área (m²)', 'Casa', 'Ej. 140'),
+    num('casa_pisos', 'Pisos', 'Casa', 'Ej. 2'),
+    toggle('casa_patio', 'Patio o jardín', 'Casa'),
+  ],
+  'inmuebles:terrenos': [
+    num('terreno_area', 'Área (m²)', 'Terreno', 'Ej. 200'),
+    num('terreno_frente', 'Frente (m)', 'Terreno', 'Ej. 8'),
+    chip('terreno_zona', 'Zonificación', 'Terreno', [
+      { value: 'urbano', label: 'Urbano' },
+      { value: 'rustico', label: 'Rústico' },
+      { value: 'comercial', label: 'Comercial' },
+    ]),
+    chip('terreno_servicios', 'Servicios', 'Terreno', [
+      { value: 'luz', label: 'Luz' },
+      { value: 'agua', label: 'Agua' },
+      { value: 'desague', label: 'Desagüe' },
+    ]),
+  ],
+  'inmuebles:locales': [
+    num('local_area', 'Área (m²)', 'Local', 'Ej. 40'),
+    num('local_frente', 'Frente (m)', 'Local', 'Ej. 5'),
+    num('local_banos', 'Baños', 'Local', 'Ej. 1'),
+    chip('local_uso', 'Uso', 'Local', [
+      { value: 'comercial', label: 'Comercial' },
+      { value: 'deposito', label: 'Depósito' },
+      { value: 'restaurante', label: 'Restaurante' },
+    ]),
+  ],
+  'inmuebles:oficinas': [
+    num('oficina_area', 'Área (m²)', 'Oficina', 'Ej. 35'),
+    num('oficina_ambientes', 'Ambientes', 'Oficina', 'Ej. 2'),
+    num('oficina_piso', 'Piso', 'Oficina', 'Ej. 6'),
+    toggle('oficina_amoblada', 'Amoblada', 'Oficina'),
+  ],
+  'inmuebles:almacenes': [
+    num('almacen_area', 'Área (m²)', 'Almacén', 'Ej. 300'),
+    num('almacen_altura', 'Altura (m)', 'Almacén', 'Ej. 6'),
+    toggle('almacen_camion', 'Acceso para camión', 'Almacén'),
+  ],
+  'inmuebles:edificios': [
+    num('edificio_area', 'Área de terreno (m²)', 'Edificio', 'Ej. 250'),
+    num('edificio_pisos', 'Pisos', 'Edificio', 'Ej. 5'),
+    num('edificio_unidades', 'Unidades', 'Edificio', 'Ej. 8'),
+  ],
+  'vehiculos:bicicletas': [
+    chip('bici_tipo', 'Tipo', 'Bicicleta', [
+      { value: 'urbana', label: 'Urbana' },
+      { value: 'montana', label: 'Montaña' },
+      { value: 'ruta', label: 'Ruta' },
+    ]),
+    num('bici_aro', 'Aro', 'Bicicleta', 'Ej. 29'),
+  ],
+  'vehiculos:motos': [
+    num('moto_anio', 'Año', 'Moto', 'Ej. 2021'),
+    num('moto_km', 'Kilometraje', 'Moto', 'Ej. 12000'),
+    num('moto_cc', 'Cilindrada (cc)', 'Moto', 'Ej. 150'),
+  ],
+  'vehiculos:autos': [
+    num('auto_anio', 'Año', 'Auto', 'Ej. 2019'),
+    num('auto_km', 'Kilometraje', 'Auto', 'Ej. 45000'),
+    chip('auto_combustible', 'Combustible', 'Auto', [
+      { value: 'gasolina', label: 'Gasolina' },
+      { value: 'diesel', label: 'Diésel' },
+      { value: 'gnv', label: 'GNV / GLP' },
+      { value: 'hibrido', label: 'Híbrido / Eléctrico' },
+    ]),
+    chip('auto_transmision', 'Transmisión', 'Auto', [
+      { value: 'mecanica', label: 'Mecánica' },
+      { value: 'automatica', label: 'Automática' },
+    ]),
+  ],
+  'vehiculos:camionetas': [
+    num('camioneta_anio', 'Año', 'Camioneta', 'Ej. 2018'),
+    num('camioneta_km', 'Kilometraje', 'Camioneta', 'Ej. 80000'),
+    chip('camioneta_traccion', 'Tracción', 'Camioneta', [
+      { value: '4x2', label: '4x2' },
+      { value: '4x4', label: '4x4' },
+    ]),
+  ],
+  'vehiculos:buses': [
+    num('bus_anio', 'Año', 'Bus', 'Ej. 2015'),
+    num('bus_asientos', 'Asientos', 'Bus', 'Ej. 30'),
+  ],
+  'vehiculos:camiones': [
+    num('camion_anio', 'Año', 'Camión', 'Ej. 2016'),
+    num('camion_carga', 'Carga (t)', 'Camión', 'Ej. 5'),
+  ],
+  'vehiculos:maquinaria': [
+    num('maq_anio', 'Año', 'Maquinaria', 'Ej. 2014'),
+    num('maq_horas', 'Horas de uso', 'Maquinaria', 'Ej. 2000'),
+  ],
+  'empleos:tiempo_completo': [num('empleo_sueldo', 'Sueldo (S/)', 'Empleo', 'Ej. 1800')],
+  'empleos:medio_tiempo': [num('empleo_sueldo_mt', 'Sueldo (S/)', 'Empleo', 'Ej. 900')],
+  'empleos:practicas': [
+    toggle('practica_convenio', 'Con convenio', 'Práctica'),
+    num('practica_propina', 'Propina o subvención (S/)', 'Práctica', 'Ej. 500'),
+  ],
+  'empleos:freelance': [num('free_tarifa', 'Tarifa (S/)', 'Freelance', 'Ej. 80')],
+  'empleos:temporal': [
+    num('temp_sueldo', 'Pago (S/)', 'Temporal', 'Ej. 1200'),
+    num('temp_dias', 'Duración (días)', 'Temporal', 'Ej. 30'),
+  ],
+  'servicios:hogar': [chip('hogar_tipo', 'Trabajo', 'Hogar', [
+    { value: 'limpieza', label: 'Limpieza' },
+    { value: 'cocina', label: 'Cocina' },
+    { value: 'cuidado', label: 'Cuidado' },
+  ])],
+  'servicios:tecnico': [chip('tec_esp', 'Especialidad', 'Técnico', [
+    { value: 'electricidad', label: 'Electricidad' },
+    { value: 'gasfiteria', label: 'Gasfitería' },
+    { value: 'computadoras', label: 'Computadoras' },
+  ])],
+  'servicios:salud_estetica': [chip('salud_tipo', 'Atención', 'Salud', [
+    { value: 'consulta', label: 'Consulta' },
+    { value: 'estetica', label: 'Estética' },
+  ])],
+  'servicios:clases': [
+    chip('clase_materia', 'Materia', 'Clases', [
+      { value: 'escolares', label: 'Escolares' },
+      { value: 'idiomas', label: 'Idiomas' },
+      { value: 'musica', label: 'Música' },
+    ]),
+  ],
+  'servicios:transporte': [chip('trans_tipo', 'Servicio', 'Transporte', [
+    { value: 'taxi', label: 'Taxi' },
+    { value: 'mudanza', label: 'Mudanza' },
+    { value: 'carga', label: 'Carga' },
+  ])],
+  'servicios:profesional': [chip('prof_area', 'Área', 'Profesional', [
+    { value: 'legal', label: 'Legal' },
+    { value: 'contable', label: 'Contable' },
+    { value: 'diseno', label: 'Diseño' },
+  ])],
+  'productos:tecnologia': [
+    num('tec_garantia', 'Garantía (meses)', 'Tecnología', 'Ej. 6'),
+  ],
+  'productos:ropa': [chip('ropa_talla', 'Talla', 'Ropa', [
+    { value: 's', label: 'S' },
+    { value: 'm', label: 'M' },
+    { value: 'l', label: 'L' },
+    { value: 'xl', label: 'XL' },
+  ])],
+  'productos:alimentos': [toggle('alimento_perecible', 'Perecible', 'Alimentos')],
+  'eventos:concierto': [num('evento_cupo', 'Cupo', 'Evento', 'Ej. 100')],
+  'eventos:conferencia': [num('charla_horas', 'Duración (horas)', 'Evento', 'Ej. 2')],
+  'eventos:fiesta': [num('fiesta_edad', 'Edad mínima', 'Evento', 'Ej. 18')],
+  'comunidad:mascotas': [
+    chip('mascota_especie', 'Especie', 'Mascota', [
+      { value: 'perro', label: 'Perro' },
+      { value: 'gato', label: 'Gato' },
+      { value: 'otro', label: 'Otro' },
+    ]),
+  ],
+  'comunidad:trueque': [
+    chip('trueque_ofrece', 'Ofrece', 'Trueque', [
+      { value: 'objeto', label: 'Un objeto' },
+      { value: 'servicio', label: 'Un servicio' },
+    ]),
+  ],
+};
+
+export function categoryAsksLocation(categoria?: Categoria, subcategoria?: string, entrega?: boolean): boolean {
+  if (!categoria) return false;
+  if (categoria === 'productos') return Boolean(entrega);
+  if (categoria === 'comunidad') return subcategoria === 'grupo' || subcategoria === 'ayuda' || subcategoria === 'mascotas';
+  return true;
 }
 
 export function inferSubcategoryFromText(categoria: Categoria, text: string): string | undefined {

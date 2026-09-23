@@ -10,6 +10,8 @@ export type PreviewVariant = 'live' | 'free' | 'paid';
 export interface PublisherPreview {
   name?: string;
   logoUrl?: string;
+  /** Suscripción mensual activa: muestra el check. */
+  subscribed?: boolean;
 }
 
 interface PublishPreviewCardProps {

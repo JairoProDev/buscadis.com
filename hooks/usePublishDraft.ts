@@ -89,8 +89,8 @@ function mergeInitialOverSaved(
   return next;
 }
 
-const HISTORY_LIMIT = 40;
-const TEXT_KEYS = new Set(['titulo', 'descripcion', 'contacto', 'ubicacion']);
+const HISTORY_LIMIT = 400;
+const TEXT_KEYS = new Set(['titulo', 'descripcion', 'contacto', 'ubicacion', 'precio', 'coverOverlay']);
 
 interface DraftHistory {
   present: PublishDraft;

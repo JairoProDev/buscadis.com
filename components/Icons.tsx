@@ -11,7 +11,7 @@ import {
   FaFileExcel, FaDownload, FaLightbulb, FaSyncAlt, FaBolt, FaTag, FaEyeSlash, FaLayerGroup, FaSquare,
   FaSort, FaSortAmountDown, FaSortAmountUp, FaVideo, FaPaperPlane, FaBell, FaMoon, FaSun, FaUser, FaHandPointUp,
   FaCog, FaSignOutAlt, FaCompass, FaUserTie, FaUserCog, FaUserEdit, FaEllipsisV,
-  FaHandshake, FaUserPlus, FaUndo, FaRedo, FaCrop, FaFont, FaPencilAlt, FaSmile, FaClipboardCheck
+  FaHandshake, FaUserPlus, FaUndo, FaRedo, FaCrop, FaFont, FaPencilAlt, FaSmile
 } from 'react-icons/fa';
 import { FcGoogle } from 'react-icons/fc';
 import { MdCenterFocusWeak } from 'react-icons/md';
@@ -190,7 +190,7 @@ export const IconSparkles = (p: IconProps) => <FaMagic size={getSize(p)} color={
 export const IconPackage = (p: IconProps) => <FaBox size={getSize(p)} color={p.color || 'currentColor'} className={p.className} onClick={p.onClick} />;
 export const IconGrid = (p: IconProps) => <FaTh size={getSize(p)} color={p.color || 'currentColor'} className={p.className} onClick={p.onClick} />;
 export const IconList = (p: IconProps) => <FaList size={getSize(p)} color={p.color || 'currentColor'} className={p.className} onClick={p.onClick} />;
-export const IconForms = (p: IconProps) => <FaClipboardCheck size={getSize(p)} color={p.color || 'currentColor'} className={p.className} onClick={p.onClick} />;
+export const IconForms = (p: IconProps) => <FaFileAlt size={getSize(p)} color={p.color || 'currentColor'} className={p.className} onClick={p.onClick} />;
 export const IconFeed = (p: IconProps) => <FaSquare size={getSize(p)} color={p.color || 'currentColor'} className={p.className} onClick={p.onClick} />;
 
 /** Vertical video / Shorts-style feed */
