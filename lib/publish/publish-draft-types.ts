@@ -19,7 +19,10 @@ export interface PublishDraft {
   descripcion?: string;
   contacto?: string;
   ubicacion?: Ubicacion;
+  /** Fotos del aviso (galería). No sustituyen la plantilla hasta que elijas portada. */
   imagenes: string[];
+  /** Foto opcional sobre la plantilla (portada manual). */
+  portadaUrl?: string;
   precio?: number;
   moneda?: 'PEN' | 'USD';
   tipoPrecio?: 'fijo' | 'a_convenir' | 'gratis' | 'consultar';

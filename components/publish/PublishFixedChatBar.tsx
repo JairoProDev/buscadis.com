@@ -8,6 +8,7 @@ import PublishImagePreview from './PublishImagePreview';
 interface PublishFixedChatBarProps {
   onSend: (text: string, imageUrl?: string) => void;
   onUploadImage: (file: File) => Promise<string | null>;
+  onRunAdis?: () => void;
   sending?: boolean;
   embedded?: boolean;
   /** Últimos mensajes del asistente para feedback visible */
@@ -17,6 +18,7 @@ interface PublishFixedChatBarProps {
 export default function PublishFixedChatBar({
   onSend,
   onUploadImage,
+  onRunAdis,
   sending = false,
   embedded = false,
   statusMessage = null,
@@ -126,6 +128,22 @@ export default function PublishFixedChatBar({
             Minimizar <IconChevronDown size={12} />
           </button>
         </div>
+
+        {onRunAdis && (
+          <div className="mb-2 flex items-center justify-between gap-2">
+            <p className="m-0 text-[10px] leading-snug text-[var(--text-tertiary)]">
+              Enviar solo guarda texto y fotos. La IA es opcional.
+            </p>
+            <button
+              type="button"
+              onClick={onRunAdis}
+              disabled={sending}
+              className="shrink-0 rounded-full px-2.5 py-1 text-[10px] font-bold text-[var(--brand-blue)] ring-1 ring-[rgba(var(--brand-primary-rgb),0.35)] disabled:opacity-40"
+            >
+              Rellenar con ADIS
+            </button>
+          </div>
+        )}
 
         {(sending || statusMessage) && (
           <div

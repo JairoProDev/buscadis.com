@@ -38,6 +38,7 @@ import FlyerTemplatePicker from '@/components/flyer/FlyerTemplatePicker';
 import TemplateThumb from '@/components/flyer/TemplateThumb';
 import PublishCoverEditor, { type CoverTool, type PublishCoverEditorHandle } from './PublishCoverEditor';
 import PublishCardCanvas from './PublishCardCanvas';
+import PublishStudioComposer from './PublishStudioComposer';
 
 export const STORIES_REFRESH_EVENT = 'buscadis:stories-refresh';
 
@@ -343,30 +344,59 @@ export default function PublishStudio({
     ]
   );
 
-  const handleChatSend = useCallback(
-    async (text: string, imageUrl?: string) => {
-      if (imageUrl) addImage(imageUrl);
-      if (!text.trim() && !imageUrl) return;
-      addChatMessage('user', text.trim() || '(imagen adjunta)');
-      await runAnalyze({ text, imageUrl, source: 'chat' });
+  const appendTextToDraft = useCallback(
+    (text: string) => {
+      const t = text.trim();
+      if (!t) return;
+      setDraft({
+        titulo: draft.titulo?.trim() ? draft.titulo : t.slice(0, 80),
+        descripcion: draft.descripcion?.trim() ? `${draft.descripcion}\n${t}` : t,
+      });
     },
-    [addImage, addChatMessage, runAnalyze]
+    [draft.titulo, draft.descripcion, setDraft],
   );
 
-  const handlePhotoAdded = useCallback(
-    (url: string) => {
-      addImage(url);
-      void runAnalyze({ imageUrl: url, source: 'photo' });
+  const handleChatSend = useCallback(
+    (text: string, imageUrl?: string) => {
+      if (imageUrl) addImage(imageUrl);
+      const t = text.trim();
+      if (!t && !imageUrl) return;
+      if (t) {
+        addChatMessage('user', t);
+        appendTextToDraft(t);
+      } else if (imageUrl) {
+        addChatMessage('user', '(foto adjunta)');
+      }
     },
-    [addImage, runAnalyze]
+    [addImage, addChatMessage, appendTextToDraft],
   );
 
   const handleFilePick = async (files: FileList | null) => {
-    const file = files?.[0];
-    if (!file) return;
-    const url = await uploadPublishImage(file);
-    if (url) handlePhotoAdded(url);
+    if (!files?.length) return;
+    let added = 0;
+    for (const file of Array.from(files)) {
+      const url = await uploadPublishImage(file);
+      if (url) {
+        addImage(url);
+        added += 1;
+      }
+    }
+    if (added > 0) {
+      onNotify?.(
+        added === 1 ? 'Foto subida (galería del aviso).' : `${added} fotos añadidas al aviso.`,
+        'success',
+      );
+    }
   };
+
+  const runAdisFill = useCallback(() => {
+    const text = [draft.titulo, draft.descripcion, composerText].filter(Boolean).join('\n').trim();
+    void runAnalyze({
+      text: text || undefined,
+      imageUrl: undefined,
+      source: 'chat',
+    });
+  }, [draft.titulo, draft.descripcion, composerText, runAnalyze]);
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const mediaChunksRef = useRef<Blob[]>([]);
@@ -383,14 +413,15 @@ export default function PublishStudio({
         if (!res.ok) throw new Error(data.error || 'STT falló');
         const text = String(data.text || '').trim();
         if (!text) throw new Error('Audio vacío');
-        addChatMessage('user', text);
-        await runAnalyze({ text, source: 'voice' });
+        setComposerText((prev) => (prev ? `${prev} ${text}` : text));
+        onNotify?.('Dictado en el cuadro de texto. Revísalo y publícalo cuando quieras.', 'success');
       } catch (e) {
         onNotify?.(e instanceof Error ? e.message : 'No se pudo transcribir', 'error');
+      } finally {
         setAnalyzing(false);
       }
     },
-    [addChatMessage, runAnalyze, onNotify]
+    [onNotify],
   );
 
   const handleVoiceCapture = async () => {
@@ -407,10 +438,10 @@ export default function PublishStudio({
     if (isSupported) {
       startVoice(
         (transcript) => {
-          addChatMessage('user', transcript);
-          void runAnalyze({ text: transcript, source: 'voice' });
+          setComposerText((prev) => (prev ? `${prev} ${transcript}` : transcript));
+          onNotify?.('Dictado en el cuadro de texto.', 'success');
         },
-        (message) => onNotify?.(message, 'error')
+        (message) => onNotify?.(message, 'error'),
       );
       return;
     }
@@ -484,6 +515,9 @@ export default function PublishStudio({
       setPublishing(true);
       try {
         let imagenes = [...publishDraft.imagenes];
+        if (publishDraft.portadaUrl) {
+          imagenes = [publishDraft.portadaUrl, ...imagenes.filter((u) => u !== publishDraft.portadaUrl)];
+        }
         let flyerTemplateId = publishDraft.flyerTemplateId;
         let flyerConfig = publishDraft.flyerConfig;
         let coverForDownload: string | null = imagenes[0] || null;
@@ -648,7 +682,7 @@ export default function PublishStudio({
     categoria: draft.categoria,
   });
 
-  const heroUrl = draft.imagenes[0];
+  const coverUrl = draft.portadaUrl;
   const canPublish = hasMinimumContent(draft) && !analyzing && !publishing;
 
   return (
@@ -693,7 +727,7 @@ export default function PublishStudio({
                 ref={coverEditorRef}
                 onLeave={requestLeave}
                 onNotify={onNotify}
-                heroUrl={heroUrl}
+                heroUrl={coverUrl}
                 templatesOpen={showTemplates}
                 formOpen={showForm}
                 onToggleForm={() => {
@@ -712,7 +746,7 @@ export default function PublishStudio({
                   if (!url) return;
                   setDraft((prev) => ({
                     ...prev,
-                    imagenes: [url, ...prev.imagenes.slice(1)],
+                    portadaUrl: url,
                   }));
                   return url;
                 }}
@@ -766,7 +800,7 @@ export default function PublishStudio({
                           analyzing={analyzing}
                           autoDownload={autoDownload}
                           onAutoDownloadChange={setAutoDownload}
-                          photoUrl={heroUrl}
+                          photoUrl={coverUrl}
                           onAddPhoto={() => galleryInputRef.current?.click()}
                         />
                       </div>
@@ -774,9 +808,9 @@ export default function PublishStudio({
                   </>
                 }
               >
-                {heroUrl && draft.plan === 'paid' ? (
+                {coverUrl && draft.plan === 'paid' ? (
                   <PublishCardCanvas
-                    heroUrl={heroUrl}
+                    heroUrl={coverUrl}
                     templateId={exportTemplateId}
                     badge={exportConfig.badge}
                     background={exportConfig.secondary || '#f8fafc'}
@@ -847,9 +881,9 @@ export default function PublishStudio({
               </div>
             ) : (
             <div className="relative mb-3 aspect-square w-full overflow-hidden rounded-2xl bg-[var(--bg-secondary)]">
-              {heroUrl ? (
+              {coverUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img src={heroUrl} alt="" className="h-full w-full object-cover" />
+                <img src={coverUrl} alt="" className="h-full w-full object-cover" />
               ) : (
                 <div className="absolute inset-0">
                   <FlyerCanvas
@@ -861,10 +895,10 @@ export default function PublishStudio({
                 </div>
               )}
 
-              {heroUrl && (
+              {coverUrl && (
                 <button
                   type="button"
-                  onClick={() => removeImage(heroUrl)}
+                  onClick={() => setDraft({ portadaUrl: undefined })}
                   className="absolute right-2 top-2 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-black/55 text-white"
                   aria-label="Quitar foto"
                   title="Quitar foto"
@@ -938,7 +972,7 @@ export default function PublishStudio({
               onEnhanceField={handleEnhanceField}
               enhancingField={enhancingField}
               analyzing={analyzing}
-              photoUrl={heroUrl}
+              photoUrl={coverUrl}
               onAddPhoto={() => galleryInputRef.current?.click()}
               autoDownload={autoDownload}
               onAutoDownloadChange={setAutoDownload}
@@ -949,6 +983,7 @@ export default function PublishStudio({
               <PublishFixedChatBar
                 onSend={handleChatSend}
                 onUploadImage={uploadPublishImage}
+                onRunAdis={draft.plan === 'paid' ? () => void runAdisFill() : undefined}
                 sending={analyzing}
                 embedded
                 statusMessage={chatStatus}
@@ -1011,85 +1046,55 @@ export default function PublishStudio({
                   Este aviso era gratis. Al publicarlo otra vez queda de pago.
                 </p>
               )}
-              <form
-                className="flex items-center gap-1.5 px-2 pt-1"
-                onSubmit={(event) => {
-                  event.preventDefault();
-                  const text = composerText.trim();
-                  if (text) {
-                    setComposerText('');
-                    if (draft.plan === 'paid') {
-                      void handleChatSend(text);
-                    } else {
-                      setDraft({
-                        titulo: draft.titulo?.trim() ? draft.titulo : text.slice(0, 80),
-                        descripcion: draft.descripcion?.trim() ? `${draft.descripcion}\n${text}` : text,
-                      });
-                    }
-                    return;
-                  }
-                  void publish(draft.plan === 'paid' ? 'paid' : 'free');
-                }}
-              >
-                <div className="flex min-w-0 flex-1 items-center rounded-full bg-[var(--bg-secondary)] pl-4 pr-1">
-                  <input
-                    value={composerText}
-                    onChange={(event) => setComposerText(event.target.value)}
-                    placeholder="Escribe un mensaje"
-                    className="h-11 min-w-0 flex-1 bg-transparent text-sm text-[var(--text-primary)] outline-none placeholder:text-[var(--text-tertiary)]"
-                    aria-label="Mensaje"
-                  />
-                  {draft.plan === 'paid' && (
-                    <button
-                      type="button"
-                      onClick={() => cameraInputRef.current?.click()}
-                      disabled={uploadingImage || analyzing}
-                      className="flex h-10 w-10 items-center justify-center text-[var(--text-secondary)] disabled:opacity-40"
-                      aria-label="Tomar foto"
-                      title="Tomar foto"
-                    >
-                      <IconCamera size={20} />
-                    </button>
-                  )}
-                  {draft.plan === 'paid' && (
-                    <button
-                      type="button"
-                      onClick={() => galleryInputRef.current?.click()}
-                      disabled={uploadingImage || analyzing}
-                      className="flex h-10 w-10 items-center justify-center text-[var(--text-secondary)] disabled:opacity-40"
-                      aria-label="Enviar foto"
-                      title="Enviar foto"
-                    >
-                      <IconImage size={18} />
-                    </button>
-                  )}
+              {draft.plan === 'paid' && (
+                <div className="flex justify-center px-3 pb-1">
+                  <button
+                    type="button"
+                    onClick={() => void runAdisFill()}
+                    disabled={analyzing}
+                    className="rounded-full px-3 py-1.5 text-[11px] font-bold text-[var(--brand-blue)] ring-1 ring-[rgba(var(--brand-primary-rgb),0.35)] disabled:opacity-40"
+                  >
+                    {analyzing ? 'ADIS trabajando…' : 'Rellenar con ADIS'}
+                  </button>
                 </div>
-                {draft.plan === 'paid' && (
-                <button
-                  type="button"
-                  onClick={() => void handleVoiceCapture()}
-                  disabled={analyzing}
-                  className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full ${
-                    isListening || recordingAudio
-                      ? 'animate-pulse bg-red-500 text-white'
-                      : 'bg-[var(--bg-secondary)] text-[var(--text-primary)]'
-                  }`}
-                  aria-label={isListening || recordingAudio ? 'Detener audio' : 'Enviar audio'}
-                  title={isListening || recordingAudio ? 'Detener' : 'Audio'}
-                >
-                  <IconMicrophone size={18} />
-                </button>
-                )}
-                <button
-                  type="submit"
-                  disabled={publishing || analyzing}
-                  className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[var(--brand-blue)] text-white shadow-[0_8px_20px_-6px_rgba(var(--brand-primary-rgb),0.45)] disabled:opacity-40"
-                  aria-label={composerText.trim() ? 'Enviar mensaje' : 'Publicar'}
-                  title={composerText.trim() ? 'Enviar' : 'Publicar'}
-                >
-                  <IconMegaphone size={18} />
-                </button>
-              </form>
+              )}
+              {draft.imagenes.length > 0 && (
+                <div className="flex gap-2 overflow-x-auto px-3 pb-1">
+                  {draft.imagenes.map((url) => (
+                    <div key={url} className="relative h-14 w-14 shrink-0 overflow-hidden rounded-xl ring-1 ring-[var(--border-color)]">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={url} alt="" className="h-full w-full object-cover" />
+                      <button
+                        type="button"
+                        onClick={() => removeImage(url)}
+                        className="absolute right-0.5 top-0.5 flex h-5 w-5 items-center justify-center rounded-full bg-black/55 text-white"
+                        aria-label="Quitar foto"
+                      >
+                        <IconX size={10} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+              <PublishStudioComposer
+                value={composerText}
+                onChange={setComposerText}
+                paid={draft.plan === 'paid'}
+                uploadingImage={uploadingImage}
+                publishing={publishing}
+                voiceActive={isListening || recordingAudio}
+                galleryUrls={draft.imagenes}
+                onUploadFiles={(files) => void handleFilePick(files)}
+                onVoice={() => void handleVoiceCapture()}
+                onSubmit={() => {
+                  const text = composerText.trim();
+                  if (!text) return;
+                  setComposerText('');
+                  if (draft.plan === 'paid') handleChatSend(text);
+                  else appendTextToDraft(text);
+                }}
+                onPublish={() => void publish(draft.plan === 'paid' ? 'paid' : 'free')}
+              />
               </>
             ) : (
             <div className="flex items-center justify-between px-4 py-2">
