@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { IconCamera, IconImage, IconX } from '@/components/Icons';
 
@@ -23,10 +23,10 @@ export default function PublishMediaSheet({
   onPickGallery,
   onSelectExisting,
 }: PublishMediaSheetProps) {
-  const mounted = useRef(false);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    mounted.current = true;
+    setMounted(true);
   }, []);
 
   useEffect(() => {
@@ -38,16 +38,21 @@ export default function PublishMediaSheet({
     return () => window.removeEventListener('keydown', onKey);
   }, [open, onClose]);
 
-  if (!open || !mounted.current) return null;
+  if (!mounted || !open) return null;
 
   return createPortal(
     <>
-      <button type="button" className="fixed inset-0 z-[85] bg-black/40" aria-label="Cerrar" onClick={onClose} />
+      <button
+        type="button"
+        className="fixed inset-0 z-[2100] bg-black/40"
+        aria-label="Cerrar"
+        onClick={onClose}
+      />
       <div
         role="dialog"
         aria-modal="true"
         aria-label="Fotos"
-        className="fixed inset-x-0 bottom-0 z-[86] rounded-t-2xl bg-[var(--bg-primary)] pb-[max(0.5rem,env(safe-area-inset-bottom))] shadow-[0_-12px_40px_rgba(0,0,0,0.15)]"
+        className="fixed inset-x-0 bottom-0 z-[2101] rounded-t-2xl bg-[var(--bg-primary)] pb-[max(0.5rem,env(safe-area-inset-bottom))] shadow-[0_-12px_40px_rgba(0,0,0,0.15)]"
       >
         <div className="flex items-center justify-between border-b border-[var(--border-color)] px-4 py-3">
           <p className="m-0 text-sm font-bold text-[var(--text-primary)]">Fotos</p>
@@ -64,7 +69,7 @@ export default function PublishMediaSheet({
           <button
             type="button"
             onClick={() => onPickCamera()}
-            className="flex w-full items-center gap-3 rounded-xl bg-[var(--bg-secondary)] px-3 py-3 text-left ring-1 ring-[var(--border-color)]"
+            className="flex w-full cursor-pointer items-center gap-3 rounded-xl bg-[var(--bg-secondary)] px-3 py-3 text-left ring-1 ring-[var(--border-color)]"
           >
             <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--bg-primary)] text-[var(--brand-blue)]">
               <IconCamera size={20} />
@@ -102,7 +107,7 @@ export default function PublishMediaSheet({
           <button
             type="button"
             onClick={() => onPickGallery()}
-            className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left ring-1 ring-[var(--border-color)]"
+            className="flex w-full cursor-pointer items-center gap-3 rounded-xl px-3 py-3 text-left ring-1 ring-[var(--border-color)]"
           >
             <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--bg-secondary)] text-[var(--text-secondary)]">
               <IconImage size={20} />

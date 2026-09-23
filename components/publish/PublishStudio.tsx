@@ -39,6 +39,7 @@ import TemplateThumb from '@/components/flyer/TemplateThumb';
 import PublishCoverEditor, { type CoverTool, type PublishCoverEditorHandle } from './PublishCoverEditor';
 import PublishCardCanvas from './PublishCardCanvas';
 import PublishStudioComposer from './PublishStudioComposer';
+import PublishAiChatPanel from './PublishAiChatPanel';
 
 export const STORIES_REFRESH_EVENT = 'buscadis:stories-refresh';
 
@@ -155,6 +156,7 @@ export default function PublishStudio({
   const [showForm, setShowForm] = useState(false);
   const formAnchorRef = useRef<HTMLDivElement>(null);
   const [composerText, setComposerText] = useState('');
+  const [aiChatMinimized, setAiChatMinimized] = useState(true);
   const coverEditorRef = useRef<PublishCoverEditorHandle>(null);
   const flyerExportRef = useRef<HTMLDivElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
@@ -403,6 +405,7 @@ export default function PublishStudio({
       return;
     }
     addChatMessage('user', pending || '(fotos del aviso)');
+    setAiChatMinimized(false);
     void runAnalyze({
       text: text || undefined,
       source: 'chat',
@@ -1059,22 +1062,13 @@ export default function PublishStudio({
                   Este aviso era gratis. Al publicarlo otra vez queda de pago.
                 </p>
               )}
-              {draft.chatHistory.length > 0 && (
-                <div className="mx-2 mb-1 max-h-36 space-y-1.5 overflow-y-auto rounded-xl bg-[var(--bg-secondary)] p-2">
-                  {draft.chatHistory.slice(-8).map((msg) => (
-                    <p
-                      key={msg.id}
-                      className={`m-0 rounded-xl px-2.5 py-1.5 text-[11px] leading-snug ${
-                        msg.role === 'user'
-                          ? 'ml-6 bg-[var(--bg-primary)] text-[var(--text-primary)]'
-                          : 'mr-4 bg-[rgba(var(--brand-primary-rgb),0.1)] text-[var(--text-secondary)]'
-                      }`}
-                    >
-                      {msg.content}
-                    </p>
-                  ))}
-                </div>
-              )}
+              <PublishAiChatPanel
+                messages={draft.chatHistory}
+                minimized={aiChatMinimized}
+                analyzing={analyzing}
+                onExpand={() => setAiChatMinimized(false)}
+                onMinimize={() => setAiChatMinimized(true)}
+              />
               {draft.imagenes.length > 0 && (
                 <div className="flex gap-2 overflow-x-auto px-3 pb-1">
                   {draft.imagenes.map((url) => (

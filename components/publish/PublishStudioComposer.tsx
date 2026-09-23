@@ -1,6 +1,7 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { IconCamera, IconMegaphone, IconMicrophone, IconSend } from '@/components/Icons';
 import PublishMediaSheet from './PublishMediaSheet';
 
@@ -32,21 +33,58 @@ export default function PublishStudioComposer({
   voiceActive,
 }: PublishStudioComposerProps) {
   const [mediaOpen, setMediaOpen] = useState(false);
+  const [portalReady, setPortalReady] = useState(false);
   const hasText = value.trim().length > 0;
   const canSendToAi = hasText || galleryUrls.length > 0;
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const galleryInputRef = useRef<HTMLInputElement>(null);
 
-  const openCamera = () => {
-    window.setTimeout(() => cameraInputRef.current?.click(), 0);
-  };
+  useEffect(() => {
+    setPortalReady(true);
+  }, []);
 
-  const openGallery = () => {
-    window.setTimeout(() => galleryInputRef.current?.click(), 0);
-  };
+  const fileInputs =
+    portalReady && typeof document !== 'undefined'
+      ? createPortal(
+          <>
+            <input
+              ref={cameraInputRef}
+              type="file"
+              accept="image/*"
+              capture="environment"
+              className="sr-only"
+              tabIndex={-1}
+              aria-hidden
+              onChange={(e) => {
+                const files = e.target.files;
+                if (files?.length) onUploadFiles(files);
+                e.target.value = '';
+                setMediaOpen(false);
+              }}
+            />
+            <input
+              ref={galleryInputRef}
+              type="file"
+              accept="image/*"
+              multiple
+              className="sr-only"
+              tabIndex={-1}
+              aria-hidden
+              onChange={(e) => {
+                const files = e.target.files;
+                if (files?.length) onUploadFiles(files);
+                e.target.value = '';
+                setMediaOpen(false);
+              }}
+            />
+          </>,
+          document.body,
+        )
+      : null;
 
   return (
     <>
+      {fileInputs}
       <div className="space-y-2 px-2 pt-1">
         <div className="flex items-center gap-2">
           <div className="flex min-w-0 flex-1 items-center rounded-full bg-[var(--bg-secondary)] pl-4 pr-1">
@@ -109,44 +147,13 @@ export default function PublishStudioComposer({
         </button>
       </div>
 
-      <input
-        ref={cameraInputRef}
-        type="file"
-        accept="image/*"
-        capture="environment"
-        className="hidden"
-        onChange={(e) => {
-          const files = e.target.files;
-          if (files?.length) onUploadFiles(files);
-          e.target.value = '';
-        }}
-      />
-      <input
-        ref={galleryInputRef}
-        type="file"
-        accept="image/*"
-        multiple
-        className="hidden"
-        onChange={(e) => {
-          const files = e.target.files;
-          if (files?.length) onUploadFiles(files);
-          e.target.value = '';
-        }}
-      />
-
       <PublishMediaSheet
         open={mediaOpen}
         onClose={() => setMediaOpen(false)}
         galleryUrls={galleryUrls}
         uploading={uploadingImage}
-        onPickCamera={() => {
-          setMediaOpen(false);
-          openCamera();
-        }}
-        onPickGallery={() => {
-          setMediaOpen(false);
-          openGallery();
-        }}
+        onPickCamera={() => cameraInputRef.current?.click()}
+        onPickGallery={() => galleryInputRef.current?.click()}
         onSelectExisting={() => undefined}
       />
     </>
