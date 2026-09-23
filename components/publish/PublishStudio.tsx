@@ -19,12 +19,11 @@ import PublishCheckoutPanel from './PublishCheckoutPanel';
 import PublishFixedChatBar from './PublishFixedChatBar';
 import PublishStepIndicator from './PublishStepIndicator';
 import PublishAIQuestions from './PublishAIQuestions';
-import PublishModeSwitcher, { type PublishStudioMode } from './PublishModeSwitcher';
 import type { PublisherPreview } from './PublishPreviewCard';
 import { PublishDraft } from '@/lib/publish/publish-draft-types';
 import { hasMinimumContent } from '@/lib/publish/publish-draft-types';
 import { publishPrimaryBtn, publishSecondaryBtn, publishCard } from './publish-ui';
-import { IconCamera, IconChevronDown, IconImage, IconMicrophone } from '@/components/Icons';
+import { IconCamera, IconImage, IconMicrophone, IconX } from '@/components/Icons';
 import type { Adiso } from '@/types';
 import { defaultFlyerForCategory } from '@/lib/flyer/templates';
 import { exportAndUploadFlyer } from '@/lib/flyer/export-client';
@@ -90,7 +89,6 @@ export default function PublishStudio({
 
   const { uploadPublishImage, uploadingImage } = usePublishActions(onNotify);
   const [step, setStepState] = useState<StudioStep>(() => loadStudioStep());
-  const [mode, setMode] = useState<PublishStudioMode>('capture');
   const [analyzing, setAnalyzing] = useState(false);
   const [chatStatus, setChatStatus] = useState<string | null>(null);
   const [publishing, setPublishing] = useState(false);
@@ -479,7 +477,7 @@ export default function PublishStudio({
   };
 
   const stepNumber = step === 'compose' ? 1 : step === 'review' ? 2 : 3;
-  const showChat = !immersive || mode === 'form';
+  const showChat = !immersive;
 
   const flyerDefaults = defaultFlyerForCategory(draft.categoria);
   const exportTemplateId = draft.flyerTemplateId || flyerDefaults.templateId;
@@ -535,68 +533,74 @@ export default function PublishStudio({
 
       {step === 'compose' && (
         <div className="flex min-h-0 flex-1 flex-col">
-          <PublishModeSwitcher mode={mode} onChange={setMode} />
-
           <div className="min-h-0 flex-1 overflow-y-auto px-3 pb-3">
-            {(mode === 'capture' || mode === 'template' || mode === 'design') && (
-              <div className="relative mb-3 aspect-square w-full overflow-hidden rounded-2xl bg-[var(--bg-secondary)]">
-                {heroUrl ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={heroUrl} alt="" className="h-full w-full object-cover" />
-                ) : (
-                  <div className="absolute inset-0">
-                    <FlyerCanvas
-                      templateId={exportTemplateId}
-                      config={exportConfig}
-                      content={exportContent}
-                      className="h-full w-full"
-                    />
-                  </div>
-                )}
+            <div className="relative mb-3 aspect-square w-full overflow-hidden rounded-2xl bg-[var(--bg-secondary)]">
+              {heroUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={heroUrl} alt="" className="h-full w-full object-cover" />
+              ) : (
+                <div className="absolute inset-0">
+                  <FlyerCanvas
+                    templateId={exportTemplateId}
+                    config={exportConfig}
+                    content={exportContent}
+                    className="h-full w-full"
+                  />
+                </div>
+              )}
 
-                {mode === 'capture' && (
-                  <div className="absolute inset-x-0 bottom-0 flex items-center justify-center gap-4 bg-gradient-to-t from-black/70 to-transparent p-4 pt-12">
-                    <button
-                      type="button"
-                      onClick={() => galleryInputRef.current?.click()}
-                      disabled={uploadingImage || analyzing}
-                      className="flex h-12 w-12 items-center justify-center rounded-full bg-white/20 text-white backdrop-blur"
-                      aria-label="Subir foto"
-                      title="Subir foto"
-                    >
-                      <IconImage size={22} />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => cameraInputRef.current?.click()}
-                      disabled={uploadingImage || analyzing}
-                      className="flex h-16 w-16 items-center justify-center rounded-full border-4 border-white bg-[var(--brand-blue)] text-white shadow-lg"
-                      aria-label="Tomar foto"
-                      title="Tomar foto"
-                    >
-                      <IconCamera size={28} />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => void handleVoiceCapture()}
-                      disabled={analyzing}
-                      className={`flex h-12 w-12 items-center justify-center rounded-full backdrop-blur ${
-                        isListening || recordingAudio
-                          ? 'animate-pulse bg-red-500 text-white'
-                          : 'bg-white/20 text-white'
-                      }`}
-                      aria-label={
-                        isListening || recordingAudio ? 'Detener dictado' : 'Dictar aviso'
-                      }
-                      aria-pressed={isListening || recordingAudio}
-                      title={isListening || recordingAudio ? 'Detener' : 'Dictar'}
-                    >
-                      <IconMicrophone size={22} />
-                    </button>
-                  </div>
-                )}
+              {heroUrl && (
+                <button
+                  type="button"
+                  onClick={() => removeImage(heroUrl)}
+                  className="absolute right-2 top-2 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-black/55 text-white"
+                  aria-label="Quitar foto"
+                  title="Quitar foto"
+                >
+                  <IconX size={14} />
+                </button>
+              )}
+
+              <div className="absolute inset-x-0 bottom-0 flex items-center justify-center gap-4 bg-gradient-to-t from-black/70 to-transparent p-4 pt-12">
+                <button
+                  type="button"
+                  onClick={() => galleryInputRef.current?.click()}
+                  disabled={uploadingImage || analyzing}
+                  className="flex h-12 w-12 items-center justify-center rounded-full bg-white/20 text-white backdrop-blur"
+                  aria-label="Subir foto"
+                  title="Subir foto"
+                >
+                  <IconImage size={22} />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => cameraInputRef.current?.click()}
+                  disabled={uploadingImage || analyzing}
+                  className="flex h-16 w-16 items-center justify-center rounded-full border-4 border-white bg-[var(--brand-blue)] text-white shadow-lg"
+                  aria-label="Tomar foto"
+                  title="Tomar foto"
+                >
+                  <IconCamera size={28} />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => void handleVoiceCapture()}
+                  disabled={analyzing}
+                  className={`flex h-12 w-12 items-center justify-center rounded-full backdrop-blur ${
+                    isListening || recordingAudio
+                      ? 'animate-pulse bg-red-500 text-white'
+                      : 'bg-white/20 text-white'
+                  }`}
+                  aria-label={
+                    isListening || recordingAudio ? 'Detener dictado' : 'Dictar aviso'
+                  }
+                  aria-pressed={isListening || recordingAudio}
+                  title={isListening || recordingAudio ? 'Detener' : 'Dictar'}
+                >
+                  <IconMicrophone size={22} />
+                </button>
               </div>
-            )}
+            </div>
 
             <input
               ref={cameraInputRef}
@@ -626,25 +630,8 @@ export default function PublishStudio({
               </p>
             )}
 
-            {mode === 'capture' && draft.missingFields.length > 0 && (
+            {draft.imagenes.length > 0 && (
               <div className="mb-3">
-                <PublishAIQuestions draft={draft} onAnswer={handleAiAnswer} />
-              </div>
-            )}
-
-            {mode === 'capture' && (draft.titulo || draft.descripcion) && (
-              <div className={`${publishCard} mb-3 space-y-1 p-3`}>
-                {draft.titulo && (
-                  <p className="m-0 text-sm font-bold text-[var(--text-primary)] line-clamp-2">{draft.titulo}</p>
-                )}
-                {draft.descripcion && (
-                  <p className="m-0 text-xs text-[var(--text-secondary)] line-clamp-3">{draft.descripcion}</p>
-                )}
-              </div>
-            )}
-
-            {mode === 'form' && (
-              <div className="space-y-4">
                 <PublishPhotoZone
                   images={draft.imagenes}
                   onAdd={handlePhotoAdded}
@@ -655,46 +642,44 @@ export default function PublishStudio({
                   maxImages={10}
                   allowEnhance
                   flyerEnabled={false}
-                  draftPreview={{
-                    titulo: draft.titulo,
-                    precio: draft.precio,
-                    moneda: draft.moneda,
-                    tipoPrecio: draft.tipoPrecio,
-                    ubicacion: draft.ubicacion,
-                    categoria: draft.categoria,
-                  }}
                 />
-                <PublishFormCompact
-                  draft={draft}
-                  onChange={setDraft}
-                  onSetAtributo={setAtributo}
-                  showAdvanced={showAdvanced}
-                  onToggleAdvanced={() => setShowAdvanced(!showAdvanced)}
-                  onEnhanceField={handleEnhanceField}
-                  enhancingField={enhancingField}
-                  analyzing={analyzing}
-                  autoDownload={autoDownload}
-                  onAutoDownloadChange={setAutoDownload}
-                />
-                {draft.missingFields.length > 0 && (
-                  <PublishAIQuestions draft={draft} onAnswer={handleAiAnswer} />
-                )}
               </div>
             )}
 
-            {(mode === 'template' || mode === 'design') && (
-              <FlyerTemplatePicker
-                templateId={exportTemplateId}
-                config={exportConfig}
-                content={exportContent}
-                onChange={(next) =>
-                  setDraft({ flyerTemplateId: next.templateId, flyerConfig: next.config })
-                }
-                compact={mode === 'template'}
-              />
+            {!heroUrl && (
+              <div className="mb-3">
+                <FlyerTemplatePicker
+                  templateId={exportTemplateId}
+                  config={exportConfig}
+                  content={exportContent}
+                  hidePreview
+                  onChange={(next) =>
+                    setDraft({ flyerTemplateId: next.templateId, flyerConfig: next.config })
+                  }
+                />
+              </div>
             )}
 
-            {mode === 'form' && (
+            {draft.missingFields.length > 0 && (
+              <div className="mb-3">
+                <PublishAIQuestions draft={draft} onAnswer={handleAiAnswer} />
+              </div>
+            )}
+
+            <PublishFormCompact
+              draft={draft}
+              onChange={setDraft}
+              onSetAtributo={setAtributo}
+              showAdvanced={showAdvanced}
+              onToggleAdvanced={() => setShowAdvanced(!showAdvanced)}
+              onEnhanceField={handleEnhanceField}
+              enhancingField={enhancingField}
+              analyzing={analyzing}
+              autoDownload={autoDownload}
+              onAutoDownloadChange={setAutoDownload}
+            />
+
+            {showChat && (
               <PublishFixedChatBar
                 onSend={handleChatSend}
                 onUploadImage={uploadPublishImage}
@@ -702,30 +687,6 @@ export default function PublishStudio({
                 embedded
                 statusMessage={chatStatus}
               />
-            )}
-
-            {mode !== 'form' && (
-              <div className="mt-2">
-                <button
-                  type="button"
-                  onClick={() => setShowAdvanced(!showAdvanced)}
-                  className="flex w-full items-center justify-center gap-1.5 py-2 text-xs font-semibold text-[var(--text-secondary)]"
-                >
-                  Ajustes avanzados
-                  <IconChevronDown size={12} className={`transition-transform ${showAdvanced ? 'rotate-180' : ''}`} />
-                </button>
-                {showAdvanced && (
-                  <label className="flex items-center gap-2 px-1 pb-2 text-xs text-[var(--text-secondary)]">
-                    <input
-                      type="checkbox"
-                      checked={autoDownload}
-                      onChange={(e) => setAutoDownload(e.target.checked)}
-                      className="rounded border-[var(--border-color)]"
-                    />
-                    Descargar el aviso al publicar
-                  </label>
-                )}
-              </div>
             )}
           </div>
 

@@ -12,6 +12,8 @@ export interface FlyerTemplatePickerProps {
   onChange: (next: { templateId: FlyerTemplateId; config: FlyerConfig }) => void;
   exportRef?: React.Ref<HTMLDivElement>;
   compact?: boolean;
+  /** El preview grande ya vive fuera (p. ej. el hero de publicar). */
+  hidePreview?: boolean;
 }
 
 export default function FlyerTemplatePicker({
@@ -21,6 +23,7 @@ export default function FlyerTemplatePicker({
   onChange,
   exportRef,
   compact = false,
+  hidePreview = false,
 }: FlyerTemplatePickerProps) {
   const resolved = useMemo(
     () => resolveFlyerConfig(content.categoria, templateId, config),
@@ -81,14 +84,16 @@ export default function FlyerTemplatePicker({
         </div>
       </div>
 
-      <div className={`overflow-hidden rounded-2xl ring-1 ring-[var(--border-color)] ${compact ? 'max-w-[220px]' : 'max-w-sm'}`}>
-        <FlyerCanvas
-          templateId={templateId}
-          config={resolved}
-          content={content}
-          exportRef={exportRef}
-        />
-      </div>
+      {!hidePreview && (
+        <div className={`overflow-hidden rounded-2xl ring-1 ring-[var(--border-color)] ${compact ? 'max-w-[220px]' : 'max-w-sm'}`}>
+          <FlyerCanvas
+            templateId={templateId}
+            config={resolved}
+            content={content}
+            exportRef={exportRef}
+          />
+        </div>
+      )}
 
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
         <label className="flex flex-col gap-1 text-[10px] font-semibold text-[var(--text-tertiary)]">
