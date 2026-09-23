@@ -12,6 +12,7 @@ import {
 import type { FlyerConfig, FlyerTemplateId } from '@/lib/flyer/types';
 import { softWashFromAccent } from '@/lib/flyer/templates';
 import { categoryAsksLocation } from '@/lib/publish/category-tree';
+import { flyerMetaFontSize, flyerPriceFontSize, flyerTitleFontSize } from '@/lib/flyer/typography';
 
 const COLORS = ['#53acc5', '#111827', '#ffffff', '#b91c1c', '#166534', '#1d4ed8', '#c2410c', '#7c3aed'];
 
@@ -21,6 +22,7 @@ interface PublishCardCanvasProps {
   badge?: string;
   background: string;
   color: string;
+  titleScale?: FlyerConfig['titleScale'];
   draft: PublishDraft;
   onFlyer?: (patch: Partial<FlyerConfig>) => void;
   onLayout: (next: PublishDraft['cardLayout'], options?: { history?: boolean }) => void;
@@ -177,6 +179,7 @@ export default function PublishCardCanvas({
   badge,
   background,
   color,
+  titleScale = 'm',
   draft,
   onFlyer,
   onLayout,
@@ -260,7 +263,7 @@ export default function PublishCardCanvas({
   return (
     <div
       ref={stageRef}
-      className="absolute inset-0 touch-none"
+      className="absolute inset-0 touch-none [container-type:inline-size]"
       onPointerMove={onPointerMove}
       onPointerUp={onPointerUp}
       onPointerCancel={onPointerUp}
@@ -280,6 +283,7 @@ export default function PublishCardCanvas({
           color={color}
           onDark={!heroUrl && (templateId === 'bold-type' || templateId === 'poster-serif' || templateId === 'gradient-dusk')}
           place={placeOf(draft.cardLayout, id)}
+          titleScale={titleScale}
           selected={selected === id}
           onDragStart={beginDrag}
           onResizeStart={beginResize}
@@ -296,6 +300,7 @@ function CardPiece({
   color,
   onDark,
   place,
+  titleScale,
   selected,
   onDragStart,
   onResizeStart,
@@ -306,6 +311,7 @@ function CardPiece({
   color: string;
   onDark?: boolean;
   place: CardPieceLayout;
+  titleScale?: FlyerConfig['titleScale'];
   selected: boolean;
   onDragStart: (event: ReactPointerEvent, id: CardPieceId) => void;
   onResizeStart: (event: ReactPointerEvent, id: CardPieceId) => void;
@@ -324,9 +330,12 @@ function CardPiece({
 
   const ink = onDark ? '#ffffff' : color;
   const fontSize =
-    id === 'titulo' ? `${1.35 * place.scale}rem`
-    : id === 'precio' ? `${1.15 * place.scale}rem`
-    : `${0.78 * place.scale}rem`;
+    id === 'titulo'
+      ? flyerTitleFontSize(titleScale, 'comfortable', place.scale)
+      : id === 'precio'
+        ? flyerPriceFontSize('comfortable', place.scale)
+        : flyerMetaFontSize('comfortable', place.scale);
+  const iconEm = place.scale * 0.95;
 
   const colorsAbove = place.y > 0.28;
 
@@ -342,11 +351,18 @@ function CardPiece({
       >
         {id === 'categoria' && (
           <span className="inline-flex items-center gap-1 font-bold">
-            {CategoryIcon ? <CategoryIcon size={Math.round(16 * place.scale)} color={missing ? (onDark ? 'rgba(255,255,255,0.55)' : 'rgba(15,23,42,0.45)') : ink} /> : null}
+            {CategoryIcon ? (
+              <CategoryIcon
+                size={Math.round(16 * iconEm)}
+                color={missing ? (onDark ? 'rgba(255,255,255,0.55)' : 'rgba(15,23,42,0.45)') : ink}
+              />
+            ) : null}
             {category}
           </span>
         )}
-        {id === 'titulo' && <span className="block font-extrabold leading-tight tracking-tight">{title}</span>}
+        {id === 'titulo' && (
+          <span className="block max-w-full font-extrabold leading-tight tracking-tight line-clamp-3">{title}</span>
+        )}
         {id === 'precio' && <span className="block font-black leading-none">{price}</span>}
         {id === 'ubicacion' && <span className="block font-semibold leading-tight">{location}</span>}
         {selected && (

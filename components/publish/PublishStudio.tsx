@@ -694,6 +694,7 @@ export default function PublishStudio({
                 onNotify={onNotify}
                 heroUrl={heroUrl}
                 templatesOpen={showTemplates}
+                dockOpen={showTemplates}
                 formOpen={showForm}
                 onToggleForm={() => {
                   setShowForm((open) => {
@@ -773,16 +774,26 @@ export default function PublishStudio({
                   </>
                 }
               >
-                <PublishCardCanvas
-                  heroUrl={heroUrl && draft.plan === 'paid' ? heroUrl : undefined}
-                  templateId={exportTemplateId}
-                  badge={exportConfig.badge}
-                  background={exportConfig.secondary || '#f8fafc'}
-                  color={exportConfig.primary || '#0f172a'}
-                  draft={draft}
-                  onFlyer={(patch) => setDraft({ flyerConfig: { ...exportConfig, ...patch } })}
-                  onLayout={(cardLayout, options) => setDraft({ cardLayout }, options)}
-                />
+                {heroUrl && draft.plan === 'paid' ? (
+                  <PublishCardCanvas
+                    heroUrl={heroUrl}
+                    templateId={exportTemplateId}
+                    badge={exportConfig.badge}
+                    background={exportConfig.secondary || '#f8fafc'}
+                    color={exportConfig.primary || '#0f172a'}
+                    titleScale={exportConfig.titleScale}
+                    draft={draft}
+                    onFlyer={(patch) => setDraft({ flyerConfig: { ...exportConfig, ...patch } })}
+                    onLayout={(cardLayout, options) => setDraft({ cardLayout }, options)}
+                  />
+                ) : (
+                  <FlyerCanvas
+                    templateId={exportTemplateId}
+                    config={exportConfig}
+                    content={exportContent}
+                    className="absolute inset-0 h-full w-full"
+                  />
+                )}
               </PublishCoverEditor>
             ) : (
             <div className="relative mb-3 aspect-square w-full overflow-hidden rounded-2xl bg-[var(--bg-secondary)]">
@@ -897,7 +908,23 @@ export default function PublishStudio({
 
           <div className="shrink-0 border-t border-[var(--border-color)] bg-[var(--bg-primary)] pb-[max(0.35rem,env(safe-area-inset-bottom))]">
             {showTemplates && (
-              <div className={immersive ? 'shrink-0 space-y-2 px-3 pb-2' : 'max-h-[42vh] overflow-y-auto border-b border-[var(--border-color)] px-3 py-3'}>
+              <div
+                className={
+                  immersive
+                    ? 'shrink-0 space-y-2 border-t border-[var(--border-color)] px-3 pb-2 pt-2'
+                    : 'max-h-[42vh] overflow-y-auto border-b border-[var(--border-color)] px-3 py-3'
+                }
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <p className="m-0 text-xs font-bold text-[var(--text-primary)]">Plantillas y colores</p>
+                  <button
+                    type="button"
+                    onClick={() => setShowTemplates(false)}
+                    className="rounded-full bg-[var(--brand-blue)] px-3 py-1.5 text-[11px] font-bold text-white"
+                  >
+                    Listo
+                  </button>
+                </div>
                 <PublishPalettePicker
                   compact={immersive}
                   config={exportConfig}

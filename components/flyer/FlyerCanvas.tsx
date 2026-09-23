@@ -4,9 +4,10 @@ import type { CSSProperties, ReactNode, Ref } from 'react';
 import type { FlyerConfig, FlyerContent, FlyerTemplateId } from '@/lib/flyer/types';
 import { resolveFlyerConfig } from '@/lib/flyer/templates';
 import { truncateFlyerTitle } from '@/lib/flyer/layout';
+import { flyerMetaFontSize, flyerPriceFontSize, flyerTitleFontSize } from '@/lib/flyer/typography';
+import type { FlyerDensity } from '@/lib/flyer/types';
 
-/** comfortable = studio/detalle/export; compact = feed/grid (~150–220px) */
-export type FlyerDensity = 'comfortable' | 'compact';
+export type { FlyerDensity };
 
 export interface FlyerCanvasProps {
   templateId: FlyerTemplateId;
@@ -16,28 +17,6 @@ export interface FlyerCanvasProps {
   exportRef?: Ref<HTMLDivElement>;
   /** En feed el contenedor es chico: tipografía cqi sin floors altos en rem. */
   density?: FlyerDensity;
-}
-
-function titleSize(scale: FlyerConfig['titleScale'], density: FlyerDensity): string {
-  if (density === 'compact') {
-    // Un poco más grande que el primer ajuste, sin floor en rem que rebalse el tile.
-    return 'clamp(0.78rem, 8.8cqi, 1.45rem)';
-  }
-  if (scale === 's') return 'clamp(1.1rem, 7cqi, 2.4rem)';
-  if (scale === 'l') return 'clamp(1.55rem, 9.5cqi, 3.2rem)';
-  return 'clamp(1.3rem, 8.2cqi, 2.8rem)';
-}
-
-function metaSize(density: FlyerDensity): string {
-  return density === 'compact'
-    ? 'clamp(0.52rem, 3.6cqi, 0.8rem)'
-    : 'clamp(0.65rem, 3.2cqi, 0.95rem)';
-}
-
-function priceSize(density: FlyerDensity): string {
-  return density === 'compact'
-    ? 'clamp(0.7rem, 5.6cqi, 1.1rem)'
-    : 'clamp(1.05rem, 5.5cqi, 1.85rem)';
 }
 
 function badgeSize(density: FlyerDensity): string {
@@ -82,7 +61,7 @@ export default function FlyerCanvas({
   };
 
   const titleStyle: CSSProperties = {
-    fontSize: titleSize(cfg.titleScale, density),
+    fontSize: flyerTitleFontSize(cfg.titleScale, density),
     lineHeight: compact ? 1.14 : 1.08,
     fontWeight: 800,
     textAlign: align,
@@ -92,12 +71,12 @@ export default function FlyerCanvas({
   };
 
   const metaStyle: CSSProperties = {
-    fontSize: metaSize(density),
+    fontSize: flyerMetaFontSize(density),
     lineHeight: 1.25,
   };
 
   const priceStyle: CSSProperties = {
-    fontSize: priceSize(density),
+    fontSize: flyerPriceFontSize(density),
     fontWeight: 700,
     lineHeight: 1.15,
   };

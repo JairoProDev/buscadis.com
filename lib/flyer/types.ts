@@ -46,3 +46,6 @@ export type FlyerTemplateMeta = {
 };
 
 export const DEFAULT_FLYER_TEMPLATE: FlyerTemplateId = 'bold-type';
+
+/** comfortable = studio/export; compact = thumbnails y feed */
+export type FlyerDensity = 'comfortable' | 'compact';

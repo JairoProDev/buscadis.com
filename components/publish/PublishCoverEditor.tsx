@@ -77,6 +77,8 @@ interface PublishCoverEditorProps {
   onReplaceCover: (file: File) => Promise<string | void>;
   onOpenTemplates: () => void;
   templatesOpen: boolean;
+  /** Oculta el bloque inferior mientras se eligen plantillas/colores. */
+  dockOpen?: boolean;
   formOpen: boolean;
   onToggleForm: () => void;
   tool: CoverTool;
@@ -177,6 +179,7 @@ const PublishCoverEditor = forwardRef<PublishCoverEditorHandle, PublishCoverEdit
       onReplaceCover,
       onOpenTemplates,
       templatesOpen,
+      dockOpen = false,
       formOpen,
       onToggleForm,
       tool,
@@ -589,11 +592,14 @@ const PublishCoverEditor = forwardRef<PublishCoverEditorHandle, PublishCoverEdit
         </div>
 
         <div className="min-h-0 flex-1 overflow-y-auto px-4 pt-1 [container-type:size]">
-          <div className="mx-auto flex flex-col" style={{ width: 'min(100%, 58cqh)' }}>
+          <div
+            className="mx-auto flex flex-col"
+            style={{ width: 'min(100%, max(240px, 58cqh))' }}
+          >
           {above}
           <div
             ref={stageRef}
-            className="relative aspect-square w-full shrink-0 touch-none overflow-hidden rounded-2xl bg-[var(--bg-secondary)]"
+            className="relative aspect-square w-full shrink-0 touch-none overflow-hidden rounded-2xl bg-[var(--bg-secondary)] [container-type:inline-size]"
             onPointerDown={onStagePointerDown}
             onPointerMove={onStagePointerMove}
             onPointerUp={onStagePointerUp}
@@ -686,7 +692,7 @@ const PublishCoverEditor = forwardRef<PublishCoverEditorHandle, PublishCoverEdit
             })}
           </div>
           </div>
-          {below}
+          {!dockOpen && below}
         </div>
 
         {tool === 'crop' && heroUrl && (
