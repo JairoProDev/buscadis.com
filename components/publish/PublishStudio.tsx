@@ -688,13 +688,13 @@ export default function PublishStudio({
         <div className="flex min-h-0 flex-1 flex-col">
           <div className={immersive ? 'flex min-h-0 flex-1 flex-col overflow-hidden' : 'min-h-0 flex-1 overflow-y-auto px-3 pb-3'}>
             {immersive ? (
+              <div className="relative flex min-h-0 flex-1 flex-col overflow-hidden">
               <PublishCoverEditor
                 ref={coverEditorRef}
                 onLeave={requestLeave}
                 onNotify={onNotify}
                 heroUrl={heroUrl}
                 templatesOpen={showTemplates}
-                dockOpen={showTemplates}
                 formOpen={showForm}
                 onToggleForm={() => {
                   setShowForm((open) => {
@@ -795,6 +795,56 @@ export default function PublishStudio({
                   />
                 )}
               </PublishCoverEditor>
+              {showTemplates && (
+                <div
+                  className="absolute inset-x-0 bottom-0 z-30 max-h-[min(46vh,400px)] space-y-2 overflow-y-auto border-t border-[var(--border-color)] bg-[var(--bg-primary)] px-3 pb-2 pt-2 shadow-[0_-10px_28px_rgba(15,23,42,0.12)]"
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="m-0 text-xs font-bold text-[var(--text-primary)]">Plantillas y colores</p>
+                    <button
+                      type="button"
+                      onClick={() => setShowTemplates(false)}
+                      className="rounded-full bg-[var(--brand-blue)] px-3 py-1.5 text-[11px] font-bold text-white"
+                    >
+                      Listo
+                    </button>
+                  </div>
+                  <PublishPalettePicker
+                    compact
+                    config={exportConfig}
+                    onChange={(flyerConfig) => setDraft({ flyerConfig })}
+                  />
+                  <div className="flex gap-2 overflow-x-auto pb-1">
+                    {FLYER_TEMPLATES.map((template) => {
+                      const selected = template.id === exportTemplateId;
+                      const thumbConfig = resolveFlyerConfig(
+                        draft.categoria,
+                        template.id,
+                        paletteOverrides ? { ...draft.flyerConfig, ...paletteOverrides } : undefined,
+                      );
+                      return (
+                        <button
+                          key={template.id}
+                          type="button"
+                          onClick={() => setDraft({ flyerTemplateId: template.id })}
+                          className="shrink-0"
+                          aria-label={template.label}
+                        >
+                          <TemplateThumb selected={selected}>
+                            <FlyerCanvas
+                              templateId={template.id}
+                              config={thumbConfig}
+                              content={exportContent}
+                              className="pointer-events-none h-full w-full"
+                            />
+                          </TemplateThumb>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+              </div>
             ) : (
             <div className="relative mb-3 aspect-square w-full overflow-hidden rounded-2xl bg-[var(--bg-secondary)]">
               {heroUrl ? (
@@ -907,14 +957,8 @@ export default function PublishStudio({
           </div>
 
           <div className="shrink-0 border-t border-[var(--border-color)] bg-[var(--bg-primary)] pb-[max(0.35rem,env(safe-area-inset-bottom))]">
-            {showTemplates && (
-              <div
-                className={
-                  immersive
-                    ? 'shrink-0 space-y-2 border-t border-[var(--border-color)] px-3 pb-2 pt-2'
-                    : 'max-h-[42vh] overflow-y-auto border-b border-[var(--border-color)] px-3 py-3'
-                }
-              >
+            {showTemplates && !immersive && (
+              <div className="max-h-[42vh] overflow-y-auto border-b border-[var(--border-color)] px-3 py-3">
                 <div className="flex items-center justify-between gap-2">
                   <p className="m-0 text-xs font-bold text-[var(--text-primary)]">Plantillas y colores</p>
                   <button
@@ -926,40 +970,9 @@ export default function PublishStudio({
                   </button>
                 </div>
                 <PublishPalettePicker
-                  compact={immersive}
                   config={exportConfig}
                   onChange={(flyerConfig) => setDraft({ flyerConfig })}
                 />
-                {immersive ? (
-                  <div className="flex gap-2 overflow-x-auto pb-1">
-                    {FLYER_TEMPLATES.map((template) => {
-                      const selected = template.id === exportTemplateId;
-                      const thumbConfig = resolveFlyerConfig(
-                        draft.categoria,
-                        template.id,
-                        paletteOverrides ? { ...draft.flyerConfig, ...paletteOverrides } : undefined,
-                      );
-                      return (
-                        <button
-                          key={template.id}
-                          type="button"
-                          onClick={() => setDraft({ flyerTemplateId: template.id })}
-                          className="shrink-0"
-                          aria-label={template.label}
-                        >
-                          <TemplateThumb selected={selected}>
-                            <FlyerCanvas
-                              templateId={template.id}
-                              config={thumbConfig}
-                              content={exportContent}
-                              className="pointer-events-none h-full w-full"
-                            />
-                          </TemplateThumb>
-                        </button>
-                      );
-                    })}
-                  </div>
-                ) : (
                 <FlyerTemplatePicker
                   templateId={exportTemplateId}
                   config={exportConfig}
@@ -970,7 +983,6 @@ export default function PublishStudio({
                     setDraft({ flyerTemplateId: next.templateId, flyerConfig: next.config })
                   }
                 />
-                )}
               </div>
             )}
             <div className="shrink-0 bg-[var(--bg-primary)] pb-[max(0.35rem,env(safe-area-inset-bottom))]">

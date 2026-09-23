@@ -77,8 +77,6 @@ interface PublishCoverEditorProps {
   onReplaceCover: (file: File) => Promise<string | void>;
   onOpenTemplates: () => void;
   templatesOpen: boolean;
-  /** Oculta el bloque inferior mientras se eligen plantillas/colores. */
-  dockOpen?: boolean;
   formOpen: boolean;
   onToggleForm: () => void;
   tool: CoverTool;
@@ -179,7 +177,6 @@ const PublishCoverEditor = forwardRef<PublishCoverEditorHandle, PublishCoverEdit
       onReplaceCover,
       onOpenTemplates,
       templatesOpen,
-      dockOpen = false,
       formOpen,
       onToggleForm,
       tool,
@@ -692,7 +689,7 @@ const PublishCoverEditor = forwardRef<PublishCoverEditorHandle, PublishCoverEdit
             })}
           </div>
           </div>
-          {!dockOpen && below}
+          {below}
         </div>
 
         {tool === 'crop' && heroUrl && (
