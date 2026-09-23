@@ -1,12 +1,13 @@
 'use client';
 
-import { useState, type ReactNode } from 'react';
-import { Categoria, UbicacionDetallada } from '@/types';
-import { formatUbicacionCorta } from '@/lib/adiso-display';
+import { useState, type ComponentType, type ReactNode } from 'react';
+import { Categoria } from '@/types';
 import { PublishDraft } from '@/lib/publish/publish-draft-types';
 import { PUBLISH_CATEGORIAS, getSubcategories, getSubsubcategories } from '@/lib/publish/category-tree';
 import { IconChevronDown, IconImage, IconStar } from '@/components/Icons';
+import { getCategoriaIcon } from '@/lib/categoria-icons';
 import PublishFormAdvanced from './PublishFormAdvanced';
+import PublishLocationField from './PublishLocationField';
 import { publishInput, publishInputAiFilled, publishLabel } from './publish-ui';
 
 interface PublishFormCompactProps {
@@ -24,40 +25,64 @@ interface PublishFormCompactProps {
   onAddPhoto?: () => void;
 }
 
-function locationText(ubicacion: PublishDraft['ubicacion']) {
-  if (!ubicacion) return '';
-  if (typeof ubicacion === 'string') return ubicacion;
-  return formatUbicacionCorta(ubicacion) || ubicacion.direccion || '';
-}
-
-async function detectLocation(onChange: (patch: Partial<PublishDraft>) => void) {
-  if (!navigator.geolocation) return;
-  navigator.geolocation.getCurrentPosition(async (pos) => {
-    const next: UbicacionDetallada = {
-      pais: 'Perú',
-      departamento: '',
-      provincia: '',
-      distrito: '',
-      latitud: pos.coords.latitude,
-      longitud: pos.coords.longitude,
-    };
-    try {
-      const res = await fetch(
-        `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${next.latitud}&lon=${next.longitud}&accept-language=es`,
-      );
-      if (res.ok) {
-        const data = await res.json();
-        const address = data.address || {};
-        next.distrito = address.suburb || address.city_district || address.town || address.city || '';
-        next.departamento = address.state || '';
-        next.provincia = address.county || address.state_district || '';
-        next.direccion = data.display_name || '';
-      }
-    } catch {
-      /* las coordenadas bastan para el mapa */
-    }
-    onChange({ ubicacion: next });
-  });
+function PrettySelect({
+  label,
+  hint,
+  value,
+  onChange,
+  options,
+}: {
+  label: string;
+  hint: string;
+  value: string;
+  onChange: (value: string) => void;
+  options: Array<{ value: string; label: string; icon?: ComponentType<{ size?: number; color?: string }> }>;
+}) {
+  const [open, setOpen] = useState(false);
+  const current = options.find((item) => item.value === value);
+  const Icon = current?.icon;
+  return (
+    <div className="relative">
+      <button
+        type="button"
+        onClick={() => setOpen((currentOpen) => !currentOpen)}
+        className={`${publishInput} mt-0 flex h-[52px] items-center justify-between gap-2 text-left`}
+      >
+        <span className="flex min-w-0 items-center gap-2">
+          {Icon ? <Icon size={16} color="var(--brand-blue)" /> : null}
+          <span className={current ? 'text-[var(--text-primary)]' : 'text-transparent'}>{current?.label || hint}</span>
+        </span>
+        <IconChevronDown size={14} className={`shrink-0 text-[var(--text-tertiary)] ${open ? 'rotate-180' : ''}`} />
+      </button>
+      <FloatingHint text={current ? label : hint} up={Boolean(current) || open} active={open} />
+      {open && (
+        <div className="absolute z-20 mt-1 max-h-56 w-full overflow-y-auto rounded-xl bg-[var(--bg-primary)] p-1 shadow-lg ring-1 ring-[var(--border-color)]">
+          {options.map((item) => {
+            const OptionIcon = item.icon;
+            const active = item.value === value;
+            return (
+              <button
+                key={item.value}
+                type="button"
+                onClick={() => {
+                  onChange(item.value);
+                  setOpen(false);
+                }}
+                className={`flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm ${
+                  active
+                    ? 'bg-[rgba(var(--brand-primary-rgb),0.1)] font-semibold text-[var(--brand-blue)]'
+                    : 'text-[var(--text-primary)]'
+                }`}
+              >
+                {OptionIcon ? <OptionIcon size={15} color={active ? 'var(--brand-blue)' : 'var(--text-secondary)'} /> : null}
+                {item.label}
+              </button>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
 }
 
 function FloatingHint({ text, up, active }: { text: string; up: boolean; active: boolean }) {
@@ -163,44 +188,31 @@ export default function PublishFormCompact({
         </div>
       )}
 
-      <div className="relative">
-        <select
-          value={draft.categoria || ''}
-          aria-label="Categoría"
-          onChange={(event) =>
-            onChange({
-              categoria: (event.target.value || undefined) as Categoria | undefined,
-              subcategoria: undefined,
-              subsubcategoria: undefined,
-            })
-          }
-          className={`${publishInput} mt-0 h-[52px] appearance-none pr-10`}
-        >
-          <option value=""></option>
-          {PUBLISH_CATEGORIAS.map((item) => (
-            <option key={item.value} value={item.value}>{item.label}</option>
-          ))}
-        </select>
-        <FloatingHint text={draft.categoria ? 'Categoría' : 'Elige una categoría'} up={Boolean(draft.categoria)} active={false} />
-        <IconChevronDown size={14} className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[var(--text-tertiary)]" />
-      </div>
-
+      <PrettySelect
+        label="Categoría"
+        hint="Elige una categoría"
+        value={draft.categoria || ''}
+        options={PUBLISH_CATEGORIAS.map((item) => ({
+          value: item.value,
+          label: item.label,
+          icon: getCategoriaIcon(item.value),
+        }))}
+        onChange={(categoria) =>
+          onChange({
+            categoria: (categoria || undefined) as Categoria | undefined,
+            subcategoria: undefined,
+            subsubcategoria: undefined,
+          })
+        }
+      />
       {draft.categoria && subs.length > 0 && (
-        <div className="relative">
-          <select
-            value={draft.subcategoria || ''}
-            aria-label="Subcategoría"
-            onChange={(event) => onChange({ subcategoria: event.target.value || undefined, subsubcategoria: undefined })}
-            className={`${publishInput} mt-0 h-[52px] appearance-none pr-10`}
-          >
-            <option value=""></option>
-            {subs.map((item) => (
-              <option key={item.id} value={item.id}>{item.label}</option>
-            ))}
-          </select>
-          <FloatingHint text={draft.subcategoria ? 'Subcategoría' : 'Elige una subcategoría'} up={Boolean(draft.subcategoria)} active={false} />
-          <IconChevronDown size={14} className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[var(--text-tertiary)]" />
-        </div>
+        <PrettySelect
+          label="Subcategoría"
+          hint="Elige una subcategoría"
+          value={draft.subcategoria || ''}
+          options={subs.map((item) => ({ value: item.id, label: item.label }))}
+          onChange={(subcategoria) => onChange({ subcategoria: subcategoria || undefined, subsubcategoria: undefined })}
+        />
       )}
 
       <PrettyField
@@ -254,21 +266,9 @@ export default function PublishFormCompact({
         onChange={(contacto) => onChange({ contacto })}
       />
 
-      <PrettyField
-        label="Ubicación"
-        hint="Distrito, zona…"
-        value={locationText(draft.ubicacion)}
-        ai={aiClass('ubicacion')}
+      <PublishLocationField
+        value={draft.ubicacion}
         onChange={(ubicacion) => onChange({ ubicacion })}
-        trailing={
-          <button
-            type="button"
-            onClick={() => void detectLocation(onChange)}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-[var(--brand-blue)]"
-          >
-            Detectar
-          </button>
-        }
       />
 
       <div className="relative">
