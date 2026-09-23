@@ -13,6 +13,8 @@ interface PublishFormCompactProps {
   onSetAtributo: (fieldId: string, value: string | string[] | boolean | number) => void;
   showAdvanced: boolean;
   onToggleAdvanced: () => void;
+  autoDownload?: boolean;
+  onAutoDownloadChange?: (value: boolean) => void;
   onEnhanceField: (field: 'titulo' | 'descripcion') => void;
   enhancingField?: 'titulo' | 'descripcion' | null;
   analyzing?: boolean;
@@ -24,6 +26,8 @@ export default function PublishFormCompact({
   onSetAtributo,
   showAdvanced,
   onToggleAdvanced,
+  autoDownload = true,
+  onAutoDownloadChange,
   onEnhanceField,
   enhancingField,
   analyzing = false,
@@ -107,12 +111,23 @@ export default function PublishFormCompact({
         onClick={onToggleAdvanced}
         className="w-full flex items-center justify-center gap-1.5 py-2.5 text-sm font-semibold text-[var(--text-secondary)] hover:text-[var(--brand-blue)] transition-colors"
       >
-        Campos
+        Ajustes avanzados
         <IconChevronDown size={14} className={`transition-transform ${showAdvanced ? 'rotate-180' : ''}`} />
       </button>
 
       {showAdvanced && (
         <div className="space-y-3 pt-1 border-t border-[var(--border-color)]">
+          {onAutoDownloadChange && (
+            <label className="flex items-center gap-2 text-xs text-[var(--text-secondary)]">
+              <input
+                type="checkbox"
+                checked={autoDownload}
+                onChange={(e) => onAutoDownloadChange(e.target.checked)}
+                className="rounded border-[var(--border-color)]"
+              />
+              Descargar el aviso al publicar
+            </label>
+          )}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className={publishLabel}>Categoría</label>

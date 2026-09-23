@@ -24,7 +24,7 @@ import type { PublisherPreview } from './PublishPreviewCard';
 import { PublishDraft } from '@/lib/publish/publish-draft-types';
 import { hasMinimumContent } from '@/lib/publish/publish-draft-types';
 import { publishPrimaryBtn, publishSecondaryBtn, publishCard } from './publish-ui';
-import { IconCamera, IconMicrophone } from '@/components/Icons';
+import { IconCamera, IconChevronDown, IconImage, IconMicrophone } from '@/components/Icons';
 import type { Adiso } from '@/types';
 import { defaultFlyerForCategory } from '@/lib/flyer/templates';
 import { exportAndUploadFlyer } from '@/lib/flyer/export-client';
@@ -561,10 +561,10 @@ export default function PublishStudio({
                       onClick={() => galleryInputRef.current?.click()}
                       disabled={uploadingImage || analyzing}
                       className="flex h-12 w-12 items-center justify-center rounded-full bg-white/20 text-white backdrop-blur"
-                      aria-label="Galería"
-                      title="Galería"
+                      aria-label="Subir foto"
+                      title="Subir foto"
                     >
-                      <IconCamera size={22} />
+                      <IconImage size={22} />
                     </button>
                     <button
                       type="button"
@@ -673,6 +673,8 @@ export default function PublishStudio({
                   onEnhanceField={handleEnhanceField}
                   enhancingField={enhancingField}
                   analyzing={analyzing}
+                  autoDownload={autoDownload}
+                  onAutoDownloadChange={setAutoDownload}
                 />
                 {draft.missingFields.length > 0 && (
                   <PublishAIQuestions draft={draft} onAnswer={handleAiAnswer} />
@@ -701,39 +703,40 @@ export default function PublishStudio({
                 statusMessage={chatStatus}
               />
             )}
+
+            {mode !== 'form' && (
+              <div className="mt-2">
+                <button
+                  type="button"
+                  onClick={() => setShowAdvanced(!showAdvanced)}
+                  className="flex w-full items-center justify-center gap-1.5 py-2 text-xs font-semibold text-[var(--text-secondary)]"
+                >
+                  Ajustes avanzados
+                  <IconChevronDown size={12} className={`transition-transform ${showAdvanced ? 'rotate-180' : ''}`} />
+                </button>
+                {showAdvanced && (
+                  <label className="flex items-center gap-2 px-1 pb-2 text-xs text-[var(--text-secondary)]">
+                    <input
+                      type="checkbox"
+                      checked={autoDownload}
+                      onChange={(e) => setAutoDownload(e.target.checked)}
+                      className="rounded border-[var(--border-color)]"
+                    />
+                    Descargar el aviso al publicar
+                  </label>
+                )}
+              </div>
+            )}
           </div>
 
-          <div className="shrink-0 space-y-2 border-t border-[var(--border-color)] bg-[var(--bg-primary)] px-3 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
-            <label className="flex items-center gap-2 text-xs text-[var(--text-secondary)]">
-              <input
-                type="checkbox"
-                checked={autoDownload}
-                onChange={(e) => setAutoDownload(e.target.checked)}
-                className="rounded border-[var(--border-color)]"
-              />
-              Descargar portada al publicar
-            </label>
+          <div className="shrink-0 border-t border-[var(--border-color)] bg-[var(--bg-primary)] px-3 py-2 pb-[max(0.5rem,env(safe-area-inset-bottom))]">
             <button
               type="button"
               onClick={() => void publish('free')}
-              className={publishPrimaryBtn}
+              className="w-full rounded-xl bg-[var(--brand-blue)] py-2.5 text-sm font-bold leading-none text-white shadow-[0_8px_20px_-6px_rgba(var(--brand-primary-rgb),0.45)] transition-all hover:brightness-105 active:scale-[0.99] disabled:pointer-events-none disabled:opacity-50"
               disabled={!canPublish}
             >
               {publishing ? 'Publicando…' : 'Publicar gratis'}
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                if (!hasMinimumContent(draft)) {
-                  onNotify?.('Agrega título, descripción o al menos una imagen', 'error');
-                  return;
-                }
-                setStep('review');
-              }}
-              className={publishSecondaryBtn}
-              disabled={analyzing}
-            >
-              Revisar o destacar
             </button>
           </div>
 
