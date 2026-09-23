@@ -20,10 +20,8 @@ export interface FlyerCanvasProps {
 
 function titleSize(scale: FlyerConfig['titleScale'], density: FlyerDensity): string {
   if (density === 'compact') {
-    // Mínimos bajos para que cqi mande en tiles ~50vw; sin esto el rem floor rebalsa.
-    if (scale === 's') return 'clamp(0.52rem, 6.2cqi, 1.05rem)';
-    if (scale === 'l') return 'clamp(0.58rem, 7cqi, 1.15rem)';
-    return 'clamp(0.55rem, 6.6cqi, 1.1rem)';
+    // Un poco más grande que el primer ajuste, sin floor en rem que rebalse el tile.
+    return 'clamp(0.78rem, 8.8cqi, 1.45rem)';
   }
   if (scale === 's') return 'clamp(1.1rem, 7cqi, 2.4rem)';
   if (scale === 'l') return 'clamp(1.55rem, 9.5cqi, 3.2rem)';
@@ -32,19 +30,19 @@ function titleSize(scale: FlyerConfig['titleScale'], density: FlyerDensity): str
 
 function metaSize(density: FlyerDensity): string {
   return density === 'compact'
-    ? 'clamp(0.4rem, 3.2cqi, 0.7rem)'
+    ? 'clamp(0.52rem, 3.6cqi, 0.8rem)'
     : 'clamp(0.65rem, 3.2cqi, 0.95rem)';
 }
 
 function priceSize(density: FlyerDensity): string {
   return density === 'compact'
-    ? 'clamp(0.55rem, 5cqi, 0.95rem)'
+    ? 'clamp(0.7rem, 5.6cqi, 1.1rem)'
     : 'clamp(1.05rem, 5.5cqi, 1.85rem)';
 }
 
 function badgeSize(density: FlyerDensity): string {
   return density === 'compact'
-    ? 'clamp(0.38rem, 3cqi, 0.62rem)'
+    ? 'clamp(0.5rem, 3.4cqi, 0.72rem)'
     : 'clamp(0.65rem, 3.2cqi, 0.95rem)';
 }
 
@@ -58,12 +56,9 @@ export default function FlyerCanvas({
 }: FlyerCanvasProps) {
   const cfg = resolveFlyerConfig(content.categoria, templateId, config);
   const compact = density === 'compact';
-  // En compact forzamos escala S y truncamos más: el feed no necesita el título completo.
-  const effectiveScale: FlyerConfig['titleScale'] = compact ? 's' : cfg.titleScale;
-  const title = truncateFlyerTitle(
-    content.title || 'Aviso en Buscadis',
-    compact ? 48 : 90
-  );
+  const rawTitle = (content.title || 'Aviso en Buscadis').trim().replace(/\s+/g, ' ');
+  // En el feed el título se envuelve: no cortar con puntos si todavía cabe en el cuadrado.
+  const title = compact ? rawTitle : truncateFlyerTitle(rawTitle, 90);
   const align = cfg.align === 'center' ? 'center' : 'left';
   const primary = cfg.primary;
   const secondary = cfg.secondary;
@@ -87,21 +82,13 @@ export default function FlyerCanvas({
   };
 
   const titleStyle: CSSProperties = {
-    fontSize: titleSize(effectiveScale, density),
-    lineHeight: compact ? 1.12 : 1.08,
+    fontSize: titleSize(cfg.titleScale, density),
+    lineHeight: compact ? 1.14 : 1.08,
     fontWeight: 800,
     textAlign: align,
     letterSpacing: '-0.02em',
     wordBreak: 'break-word',
-    overflowWrap: 'anywhere',
-    ...(compact
-      ? {
-          display: '-webkit-box',
-          WebkitLineClamp: 5,
-          WebkitBoxOrient: 'vertical' as const,
-          overflow: 'hidden',
-        }
-      : {}),
+    overflowWrap: 'break-word',
   };
 
   const metaStyle: CSSProperties = {
