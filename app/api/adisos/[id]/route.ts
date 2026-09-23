@@ -143,6 +143,20 @@ export async function PUT(
       imagenesUrls: imagenesUrlsSanitized,
       imagenUrl: imagenUrlSanitized,
       esGratuito: adisoExistente.esGratuito,
+      subcategoria: typeof body.subcategoria === 'string' ? body.subcategoria : adisoExistente.subcategoria,
+      subsubcategoria: typeof body.subsubcategoria === 'string' ? body.subsubcategoria : adisoExistente.subsubcategoria,
+      atributos: body.atributos && typeof body.atributos === 'object' ? body.atributos : adisoExistente.atributos,
+      precio: typeof body.precio === 'number' ? body.precio : adisoExistente.precio,
+      moneda: body.moneda === 'PEN' || body.moneda === 'USD' ? body.moneda : adisoExistente.moneda,
+      tipoPrecio: body.tipoPrecio === 'fijo' || body.tipoPrecio === 'a_convenir' || body.tipoPrecio === 'gratis'
+        ? body.tipoPrecio
+        : adisoExistente.tipoPrecio,
+      publishTier: adisoExistente.publishTier,
+      paymentStatus: adisoExistente.paymentStatus,
+      user_id: adisoExistente.user_id || adisoExistente.usuario_id,
+      features: body.features && typeof body.features === 'object'
+        ? { ...(adisoExistente.features || {}), ...body.features }
+        : adisoExistente.features,
     } as Adiso;
 
     const resultado = await updateAdisoInSupabase(adisoActualizado);

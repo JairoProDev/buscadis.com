@@ -102,9 +102,21 @@ function withMissing(draft: PublishDraft): PublishDraft {
   return { ...draft, missingFields: detectMissingFields(draft) };
 }
 
-export function usePublishDraft(initial?: Partial<PublishDraft>) {
+export function usePublishDraft(
+  initial?: Partial<PublishDraft>,
+  options?: { persist?: boolean; fresh?: boolean },
+) {
+  const persistRef = useRef(options?.persist !== false);
+  persistRef.current = options?.persist !== false;
+  const remember = (next: PublishDraft) => {
+    if (persistRef.current) saveDraft(next);
+  };
   const [history, setHistory] = useState<DraftHistory>(() => ({
-    present: withMissing(mergeInitialOverSaved(loadDraft(), initial)),
+    present: withMissing(
+      options?.fresh
+        ? mergeInitialOverSaved({ ...EMPTY_PUBLISH_DRAFT }, initial)
+        : mergeInitialOverSaved(loadDraft(), initial),
+    ),
     past: [],
     future: [],
   }));
@@ -113,11 +125,11 @@ export function usePublishDraft(initial?: Partial<PublishDraft>) {
   const draft = history.present;
 
   useEffect(() => {
-    saveDraft(draft);
+    remember(draft);
   }, [draft]);
 
   useEffect(() => {
-    const flush = () => saveDraft(draft);
+    const flush = () => remember(draft);
     const onHide = () => {
       if (document.visibilityState === 'hidden') flush();
     };
@@ -143,7 +155,7 @@ export function usePublishDraft(initial?: Partial<PublishDraft>) {
       const now = Date.now();
       const coalesce = record && textOnly && now - lastTextPush.current < 700 && h.past.length > 0;
       if (record && !coalesce) lastTextPush.current = now;
-      saveDraft(next);
+      remember(next);
       return {
         present: next,
         past: !record || coalesce ? h.past : [...h.past, h.present].slice(-HISTORY_LIMIT),
@@ -156,7 +168,7 @@ export function usePublishDraft(initial?: Partial<PublishDraft>) {
     setHistory((h) => {
       if (h.past.length === 0) return h;
       const present = h.past[h.past.length - 1];
-      saveDraft(present);
+      remember(present);
       return {
         present,
         past: h.past.slice(0, -1),
@@ -169,7 +181,7 @@ export function usePublishDraft(initial?: Partial<PublishDraft>) {
     setHistory((h) => {
       if (h.future.length === 0) return h;
       const [present, ...rest] = h.future;
-      saveDraft(present);
+      remember(present);
       return {
         present,
         past: [...h.past, h.present].slice(-HISTORY_LIMIT),
@@ -211,8 +223,10 @@ export function usePublishDraft(initial?: Partial<PublishDraft>) {
   const resetDraft = useCallback(() => {
     const fresh = withMissing(mergeInitialOverSaved({ ...EMPTY_PUBLISH_DRAFT }, initial));
     setHistory({ present: fresh, past: [], future: [] });
-    clearPublishDraftStorage();
-    saveDraft(fresh);
+    if (persistRef.current) {
+      clearPublishDraftStorage();
+      saveDraft(fresh);
+    }
     saveStudioStep('compose');
   }, [initial]);
 

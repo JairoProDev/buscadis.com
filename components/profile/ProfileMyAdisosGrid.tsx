@@ -55,6 +55,14 @@ export default function ProfileMyAdisosGrid({ token, highlightId }: ProfileMyAdi
               : ''
           }
         >
+          <div className="mb-1 flex justify-end px-1">
+            <a
+              href={`/publicar?desde=${adiso.id}`}
+              className="rounded-full px-3 py-1 text-xs font-bold text-[var(--brand-blue)]"
+            >
+              Modificar
+            </a>
+          </div>
           <GrillaAdisos
             adisos={[adiso]}
             onAbrirAdiso={(a) => {

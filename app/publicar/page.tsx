@@ -47,8 +47,9 @@ function PublicarHubContent() {
     <div className="fixed inset-0 z-[2100] flex flex-col bg-[var(--bg-primary)]">
       <main className="flex min-h-0 flex-1 flex-col">
         <PublishStudio
-          key={seedKey}
+          key={searchParams.get('desde') || seedKey}
           immersive
+          reeditId={searchParams.get('desde')}
           initialText={initialText}
           initialImageUrl={initialImageUrl}
           initialContacto={initialContacto}

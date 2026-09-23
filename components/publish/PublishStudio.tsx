@@ -20,7 +20,7 @@ import PublishFixedChatBar from './PublishFixedChatBar';
 import PublishStepIndicator from './PublishStepIndicator';
 import PublishAIQuestions from './PublishAIQuestions';
 import type { PublisherPreview } from './PublishPreviewCard';
-import { EMPTY_COVER_OVERLAY, PublishDraft } from '@/lib/publish/publish-draft-types';
+import { EMPTY_COVER_OVERLAY, EMPTY_PUBLISH_DRAFT, PublishDraft } from '@/lib/publish/publish-draft-types';
 import { getSubscriptionTier } from '@/lib/business/subscription';
 import { hasMinimumContent } from '@/lib/publish/publish-draft-types';
 import { publishPrimaryBtn, publishSecondaryBtn, publishCard } from './publish-ui';
@@ -46,6 +46,42 @@ interface PublishStudioProps {
   onNotify?: (msg: string, type?: 'info' | 'error' | 'success') => void;
   onPublished?: (adiso: Adiso) => void;
   onClose?: () => void;
+  /** Aviso ya publicado que se abre para modificar. */
+  reeditId?: string | null;
+}
+
+function adisoToDraft(adiso: Adiso): { draft: PublishDraft; paid: boolean } {
+  const paid = adiso.esGratuito !== true && adiso.publishTier !== 'free';
+  const features = (adiso.features || {}) as {
+    flyerTemplateId?: PublishDraft['flyerTemplateId'];
+    flyerConfig?: PublishDraft['flyerConfig'];
+  };
+  const imagenes = adiso.imagenesUrls?.length
+    ? adiso.imagenesUrls
+    : adiso.imagenUrl
+      ? [adiso.imagenUrl]
+      : [];
+  return {
+    paid,
+    draft: {
+      ...EMPTY_PUBLISH_DRAFT,
+      categoria: adiso.categoria,
+      subcategoria: adiso.subcategoria,
+      subsubcategoria: adiso.subsubcategoria,
+      titulo: adiso.titulo,
+      descripcion: adiso.descripcion,
+      contacto: adiso.contacto,
+      ubicacion: adiso.ubicacion,
+      imagenes: paid ? imagenes : [],
+      precio: adiso.precio,
+      moneda: adiso.moneda,
+      tipoPrecio: adiso.tipoPrecio,
+      atributos: adiso.atributos || {},
+      plan: 'paid',
+      flyerTemplateId: features.flyerTemplateId,
+      flyerConfig: features.flyerConfig,
+    },
+  };
 }
 
 function draftHasAiFields(patch: Partial<PublishDraft>): boolean {
@@ -68,6 +104,7 @@ export default function PublishStudio({
   onNotify,
   onPublished,
   onClose,
+  reeditId = null,
 }: PublishStudioProps) {
   const { user, session } = useAuth();
   const { openAuthModal } = useUI();
@@ -86,11 +123,15 @@ export default function PublishStudio({
     canUndo,
     canRedo,
     addChatMessage,
-  } = usePublishDraft({
-    descripcion: initialText,
-    contacto: initialContacto,
-    imagenes: initialImageUrl ? [initialImageUrl] : [],
-  });
+  } = usePublishDraft(
+    {
+      descripcion: initialText,
+      contacto: initialContacto,
+      imagenes: initialImageUrl ? [initialImageUrl] : [],
+    },
+    { persist: !reeditId, fresh: Boolean(reeditId) },
+  );
+  const [sourcePaid, setSourcePaid] = useState(false);
 
   const { uploadPublishImage, uploadingImage } = usePublishActions(onNotify);
   const [step, setStepState] = useState<StudioStep>(() => loadStudioStep());
@@ -114,6 +155,32 @@ export default function PublishStudio({
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const galleryInputRef = useRef<HTMLInputElement>(null);
   const { isListening, isSupported, start: startVoice, stop: stopVoice } = useSpeechRecognition('es-PE');
+
+  useEffect(() => {
+    if (!reeditId) return;
+    let cancel = false;
+    fetch(`/api/adisos/${reeditId}`)
+      .then(async (res) => {
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'No se pudo abrir el aviso');
+        return data as Adiso;
+      })
+      .then((adiso) => {
+        if (cancel) return;
+        const loaded = adisoToDraft(adiso);
+        setSourcePaid(loaded.paid);
+        setDraft(() => loaded.draft, { history: false });
+        if (!loaded.paid) {
+          onNotify?.('Este aviso era gratis. Para modificarlo y volver a publicarlo, queda de pago.', 'info');
+        }
+      })
+      .catch((error: unknown) => {
+        if (!cancel) onNotify?.(error instanceof Error ? error.message : 'No se pudo abrir el aviso', 'error');
+      });
+    return () => {
+      cancel = true;
+    };
+  }, [reeditId, setDraft, onNotify]);
 
   useEffect(() => {
     if (draft.flyerTemplateId) return;
@@ -406,8 +473,9 @@ export default function PublishStudio({
         return;
       }
 
+      const effectivePlan: 'free' | 'paid' = reeditId ? 'paid' : plan;
       const publishDraft: PublishDraft =
-        plan === 'free' ? { ...draft, plan: 'free', imagenes: [] } : draft;
+        effectivePlan === 'free' ? { ...draft, plan: 'free', imagenes: [] } : { ...draft, plan: 'paid' };
 
       setPublishing(true);
       try {
@@ -417,7 +485,7 @@ export default function PublishStudio({
         let coverForDownload: string | null = imagenes[0] || null;
 
         const editor = coverEditorRef.current;
-        if (plan !== 'free' && editor && (editor.hasEdits() || editor.cropPending())) {
+        if (effectivePlan !== 'free' && editor && (editor.hasEdits() || editor.cropPending())) {
           const blob = await editor.exportJpeg();
           if (blob) {
             const baked = await uploadPublishImage(
@@ -444,21 +512,41 @@ export default function PublishStudio({
           }
         }
 
-        const res = await fetch('/api/adisos/publish', {
-          method: 'POST',
+        const saveExisting = Boolean(reeditId && sourcePaid);
+        const res = await fetch(saveExisting ? `/api/adisos/${reeditId}` : '/api/adisos/publish', {
+          method: saveExisting ? 'PUT' : 'POST',
           headers: {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${session?.access_token}`,
           },
-          body: JSON.stringify({
-            ...publishDraft,
-            imagenes,
-            flyerTemplateId,
-            flyerConfig,
-            plan,
-            paidDays: publishDraft.paidDays ?? 7,
-            dailyRate: publishDraft.dailyRate ?? 5,
-          }),
+          body: JSON.stringify(
+            saveExisting
+              ? {
+                  categoria: publishDraft.categoria,
+                  subcategoria: publishDraft.subcategoria,
+                  subsubcategoria: publishDraft.subsubcategoria,
+                  titulo: publishDraft.titulo,
+                  descripcion: publishDraft.descripcion,
+                  contacto: publishDraft.contacto,
+                  ubicacion: publishDraft.ubicacion,
+                  imagenesUrls: imagenes,
+                  imagenUrl: imagenes[0],
+                  precio: publishDraft.precio,
+                  moneda: publishDraft.moneda,
+                  tipoPrecio: publishDraft.tipoPrecio === 'consultar' ? 'a_convenir' : publishDraft.tipoPrecio,
+                  atributos: publishDraft.atributos,
+                  features: { flyerTemplateId, flyerConfig },
+                }
+              : {
+                  ...publishDraft,
+                  imagenes,
+                  flyerTemplateId,
+                  flyerConfig,
+                  plan: effectivePlan,
+                  paidDays: publishDraft.paidDays ?? 7,
+                  dailyRate: publishDraft.dailyRate ?? 5,
+                },
+          ),
         });
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || 'Error al publicar');
@@ -484,7 +572,10 @@ export default function PublishStudio({
           void downloadCoverImage(coverForDownload, `buscadis-${created?.id || 'aviso'}.jpg`);
         }
 
-        if (plan === 'paid') {
+        if (saveExisting) {
+          onNotify?.('Cambios guardados.', 'success');
+          setStep('compose');
+        } else if (effectivePlan === 'paid') {
           setPublishedAdisoId(data.adiso?.id);
           setPublishedOrderId(data.orderId);
           setStep('pay');
@@ -514,6 +605,8 @@ export default function PublishStudio({
       publisher,
       autoDownload,
       uploadPublishImage,
+      reeditId,
+      sourcePaid,
     ]
   );
 
@@ -849,6 +942,7 @@ export default function PublishStudio({
             <div className="shrink-0 bg-[var(--bg-primary)] pb-[max(0.35rem,env(safe-area-inset-bottom))]">
             {immersive ? (
               <>
+              {!reeditId && (
               <div className="flex justify-center gap-2 px-3 pt-1">
                 <button
                   type="button"
@@ -865,6 +959,12 @@ export default function PublishStudio({
                   De pago
                 </button>
               </div>
+              )}
+              {reeditId && !sourcePaid && (
+                <p className="m-0 px-4 pt-2 text-center text-xs text-[var(--text-secondary)]">
+                  Este aviso era gratis. Al publicarlo otra vez queda de pago.
+                </p>
+              )}
               <form
                 className="flex items-center gap-1.5 px-2 pt-1"
                 onSubmit={(event) => {
