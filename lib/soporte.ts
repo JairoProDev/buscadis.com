@@ -23,9 +23,9 @@ export const MOTIVOS_AYUDA: Array<{
   },
   {
     id: 'duda',
-    label: 'Hacer una consulta',
-    descripcion: 'Dudas sobre cómo usar Buscadis',
-    mensaje: 'Hola, tengo una duda sobre Buscadis: ',
+    label: 'Ayuda para buscar',
+    descripcion: 'Encuentra lo que necesitas en el marketplace',
+    mensaje: 'Hola, necesito ayuda para buscar en Buscadis: ',
   },
   {
     id: 'publicar',

@@ -8,6 +8,7 @@ import { IconMegaphone } from './Icons';
 import { MAIN_NAV_ITEMS, isMainNavActive } from '@/lib/main-nav';
 import { publishCta } from '@/lib/publish-cta-styles';
 import { useTranslation } from '@/hooks/useTranslation';
+import { useScrollHideBar } from '@/hooks/useScrollHideBar';
 
 interface NavbarMobileProps {
   seccionActiva: SeccionSidebar | null;
@@ -26,11 +27,23 @@ export default function NavbarMobile({
   const { t } = useTranslation();
   const [mounted, setMounted] = React.useState(false);
   const isDesktop = useMediaQuery('(min-width: 768px)');
+  const navVisible = useScrollHideBar(72);
 
   React.useEffect(() => {
     setMounted(true);
     router.prefetch('/publicar');
   }, [router]);
+
+  React.useEffect(() => {
+    if (isDesktop) return;
+    const offset = navVisible
+      ? 'calc(var(--bs-nav-height, 56px) + env(safe-area-inset-bottom, 0px))'
+      : 'env(safe-area-inset-bottom, 0px)';
+    document.documentElement.style.setProperty('--bs-nav-visible-offset', offset);
+    return () => {
+      document.documentElement.style.removeProperty('--bs-nav-visible-offset');
+    };
+  }, [navVisible, isDesktop]);
 
   if (!mounted) return null;
   if (isDesktop) return null;
@@ -50,8 +63,12 @@ export default function NavbarMobile({
         display: 'flex',
         justifyContent: 'space-around',
         alignItems: 'stretch',
-        boxShadow: '0 -2px 10px rgba(0, 0, 0, 0.05)',
+        boxShadow: '0 -2px 10px rgba(0, 0, 0, 0.08)',
         zIndex: 1500,
+        backgroundColor: 'var(--bg-primary)',
+        transform: navVisible ? 'translateY(0)' : 'translateY(100%)',
+        transition: 'transform 0.28s ease-out',
+        willChange: 'transform',
       }}
     >
       {MAIN_NAV_ITEMS.map((seccion) => {

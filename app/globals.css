@@ -13,11 +13,16 @@
   --bs-header-height-desktop: 64px;
   --bs-header-height: var(--bs-header-height-mobile);
   --bs-nav-height: 56px;
+  --bs-nav-visible-offset: calc(var(--bs-nav-height) + env(safe-area-inset-bottom, 0px));
+}
+
+:root {
   --header-height: var(--bs-header-height);
 }
 
 @media (min-width: 768px) {
   :root {
+    --bs-nav-visible-offset: 0px;
     --bs-header-height: var(--bs-header-height-desktop);
     --header-height: var(--bs-header-height-desktop);
   }
@@ -281,15 +286,12 @@ html.dark .brand-category-tile {
 }
 
 .brand-nav-sheen {
-  background-color: color-mix(in srgb, var(--bs-bg-surface) 94%, transparent);
-  background-image:
-    linear-gradient(to top, rgba(var(--brand-yellow-rgb), 0.1) 0%, transparent 55%),
-    linear-gradient(
-      90deg,
-      rgba(var(--brand-primary-rgb), 0.06) 0%,
-      transparent 45%,
-      rgba(var(--brand-yellow-rgb), 0.06) 100%
-    );
+  background-color: var(--bg-primary);
+  background-image: linear-gradient(
+    to top,
+    rgba(var(--brand-yellow-rgb), 0.06) 0%,
+    transparent 40%
+  );
 }
 
 .brand-pill-glass {
@@ -454,7 +456,7 @@ html.dark .brand-header-sheen {
 
 .dark-mode .brand-nav-sheen,
 html.dark .brand-nav-sheen {
-  background-color: color-mix(in srgb, var(--bs-bg-surface) 96%, transparent);
+  background-color: var(--bg-primary);
   border-top: 1px solid var(--bs-border-subtle);
 }
 

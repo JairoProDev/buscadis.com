@@ -45,9 +45,10 @@ export default function FeedbackButton({ variant = 'floating' }: FeedbackButtonP
       ref={panelRef}
       style={{
         position: 'fixed',
-        bottom: 'max(1rem, env(safe-area-inset-bottom))',
+        bottom: 'calc(var(--bs-nav-visible-offset, calc(var(--bs-nav-height, 56px) + env(safe-area-inset-bottom, 0px))) + 0.75rem)',
         left: 'max(1rem, env(safe-area-inset-left))',
-        zIndex: 999,
+        zIndex: 1600,
+        transition: 'bottom 0.28s ease-out',
       }}
     >
       {abierto && (

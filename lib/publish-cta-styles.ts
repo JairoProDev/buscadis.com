@@ -1,7 +1,7 @@
-/** CTA Publicar en nav: azul de acción + blanco (AA). Amarillo solo para upsell promocionado. */
+/** CTA Publicar en nav: círculo azul + etiqueta legible. Amarillo solo para upsell promocionado. */
 export const publishCta = {
   iconColor: '#ffffff',
-  labelColor: '#ffffff',
+  labelColor: 'var(--brand-blue)',
   background:
     'linear-gradient(145deg, var(--bs-action, var(--brand-blue)) 0%, color-mix(in srgb, var(--bs-action, var(--brand-blue)) 85%, #0a1628) 100%)',
   backgroundActive:

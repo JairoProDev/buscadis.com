@@ -7,7 +7,7 @@ import {
   FaEnvelope, FaShareAlt, FaCheckCircle, FaChevronDown, FaHeart, FaArrowLeft, FaRobot,
   FaHandHoldingHeart, FaPlus, FaImage, FaSpinner, FaEye, FaTags, FaExclamationTriangle,
   FaInfoCircle, FaRegHeart, FaMicrophone, FaLinkedin, FaYoutube,
-  FaFile, FaCamera, FaTable, FaUpload, FaList, FaFilter, FaMapPin, FaShoppingCart, FaMagic, FaMinus,
+  FaFile, FaCamera, FaTable, FaUpload, FaList, FaFilter, FaMapPin, FaShoppingCart, FaMagic, FaMinus, FaChevronUp,
   FaFileExcel, FaDownload, FaLightbulb, FaSyncAlt, FaBolt, FaTag, FaEyeSlash, FaLayerGroup, FaSquare,
   FaSort, FaSortAmountDown, FaSortAmountUp, FaVideo, FaPaperPlane, FaBell, FaMoon, FaSun, FaUser, FaHandPointUp,
   FaCog, FaSignOutAlt, FaCompass, FaUserTie, FaUserCog, FaUserEdit, FaEllipsisV,
@@ -48,6 +48,7 @@ export const IconRedo = (p: IconProps) => <FaRedo size={getSize(p)} color={p.col
 export const IconArrowRight = (p: IconProps) => <FaChevronRight size={getSize(p)} color={p.color || 'currentColor'} className={p.className} onClick={p.onClick} />;
 export const IconChevronRight = (p: IconProps) => <FaChevronRight size={getSize(p)} color={p.color || 'currentColor'} className={p.className} onClick={p.onClick} />;
 export const IconChevronDown = (p: IconProps) => <FaChevronDown size={getSize(p)} color={p.color || 'currentColor'} className={p.className} onClick={p.onClick} />;
+export const IconChevronUp = (p: IconProps) => <FaChevronUp size={getSize(p)} color={p.color || 'currentColor'} className={p.className} onClick={p.onClick} />;
 export const IconSearch = (p: IconProps) => <FaSearch size={getSize(p)} color={p.color || 'currentColor'} className={p.className} onClick={p.onClick} />;
 export const IconCheck = (p: IconProps) => <FaCheck size={getSize(p)} color={p.color || 'currentColor'} className={p.className} onClick={p.onClick} />;
 export const IconVerified = (p: IconProps) => <FaCheckCircle size={getSize(p)} color={p.color || 'currentColor'} className={p.className} onClick={p.onClick} />;
