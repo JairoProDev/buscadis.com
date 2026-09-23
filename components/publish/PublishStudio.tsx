@@ -22,7 +22,7 @@ import type { PublisherPreview } from './PublishPreviewCard';
 import { PublishDraft } from '@/lib/publish/publish-draft-types';
 import { hasMinimumContent } from '@/lib/publish/publish-draft-types';
 import { publishPrimaryBtn, publishSecondaryBtn, publishCard } from './publish-ui';
-import { IconCamera, IconImage, IconLayers, IconMegaphone, IconMicrophone, IconX } from '@/components/Icons';
+import { IconCamera, IconImage, IconLayers, IconMegaphone, IconMicrophone, IconSend, IconX } from '@/components/Icons';
 import type { Adiso } from '@/types';
 import { FLYER_TEMPLATES, defaultFlyerForCategory, resolveFlyerConfig } from '@/lib/flyer/templates';
 import { exportAndUploadFlyer } from '@/lib/flyer/export-client';
@@ -103,8 +103,8 @@ export default function PublishStudio({
   const [showUpsell, setShowUpsell] = useState(false);
   const [showTemplates, setShowTemplates] = useState(false);
   const [confirmLeave, setConfirmLeave] = useState(false);
-  const [hd, setHd] = useState(true);
   const [coverTool, setCoverTool] = useState<CoverTool>(null);
+  const [composerText, setComposerText] = useState('');
   const coverEditorRef = useRef<PublishCoverEditorHandle>(null);
   const flyerExportRef = useRef<HTMLDivElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
@@ -406,8 +406,9 @@ export default function PublishStudio({
         let flyerConfig = publishDraft.flyerConfig;
         let coverForDownload: string | null = imagenes[0] || null;
 
-        if (coverEditorRef.current?.hasEdits()) {
-          const blob = await coverEditorRef.current.exportJpeg();
+        const editor = coverEditorRef.current;
+        if (editor && (editor.hasEdits() || editor.cropPending())) {
+          const blob = await editor.exportJpeg();
           if (blob) {
             const baked = await uploadPublishImage(
               new File([blob], `portada-${Date.now()}.jpg`, { type: 'image/jpeg' }),
@@ -579,13 +580,6 @@ export default function PublishStudio({
             {immersive ? (
               <PublishCoverEditor
                 ref={coverEditorRef}
-                hd={hd}
-                onToggleHd={() => {
-                  setHd((on) => {
-                    onNotify?.(on ? 'Calidad estándar' : 'Alta calidad al guardar', 'info');
-                    return !on;
-                  });
-                }}
                 onLeave={requestLeave}
                 onNotify={onNotify}
                 heroUrl={heroUrl}
@@ -595,6 +589,11 @@ export default function PublishStudio({
                 onDescription={(value) => setDraft({ descripcion: value })}
                 autoDownload={autoDownload}
                 onAutoDownload={setAutoDownload}
+                templatesOpen={showTemplates}
+                onOpenTemplates={() => {
+                  setShowTemplates((open) => !open);
+                  setCoverTool(null);
+                }}
                 onReplaceCover={async (file) => {
                   const url = await uploadPublishImage(file);
                   if (!url) return;
@@ -602,6 +601,7 @@ export default function PublishStudio({
                     ...prev,
                     imagenes: [url, ...prev.imagenes.slice(1)],
                   }));
+                  return url;
                 }}
                 tool={coverTool}
                 onTool={(next) => {
@@ -784,6 +784,75 @@ export default function PublishStudio({
                 )}
               </div>
             )}
+            <div className="shrink-0 bg-[var(--bg-primary)] pb-[max(0.35rem,env(safe-area-inset-bottom))]">
+            {immersive ? (
+              <form
+                className="flex items-center gap-1.5 px-2 pt-1"
+                onSubmit={(event) => {
+                  event.preventDefault();
+                  const text = composerText.trim();
+                  if (text) {
+                    setComposerText('');
+                    void handleChatSend(text);
+                    return;
+                  }
+                  void publish('free');
+                }}
+              >
+                <div className="flex min-w-0 flex-1 items-center rounded-full bg-[var(--bg-secondary)] pl-4 pr-1">
+                  <input
+                    value={composerText}
+                    onChange={(event) => setComposerText(event.target.value)}
+                    placeholder="Escribe un mensaje"
+                    className="h-11 min-w-0 flex-1 bg-transparent text-sm text-[var(--text-primary)] outline-none placeholder:text-[var(--text-tertiary)]"
+                    aria-label="Mensaje"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => cameraInputRef.current?.click()}
+                    disabled={uploadingImage || analyzing}
+                    className="flex h-10 w-10 items-center justify-center text-[var(--text-secondary)] disabled:opacity-40"
+                    aria-label="Tomar foto"
+                    title="Tomar foto"
+                  >
+                    <IconCamera size={20} />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => galleryInputRef.current?.click()}
+                    disabled={uploadingImage || analyzing}
+                    className="flex h-10 w-10 items-center justify-center text-[var(--text-secondary)] disabled:opacity-40"
+                    aria-label="Enviar foto"
+                    title="Enviar foto"
+                  >
+                    <IconImage size={18} />
+                  </button>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => void handleVoiceCapture()}
+                  disabled={analyzing}
+                  className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full ${
+                    isListening || recordingAudio
+                      ? 'animate-pulse bg-red-500 text-white'
+                      : 'bg-[var(--bg-secondary)] text-[var(--text-primary)]'
+                  }`}
+                  aria-label={isListening || recordingAudio ? 'Detener audio' : 'Enviar audio'}
+                  title={isListening || recordingAudio ? 'Detener' : 'Audio'}
+                >
+                  <IconMicrophone size={18} />
+                </button>
+                <button
+                  type="submit"
+                  disabled={publishing || analyzing}
+                  className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#1dab61] text-white disabled:opacity-40"
+                  aria-label={composerText.trim() ? 'Enviar mensaje' : 'Publicar'}
+                  title={composerText.trim() ? 'Enviar' : 'Publicar'}
+                >
+                  <IconSend size={16} />
+                </button>
+              </form>
+            ) : (
             <div className="flex items-center justify-between px-4 py-2">
               <button
                 type="button"
@@ -850,6 +919,7 @@ export default function PublishStudio({
               </button>
               </div>
             </div>
+            )}
           </div>
 
           {showUpsell && (
@@ -879,6 +949,7 @@ export default function PublishStudio({
               </div>
             </div>
           )}
+          </div>
         </div>
       )}
 

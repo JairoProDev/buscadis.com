@@ -2,19 +2,22 @@
 
 import {
   forwardRef,
+  useEffect,
   useImperativeHandle,
   useRef,
   useState,
   type PointerEvent as ReactPointerEvent,
   type ReactNode,
 } from 'react';
-import { IconCrop, IconDownload, IconPen, IconSmile, IconText, IconUndo, IconX } from '@/components/Icons';
+import { IconCrop, IconLayers, IconPen, IconSmile, IconText, IconUndo, IconX } from '@/components/Icons';
 
-export type CoverTool = 'hd' | 'crop' | 'sticker' | 'text' | 'draw' | null;
+export type CoverTool = 'crop' | 'sticker' | 'text' | 'draw' | null;
 
 export interface PublishCoverEditorHandle {
   hasEdits: () => boolean;
+  cropPending: () => boolean;
   exportJpeg: () => Promise<Blob | null>;
+  commitCrop: () => Promise<string | null>;
 }
 
 interface TextMark {
@@ -45,8 +48,6 @@ const circle =
   'flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#8e8e93] text-white disabled:opacity-40';
 
 interface PublishCoverEditorProps {
-  hd: boolean;
-  onToggleHd: () => void;
   onLeave: () => void;
   onNotify?: (msg: string, type?: 'info' | 'error' | 'success') => void;
   heroUrl?: string;
@@ -56,7 +57,9 @@ interface PublishCoverEditorProps {
   onDescription: (value: string) => void;
   autoDownload: boolean;
   onAutoDownload: (value: boolean) => void;
-  onReplaceCover: (file: File) => Promise<void>;
+  onReplaceCover: (file: File) => Promise<string | void>;
+  onOpenTemplates: () => void;
+  templatesOpen: boolean;
   tool: CoverTool;
   onTool: (tool: CoverTool) => void;
   children: ReactNode;
@@ -66,11 +69,43 @@ function uid() {
   return `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
 }
 
+function clampCropPan(
+  pan: { x: number; y: number },
+  zoom: number,
+  stage: number,
+  photo: { w: number; h: number },
+) {
+  if (stage <= 0 || photo.w <= 0 || photo.h <= 0) return { x: 0, y: 0 };
+  const scale = Math.max(stage / photo.w, stage / photo.h) * zoom;
+  const maxX = Math.max(0, (photo.w * scale - stage) / 2);
+  const maxY = Math.max(0, (photo.h * scale - stage) / 2);
+  return {
+    x: Math.min(maxX, Math.max(-maxX, pan.x)),
+    y: Math.min(maxY, Math.max(-maxY, pan.y)),
+  };
+}
+
+function cropDrawRect(
+  stage: number,
+  photo: { w: number; h: number },
+  zoom: number,
+  pan: { x: number; y: number },
+) {
+  const scale = Math.max(stage / photo.w, stage / photo.h) * zoom;
+  const width = photo.w * scale;
+  const height = photo.h * scale;
+  const clamped = clampCropPan(pan, zoom, stage, photo);
+  return {
+    width,
+    height,
+    left: stage / 2 - width / 2 + clamped.x,
+    top: stage / 2 - height / 2 + clamped.y,
+  };
+}
+
 const PublishCoverEditor = forwardRef<PublishCoverEditorHandle, PublishCoverEditorProps>(
   function PublishCoverEditor(
     {
-      hd,
-      onToggleHd,
       onLeave,
       onNotify,
       heroUrl,
@@ -81,6 +116,8 @@ const PublishCoverEditor = forwardRef<PublishCoverEditorHandle, PublishCoverEdit
       autoDownload,
       onAutoDownload,
       onReplaceCover,
+      onOpenTemplates,
+      templatesOpen,
       tool,
       onTool,
       children,
@@ -97,12 +134,42 @@ const PublishCoverEditor = forwardRef<PublishCoverEditorHandle, PublishCoverEdit
     const [textValue, setTextValue] = useState('');
     const [textColor, setTextColor] = useState('#ffffff');
     const [cropZoom, setCropZoom] = useState(1);
-    const [cropRot, setCropRot] = useState(0);
     const [cropPan, setCropPan] = useState({ x: 0, y: 0 });
+    const [photoSize, setPhotoSize] = useState<{ w: number; h: number } | null>(null);
+    const [stageSize, setStageSize] = useState(0);
     const dragRef = useRef<{ id: string; kind: 'text' | 'sticker'; px: number; py: number; x: number; y: number } | null>(null);
     const cropDrag = useRef<{ px: number; py: number; x: number; y: number } | null>(null);
 
     const hasEdits = () => texts.length > 0 || stickers.length > 0 || strokes.length > 0;
+
+    useEffect(() => {
+      const node = stageRef.current;
+      if (!node) return;
+      const update = () => setStageSize(Math.round(node.clientWidth));
+      update();
+      const observer = new ResizeObserver(update);
+      observer.observe(node);
+      return () => observer.disconnect();
+    }, []);
+
+    useEffect(() => {
+      setCropZoom(1);
+      setCropPan({ x: 0, y: 0 });
+      if (!heroUrl) {
+        setPhotoSize(null);
+        return;
+      }
+      let cancelled = false;
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.onload = () => {
+        if (!cancelled) setPhotoSize({ w: img.naturalWidth, h: img.naturalHeight });
+      };
+      img.src = heroUrl;
+      return () => {
+        cancelled = true;
+      };
+    }, [heroUrl]);
 
     const exportJpeg = async (): Promise<Blob | null> => {
       const node = stageRef.current;
@@ -110,8 +177,8 @@ const PublishCoverEditor = forwardRef<PublishCoverEditorHandle, PublishCoverEdit
       try {
         const { toJpeg } = await import('html-to-image');
         const dataUrl = await toJpeg(node, {
-          quality: hd ? 0.95 : 0.82,
-          pixelRatio: hd ? 2 : 1.25,
+          quality: 0.92,
+          pixelRatio: 2,
           cacheBust: true,
           backgroundColor: '#ffffff',
         });
@@ -123,24 +190,33 @@ const PublishCoverEditor = forwardRef<PublishCoverEditorHandle, PublishCoverEdit
       }
     };
 
-    useImperativeHandle(ref, () => ({ hasEdits, exportJpeg }), [hd, texts, stickers, strokes]);
-
-    const download = async () => {
-      const blob = await exportJpeg();
-      if (!blob) return;
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `buscadis-portada.jpg`;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      URL.revokeObjectURL(url);
-      onNotify?.('Portada descargada', 'success');
-    };
+    useImperativeHandle(
+      ref,
+      () => ({
+        hasEdits,
+        cropPending: () =>
+          tool === 'crop' && !!heroUrl && (cropZoom !== 1 || cropPan.x !== 0 || cropPan.y !== 0),
+        exportJpeg,
+        commitCrop: async () => {
+          const dirty = cropZoom !== 1 || cropPan.x !== 0 || cropPan.y !== 0;
+          if (!dirty || !heroUrl || tool !== 'crop') return null;
+          const url = await applyCrop();
+          if (url) onTool(null);
+          return url;
+        },
+      }),
+      // applyCrop closes over the latest crop state on each render.
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+      [texts, stickers, strokes, cropZoom, cropPan, heroUrl, tool, photoSize, stageSize],
+    );
 
     const toggle = (next: CoverTool) => {
-      onTool(tool === next ? null : next);
+      const opening = tool === next ? null : next;
+      if (tool === 'crop' && opening !== 'crop') {
+        void finishCrop(opening);
+        return;
+      }
+      onTool(opening);
     };
 
     const pointOf = (event: ReactPointerEvent) => {
@@ -152,10 +228,10 @@ const PublishCoverEditor = forwardRef<PublishCoverEditorHandle, PublishCoverEdit
       };
     };
 
-    const applyCrop = async () => {
-      if (!heroUrl) {
+    const applyCrop = async (): Promise<string | null> => {
+      if (!heroUrl || !photoSize) {
         onNotify?.('Primero toma o sube una foto', 'info');
-        return;
+        return null;
       }
       const img = new Image();
       img.crossOrigin = 'anonymous';
@@ -164,31 +240,39 @@ const PublishCoverEditor = forwardRef<PublishCoverEditorHandle, PublishCoverEdit
         await img.decode();
       } catch {
         onNotify?.('No se pudo recortar esta foto', 'error');
-        return;
+        return null;
       }
-      const size = hd ? 1600 : 1080;
+      const size = 1080;
+      const stage = stageRef.current?.clientWidth || stageSize || size;
       const canvas = document.createElement('canvas');
       canvas.width = size;
       canvas.height = size;
       const ctx = canvas.getContext('2d');
-      if (!ctx) return;
-      ctx.fillStyle = '#ffffff';
+      if (!ctx) return null;
+      ctx.fillStyle = '#111827';
       ctx.fillRect(0, 0, size, size);
-      ctx.save();
-      ctx.translate(size / 2 + cropPan.x, size / 2 + cropPan.y);
-      ctx.rotate((cropRot * Math.PI) / 180);
-      ctx.scale(cropZoom, cropZoom);
-      const scale = Math.max(size / img.width, size / img.height);
-      ctx.drawImage(img, (-img.width * scale) / 2, (-img.height * scale) / 2, img.width * scale, img.height * scale);
-      ctx.restore();
-      const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, 'image/jpeg', hd ? 0.95 : 0.82));
-      if (!blob) return;
-      await onReplaceCover(new File([blob], `recorte-${Date.now()}.jpg`, { type: 'image/jpeg' }));
+      const rect = cropDrawRect(size, photoSize, cropZoom, {
+        x: cropPan.x * (size / stage),
+        y: cropPan.y * (size / stage),
+      });
+      ctx.drawImage(img, rect.left, rect.top, rect.width, rect.height);
+      const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, 'image/jpeg', 0.92));
+      if (!blob) return null;
+      const url = await onReplaceCover(new File([blob], `recorte-${Date.now()}.jpg`, { type: 'image/jpeg' }));
+      if (!url) return null;
       setCropZoom(1);
-      setCropRot(0);
       setCropPan({ x: 0, y: 0 });
-      onTool(null);
       onNotify?.('Recorte aplicado', 'success');
+      return url;
+    };
+
+    const finishCrop = async (next: CoverTool) => {
+      const dirty = cropZoom !== 1 || cropPan.x !== 0 || cropPan.y !== 0;
+      if (dirty && heroUrl) {
+        const url = await applyCrop();
+        if (!url) return;
+      }
+      onTool(next);
     };
 
     const onStagePointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
@@ -210,11 +294,18 @@ const PublishCoverEditor = forwardRef<PublishCoverEditorHandle, PublishCoverEdit
         setDraftStroke({ ...draftStroke, points: [...draftStroke.points, p] });
         return;
       }
-      if (tool === 'crop' && cropDrag.current) {
-        setCropPan({
-          x: cropDrag.current.x + (event.clientX - cropDrag.current.px),
-          y: cropDrag.current.y + (event.clientY - cropDrag.current.py),
-        });
+      if (tool === 'crop' && cropDrag.current && photoSize && stageSize > 0) {
+        setCropPan(
+          clampCropPan(
+            {
+              x: cropDrag.current.x + (event.clientX - cropDrag.current.px),
+              y: cropDrag.current.y + (event.clientY - cropDrag.current.py),
+            },
+            cropZoom,
+            stageSize,
+            photoSize,
+          ),
+        );
         return;
       }
       const drag = dragRef.current;
@@ -242,31 +333,29 @@ const PublishCoverEditor = forwardRef<PublishCoverEditorHandle, PublishCoverEdit
 
     return (
       <>
-        <div className="flex shrink-0 items-center justify-between gap-1 px-3 pt-[max(0.65rem,env(safe-area-inset-top))] pb-2">
+        <div className="flex shrink-0 items-center justify-between gap-2 px-3 pt-[max(0.65rem,env(safe-area-inset-top))] pb-2">
           <button type="button" className={circle} onClick={onLeave} aria-label="Salir" title="Salir">
             <IconX size={18} />
           </button>
-          <button type="button" className={circle} onClick={() => void download()} aria-label="Descargar portada" title="Descargar">
-            <IconDownload size={16} />
-          </button>
+          {heroUrl && (
+            <button
+              type="button"
+              className={tool === 'crop' ? `${circle} bg-[var(--brand-blue)]` : circle}
+              onClick={() => toggle('crop')}
+              aria-label="Reencuadrar foto"
+              title="Reencuadrar"
+            >
+              <IconCrop size={16} />
+            </button>
+          )}
           <button
             type="button"
-            className={hd ? `${circle} bg-[var(--brand-blue)]` : circle}
-            onClick={onToggleHd}
-            aria-pressed={hd}
-            aria-label={hd ? 'Alta calidad activada' : 'Activar alta calidad'}
-            title={hd ? 'Alta calidad' : 'Calidad estándar'}
+            className={templatesOpen ? `${circle} bg-[var(--brand-blue)]` : circle}
+            onClick={onOpenTemplates}
+            aria-label="Plantillas"
+            title="Plantillas"
           >
-            <span className="text-[11px] font-black tracking-tight">HD</span>
-          </button>
-          <button
-            type="button"
-            className={tool === 'crop' ? `${circle} bg-[var(--brand-blue)]` : circle}
-            onClick={() => toggle('crop')}
-            aria-label="Recortar"
-            title="Recortar"
-          >
-            <IconCrop size={16} />
+            <IconLayers size={16} />
           </button>
           <button
             type="button"
@@ -297,27 +386,29 @@ const PublishCoverEditor = forwardRef<PublishCoverEditorHandle, PublishCoverEdit
           </button>
         </div>
 
-        <div className="flex min-h-0 flex-1 items-center justify-center px-4 py-2">
+        <div className="flex min-h-0 w-full flex-1 items-center justify-center px-4 py-3 [container-type:size]">
           <div
             ref={stageRef}
-            className="relative aspect-square h-full max-h-full w-auto max-w-full overflow-hidden rounded-2xl bg-[var(--bg-secondary)]"
+            className="relative shrink-0 overflow-hidden rounded-2xl bg-[var(--bg-secondary)]"
+            style={{ width: 'min(100cqw, 100cqh)', height: 'min(100cqw, 100cqh)', aspectRatio: '1 / 1' }}
             onPointerDown={onStagePointerDown}
             onPointerMove={onStagePointerMove}
             onPointerUp={onStagePointerUp}
             onPointerCancel={onStagePointerUp}
           >
-            <div
-              className="absolute inset-0"
-              style={
-                tool === 'crop' && heroUrl
-                  ? {
-                      transform: `translate(${cropPan.x}px, ${cropPan.y}px) rotate(${cropRot}deg) scale(${cropZoom})`,
-                    }
-                  : undefined
-              }
-            >
-              {children}
-            </div>
+            {tool === 'crop' && heroUrl && photoSize && stageSize > 0 ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={heroUrl}
+                alt=""
+                draggable={false}
+                crossOrigin="anonymous"
+                className="pointer-events-none absolute max-w-none select-none"
+                style={cropDrawRect(stageSize, photoSize, cropZoom, cropPan)}
+              />
+            ) : (
+              <div className="absolute inset-0">{children}</div>
+            )}
             <svg className="pointer-events-none absolute inset-0 h-full w-full" viewBox="0 0 100 100" preserveAspectRatio="none">
               {allStrokes.map((stroke, index) => (
                 <polyline
@@ -363,12 +454,34 @@ const PublishCoverEditor = forwardRef<PublishCoverEditorHandle, PublishCoverEdit
           </div>
         </div>
 
-        {tool === 'crop' && (
+        {tool === 'crop' && heroUrl && (
           <div className="flex shrink-0 items-center justify-center gap-2 px-3 pb-2">
-            <button type="button" className="rounded-full bg-[var(--bg-secondary)] px-3 py-1.5 text-xs font-bold" onClick={() => setCropZoom((z) => Math.max(1, z - 0.15))}>−</button>
-            <button type="button" className="rounded-full bg-[var(--bg-secondary)] px-3 py-1.5 text-xs font-bold" onClick={() => setCropZoom((z) => Math.min(3, z + 0.15))}>+</button>
-            <button type="button" className="rounded-full bg-[var(--bg-secondary)] px-3 py-1.5 text-xs font-bold" onClick={() => setCropRot((r) => (r + 90) % 360)}>Girar</button>
-            <button type="button" className="rounded-full bg-[var(--brand-blue)] px-3 py-1.5 text-xs font-bold text-white" onClick={() => void applyCrop()}>Aplicar</button>
+            <p className="m-0 text-xs text-[var(--text-secondary)]">Arrastra la foto dentro del cuadrado</p>
+            <button
+              type="button"
+              className="rounded-full bg-[var(--bg-secondary)] px-3 py-1.5 text-xs font-bold"
+              onClick={() => {
+                const next = Math.max(1, +(cropZoom - 0.15).toFixed(2));
+                setCropZoom(next);
+                if (photoSize && stageSize > 0) setCropPan((pan) => clampCropPan(pan, next, stageSize, photoSize));
+              }}
+            >
+              −
+            </button>
+            <button
+              type="button"
+              className="rounded-full bg-[var(--bg-secondary)] px-3 py-1.5 text-xs font-bold"
+              onClick={() => {
+                const next = Math.min(3, +(cropZoom + 0.15).toFixed(2));
+                setCropZoom(next);
+                if (photoSize && stageSize > 0) setCropPan((pan) => clampCropPan(pan, next, stageSize, photoSize));
+              }}
+            >
+              +
+            </button>
+            <button type="button" className="rounded-full bg-[var(--brand-blue)] px-3 py-1.5 text-xs font-bold text-white" onClick={() => void finishCrop(null)}>
+              Listo
+            </button>
           </div>
         )}
 
