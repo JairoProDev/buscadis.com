@@ -189,7 +189,7 @@ function CardPiece({
     : id === 'precio' ? `${1.15 * place.scale}rem`
     : `${0.78 * place.scale}rem`;
 
-  const sideRight = place.x < 0.55;
+  const colorsAbove = place.y > 0.28;
 
   return (
     <div
@@ -217,15 +217,15 @@ function CardPiece({
             aria-valuemin={0}
             aria-valuemax={100}
             aria-valuenow={50}
-            className="absolute -bottom-1.5 -right-1.5 z-10 h-3.5 w-3.5 cursor-nwse-resize rounded-sm border-2 border-[var(--brand-blue)] bg-white"
+            className="absolute -bottom-1.5 -right-1.5 z-10 h-3 w-3 cursor-nwse-resize rounded-[2px] border-2 border-[var(--brand-blue)] bg-white shadow-sm"
             onPointerDown={(event) => onResizeStart(event, id)}
           />
         )}
       </div>
       {selected && (id === 'titulo' || id === 'precio') && (
         <div
-          className={`absolute top-0 z-20 flex w-8 flex-col gap-1 rounded-xl bg-white/95 p-1 shadow-lg ring-1 ring-black/10 ${
-            sideRight ? 'left-full ml-2' : 'right-full mr-2'
+          className={`absolute left-0 z-20 flex max-w-[15rem] gap-1 rounded-full bg-white/95 p-1 shadow-lg ring-1 ring-black/10 ${
+            colorsAbove ? 'bottom-full mb-2' : 'top-full mt-2'
           }`}
           onPointerDown={(event) => event.stopPropagation()}
         >

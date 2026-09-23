@@ -12,7 +12,7 @@ import {
   type PublishFieldDefinition,
 } from '@/lib/publish/category-tree';
 import { getCategoriaIcon, PUBLISH_CATEGORIAS } from '@/lib/categoria-icons';
-import { IconLocation } from '@/components/Icons';
+import { IconClock, IconFileAlt, IconLocation, IconTag, IconTags, IconText } from '@/components/Icons';
 
 interface PublishListingPreviewProps {
   draft: PublishDraft;
@@ -68,6 +68,12 @@ async function detectLocation(onChange: (patch: Partial<PublishDraft>) => void) 
   });
 }
 
+function fieldIcon(field: PublishFieldDefinition) {
+  if (/sueldo|precio|tarifa|pago/.test(field.id)) return IconTag;
+  if (/jornada|horario|hora|dia|anio/.test(field.id)) return IconClock;
+  return IconTags;
+}
+
 function AttributeField({
   field,
   value,
@@ -78,6 +84,7 @@ function AttributeField({
   onChange: (value: string | boolean | number) => void;
 }) {
   const [open, setOpen] = useState(false);
+  const Icon = fieldIcon(field);
   if (field.type === 'chips' && field.options) {
     const current = field.options.find((option) => option.value === value)?.label;
     return (
@@ -86,8 +93,9 @@ function AttributeField({
           <button
             type="button"
             onClick={() => setOpen(true)}
-            className={`text-left text-sm ${current ? 'text-[var(--text-primary)]' : 'text-[var(--text-tertiary)]'}`}
+            className={`inline-flex items-center gap-1.5 text-left text-sm ${current ? 'text-[var(--text-primary)]' : 'text-[var(--text-tertiary)]'}`}
           >
+            <Icon size={16} color="var(--brand-blue)" />
             {current || field.label}
           </button>
         ) : (
@@ -120,22 +128,24 @@ function AttributeField({
   if (field.type === 'toggle') {
     return (
       <label className="mt-3 flex items-center gap-2 text-sm text-[var(--text-primary)]">
+        <Icon size={16} color="var(--brand-blue)" />
         <input type="checkbox" checked={Boolean(value)} onChange={(event) => onChange(event.target.checked)} />
         {field.label}
       </label>
     );
   }
   return (
-    <label className="mt-3 block">
-      <span className="mb-1 block text-xs font-bold uppercase tracking-wide text-[var(--text-tertiary)]">{field.label}</span>
+    <label className="mt-3 flex items-center gap-1.5">
+      <Icon size={16} color="var(--brand-blue)" />
       <input
         type={field.type === 'number' ? 'number' : 'text'}
         value={value === undefined || value === null ? '' : String(value)}
         placeholder={field.placeholder || field.label}
+        aria-label={field.label}
         onChange={(event) =>
           onChange(field.type === 'number' ? Number(event.target.value) || 0 : event.target.value)
         }
-        className="w-full bg-transparent text-base text-[var(--text-primary)] outline-none placeholder:text-[var(--text-tertiary)]"
+        className="min-w-0 flex-1 bg-transparent text-base text-[var(--text-primary)] outline-none placeholder:text-[var(--text-tertiary)]"
       />
     </label>
   );
@@ -182,8 +192,9 @@ export default function PublishListingPreview({
           <button
             type="button"
             onClick={() => setOpen(open === 'subcategoria' ? null : 'subcategoria')}
-            className="text-sm text-[var(--text-secondary)]"
+            className="inline-flex items-center gap-1 text-sm text-[var(--text-secondary)]"
           >
+            <IconTags size={14} color="var(--brand-blue)" />
             {subLabel}
           </button>
         )}
@@ -246,28 +257,34 @@ export default function PublishListingPreview({
         </div>
       )}
 
-      <input
-        value={draft.titulo || ''}
-        onChange={(event) => onChange({ titulo: event.target.value })}
-        placeholder="Título"
-        maxLength={120}
-        aria-label="Título"
-        className={`${fieldClass} mt-3 text-2xl font-extrabold leading-tight tracking-tight text-[var(--text-primary)]`}
-      />
+      <div className="mt-3 flex items-start gap-1.5">
+        <IconText size={16} color="var(--brand-blue)" className="mt-2 shrink-0" />
+        <input
+          value={draft.titulo || ''}
+          onChange={(event) => onChange({ titulo: event.target.value })}
+          placeholder="Título"
+          maxLength={120}
+          aria-label="Título"
+          className={`${fieldClass} text-2xl font-extrabold leading-tight tracking-tight text-[var(--text-primary)]`}
+        />
+      </div>
 
-      <input
-        inputMode="decimal"
-        value={draft.precio ?? ''}
-        onChange={(event) =>
-          onChange({
-            precio: event.target.value ? Number(event.target.value) : undefined,
-            tipoPrecio: 'fijo',
-          })
-        }
-        placeholder={priceLabel(draft.precio) || 'Precio'}
-        aria-label="Precio"
-        className={`${fieldClass} mt-1 text-3xl font-black text-[var(--brand-blue)]`}
-      />
+      <div className="mt-1 flex items-center gap-1.5">
+        <IconTag size={16} color="var(--brand-blue)" className="shrink-0" />
+        <input
+          inputMode="decimal"
+          value={draft.precio ?? ''}
+          onChange={(event) =>
+            onChange({
+              precio: event.target.value ? Number(event.target.value) : undefined,
+              tipoPrecio: 'fijo',
+            })
+          }
+          placeholder={priceLabel(draft.precio) || 'Precio'}
+          aria-label="Precio"
+          className={`${fieldClass} text-3xl font-black text-[var(--brand-blue)]`}
+        />
+      </div>
 
       {showLocation && (
         <div className="mt-3 flex items-center gap-1.5 text-sm text-[var(--text-secondary)]">
@@ -298,15 +315,18 @@ export default function PublishListingPreview({
         />
       ))}
 
-      <textarea
-        value={draft.descripcion || ''}
-        onChange={(event) => onChange({ descripcion: event.target.value })}
-        placeholder="Descripción"
-        rows={4}
-        maxLength={2000}
-        aria-label="Descripción"
-        className={`${fieldClass} mt-4 resize-none text-base leading-relaxed text-[var(--text-secondary)]`}
-      />
+      <div className="mt-4 flex items-start gap-1.5">
+        <IconFileAlt size={16} color="var(--brand-blue)" className="mt-1 shrink-0" />
+        <textarea
+          value={draft.descripcion || ''}
+          onChange={(event) => onChange({ descripcion: event.target.value })}
+          placeholder="Descripción"
+          rows={4}
+          maxLength={2000}
+          aria-label="Descripción"
+          className={`${fieldClass} resize-none text-base leading-relaxed text-[var(--text-secondary)]`}
+        />
+      </div>
     </div>
   );
 }

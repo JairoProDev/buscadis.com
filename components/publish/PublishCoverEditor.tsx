@@ -673,15 +673,13 @@ const PublishCoverEditor = forwardRef<PublishCoverEditorHandle, PublishCoverEdit
                       data-resize
                       aria-label="Cambiar tamaño"
                       title="Tamaño"
-                      className="absolute -bottom-3 -right-3 z-10 flex h-7 w-7 items-center justify-center rounded-full bg-white text-xs font-black text-slate-900 shadow"
+                      className="absolute -bottom-1.5 -right-1.5 z-10 h-3 w-3 cursor-nwse-resize rounded-[2px] border-2 border-white bg-[var(--brand-blue)] shadow-sm"
                       onPointerDown={(event) => {
                         event.stopPropagation();
                         holdPointer(event);
                         resizeRef.current = { id: mark.id, py: event.clientY, size: mark.size };
                       }}
-                    >
-                      ↘
-                    </button>
+                    />
                   )}
                 </div>
               );
