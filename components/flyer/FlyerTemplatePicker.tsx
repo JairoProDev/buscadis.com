@@ -4,6 +4,8 @@ import { useMemo } from 'react';
 import FlyerCanvas from './FlyerCanvas';
 import TemplateThumb from './TemplateThumb';
 import { FLYER_TEMPLATES, resolveFlyerConfig } from '@/lib/flyer/templates';
+import { getPaletteOverrides } from '@/lib/flyer/color-palettes';
+import PublishPalettePicker from '@/components/publish/PublishPalettePicker';
 import type { FlyerConfig, FlyerContent, FlyerTemplateId } from '@/lib/flyer/types';
 
 export interface FlyerTemplatePickerProps {
@@ -15,6 +17,8 @@ export interface FlyerTemplatePickerProps {
   compact?: boolean;
   /** El preview grande ya vive fuera (p. ej. el hero de publicar). */
   hidePreview?: boolean;
+  /** Si la paleta ya se muestra arriba (p. ej. en PublishStudio). */
+  hidePalette?: boolean;
 }
 
 export default function FlyerTemplatePicker({
@@ -25,10 +29,18 @@ export default function FlyerTemplatePicker({
   exportRef,
   compact = false,
   hidePreview = false,
+  hidePalette = false,
 }: FlyerTemplatePickerProps) {
+  const paletteOverrides = useMemo(() => getPaletteOverrides(config), [config]);
+
   const resolved = useMemo(
-    () => resolveFlyerConfig(content.categoria, templateId, config),
-    [content.categoria, templateId, config]
+    () =>
+      resolveFlyerConfig(
+        content.categoria,
+        templateId,
+        paletteOverrides ? { ...config, ...paletteOverrides } : config,
+      ),
+    [content.categoria, templateId, config, paletteOverrides],
   );
 
   const patch = (partial: Partial<FlyerConfig>) => {
@@ -51,21 +63,17 @@ export default function FlyerTemplatePicker({
               <button
                 key={t.id}
                 type="button"
-                onClick={() =>
-                  onChange({
-                    templateId: t.id,
-                    config: resolveFlyerConfig(content.categoria, t.id, {
-                      ...resolved,
-                      ...t.defaultConfig,
-                    }),
-                  })
-                }
+                onClick={() => onChange({ templateId: t.id, config })}
                 className="shrink-0"
               >
                 <TemplateThumb selected={selected}>
                   <FlyerCanvas
                     templateId={t.id}
-                    config={resolveFlyerConfig(content.categoria, t.id)}
+                    config={resolveFlyerConfig(
+                      content.categoria,
+                      t.id,
+                      paletteOverrides ? { ...config, ...paletteOverrides } : undefined,
+                    )}
                     content={content}
                     className="pointer-events-none h-full w-full"
                   />
@@ -90,66 +98,21 @@ export default function FlyerTemplatePicker({
         </div>
       )}
 
-      <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-        <label className="flex flex-col gap-1 text-[10px] font-semibold text-[var(--text-tertiary)]">
-          Color 1
-          <input
-            type="color"
-            value={resolved.primary}
-            onChange={(e) => patch({ primary: e.target.value })}
-            className="h-8 w-full cursor-pointer rounded-lg border border-[var(--border-color)] bg-transparent"
-          />
-        </label>
-        <label className="flex flex-col gap-1 text-[10px] font-semibold text-[var(--text-tertiary)]">
-          Color 2
-          <input
-            type="color"
-            value={/^#/.test(resolved.secondary) ? resolved.secondary : '#f1f5f9'}
-            onChange={(e) => patch({ secondary: e.target.value })}
-            className="h-8 w-full cursor-pointer rounded-lg border border-[var(--border-color)] bg-transparent"
-          />
-        </label>
-        <label className="col-span-2 flex flex-col gap-1 text-[10px] font-semibold text-[var(--text-tertiary)] sm:col-span-1">
-          Etiqueta
-          <input
-            type="text"
-            value={resolved.badge || ''}
-            maxLength={24}
-            placeholder="Ej. ¡Nuevo!"
-            onChange={(e) => patch({ badge: e.target.value })}
-            className="rounded-lg border border-[var(--border-color)] bg-[var(--bg-secondary)] px-2 py-1.5 text-xs text-[var(--text-primary)]"
-          />
-        </label>
-      </div>
+      {!hidePalette && (
+        <PublishPalettePicker config={resolved} onChange={(next) => onChange({ templateId, config: next })} />
+      )}
 
-      <div>
-        <p className="m-0 mb-1.5 text-[10px] font-semibold text-[var(--text-tertiary)]">Paletas rápidas</p>
-        <div className="flex flex-wrap gap-1.5">
-          {(
-            [
-              ['#e11d48', '#fff1f2'],
-              ['#0f766e', '#ccfbf1'],
-              ['#1d4ed8', '#dbeafe'],
-              ['#c2410c', '#ffedd5'],
-              ['#7c3aed', '#ede9fe'],
-              ['#0f172a', '#fef3c7'],
-              ['#be123c', '#fff7ed'],
-              ['#0369a1', '#e0f2fe'],
-            ] as const
-          ).map(([p, s]) => (
-            <button
-              key={`${p}-${s}`}
-              type="button"
-              title="Aplicar paleta"
-              onClick={() => patch({ primary: p, secondary: s })}
-              className="h-7 w-7 overflow-hidden rounded-full ring-1 ring-[var(--border-color)]"
-              style={{
-                background: `linear-gradient(135deg, ${p} 0 50%, ${s} 50% 100%)`,
-              }}
-            />
-          ))}
-        </div>
-      </div>
+      <label className="flex flex-col gap-1 text-[10px] font-semibold text-[var(--text-tertiary)]">
+        Etiqueta en la portada
+        <input
+          type="text"
+          value={resolved.badge || ''}
+          maxLength={24}
+          placeholder="Ej. ¡Nuevo!"
+          onChange={(e) => patch({ badge: e.target.value })}
+          className="rounded-lg border border-[var(--border-color)] bg-[var(--bg-secondary)] px-2 py-1.5 text-xs text-[var(--text-primary)]"
+        />
+      </label>
 
       <div className="flex flex-wrap gap-2">
         <div className="flex overflow-hidden rounded-lg ring-1 ring-[var(--border-color)]">

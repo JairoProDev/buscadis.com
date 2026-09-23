@@ -27,6 +27,8 @@ import { publishPrimaryBtn, publishSecondaryBtn, publishCard } from './publish-u
 import { IconCamera, IconImage, IconLayers, IconMegaphone, IconMicrophone, IconVerified, IconX } from '@/components/Icons';
 import type { Adiso } from '@/types';
 import { FLYER_TEMPLATES, defaultFlyerForCategory, resolveFlyerConfig } from '@/lib/flyer/templates';
+import { getPaletteOverrides } from '@/lib/flyer/color-palettes';
+import PublishPalettePicker from '@/components/publish/PublishPalettePicker';
 import { exportAndUploadFlyer } from '@/lib/flyer/export-client';
 import type { FlyerConfig, FlyerTemplateId } from '@/lib/flyer/types';
 import FlyerCanvas from '@/components/flyer/FlyerCanvas';
@@ -629,10 +631,13 @@ export default function PublishStudio({
 
   const flyerDefaults = defaultFlyerForCategory(draft.categoria);
   const exportTemplateId = draft.flyerTemplateId || flyerDefaults.templateId;
+  const paletteOverrides = getPaletteOverrides(draft.flyerConfig);
   const exportConfig = resolveFlyerConfig(
     draft.categoria,
     exportTemplateId,
-    draft.flyerConfig || flyerDefaults.config
+    paletteOverrides
+      ? { ...draft.flyerConfig, ...paletteOverrides }
+      : draft.flyerConfig || flyerDefaults.config,
   );
   const exportContent = buildFlyerContent({
     titulo: draft.titulo || 'Aviso en Buscadis',
@@ -892,28 +897,33 @@ export default function PublishStudio({
 
           <div className="shrink-0 border-t border-[var(--border-color)] bg-[var(--bg-primary)] pb-[max(0.35rem,env(safe-area-inset-bottom))]">
             {showTemplates && (
-              <div className={immersive ? 'shrink-0 px-3 pb-2' : 'max-h-[42vh] overflow-y-auto border-b border-[var(--border-color)] px-3 py-3'}>
+              <div className={immersive ? 'shrink-0 space-y-2 px-3 pb-2' : 'max-h-[42vh] overflow-y-auto border-b border-[var(--border-color)] px-3 py-3'}>
+                <PublishPalettePicker
+                  compact={immersive}
+                  config={exportConfig}
+                  onChange={(flyerConfig) => setDraft({ flyerConfig })}
+                />
                 {immersive ? (
                   <div className="flex gap-2 overflow-x-auto pb-1">
                     {FLYER_TEMPLATES.map((template) => {
                       const selected = template.id === exportTemplateId;
+                      const thumbConfig = resolveFlyerConfig(
+                        draft.categoria,
+                        template.id,
+                        paletteOverrides ? { ...draft.flyerConfig, ...paletteOverrides } : undefined,
+                      );
                       return (
                         <button
                           key={template.id}
                           type="button"
-                          onClick={() =>
-                            setDraft({
-                              flyerTemplateId: template.id,
-                              flyerConfig: resolveFlyerConfig(draft.categoria, template.id),
-                            })
-                          }
+                          onClick={() => setDraft({ flyerTemplateId: template.id })}
                           className="shrink-0"
                           aria-label={template.label}
                         >
                           <TemplateThumb selected={selected}>
                             <FlyerCanvas
                               templateId={template.id}
-                              config={resolveFlyerConfig(draft.categoria, template.id)}
+                              config={thumbConfig}
                               content={exportContent}
                               className="pointer-events-none h-full w-full"
                             />
@@ -928,6 +938,7 @@ export default function PublishStudio({
                   config={exportConfig}
                   content={exportContent}
                   hidePreview
+                  hidePalette
                   onChange={(next) =>
                     setDraft({ flyerTemplateId: next.templateId, flyerConfig: next.config })
                   }

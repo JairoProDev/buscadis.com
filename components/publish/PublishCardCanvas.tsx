@@ -10,6 +10,7 @@ import {
   type PublishDraft,
 } from '@/lib/publish/publish-draft-types';
 import type { FlyerConfig, FlyerTemplateId } from '@/lib/flyer/types';
+import { softWashFromAccent } from '@/lib/flyer/templates';
 import { categoryAsksLocation } from '@/lib/publish/category-tree';
 
 const COLORS = ['#53acc5', '#111827', '#ffffff', '#b91c1c', '#166534', '#1d4ed8', '#c2410c', '#7c3aed'];
@@ -374,7 +375,9 @@ function CardPiece({
               aria-label={swatch}
               className="h-5 w-5 rounded-full ring-1 ring-black/15"
               style={{ background: swatch, outline: color === swatch ? '2px solid var(--brand-blue)' : undefined }}
-              onClick={() => onFlyer?.({ primary: swatch })}
+              onClick={() =>
+                onFlyer?.({ primary: swatch, paletteId: 'custom', secondary: softWashFromAccent(swatch) })
+              }
             />
           ))}
         </div>

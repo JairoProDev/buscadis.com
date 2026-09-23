@@ -19,6 +19,8 @@ export type FlyerTemplateId =
   | 'corner-mark';
 
 export type FlyerConfig = {
+  /** Paleta global elegida por el anunciante; al estar definida, primary/secondary aplican a todas las plantillas. */
+  paletteId?: string;
   primary?: string;
   secondary?: string;
   align?: 'left' | 'center';
