@@ -759,6 +759,8 @@ export default function PublishStudio({
                           analyzing={analyzing}
                           autoDownload={autoDownload}
                           onAutoDownloadChange={setAutoDownload}
+                          photoUrl={heroUrl}
+                          onAddPhoto={() => galleryInputRef.current?.click()}
                         />
                       </div>
                     )}
@@ -867,6 +869,8 @@ export default function PublishStudio({
               onEnhanceField={handleEnhanceField}
               enhancingField={enhancingField}
               analyzing={analyzing}
+              photoUrl={heroUrl}
+              onAddPhoto={() => galleryInputRef.current?.click()}
               autoDownload={autoDownload}
               onAutoDownloadChange={setAutoDownload}
             />
