@@ -11,7 +11,7 @@ import {
   FaFileExcel, FaDownload, FaLightbulb, FaSyncAlt, FaBolt, FaTag, FaEyeSlash, FaLayerGroup, FaSquare,
   FaSort, FaSortAmountDown, FaSortAmountUp, FaVideo, FaPaperPlane, FaBell, FaMoon, FaSun, FaUser, FaHandPointUp,
   FaCog, FaSignOutAlt, FaCompass, FaUserTie, FaUserCog, FaUserEdit, FaEllipsisV,
-  FaHandshake, FaUserPlus, FaUndo, FaRedo
+  FaHandshake, FaUserPlus, FaUndo, FaRedo, FaCrop, FaFont, FaPencilAlt, FaSmile
 } from 'react-icons/fa';
 import { FcGoogle } from 'react-icons/fc';
 import { MdCenterFocusWeak } from 'react-icons/md';
@@ -219,6 +219,10 @@ export const IconMinus = (p: IconProps) => <FaMinus size={getSize(p)} color={p.c
 export const IconAlertTriangle = (p: IconProps) => <FaExclamationTriangle size={getSize(p)} color={p.color || 'currentColor'} className={p.className} onClick={p.onClick} />;
 export const IconFileSpreadsheet = (p: IconProps) => <FaFileExcel size={getSize(p)} color={p.color || 'currentColor'} className={p.className} onClick={p.onClick} />;
 export const IconDownload = (p: IconProps) => <FaDownload size={getSize(p)} color={p.color || 'currentColor'} className={p.className} onClick={p.onClick} />;
+export const IconCrop = (p: IconProps) => <FaCrop size={getSize(p)} color={p.color || 'currentColor'} className={p.className} onClick={p.onClick} />;
+export const IconText = (p: IconProps) => <FaFont size={getSize(p)} color={p.color || 'currentColor'} className={p.className} onClick={p.onClick} />;
+export const IconPen = (p: IconProps) => <FaPencilAlt size={getSize(p)} color={p.color || 'currentColor'} className={p.className} onClick={p.onClick} />;
+export const IconSmile = (p: IconProps) => <FaSmile size={getSize(p)} color={p.color || 'currentColor'} className={p.className} onClick={p.onClick} />;
 export const IconLightbulb = (p: IconProps) => <FaLightbulb size={getSize(p)} color={p.color || 'currentColor'} className={p.className} onClick={p.onClick} />;
 export const IconRefresh = (p: IconProps) => <FaSyncAlt size={getSize(p)} color={p.color || 'currentColor'} className={p.className} onClick={p.onClick} />;
 export const IconZap = (p: IconProps) => <FaBolt size={getSize(p)} color={p.color || 'currentColor'} className={p.className} onClick={p.onClick} />;

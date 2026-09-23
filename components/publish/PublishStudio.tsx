@@ -22,16 +22,16 @@ import type { PublisherPreview } from './PublishPreviewCard';
 import { PublishDraft } from '@/lib/publish/publish-draft-types';
 import { hasMinimumContent } from '@/lib/publish/publish-draft-types';
 import { publishPrimaryBtn, publishSecondaryBtn, publishCard } from './publish-ui';
-import { IconCamera, IconChevronLeft, IconImage, IconLayers, IconMegaphone, IconMicrophone, IconRedo, IconUndo, IconX } from '@/components/Icons';
+import { IconCamera, IconImage, IconLayers, IconMegaphone, IconMicrophone, IconX } from '@/components/Icons';
 import type { Adiso } from '@/types';
-import { defaultFlyerForCategory } from '@/lib/flyer/templates';
+import { FLYER_TEMPLATES, defaultFlyerForCategory, resolveFlyerConfig } from '@/lib/flyer/templates';
 import { exportAndUploadFlyer } from '@/lib/flyer/export-client';
 import type { FlyerConfig, FlyerTemplateId } from '@/lib/flyer/types';
 import FlyerCanvas from '@/components/flyer/FlyerCanvas';
 import { buildFlyerContent } from '@/lib/flyer/layout';
-import { resolveFlyerConfig } from '@/lib/flyer/templates';
 import { downloadCoverImage } from '@/lib/publish/download-cover';
 import FlyerTemplatePicker from '@/components/flyer/FlyerTemplatePicker';
+import PublishCoverEditor, { type CoverTool, type PublishCoverEditorHandle } from './PublishCoverEditor';
 
 export const STORIES_REFRESH_EVENT = 'buscadis:stories-refresh';
 
@@ -103,6 +103,9 @@ export default function PublishStudio({
   const [showUpsell, setShowUpsell] = useState(false);
   const [showTemplates, setShowTemplates] = useState(false);
   const [confirmLeave, setConfirmLeave] = useState(false);
+  const [hd, setHd] = useState(true);
+  const [coverTool, setCoverTool] = useState<CoverTool>(null);
+  const coverEditorRef = useRef<PublishCoverEditorHandle>(null);
   const flyerExportRef = useRef<HTMLDivElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const galleryInputRef = useRef<HTMLInputElement>(null);
@@ -403,6 +406,19 @@ export default function PublishStudio({
         let flyerConfig = publishDraft.flyerConfig;
         let coverForDownload: string | null = imagenes[0] || null;
 
+        if (coverEditorRef.current?.hasEdits()) {
+          const blob = await coverEditorRef.current.exportJpeg();
+          if (blob) {
+            const baked = await uploadPublishImage(
+              new File([blob], `portada-${Date.now()}.jpg`, { type: 'image/jpeg' }),
+            );
+            if (baked) {
+              imagenes = [baked, ...imagenes.slice(1)];
+              coverForDownload = baked;
+            }
+          }
+        }
+
         if (imagenes.length === 0) {
           const defaults = defaultFlyerForCategory(publishDraft.categoria);
           flyerTemplateId = flyerTemplateId || defaults.templateId;
@@ -486,6 +502,7 @@ export default function PublishStudio({
       setStep,
       publisher,
       autoDownload,
+      uploadPublishImage,
     ]
   );
 
@@ -554,47 +571,59 @@ export default function PublishStudio({
         </div>
       )}
 
-      {immersive && onClose && (
-        <div className="pointer-events-none absolute inset-x-0 top-0 z-20 flex items-center justify-between px-1 pt-[max(0.25rem,env(safe-area-inset-top))]">
-          <button
-            type="button"
-            onClick={requestLeave}
-            className="pointer-events-auto flex h-10 w-10 items-center justify-center text-[var(--text-primary)] drop-shadow-[0_1px_1px_rgba(255,255,255,0.85)]"
-            aria-label="Volver"
-            title="Volver"
-          >
-            <IconChevronLeft size={22} />
-          </button>
-          <div className="pointer-events-auto flex items-center">
-            <button
-              type="button"
-              onClick={undo}
-              disabled={!canUndo}
-              className="flex h-10 w-10 items-center justify-center text-[var(--text-primary)] drop-shadow-[0_1px_1px_rgba(255,255,255,0.85)] disabled:opacity-30"
-              aria-label="Deshacer"
-              title="Deshacer"
-            >
-              <IconUndo size={16} />
-            </button>
-            <button
-              type="button"
-              onClick={redo}
-              disabled={!canRedo}
-              className="flex h-10 w-10 items-center justify-center text-[var(--text-primary)] drop-shadow-[0_1px_1px_rgba(255,255,255,0.85)] disabled:opacity-30"
-              aria-label="Rehacer"
-              title="Rehacer"
-            >
-              <IconRedo size={16} />
-            </button>
-          </div>
-        </div>
-      )}
-
       {!immersive && <PublishStepIndicator step={stepNumber} />}
 
       {step === 'compose' && (
         <div className="flex min-h-0 flex-1 flex-col">
-          <div className="min-h-0 flex-1 overflow-y-auto px-3 pb-3">
+          <div className={immersive ? 'flex min-h-0 flex-1 flex-col overflow-hidden' : 'min-h-0 flex-1 overflow-y-auto px-3 pb-3'}>
+            {immersive ? (
+              <PublishCoverEditor
+                ref={coverEditorRef}
+                hd={hd}
+                onToggleHd={() => {
+                  setHd((on) => {
+                    onNotify?.(on ? 'Calidad estándar' : 'Alta calidad al guardar', 'info');
+                    return !on;
+                  });
+                }}
+                onLeave={requestLeave}
+                onNotify={onNotify}
+                heroUrl={heroUrl}
+                titulo={draft.titulo}
+                descripcion={draft.descripcion}
+                onTitle={(value) => setDraft({ titulo: value })}
+                onDescription={(value) => setDraft({ descripcion: value })}
+                autoDownload={autoDownload}
+                onAutoDownload={setAutoDownload}
+                onReplaceCover={async (file) => {
+                  const url = await uploadPublishImage(file);
+                  if (!url) return;
+                  setDraft((prev) => ({
+                    ...prev,
+                    imagenes: [url, ...prev.imagenes.slice(1)],
+                  }));
+                }}
+                tool={coverTool}
+                onTool={(next) => {
+                  setCoverTool(next);
+                  if (next) setShowTemplates(false);
+                }}
+              >
+                {heroUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={heroUrl} alt="" crossOrigin="anonymous" className="h-full w-full object-cover" />
+                ) : (
+                  <div className="absolute inset-0">
+                    <FlyerCanvas
+                      templateId={exportTemplateId}
+                      config={exportConfig}
+                      content={exportContent}
+                      className="h-full w-full"
+                    />
+                  </div>
+                )}
+              </PublishCoverEditor>
+            ) : (
             <div className="relative mb-3 aspect-square w-full overflow-hidden rounded-2xl bg-[var(--bg-secondary)]">
               {heroUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
@@ -622,6 +651,7 @@ export default function PublishStudio({
                 </button>
               )}
             </div>
+            )}
 
             <input
               ref={cameraInputRef}
@@ -651,7 +681,7 @@ export default function PublishStudio({
               </p>
             )}
 
-            {draft.imagenes.length > 1 && (
+            {!immersive && draft.imagenes.length > 1 && (
               <div className="mb-3 flex gap-2 overflow-x-auto pb-1">
                 {draft.imagenes.slice(1).map((url) => (
                   <div key={url} className="relative h-16 w-16 shrink-0 overflow-hidden rounded-xl ring-1 ring-[var(--border-color)]">
@@ -670,12 +700,13 @@ export default function PublishStudio({
               </div>
             )}
 
-            {draft.missingFields.length > 0 && (
+            {!immersive && draft.missingFields.length > 0 && (
               <div className="mb-3">
                 <PublishAIQuestions draft={draft} onAnswer={handleAiAnswer} />
               </div>
             )}
 
+            {!immersive && (
             <PublishFormCompact
               draft={draft}
               onChange={setDraft}
@@ -688,8 +719,9 @@ export default function PublishStudio({
               autoDownload={autoDownload}
               onAutoDownloadChange={setAutoDownload}
             />
+            )}
 
-            {showChat && (
+            {!immersive && showChat && (
               <PublishFixedChatBar
                 onSend={handleChatSend}
                 onUploadImage={uploadPublishImage}
@@ -702,7 +734,44 @@ export default function PublishStudio({
 
           <div className="shrink-0 border-t border-[var(--border-color)] bg-[var(--bg-primary)] pb-[max(0.35rem,env(safe-area-inset-bottom))]">
             {showTemplates && (
-              <div className="max-h-[42vh] overflow-y-auto border-b border-[var(--border-color)] px-3 py-3">
+              <div className={immersive ? 'shrink-0 px-3 pb-2' : 'max-h-[42vh] overflow-y-auto border-b border-[var(--border-color)] px-3 py-3'}>
+                {immersive ? (
+                  <div className="flex gap-2 overflow-x-auto pb-1">
+                    {FLYER_TEMPLATES.map((template) => {
+                      const selected = template.id === exportTemplateId;
+                      return (
+                        <button
+                          key={template.id}
+                          type="button"
+                          onClick={() =>
+                            setDraft({
+                              flyerTemplateId: template.id,
+                              flyerConfig: resolveFlyerConfig(draft.categoria, template.id, {
+                                ...exportConfig,
+                                ...template.defaultConfig,
+                              }),
+                            })
+                          }
+                          className={`w-14 shrink-0 overflow-hidden rounded-xl ring-2 ${
+                            selected ? 'ring-[var(--brand-blue)]' : 'ring-transparent'
+                          }`}
+                          aria-label={template.label}
+                        >
+                          <FlyerCanvas
+                            templateId={template.id}
+                            config={resolveFlyerConfig(draft.categoria, template.id, {
+                              ...exportConfig,
+                              ...template.defaultConfig,
+                            })}
+                            content={exportContent}
+                            density="compact"
+                            className="pointer-events-none"
+                          />
+                        </button>
+                      );
+                    })}
+                  </div>
+                ) : (
                 <FlyerTemplatePicker
                   templateId={exportTemplateId}
                   config={exportConfig}
@@ -712,22 +781,16 @@ export default function PublishStudio({
                     setDraft({ flyerTemplateId: next.templateId, flyerConfig: next.config })
                   }
                 />
+                )}
               </div>
             )}
-            <div className="flex items-center justify-center gap-3 px-3 py-2">
+            <div className="flex items-center justify-between px-4 py-2">
               <button
                 type="button"
-                onClick={() => galleryInputRef.current?.click()}
-                disabled={uploadingImage || analyzing}
-                className="flex h-12 w-12 items-center justify-center rounded-full bg-[var(--bg-secondary)] text-[var(--text-primary)] disabled:opacity-40"
-                aria-label="Subir foto"
-                title="Subir foto"
-              >
-                <IconImage size={20} />
-              </button>
-              <button
-                type="button"
-                onClick={() => setShowTemplates((open) => !open)}
+                onClick={() => {
+                  setShowTemplates((open) => !open);
+                  setCoverTool(null);
+                }}
                 className={`flex h-12 w-12 items-center justify-center rounded-full ${
                   showTemplates
                     ? 'bg-[var(--brand-blue)] text-white'
@@ -739,6 +802,7 @@ export default function PublishStudio({
               >
                 <IconLayers size={20} />
               </button>
+              <div className="flex items-center gap-3">
               <button
                 type="button"
                 onClick={() => cameraInputRef.current?.click()}
@@ -748,6 +812,16 @@ export default function PublishStudio({
                 title="Tomar foto"
               >
                 <IconCamera size={24} />
+              </button>
+              <button
+                type="button"
+                onClick={() => galleryInputRef.current?.click()}
+                disabled={uploadingImage || analyzing}
+                className="flex h-12 w-12 items-center justify-center rounded-full bg-[var(--bg-secondary)] text-[var(--text-primary)] disabled:opacity-40"
+                aria-label="Subir foto"
+                title="Subir foto"
+              >
+                <IconImage size={20} />
               </button>
               <button
                 type="button"
@@ -774,6 +848,7 @@ export default function PublishStudio({
               >
                 <IconMegaphone size={20} />
               </button>
+              </div>
             </div>
           </div>
 
