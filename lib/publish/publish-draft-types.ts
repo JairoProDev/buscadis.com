@@ -39,7 +39,25 @@ export interface PublishDraft {
 
   /** Texto, stickers y trazos sobre la portada. Entra en deshacer/rehacer. */
   coverOverlay?: PublishCoverOverlay;
+
+  /** Posición de cada pieza sobre el card. x/y son fracción del cuadrado. */
+  cardLayout?: Partial<Record<CardPieceId, CardPieceLayout>>;
 }
+
+export type CardPieceId = 'categoria' | 'titulo' | 'precio' | 'ubicacion';
+
+export interface CardPieceLayout {
+  x: number;
+  y: number;
+  scale: number;
+}
+
+export const DEFAULT_CARD_LAYOUT: Record<CardPieceId, CardPieceLayout> = {
+  categoria: { x: 0.08, y: 0.08, scale: 1 },
+  titulo: { x: 0.08, y: 0.3, scale: 1 },
+  precio: { x: 0.08, y: 0.58, scale: 1 },
+  ubicacion: { x: 0.08, y: 0.78, scale: 1 },
+};
 
 export interface PublishCoverOverlay {
   texts: Array<{

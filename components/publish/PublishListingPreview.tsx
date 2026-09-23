@@ -22,10 +22,6 @@ interface PublishListingPreviewProps {
   onFlyer?: (patch: Partial<FlyerConfig>) => void;
 }
 
-const CARD_COLORS = ['#53acc5', '#111827', '#b91c1c', '#166534', '#1d4ed8', '#c2410c', '#7c3aed'];
-
-type Piece = 'categoria' | 'subcategoria' | 'titulo' | 'precio' | 'ubicacion' | 'descripcion' | `attr:${string}`;
-
 function priceLabel(precio?: number) {
   if (!precio || precio <= 0) return '';
   return `S/ ${precio.toLocaleString('es-PE')}`;
@@ -81,29 +77,43 @@ function AttributeField({
   value: string | boolean | number | undefined;
   onChange: (value: string | boolean | number) => void;
 }) {
+  const [open, setOpen] = useState(false);
   if (field.type === 'chips' && field.options) {
+    const current = field.options.find((option) => option.value === value)?.label;
     return (
-      <div className="mt-3">
-        <p className="m-0 mb-1 text-xs font-bold uppercase tracking-wide text-[var(--text-tertiary)]">{field.label}</p>
-        <div className="flex flex-wrap gap-1.5">
-          {field.options.map((option) => {
-            const selected = value === option.value;
-            return (
-              <button
-                key={option.value}
-                type="button"
-                onClick={() => onChange(option.value)}
-                className={`rounded-full px-3 py-1 text-xs font-bold ${
-                  selected
-                    ? 'bg-[var(--brand-blue)] text-white'
-                    : 'bg-[var(--bg-primary)] text-[var(--text-secondary)] ring-1 ring-[var(--border-color)]'
-                }`}
-              >
-                {option.label}
-              </button>
-            );
-          })}
-        </div>
+      <div className="mt-2">
+        {!open ? (
+          <button
+            type="button"
+            onClick={() => setOpen(true)}
+            className={`text-left text-sm ${current ? 'text-[var(--text-primary)]' : 'text-[var(--text-tertiary)]'}`}
+          >
+            {current || field.label}
+          </button>
+        ) : (
+          <div className="flex gap-2 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            {field.options.map((option) => {
+              const selected = value === option.value;
+              return (
+                <button
+                  key={option.value}
+                  type="button"
+                  onClick={() => {
+                    onChange(option.value);
+                    setOpen(false);
+                  }}
+                  className={`shrink-0 whitespace-nowrap rounded-full border px-3 py-1.5 text-sm ${
+                    selected
+                      ? 'border-[var(--text-primary)] bg-[var(--text-primary)] text-[var(--bg-primary)]'
+                      : 'border-[var(--border-color)] bg-[var(--bg-primary)] text-[var(--text-primary)]'
+                  }`}
+                >
+                  {option.label}
+                </button>
+              );
+            })}
+          </div>
+        )}
       </div>
     );
   }
@@ -131,15 +141,15 @@ function AttributeField({
   );
 }
 
+const fieldClass =
+  'w-full bg-transparent outline-none placeholder:text-[var(--text-tertiary)]';
+
 export default function PublishListingPreview({
   draft,
   onChange,
   onSetAtributo,
-  flyerConfig,
-  onFlyer,
 }: PublishListingPreviewProps) {
-  const [selected, setSelected] = useState<Piece | null>(null);
-  const [scales, setScales] = useState<Partial<Record<Piece, number>>>({});
+  const [open, setOpen] = useState<'categoria' | 'subcategoria' | null>(null);
   const subs = draft.categoria ? getSubcategories(draft.categoria) : [];
   const extraFields = getPublishFieldsForCategory(draft.categoria, draft.subcategoria);
   const showLocation = categoryAsksLocation(
@@ -147,297 +157,156 @@ export default function PublishListingPreview({
     draft.subcategoria,
     Boolean(draft.atributos.productos_entrega),
   );
-  const price = priceLabel(draft.precio);
-  const location = locationLabel(draft.ubicacion);
-  const subLabel = subs.find((item) => item.id === draft.subcategoria)?.label;
-  const categoryLabel = PUBLISH_CATEGORIAS.find((item) => item.value === draft.categoria)?.label;
+  const category = PUBLISH_CATEGORIAS.find((item) => item.value === draft.categoria);
   const CategoryIcon = draft.categoria ? getCategoriaIcon(draft.categoria) : null;
-
-  const scaleOf = (piece: Piece) => scales[piece] ?? 1;
-  const resize = (piece: Piece, delta: number) => {
-    setScales((current) => {
-      const next = Math.min(1.8, Math.max(0.75, (current[piece] ?? 1) + delta));
-      return { ...current, [piece]: next };
-    });
-    if (piece === 'titulo') {
-      const next = (scales.titulo ?? 1) + delta;
-      onFlyer?.({ titleScale: next > 1.2 ? 'l' : next < 0.9 ? 's' : 'm' });
-    }
-  };
-
-  const frame = (piece: Piece) =>
-    selected === piece ? 'relative rounded-xl ring-2 ring-[var(--brand-blue)] ring-offset-2' : 'relative rounded-xl';
+  const subLabel = subs.find((item) => item.id === draft.subcategoria)?.label;
 
   return (
     <div className="px-4 pb-6 pt-3">
-      <div className="flex flex-wrap gap-2">
-        <button type="button" onClick={() => setSelected('categoria')} className={`${frame('categoria')} inline-flex items-center gap-1.5 px-2 py-1`}>
-          {CategoryIcon ? <CategoryIcon size={16} /> : null}
-          <span className="text-sm font-bold text-[var(--text-primary)]">{categoryLabel || 'Categoría'}</span>
-          {selected === 'categoria' && <ResizeHandle onResize={(delta) => resize('categoria', delta)} />}
-        </button>
-        {draft.categoria && (
-          <button type="button" onClick={() => setSelected('subcategoria')} className={`${frame('subcategoria')} px-2 py-1 text-sm font-semibold text-[var(--text-secondary)]`}>
-            {subLabel || 'Subcategoría'}
-            {selected === 'subcategoria' && <ResizeHandle onResize={(delta) => resize('subcategoria', delta)} />}
-          </button>
-        )}
-      </div>
-
-      <button
-        type="button"
-        onClick={() => setSelected('titulo')}
-        className={`${frame('titulo')} mt-2 block w-full px-1 text-left font-extrabold leading-tight tracking-tight ${
-          draft.titulo?.trim() ? 'text-[var(--text-primary)]' : 'text-[var(--text-tertiary)]'
-        }`}
-        style={{ fontSize: `${1.5 * scaleOf('titulo')}rem`, color: flyerConfig?.primary }}
-      >
-        {draft.titulo?.trim() || 'Título'}
-        {selected === 'titulo' && <ResizeHandle onResize={(delta) => resize('titulo', delta)} />}
-      </button>
-
-      <button
-        type="button"
-        onClick={() => setSelected('precio')}
-        className={`${frame('precio')} mt-2 block px-1 text-left font-black ${
-          price ? 'text-[var(--brand-blue)]' : 'text-[var(--text-tertiary)]'
-        }`}
-        style={{ fontSize: `${1.85 * scaleOf('precio')}rem`, color: price ? flyerConfig?.primary || 'var(--brand-blue)' : undefined }}
-      >
-        {price || 'Precio'}
-        {selected === 'precio' && <ResizeHandle onResize={(delta) => resize('precio', delta)} />}
-      </button>
-
-      {showLocation && (
+      <div className="flex items-center gap-2">
         <button
           type="button"
-          onClick={() => setSelected('ubicacion')}
-          className={`${frame('ubicacion')} mt-3 flex w-full items-center gap-1.5 px-1 text-left text-sm text-[var(--text-secondary)]`}
-          style={{ fontSize: `${0.9 * scaleOf('ubicacion')}rem` }}
+          onClick={() => {
+            if (open === 'categoria') {
+              setOpen(subs.length > 0 && !draft.subcategoria ? 'subcategoria' : null);
+              return;
+            }
+            setOpen('categoria');
+          }}
+          className="inline-flex items-center gap-1.5 text-sm font-bold text-[var(--text-primary)]"
         >
-          <IconLocation size={16} color="var(--brand-blue)" />
-          <span>{location || 'Ubicación'}</span>
-          {selected === 'ubicacion' && <ResizeHandle onResize={(delta) => resize('ubicacion', delta)} />}
+          {CategoryIcon ? <CategoryIcon size={16} /> : null}
+          {category?.label || 'Categoría'}
         </button>
+        {subLabel && (
+          <button
+            type="button"
+            onClick={() => setOpen(open === 'subcategoria' ? null : 'subcategoria')}
+            className="text-sm text-[var(--text-secondary)]"
+          >
+            {subLabel}
+          </button>
+        )}
+      </div>
+
+      {open === 'categoria' && (
+        <div className="-mx-4 mt-2 flex gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          {PUBLISH_CATEGORIAS.map((item) => {
+            const Icon = getCategoriaIcon(item.value);
+            const active = draft.categoria === item.value;
+            return (
+              <button
+                key={item.value}
+                type="button"
+                onClick={() => {
+                  const nextSubs = getSubcategories(item.value);
+                  onChange({
+                    categoria: item.value as Categoria,
+                    subcategoria: undefined,
+                    subsubcategoria: undefined,
+                  });
+                  setOpen(nextSubs.length > 0 ? 'subcategoria' : null);
+                }}
+                className={`inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full border border-[var(--border-color)] px-3 py-1.5 text-sm ${
+                  active
+                    ? 'bg-[var(--text-primary)] text-[var(--bg-primary)]'
+                    : 'bg-[var(--bg-primary)] text-[var(--text-primary)]'
+                }`}
+              >
+                <Icon size={15} color={active ? 'var(--bg-primary)' : 'var(--text-primary)'} />
+                {item.label}
+              </button>
+            );
+          })}
+        </div>
       )}
 
-      {extraFields.map((item) => {
-        const raw = draft.atributos[item.id];
-        const shown = item.type === 'toggle'
-          ? (raw ? item.label : '')
-          : item.options?.find((option) => option.value === raw)?.label || (raw ? String(raw) : '');
-        const piece = `attr:${item.id}` as Piece;
-        return (
-          <button
-            key={item.id}
-            type="button"
-            onClick={() => setSelected(piece)}
-            className={`${frame(piece)} mt-2 block w-full px-1 text-left text-sm ${shown ? 'text-[var(--text-primary)]' : 'text-[var(--text-tertiary)]'}`}
-          >
-            {shown || item.label}
-            {selected === piece && <ResizeHandle onResize={(delta) => resize(piece, delta)} />}
-          </button>
-        );
-      })}
-
-      <button
-        type="button"
-        onClick={() => setSelected('descripcion')}
-        className={`${frame('descripcion')} mt-4 block w-full whitespace-pre-wrap px-1 text-left leading-relaxed ${
-          draft.descripcion?.trim() ? 'text-[var(--text-secondary)]' : 'text-[var(--text-tertiary)]'
-        }`}
-        style={{ fontSize: `${1 * scaleOf('descripcion')}rem` }}
-      >
-        {draft.descripcion?.trim() || 'Descripción'}
-        {selected === 'descripcion' && <ResizeHandle onResize={(delta) => resize('descripcion', delta)} />}
-      </button>
-
-      {selected && (
-        <aside className="fixed bottom-24 right-3 top-24 z-[80] flex w-44 flex-col gap-2 overflow-y-auto rounded-2xl bg-[var(--bg-primary)] p-3 shadow-xl ring-1 ring-[var(--border-color)]">
-          <SideOptions
-            selected={selected}
-            draft={draft}
-            subs={subs}
-            extraFields={extraFields}
-            flyerConfig={flyerConfig}
-            onChange={onChange}
-            onSetAtributo={onSetAtributo}
-            onFlyer={onFlyer}
-            onDetect={() => void detectLocation(onChange)}
-          />
-        </aside>
+      {open === 'subcategoria' && subs.length > 0 && (
+        <div className="-mx-4 mt-2 flex gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          {subs.map((item) => {
+            const active = draft.subcategoria === item.id;
+            return (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => {
+                  onChange({ subcategoria: item.id, subsubcategoria: undefined });
+                  setOpen(null);
+                }}
+                className={`shrink-0 whitespace-nowrap rounded-full border px-3 py-1.5 text-sm ${
+                  active
+                    ? 'border-[var(--text-primary)] bg-[var(--text-primary)] text-[var(--bg-primary)]'
+                    : 'border-[var(--border-color)] bg-[var(--bg-primary)] text-[var(--text-primary)]'
+                }`}
+              >
+                {item.label}
+              </button>
+            );
+          })}
+        </div>
       )}
-    </div>
-  );
-}
 
-function ResizeHandle({ onResize }: { onResize: (delta: number) => void }) {
-  return (
-    <span
-      role="slider"
-      aria-label="Redimensionar"
-      aria-valuemin={0}
-      aria-valuemax={100}
-      aria-valuenow={50}
-      className="absolute -bottom-1.5 -right-1.5 z-10 h-4 w-4 cursor-nwse-resize rounded-sm border-2 border-[var(--brand-blue)] bg-white"
-      onPointerDown={(event) => {
-        event.stopPropagation();
-        event.preventDefault();
-        const start = event.clientY;
-        let last = start;
-        const move = (next: PointerEvent) => {
-          onResize((last - next.clientY) / 80);
-          last = next.clientY;
-        };
-        const up = () => {
-          window.removeEventListener('pointermove', move);
-          window.removeEventListener('pointerup', up);
-        };
-        window.addEventListener('pointermove', move);
-        window.addEventListener('pointerup', up);
-      }}
-    />
-  );
-}
+      <input
+        value={draft.titulo || ''}
+        onChange={(event) => onChange({ titulo: event.target.value })}
+        placeholder="Título"
+        maxLength={120}
+        aria-label="Título"
+        className={`${fieldClass} mt-3 text-2xl font-extrabold leading-tight tracking-tight text-[var(--text-primary)]`}
+      />
 
-function SideOptions({
-  selected,
-  draft,
-  subs,
-  extraFields,
-  flyerConfig,
-  onChange,
-  onSetAtributo,
-  onFlyer,
-  onDetect,
-}: {
-  selected: Piece;
-  draft: PublishDraft;
-  subs: ReturnType<typeof getSubcategories>;
-  extraFields: PublishFieldDefinition[];
-  flyerConfig?: FlyerConfig;
-  onChange: (patch: Partial<PublishDraft>) => void;
-  onSetAtributo: (fieldId: string, value: string | boolean | number) => void;
-  onFlyer?: (patch: Partial<FlyerConfig>) => void;
-  onDetect: () => void;
-}) {
-  if (selected === 'categoria') {
-    return (
-      <div className="flex flex-col gap-1">
-        {PUBLISH_CATEGORIAS.map((item) => {
-          const Icon = getCategoriaIcon(item.value);
-          const active = draft.categoria === item.value;
-          return (
-            <button
-              key={item.value}
-              type="button"
-              onClick={() => onChange({ categoria: item.value as Categoria, subcategoria: undefined, subsubcategoria: undefined })}
-              className={`flex items-center gap-2 rounded-xl px-2 py-2 text-left text-sm font-semibold ${
-                active ? 'bg-[var(--text-primary)] text-[var(--bg-primary)]' : 'text-[var(--text-primary)]'
-              }`}
-            >
-              <Icon size={16} color={active ? 'var(--bg-primary)' : 'var(--text-primary)'} />
-              {item.label}
-            </button>
-          );
-        })}
-      </div>
-    );
-  }
-  if (selected === 'subcategoria') {
-    return (
-      <div className="flex flex-col gap-1">
-        {subs.map((item) => (
-          <button
-            key={item.id}
-            type="button"
-            onClick={() => onChange({ subcategoria: item.id, subsubcategoria: undefined })}
-            className={`rounded-xl px-2 py-2 text-left text-sm font-semibold ${
-              draft.subcategoria === item.id ? 'bg-[var(--brand-blue)] text-white' : 'text-[var(--text-primary)]'
-            }`}
-          >
-            {item.label}
-          </button>
-        ))}
-      </div>
-    );
-  }
-  if (selected === 'titulo' || selected === 'descripcion' || selected === 'ubicacion' || selected === 'precio') {
-    return (
-      <div className="flex flex-col gap-2">
-        {selected === 'titulo' && (
-          <textarea
-            value={draft.titulo || ''}
-            onChange={(event) => onChange({ titulo: event.target.value })}
-            placeholder="Título"
-            rows={3}
-            className="w-full resize-none rounded-xl bg-[var(--bg-secondary)] px-2 py-2 text-sm outline-none"
-          />
-        )}
-        {selected === 'descripcion' && (
-          <textarea
-            value={draft.descripcion || ''}
-            onChange={(event) => onChange({ descripcion: event.target.value })}
-            placeholder="Descripción"
-            rows={5}
-            className="w-full resize-none rounded-xl bg-[var(--bg-secondary)] px-2 py-2 text-sm outline-none"
-          />
-        )}
-        {selected === 'precio' && (
+      <input
+        inputMode="decimal"
+        value={draft.precio ?? ''}
+        onChange={(event) =>
+          onChange({
+            precio: event.target.value ? Number(event.target.value) : undefined,
+            tipoPrecio: 'fijo',
+          })
+        }
+        placeholder={priceLabel(draft.precio) || 'Precio'}
+        aria-label="Precio"
+        className={`${fieldClass} mt-1 text-3xl font-black text-[var(--brand-blue)]`}
+      />
+
+      {showLocation && (
+        <div className="mt-3 flex items-center gap-1.5 text-sm text-[var(--text-secondary)]">
+          <IconLocation size={16} color="var(--brand-blue)" />
           <input
-            inputMode="decimal"
-            value={draft.precio ?? ''}
-            onChange={(event) => onChange({ precio: event.target.value ? Number(event.target.value) : undefined, tipoPrecio: 'fijo' })}
-            placeholder="Precio"
-            className="w-full rounded-xl bg-[var(--bg-secondary)] px-2 py-2 text-sm outline-none"
+            value={typeof draft.ubicacion === 'string' ? draft.ubicacion : locationLabel(draft.ubicacion)}
+            onChange={(event) => onChange({ ubicacion: event.target.value })}
+            placeholder="Ubicación"
+            aria-label="Ubicación"
+            className={`${fieldClass} min-w-0 flex-1 text-sm text-[var(--text-secondary)]`}
           />
-        )}
-        {selected === 'ubicacion' && (
-          <>
-            <input
-              value={typeof draft.ubicacion === 'string' ? draft.ubicacion : locationLabel(draft.ubicacion)}
-              onChange={(event) => onChange({ ubicacion: event.target.value })}
-              placeholder="Ubicación"
-              className="w-full rounded-xl bg-[var(--bg-secondary)] px-2 py-2 text-sm outline-none"
-            />
-            <button type="button" onClick={onDetect} className="rounded-xl bg-[var(--brand-blue)] py-2 text-xs font-bold text-white">
-              Detectar en el mapa
-            </button>
-          </>
-        )}
-        {(selected === 'titulo' || selected === 'precio') && (
-          <div className="flex flex-col gap-2">
-            <div className="flex flex-wrap gap-1.5">
-              {CARD_COLORS.map((color) => (
-                <button
-                  key={color}
-                  type="button"
-                  aria-label={color}
-                  onClick={() => onFlyer?.({ primary: color })}
-                  className="h-6 w-6 rounded-full ring-1 ring-black/10"
-                  style={{ background: color, outline: flyerConfig?.primary === color ? '2px solid var(--brand-blue)' : undefined }}
-                />
-              ))}
-            </div>
-            <button
-              type="button"
-              onClick={() => onFlyer?.({ align: flyerConfig?.align === 'center' ? 'left' : 'center' })}
-              className="rounded-lg py-1 text-left text-xs font-bold text-[var(--text-secondary)]"
-            >
-              {flyerConfig?.align === 'center' ? 'Centrado' : 'A la izquierda'}
-            </button>
-          </div>
-        )}
-      </div>
-    );
-  }
-  const field = extraFields.find((item) => selected === `attr:${item.id}`);
-  if (!field) return null;
-  return (
-    <AttributeField
-      field={field}
-      value={draft.atributos[field.id] as string | boolean | number | undefined}
-      onChange={(value) => onSetAtributo(field.id, value)}
-    />
+          <button
+            type="button"
+            onClick={() => void detectLocation(onChange)}
+            className="shrink-0 rounded-full px-2 py-1 text-xs font-bold text-[var(--brand-blue)]"
+          >
+            Detectar
+          </button>
+        </div>
+      )}
+
+      {extraFields.map((item) => (
+        <AttributeField
+          key={item.id}
+          field={item}
+          value={draft.atributos[item.id] as string | boolean | number | undefined}
+          onChange={(value) => onSetAtributo(item.id, value)}
+        />
+      ))}
+
+      <textarea
+        value={draft.descripcion || ''}
+        onChange={(event) => onChange({ descripcion: event.target.value })}
+        placeholder="Descripción"
+        rows={4}
+        maxLength={2000}
+        aria-label="Descripción"
+        className={`${fieldClass} mt-4 resize-none text-base leading-relaxed text-[var(--text-secondary)]`}
+      />
+    </div>
   );
 }

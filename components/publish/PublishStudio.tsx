@@ -34,6 +34,7 @@ import { buildFlyerContent } from '@/lib/flyer/layout';
 import { downloadCoverImage } from '@/lib/publish/download-cover';
 import FlyerTemplatePicker from '@/components/flyer/FlyerTemplatePicker';
 import PublishCoverEditor, { type CoverTool, type PublishCoverEditorHandle } from './PublishCoverEditor';
+import PublishCardCanvas from './PublishCardCanvas';
 
 export const STORIES_REFRESH_EVENT = 'buscadis:stories-refresh';
 
@@ -485,14 +486,14 @@ export default function PublishStudio({
         let coverForDownload: string | null = imagenes[0] || null;
 
         const editor = coverEditorRef.current;
-        if (effectivePlan !== 'free' && editor && (editor.hasEdits() || editor.cropPending())) {
+        if (editor) {
           const blob = await editor.exportJpeg();
           if (blob) {
             const baked = await uploadPublishImage(
               new File([blob], `portada-${Date.now()}.jpg`, { type: 'image/jpeg' }),
             );
             if (baked) {
-              imagenes = [baked, ...imagenes.slice(1)];
+              imagenes = effectivePlan === 'free' ? [baked] : [baked, ...imagenes.filter((url) => url !== baked)];
               coverForDownload = baked;
             }
           }
@@ -764,19 +765,14 @@ export default function PublishStudio({
                   </>
                 }
               >
-                {heroUrl && draft.plan === 'paid' ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={heroUrl} alt="" crossOrigin="anonymous" className="h-full w-full object-cover" />
-                ) : (
-                  <div className="absolute inset-0">
-                    <FlyerCanvas
-                      templateId={exportTemplateId}
-                      config={exportConfig}
-                      content={exportContent}
-                      className="h-full w-full"
-                    />
-                  </div>
-                )}
+                <PublishCardCanvas
+                  heroUrl={heroUrl && draft.plan === 'paid' ? heroUrl : undefined}
+                  background={exportConfig.secondary || '#f8fafc'}
+                  color={exportConfig.primary || '#0f172a'}
+                  draft={draft}
+                  onFlyer={(patch) => setDraft({ flyerConfig: { ...exportConfig, ...patch } })}
+                  onLayout={(cardLayout, options) => setDraft({ cardLayout }, options)}
+                />
               </PublishCoverEditor>
             ) : (
             <div className="relative mb-3 aspect-square w-full overflow-hidden rounded-2xl bg-[var(--bg-secondary)]">
