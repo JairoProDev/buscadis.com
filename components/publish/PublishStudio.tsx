@@ -12,7 +12,6 @@ import {
 } from '@/hooks/usePublishDraft';
 import { usePublishActions } from '@/hooks/usePublishActions';
 import { getMyBusinessViaAPI } from '@/lib/business-api';
-import PublishPhotoZone from './PublishPhotoZone';
 import PublishFormCompact from './PublishFormCompact';
 import PublishReviewStep from './PublishReviewStep';
 import PublishCheckoutPanel from './PublishCheckoutPanel';
@@ -306,27 +305,6 @@ export default function PublishStudio({
       onNotify?.('No se pudo acceder al micrófono', 'error');
     }
   };
-
-  const handleEnhanceImage = useCallback(
-    async (url: string, action: string) => {
-      try {
-        const res = await fetch('/api/catalog/enhance-image', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ action, imageUrl: url }),
-        });
-        const data = await res.json();
-        if (data.url) {
-          removeImage(url);
-          addImage(data.url);
-          onNotify?.('Imagen mejorada', 'success');
-        }
-      } catch {
-        onNotify?.('No se pudo mejorar la imagen', 'error');
-      }
-    },
-    [addImage, removeImage, onNotify]
-  );
 
   const handleEnhanceField = useCallback(
     async (field: 'titulo' | 'descripcion') => {
@@ -630,19 +608,22 @@ export default function PublishStudio({
               </p>
             )}
 
-            {draft.imagenes.length > 0 && (
-              <div className="mb-3">
-                <PublishPhotoZone
-                  images={draft.imagenes}
-                  onAdd={handlePhotoAdded}
-                  onRemove={removeImage}
-                  onUpload={uploadPublishImage}
-                  onEnhance={handleEnhanceImage}
-                  uploading={uploadingImage}
-                  maxImages={10}
-                  allowEnhance
-                  flyerEnabled={false}
-                />
+            {draft.imagenes.length > 1 && (
+              <div className="mb-3 flex gap-2 overflow-x-auto pb-1">
+                {draft.imagenes.slice(1).map((url) => (
+                  <div key={url} className="relative h-16 w-16 shrink-0 overflow-hidden rounded-xl ring-1 ring-[var(--border-color)]">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={url} alt="" className="h-full w-full object-cover" />
+                    <button
+                      type="button"
+                      onClick={() => removeImage(url)}
+                      className="absolute right-1 top-1 flex h-5 w-5 items-center justify-center rounded-full bg-black/55 text-white"
+                      aria-label="Quitar foto"
+                    >
+                      <IconX size={10} />
+                    </button>
+                  </div>
+                ))}
               </div>
             )}
 
