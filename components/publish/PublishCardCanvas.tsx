@@ -9,13 +9,15 @@ import {
   type CardPieceLayout,
   type PublishDraft,
 } from '@/lib/publish/publish-draft-types';
-import type { FlyerConfig } from '@/lib/flyer/types';
+import type { FlyerConfig, FlyerTemplateId } from '@/lib/flyer/types';
 import { categoryAsksLocation } from '@/lib/publish/category-tree';
 
 const COLORS = ['#53acc5', '#111827', '#ffffff', '#b91c1c', '#166534', '#1d4ed8', '#c2410c', '#7c3aed'];
 
 interface PublishCardCanvasProps {
   heroUrl?: string;
+  templateId?: FlyerTemplateId;
+  badge?: string;
   background: string;
   color: string;
   draft: PublishDraft;
@@ -39,8 +41,139 @@ function locationLabel(draft: PublishDraft) {
   return formatUbicacionCorta(draft.ubicacion) || draft.ubicacion.direccion || 'Ubicación';
 }
 
+function TemplateBackdrop({
+  templateId,
+  background,
+  color,
+  badge,
+}: {
+  templateId?: FlyerTemplateId;
+  background: string;
+  color: string;
+  badge?: string;
+}) {
+  const mark = badge?.trim();
+  if (templateId === 'diagonal-band') {
+    return (
+      <div className="pointer-events-none absolute inset-0 overflow-hidden" style={{ background }}>
+        <div className="absolute -left-[20%] top-[18%] h-[55%] w-[140%] -rotate-12" style={{ background: color }} />
+      </div>
+    );
+  }
+  if (templateId === 'gradient-dusk') {
+    return (
+      <div
+        className="pointer-events-none absolute inset-0"
+        style={{ background: `linear-gradient(160deg, ${color} 0%, ${background} 55%, #020617 100%)` }}
+      />
+    );
+  }
+  if (templateId === 'split') {
+    return (
+      <div className="pointer-events-none absolute inset-0" style={{ background }}>
+        <div className="absolute inset-x-0 top-0 h-[22%]" style={{ background: color }} />
+      </div>
+    );
+  }
+  if (templateId === 'urgent') {
+    return (
+      <div className="pointer-events-none absolute inset-0 p-[6%]" style={{ background }}>
+        <div className="h-full w-full border-[6px]" style={{ borderColor: color }} />
+      </div>
+    );
+  }
+  if (templateId === 'poster-serif' || templateId === 'bold-type') {
+    return (
+      <div className="pointer-events-none absolute inset-0" style={{ background: color }}>
+        <div className="absolute inset-[5%] border border-white/35" />
+      </div>
+    );
+  }
+  if (templateId === 'ribbon') {
+    return (
+      <div className="pointer-events-none absolute inset-0" style={{ background }}>
+        <div className="absolute inset-x-0 top-[12%] py-1.5 text-center text-[10px] font-black uppercase tracking-[0.2em] text-white" style={{ background: color }}>
+          {mark || 'Buscadis'}
+        </div>
+      </div>
+    );
+  }
+  if (templateId === 'duo-tone') {
+    return (
+      <div className="pointer-events-none absolute inset-0 overflow-hidden">
+        <div className="absolute inset-0" style={{ background: color }} />
+        <div className="absolute inset-x-0 bottom-0 h-[48%]" style={{ background, clipPath: 'polygon(0 18%, 100% 0, 100% 100%, 0 100%)' }} />
+      </div>
+    );
+  }
+  if (templateId === 'editorial') {
+    return (
+      <div className="pointer-events-none absolute inset-0" style={{ background }}>
+        <div className="absolute inset-x-[8%] top-[8%] border-b-2" style={{ borderColor: color }} />
+        <div className="absolute inset-x-[8%] bottom-[8%] border-t border-black/10" />
+      </div>
+    );
+  }
+  if (templateId === 'stamp') {
+    return (
+      <div className="pointer-events-none absolute inset-0 p-[8%]" style={{ background }}>
+        <div className="h-full w-full rounded-2xl border-[3px] border-dashed" style={{ borderColor: color }} />
+      </div>
+    );
+  }
+  if (templateId === 'soft-wash') {
+    return (
+      <div
+        className="pointer-events-none absolute inset-0"
+        style={{ background: `radial-gradient(120% 80% at 10% 0%, ${color}33 0%, ${background} 45%, #ffffff 100%)` }}
+      />
+    );
+  }
+  if (templateId === 'ticket') {
+    return (
+      <div className="pointer-events-none absolute inset-0 p-[7%]" style={{ background }}>
+        <div className="h-full w-full rounded-2xl border-2 border-dashed bg-white/70" style={{ borderColor: color }} />
+      </div>
+    );
+  }
+  if (templateId === 'corner-mark') {
+    return (
+      <div className="pointer-events-none absolute inset-0 overflow-hidden" style={{ background }}>
+        <div className="absolute -right-6 -top-6 h-[42%] w-[42%] rotate-45" style={{ background: color }} />
+      </div>
+    );
+  }
+  if (templateId === 'minimal-cream') {
+    return (
+      <div className="pointer-events-none absolute inset-0" style={{ background }}>
+        <div className="absolute left-[9%] top-[9%] h-1 w-[28%]" style={{ background: color }} />
+      </div>
+    );
+  }
+  if (templateId === 'negocio') {
+    return (
+      <div className="pointer-events-none absolute inset-0 bg-white">
+        <div className="absolute inset-x-[9%] top-[8%] h-2 rounded-full" style={{ background: `linear-gradient(90deg, ${color}, ${background})` }} />
+        <div className="absolute inset-x-[9%] bottom-[12%] border-t border-slate-200" />
+      </div>
+    );
+  }
+  if (templateId === 'marketplace-tag') {
+    return (
+      <div className="pointer-events-none absolute inset-0" style={{ background }}>
+        <div className="absolute left-1/2 top-[10%] -translate-x-1/2 rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-wide text-white" style={{ background: color }}>
+          {mark || 'Aviso'}
+        </div>
+      </div>
+    );
+  }
+  return <div className="pointer-events-none absolute inset-0" style={{ background }} />;
+}
+
 export default function PublishCardCanvas({
   heroUrl,
+  templateId,
+  badge,
   background,
   color,
   draft,
@@ -136,7 +269,7 @@ export default function PublishCardCanvas({
         // eslint-disable-next-line @next/next/no-img-element
         <img src={heroUrl} alt="" crossOrigin="anonymous" draggable={false} className="pointer-events-none h-full w-full object-cover" />
       ) : (
-        <div className="pointer-events-none absolute inset-0" style={{ background }} />
+        <TemplateBackdrop templateId={templateId} background={background} color={color} badge={badge} />
       )}
       {pieces.map((id) => (
         <CardPiece
@@ -144,6 +277,7 @@ export default function PublishCardCanvas({
           id={id}
           draft={draft}
           color={color}
+          onDark={!heroUrl && (templateId === 'bold-type' || templateId === 'poster-serif' || templateId === 'gradient-dusk')}
           place={placeOf(draft.cardLayout, id)}
           selected={selected === id}
           onDragStart={beginDrag}
@@ -159,6 +293,7 @@ function CardPiece({
   id,
   draft,
   color,
+  onDark,
   place,
   selected,
   onDragStart,
@@ -168,6 +303,7 @@ function CardPiece({
   id: CardPieceId;
   draft: PublishDraft;
   color: string;
+  onDark?: boolean;
   place: CardPieceLayout;
   selected: boolean;
   onDragStart: (event: ReactPointerEvent, id: CardPieceId) => void;
@@ -185,6 +321,7 @@ function CardPiece({
     (id === 'precio' && !(draft.precio && draft.precio > 0)) ||
     (id === 'ubicacion' && !draft.ubicacion);
 
+  const ink = onDark ? '#ffffff' : color;
   const fontSize =
     id === 'titulo' ? `${1.35 * place.scale}rem`
     : id === 'precio' ? `${1.15 * place.scale}rem`
@@ -200,11 +337,11 @@ function CardPiece({
     >
       <div
         className={`relative px-1 ${selected ? 'rounded-md ring-2 ring-[var(--brand-blue)] ring-offset-2' : ''}`}
-        style={{ color: missing ? 'rgba(15,23,42,0.45)' : id === 'precio' || id === 'titulo' ? color : '#0f172a' }}
+        style={{ color: missing ? (onDark ? 'rgba(255,255,255,0.55)' : 'rgba(15,23,42,0.45)') : id === 'precio' || id === 'titulo' || onDark ? ink : '#0f172a' }}
       >
         {id === 'categoria' && (
           <span className="inline-flex items-center gap-1 font-bold">
-            {CategoryIcon ? <CategoryIcon size={Math.round(16 * place.scale)} color={missing ? 'rgba(15,23,42,0.45)' : color} /> : null}
+            {CategoryIcon ? <CategoryIcon size={Math.round(16 * place.scale)} color={missing ? (onDark ? 'rgba(255,255,255,0.55)' : 'rgba(15,23,42,0.45)') : ink} /> : null}
             {category}
           </span>
         )}

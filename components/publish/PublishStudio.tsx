@@ -769,6 +769,8 @@ export default function PublishStudio({
               >
                 <PublishCardCanvas
                   heroUrl={heroUrl && draft.plan === 'paid' ? heroUrl : undefined}
+                  templateId={exportTemplateId}
+                  badge={exportConfig.badge}
                   background={exportConfig.secondary || '#f8fafc'}
                   color={exportConfig.primary || '#0f172a'}
                   draft={draft}
@@ -901,10 +903,7 @@ export default function PublishStudio({
                           onClick={() =>
                             setDraft({
                               flyerTemplateId: template.id,
-                              flyerConfig: resolveFlyerConfig(draft.categoria, template.id, {
-                                ...exportConfig,
-                                ...template.defaultConfig,
-                              }),
+                              flyerConfig: resolveFlyerConfig(draft.categoria, template.id),
                             })
                           }
                           className={`w-14 shrink-0 overflow-hidden rounded-xl ring-2 ${
@@ -914,10 +913,7 @@ export default function PublishStudio({
                         >
                           <FlyerCanvas
                             templateId={template.id}
-                            config={resolveFlyerConfig(draft.categoria, template.id, {
-                              ...exportConfig,
-                              ...template.defaultConfig,
-                            })}
+                            config={resolveFlyerConfig(draft.categoria, template.id)}
                             content={exportContent}
                             density="compact"
                             className="pointer-events-none"

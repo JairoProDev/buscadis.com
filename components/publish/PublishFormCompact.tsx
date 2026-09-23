@@ -64,7 +64,9 @@ async function detectLocation(onChange: (patch: Partial<PublishDraft>) => void) 
 function FloatingHint({ text, up, active }: { text: string; up: boolean; active: boolean }) {
   return (
     <span
-      className={`pointer-events-none absolute left-3 z-10 bg-[var(--bg-primary)] px-1 transition-all ${
+      className={`pointer-events-none absolute left-3 z-10 px-1 transition-all ${
+        up ? 'bg-[var(--bg-secondary)]' : 'bg-transparent'
+      } ${
         up
           ? '-top-2 text-[10px] font-bold uppercase tracking-wider'
           : 'top-3.5 text-sm font-medium'
