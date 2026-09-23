@@ -13,6 +13,7 @@ import {
 import { usePublishActions } from '@/hooks/usePublishActions';
 import { getMyBusinessViaAPI } from '@/lib/business-api';
 import PublishFormCompact from './PublishFormCompact';
+import PublishListingPreview from './PublishListingPreview';
 import PublishReviewStep from './PublishReviewStep';
 import PublishCheckoutPanel from './PublishCheckoutPanel';
 import PublishFixedChatBar from './PublishFixedChatBar';
@@ -104,6 +105,8 @@ export default function PublishStudio({
   const [showTemplates, setShowTemplates] = useState(false);
   const [confirmLeave, setConfirmLeave] = useState(false);
   const [coverTool, setCoverTool] = useState<CoverTool>(null);
+  const [showForm, setShowForm] = useState(false);
+  const formAnchorRef = useRef<HTMLDivElement>(null);
   const [composerText, setComposerText] = useState('');
   const coverEditorRef = useRef<PublishCoverEditorHandle>(null);
   const flyerExportRef = useRef<HTMLDivElement>(null);
@@ -583,13 +586,15 @@ export default function PublishStudio({
                 onLeave={requestLeave}
                 onNotify={onNotify}
                 heroUrl={heroUrl}
-                titulo={draft.titulo}
-                descripcion={draft.descripcion}
-                onTitle={(value) => setDraft({ titulo: value })}
-                onDescription={(value) => setDraft({ descripcion: value })}
-                autoDownload={autoDownload}
-                onAutoDownload={setAutoDownload}
                 templatesOpen={showTemplates}
+                formOpen={showForm}
+                onToggleForm={() => {
+                  setShowForm((open) => {
+                    const next = !open;
+                    if (!open) requestAnimationFrame(() => formAnchorRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }));
+                    return next;
+                  });
+                }}
                 onOpenTemplates={() => {
                   setShowTemplates((open) => !open);
                   setCoverTool(null);
@@ -608,6 +613,31 @@ export default function PublishStudio({
                   setCoverTool(next);
                   if (next) setShowTemplates(false);
                 }}
+                below={
+                  <>
+                    <PublishListingPreview
+                      draft={draft}
+                      onChange={setDraft}
+                      onOpenForm={() => setShowForm(true)}
+                    />
+                    {showForm && (
+                      <div ref={formAnchorRef} className="px-3 pb-8">
+                        <PublishFormCompact
+                          draft={draft}
+                          onChange={setDraft}
+                          onSetAtributo={setAtributo}
+                          showAdvanced={showAdvanced}
+                          onToggleAdvanced={() => setShowAdvanced(!showAdvanced)}
+                          onEnhanceField={handleEnhanceField}
+                          enhancingField={enhancingField}
+                          analyzing={analyzing}
+                          autoDownload={autoDownload}
+                          onAutoDownloadChange={setAutoDownload}
+                        />
+                      </div>
+                    )}
+                  </>
+                }
               >
                 {heroUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element

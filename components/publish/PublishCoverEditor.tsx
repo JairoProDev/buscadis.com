@@ -6,10 +6,11 @@ import {
   useImperativeHandle,
   useRef,
   useState,
+  type CSSProperties,
   type PointerEvent as ReactPointerEvent,
   type ReactNode,
 } from 'react';
-import { IconChevronLeft, IconCrop, IconLayers, IconPen, IconSmile, IconText, IconUndo } from '@/components/Icons';
+import { IconChevronLeft, IconCrop, IconForms, IconLayers, IconPen, IconSmile, IconText, IconUndo } from '@/components/Icons';
 
 export type CoverTool = 'crop' | 'sticker' | 'text' | 'draw' | null;
 
@@ -20,12 +21,20 @@ export interface PublishCoverEditorHandle {
   commitCrop: () => Promise<string | null>;
 }
 
+type CoverFont = 'classic' | 'modern' | 'strong' | 'type' | 'script';
+type CoverBg = 'none' | 'solid' | 'soft';
+type CoverAlign = 'left' | 'center' | 'right';
+
 interface TextMark {
   id: string;
   text: string;
   x: number;
   y: number;
   color: string;
+  font: CoverFont;
+  size: number;
+  align: CoverAlign;
+  bg: CoverBg;
 }
 
 interface StickerMark {
@@ -42,7 +51,15 @@ interface Stroke {
 }
 
 const STICKERS = ['😀', '😍', '🔥', '⭐', '✅', '❤️', '🏠', '🚗', '💼', '📍', '🎉', '👀'];
-const COLORS = ['#ffffff', '#111827', '#facc15', '#ef4444', '#2563eb', '#16a34a'];
+const COLORS = ['#ffffff', '#111827', '#facc15', '#ef4444', '#2563eb', '#16a34a', '#a855f7', '#f97316'];
+
+const TEXT_FONTS: Array<{ id: CoverFont; label: string; fontFamily: string; fontWeight: number }> = [
+  { id: 'classic', label: 'Clásica', fontFamily: 'Georgia, "Times New Roman", serif', fontWeight: 700 },
+  { id: 'modern', label: 'Moderna', fontFamily: 'ui-sans-serif, system-ui, sans-serif', fontWeight: 700 },
+  { id: 'strong', label: 'Fuerte', fontFamily: 'Impact, "Arial Black", sans-serif', fontWeight: 900 },
+  { id: 'type', label: 'Máquina', fontFamily: 'ui-monospace, monospace', fontWeight: 600 },
+  { id: 'script', label: 'Manuscrita', fontFamily: '"Segoe Script", "Brush Script MT", cursive', fontWeight: 500 },
+];
 
 function toolButton(active: boolean) {
   return `flex h-9 w-9 items-center justify-center rounded-xl transition-colors ${
@@ -56,22 +73,56 @@ interface PublishCoverEditorProps {
   onLeave: () => void;
   onNotify?: (msg: string, type?: 'info' | 'error' | 'success') => void;
   heroUrl?: string;
-  titulo?: string;
-  descripcion?: string;
-  onTitle: (value: string) => void;
-  onDescription: (value: string) => void;
-  autoDownload: boolean;
-  onAutoDownload: (value: boolean) => void;
   onReplaceCover: (file: File) => Promise<string | void>;
   onOpenTemplates: () => void;
   templatesOpen: boolean;
+  formOpen: boolean;
+  onToggleForm: () => void;
   tool: CoverTool;
   onTool: (tool: CoverTool) => void;
+  below?: ReactNode;
   children: ReactNode;
 }
 
 function uid() {
   return `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+}
+
+function blankText(id = uid()): TextMark {
+  return { id, text: '', x: 0.5, y: 0.46, color: '#ffffff', font: 'strong', size: 1, align: 'center', bg: 'none' };
+}
+
+function fontOf(id: CoverFont) {
+  return TEXT_FONTS.find((font) => font.id === id) || TEXT_FONTS[2];
+}
+
+function contrastColor(hex: string) {
+  const raw = hex.replace('#', '');
+  if (raw.length !== 6) return '#111827';
+  const r = parseInt(raw.slice(0, 2), 16);
+  const g = parseInt(raw.slice(2, 4), 16);
+  const b = parseInt(raw.slice(4, 6), 16);
+  return (r * 299 + g * 587 + b * 114) / 1000 > 150 ? '#111827' : '#ffffff';
+}
+
+function textLook(mark: TextMark, stageSize: number): CSSProperties {
+  const font = fontOf(mark.font);
+  const fontSize = Math.round(Math.max(stageSize, 220) * 0.078 * mark.size);
+  const shared: CSSProperties = {
+    fontFamily: font.fontFamily,
+    fontWeight: font.fontWeight,
+    fontSize,
+    lineHeight: 1.15,
+    textAlign: mark.align,
+    letterSpacing: mark.font === 'strong' ? '0.01em' : undefined,
+  };
+  if (mark.bg === 'solid') {
+    return { ...shared, color: contrastColor(mark.color), background: mark.color, padding: '0.12em 0.38em', borderRadius: '0.2em' };
+  }
+  if (mark.bg === 'soft') {
+    return { ...shared, color: '#ffffff', background: `${mark.color}99`, padding: '0.12em 0.38em', borderRadius: '0.2em' };
+  }
+  return { ...shared, color: mark.color, textShadow: '0 1px 6px rgba(0,0,0,0.55)' };
 }
 
 function clampCropPan(
@@ -114,17 +165,14 @@ const PublishCoverEditor = forwardRef<PublishCoverEditorHandle, PublishCoverEdit
       onLeave,
       onNotify,
       heroUrl,
-      titulo,
-      descripcion,
-      onTitle,
-      onDescription,
-      autoDownload,
-      onAutoDownload,
       onReplaceCover,
       onOpenTemplates,
       templatesOpen,
+      formOpen,
+      onToggleForm,
       tool,
       onTool,
+      below,
       children,
     },
     ref,
@@ -137,16 +185,34 @@ const PublishCoverEditor = forwardRef<PublishCoverEditorHandle, PublishCoverEdit
     const draftStrokeRef = useRef<Stroke | null>(null);
     const [penColor, setPenColor] = useState('#ffffff');
     const [penWidth, setPenWidth] = useState(6);
-    const [textValue, setTextValue] = useState('');
-    const [textColor, setTextColor] = useState('#ffffff');
+    const [selectedTextId, setSelectedTextId] = useState<string | null>(null);
     const [cropZoom, setCropZoom] = useState(1);
     const [cropPan, setCropPan] = useState({ x: 0, y: 0 });
     const [photoSize, setPhotoSize] = useState<{ w: number; h: number } | null>(null);
     const [stageSize, setStageSize] = useState(0);
-    const dragRef = useRef<{ id: string; kind: 'text' | 'sticker'; px: number; py: number; x: number; y: number } | null>(null);
+    const dragRef = useRef<{ id: string; kind: 'text' | 'sticker'; px: number; py: number; x: number; y: number; moved: boolean } | null>(null);
+    const resizeRef = useRef<{ id: string; py: number; size: number } | null>(null);
+    const textEls = useRef<Record<string, HTMLTextAreaElement | null>>({});
     const cropDrag = useRef<{ px: number; py: number; x: number; y: number } | null>(null);
 
-    const hasEdits = () => texts.length > 0 || stickers.length > 0 || strokes.length > 0;
+    const hasEdits = () => texts.some((mark) => mark.text.trim()) || stickers.length > 0 || strokes.length > 0;
+
+    useEffect(() => {
+      if (tool !== 'text') return;
+      setTexts((list) => (list.length > 0 ? list : [blankText()]));
+    }, [tool]);
+
+    useEffect(() => {
+      if (tool !== 'text' || texts.length === 0) return;
+      if (!selectedTextId || !texts.some((mark) => mark.id === selectedTextId)) {
+        setSelectedTextId(texts[texts.length - 1].id);
+      }
+    }, [tool, texts, selectedTextId]);
+
+    useEffect(() => {
+      if (tool !== 'text' || !selectedTextId) return;
+      textEls.current[selectedTextId]?.focus();
+    }, [tool, selectedTextId]);
 
     useEffect(() => {
       const node = stageRef.current;
@@ -295,7 +361,17 @@ const PublishCoverEditor = forwardRef<PublishCoverEditorHandle, PublishCoverEdit
     ) => {
       event.stopPropagation();
       holdPointer(event);
-      dragRef.current = { id, kind, px: event.clientX, py: event.clientY, x, y };
+      dragRef.current = { id, kind, px: event.clientX, py: event.clientY, x, y, moved: false };
+    };
+
+    const patchText = (id: string, patch: Partial<TextMark>) => {
+      setTexts((list) => list.map((item) => (item.id === id ? { ...item, ...patch } : item)));
+    };
+
+    const addText = () => {
+      const mark = blankText();
+      setTexts((list) => [...list, mark]);
+      setSelectedTextId(mark.id);
     };
 
     const onStagePointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
@@ -334,11 +410,24 @@ const PublishCoverEditor = forwardRef<PublishCoverEditorHandle, PublishCoverEdit
         );
         return;
       }
+      const resizing = resizeRef.current;
+      if (resizing) {
+        const size = Math.min(2.4, Math.max(0.45, resizing.size + (event.clientY - resizing.py) / 120));
+        patchText(resizing.id, { size });
+        return;
+      }
       const drag = dragRef.current;
       if (!drag || !stageRef.current) return;
+      const dx = event.clientX - drag.px;
+      const dy = event.clientY - drag.py;
+      if (!drag.moved && Math.hypot(dx, dy) < 8) return;
+      if (!drag.moved) {
+        drag.moved = true;
+        if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
+      }
       const rect = stageRef.current.getBoundingClientRect();
-      const x = drag.x + (event.clientX - drag.px) / rect.width;
-      const y = drag.y + (event.clientY - drag.py) / rect.height;
+      const x = Math.min(0.92, Math.max(0.08, drag.x + dx / rect.width));
+      const y = Math.min(0.92, Math.max(0.08, drag.y + dy / rect.height));
       if (drag.kind === 'text') {
         setTexts((list) => list.map((item) => (item.id === drag.id ? { ...item, x, y } : item)));
       } else {
@@ -353,14 +442,21 @@ const PublishCoverEditor = forwardRef<PublishCoverEditorHandle, PublishCoverEdit
       }
       draftStrokeRef.current = null;
       setDraftStroke(null);
+      const drag = dragRef.current;
       dragRef.current = null;
+      resizeRef.current = null;
       cropDrag.current = null;
+      if (drag?.kind === 'text' && !drag.moved) {
+        setSelectedTextId(drag.id);
+        requestAnimationFrame(() => textEls.current[drag.id]?.focus());
+      }
     };
 
     const allStrokes = draftStroke ? [...strokes, draftStroke] : strokes;
+    const selectedMark = texts.find((mark) => mark.id === selectedTextId) || null;
 
     return (
-      <>
+      <div className="flex min-h-0 flex-1 flex-col">
         <div className="flex shrink-0 items-center gap-2 px-2 pt-[max(0.4rem,env(safe-area-inset-top))] pb-1">
           <button
             type="button"
@@ -420,13 +516,24 @@ const PublishCoverEditor = forwardRef<PublishCoverEditorHandle, PublishCoverEdit
               <IconPen size={16} />
             </button>
           </div>
+          <button
+            type="button"
+            className={toolButton(formOpen)}
+            onClick={onToggleForm}
+            aria-label="Formulario"
+            aria-pressed={formOpen}
+            title="Formulario"
+          >
+            <IconForms size={16} />
+          </button>
         </div>
 
-        <div className="flex min-h-0 w-full flex-1 items-center justify-center px-4 py-3 [container-type:size]">
+        <div className="min-h-0 flex-1 overflow-y-auto px-4 pt-1 [container-type:size]">
+          <div className="flex justify-center">
           <div
             ref={stageRef}
-            className="relative shrink-0 touch-none overflow-hidden rounded-2xl bg-[var(--bg-secondary)]"
-            style={{ width: 'min(100cqw, 100cqh)', height: 'min(100cqw, 100cqh)', aspectRatio: '1 / 1' }}
+            className="relative aspect-square shrink-0 touch-none overflow-hidden rounded-2xl bg-[var(--bg-secondary)]"
+            style={{ width: 'min(100%, 58cqh)' }}
             onPointerDown={onStagePointerDown}
             onPointerMove={onStagePointerMove}
             onPointerUp={onStagePointerUp}
@@ -470,18 +577,58 @@ const PublishCoverEditor = forwardRef<PublishCoverEditorHandle, PublishCoverEdit
                 {sticker.emoji}
               </button>
             ))}
-            {texts.map((mark) => (
-              <button
-                key={mark.id}
-                type="button"
-                className="absolute max-w-[80%] -translate-x-1/2 -translate-y-1/2 cursor-grab touch-none text-center text-xl font-black leading-tight drop-shadow active:cursor-grabbing"
-                style={{ left: `${mark.x * 100}%`, top: `${mark.y * 100}%`, color: mark.color }}
-                onPointerDown={(event) => beginMarkDrag(event, 'text', mark.id, mark.x, mark.y)}
-              >
-                {mark.text}
-              </button>
-            ))}
+            {texts.map((mark) => {
+              const selected = tool === 'text' && mark.id === selectedTextId;
+              const look = textLook(mark, stageSize);
+              return (
+                <div
+                  key={mark.id}
+                  className={`absolute max-w-[86%] -translate-x-1/2 -translate-y-1/2 touch-none ${selected ? 'rounded-md ring-2 ring-white' : ''}`}
+                  style={{ left: `${mark.x * 100}%`, top: `${mark.y * 100}%` }}
+                  onPointerDown={(event) => {
+                    if ((event.target as HTMLElement).closest('[data-resize]')) return;
+                    beginMarkDrag(event, 'text', mark.id, mark.x, mark.y);
+                  }}
+                >
+                  <div className="min-w-[3.5rem] whitespace-pre-wrap" style={look}>
+                    {mark.text || (selected ? 'Texto' : '')}
+                  </div>
+                  {selected && (
+                    <textarea
+                      ref={(node) => {
+                        textEls.current[mark.id] = node;
+                      }}
+                      value={mark.text}
+                      rows={2}
+                      aria-label="Texto sobre la foto"
+                      placeholder="Texto"
+                      onChange={(event) => patchText(mark.id, { text: event.target.value })}
+                      className="absolute inset-0 resize-none overflow-hidden bg-transparent outline-none"
+                      style={{ ...look, color: 'transparent', background: 'transparent', caretColor: String(look.color || '#fff') }}
+                    />
+                  )}
+                  {selected && (
+                    <button
+                      type="button"
+                      data-resize
+                      aria-label="Cambiar tamaño"
+                      title="Tamaño"
+                      className="absolute -bottom-3 -right-3 z-10 flex h-7 w-7 items-center justify-center rounded-full bg-white text-xs font-black text-slate-900 shadow"
+                      onPointerDown={(event) => {
+                        event.stopPropagation();
+                        holdPointer(event);
+                        resizeRef.current = { id: mark.id, py: event.clientY, size: mark.size };
+                      }}
+                    >
+                      ↘
+                    </button>
+                  )}
+                </div>
+              );
+            })}
           </div>
+          </div>
+          {below}
         </div>
 
         {tool === 'crop' && heroUrl && (
@@ -533,49 +680,88 @@ const PublishCoverEditor = forwardRef<PublishCoverEditorHandle, PublishCoverEdit
           </div>
         )}
 
-        {tool === 'text' && (
+        {tool === 'text' && selectedMark && (
           <div className="shrink-0 space-y-2 px-3 pb-2">
-            <div className="flex gap-2">
-              <input
-                value={textValue}
-                onChange={(e) => setTextValue(e.target.value)}
-                placeholder="Texto sobre la portada"
-                className="min-w-0 flex-1 rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)] px-3 py-2 text-sm"
-              />
-              <button
-                type="button"
-                className="rounded-xl bg-[var(--brand-blue)] px-3 text-xs font-bold text-white"
-                onClick={() => {
-                  const text = textValue.trim();
-                  if (!text) return;
-                  setTexts((list) => [...list, { id: uid(), text, x: 0.5, y: 0.42, color: textColor }]);
-                  setTextValue('');
-                }}
-              >
-                Poner
-              </button>
-            </div>
-            <div className="flex gap-1.5">
-              {COLORS.map((color) => (
-                <button key={color} type="button" className="h-6 w-6 rounded-full ring-1 ring-black/10" style={{ background: color }} onClick={() => setTextColor(color)} aria-label={color} />
+            <div className="flex gap-1.5 overflow-x-auto pb-1">
+              {TEXT_FONTS.map((font) => (
+                <button
+                  key={font.id}
+                  type="button"
+                  onClick={() => patchText(selectedMark.id, { font: font.id })}
+                  className={`shrink-0 rounded-full px-3 py-1 text-sm ${
+                    selectedMark.font === font.id
+                      ? 'bg-[var(--brand-blue)] text-white'
+                      : 'bg-[var(--bg-secondary)] text-[var(--text-primary)]'
+                  }`}
+                  style={{ fontFamily: font.fontFamily, fontWeight: font.fontWeight }}
+                >
+                  {font.label}
+                </button>
               ))}
             </div>
-            <input
-              value={titulo || ''}
-              onChange={(e) => onTitle(e.target.value)}
-              placeholder="Título del aviso"
-              className="w-full rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)] px-3 py-2 text-sm"
-            />
-            <input
-              value={descripcion || ''}
-              onChange={(e) => onDescription(e.target.value)}
-              placeholder="Descripción"
-              className="w-full rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)] px-3 py-2 text-sm"
-            />
-            <label className="flex items-center gap-2 text-xs text-[var(--text-secondary)]">
-              <input type="checkbox" checked={autoDownload} onChange={(e) => onAutoDownload(e.target.checked)} />
-              Descargar el aviso al publicar
-            </label>
+            <div className="flex items-center gap-1.5 overflow-x-auto">
+              {COLORS.map((color) => (
+                <button
+                  key={color}
+                  type="button"
+                  className="h-6 w-6 shrink-0 rounded-full ring-1 ring-black/15"
+                  style={{ background: color, outline: selectedMark.color === color ? '2px solid var(--brand-blue)' : undefined }}
+                  onClick={() => patchText(selectedMark.id, { color })}
+                  aria-label={color}
+                />
+              ))}
+              <button
+                type="button"
+                className="shrink-0 rounded-full bg-[var(--bg-secondary)] px-2.5 py-1 text-xs font-bold"
+                onClick={() =>
+                  patchText(selectedMark.id, {
+                    bg: selectedMark.bg === 'none' ? 'solid' : selectedMark.bg === 'solid' ? 'soft' : 'none',
+                  })
+                }
+              >
+                {selectedMark.bg === 'none' ? 'Sin fondo' : selectedMark.bg === 'solid' ? 'Fondo' : 'Fondo suave'}
+              </button>
+              <button
+                type="button"
+                className="shrink-0 rounded-full bg-[var(--bg-secondary)] px-2.5 py-1 text-xs font-bold"
+                onClick={() =>
+                  patchText(selectedMark.id, {
+                    align: selectedMark.align === 'center' ? 'left' : selectedMark.align === 'left' ? 'right' : 'center',
+                  })
+                }
+              >
+                {selectedMark.align === 'center' ? 'Centro' : selectedMark.align === 'left' ? 'Izquierda' : 'Derecha'}
+              </button>
+              <button
+                type="button"
+                className="shrink-0 rounded-full bg-[var(--bg-secondary)] px-2 py-1 text-xs font-bold"
+                onClick={() => patchText(selectedMark.id, { size: Math.max(0.45, +(selectedMark.size - 0.12).toFixed(2)) })}
+                aria-label="Achicar"
+              >
+                A−
+              </button>
+              <button
+                type="button"
+                className="shrink-0 rounded-full bg-[var(--bg-secondary)] px-2 py-1 text-xs font-bold"
+                onClick={() => patchText(selectedMark.id, { size: Math.min(2.4, +(selectedMark.size + 0.12).toFixed(2)) })}
+                aria-label="Agrandar"
+              >
+                A+
+              </button>
+              <button type="button" className="shrink-0 rounded-full bg-[var(--bg-secondary)] px-2.5 py-1 text-xs font-bold" onClick={addText}>
+                Otro
+              </button>
+              <button
+                type="button"
+                className="shrink-0 text-xs font-semibold text-red-600"
+                onClick={() => {
+                  setTexts((list) => list.filter((item) => item.id !== selectedMark.id));
+                  setSelectedTextId(null);
+                }}
+              >
+                Quitar
+              </button>
+            </div>
           </div>
         )}
 
@@ -589,7 +775,7 @@ const PublishCoverEditor = forwardRef<PublishCoverEditorHandle, PublishCoverEdit
             </button>
           </div>
         )}
-      </>
+      </div>
     );
   },
 );
