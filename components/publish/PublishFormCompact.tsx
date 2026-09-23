@@ -5,7 +5,6 @@ import { Categoria, UbicacionDetallada } from '@/types';
 import { formatUbicacionCorta } from '@/lib/adiso-display';
 import { PublishDraft } from '@/lib/publish/publish-draft-types';
 import { PUBLISH_CATEGORIAS, getSubcategories, getSubsubcategories } from '@/lib/publish/category-tree';
-import { getCategoriaIcon } from '@/lib/categoria-icons';
 import { IconChevronDown, IconImage, IconStar } from '@/components/Icons';
 import PublishFormAdvanced from './PublishFormAdvanced';
 import { publishInput, publishInputAiFilled, publishLabel } from './publish-ui';
@@ -148,14 +147,10 @@ export default function PublishFormCompact({
   photoUrl,
   onAddPhoto,
 }: PublishFormCompactProps) {
-  const [picking, setPicking] = useState<'categoria' | 'subcategoria' | null>(null);
   const subs = draft.categoria ? getSubcategories(draft.categoria) : [];
   const subsubs = draft.categoria && draft.subcategoria
     ? getSubsubcategories(draft.categoria, draft.subcategoria)
     : [];
-  const category = PUBLISH_CATEGORIAS.find((item) => item.value === draft.categoria);
-  const CategoryIcon = draft.categoria ? getCategoriaIcon(draft.categoria) : null;
-  const subLabel = subs.find((item) => item.id === draft.subcategoria)?.label;
 
   const aiClass = (field: string) =>
     draft.aiConfidence[field] ? publishInputAiFilled : analyzing ? 'animate-pulse' : '';
@@ -169,93 +164,43 @@ export default function PublishFormCompact({
       )}
 
       <div className="relative">
-        <button
-          type="button"
-          onClick={() => setPicking(picking === 'categoria' ? null : 'categoria')}
-          className={`${publishInput} mt-0 flex h-[52px] items-center gap-2 text-left`}
+        <select
+          value={draft.categoria || ''}
+          aria-label="Categoría"
+          onChange={(event) =>
+            onChange({
+              categoria: (event.target.value || undefined) as Categoria | undefined,
+              subcategoria: undefined,
+              subsubcategoria: undefined,
+            })
+          }
+          className={`${publishInput} mt-0 h-[52px] appearance-none pr-10`}
         >
-          {CategoryIcon ? <CategoryIcon size={16} color="var(--brand-blue)" /> : null}
-          <span className="text-[var(--text-primary)]">{category ? category.label : ''}</span>
-        </button>
-        <FloatingHint
-          text={category || picking === 'categoria' ? 'Categoría' : 'Elige una categoría'}
-          up={Boolean(category) || picking === 'categoria'}
-          active={picking === 'categoria'}
-        />
+          <option value=""></option>
+          {PUBLISH_CATEGORIAS.map((item) => (
+            <option key={item.value} value={item.value}>{item.label}</option>
+          ))}
+        </select>
+        <FloatingHint text={draft.categoria ? 'Categoría' : 'Elige una categoría'} up={Boolean(draft.categoria)} active={false} />
+        <IconChevronDown size={14} className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[var(--text-tertiary)]" />
       </div>
-      {picking === 'categoria' && (
-        <div className="flex flex-wrap gap-2">
-          {PUBLISH_CATEGORIAS.map((item) => {
-            const Icon = getCategoriaIcon(item.value);
-            const active = draft.categoria === item.value;
-            return (
-              <button
-                key={item.value}
-                type="button"
-                onClick={() => {
-                  const nextSubs = getSubcategories(item.value);
-                  onChange({
-                    categoria: item.value as Categoria,
-                    subcategoria: undefined,
-                    subsubcategoria: undefined,
-                  });
-                  setPicking(nextSubs.length > 0 ? 'subcategoria' : null);
-                }}
-                className={`inline-flex items-center gap-1.5 rounded-xl border px-3 py-2 text-sm font-semibold transition ${
-                  active
-                    ? 'border-[var(--brand-blue)] bg-[rgba(var(--brand-primary-rgb),0.1)] text-[var(--brand-blue)]'
-                    : 'border-[var(--border-color)] bg-[var(--bg-secondary)] text-[var(--text-primary)]'
-                }`}
-              >
-                <Icon size={15} color={active ? 'var(--brand-blue)' : 'var(--text-secondary)'} />
-                {item.label}
-              </button>
-            );
-          })}
-        </div>
-      )}
 
       {draft.categoria && subs.length > 0 && (
-        <>
-          <div className="relative">
-            <button
-              type="button"
-              onClick={() => setPicking(picking === 'subcategoria' ? null : 'subcategoria')}
-              className={`${publishInput} mt-0 flex h-[52px] items-center text-left`}
-            >
-              <span className="text-[var(--text-primary)]">{subLabel || ''}</span>
-            </button>
-            <FloatingHint
-              text={subLabel || picking === 'subcategoria' ? 'Subcategoría' : 'Elige una subcategoría'}
-              up={Boolean(subLabel) || picking === 'subcategoria'}
-              active={picking === 'subcategoria'}
-            />
-          </div>
-          {picking === 'subcategoria' && (
-            <div className="flex flex-wrap gap-2">
-              {subs.map((item) => {
-                const active = draft.subcategoria === item.id;
-                return (
-                  <button
-                    key={item.id}
-                    type="button"
-                    onClick={() => {
-                      onChange({ subcategoria: item.id, subsubcategoria: undefined });
-                      setPicking(null);
-                    }}
-                    className={`rounded-xl border px-3 py-2 text-sm font-semibold transition ${
-                      active
-                        ? 'border-[var(--brand-blue)] bg-[rgba(var(--brand-primary-rgb),0.1)] text-[var(--brand-blue)]'
-                        : 'border-[var(--border-color)] bg-[var(--bg-secondary)] text-[var(--text-primary)]'
-                    }`}
-                  >
-                    {item.label}
-                  </button>
-                );
-              })}
-            </div>
-          )}
-        </>
+        <div className="relative">
+          <select
+            value={draft.subcategoria || ''}
+            aria-label="Subcategoría"
+            onChange={(event) => onChange({ subcategoria: event.target.value || undefined, subsubcategoria: undefined })}
+            className={`${publishInput} mt-0 h-[52px] appearance-none pr-10`}
+          >
+            <option value=""></option>
+            {subs.map((item) => (
+              <option key={item.id} value={item.id}>{item.label}</option>
+            ))}
+          </select>
+          <FloatingHint text={draft.subcategoria ? 'Subcategoría' : 'Elige una subcategoría'} up={Boolean(draft.subcategoria)} active={false} />
+          <IconChevronDown size={14} className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[var(--text-tertiary)]" />
+        </div>
       )}
 
       <PrettyField

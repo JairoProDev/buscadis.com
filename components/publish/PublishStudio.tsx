@@ -33,6 +33,7 @@ import FlyerCanvas from '@/components/flyer/FlyerCanvas';
 import { buildFlyerContent } from '@/lib/flyer/layout';
 import { downloadCoverImage } from '@/lib/publish/download-cover';
 import FlyerTemplatePicker from '@/components/flyer/FlyerTemplatePicker';
+import TemplateThumb from '@/components/flyer/TemplateThumb';
 import PublishCoverEditor, { type CoverTool, type PublishCoverEditorHandle } from './PublishCoverEditor';
 import PublishCardCanvas from './PublishCardCanvas';
 
@@ -906,18 +907,17 @@ export default function PublishStudio({
                               flyerConfig: resolveFlyerConfig(draft.categoria, template.id),
                             })
                           }
-                          className={`w-14 shrink-0 overflow-hidden rounded-xl ring-2 ${
-                            selected ? 'ring-[var(--brand-blue)]' : 'ring-transparent'
-                          }`}
+                          className="shrink-0"
                           aria-label={template.label}
                         >
-                          <FlyerCanvas
-                            templateId={template.id}
-                            config={resolveFlyerConfig(draft.categoria, template.id)}
-                            content={exportContent}
-                            density="compact"
-                            className="pointer-events-none"
-                          />
+                          <TemplateThumb selected={selected}>
+                            <FlyerCanvas
+                              templateId={template.id}
+                              config={resolveFlyerConfig(draft.categoria, template.id)}
+                              content={exportContent}
+                              className="pointer-events-none h-full w-full"
+                            />
+                          </TemplateThumb>
                         </button>
                       );
                     })}

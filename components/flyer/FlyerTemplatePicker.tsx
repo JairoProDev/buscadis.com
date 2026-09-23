@@ -2,6 +2,7 @@
 
 import { useMemo } from 'react';
 import FlyerCanvas from './FlyerCanvas';
+import TemplateThumb from './TemplateThumb';
 import { FLYER_TEMPLATES, resolveFlyerConfig } from '@/lib/flyer/templates';
 import type { FlyerConfig, FlyerContent, FlyerTemplateId } from '@/lib/flyer/types';
 
@@ -59,22 +60,16 @@ export default function FlyerTemplatePicker({
                     }),
                   })
                 }
-                className={`w-[72px] shrink-0 overflow-hidden rounded-xl ring-2 transition-shadow ${
-                  selected
-                    ? 'ring-[var(--brand-blue)] shadow-md'
-                    : 'ring-[var(--border-color)] opacity-90 hover:opacity-100'
-                }`}
+                className="shrink-0"
               >
-                <FlyerCanvas
-                  templateId={t.id}
-                  config={resolveFlyerConfig(content.categoria, t.id, {
-                    ...resolved,
-                    ...t.defaultConfig,
-                  })}
-                  content={content}
-                  density="compact"
-                  className="pointer-events-none"
-                />
+                <TemplateThumb selected={selected}>
+                  <FlyerCanvas
+                    templateId={t.id}
+                    config={resolveFlyerConfig(content.categoria, t.id)}
+                    content={content}
+                    className="pointer-events-none h-full w-full"
+                  />
+                </TemplateThumb>
                 <span className="block truncate bg-[var(--bg-secondary)] px-1 py-0.5 text-center text-[9px] font-semibold text-[var(--text-secondary)]">
                   {t.label}
                 </span>
