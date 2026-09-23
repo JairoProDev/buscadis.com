@@ -4,9 +4,14 @@ import React, { createContext, useContext, useState, useCallback, ReactNode } fr
 import dynamic from 'next/dynamic';
 import { useToast } from '@/hooks/useToast';
 import { ToastContainer } from '@/components/Toast';
+import { markAuthPromptDismissed } from '@/lib/auth-session-prompt';
+import { promptGoogleSignIn } from '@/lib/auth/google-sign-in-prompt';
 
 const AuthModal = dynamic(() => import('@/components/AuthModal'), { ssr: false });
 const ChatDock = dynamic(() => import('@/components/ChatDock'), { ssr: false });
+const AuthSessionPrompt = dynamic(() => import('@/components/auth/AuthSessionPrompt'), {
+  ssr: false,
+});
 
 export interface ChatOpenContext {
   matchScore?: number;
@@ -30,8 +35,9 @@ interface DockedChat {
 
 interface UIContextType {
   isAuthModalOpen: boolean;
-  openAuthModal: () => void;
-  closeAuthModal: () => void;
+  authModalMode: 'login' | 'signup';
+  openAuthModal: (mode?: 'login' | 'signup') => void;
+  closeAuthModal: (options?: { dismissed?: boolean }) => void;
   activeChatId: string | null;
   chatContext: ChatOpenContext | null;
   openChat: (conversationId: string, context?: ChatOpenContext) => void;
@@ -43,10 +49,19 @@ const UIContext = createContext<UIContextType | undefined>(undefined);
 
 export function UIProvider({ children }: { children: ReactNode }) {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [authModalMode, setAuthModalMode] = useState<'login' | 'signup'>('signup');
   const [chatDock, setChatDock] = useState<DockedChat[]>([]);
 
-  const openAuthModal = useCallback(() => setIsAuthModalOpen(true), []);
-  const closeAuthModal = useCallback(() => setIsAuthModalOpen(false), []);
+  const openAuthModal = useCallback(async (mode?: 'login' | 'signup') => {
+    const shown = await promptGoogleSignIn();
+    if (shown) return;
+    if (mode) setAuthModalMode(mode);
+    setIsAuthModalOpen(true);
+  }, []);
+  const closeAuthModal = useCallback((options?: { dismissed?: boolean }) => {
+    setIsAuthModalOpen(false);
+    if (options?.dismissed) markAuthPromptDismissed();
+  }, []);
 
   const openChat = useCallback((id: string, context?: ChatOpenContext) => {
     setChatDock((prev) => {
@@ -87,6 +102,7 @@ export function UIProvider({ children }: { children: ReactNode }) {
     <UIContext.Provider
       value={{
         isAuthModalOpen,
+        authModalMode,
         openAuthModal,
         closeAuthModal,
         activeChatId: active?.id ?? null,
@@ -97,7 +113,12 @@ export function UIProvider({ children }: { children: ReactNode }) {
       }}
     >
       {children}
-      <AuthModal abierto={isAuthModalOpen} onCerrar={closeAuthModal} />
+      <AuthSessionPrompt />
+      <AuthModal
+        abierto={isAuthModalOpen}
+        onCerrar={closeAuthModal}
+        modoInicial={authModalMode}
+      />
       <ChatDock
         chats={chatDock}
         onClose={closeChat}

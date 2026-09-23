@@ -4,7 +4,7 @@ import React, { useState, useRef, useEffect, Suspense } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { useHeaderIdentity } from '@/hooks/useHeaderIdentity';
-import AuthModal from './AuthModal';
+import { useUI } from '@/contexts/UIContext';
 import {
   IconStore,
   IconChevronDown,
@@ -284,21 +284,18 @@ function UserMenuContent({ onProgressClick }: UserMenuProps) {
 }
 
 export default function UserMenu(props: UserMenuProps) {
-  const [mostrarAuthModal, setMostrarAuthModal] = useState(false);
+  const { openAuthModal } = useUI();
   const { user } = useAuth();
 
   if (!user) {
     return (
-      <>
-        <button
-          type="button"
-          onClick={() => setMostrarAuthModal(true)}
-          className="rounded-xl bg-[var(--brand-blue)] px-4 py-2 text-sm font-semibold text-white transition-opacity hover:opacity-90"
-        >
-          Entrar
-        </button>
-        <AuthModal abierto={mostrarAuthModal} onCerrar={() => setMostrarAuthModal(false)} />
-      </>
+      <button
+        type="button"
+        onClick={() => void openAuthModal('login')}
+        className="rounded-xl bg-[var(--brand-blue)] px-4 py-2 text-sm font-semibold text-white transition-opacity hover:opacity-90"
+      >
+        Entrar
+      </button>
     );
   }
 

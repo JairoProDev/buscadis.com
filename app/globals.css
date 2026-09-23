@@ -14,6 +14,9 @@
   --bs-header-height: var(--bs-header-height-mobile);
   --bs-nav-height: 56px;
   --bs-nav-visible-offset: calc(var(--bs-nav-height) + env(safe-area-inset-bottom, 0px));
+  /* Por encima de nav móvil (1500), ayuda (1600) y buscador sticky (900) */
+  --bs-z-overlay: 2400;
+  --bs-z-modal: 2500;
 }
 
 :root {

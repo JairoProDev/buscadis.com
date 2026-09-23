@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { FaTimes, FaWhatsapp } from 'react-icons/fa';
 import { IconClose } from '@/components/Icons';
 import { MOTIVOS_AYUDA, getSoporteWhatsAppUrl, type MotivoAyuda } from '@/lib/soporte';
+import { useUI } from '@/contexts/UIContext';
 
 interface FeedbackButtonProps {
   variant?: 'floating';
@@ -12,6 +13,7 @@ interface FeedbackButtonProps {
 export default function FeedbackButton({ variant = 'floating' }: FeedbackButtonProps) {
   const [abierto, setAbierto] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
+  const { isAuthModalOpen } = useUI();
 
   useEffect(() => {
     if (!abierto) return;
@@ -39,6 +41,7 @@ export default function FeedbackButton({ variant = 'floating' }: FeedbackButtonP
   };
 
   if (variant !== 'floating') return null;
+  if (isAuthModalOpen) return null;
 
   return (
     <div
