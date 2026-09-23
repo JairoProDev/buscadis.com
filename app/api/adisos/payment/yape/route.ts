@@ -91,6 +91,7 @@ export async function PATCH(request: NextRequest) {
       .update({
         contact_locked: status !== 'verified',
         payment_status: status,
+        esta_activo: status === 'verified',
       })
       .eq('id', order.adiso_id);
 

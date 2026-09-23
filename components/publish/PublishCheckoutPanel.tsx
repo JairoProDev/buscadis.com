@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { PublishDraft } from '@/lib/publish/publish-draft-types';
 import {
   DAY_BUNDLES,
@@ -36,6 +37,7 @@ export default function PublishCheckoutPanel({
   publishedAdisoId,
   publisher,
 }: PublishCheckoutPanelProps) {
+  const [previewMode, setPreviewMode] = useState<'both' | 'free' | 'paid'>('both');
   const days = draft.paidDays ?? 7;
   const rate = draft.dailyRate ?? 5;
   const total = calculateTotalPrice(days, rate);
@@ -94,12 +96,42 @@ export default function PublishCheckoutPanel({
   return (
     <div className="space-y-4">
       <div className={`${publishCard} p-4`}>
-        <p className="text-sm font-bold text-[var(--text-primary)] m-0 mb-3">
-          Compara tu aviso
-        </p>
-        <div className="grid grid-cols-2 gap-3 items-start">
-          <PublishPreviewCard draft={draft} variant="free" label="Gratis" compact publisher={publisher} />
-          <PublishPreviewCard draft={draft} variant="paid" label="Promocionado" compact publisher={publisher} />
+        <div className="mb-3 flex items-center justify-between gap-2">
+          <p className="text-sm font-bold text-[var(--text-primary)] m-0">Compara tu aviso</p>
+          <div className="flex overflow-hidden rounded-full ring-1 ring-[var(--border-color)]">
+            {(
+              [
+                ['both', 'Ambos'],
+                ['free', 'Gratis'],
+                ['paid', 'Promo'],
+              ] as const
+            ).map(([id, label]) => (
+              <button
+                key={id}
+                type="button"
+                onClick={() => setPreviewMode(id)}
+                className={`px-2.5 py-1 text-[10px] font-bold ${
+                  previewMode === id
+                    ? 'bg-[var(--brand-blue)] text-white'
+                    : 'bg-[var(--bg-secondary)] text-[var(--text-secondary)]'
+                }`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+        </div>
+        <div
+          className={
+            previewMode === 'both' ? 'grid grid-cols-2 gap-3 items-start' : 'mx-auto max-w-[220px]'
+          }
+        >
+          {(previewMode === 'both' || previewMode === 'free') && (
+            <PublishPreviewCard draft={draft} variant="free" label="Gratis" compact publisher={publisher} />
+          )}
+          {(previewMode === 'both' || previewMode === 'paid') && (
+            <PublishPreviewCard draft={draft} variant="paid" label="Promocionado" compact publisher={publisher} />
+          )}
         </div>
         <div className="mt-3 pt-3 border-t border-[var(--border-color)]">
           <PublishReachLines draft={{ ...draft, dailyRate: rate }} variant="stack" />

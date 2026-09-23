@@ -1,7 +1,7 @@
 'use client';
 
 import { useRef, useState } from 'react';
-import { IconAdis, IconChevronDown, IconMicrophone } from '@/components/Icons';
+import { IconAdis, IconChevronDown, IconMicrophone, IconSparkles } from '@/components/Icons';
 import PublishChatInput from './PublishChatInput';
 import PublishImagePreview from './PublishImagePreview';
 
@@ -129,22 +129,6 @@ export default function PublishFixedChatBar({
           </button>
         </div>
 
-        {onRunAdis && (
-          <div className="mb-2 flex items-center justify-between gap-2">
-            <p className="m-0 text-[10px] leading-snug text-[var(--text-tertiary)]">
-              Enviar solo guarda texto y fotos. La IA es opcional.
-            </p>
-            <button
-              type="button"
-              onClick={onRunAdis}
-              disabled={sending}
-              className="shrink-0 rounded-full px-2.5 py-1 text-[10px] font-bold text-[var(--brand-blue)] ring-1 ring-[rgba(var(--brand-primary-rgb),0.35)] disabled:opacity-40"
-            >
-              Rellenar con ADIS
-            </button>
-          </div>
-        )}
-
         {(sending || statusMessage) && (
           <div
             className={`mb-2 rounded-xl px-3 py-2 text-xs leading-snug ${
@@ -175,15 +159,6 @@ export default function PublishFixedChatBar({
         )}
 
         <div className="flex items-end gap-2">
-          <button
-            type="button"
-            onClick={startVoice}
-            disabled={sending}
-            className="shrink-0 mb-0.5 flex h-9 w-9 items-center justify-center rounded-full text-[var(--text-tertiary)] hover:bg-[var(--hover-bg)] hover:text-[var(--brand-blue)] transition-colors disabled:opacity-40"
-            aria-label="Entrada de voz"
-          >
-            <IconMicrophone size={18} />
-          </button>
           <div className="flex-1 min-w-0">
             <PublishChatInput
               value={text}
@@ -191,13 +166,34 @@ export default function PublishFixedChatBar({
               onSend={handleSend}
               sending={sending}
               disabled={sending}
-              placeholder="Describe tu aviso o pega el texto…"
+              placeholder="Escribe tu aviso y la IA lo mejorará"
               onAttachImage={handleFilePick}
               imageAttached={Boolean(pendingImage)}
               imageUploading={uploading}
               compact
             />
           </div>
+          {onRunAdis && (
+            <button
+              type="button"
+              onClick={onRunAdis}
+              disabled={sending}
+              className="mb-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[rgba(var(--brand-primary-rgb),0.12)] text-[var(--brand-blue)] disabled:opacity-40"
+              aria-label="Mejorar con IA"
+              title="Mejorar con IA"
+            >
+              <IconSparkles size={17} color="var(--brand-blue)" />
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={startVoice}
+            disabled={sending}
+            className="mb-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-[var(--text-tertiary)] hover:bg-[var(--hover-bg)] hover:text-[var(--brand-blue)] disabled:opacity-40"
+            aria-label="Dictar"
+          >
+            <IconMicrophone size={18} />
+          </button>
         </div>
       </div>
       <input

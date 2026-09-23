@@ -45,6 +45,8 @@ export interface PublishDraft {
 
   /** Posición de cada pieza sobre el card. x/y son fracción del cuadrado. */
   cardLayout?: Partial<Record<CardPieceId, CardPieceLayout>>;
+  /** Piezas ocultas en la portada (arrastrar al tachito). */
+  cardHidden?: Partial<Record<CardPieceId, boolean>>;
 }
 
 export type CardPieceId = 'categoria' | 'titulo' | 'precio' | 'ubicacion';
@@ -90,7 +92,7 @@ export const EMPTY_PUBLISH_DRAFT: PublishDraft = {
   aiConfidence: {},
   missingFields: [],
   chatHistory: [],
-  plan: 'free',
+  plan: 'paid',
   paidDays: 7,
   dailyRate: 5,
 };

@@ -91,7 +91,8 @@ export async function publishFromStudio(input: PublishStudioInput): Promise<{
     imagenUrl: draft.imagenes[0],
     usuario_id: userId,
     user_id: userId,
-    estaActivo: true,
+    /** Pagado pendiente: solo visible para el anunciante hasta verificar pago o pasar a gratis. */
+    estaActivo: isFree,
     esHistorico: false,
     esGratuito: isFree,
     fechaExpiracion: (expiresAt || paidExpiresAt) || undefined,
@@ -156,9 +157,11 @@ export async function publishFromStudio(input: PublishStudioInput): Promise<{
     else orderId = order?.id;
   }
 
-  await createStoryFromAdiso(userId, created, {
-    promotionTier: isFree ? 'gratis' : 'destacada',
-  });
+  if (isFree) {
+    await createStoryFromAdiso(userId, created, {
+      promotionTier: 'gratis',
+    });
+  }
 
   if (!isFree) {
     try {

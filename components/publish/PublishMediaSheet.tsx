@@ -63,10 +63,7 @@ export default function PublishMediaSheet({
         <div className="space-y-3 px-4 py-3">
           <button
             type="button"
-            onClick={() => {
-              onPickCamera();
-              onClose();
-            }}
+            onClick={() => onPickCamera()}
             className="flex w-full items-center gap-3 rounded-xl bg-[var(--bg-secondary)] px-3 py-3 text-left ring-1 ring-[var(--border-color)]"
           >
             <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--bg-primary)] text-[var(--brand-blue)]">
@@ -104,10 +101,7 @@ export default function PublishMediaSheet({
 
           <button
             type="button"
-            onClick={() => {
-              onPickGallery();
-              onClose();
-            }}
+            onClick={() => onPickGallery()}
             className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left ring-1 ring-[var(--border-color)]"
           >
             <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--bg-secondary)] text-[var(--text-secondary)]">

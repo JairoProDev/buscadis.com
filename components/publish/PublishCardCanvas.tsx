@@ -1,6 +1,7 @@
 'use client';
 
 import { useRef, useState, type PointerEvent as ReactPointerEvent } from 'react';
+import CardDeleteZone, { hitTrash } from '@/components/publish/CardDeleteZone';
 import { getCategoriaIcon, getCategoriaLabel } from '@/lib/categoria-icons';
 import { formatUbicacionCorta } from '@/lib/adiso-display';
 import {
@@ -26,6 +27,7 @@ interface PublishCardCanvasProps {
   draft: PublishDraft;
   onFlyer?: (patch: Partial<FlyerConfig>) => void;
   onLayout: (next: PublishDraft['cardLayout'], options?: { history?: boolean }) => void;
+  onHidePiece?: (id: CardPieceId) => void;
 }
 
 function placeOf(layout: PublishDraft['cardLayout'], id: CardPieceId): CardPieceLayout {
@@ -183,8 +185,10 @@ export default function PublishCardCanvas({
   draft,
   onFlyer,
   onLayout,
+  onHidePiece,
 }: PublishCardCanvasProps) {
   const stageRef = useRef<HTMLDivElement>(null);
+  const trashRef = useRef<HTMLDivElement>(null);
   const dragRef = useRef<{
     id: CardPieceId;
     px: number;
@@ -196,6 +200,8 @@ export default function PublishCardCanvas({
   } | null>(null);
   const resizeRef = useRef<{ id: CardPieceId; py: number; scale: number; recorded: boolean } | null>(null);
   const [selected, setSelected] = useState<CardPieceId | null>(null);
+  const [dragging, setDragging] = useState(false);
+  const [trashHot, setTrashHot] = useState(false);
 
   const showLocation = categoryAsksLocation(
     draft.categoria,
@@ -225,18 +231,30 @@ export default function PublishCardCanvas({
     const dx = event.clientX - drag.px;
     const dy = event.clientY - drag.py;
     if (!drag.moved && Math.hypot(dx, dy) < 8) return;
-    drag.moved = true;
+    if (!drag.moved) {
+      drag.moved = true;
+      setDragging(true);
+    }
     const history = !drag.recorded;
     drag.recorded = true;
     const x = Math.min(0.86, Math.max(0.02, drag.x + dx / rect.width));
     const y = Math.min(0.88, Math.max(0.02, drag.y + dy / rect.height));
+    setTrashHot(hitTrash(event.clientX, event.clientY, trashRef.current));
     write(drag.id, { x, y }, { history });
   };
 
-  const onPointerUp = () => {
+  const onPointerUp = (event: ReactPointerEvent<HTMLDivElement>) => {
     const drag = dragRef.current;
     dragRef.current = null;
     resizeRef.current = null;
+    const overTrash = drag?.moved && hitTrash(event.clientX, event.clientY, trashRef.current);
+    setDragging(false);
+    setTrashHot(false);
+    if (overTrash && drag) {
+      onHidePiece?.(drag.id);
+      setSelected(null);
+      return;
+    }
     if (drag && !drag.moved) setSelected(drag.id);
   };
 
@@ -256,9 +274,11 @@ export default function PublishCardCanvas({
     resizeRef.current = { id, py: event.clientY, scale: placeOf(draft.cardLayout, id).scale, recorded: false };
   };
 
-  const pieces: CardPieceId[] = showLocation
+  const hidden = draft.cardHidden || {};
+  const allPieces: CardPieceId[] = showLocation
     ? ['categoria', 'titulo', 'precio', 'ubicacion']
     : ['categoria', 'titulo', 'precio'];
+  const pieces = allPieces.filter((id) => !hidden[id]);
 
   return (
     <div
@@ -275,6 +295,7 @@ export default function PublishCardCanvas({
       ) : (
         <TemplateBackdrop templateId={templateId} background={background} color={color} badge={badge} />
       )}
+      <CardDeleteZone ref={trashRef} active={dragging} hot={trashHot} />
       {pieces.map((id) => (
         <CardPiece
           key={id}

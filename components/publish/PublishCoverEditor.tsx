@@ -12,6 +12,7 @@ import {
 } from 'react';
 import { IconChevronLeft, IconCrop, IconForms, IconLayers, IconPen, IconRedo, IconSmile, IconText, IconUndo } from '@/components/Icons';
 import { EMPTY_COVER_OVERLAY, type PublishCoverOverlay } from '@/lib/publish/publish-draft-types';
+import CardDeleteZone, { hitTrash } from '@/components/publish/CardDeleteZone';
 
 export type CoverTool = 'crop' | 'sticker' | 'text' | 'draw' | null;
 
@@ -211,6 +212,9 @@ const PublishCoverEditor = forwardRef<PublishCoverEditorHandle, PublishCoverEdit
     const resizeRef = useRef<{ id: string; py: number; size: number } | null>(null);
     const textEls = useRef<Record<string, HTMLTextAreaElement | null>>({});
     const cropDrag = useRef<{ px: number; py: number; x: number; y: number } | null>(null);
+    const trashRef = useRef<HTMLDivElement>(null);
+    const [overlayDragging, setOverlayDragging] = useState(false);
+    const [trashHot, setTrashHot] = useState(false);
 
     const hasEdits = () => texts.some((mark) => mark.text.trim()) || stickers.length > 0 || strokes.length > 0;
 
@@ -449,11 +453,13 @@ const PublishCoverEditor = forwardRef<PublishCoverEditorHandle, PublishCoverEdit
       if (!drag.moved && Math.hypot(dx, dy) < 8) return;
       if (!drag.moved) {
         drag.moved = true;
+        setOverlayDragging(true);
         if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
       }
       const rect = stageRef.current.getBoundingClientRect();
       const x = Math.min(0.92, Math.max(0.08, drag.x + dx / rect.width));
       const y = Math.min(0.92, Math.max(0.08, drag.y + dy / rect.height));
+      setTrashHot(hitTrash(event.clientX, event.clientY, trashRef.current));
       const history = !drag.recorded;
       drag.recorded = true;
       if (drag.kind === 'text') {
@@ -469,7 +475,7 @@ const PublishCoverEditor = forwardRef<PublishCoverEditorHandle, PublishCoverEdit
       }
     };
 
-    const onStagePointerUp = () => {
+    const onStagePointerUp = (event: ReactPointerEvent<HTMLDivElement>) => {
       const stroke = draftStrokeRef.current;
       if (stroke && stroke.points.length > 1) {
         writeOverlay({ texts, stickers, strokes: [...strokes, stroke] });
@@ -480,6 +486,26 @@ const PublishCoverEditor = forwardRef<PublishCoverEditorHandle, PublishCoverEdit
       dragRef.current = null;
       resizeRef.current = null;
       cropDrag.current = null;
+      const overTrash = drag?.moved && hitTrash(event.clientX, event.clientY, trashRef.current);
+      setOverlayDragging(false);
+      setTrashHot(false);
+      if (overTrash && drag) {
+        if (drag.kind === 'text') {
+          writeOverlay({
+            texts: texts.filter((item) => item.id !== drag.id),
+            stickers,
+            strokes,
+          });
+          if (selectedTextId === drag.id) setSelectedTextId(null);
+        } else {
+          writeOverlay({
+            texts,
+            stickers: stickers.filter((item) => item.id !== drag.id),
+            strokes,
+          });
+        }
+        return;
+      }
       if (drag?.kind === 'text' && !drag.moved) {
         setSelectedTextId(drag.id);
         requestAnimationFrame(() => textEls.current[drag.id]?.focus());
@@ -615,6 +641,7 @@ const PublishCoverEditor = forwardRef<PublishCoverEditorHandle, PublishCoverEdit
             ) : (
               <div className="absolute inset-0">{children}</div>
             )}
+            <CardDeleteZone ref={trashRef} active={overlayDragging} hot={trashHot} />
             <svg className="pointer-events-none absolute inset-0 h-full w-full" viewBox="0 0 100 100" preserveAspectRatio="none">
               {allStrokes.map((stroke, index) => (
                 <polyline

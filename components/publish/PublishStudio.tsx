@@ -188,6 +188,12 @@ export default function PublishStudio({
   }, [reeditId, setDraft, onNotify]);
 
   useEffect(() => {
+    if (immersive && draft.plan !== 'paid') {
+      setDraft({ plan: 'paid' }, { history: false });
+    }
+  }, [immersive, draft.plan, setDraft]);
+
+  useEffect(() => {
     if (draft.flyerTemplateId) return;
     const d = defaultFlyerForCategory(draft.categoria);
     setDraft({ flyerTemplateId: d.templateId, flyerConfig: d.config }, { history: false });
@@ -266,8 +272,6 @@ export default function PublishStudio({
       const text = opts.text?.trim();
       const imageUrl = opts.imageUrl;
       if (!text && !imageUrl) return false;
-      if (draft.plan === 'free') return false;
-
       setAnalyzing(true);
       setChatStatus(null);
       try {
@@ -389,14 +393,30 @@ export default function PublishStudio({
     }
   };
 
-  const runAdisFill = useCallback(() => {
-    const text = [draft.titulo, draft.descripcion, composerText].filter(Boolean).join('\n').trim();
+  const sendComposerToAi = useCallback(() => {
+    const pending = composerText.trim();
+    if (pending) appendTextToDraft(pending);
+    setComposerText('');
+    const text = [draft.titulo, draft.descripcion, pending].filter(Boolean).join('\n').trim();
+    if (!text && draft.imagenes.length === 0) {
+      onNotify?.('Escribe algo o adjunta una foto para que la IA trabaje.', 'info');
+      return;
+    }
+    addChatMessage('user', pending || '(fotos del aviso)');
     void runAnalyze({
       text: text || undefined,
-      imageUrl: undefined,
       source: 'chat',
     });
-  }, [draft.titulo, draft.descripcion, composerText, runAnalyze]);
+  }, [
+    draft.titulo,
+    draft.descripcion,
+    draft.imagenes.length,
+    composerText,
+    appendTextToDraft,
+    runAnalyze,
+    addChatMessage,
+    onNotify,
+  ]);
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const mediaChunksRef = useRef<Blob[]>([]);
@@ -512,6 +532,15 @@ export default function PublishStudio({
       const publishDraft: PublishDraft =
         effectivePlan === 'free' ? { ...draft, plan: 'free', imagenes: [] } : { ...draft, plan: 'paid' };
 
+      const saveExisting = Boolean(reeditId && sourcePaid);
+      if (effectivePlan === 'paid' && !saveExisting) {
+        setStep('pay');
+        onNotify?.(
+          '¡Publicado! Solo tú lo ves por ahora. Paga o elige la versión gratis para mostrarlo a todos.',
+          'success',
+        );
+      }
+
       setPublishing(true);
       try {
         let imagenes = [...publishDraft.imagenes];
@@ -550,7 +579,6 @@ export default function PublishStudio({
           }
         }
 
-        const saveExisting = Boolean(reeditId && sourcePaid);
         const res = await fetch(saveExisting ? `/api/adisos/${reeditId}` : '/api/adisos/publish', {
           method: saveExisting ? 'PUT' : 'POST',
           headers: {
@@ -617,7 +645,6 @@ export default function PublishStudio({
           setPublishedAdisoId(data.adiso?.id);
           setPublishedOrderId(data.orderId);
           setStep('pay');
-          onNotify?.('¡Ya está en el feed! Verifica tu pago Yape para activar el contacto.', 'success');
         } else {
           onNotify?.('¡Publicado! Ya aparece en el feed (gratis 24h).', 'success');
           setShowUpsell(true);
@@ -787,6 +814,7 @@ export default function PublishStudio({
                       flyerConfig={exportConfig}
                       onFlyer={(patch) => setDraft({ flyerConfig: { ...exportConfig, ...patch } })}
                     />
+                    <PublishAIQuestions draft={draft} onAnswer={handleAiAnswer} />
                     {showForm && (
                       <div ref={formAnchorRef} className="px-3 pb-8">
                         <PublishFormCompact
@@ -808,7 +836,7 @@ export default function PublishStudio({
                   </>
                 }
               >
-                {coverUrl && draft.plan === 'paid' ? (
+                {coverUrl ? (
                   <PublishCardCanvas
                     heroUrl={coverUrl}
                     templateId={exportTemplateId}
@@ -819,6 +847,9 @@ export default function PublishStudio({
                     draft={draft}
                     onFlyer={(patch) => setDraft({ flyerConfig: { ...exportConfig, ...patch } })}
                     onLayout={(cardLayout, options) => setDraft({ cardLayout }, options)}
+                    onHidePiece={(id) =>
+                      setDraft({ cardHidden: { ...draft.cardHidden, [id]: true } }, { history: true })
+                    }
                   />
                 ) : (
                   <FlyerCanvas
@@ -983,7 +1014,7 @@ export default function PublishStudio({
               <PublishFixedChatBar
                 onSend={handleChatSend}
                 onUploadImage={uploadPublishImage}
-                onRunAdis={draft.plan === 'paid' ? () => void runAdisFill() : undefined}
+                onRunAdis={() => void sendComposerToAi()}
                 sending={analyzing}
                 embedded
                 statusMessage={chatStatus}
@@ -1023,39 +1054,25 @@ export default function PublishStudio({
             <div className="shrink-0 bg-[var(--bg-primary)] pb-[max(0.35rem,env(safe-area-inset-bottom))]">
             {immersive ? (
               <>
-              {!reeditId && (
-              <div className="flex justify-center gap-2 px-3 pt-1">
-                <button
-                  type="button"
-                  onClick={() => setDraft({ plan: 'free' })}
-                  className={`rounded-full px-3 py-1 text-xs font-bold ${draft.plan !== 'paid' ? 'bg-[var(--brand-blue)] text-white' : 'text-[var(--text-secondary)]'}`}
-                >
-                  Gratis
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setDraft({ plan: 'paid' })}
-                  className={`rounded-full px-3 py-1 text-xs font-bold ${draft.plan === 'paid' ? 'bg-[var(--brand-blue)] text-white' : 'text-[var(--text-secondary)]'}`}
-                >
-                  De pago
-                </button>
-              </div>
-              )}
               {reeditId && !sourcePaid && (
                 <p className="m-0 px-4 pt-2 text-center text-xs text-[var(--text-secondary)]">
                   Este aviso era gratis. Al publicarlo otra vez queda de pago.
                 </p>
               )}
-              {draft.plan === 'paid' && (
-                <div className="flex justify-center px-3 pb-1">
-                  <button
-                    type="button"
-                    onClick={() => void runAdisFill()}
-                    disabled={analyzing}
-                    className="rounded-full px-3 py-1.5 text-[11px] font-bold text-[var(--brand-blue)] ring-1 ring-[rgba(var(--brand-primary-rgb),0.35)] disabled:opacity-40"
-                  >
-                    {analyzing ? 'ADIS trabajando…' : 'Rellenar con ADIS'}
-                  </button>
+              {draft.chatHistory.length > 0 && (
+                <div className="mx-2 mb-1 max-h-36 space-y-1.5 overflow-y-auto rounded-xl bg-[var(--bg-secondary)] p-2">
+                  {draft.chatHistory.slice(-8).map((msg) => (
+                    <p
+                      key={msg.id}
+                      className={`m-0 rounded-xl px-2.5 py-1.5 text-[11px] leading-snug ${
+                        msg.role === 'user'
+                          ? 'ml-6 bg-[var(--bg-primary)] text-[var(--text-primary)]'
+                          : 'mr-4 bg-[rgba(var(--brand-primary-rgb),0.1)] text-[var(--text-secondary)]'
+                      }`}
+                    >
+                      {msg.content}
+                    </p>
+                  ))}
                 </div>
               )}
               {draft.imagenes.length > 0 && (
@@ -1079,21 +1096,22 @@ export default function PublishStudio({
               <PublishStudioComposer
                 value={composerText}
                 onChange={setComposerText}
-                paid={draft.plan === 'paid'}
                 uploadingImage={uploadingImage}
                 publishing={publishing}
+                aiWorking={analyzing}
                 voiceActive={isListening || recordingAudio}
                 galleryUrls={draft.imagenes}
                 onUploadFiles={(files) => void handleFilePick(files)}
                 onVoice={() => void handleVoiceCapture()}
-                onSubmit={() => {
-                  const text = composerText.trim();
-                  if (!text) return;
-                  setComposerText('');
-                  if (draft.plan === 'paid') handleChatSend(text);
-                  else appendTextToDraft(text);
+                onSendToAi={() => void sendComposerToAi()}
+                onPublish={() => {
+                  if (!hasMinimumContent(draft)) {
+                    onNotify?.('Agrega título, descripción o al menos una imagen', 'error');
+                    return;
+                  }
+                  setDraft({ plan: 'paid' });
+                  void publish('paid');
                 }}
-                onPublish={() => void publish(draft.plan === 'paid' ? 'paid' : 'free')}
               />
               </>
             ) : (

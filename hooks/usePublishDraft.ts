@@ -98,6 +98,7 @@ const TEXT_KEYS = new Set([
   'precio',
   'coverOverlay',
   'cardLayout',
+  'cardHidden',
   'portadaUrl',
   'imagenes',
 ]);
