@@ -4,7 +4,6 @@ import React, { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { ToastContainer } from '@/components/Toast';
 import { useToast } from '@/hooks/useToast';
-import { IconClose } from '@/components/Icons';
 import PublishStudio from '@/components/publish/PublishStudio';
 
 function PublicarHubContent() {
@@ -31,35 +30,21 @@ function PublicarHubContent() {
     }
   }, [searchParams]);
 
+  useEffect(() => {
+    router.prefetch('/');
+  }, [router]);
+
   const notify = (msg: string, type?: 'info' | 'error' | 'success') => {
     if (type === 'error') error(msg);
     else if (type === 'success') success(msg);
   };
 
   const handleExit = () => {
-    if (typeof window !== 'undefined' && window.history.length > 1) {
-      router.back();
-    } else {
-      router.push('/');
-    }
+    router.push('/');
   };
 
   return (
     <div className="fixed inset-0 z-[2100] flex flex-col bg-[var(--bg-primary)]">
-      <header className="flex shrink-0 items-center justify-between px-3 pt-[max(0.75rem,env(safe-area-inset-top))] pb-2">
-        <button
-          type="button"
-          onClick={handleExit}
-          className="flex h-11 w-11 items-center justify-center rounded-full bg-[var(--bg-secondary)] text-[var(--text-primary)] transition-colors hover:bg-[var(--hover-bg)]"
-          aria-label="Cerrar y salir"
-          title="Salir"
-        >
-          <IconClose size={20} />
-        </button>
-        <span className="text-sm font-bold text-[var(--text-primary)]">Publicar</span>
-        <span className="w-11" aria-hidden />
-      </header>
-
       <main className="flex min-h-0 flex-1 flex-col">
         <PublishStudio
           key={seedKey}
@@ -68,6 +53,7 @@ function PublicarHubContent() {
           initialImageUrl={initialImageUrl}
           initialContacto={initialContacto}
           onNotify={notify}
+          onClose={handleExit}
           onPublished={() => {
             setInitialText('');
             setInitialImageUrl(null);

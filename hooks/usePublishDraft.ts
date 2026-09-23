@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   EMPTY_PUBLISH_DRAFT,
   PublishDraft,
@@ -9,15 +9,36 @@ import {
 
 const STORAGE_KEY = 'publish_studio_draft_v1';
 const STEP_KEY = 'publish_studio_step_v1';
+const LEGACY_SESSION_KEY = 'publish_studio_draft_v1';
+
+function readStorage(storage: Storage, key: string): string | null {
+  try {
+    return storage.getItem(key);
+  } catch {
+    return null;
+  }
+}
+
+function writeStorage(storage: Storage, key: string, value: string) {
+  try {
+    storage.setItem(key, value);
+  } catch {
+    // cuota llena o modo privado
+  }
+}
 
 export type StudioStep = 'compose' | 'review' | 'pay';
 
 function loadDraft(): PublishDraft {
   if (typeof window === 'undefined') return { ...EMPTY_PUBLISH_DRAFT };
+  const fromLocal = readStorage(window.localStorage, STORAGE_KEY);
+  const fromSession = readStorage(window.sessionStorage, LEGACY_SESSION_KEY);
+  const raw = fromLocal || fromSession;
+  if (!raw) return { ...EMPTY_PUBLISH_DRAFT };
   try {
-    const raw = sessionStorage.getItem(STORAGE_KEY);
-    if (!raw) return { ...EMPTY_PUBLISH_DRAFT };
-    return { ...EMPTY_PUBLISH_DRAFT, ...JSON.parse(raw) };
+    const parsed = { ...EMPTY_PUBLISH_DRAFT, ...JSON.parse(raw) };
+    if (!fromLocal && fromSession) writeStorage(window.localStorage, STORAGE_KEY, raw);
+    return parsed;
   } catch {
     return { ...EMPTY_PUBLISH_DRAFT };
   }
@@ -25,31 +46,31 @@ function loadDraft(): PublishDraft {
 
 function saveDraft(draft: PublishDraft) {
   if (typeof window === 'undefined') return;
+  writeStorage(window.localStorage, STORAGE_KEY, JSON.stringify(draft));
+}
+
+export function clearPublishDraftStorage() {
+  if (typeof window === 'undefined') return;
   try {
-    sessionStorage.setItem(STORAGE_KEY, JSON.stringify(draft));
+    window.localStorage.removeItem(STORAGE_KEY);
+    window.localStorage.removeItem(STEP_KEY);
+    window.sessionStorage.removeItem(LEGACY_SESSION_KEY);
+    window.sessionStorage.removeItem(STEP_KEY);
   } catch {
-    // ignore quota errors
+    // ignore
   }
 }
 
 export function loadStudioStep(): StudioStep {
   if (typeof window === 'undefined') return 'compose';
-  try {
-    const raw = sessionStorage.getItem(STEP_KEY);
-    if (raw === 'compose' || raw === 'review' || raw === 'pay') return raw;
-  } catch {
-    // ignore
-  }
+  const raw = readStorage(window.localStorage, STEP_KEY) || readStorage(window.sessionStorage, STEP_KEY);
+  if (raw === 'compose' || raw === 'review' || raw === 'pay') return raw;
   return 'compose';
 }
 
 export function saveStudioStep(step: StudioStep) {
   if (typeof window === 'undefined') return;
-  try {
-    sessionStorage.setItem(STEP_KEY, step);
-  } catch {
-    // ignore
-  }
+  writeStorage(window.localStorage, STEP_KEY, step);
 }
 
 /** Solo aplica iniciales con valor real; no pisa el borrador guardado con '' o []. */
@@ -68,21 +89,92 @@ function mergeInitialOverSaved(
   return next;
 }
 
+const HISTORY_LIMIT = 40;
+const TEXT_KEYS = new Set(['titulo', 'descripcion', 'contacto', 'ubicacion']);
+
+interface DraftHistory {
+  present: PublishDraft;
+  past: PublishDraft[];
+  future: PublishDraft[];
+}
+
+function withMissing(draft: PublishDraft): PublishDraft {
+  return { ...draft, missingFields: detectMissingFields(draft) };
+}
+
 export function usePublishDraft(initial?: Partial<PublishDraft>) {
-  const [draft, setDraftState] = useState<PublishDraft>(() =>
-    mergeInitialOverSaved(loadDraft(), initial),
-  );
+  const [history, setHistory] = useState<DraftHistory>(() => ({
+    present: withMissing(mergeInitialOverSaved(loadDraft(), initial)),
+    past: [],
+    future: [],
+  }));
   const [showAdvanced, setShowAdvanced] = useState(false);
+  const lastTextPush = useRef(0);
+  const draft = history.present;
 
   useEffect(() => {
     saveDraft(draft);
   }, [draft]);
 
-  const setDraft = useCallback((patch: Partial<PublishDraft> | ((prev: PublishDraft) => PublishDraft)) => {
-    setDraftState((prev) => {
-      const next = typeof patch === 'function' ? patch(prev) : { ...prev, ...patch };
-      next.missingFields = detectMissingFields(next);
-      return next;
+  useEffect(() => {
+    const flush = () => saveDraft(draft);
+    const onHide = () => {
+      if (document.visibilityState === 'hidden') flush();
+    };
+    window.addEventListener('pagehide', flush);
+    document.addEventListener('visibilitychange', onHide);
+    return () => {
+      window.removeEventListener('pagehide', flush);
+      document.removeEventListener('visibilitychange', onHide);
+    };
+  }, [draft]);
+
+  const setDraft = useCallback((
+    patch: Partial<PublishDraft> | ((prev: PublishDraft) => PublishDraft),
+    options?: { history?: boolean },
+  ) => {
+    setHistory((h) => {
+      const nextRaw = typeof patch === 'function' ? patch(h.present) : { ...h.present, ...patch };
+      const next = withMissing(nextRaw);
+      if (JSON.stringify(next) === JSON.stringify(h.present)) return h;
+      const record = options?.history !== false;
+      const keys = typeof patch === 'function' ? null : Object.keys(patch);
+      const textOnly = !!keys && keys.length > 0 && keys.every((key) => TEXT_KEYS.has(key));
+      const now = Date.now();
+      const coalesce = record && textOnly && now - lastTextPush.current < 700 && h.past.length > 0;
+      if (record && !coalesce) lastTextPush.current = now;
+      saveDraft(next);
+      return {
+        present: next,
+        past: !record || coalesce ? h.past : [...h.past, h.present].slice(-HISTORY_LIMIT),
+        future: record ? [] : h.future,
+      };
+    });
+  }, []);
+
+  const undo = useCallback(() => {
+    setHistory((h) => {
+      if (h.past.length === 0) return h;
+      const present = h.past[h.past.length - 1];
+      saveDraft(present);
+      return {
+        present,
+        past: h.past.slice(0, -1),
+        future: [h.present, ...h.future].slice(0, HISTORY_LIMIT),
+      };
+    });
+  }, []);
+
+  const redo = useCallback(() => {
+    setHistory((h) => {
+      if (h.future.length === 0) return h;
+      const [present, ...rest] = h.future;
+      saveDraft(present);
+      return {
+        present,
+        past: [...h.past, h.present].slice(-HISTORY_LIMIT),
+        future: rest,
+      };
     });
   }, []);
 
@@ -94,7 +186,6 @@ export function usePublishDraft(initial?: Partial<PublishDraft>) {
           if (value === undefined || value === null) continue;
           if (key === 'aiConfidence' || key === 'atributos' || key === 'imagenes') continue;
           if (typeof value === 'string' && !value.trim()) continue;
-          // Don't overwrite manually edited high-confidence fields unless new confidence is higher
           const conf = confidence?.[key] ?? 0.8;
           const existingConf = prev.aiConfidence[key] ?? 0;
           if (existingConf >= 0.9 && conf < existingConf) continue;
@@ -118,8 +209,9 @@ export function usePublishDraft(initial?: Partial<PublishDraft>) {
   );
 
   const resetDraft = useCallback(() => {
-    const fresh = mergeInitialOverSaved({ ...EMPTY_PUBLISH_DRAFT }, initial);
-    setDraftState(fresh);
+    const fresh = withMissing(mergeInitialOverSaved({ ...EMPTY_PUBLISH_DRAFT }, initial));
+    setHistory({ present: fresh, past: [], future: [] });
+    clearPublishDraftStorage();
     saveDraft(fresh);
     saveStudioStep('compose');
   }, [initial]);
@@ -173,6 +265,10 @@ export function usePublishDraft(initial?: Partial<PublishDraft>) {
     setDraft,
     mergeDraft,
     resetDraft,
+    undo,
+    redo,
+    canUndo: history.past.length > 0,
+    canRedo: history.future.length > 0,
     addImage,
     removeImage,
     setField,

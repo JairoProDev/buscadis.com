@@ -22,7 +22,7 @@ import type { PublisherPreview } from './PublishPreviewCard';
 import { PublishDraft } from '@/lib/publish/publish-draft-types';
 import { hasMinimumContent } from '@/lib/publish/publish-draft-types';
 import { publishPrimaryBtn, publishSecondaryBtn, publishCard } from './publish-ui';
-import { IconCamera, IconImage, IconLayers, IconMegaphone, IconMicrophone, IconX } from '@/components/Icons';
+import { IconCamera, IconChevronLeft, IconImage, IconLayers, IconMegaphone, IconMicrophone, IconRedo, IconUndo, IconX } from '@/components/Icons';
 import type { Adiso } from '@/types';
 import { defaultFlyerForCategory } from '@/lib/flyer/templates';
 import { exportAndUploadFlyer } from '@/lib/flyer/export-client';
@@ -79,6 +79,10 @@ export default function PublishStudio({
     showAdvanced,
     setShowAdvanced,
     resetDraft,
+    undo,
+    redo,
+    canUndo,
+    canRedo,
     addChatMessage,
   } = usePublishDraft({
     descripcion: initialText,
@@ -98,6 +102,7 @@ export default function PublishStudio({
   const [autoDownload, setAutoDownload] = useState(true);
   const [showUpsell, setShowUpsell] = useState(false);
   const [showTemplates, setShowTemplates] = useState(false);
+  const [confirmLeave, setConfirmLeave] = useState(false);
   const flyerExportRef = useRef<HTMLDivElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const galleryInputRef = useRef<HTMLInputElement>(null);
@@ -106,8 +111,49 @@ export default function PublishStudio({
   useEffect(() => {
     if (draft.flyerTemplateId) return;
     const d = defaultFlyerForCategory(draft.categoria);
-    setDraft({ flyerTemplateId: d.templateId, flyerConfig: d.config });
+    setDraft({ flyerTemplateId: d.templateId, flyerConfig: d.config }, { history: false });
   }, [draft.categoria, draft.flyerTemplateId, setDraft]);
+
+  useEffect(() => {
+    const onKey = (event: KeyboardEvent) => {
+      const target = event.target as HTMLElement | null;
+      if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable)) {
+        return;
+      }
+      const meta = event.metaKey || event.ctrlKey;
+      if (!meta || event.key.toLowerCase() !== 'z') return;
+      event.preventDefault();
+      if (event.shiftKey) redo();
+      else undo();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [undo, redo]);
+
+  const hasWork = Boolean(
+    draft.titulo?.trim() ||
+      draft.descripcion?.trim() ||
+      draft.contacto?.trim() ||
+      draft.imagenes.length ||
+      draft.precio != null ||
+      draft.categoria ||
+      draft.chatHistory.length ||
+      Object.keys(draft.atributos || {}).length ||
+      (draft.flyerTemplateId &&
+        draft.flyerTemplateId !== defaultFlyerForCategory(draft.categoria).templateId) ||
+      (draft.flyerConfig &&
+        JSON.stringify(draft.flyerConfig) !==
+          JSON.stringify(defaultFlyerForCategory(draft.categoria).config))
+  );
+
+  const requestLeave = () => {
+    if (!onClose) return;
+    if (!hasWork) {
+      onClose();
+      return;
+    }
+    setConfirmLeave(true);
+  };
 
   const setStep = useCallback((next: StudioStep) => {
     setStepState(next);
@@ -479,7 +525,7 @@ export default function PublishStudio({
 
   return (
     <div
-      className={`flex flex-col ${
+      className={`relative flex flex-col ${
         immersive || compact ? 'h-full min-h-0' : 'min-h-0'
       } ${showChat && step === 'compose' && !compact && !immersive ? 'pb-[120px]' : ''}`}
     >
@@ -494,17 +540,53 @@ export default function PublishStudio({
         </div>
       )}
 
-      {onClose && (
+      {onClose && !immersive && (
         <div className="mb-2 flex shrink-0 items-center justify-between px-1">
           <h2 className="m-0 text-base font-bold text-[var(--text-primary)]">Publicar aviso</h2>
           <button
             type="button"
-            onClick={onClose}
+            onClick={requestLeave}
             className="rounded-lg p-2 text-[var(--text-tertiary)] transition-colors hover:bg-[var(--hover-bg)]"
             aria-label="Cerrar"
           >
             ✕
           </button>
+        </div>
+      )}
+
+      {immersive && onClose && (
+        <div className="pointer-events-none absolute inset-x-0 top-0 z-20 flex items-center justify-between px-1 pt-[max(0.25rem,env(safe-area-inset-top))]">
+          <button
+            type="button"
+            onClick={requestLeave}
+            className="pointer-events-auto flex h-10 w-10 items-center justify-center text-[var(--text-primary)] drop-shadow-[0_1px_1px_rgba(255,255,255,0.85)]"
+            aria-label="Volver"
+            title="Volver"
+          >
+            <IconChevronLeft size={22} />
+          </button>
+          <div className="pointer-events-auto flex items-center">
+            <button
+              type="button"
+              onClick={undo}
+              disabled={!canUndo}
+              className="flex h-10 w-10 items-center justify-center text-[var(--text-primary)] drop-shadow-[0_1px_1px_rgba(255,255,255,0.85)] disabled:opacity-30"
+              aria-label="Deshacer"
+              title="Deshacer"
+            >
+              <IconUndo size={16} />
+            </button>
+            <button
+              type="button"
+              onClick={redo}
+              disabled={!canRedo}
+              className="flex h-10 w-10 items-center justify-center text-[var(--text-primary)] drop-shadow-[0_1px_1px_rgba(255,255,255,0.85)] disabled:opacity-30"
+              aria-label="Rehacer"
+              title="Rehacer"
+            >
+              <IconRedo size={16} />
+            </button>
+          </div>
         </div>
       )}
 
@@ -765,6 +847,43 @@ export default function PublishStudio({
               </button>
             </div>
           )}
+        </div>
+      )}
+
+      {confirmLeave && (
+        <div className="fixed inset-0 z-[2200] flex items-end justify-center bg-black/45 p-4 sm:items-center">
+          <div className={`${publishCard} w-full max-w-sm space-y-3 p-4`} role="dialog" aria-labelledby="leave-publish-title">
+            <h2 id="leave-publish-title" className="m-0 text-base font-bold text-[var(--text-primary)]">
+              Tienes un avance sin publicar
+            </h2>
+            <p className="m-0 text-sm leading-snug text-[var(--text-secondary)]">
+              Puedes guardarlo como borrador y retomarlo cuando vuelvas, o descartarlo y borrar lo que llevas.
+            </p>
+            <button
+              type="button"
+              className={publishPrimaryBtn}
+              onClick={() => onClose?.()}
+            >
+              Guardar borrador
+            </button>
+            <button
+              type="button"
+              className="w-full rounded-xl py-3 text-sm font-bold text-red-600 transition-colors hover:bg-red-500/10"
+              onClick={() => {
+                resetDraft();
+                onClose?.();
+              }}
+            >
+              Descartar avance
+            </button>
+            <button
+              type="button"
+              className="w-full py-2 text-sm font-semibold text-[var(--text-secondary)]"
+              onClick={() => setConfirmLeave(false)}
+            >
+              Seguir editando
+            </button>
+          </div>
         </div>
       )}
     </div>

@@ -11,7 +11,7 @@ import {
   FaFileExcel, FaDownload, FaLightbulb, FaSyncAlt, FaBolt, FaTag, FaEyeSlash, FaLayerGroup, FaSquare,
   FaSort, FaSortAmountDown, FaSortAmountUp, FaVideo, FaPaperPlane, FaBell, FaMoon, FaSun, FaUser, FaHandPointUp,
   FaCog, FaSignOutAlt, FaCompass, FaUserTie, FaUserCog, FaUserEdit, FaEllipsisV,
-  FaHandshake, FaUserPlus
+  FaHandshake, FaUserPlus, FaUndo, FaRedo
 } from 'react-icons/fa';
 import { FcGoogle } from 'react-icons/fc';
 import { MdCenterFocusWeak } from 'react-icons/md';
@@ -40,6 +40,8 @@ const getSize = (props: IconProps): number => {
 export const IconClose = (p: IconProps) => <FaTimes size={getSize(p)} color={p.color || 'currentColor'} className={p.className} onClick={p.onClick} />;
 export const IconArrowLeft = (p: IconProps) => <FaChevronLeft size={getSize(p)} color={p.color || 'currentColor'} className={p.className} onClick={p.onClick} />;
 export const IconChevronLeft = (p: IconProps) => <FaChevronLeft size={getSize(p)} color={p.color || 'currentColor'} className={p.className} onClick={p.onClick} />;
+export const IconUndo = (p: IconProps) => <FaUndo size={getSize(p)} color={p.color || 'currentColor'} className={p.className} onClick={p.onClick} />;
+export const IconRedo = (p: IconProps) => <FaRedo size={getSize(p)} color={p.color || 'currentColor'} className={p.className} onClick={p.onClick} />;
 export const IconArrowRight = (p: IconProps) => <FaChevronRight size={getSize(p)} color={p.color || 'currentColor'} className={p.className} onClick={p.onClick} />;
 export const IconChevronRight = (p: IconProps) => <FaChevronRight size={getSize(p)} color={p.color || 'currentColor'} className={p.className} onClick={p.onClick} />;
 export const IconChevronDown = (p: IconProps) => <FaChevronDown size={getSize(p)} color={p.color || 'currentColor'} className={p.className} onClick={p.onClick} />;
