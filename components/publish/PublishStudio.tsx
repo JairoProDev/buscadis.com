@@ -22,7 +22,7 @@ import type { PublisherPreview } from './PublishPreviewCard';
 import { PublishDraft } from '@/lib/publish/publish-draft-types';
 import { hasMinimumContent } from '@/lib/publish/publish-draft-types';
 import { publishPrimaryBtn, publishSecondaryBtn, publishCard } from './publish-ui';
-import { IconCamera, IconImage, IconMicrophone, IconX } from '@/components/Icons';
+import { IconCamera, IconImage, IconLayers, IconMegaphone, IconMicrophone, IconX } from '@/components/Icons';
 import type { Adiso } from '@/types';
 import { defaultFlyerForCategory } from '@/lib/flyer/templates';
 import { exportAndUploadFlyer } from '@/lib/flyer/export-client';
@@ -97,6 +97,7 @@ export default function PublishStudio({
   const [publisher, setPublisher] = useState<PublisherPreview | null>(null);
   const [autoDownload, setAutoDownload] = useState(true);
   const [showUpsell, setShowUpsell] = useState(false);
+  const [showTemplates, setShowTemplates] = useState(false);
   const flyerExportRef = useRef<HTMLDivElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const galleryInputRef = useRef<HTMLInputElement>(null);
@@ -538,46 +539,6 @@ export default function PublishStudio({
                   <IconX size={14} />
                 </button>
               )}
-
-              <div className="absolute inset-x-0 bottom-0 flex items-center justify-center gap-4 bg-gradient-to-t from-black/70 to-transparent p-4 pt-12">
-                <button
-                  type="button"
-                  onClick={() => galleryInputRef.current?.click()}
-                  disabled={uploadingImage || analyzing}
-                  className="flex h-12 w-12 items-center justify-center rounded-full bg-white/20 text-white backdrop-blur"
-                  aria-label="Subir foto"
-                  title="Subir foto"
-                >
-                  <IconImage size={22} />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => cameraInputRef.current?.click()}
-                  disabled={uploadingImage || analyzing}
-                  className="flex h-16 w-16 items-center justify-center rounded-full border-4 border-white bg-[var(--brand-blue)] text-white shadow-lg"
-                  aria-label="Tomar foto"
-                  title="Tomar foto"
-                >
-                  <IconCamera size={28} />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => void handleVoiceCapture()}
-                  disabled={analyzing}
-                  className={`flex h-12 w-12 items-center justify-center rounded-full backdrop-blur ${
-                    isListening || recordingAudio
-                      ? 'animate-pulse bg-red-500 text-white'
-                      : 'bg-white/20 text-white'
-                  }`}
-                  aria-label={
-                    isListening || recordingAudio ? 'Detener dictado' : 'Dictar aviso'
-                  }
-                  aria-pressed={isListening || recordingAudio}
-                  title={isListening || recordingAudio ? 'Detener' : 'Dictar'}
-                >
-                  <IconMicrophone size={22} />
-                </button>
-              </div>
             </div>
 
             <input
@@ -627,20 +588,6 @@ export default function PublishStudio({
               </div>
             )}
 
-            {!heroUrl && (
-              <div className="mb-3">
-                <FlyerTemplatePicker
-                  templateId={exportTemplateId}
-                  config={exportConfig}
-                  content={exportContent}
-                  hidePreview
-                  onChange={(next) =>
-                    setDraft({ flyerTemplateId: next.templateId, flyerConfig: next.config })
-                  }
-                />
-              </div>
-            )}
-
             {draft.missingFields.length > 0 && (
               <div className="mb-3">
                 <PublishAIQuestions draft={draft} onAnswer={handleAiAnswer} />
@@ -671,15 +618,81 @@ export default function PublishStudio({
             )}
           </div>
 
-          <div className="shrink-0 border-t border-[var(--border-color)] bg-[var(--bg-primary)] px-3 py-2 pb-[max(0.5rem,env(safe-area-inset-bottom))]">
-            <button
-              type="button"
-              onClick={() => void publish('free')}
-              className="w-full rounded-xl bg-[var(--brand-blue)] py-2.5 text-sm font-bold leading-none text-white shadow-[0_8px_20px_-6px_rgba(var(--brand-primary-rgb),0.45)] transition-all hover:brightness-105 active:scale-[0.99] disabled:pointer-events-none disabled:opacity-50"
-              disabled={!canPublish}
-            >
-              {publishing ? 'Publicando…' : 'Publicar gratis'}
-            </button>
+          <div className="shrink-0 border-t border-[var(--border-color)] bg-[var(--bg-primary)] pb-[max(0.35rem,env(safe-area-inset-bottom))]">
+            {showTemplates && (
+              <div className="max-h-[42vh] overflow-y-auto border-b border-[var(--border-color)] px-3 py-3">
+                <FlyerTemplatePicker
+                  templateId={exportTemplateId}
+                  config={exportConfig}
+                  content={exportContent}
+                  hidePreview
+                  onChange={(next) =>
+                    setDraft({ flyerTemplateId: next.templateId, flyerConfig: next.config })
+                  }
+                />
+              </div>
+            )}
+            <div className="flex items-center justify-center gap-3 px-3 py-2">
+              <button
+                type="button"
+                onClick={() => galleryInputRef.current?.click()}
+                disabled={uploadingImage || analyzing}
+                className="flex h-12 w-12 items-center justify-center rounded-full bg-[var(--bg-secondary)] text-[var(--text-primary)] disabled:opacity-40"
+                aria-label="Subir foto"
+                title="Subir foto"
+              >
+                <IconImage size={20} />
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowTemplates((open) => !open)}
+                className={`flex h-12 w-12 items-center justify-center rounded-full ${
+                  showTemplates
+                    ? 'bg-[var(--brand-blue)] text-white'
+                    : 'bg-[var(--bg-secondary)] text-[var(--text-primary)]'
+                }`}
+                aria-label="Plantillas"
+                aria-pressed={showTemplates}
+                title="Plantillas"
+              >
+                <IconLayers size={20} />
+              </button>
+              <button
+                type="button"
+                onClick={() => cameraInputRef.current?.click()}
+                disabled={uploadingImage || analyzing}
+                className="flex h-14 w-14 items-center justify-center rounded-full bg-[var(--brand-blue)] text-white shadow-lg disabled:opacity-40"
+                aria-label="Tomar foto"
+                title="Tomar foto"
+              >
+                <IconCamera size={24} />
+              </button>
+              <button
+                type="button"
+                onClick={() => void handleVoiceCapture()}
+                disabled={analyzing}
+                className={`flex h-12 w-12 items-center justify-center rounded-full ${
+                  isListening || recordingAudio
+                    ? 'animate-pulse bg-red-500 text-white'
+                    : 'bg-[var(--bg-secondary)] text-[var(--text-primary)]'
+                }`}
+                aria-label={isListening || recordingAudio ? 'Detener dictado' : 'Dictar aviso'}
+                aria-pressed={isListening || recordingAudio}
+                title={isListening || recordingAudio ? 'Detener' : 'Dictar'}
+              >
+                <IconMicrophone size={20} />
+              </button>
+              <button
+                type="button"
+                onClick={() => void publish('free')}
+                disabled={!canPublish}
+                className="flex h-12 w-12 items-center justify-center rounded-full bg-[var(--brand-blue)] text-white shadow-lg disabled:opacity-40"
+                aria-label={publishing ? 'Publicando' : 'Publicar'}
+                title={publishing ? 'Publicando…' : 'Publicar'}
+              >
+                <IconMegaphone size={20} />
+              </button>
+            </div>
           </div>
 
           {showUpsell && (
