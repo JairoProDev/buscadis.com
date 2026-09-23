@@ -22,7 +22,7 @@ import type { PublisherPreview } from './PublishPreviewCard';
 import { PublishDraft } from '@/lib/publish/publish-draft-types';
 import { hasMinimumContent } from '@/lib/publish/publish-draft-types';
 import { publishPrimaryBtn, publishSecondaryBtn, publishCard } from './publish-ui';
-import { IconCamera, IconImage, IconLayers, IconMegaphone, IconMicrophone, IconSend, IconX } from '@/components/Icons';
+import { IconCamera, IconImage, IconLayers, IconMegaphone, IconMicrophone, IconX } from '@/components/Icons';
 import type { Adiso } from '@/types';
 import { FLYER_TEMPLATES, defaultFlyerForCategory, resolveFlyerConfig } from '@/lib/flyer/templates';
 import { exportAndUploadFlyer } from '@/lib/flyer/export-client';
@@ -845,11 +845,11 @@ export default function PublishStudio({
                 <button
                   type="submit"
                   disabled={publishing || analyzing}
-                  className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#1dab61] text-white disabled:opacity-40"
+                  className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[var(--brand-blue)] text-white shadow-[0_8px_20px_-6px_rgba(var(--brand-primary-rgb),0.45)] disabled:opacity-40"
                   aria-label={composerText.trim() ? 'Enviar mensaje' : 'Publicar'}
                   title={composerText.trim() ? 'Enviar' : 'Publicar'}
                 >
-                  <IconSend size={16} />
+                  <IconMegaphone size={18} />
                 </button>
               </form>
             ) : (

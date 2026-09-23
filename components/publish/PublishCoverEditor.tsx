@@ -9,7 +9,7 @@ import {
   type PointerEvent as ReactPointerEvent,
   type ReactNode,
 } from 'react';
-import { IconCrop, IconLayers, IconPen, IconSmile, IconText, IconUndo, IconX } from '@/components/Icons';
+import { IconChevronLeft, IconCrop, IconLayers, IconPen, IconSmile, IconText, IconUndo } from '@/components/Icons';
 
 export type CoverTool = 'crop' | 'sticker' | 'text' | 'draw' | null;
 
@@ -44,8 +44,13 @@ interface Stroke {
 const STICKERS = ['😀', '😍', '🔥', '⭐', '✅', '❤️', '🏠', '🚗', '💼', '📍', '🎉', '👀'];
 const COLORS = ['#ffffff', '#111827', '#facc15', '#ef4444', '#2563eb', '#16a34a'];
 
-const circle =
-  'flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#8e8e93] text-white disabled:opacity-40';
+function toolButton(active: boolean) {
+  return `flex h-9 w-9 items-center justify-center rounded-xl transition-colors ${
+    active
+      ? 'bg-[var(--brand-blue)] text-white'
+      : 'text-[var(--text-secondary)] hover:bg-[var(--hover-bg)] hover:text-[var(--text-primary)]'
+  }`;
+}
 
 interface PublishCoverEditorProps {
   onLeave: () => void;
@@ -129,6 +134,7 @@ const PublishCoverEditor = forwardRef<PublishCoverEditorHandle, PublishCoverEdit
     const [stickers, setStickers] = useState<StickerMark[]>([]);
     const [strokes, setStrokes] = useState<Stroke[]>([]);
     const [draftStroke, setDraftStroke] = useState<Stroke | null>(null);
+    const draftStrokeRef = useRef<Stroke | null>(null);
     const [penColor, setPenColor] = useState('#ffffff');
     const [penWidth, setPenWidth] = useState(6);
     const [textValue, setTextValue] = useState('');
@@ -275,23 +281,43 @@ const PublishCoverEditor = forwardRef<PublishCoverEditorHandle, PublishCoverEdit
       onTool(next);
     };
 
+    const holdPointer = (event: ReactPointerEvent) => {
+      event.preventDefault();
+      stageRef.current?.setPointerCapture(event.pointerId);
+    };
+
+    const beginMarkDrag = (
+      event: ReactPointerEvent,
+      kind: 'text' | 'sticker',
+      id: string,
+      x: number,
+      y: number,
+    ) => {
+      event.stopPropagation();
+      holdPointer(event);
+      dragRef.current = { id, kind, px: event.clientX, py: event.clientY, x, y };
+    };
+
     const onStagePointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
       if (tool === 'draw') {
         const stroke = { color: penColor, width: penWidth, points: [pointOf(event)] };
+        draftStrokeRef.current = stroke;
         setDraftStroke(stroke);
-        event.currentTarget.setPointerCapture(event.pointerId);
+        holdPointer(event);
         return;
       }
       if (tool === 'crop' && heroUrl) {
         cropDrag.current = { px: event.clientX, py: event.clientY, x: cropPan.x, y: cropPan.y };
-        event.currentTarget.setPointerCapture(event.pointerId);
+        holdPointer(event);
       }
     };
 
     const onStagePointerMove = (event: ReactPointerEvent<HTMLDivElement>) => {
-      if (tool === 'draw' && draftStroke) {
-        const p = pointOf(event);
-        setDraftStroke({ ...draftStroke, points: [...draftStroke.points, p] });
+      const drawing = draftStrokeRef.current;
+      if (tool === 'draw' && drawing) {
+        const next = { ...drawing, points: [...drawing.points, pointOf(event)] };
+        draftStrokeRef.current = next;
+        setDraftStroke(next);
         return;
       }
       if (tool === 'crop' && cropDrag.current && photoSize && stageSize > 0) {
@@ -321,9 +347,11 @@ const PublishCoverEditor = forwardRef<PublishCoverEditorHandle, PublishCoverEdit
     };
 
     const onStagePointerUp = () => {
-      if (draftStroke && draftStroke.points.length > 1) {
-        setStrokes((list) => [...list, draftStroke]);
+      const stroke = draftStrokeRef.current;
+      if (stroke && stroke.points.length > 1) {
+        setStrokes((list) => [...list, stroke]);
       }
+      draftStrokeRef.current = null;
       setDraftStroke(null);
       dragRef.current = null;
       cropDrag.current = null;
@@ -333,63 +361,71 @@ const PublishCoverEditor = forwardRef<PublishCoverEditorHandle, PublishCoverEdit
 
     return (
       <>
-        <div className="flex shrink-0 items-center justify-between gap-2 px-3 pt-[max(0.65rem,env(safe-area-inset-top))] pb-2">
-          <button type="button" className={circle} onClick={onLeave} aria-label="Salir" title="Salir">
-            <IconX size={18} />
+        <div className="flex shrink-0 items-center gap-2 px-2 pt-[max(0.4rem,env(safe-area-inset-top))] pb-1">
+          <button
+            type="button"
+            onClick={onLeave}
+            className="flex h-10 w-10 items-center justify-center text-[var(--text-primary)]"
+            aria-label="Salir"
+            title="Salir"
+          >
+            <IconChevronLeft size={18} />
           </button>
-          {heroUrl && (
+          <div className="ml-auto flex items-center gap-0.5 rounded-2xl bg-[var(--bg-secondary)] p-1 ring-1 ring-[var(--border-color)]">
+            {heroUrl && (
+              <button
+                type="button"
+                className={toolButton(tool === 'crop')}
+                onClick={() => toggle('crop')}
+                aria-label="Reencuadrar foto"
+                title="Reencuadrar"
+              >
+                <IconCrop size={16} />
+              </button>
+            )}
             <button
               type="button"
-              className={tool === 'crop' ? `${circle} bg-[var(--brand-blue)]` : circle}
-              onClick={() => toggle('crop')}
-              aria-label="Reencuadrar foto"
-              title="Reencuadrar"
+              className={toolButton(templatesOpen)}
+              onClick={onOpenTemplates}
+              aria-label="Plantillas"
+              title="Plantillas"
             >
-              <IconCrop size={16} />
+              <IconLayers size={16} />
             </button>
-          )}
-          <button
-            type="button"
-            className={templatesOpen ? `${circle} bg-[var(--brand-blue)]` : circle}
-            onClick={onOpenTemplates}
-            aria-label="Plantillas"
-            title="Plantillas"
-          >
-            <IconLayers size={16} />
-          </button>
-          <button
-            type="button"
-            className={tool === 'sticker' ? `${circle} bg-[var(--brand-blue)]` : circle}
-            onClick={() => toggle('sticker')}
-            aria-label="Stickers"
-            title="Stickers"
-          >
-            <IconSmile size={16} />
-          </button>
-          <button
-            type="button"
-            className={tool === 'text' ? `${circle} bg-[var(--brand-blue)]` : circle}
-            onClick={() => toggle('text')}
-            aria-label="Texto"
-            title="Texto"
-          >
-            <IconText size={16} />
-          </button>
-          <button
-            type="button"
-            className={tool === 'draw' ? `${circle} bg-[var(--brand-blue)]` : circle}
-            onClick={() => toggle('draw')}
-            aria-label="Dibujar"
-            title="Dibujar"
-          >
-            <IconPen size={16} />
-          </button>
+            <button
+              type="button"
+              className={toolButton(tool === 'sticker')}
+              onClick={() => toggle('sticker')}
+              aria-label="Stickers"
+              title="Stickers"
+            >
+              <IconSmile size={16} />
+            </button>
+            <button
+              type="button"
+              className={toolButton(tool === 'text')}
+              onClick={() => toggle('text')}
+              aria-label="Texto"
+              title="Texto"
+            >
+              <IconText size={16} />
+            </button>
+            <button
+              type="button"
+              className={toolButton(tool === 'draw')}
+              onClick={() => toggle('draw')}
+              aria-label="Dibujar"
+              title="Dibujar"
+            >
+              <IconPen size={16} />
+            </button>
+          </div>
         </div>
 
         <div className="flex min-h-0 w-full flex-1 items-center justify-center px-4 py-3 [container-type:size]">
           <div
             ref={stageRef}
-            className="relative shrink-0 overflow-hidden rounded-2xl bg-[var(--bg-secondary)]"
+            className="relative shrink-0 touch-none overflow-hidden rounded-2xl bg-[var(--bg-secondary)]"
             style={{ width: 'min(100cqw, 100cqh)', height: 'min(100cqw, 100cqh)', aspectRatio: '1 / 1' }}
             onPointerDown={onStagePointerDown}
             onPointerMove={onStagePointerMove}
@@ -427,12 +463,9 @@ const PublishCoverEditor = forwardRef<PublishCoverEditorHandle, PublishCoverEdit
               <button
                 key={sticker.id}
                 type="button"
-                className="absolute -translate-x-1/2 -translate-y-1/2 text-4xl leading-none"
+                className="absolute -translate-x-1/2 -translate-y-1/2 cursor-grab touch-none text-4xl leading-none active:cursor-grabbing"
                 style={{ left: `${sticker.x * 100}%`, top: `${sticker.y * 100}%` }}
-                onPointerDown={(event) => {
-                  event.stopPropagation();
-                  dragRef.current = { id: sticker.id, kind: 'sticker', px: event.clientX, py: event.clientY, x: sticker.x, y: sticker.y };
-                }}
+                onPointerDown={(event) => beginMarkDrag(event, 'sticker', sticker.id, sticker.x, sticker.y)}
               >
                 {sticker.emoji}
               </button>
@@ -441,12 +474,9 @@ const PublishCoverEditor = forwardRef<PublishCoverEditorHandle, PublishCoverEdit
               <button
                 key={mark.id}
                 type="button"
-                className="absolute max-w-[80%] -translate-x-1/2 -translate-y-1/2 text-center text-xl font-black leading-tight drop-shadow"
+                className="absolute max-w-[80%] -translate-x-1/2 -translate-y-1/2 cursor-grab touch-none text-center text-xl font-black leading-tight drop-shadow active:cursor-grabbing"
                 style={{ left: `${mark.x * 100}%`, top: `${mark.y * 100}%`, color: mark.color }}
-                onPointerDown={(event) => {
-                  event.stopPropagation();
-                  dragRef.current = { id: mark.id, kind: 'text', px: event.clientX, py: event.clientY, x: mark.x, y: mark.y };
-                }}
+                onPointerDown={(event) => beginMarkDrag(event, 'text', mark.id, mark.x, mark.y)}
               >
                 {mark.text}
               </button>
