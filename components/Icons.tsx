@@ -11,7 +11,10 @@ import {
   FaFileExcel, FaDownload, FaLightbulb, FaSyncAlt, FaBolt, FaTag, FaEyeSlash, FaLayerGroup, FaSquare,
   FaSort, FaSortAmountDown, FaSortAmountUp, FaVideo, FaPaperPlane, FaBell, FaMoon, FaSun, FaUser, FaHandPointUp,
   FaCog, FaSignOutAlt, FaCompass, FaUserTie, FaUserCog, FaUserEdit, FaEllipsisV,
-  FaHandshake, FaUserPlus, FaUndo, FaRedo, FaCrop, FaFont, FaPencilAlt, FaSmile
+  FaHandshake, FaUserPlus, FaUndo, FaRedo, FaCrop, FaPencilAlt, FaSmile,
+  FaBed, FaBath, FaRulerCombined, FaCouch, FaKey, FaTree, FaWifi, FaGasPump, FaCogs,
+  FaTachometerAlt, FaBicycle, FaTshirt, FaUtensils, FaGraduationCap, FaLaptop, FaPaw,
+  FaExchangeAlt, FaTruck, FaDoorOpen, FaTicketAlt, FaWeightHanging, FaCoins
 } from 'react-icons/fa';
 import { FcGoogle } from 'react-icons/fc';
 import { MdCenterFocusWeak } from 'react-icons/md';
@@ -221,7 +224,34 @@ export const IconAlertTriangle = (p: IconProps) => <FaExclamationTriangle size={
 export const IconFileSpreadsheet = (p: IconProps) => <FaFileExcel size={getSize(p)} color={p.color || 'currentColor'} className={p.className} onClick={p.onClick} />;
 export const IconDownload = (p: IconProps) => <FaDownload size={getSize(p)} color={p.color || 'currentColor'} className={p.className} onClick={p.onClick} />;
 export const IconCrop = (p: IconProps) => <FaCrop size={getSize(p)} color={p.color || 'currentColor'} className={p.className} onClick={p.onClick} />;
-export const IconText = (p: IconProps) => <FaFont size={getSize(p)} color={p.color || 'currentColor'} className={p.className} onClick={p.onClick} />;
+export const IconText = (p: IconProps) => (
+  <svg width={getSize(p)} height={getSize(p)} viewBox="0 0 24 24" fill={p.color || 'currentColor'} className={p.className} aria-hidden>
+    <path d="M3.5 3.5h17v4.2h-6.2V20.5h-4.6V7.7H3.5V3.5z" />
+  </svg>
+);
+export const IconBed = (p: IconProps) => <FaBed size={getSize(p)} color={p.color || 'currentColor'} className={p.className} onClick={p.onClick} />;
+export const IconBath = (p: IconProps) => <FaBath size={getSize(p)} color={p.color || 'currentColor'} className={p.className} onClick={p.onClick} />;
+export const IconRuler = (p: IconProps) => <FaRulerCombined size={getSize(p)} color={p.color || 'currentColor'} className={p.className} onClick={p.onClick} />;
+export const IconCouch = (p: IconProps) => <FaCouch size={getSize(p)} color={p.color || 'currentColor'} className={p.className} onClick={p.onClick} />;
+export const IconKey = (p: IconProps) => <FaKey size={getSize(p)} color={p.color || 'currentColor'} className={p.className} onClick={p.onClick} />;
+export const IconTree = (p: IconProps) => <FaTree size={getSize(p)} color={p.color || 'currentColor'} className={p.className} onClick={p.onClick} />;
+export const IconWifi = (p: IconProps) => <FaWifi size={getSize(p)} color={p.color || 'currentColor'} className={p.className} onClick={p.onClick} />;
+export const IconGas = (p: IconProps) => <FaGasPump size={getSize(p)} color={p.color || 'currentColor'} className={p.className} onClick={p.onClick} />;
+export const IconCogs = (p: IconProps) => <FaCogs size={getSize(p)} color={p.color || 'currentColor'} className={p.className} onClick={p.onClick} />;
+export const IconGauge = (p: IconProps) => <FaTachometerAlt size={getSize(p)} color={p.color || 'currentColor'} className={p.className} onClick={p.onClick} />;
+export const IconBicycle = (p: IconProps) => <FaBicycle size={getSize(p)} color={p.color || 'currentColor'} className={p.className} onClick={p.onClick} />;
+export const IconShirt = (p: IconProps) => <FaTshirt size={getSize(p)} color={p.color || 'currentColor'} className={p.className} onClick={p.onClick} />;
+export const IconUtensils = (p: IconProps) => <FaUtensils size={getSize(p)} color={p.color || 'currentColor'} className={p.className} onClick={p.onClick} />;
+export const IconGrad = (p: IconProps) => <FaGraduationCap size={getSize(p)} color={p.color || 'currentColor'} className={p.className} onClick={p.onClick} />;
+export const IconLaptop = (p: IconProps) => <FaLaptop size={getSize(p)} color={p.color || 'currentColor'} className={p.className} onClick={p.onClick} />;
+export const IconPaw = (p: IconProps) => <FaPaw size={getSize(p)} color={p.color || 'currentColor'} className={p.className} onClick={p.onClick} />;
+export const IconExchange = (p: IconProps) => <FaExchangeAlt size={getSize(p)} color={p.color || 'currentColor'} className={p.className} onClick={p.onClick} />;
+export const IconTruck = (p: IconProps) => <FaTruck size={getSize(p)} color={p.color || 'currentColor'} className={p.className} onClick={p.onClick} />;
+export const IconDoor = (p: IconProps) => <FaDoorOpen size={getSize(p)} color={p.color || 'currentColor'} className={p.className} onClick={p.onClick} />;
+export const IconTicket = (p: IconProps) => <FaTicketAlt size={getSize(p)} color={p.color || 'currentColor'} className={p.className} onClick={p.onClick} />;
+export const IconWeight = (p: IconProps) => <FaWeightHanging size={getSize(p)} color={p.color || 'currentColor'} className={p.className} onClick={p.onClick} />;
+export const IconCoins = (p: IconProps) => <FaCoins size={getSize(p)} color={p.color || 'currentColor'} className={p.className} onClick={p.onClick} />;
+export const IconBuilding = (p: IconProps) => <FaBuilding size={getSize(p)} color={p.color || 'currentColor'} className={p.className} onClick={p.onClick} />;
 export const IconPen = (p: IconProps) => <FaPencilAlt size={getSize(p)} color={p.color || 'currentColor'} className={p.className} onClick={p.onClick} />;
 export const IconSmile = (p: IconProps) => <FaSmile size={getSize(p)} color={p.color || 'currentColor'} className={p.className} onClick={p.onClick} />;
 export const IconLightbulb = (p: IconProps) => <FaLightbulb size={getSize(p)} color={p.color || 'currentColor'} className={p.className} onClick={p.onClick} />;

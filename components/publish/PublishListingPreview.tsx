@@ -12,7 +12,41 @@ import {
   type PublishFieldDefinition,
 } from '@/lib/publish/category-tree';
 import { getCategoriaIcon, PUBLISH_CATEGORIAS } from '@/lib/categoria-icons';
-import { IconClock, IconFileAlt, IconLocation, IconTag, IconTags, IconText } from '@/components/Icons';
+import {
+  IconBath,
+  IconBed,
+  IconBuilding,
+  IconCoins,
+  IconBicycle,
+  IconCalendar,
+  IconCheck,
+  IconClock,
+  IconCogs,
+  IconCouch,
+  IconDoor,
+  IconExchange,
+  IconGas,
+  IconGauge,
+  IconGrad,
+  IconKey,
+  IconLaptop,
+  IconLocation,
+  IconPaw,
+  IconRuler,
+  IconShield,
+  IconShirt,
+  IconStore,
+  IconVehiculos,
+  IconTicket,
+  IconTree,
+  IconTruck,
+  IconUser,
+  IconUsers,
+  IconUtensils,
+  IconWeight,
+  IconWifi,
+} from '@/components/Icons';
+import type { ComponentType } from 'react';
 
 interface PublishListingPreviewProps {
   draft: PublishDraft;
@@ -20,11 +54,6 @@ interface PublishListingPreviewProps {
   onSetAtributo: (fieldId: string, value: string | boolean | number) => void;
   flyerConfig?: FlyerConfig;
   onFlyer?: (patch: Partial<FlyerConfig>) => void;
-}
-
-function priceLabel(precio?: number) {
-  if (!precio || precio <= 0) return '';
-  return `S/ ${precio.toLocaleString('es-PE')}`;
 }
 
 function locationLabel(ubicacion: PublishDraft['ubicacion']) {
@@ -68,10 +97,46 @@ async function detectLocation(onChange: (patch: Partial<PublishDraft>) => void) 
   });
 }
 
+const FIELD_ICONS: Array<[RegExp, ComponentType<{ size?: number; color?: string }>]> = [
+  [/operacion/, IconKey],
+  [/condicion/, IconCheck],
+  [/modalidad/, IconLaptop],
+  [/jornada/, IconClock],
+  [/sueldo|tarifa|pago/, IconCoins],
+  [/dormitorio/, IconBed],
+  [/bano/, IconBath],
+  [/area|frente|altura/, IconRuler],
+  [/ambiente/, IconDoor],
+  [/piso|pisos|edificio|unidad/, IconBuilding],
+  [/amobl|mueble/, IconCouch],
+  [/estacionamiento/, IconVehiculos],
+  [/patio|jardin/, IconTree],
+  [/servicio/, IconWifi],
+  [/anio|fecha/, IconCalendar],
+  [/km|kilomet/, IconGauge],
+  [/combustible/, IconGas],
+  [/transmision|traccion|cilindrada|cc/, IconCogs],
+  [/asiento|cupo/, IconUsers],
+  [/carga|camion/, IconTruck],
+  [/peso/, IconWeight],
+  [/hora/, IconClock],
+  [/aro|bici/, IconBicycle],
+  [/talla|ropa/, IconShirt],
+  [/especie|mascota/, IconPaw],
+  [/trueque|ofrece/, IconExchange],
+  [/entrada|evento_tipo/, IconTicket],
+  [/edad/, IconUser],
+  [/garantia/, IconShield],
+  [/perecible|alimento|cocina/, IconUtensils],
+  [/materia|clase/, IconGrad],
+  [/rubro/, IconStore],
+  [/uso|zona|trabajo|esp|area_prof|prof/, IconStore],
+];
+
 function fieldIcon(field: PublishFieldDefinition) {
-  if (/sueldo|precio|tarifa|pago/.test(field.id)) return IconTag;
-  if (/jornada|horario|hora|dia|anio/.test(field.id)) return IconClock;
-  return IconTags;
+  const id = field.id.toLowerCase();
+  const match = FIELD_ICONS.find(([pattern]) => pattern.test(id));
+  return match?.[1] ?? IconCheck;
 }
 
 function AttributeField({
@@ -140,7 +205,7 @@ function AttributeField({
       <input
         type={field.type === 'number' ? 'number' : 'text'}
         value={value === undefined || value === null ? '' : String(value)}
-        placeholder={field.placeholder || field.label}
+        placeholder={field.label}
         aria-label={field.label}
         onChange={(event) =>
           onChange(field.type === 'number' ? Number(event.target.value) || 0 : event.target.value)
@@ -192,9 +257,8 @@ export default function PublishListingPreview({
           <button
             type="button"
             onClick={() => setOpen(open === 'subcategoria' ? null : 'subcategoria')}
-            className="inline-flex items-center gap-1 text-sm text-[var(--text-secondary)]"
+            className="text-sm text-[var(--text-secondary)]"
           >
-            <IconTags size={14} color="var(--brand-blue)" />
             {subLabel}
           </button>
         )}
@@ -257,20 +321,34 @@ export default function PublishListingPreview({
         </div>
       )}
 
-      <div className="mt-3 flex items-start gap-1.5">
-        <IconText size={16} color="var(--brand-blue)" className="mt-2 shrink-0" />
-        <input
-          value={draft.titulo || ''}
-          onChange={(event) => onChange({ titulo: event.target.value })}
-          placeholder="Título"
-          maxLength={120}
-          aria-label="Título"
-          className={`${fieldClass} text-2xl font-extrabold leading-tight tracking-tight text-[var(--text-primary)]`}
-        />
-      </div>
+      <textarea
+        value={draft.titulo || ''}
+        onChange={(event) => onChange({ titulo: event.target.value })}
+        placeholder="Título"
+        maxLength={120}
+        rows={2}
+        aria-label="Título"
+        className={`${fieldClass} mt-3 resize-none text-2xl font-extrabold leading-tight tracking-tight text-[var(--text-primary)]`}
+      />
 
-      <div className="mt-1 flex items-center gap-1.5">
-        <IconTag size={16} color="var(--brand-blue)" className="shrink-0" />
+      <div className="mt-1 flex items-center gap-2">
+        <div className="flex shrink-0 overflow-hidden rounded-full ring-1 ring-[var(--border-color)]">
+          {(['PEN', 'USD'] as const).map((code) => {
+            const active = (draft.moneda || 'PEN') === code;
+            return (
+              <button
+                key={code}
+                type="button"
+                onClick={() => onChange({ moneda: code, tipoPrecio: 'fijo' })}
+                className={`px-2.5 py-1 text-sm font-black ${
+                  active ? 'bg-[var(--brand-blue)] text-white' : 'text-[var(--text-secondary)]'
+                }`}
+              >
+                {code === 'USD' ? '$' : 'S/'}
+              </button>
+            );
+          })}
+        </div>
         <input
           inputMode="decimal"
           value={draft.precio ?? ''}
@@ -278,9 +356,10 @@ export default function PublishListingPreview({
             onChange({
               precio: event.target.value ? Number(event.target.value) : undefined,
               tipoPrecio: 'fijo',
+              moneda: draft.moneda || 'PEN',
             })
           }
-          placeholder={priceLabel(draft.precio) || 'Precio'}
+          placeholder="Precio"
           aria-label="Precio"
           className={`${fieldClass} text-3xl font-black text-[var(--brand-blue)]`}
         />
@@ -315,18 +394,15 @@ export default function PublishListingPreview({
         />
       ))}
 
-      <div className="mt-4 flex items-start gap-1.5">
-        <IconFileAlt size={16} color="var(--brand-blue)" className="mt-1 shrink-0" />
-        <textarea
-          value={draft.descripcion || ''}
-          onChange={(event) => onChange({ descripcion: event.target.value })}
-          placeholder="Descripción"
-          rows={4}
-          maxLength={2000}
-          aria-label="Descripción"
-          className={`${fieldClass} resize-none text-base leading-relaxed text-[var(--text-secondary)]`}
-        />
-      </div>
+      <textarea
+        value={draft.descripcion || ''}
+        onChange={(event) => onChange({ descripcion: event.target.value })}
+        placeholder="Descripción"
+        rows={4}
+        maxLength={2000}
+        aria-label="Descripción"
+        className={`${fieldClass} mt-4 resize-none text-base leading-relaxed text-[var(--text-secondary)]`}
+      />
     </div>
   );
 }

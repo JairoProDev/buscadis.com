@@ -29,7 +29,8 @@ function placeOf(layout: PublishDraft['cardLayout'], id: CardPieceId): CardPiece
 
 function priceLabel(draft: PublishDraft) {
   if (!draft.precio || draft.precio <= 0) return 'Precio';
-  return `S/ ${draft.precio.toLocaleString('es-PE')}`;
+  const symbol = draft.moneda === 'USD' ? '$' : 'S/';
+  return `${symbol} ${draft.precio.toLocaleString('es-PE')}`;
 }
 
 function locationLabel(draft: PublishDraft) {
