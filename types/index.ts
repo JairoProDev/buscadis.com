@@ -372,6 +372,8 @@ export interface Adiso {
   promotionTier?: AdisoPromotionTier;
   promotionRank?: number;
   promotionExpiresAt?: string;
+  /** Momento en que se pagó destacado/premium; sube en el feed sin cambiar fechaPublicacion. */
+  promotedAt?: string;
   vistas?: number;
   contactos?: number;
 

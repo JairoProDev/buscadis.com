@@ -641,27 +641,28 @@ export async function getMarketplaceFeed(options: {
     busqueda?: string;
 }): Promise<Adiso[]> {
     const productosTab = options.categoria === 'productos';
-    // Clasificados llevan el feed; catálogo aporta variedad sin sepultar lo reciente.
-    // Antes era ~50/50 y el usuario solo veía productos/viejos hasta hacer scroll.
-    const adisoLimit = productosTab
-        ? Math.max(4, Math.ceil(options.limit * 0.25))
-        : Math.max(14, Math.ceil(options.limit * 0.85));
-    const catalogLimit = Math.max(
-        productosTab ? 12 : Math.ceil(options.limit * 0.15),
-        options.limit - adisoLimit
+    const pageEnd = options.offset + options.limit;
+
+    // Pool desde el inicio del feed: misma orden global en cada página (sin saltos al hacer scroll).
+    const adisoPoolSize = productosTab
+        ? Math.min(pageEnd + 24, 400)
+        : Math.min(Math.ceil(pageEnd * 1.15) + 32, 500);
+    const catalogPoolSize = Math.min(
+        productosTab ? pageEnd + 24 : Math.ceil(pageEnd * 0.45) + 24,
+        250,
     );
 
     const [adisosBase, catalogAdisos] = await Promise.all([
         getAdisosFromSupabase({
             ...options,
-            limit: adisoLimit,
-            // Por defecto no filtrar por expiración aquí: el home pide soloActivos explícito.
+            limit: adisoPoolSize,
+            offset: 0,
             soloActivos: options.soloActivos ?? false,
             categoria: productosTab ? undefined : options.categoria,
         }),
         getCatalogProductsAsAdisos({
-            limit: catalogLimit,
-            offset: options.offset,
+            limit: catalogPoolSize,
+            offset: 0,
             categoria: options.categoria,
             busqueda: options.busqueda,
             preferImages: !productosTab,
@@ -669,23 +670,23 @@ export async function getMarketplaceFeed(options: {
     ]);
 
     const mergedMap = new Map<string, Adiso>();
-    // Clasificados primero en el map; el sort final impone recencia
     [...adisosBase, ...catalogAdisos].forEach((item) => mergedMap.set(item.id, item));
 
     const merged = Array.from(mergedMap.values());
 
-    if (productosTab) {
-        return merged
-            .sort((a, b) => {
+    const sortMerged = () => {
+        if (productosTab) {
+            return merged.sort((a, b) => {
                 const aCatalog = isCatalogProduct(a) ? 1 : 0;
                 const bCatalog = isCatalogProduct(b) ? 1 : 0;
                 if (aCatalog !== bCatalog) return bCatalog - aCatalog;
                 return compareRecientesFeed(a, b);
-            })
-            .slice(0, options.limit);
-    }
+            });
+        }
+        return merged.sort((a, b) => compareRecientesFeed(a, b));
+    };
 
-    return merged.sort((a, b) => compareRecientesFeed(a, b)).slice(0, options.limit);
+    return sortMerged().slice(options.offset, options.offset + options.limit);
 }
 
 // Helper to get extension from mime type

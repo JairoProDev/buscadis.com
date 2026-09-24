@@ -21,6 +21,21 @@ export function getPackageRank(tamaño: TamañoPaquete | undefined): number {
   return PACKAGE_RANK[tamaño] ?? PACKAGE_RANK.miniatura;
 }
 
+export function getPromotedBumpTimestamp(adiso: Adiso): number {
+  if (!adiso.promotedAt) return 0;
+  try {
+    const t = new Date(adiso.promotedAt).getTime();
+    return Number.isNaN(t) ? 0 : t;
+  } catch {
+    return 0;
+  }
+}
+
+/** Recencia “oficial” para el feed: publicación o último destacado pagado. */
+export function getFeedRecencyAnchorMs(adiso: Adiso): number {
+  return Math.max(getPublishedTimestamp(adiso), getPromotedBumpTimestamp(adiso));
+}
+
 export function getPublishedTimestamp(adiso: Adiso): number {
   if (!adiso.fechaPublicacion) return 0;
   try {
@@ -76,13 +91,21 @@ export function getFeedEffectiveTimestamp(
   adiso: Adiso,
   interestProfile?: UserInterestProfile | null,
 ): number {
-  return getPublishedTimestamp(adiso)
+  return getFeedRecencyAnchorMs(adiso)
     + personalizationFreshnessBoostMs(adiso, interestProfile)
     + getFeedVisualBoostMs(adiso);
 }
 
 /** Día civil YYYY-MM-DD (sin hora) para ranking por recencia oficial. */
 function getPublishedDayKey(adiso: Adiso): string {
+  const anchor = getFeedRecencyAnchorMs(adiso);
+  if (anchor > 0) {
+    const d = new Date(anchor);
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+  }
   const raw = String(adiso.fechaPublicacion || '').trim();
   if (!raw) return '0000-00-00';
   if (raw.includes('T')) return raw.slice(0, 10);
@@ -91,9 +114,9 @@ function getPublishedDayKey(adiso: Adiso): string {
 
 /**
  * Comparador del feed por defecto ("recientes"):
- * 1. Promoción pagada (premium/destacada)
- * 2. Día de publicación — lo más nuevo SIEMPRE gana (aunque el otro tenga foto)
- * 3. Dentro del mismo día: timestamp efectivo (foto/catálogo/personalización)
+ * 1. Día de recencia (publicación o último destacado pagado)
+ * 2. Dentro del mismo día: timestamp efectivo (foto/catálogo/personalización)
+ * 3. Tier de promoción (desempate suave entre anuncios del mismo momento)
  * 4. Tamaño de paquete legacy
  * 5. id estable
  */
@@ -102,10 +125,6 @@ export function compareRecientesFeed(
   b: Adiso,
   interestProfile?: UserInterestProfile | null,
 ): number {
-  const ra = a.promotionRank ?? 0;
-  const rb = b.promotionRank ?? 0;
-  if (ra !== rb) return rb - ra;
-
   const dayA = getPublishedDayKey(a);
   const dayB = getPublishedDayKey(b);
   if (dayA !== dayB) {
@@ -116,6 +135,10 @@ export function compareRecientesFeed(
   const fb = getFeedEffectiveTimestamp(b, interestProfile);
   const dateCmp = fb - fa;
   if (dateCmp !== 0) return dateCmp;
+
+  const ra = a.promotionRank ?? 0;
+  const rb = b.promotionRank ?? 0;
+  if (ra !== rb) return rb - ra;
 
   const pa = getPackageRank(a.tamaño);
   const pb = getPackageRank(b.tamaño);

@@ -118,6 +118,11 @@ export interface ApplyBrowseFiltersInput {
   userLng?: number;
   interestProfile?: UserInterestProfile | null;
   hiddenAdIds?: Set<string>;
+  /**
+   * Feed principal: orden cronológico estable (sin exploración ni reorden por perfil).
+   * Evita que al paginar o cargar intereses se muevan tarjetas ya vistas.
+   */
+  stableChronological?: boolean;
 }
 
 export function applyBrowseFilters({
@@ -131,6 +136,7 @@ export function applyBrowseFilters({
   userLng,
   interestProfile,
   hiddenAdIds,
+  stableChronological = false,
 }: ApplyBrowseFiltersInput): Adiso[] {
   let filtrados = adisos.filter((a) => !TEST_REGEX.test(a.titulo || ''));
 
@@ -212,10 +218,12 @@ export function applyBrowseFilters({
     return filtrados;
   }
 
+  const profileForSort = stableChronological ? null : interestProfile;
+
   const sorted = [...filtrados].sort((a, b) => {
     switch (ordenamiento) {
     case 'recientes':
-      return compareRecientesFeed(a, b, interestProfile);
+      return compareRecientesFeed(a, b, profileForSort);
     case 'precio-asc':
       return comparePrecio(a, b, 'asc');
     case 'precio-desc':
@@ -227,17 +235,18 @@ export function applyBrowseFilters({
     case 'con-fotos':
       return compareConFotos(a, b);
     default:
-      return compareRecientesFeed(a, b, interestProfile);
+      return compareRecientesFeed(a, b, profileForSort);
     }
   });
 
-  if (ordenamiento === 'recientes' && interestProfile) {
+  if (stableChronological || ordenamiento !== 'recientes') {
+    return sorted;
+  }
+
+  if (interestProfile) {
     return injectFeedExploration(personalizeAdisos(sorted, interestProfile));
   }
-  if (ordenamiento === 'recientes') {
-    return injectFeedExploration(sorted);
-  }
-  return sorted;
+  return injectFeedExploration(sorted);
 }
 
 export function countFacetOption(

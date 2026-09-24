@@ -92,6 +92,7 @@ export function dbToAdiso(row: any): Adiso {
     promotionTier: row.promotion_tier || 'gratis',
     promotionRank: row.promotion_rank || 0,
     promotionExpiresAt: row.promotion_expires_at || undefined,
+    promotedAt: row.promoted_at || undefined,
     esDestacado: Boolean(row.promotion_tier && row.promotion_tier !== 'gratis'),
     subcategoria: row.subcategoria || undefined,
     subsubcategoria: row.subsubcategoria || undefined,
@@ -243,6 +244,7 @@ export async function getAdisosFromSupabase(options?: {
 
     // Ordenar por promoción (premium/destacados primero) y luego por fecha
     query = query.order('promotion_rank', { ascending: false })
+      .order('promoted_at', { ascending: false, nullsFirst: false })
       .order('fecha_publicacion', { ascending: false })
       .order('hora_publicacion', { ascending: false });
 
@@ -307,6 +309,7 @@ export async function getAdisosPageFromSupabase(options: {
 
     query = query
       .order('promotion_rank', { ascending: false })
+      .order('promoted_at', { ascending: false, nullsFirst: false })
       .order('fecha_publicacion', { ascending: false })
       .order('hora_publicacion', { ascending: false });
 

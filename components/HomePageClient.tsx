@@ -45,6 +45,7 @@ import {
   IconFilterFunnel,
 } from '@/components/Icons';
 import { getCategoriaThemeTokens } from '@/lib/categoria-theme';
+import { mergeStableFeedOrder } from '@/lib/feed/stable-order';
 import {
   applyBrowseFilters,
   browseFiltersFromSearchParams,
@@ -140,7 +141,9 @@ function HomeContent() {
   const [geoEstado, setGeoEstado] = useState<'idle' | 'pending' | 'ready' | 'denied'>('idle');
   const [interestProfile, setInterestProfile] = useState<UserInterestProfile | null>(null);
   const [hiddenAdIds, setHiddenAdIds] = useState<Set<string>>(new Set());
-
+  const feedOrderRef = useRef<string[]>([]);
+  const feedLayoutKeyRef = useRef('');
+  const prevAdisosCountRef = useRef(0);
 
   const [browseFilters, setBrowseFilters] = useState<BrowseFilterState>(() =>
     browseFiltersFromSearchParams(searchParams),
@@ -650,6 +653,21 @@ function HomeContent() {
   const tieneUbicacionPerfil = profile?.latitud != null && profile?.longitud != null;
   const userLat = profile?.latitud ?? geoOrigen?.lat;
   const userLng = profile?.longitud ?? geoOrigen?.lng;
+
+  const feedLayoutKey = useMemo(
+    () =>
+      JSON.stringify({
+        committedQuery,
+        categoriaFiltro,
+        ordenamiento,
+        browseFilters,
+        searchMode: searchResults !== null,
+        userLat,
+        userLng,
+      }),
+    [committedQuery, categoriaFiltro, ordenamiento, browseFilters, searchResults, userLat, userLng],
+  );
+
   const notaCercanos =
     ordenamiento !== 'cercanos' || tieneUbicacionPerfil || geoEstado === 'ready'
       ? undefined
@@ -698,6 +716,8 @@ function HomeContent() {
     }
 
     const baseAdisos = searchResults !== null ? searchResults : adisos;
+    const stableChronological =
+      searchResults === null && ordenamiento === 'recientes';
     // Keep API ranking when searching; "recientes" would destroy relevance
     const filtrados = applyBrowseFilters({
       adisos: baseAdisos,
@@ -706,14 +726,35 @@ function HomeContent() {
       filters: browseFilters,
       ordenamiento,
       preserveOrder: searchResults !== null && ordenamiento === 'recientes',
+      stableChronological,
       userLat,
       userLng,
       interestProfile,
       hiddenAdIds,
     });
 
-    setAdisosFiltrados(filtrados);
-  }, [committedQuery, searchResults, categoriaFiltro, ordenamiento, adisos, browseFilters, userLat, userLng, interestProfile, hiddenAdIds]);
+    const grewByPagination =
+      adisos.length > prevAdisosCountRef.current && prevAdisosCountRef.current > 0;
+    prevAdisosCountRef.current = adisos.length;
+
+    let order: string[];
+    if (
+      stableChronological
+      && feedLayoutKeyRef.current === feedLayoutKey
+      && grewByPagination
+    ) {
+      order = mergeStableFeedOrder(feedOrderRef.current, filtrados);
+    } else {
+      order = filtrados.map((a) => a.id);
+      feedLayoutKeyRef.current = feedLayoutKey;
+    }
+    feedOrderRef.current = order;
+
+    const byId = new Map(filtrados.map((a) => [a.id, a]));
+    setAdisosFiltrados(
+      order.map((id) => byId.get(id)).filter((a): a is Adiso => Boolean(a)),
+    );
+  }, [committedQuery, searchResults, categoriaFiltro, ordenamiento, adisos, browseFilters, userLat, userLng, interestProfile, hiddenAdIds, feedLayoutKey]);
 
   // Breve skeleton al cambiar filtros (no en carga inicial)
   useEffect(() => {
@@ -1024,13 +1065,10 @@ function HomeContent() {
         // Filtrar adisos de prueba que puedan venir de la API
         const nuevosFiltrados = nuevosAdisos.filter(a => !TEST_REGEX.test(a.titulo || ''));
 
-        setAdisos(prev => {
-          const adisosMap = new Map<string, Adiso>();
-          // Agregar adisos existentes
-          prev.forEach(adiso => adisosMap.set(adiso.id, adiso));
-          // Agregar nuevos adisos filtrados
-          nuevosFiltrados.forEach(adiso => adisosMap.set(adiso.id, adiso));
-          return Array.from(adisosMap.values());
+        setAdisos((prev) => {
+          const seen = new Set(prev.map((adiso) => adiso.id));
+          const appended = nuevosFiltrados.filter((adiso) => !seen.has(adiso.id));
+          return appended.length > 0 ? [...prev, ...appended] : prev;
         });
 
         // Aumentar visibleCount para mostrar los nuevos
