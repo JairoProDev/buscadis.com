@@ -33,6 +33,7 @@ import {
   formatUbicacionCorta,
   toDisplayTitle,
   formatRelativePublishedAt,
+  formatCatalogUpdatedAt,
   getJobSalaryLabel,
 } from '@/lib/adiso-display';
 import FlyerCanvas from '@/components/flyer/FlyerCanvas';
@@ -113,9 +114,11 @@ const AdisoCard = forwardRef<HTMLDivElement, AdisoCardProps>(
     const priceLabel = formatPrecioDisplay(adiso);
     const salaryLabel = adiso.categoria === 'empleos' ? getJobSalaryLabel(adiso) : null;
     const priceDisplay = salaryLabel || priceLabel;
-    const relativeTime = formatRelativePublishedAt(adiso);
-    const sellerName = getSellerDisplayName(adiso);
     const isCatalogProduct = adiso.privateData?.source === 'catalog_product';
+    const relativeTime = isCatalogProduct
+      ? formatCatalogUpdatedAt(adiso) ?? formatRelativePublishedAt(adiso)
+      : formatRelativePublishedAt(adiso);
+    const sellerName = getSellerDisplayName(adiso);
     const isPaused = adiso.estaActivo === false;
     const isDestacado =
       adiso.promotionTier === 'destacada' || adiso.promotionTier === 'premium';

@@ -125,16 +125,16 @@ export function compareRecientesFeed(
   b: Adiso,
   interestProfile?: UserInterestProfile | null,
 ): number {
-  const dayA = getPublishedDayKey(a);
-  const dayB = getPublishedDayKey(b);
-  if (dayA !== dayB) {
-    return dayB.localeCompare(dayA); // más reciente primero
-  }
-
   const fa = getFeedEffectiveTimestamp(a, interestProfile);
   const fb = getFeedEffectiveTimestamp(b, interestProfile);
   const dateCmp = fb - fa;
   if (dateCmp !== 0) return dateCmp;
+
+  const dayA = getPublishedDayKey(a);
+  const dayB = getPublishedDayKey(b);
+  if (dayA !== dayB) {
+    return dayB.localeCompare(dayA);
+  }
 
   const ra = a.promotionRank ?? 0;
   const rb = b.promotionRank ?? 0;

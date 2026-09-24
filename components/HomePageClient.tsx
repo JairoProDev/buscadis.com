@@ -45,7 +45,7 @@ import {
   IconFilterFunnel,
 } from '@/components/Icons';
 import { getCategoriaThemeTokens } from '@/lib/categoria-theme';
-import { mergeStableFeedOrder } from '@/lib/feed/stable-order';
+import { mergeStableFeedOrder, resetStableFeedOrderRefs } from '@/lib/feed/stable-order';
 import {
   applyBrowseFilters,
   browseFiltersFromSearchParams,
@@ -299,6 +299,11 @@ function HomeContent() {
         });
         if (cancelled) return;
         const filtered = items.filter((a) => !TEST_REGEX.test(a.titulo || ''));
+        resetStableFeedOrderRefs({
+          feedOrderRef,
+          feedLayoutKeyRef,
+          prevAdisosCountRef,
+        });
         setAdisos(filtered);
         setHayMasAdisos(filtered.length >= ITEMS_POR_PAGINA);
         setVisibleCount(ITEMS_POR_PAGINA);
@@ -351,6 +356,11 @@ function HomeContent() {
       if (nuevosFiltrados.some(a => TEST_REGEX.test(a.titulo || ''))) {
         nuevosFiltrados = nuevosFiltrados.filter(a => !TEST_REGEX.test(a.titulo || ''));
       }
+      resetStableFeedOrderRefs({
+        feedOrderRef,
+        feedLayoutKeyRef,
+        prevAdisosCountRef,
+      });
       setAdisos(nuevosFiltrados);
       setHayMasAdisos(adisosDesdeAPI.length >= ITEMS_POR_PAGINA);
       success('Buscando anuncios recientes...');
@@ -423,6 +433,11 @@ function HomeContent() {
           setVisibleCount(ITEMS_POR_PAGINA);
 
           // API manda: no mezclar caché vieja que sepulta adisos nuevos
+          resetStableFeedOrderRefs({
+            feedOrderRef,
+            feedLayoutKeyRef,
+            prevAdisosCountRef,
+          });
           setAdisos(adisosDesdeAPI);
 
           // Si hay adisoId, buscar en la lista actualizada

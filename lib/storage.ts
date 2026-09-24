@@ -1,6 +1,8 @@
 import { Adiso } from '@/types';
+import { compareRecientesFeed } from '@/lib/feed/ranking';
 
-const STORAGE_KEY = 'buscadis_adisos_v2';
+const STORAGE_KEY = 'buscadis_adisos_v3';
+const LEGACY_STORAGE_KEY = 'buscadis_adisos_v2';
 
 // Por defecto usa localStorage. Cambiar a false para usar API/Supabase
 const USE_LOCAL_STORAGE = process.env.NEXT_PUBLIC_USE_LOCAL_STORAGE === 'true';
@@ -9,8 +11,20 @@ const USE_LOCAL_STORAGE = process.env.NEXT_PUBLIC_USE_LOCAL_STORAGE === 'true';
 const getAdisosLocal = (): Adiso[] => {
   if (typeof window === 'undefined') return [];
   try {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    return stored ? JSON.parse(stored) : [];
+    let stored = localStorage.getItem(STORAGE_KEY);
+    if (!stored) {
+      stored = localStorage.getItem(LEGACY_STORAGE_KEY);
+      if (stored) {
+        try {
+          localStorage.removeItem(LEGACY_STORAGE_KEY);
+        } catch {
+          // ignore
+        }
+      }
+    }
+    if (!stored) return [];
+    const parsed: Adiso[] = JSON.parse(stored);
+    return [...parsed].sort((a, b) => compareRecientesFeed(a, b));
   } catch (error) {
     console.error('Error al leer localStorage:', error);
     // Si hay error, limpiar y empezar de nuevo
@@ -45,12 +59,8 @@ const saveAdisoLocal = (adiso: Adiso): void => {
     const MAX_CACHE_SIZE = 50;
 
     // Ordenar por fecha de publicación (más recientes primero) y limitar
-    const adisosOrdenados = adisos
-      .sort((a, b) => {
-        const fechaA = new Date(`${a.fechaPublicacion}T${a.horaPublicacion}:00`).getTime();
-        const fechaB = new Date(`${b.fechaPublicacion}T${b.horaPublicacion}:00`).getTime();
-        return fechaB - fechaA; // Más recientes primero
-      })
+    const adisosOrdenados = [...adisos]
+      .sort((a, b) => compareRecientesFeed(a, b))
       .slice(0, MAX_CACHE_SIZE);
 
     localStorage.setItem(STORAGE_KEY, JSON.stringify(adisosOrdenados));

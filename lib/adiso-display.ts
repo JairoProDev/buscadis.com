@@ -143,10 +143,16 @@ export function formatPrecioDisplay(adiso: Adiso): string | null {
 
 function getPublishedDate(adiso: Pick<Adiso, 'fechaPublicacion' | 'horaPublicacion'>): Date | null {
   if (!adiso.fechaPublicacion) return null;
-  const iso = adiso.horaPublicacion
-    ? `${adiso.fechaPublicacion}T${adiso.horaPublicacion}`
-    : adiso.fechaPublicacion;
-  const date = new Date(iso);
+  const raw = String(adiso.fechaPublicacion).trim();
+  if (raw.includes('T') || raw.endsWith('Z')) {
+    const date = new Date(raw);
+    return Number.isNaN(date.getTime()) ? null : date;
+  }
+  let hora = (adiso.horaPublicacion || '00:00').trim();
+  if (hora.length >= 8) hora = hora.slice(0, 8);
+  else if (hora.length === 5) hora = `${hora}:00`;
+  else if (hora.length !== 8) hora = '00:00:00';
+  const date = new Date(`${raw}T${hora}`);
   return Number.isNaN(date.getTime()) ? null : date;
 }
 
@@ -174,7 +180,23 @@ export function formatRelativePublishedAt(
   const weeks = Math.floor(days / 7);
   if (weeks < 5) return `Hace ${weeks} sem`;
 
-  return date.toLocaleDateString('es-PE', { day: 'numeric', month: 'short' });
+  const now = new Date();
+  const sameYear = date.getFullYear() === now.getFullYear();
+  const showYear = !sameYear || days > 75;
+  return date.toLocaleDateString('es-PE', {
+    day: 'numeric',
+    month: 'short',
+    ...(showYear ? { year: 'numeric' } : {}),
+  });
+}
+
+/** Etiqueta de fecha para cards de catálogo (siempre muestra recencia). */
+export function formatCatalogUpdatedAt(adiso: Adiso): string | null {
+  if (adiso.privateData?.source !== 'catalog_product') return null;
+  const relative = formatRelativePublishedAt(adiso);
+  if (!relative) return 'Recién publicado';
+  if (relative === 'Ahora' || relative.startsWith('Hace')) return relative;
+  return `Actualizado · ${relative}`;
 }
 
 /** Parsea sueldo desde descripción de adisos importados/seed */

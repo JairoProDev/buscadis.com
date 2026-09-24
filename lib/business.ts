@@ -435,8 +435,9 @@ function catalogProductToAdiso(product: any): Adiso {
         : (product.created_at || product.updated_at);
     const publishedAt = rawDate ? new Date(rawDate) : new Date();
     const safeDate = Number.isNaN(publishedAt.getTime()) ? new Date() : publishedAt;
-    const fechaPublicacion = safeDate.toISOString().split('T')[0];
-    const horaPublicacion = safeDate.toISOString().slice(11, 16);
+    // ISO completo: evita desfase UTC al partir solo la fecha y mejora el orden en el feed.
+    const fechaPublicacion = safeDate.toISOString();
+    const horaPublicacion = safeDate.toISOString().slice(11, 19);
 
     return {
         id: product.id,
