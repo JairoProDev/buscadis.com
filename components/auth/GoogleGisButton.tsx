@@ -10,6 +10,8 @@ import {
 } from '@/lib/auth/google-gis';
 import { IconGoogle } from '@/components/Icons';
 import { semantic, tokens } from '@/lib/bs-tokens';
+import { isBuscadisNativeApp, requestNativeGoogleSignIn } from '@/lib/mobile-app-bridge';
+import { useNativeGoogleIdTokenListener } from '@/hooks/useNativeGoogleIdToken';
 
 type Props = {
   label: string;
@@ -28,8 +30,35 @@ export default function GoogleGisButton({ label, disabled, onSuccess, onError }:
   const [fallback, setFallback] = useState(false);
   const [busy, setBusy] = useState(false);
   const clientId = getGoogleClientId();
+  const nativeApp = isBuscadisNativeApp();
+
+  useNativeGoogleIdTokenListener(
+    async () => {
+      setBusy(false);
+      await onSuccess?.();
+    },
+    (msg) => {
+      setBusy(false);
+      onError?.(msg);
+    }
+  );
 
   useEffect(() => {
+    if (!nativeApp) return;
+    const onNativeErr = (event: Event) => {
+      const msg = (event as CustomEvent<{ message?: string }>).detail?.message;
+      if (msg) onError?.(msg);
+      setBusy(false);
+    };
+    window.addEventListener('buscadis:native-google-error', onNativeErr);
+    return () => window.removeEventListener('buscadis:native-google-error', onNativeErr);
+  }, [nativeApp, onError]);
+
+  useEffect(() => {
+    if (nativeApp) {
+      setFallback(true);
+      return;
+    }
     if (!clientId || !hostRef.current) {
       setFallback(true);
       return;
@@ -90,9 +119,20 @@ export default function GoogleGisButton({ label, disabled, onSuccess, onError }:
     return () => {
       cancelled = true;
     };
-  }, [clientId, onError, onSuccess]);
+  }, [clientId, nativeApp, onError, onSuccess]);
 
   const triggerPrompt = async () => {
+    if (nativeApp) {
+      setBusy(true);
+      const sent = requestNativeGoogleSignIn();
+      if (!sent) {
+        setBusy(false);
+        onError?.('No se pudo abrir Google en la app. Actualiza Buscadis desde Play Store.');
+      }
+      // busy cleared when native returns token or user cancels (native posts error event later if we add it)
+      window.setTimeout(() => setBusy(false), 8000);
+      return;
+    }
     if (!clientId) {
       onError?.(
         'Falta NEXT_PUBLIC_GOOGLE_CLIENT_ID. Configura Google Cloud (orígenes JS) y el Client ID en .env'

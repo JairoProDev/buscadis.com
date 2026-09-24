@@ -36,6 +36,22 @@ export function syncNativePushUser(userId: string | null): void {
   );
 }
 
+/** GIS / One Tap no funcionan dentro de WebView — el shell nativo debe devolver un ID token. */
+export function requestNativeGoogleSignIn(): boolean {
+  if (!isBuscadisNativeApp()) return false;
+  window.ReactNativeWebView?.postMessage(
+    JSON.stringify({
+      type: 'google_sign_in',
+      payload: { href: typeof window !== 'undefined' ? window.location.href : null },
+    })
+  );
+  return true;
+}
+
+export const NATIVE_GOOGLE_ID_TOKEN_EVENT = 'buscadis:native-google-id-token';
+
+export type NativeGoogleIdTokenDetail = { idToken: string; nonce?: string };
+
 /**
  * Link Expo push token to the logged-in user via web session.
  * Fallback when native bridge is unavailable; uses token stored by the shell.
