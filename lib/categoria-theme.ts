@@ -1,3 +1,4 @@
+import { tokens } from '@buscadis/tokens';
 import { Categoria } from '@/types';
 
 export interface CategoriaThemeTokens {
@@ -6,50 +7,47 @@ export interface CategoriaThemeTokens {
   placeholderBgDark: string;
 }
 
-/**
- * Category accents — synced with packages/tokens/src/semantic/category.json
- * Single runtime source; CSS --bs-cat-* generated from the same values at token build.
- */
+/** Category accents — values from @buscadis/tokens (semantic/category + primitives). */
 export const CATEGORIA_THEME: Record<Categoria, CategoriaThemeTokens> = {
   empleos: {
-    accent: '#0F766E',
-    placeholderBg: '#F0FDFA',
-    placeholderBgDark: '#042F2E',
+    accent: tokens['--bs-cat-empleos-fg'],
+    placeholderBg: tokens['--bs-cat-empleos-bg'],
+    placeholderBgDark: tokens['--bs-cat-empleos-bgDark'],
   },
   inmuebles: {
-    accent: '#047857',
-    placeholderBg: '#ECFDF5',
-    placeholderBgDark: '#022C22',
+    accent: tokens['--bs-cat-inmuebles-fg'],
+    placeholderBg: tokens['--bs-cat-inmuebles-bg'],
+    placeholderBgDark: tokens['--bs-cat-inmuebles-bgDark'],
   },
   vehiculos: {
-    accent: '#C2410C',
-    placeholderBg: '#FFF7ED',
-    placeholderBgDark: '#431407',
+    accent: tokens['--bs-cat-vehiculos-fg'],
+    placeholderBg: tokens['--bs-cat-vehiculos-bg'],
+    placeholderBgDark: tokens['--bs-cat-vehiculos-bgDark'],
   },
   servicios: {
-    accent: '#A16207',
-    placeholderBg: '#FFFBEB',
-    placeholderBgDark: '#422006',
+    accent: tokens['--bs-cat-servicios-fg'],
+    placeholderBg: tokens['--bs-cat-servicios-bg'],
+    placeholderBgDark: tokens['--bs-cat-servicios-bgDark'],
   },
   productos: {
-    accent: '#BE123C',
-    placeholderBg: '#FFF1F2',
-    placeholderBgDark: '#4C0519',
+    accent: tokens['--bs-cat-productos-fg'],
+    placeholderBg: tokens['--bs-cat-productos-bg'],
+    placeholderBgDark: tokens['--bs-cat-productos-bgDark'],
   },
   eventos: {
-    accent: '#7E22CE',
-    placeholderBg: '#FAF5FF',
-    placeholderBgDark: '#3B0764',
+    accent: tokens['--bs-cat-eventos-fg'],
+    placeholderBg: tokens['--bs-cat-eventos-bg'],
+    placeholderBgDark: tokens['--bs-cat-eventos-bgDark'],
   },
   negocios: {
-    accent: '#4F46E5',
-    placeholderBg: '#EEF2FF',
-    placeholderBgDark: '#1E1B4B',
+    accent: tokens['--bs-cat-negocios-fg'],
+    placeholderBg: tokens['--bs-cat-negocios-bg'],
+    placeholderBgDark: tokens['--bs-cat-negocios-bgDark'],
   },
   comunidad: {
-    accent: '#A21CAF',
-    placeholderBg: '#FDF4FF',
-    placeholderBgDark: '#4A044E',
+    accent: tokens['--bs-cat-comunidad-fg'],
+    placeholderBg: tokens['--bs-cat-comunidad-bg'],
+    placeholderBgDark: tokens['--bs-cat-comunidad-bgDark'],
   },
 };
 

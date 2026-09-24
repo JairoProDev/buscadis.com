@@ -307,7 +307,7 @@ export default function AdisoLandingPage({ adiso, onVolver }: AdisoLandingPagePr
         <button
           type="button"
           onClick={() => handleExternalContact(externalContact)}
-          className={`flex shrink-0 items-center justify-center gap-2 rounded-2xl bg-[#25D366] font-bold text-white shadow-lg shadow-[#25D366]/30 transition-transform hover:brightness-105 active:scale-[0.98] ${
+          className={`flex shrink-0 items-center justify-center gap-2 rounded-2xl bg-[var(--bs-color-social-whatsapp)] font-bold text-white shadow-lg transition-transform hover:brightness-105 active:scale-[0.98] ${
             compact
               ? 'px-4 py-3'
               : canMessageInApp

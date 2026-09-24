@@ -18,13 +18,13 @@ export default function FloatingChatbot() {
                 @keyframes pulse-shadow {
                     0%, 100% {
                         box-shadow: 
-                            0 4px 12px rgba(102, 126, 234, 0.4),
-                            0 0 0 0 rgba(102, 126, 234, 0.4);
+                            0 4px 12px color-mix(in srgb, var(--bs-color-accent-chatStart) 40%, transparent),
+                            0 0 0 0 color-mix(in srgb, var(--bs-color-accent-chatStart) 40%, transparent);
                     }
                     50% {
                         box-shadow: 
-                            0 4px 12px rgba(102, 126, 234, 0.4),
-                            0 0 0 10px rgba(102, 126, 234, 0);
+                            0 4px 12px color-mix(in srgb, var(--bs-color-accent-chatStart) 40%, transparent),
+                            0 0 0 10px color-mix(in srgb, var(--bs-color-accent-chatStart) 0%, transparent);
                     }
                 }
 
@@ -34,8 +34,8 @@ export default function FloatingChatbot() {
                 }
 
                 .chatbot-fab {
-                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+                    background: linear-gradient(135deg, var(--bs-color-accent-chatStart) 0%, var(--bs-color-accent-chatEnd) 100%);
+                    box-shadow: 0 4px 12px color-mix(in srgb, var(--bs-color-accent-chatStart) 40%, transparent);
                     animation: pulse-shadow 2s infinite;
                 }
             `}</style>

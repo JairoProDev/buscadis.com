@@ -11,6 +11,7 @@ import {
 import { getCurrentLocation } from '@/lib/location';
 import { IconLocation } from './Icons';
 import { FaMapMarkerAlt, FaCrosshairs, FaTimes } from 'react-icons/fa';
+import { bsMix, semantic } from '@/lib/bs-tokens';
 
 interface SelectorUbicacionProps {
   value?: UbicacionDetallada;
@@ -143,7 +144,7 @@ export default function SelectorUbicacion({
         }}>
           <IconLocation size={16} />
           {label}
-          {required && <span style={{ color: '#ef4444' }}>*</span>}
+          {required && <span style={{ color: semantic.dangerFg }}>*</span>}
           {!required && (
             <span style={{ 
               fontSize: '0.75rem', 
@@ -449,10 +450,10 @@ export default function SelectorUbicacion({
             {error && (
               <div style={{
                 padding: '0.5rem',
-                backgroundColor: 'rgba(239, 68, 68, 0.1)',
-                border: '1px solid rgba(239, 68, 68, 0.3)',
+                backgroundColor: bsMix('--bs-danger-fg', 10),
+                border: `1px solid ${bsMix('--bs-danger-fg', 30)}`,
                 borderRadius: '6px',
-                color: '#ef4444',
+                color: semantic.dangerFg,
                 fontSize: '0.75rem'
               }}>
                 {error}

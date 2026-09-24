@@ -6,6 +6,7 @@ import { Adiso, UbicacionDetallada, Categoria } from '@/types';
 import { getCategoriaIcon, PUBLISH_CATEGORIAS } from '@/lib/categoria-icons';
 import { getCategoriaThemeTokens } from '@/lib/categoria-theme';
 import { IconMapPin, IconMinus, IconPlus } from '@/components/Icons';
+import { bsMix, semantic, tokens } from '@/lib/bs-tokens';
 
 const MAP_FILTERS: { id: Categoria | 'todos'; label: string }[] = [
   { id: 'todos', label: 'Todos' },
@@ -230,7 +231,7 @@ export default function MapaInteractivo({ adisos, onAbrirAdiso }: MapaInteractiv
         userMarkerRef.current = L.marker([latitude, longitude], {
           icon: L.divIcon({
             className: 'user-loc-marker',
-            html: `<div style="width:14px;height:14px;background:#3b82f6;border:2.5px solid white;border-radius:50%;box-shadow:0 0 0 4px rgba(59,130,246,0.35);"></div>`,
+            html: `<div style="width:14px;height:14px;background:${semantic.action};border:2.5px solid ${tokens['--bs-color-neutral-0']};border-radius:50%;box-shadow:0 0 0 4px ${bsMix('--bs-action', 35)};"></div>`,
             iconSize: [18, 18],
             iconAnchor: [9, 9],
           }),
@@ -287,7 +288,7 @@ export default function MapaInteractivo({ adisos, onAbrirAdiso }: MapaInteractiv
                     : 'border-[var(--border-color)] bg-[var(--bg-primary)]/95 text-[var(--text-secondary)] backdrop-blur-md hover:border-[rgba(var(--brand-primary-rgb),0.35)] hover:text-[var(--text-primary)]'
                 }`}
               >
-                <Icon size={12} color={active ? '#fff' : accent} />
+                <Icon size={12} color={active ? tokens['--bs-color-neutral-0'] : accent} />
                 <span>{f.label}</span>
               </button>
             );
@@ -346,7 +347,7 @@ export default function MapaInteractivo({ adisos, onAbrirAdiso }: MapaInteractiv
           border-radius: 12px;
           padding: 0;
           box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-          border: 1px solid var(--border-color, #e5e7eb);
+          border: 1px solid var(--border-color);
         }
 
         .map-popup-wrapper .leaflet-popup-content {
@@ -365,7 +366,7 @@ export default function MapaInteractivo({ adisos, onAbrirAdiso }: MapaInteractiv
           font-weight: 600;
           text-transform: uppercase;
           letter-spacing: 0.04em;
-          color: var(--text-tertiary, #6b7280);
+          color: var(--text-tertiary);
         }
 
         .map-popup__title {
@@ -373,14 +374,14 @@ export default function MapaInteractivo({ adisos, onAbrirAdiso }: MapaInteractiv
           font-size: 13px;
           font-weight: 700;
           line-height: 1.3;
-          color: var(--text-primary, #111);
+          color: var(--text-primary);
         }
 
         .map-popup__price {
           margin: 0 0 10px;
           font-size: 12px;
           font-weight: 600;
-          color: var(--brand-blue, #53acc5);
+          color: var(--brand-blue);
         }
 
         .map-popup__btn {
@@ -391,7 +392,7 @@ export default function MapaInteractivo({ adisos, onAbrirAdiso }: MapaInteractiv
           font-size: 12px;
           font-weight: 700;
           color: white;
-          background: var(--brand-blue, #53acc5);
+          background: var(--brand-blue);
           cursor: pointer;
         }
 

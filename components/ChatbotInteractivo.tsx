@@ -1,5 +1,7 @@
 'use client';
 
+import { chatGradient } from '@/lib/bs-tokens';
+
 import React, { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Adiso, Categoria } from '@/types';
@@ -156,7 +158,7 @@ const ChatMessage = ({
                                 width: '32px',
                                 height: '32px',
                                 borderRadius: '50%',
-                                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                                background: chatGradient,
                                 display: 'flex',
                                 alignItems: 'center',
                                 justifyContent: 'center',
@@ -750,7 +752,7 @@ export default function ChatbotInteractivo({ onPublicar, onError, onSuccess, onM
                         width: '40px',
                         height: '40px',
                         borderRadius: '50%',
-                        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                        background: chatGradient,
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',

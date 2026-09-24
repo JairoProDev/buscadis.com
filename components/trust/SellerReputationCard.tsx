@@ -1,6 +1,7 @@
 import React from 'react';
 import Image from 'next/image';
 import { IconStar, IconClock, IconMedal } from '../Icons';
+import { semantic } from '@/lib/bs-tokens';
 import TrustBadge from './TrustBadge';
 
 interface SellerReputationCardProps {
@@ -22,9 +23,9 @@ interface SellerReputationCardProps {
 export default function SellerReputationCard({ seller }: SellerReputationCardProps) {
     // Configuración de badges adicionales
     const badgeConfig = {
-        'vendedor_destacado': { label: 'Top Seller', icon: IconMedal, color: '#F59E0B' },
-        'respuesta_rapida': { label: 'Responde Rápido', icon: IconClock, color: '#3B82F6' },
-        'antiguo': { label: 'Veterano', icon: IconMedal, color: '#6B7280' }
+        'vendedor_destacado': { label: 'Top Seller', icon: IconMedal, color: semantic.warningFg },
+        'respuesta_rapida': { label: 'Responde Rápido', icon: IconClock, color: semantic.infoFg },
+        'antiguo': { label: 'Veterano', icon: IconMedal, color: semantic.muted },
     };
 
     return (
@@ -105,7 +106,7 @@ export default function SellerReputationCard({ seller }: SellerReputationCardPro
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
                         <span style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)' }}>Calificación</span>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', fontWeight: 600, color: 'var(--text-primary)' }}>
-                            <IconStar size={14} color="#F59E0B" />
+                            <IconStar size={14} color={semantic.warningFg} />
                             <span>{seller.stats.rating.toFixed(1)}</span>
                             <span style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', fontWeight: 400 }}>
                                 ({seller.stats.totalVentas || 0})

@@ -629,7 +629,7 @@ export default function StoryViewer({ groups, initialGroupIndex, onClose }: Stor
                         <button
                           type="button"
                           onClick={handleWhatsApp}
-                          className="flex items-center justify-center gap-2 rounded-xl bg-[#25D366] py-3 text-sm font-semibold text-white"
+                          className="flex items-center justify-center gap-2 rounded-xl bg-[var(--bs-color-social-whatsapp)] py-3 text-sm font-semibold text-white"
                         >
                           <IconWhatsApp size={18} />
                           WhatsApp

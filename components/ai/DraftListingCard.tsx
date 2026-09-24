@@ -10,6 +10,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Categoria } from '@/types';
+import { chatGradient, confidenceColor, semantic } from '@/lib/bs-tokens';
 
 export interface DraftListingData {
   imageUrl?: string;
@@ -52,18 +53,7 @@ export function DraftListingCard({
     }
   };
 
-  const getConfidenceColor = (confidence?: string) => {
-    switch (confidence) {
-      case 'alta':
-        return '#10b981';
-      case 'media':
-        return '#f59e0b';
-      case 'baja':
-        return '#ef4444';
-      default:
-        return '#6b7280';
-    }
-  };
+  const getConfidenceColor = (confidence?: string) => confidenceColor(confidence);
 
   const getConfidenceText = (confidence?: string) => {
     switch (confidence) {
@@ -84,7 +74,7 @@ export function DraftListingCard({
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
         style={{
-          background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+          background: `linear-gradient(135deg, ${semantic.successFg} 0%, ${semantic.successFg} 100%)`,
           borderRadius: '16px',
           padding: '2px',
           marginTop: '12px',
@@ -139,7 +129,7 @@ export function DraftListingCard({
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.3 }}
       style={{
-        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        background: chatGradient,
         borderRadius: '16px',
         padding: '2px',
         marginTop: '12px',
@@ -424,7 +414,7 @@ export function DraftListingCard({
                   padding: '12px',
                   borderRadius: '10px',
                   border: 'none',
-                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                  background: chatGradient,
                   color: 'white',
                   fontSize: '14px',
                   fontWeight: 600,
@@ -460,7 +450,7 @@ export function DraftListingCard({
                   padding: '12px',
                   borderRadius: '10px',
                   border: 'none',
-                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                  background: chatGradient,
                   color: 'white',
                   fontSize: '14px',
                   fontWeight: 700,

@@ -12,6 +12,7 @@
     "start": "next start",
     "lint": "eslint \"{app,components,lib}/**/*.{ts,tsx}\" --max-warnings 0",
     "tokens:build": "npm run build --workspace=@buscadis/tokens",
+    "tokens:prune-legacy-hex": "node scripts/prune-legacy-hex-allowlist.mjs",
     "storybook": "npx storybook dev -p 6006 -c packages/ui/.storybook",
     "build-storybook": "npx storybook build -c packages/ui/.storybook -o packages/ui/storybook-static",
     "prebuild": "npm run tokens:build",

@@ -53,6 +53,10 @@
   --bs-color-danger-bgDark: #2E1218;
   --bs-color-ink-onWarm: #10242B;
   --bs-color-ink-onActionDark: #08171D;
+  --bs-color-social-whatsapp: #25D366;
+  --bs-color-social-whatsappDark: #128C7E;
+  --bs-color-accent-chatStart: #667EEA;
+  --bs-color-accent-chatEnd: #764BA2;
   --bs-radius-xs: 4px;
   --bs-radius-sm: 8px;
   --bs-radius-md: 12px;
@@ -235,6 +239,10 @@
   --bs-color-danger-bgDark: #2E1218;
   --bs-color-ink-onWarm: #10242B;
   --bs-color-ink-onActionDark: #08171D;
+  --bs-color-social-whatsapp: #25D366;
+  --bs-color-social-whatsappDark: #128C7E;
+  --bs-color-accent-chatStart: #667EEA;
+  --bs-color-accent-chatEnd: #764BA2;
   --bs-radius-xs: 4px;
   --bs-radius-sm: 8px;
   --bs-radius-md: 12px;

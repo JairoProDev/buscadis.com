@@ -10,6 +10,7 @@
 import React from 'react';
 import { Adiso } from '@/types';
 import { motion } from 'framer-motion';
+import { categoriaFg, tokens } from '@/lib/bs-tokens';
 
 export interface ListingCardProps {
   adiso: Adiso;
@@ -48,19 +49,7 @@ export function ListingCard({
     return nombres[categoria] || categoria;
   };
 
-  const getCategoriaColor = (categoria: string): string => {
-    const colors: Record<string, string> = {
-      empleos: '#0F766E',
-      inmuebles: '#047857',
-      vehiculos: '#C2410C',
-      servicios: '#A16207',
-      productos: '#BE123C',
-      eventos: '#7E22CE',
-      negocios: '#4F46E5',
-      comunidad: '#A21CAF',
-    };
-    return colors[categoria] || '#55666F';
-  };
+  const getCategoriaColor = (categoria: string): string => categoriaFg(categoria);
 
   const handleView = () => {
     if (onView) {
@@ -94,11 +83,11 @@ export function ListingCard({
         marginBottom: '12px',
         cursor: 'pointer',
         transition: 'all 0.2s',
-        boxShadow: '0 2px 4px rgba(0,0,0,0.05)',
+        boxShadow: tokens['--bs-elevation-1'],
       }}
       whileHover={{
         y: -2,
-        boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+        boxShadow: tokens['--bs-elevation-2'],
       }}
       onClick={handleView}
     >

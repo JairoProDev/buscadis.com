@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
+import { bsMix, semantic } from '@/lib/bs-tokens';
 
 export function ErrorCard({ message }: { message: string }) {
     return (
@@ -11,9 +12,9 @@ export function ErrorCard({ message }: { message: string }) {
             style={{
                 padding: '16px',
                 borderRadius: '12px',
-                background: 'rgba(239, 68, 68, 0.1)',
-                border: '1px solid rgba(239, 68, 68, 0.2)',
-                color: '#ef4444',
+                background: bsMix('--bs-danger-fg', 10),
+                border: `1px solid ${bsMix('--bs-danger-fg', 20)}`,
+                color: semantic.dangerFg,
                 marginBottom: '12px',
                 fontSize: '14px',
                 display: 'flex',

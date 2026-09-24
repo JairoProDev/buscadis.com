@@ -19,6 +19,7 @@ import {
   buildDefaultTwitterImageMeta,
   getSiteUrl,
 } from '@/lib/seo/og-image';
+import { THEME_COLORS } from '@/lib/theme-meta';
 
 const siteUrl = getSiteUrl();
 
@@ -103,7 +104,7 @@ export default function RootLayout({
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
         <link rel="manifest" href="/site.webmanifest" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <meta name="theme-color" content="#ffffff" />
+        <meta name="theme-color" content={THEME_COLORS.light} />
         <script
           dangerouslySetInnerHTML={{
             __html: `
@@ -113,7 +114,7 @@ export default function RootLayout({
                   const root = document.documentElement;
                   const meta = document.querySelector('meta[name="theme-color"]');
                   const setColor = function(dark) {
-                    if (meta) meta.setAttribute('content', dark ? '#13171d' : '#ffffff');
+                    if (meta) meta.setAttribute('content', dark ? '${THEME_COLORS.dark}' : '${THEME_COLORS.light}');
                   };
                   if (theme === 'dark') {
                     root.classList.add('dark-mode', 'dark');

@@ -6,6 +6,7 @@ import { IconWhatsApp, IconGratuitos } from './Icons';
 import { getWhatsAppUrl, generarIdUnico } from '@/lib/utils';
 import { createAdisoGratuito } from '@/lib/api';
 import { useAdisosGratuitosCache } from '@/contexts/AdisosGratuitosCache';
+import { semantic } from '@/lib/bs-tokens';
 import { 
   IconEmpleos, 
   IconInmuebles, 
@@ -440,7 +441,7 @@ export default function AdisosGratuitos({ onPublicarGratuito, todosLosAdisos = [
                         style={{ 
                           fontSize: '0.65rem',
                           padding: '0.125rem 0.375rem',
-                          backgroundColor: '#25D366',
+                          backgroundColor: semantic.whatsapp,
                           color: 'white',
                           borderRadius: '4px',
                           fontWeight: 600,
@@ -462,7 +463,7 @@ export default function AdisosGratuitos({ onPublicarGratuito, todosLosAdisos = [
                     >
                       <IconWhatsApp 
                         size={14} 
-                        color="#25D366"
+                        color={semantic.whatsapp}
                       />
                     </span>
                   </div>

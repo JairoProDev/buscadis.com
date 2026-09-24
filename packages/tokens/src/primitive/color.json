@@ -61,6 +61,14 @@
     "ink": {
       "onWarm": { "value": "#10242B", "type": "color" },
       "onActionDark": { "value": "#08171D", "type": "color" }
+    },
+    "social": {
+      "whatsapp": { "value": "#25D366", "type": "color" },
+      "whatsappDark": { "value": "#128C7E", "type": "color" }
+    },
+    "accent": {
+      "chatStart": { "value": "#667EEA", "type": "color", "comment": "assistant UI gradient start" },
+      "chatEnd": { "value": "#764BA2", "type": "color", "comment": "assistant UI gradient end" }
     }
   }
 }

@@ -13,6 +13,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useUser } from '@/hooks/useUser';
 import { useUI } from '@/contexts/UIContext';
 import VerificationGateModal from '@/components/profile/VerificationGateModal';
+import { semantic, tokens } from '@/lib/bs-tokens';
 import {
   IconEmpleos,
   IconInmuebles,
@@ -780,7 +781,7 @@ export default function FormularioPublicar({
             width: '100%',
             padding: '0.75rem',
             fontSize: '1rem',
-            border: `1px solid ${errors.titulo ? '#ef4444' : 'var(--border-color)'}`,
+            border: `1px solid ${errors.titulo ? semantic.dangerFg : 'var(--border-color)'}`,
             borderRadius: '8px',
             backgroundColor: 'var(--bg-primary)',
             color: 'var(--text-primary)',
@@ -788,19 +789,19 @@ export default function FormularioPublicar({
             transition: 'border-color 0.2s'
           }}
           onFocus={(e) => {
-            e.target.style.borderColor = errors.titulo ? '#ef4444' : 'var(--brand-blue)';
+            e.target.style.borderColor = errors.titulo ? semantic.dangerFg : 'var(--brand-blue)';
           }}
           onBlur={(e) => {
-            e.target.style.borderColor = errors.titulo ? '#ef4444' : 'var(--border-color)';
+            e.target.style.borderColor = errors.titulo ? semantic.dangerFg : 'var(--border-color)';
           }}
         />
         <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '0.25rem' }}>
           {errors.titulo && (
-            <span role="alert" style={{ fontSize: '0.75rem', color: '#ef4444' }}>{errors.titulo}</span>
+            <span role="alert" style={{ fontSize: '0.75rem', color: semantic.dangerFg }}>{errors.titulo}</span>
           )}
           <span style={{
             fontSize: '0.75rem',
-            color: formData.titulo.length > (modoGratuito ? 30 : LIMITS.TITULO_MAX) * 0.9 ? '#f59e0b' : 'var(--text-tertiary)',
+            color: formData.titulo.length > (modoGratuito ? 30 : LIMITS.TITULO_MAX) * 0.9 ? semantic.warningFg : 'var(--text-tertiary)',
             marginLeft: 'auto'
           }}>
             {formData.titulo.length}/{modoGratuito ? 30 : LIMITS.TITULO_MAX}
@@ -848,7 +849,7 @@ export default function FormularioPublicar({
               width: '100%',
               padding: '0.75rem',
               fontSize: '1rem',
-              border: `1px solid ${errors.descripcion ? '#ef4444' : 'var(--border-color)'}`,
+              border: `1px solid ${errors.descripcion ? semantic.dangerFg : 'var(--border-color)'}`,
               borderRadius: '8px',
               backgroundColor: 'var(--bg-primary)',
               color: 'var(--text-primary)',
@@ -858,19 +859,19 @@ export default function FormularioPublicar({
               transition: 'border-color 0.2s'
             }}
             onFocus={(e) => {
-              e.target.style.borderColor = errors.descripcion ? '#ef4444' : 'var(--brand-blue)';
+              e.target.style.borderColor = errors.descripcion ? semantic.dangerFg : 'var(--brand-blue)';
             }}
             onBlur={(e) => {
-              e.target.style.borderColor = errors.descripcion ? '#ef4444' : 'var(--border-color)';
+              e.target.style.borderColor = errors.descripcion ? semantic.dangerFg : 'var(--border-color)';
             }}
           />
           <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '0.25rem' }}>
             {errors.descripcion && (
-              <span role="alert" style={{ fontSize: '0.75rem', color: '#ef4444' }}>{errors.descripcion}</span>
+              <span role="alert" style={{ fontSize: '0.75rem', color: semantic.dangerFg }}>{errors.descripcion}</span>
             )}
             <span style={{
               fontSize: '0.75rem',
-              color: formData.descripcion.length > LIMITS.DESCRIPCION_MAX * 0.9 ? '#f59e0b' : 'var(--text-tertiary)',
+              color: formData.descripcion.length > LIMITS.DESCRIPCION_MAX * 0.9 ? semantic.warningFg : 'var(--text-tertiary)',
               marginLeft: 'auto'
             }}>
               {formData.descripcion.length}/{LIMITS.DESCRIPCION_MAX}
@@ -1028,7 +1029,7 @@ export default function FormularioPublicar({
                     top: '-0.5rem',
                     right: '0.75rem',
                     backgroundColor: 'var(--brand-yellow)',
-                    color: '#000',
+                    color: tokens['--bs-color-neutral-950'],
                     padding: '0.25rem 0.6rem',
                     borderRadius: '20px',
                     fontSize: '0.75rem',
@@ -1101,7 +1102,7 @@ export default function FormularioPublicar({
         </div>
 
         {errors.tamaño && (
-          <span style={{ fontSize: '0.75rem', color: '#ef4444', marginTop: '0.5rem', display: 'block' }}>
+          <span style={{ fontSize: '0.75rem', color: semantic.dangerFg, marginTop: '0.5rem', display: 'block' }}>
             {errors.tamaño}
           </span>
         )}
@@ -1189,7 +1190,7 @@ export default function FormularioPublicar({
             width: '100%',
             padding: '0.75rem',
             fontSize: '1rem',
-            border: `1px solid ${errors.contacto ? '#ef4444' : 'var(--border-color)'}`,
+            border: `1px solid ${errors.contacto ? semantic.dangerFg : 'var(--border-color)'}`,
             borderRadius: '8px',
             backgroundColor: 'var(--bg-primary)',
             color: 'var(--text-primary)',
@@ -1197,15 +1198,15 @@ export default function FormularioPublicar({
             transition: 'border-color 0.2s'
           }}
           onFocus={(e) => {
-            e.target.style.borderColor = errors.contacto ? '#ef4444' : 'var(--brand-blue)';
+            e.target.style.borderColor = errors.contacto ? semantic.dangerFg : 'var(--brand-blue)';
           }}
           onBlur={(e) => {
-            e.target.style.borderColor = errors.contacto ? '#ef4444' : 'var(--border-color)';
+            e.target.style.borderColor = errors.contacto ? semantic.dangerFg : 'var(--border-color)';
           }}
         />
         <div style={{ marginTop: '0.25rem' }}>
           {errors.contacto ? (
-            <span role="alert" style={{ fontSize: '0.75rem', color: '#ef4444' }}>{errors.contacto}</span>
+            <span role="alert" style={{ fontSize: '0.75rem', color: semantic.dangerFg }}>{errors.contacto}</span>
           ) : (
             <span style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)' }}>
               🔒 Este número no se mostrará públicamente
@@ -1230,7 +1231,7 @@ export default function FormularioPublicar({
           {errors.ubicacion && (
             <span role="alert" style={{
               fontSize: '0.75rem',
-              color: '#ef4444',
+              color: semantic.dangerFg,
               marginTop: '0.25rem',
               display: 'block'
             }}>
@@ -1735,7 +1736,7 @@ export default function FormularioPublicar({
           borderRadius: '10px',
           backgroundColor: 'rgba(239, 68, 68, 0.08)',
           border: '1px solid rgba(239, 68, 68, 0.35)',
-          color: '#b91c1c',
+          color: semantic.dangerFg,
           fontSize: '0.875rem',
           lineHeight: 1.5,
           fontWeight: 500,

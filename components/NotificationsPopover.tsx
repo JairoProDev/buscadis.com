@@ -6,6 +6,7 @@ import { IconBell, IconHeart, IconMessages, IconCheck, IconMegaphone } from '@/c
 import { Notification, NotificationType } from '@/types';
 import { formatTimeAgo } from '@/utils/date';
 import { saveOpportunityContext } from '@/lib/opportunity-context';
+import { semantic } from '@/lib/bs-tokens';
 
 interface NotificationsPopoverProps {
     onClose: () => void;
@@ -48,13 +49,13 @@ export default function NotificationsPopover({ onClose }: NotificationsPopoverPr
     const getIcon = (type: NotificationType) => {
         switch (type) {
             case 'like':
-                return <IconHeart size={14} color="#ef4444" />;
+                return <IconHeart size={14} color={semantic.dangerFg} />;
             case 'message':
                 return <IconMessages size={14} color="var(--brand-yellow)" />;
             case 'ad_approved':
-                return <IconCheck size={14} color="#22c55e" />;
+                return <IconCheck size={14} color={semantic.successFg} />;
             case 'ad_rejected':
-                return <IconBell size={14} color="#ef4444" />;
+                return <IconBell size={14} color={semantic.dangerFg} />;
             case 'system':
             default:
                 return <IconMegaphone size={14} color="var(--brand-yellow)" />;

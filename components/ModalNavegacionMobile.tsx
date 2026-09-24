@@ -17,6 +17,7 @@ import { Adiso } from '@/types';
 import { SeccionSidebar } from './SidebarDesktop';
 import ModalAdiso from './ModalAdiso';
 import MapaInteractivo from './MapaInteractivo';
+import { semantic } from '@/lib/bs-tokens';
 import FormularioPublicar from './FormularioPublicar';
 import PublishStudioShell from './publish/PublishStudioShell';
 import AdisosGratuitos from './AdisosGratuitos';
@@ -443,7 +444,7 @@ export default function ModalNavegacionMobile({
                           {/* Badge if exists */}
                           {item.badge && (
                             <span style={{
-                              backgroundColor: '#ef4444',
+                              backgroundColor: semantic.dangerFg,
                               color: 'white',
                               fontSize: '0.75rem',
                               fontWeight: 700,
@@ -542,7 +543,7 @@ export default function ModalNavegacionMobile({
                   borderRadius: '8px',
                   border: 'none',
                   background: 'transparent',
-                  color: '#ef4444',
+                  color: semantic.dangerFg,
                   cursor: 'pointer',
                   fontSize: '0.9375rem',
                   fontWeight: 500,

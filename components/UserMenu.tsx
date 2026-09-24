@@ -24,6 +24,7 @@ import { useTranslation } from '@/hooks/useTranslation';
 import ThemeToggle from './ThemeToggle';
 import LanguageSelector from './LanguageSelector';
 import ModeIndicator, { ModeSubtitle } from '@/components/profile/ModeIndicator';
+import { semantic } from '@/lib/bs-tokens';
 
 interface UserMenuProps {
   onProgressClick?: () => void;
@@ -169,7 +170,7 @@ function UserMenuContent({ onProgressClick }: UserMenuProps) {
               className="absolute -bottom-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-[var(--bg-primary)]"
               title="Cuenta verificada"
             >
-              <IconVerified size={14} color="#22c55e" />
+              <IconVerified size={14} color={semantic.successFg} />
             </span>
           )}
         </div>
@@ -211,7 +212,7 @@ function UserMenuContent({ onProgressClick }: UserMenuProps) {
                 )}
                 {identity.isVerificado && (
                   <span className="absolute -bottom-0.5 -right-0.5 flex h-[18px] w-[18px] items-center justify-center rounded-full bg-[var(--bg-primary)]">
-                    <IconVerified size={16} color="#22c55e" />
+                    <IconVerified size={16} color={semantic.successFg} />
                   </span>
                 )}
               </div>
@@ -270,7 +271,7 @@ function UserMenuContent({ onProgressClick }: UserMenuProps) {
 
           <div className="p-1.5">
             <MenuItem
-              icon={<IconSignOut size={16} color="#ef4444" />}
+              icon={<IconSignOut size={16} color={semantic.dangerFg} />}
               iconBg="bg-red-500/8"
               label="Cerrar sesión"
               onClick={handleSignOut}

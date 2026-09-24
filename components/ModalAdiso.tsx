@@ -55,6 +55,7 @@ import { getBusinessProfilePath } from '@/lib/seo/business-metadata';
 import { FIELD_QUESTIONS, type RevealField } from '@/lib/interactions/field-reveal';
 import { chatContextFromAdiso } from '@/lib/chat/context-from-adiso';
 import FlyerCanvas from '@/components/flyer/FlyerCanvas';
+import { semantic } from '@/lib/bs-tokens';
 import { buildFlyerContentFromAdiso, flyerStateFromPrivateData } from '@/lib/flyer/layout';
 import { resolveFlyerConfig } from '@/lib/flyer/templates';
 import {
@@ -659,7 +660,7 @@ export default function ModalAdiso({
         ? '#0ea5e9'
         : externalContact?.kind === 'link'
           ? 'var(--brand-blue)'
-          : '#25D366';
+          : semantic.whatsapp;
 
   const ContactFooter = () => {
     const isOwnerView = esMiAdiso || esPropietario;

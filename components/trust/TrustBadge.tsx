@@ -1,4 +1,5 @@
 import React from 'react';
+import { trustBadge } from '@/lib/bs-tokens';
 import { IconShield, IconUserCheck } from '../Icons';
 
 interface TrustBadgeProps {
@@ -13,26 +14,20 @@ export default function TrustBadge({ type, size = 'md', showLabel = true }: Trus
             case 'verified':
                 return {
                     icon: IconUserCheck,
-                    color: '#3B82F6', // Blue
                     label: 'Verificado',
-                    bgColor: 'rgba(59, 130, 246, 0.15)',
-                    borderColor: 'rgba(59, 130, 246, 0.3)'
+                    ...trustBadge.verified,
                 };
             case 'business':
                 return {
                     icon: IconShield,
-                    color: '#8B5CF6', // Purple
                     label: 'Empresa',
-                    bgColor: 'rgba(139, 92, 246, 0.15)',
-                    borderColor: 'rgba(139, 92, 246, 0.3)'
+                    ...trustBadge.business,
                 };
             case 'identity':
                 return {
                     icon: IconShield,
-                    color: '#10B981', // Green
                     label: 'Identidad',
-                    bgColor: 'rgba(16, 185, 129, 0.15)',
-                    borderColor: 'rgba(16, 185, 129, 0.3)'
+                    ...trustBadge.identity,
                 };
         }
     };
@@ -55,8 +50,8 @@ export default function TrustBadge({ type, size = 'md', showLabel = true }: Trus
                 alignItems: 'center',
                 gap: '0.35rem',
                 padding: s.padding,
-                backgroundColor: config.bgColor,
-                border: `1px solid ${config.borderColor}`,
+                backgroundColor: config.bg,
+                border: `1px solid ${config.border}`,
                 borderRadius: '100px',
                 color: config.color,
                 fontSize: s.fontSize,

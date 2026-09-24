@@ -127,7 +127,7 @@ export default function BusinessShareTools({
                 href={waSelfHref}
                 target="_blank"
                 rel="noreferrer"
-                className="min-h-[44px] inline-flex items-center px-3 rounded-lg bg-[#25D366] text-white text-[13px] font-semibold"
+                className="min-h-[44px] inline-flex items-center px-3 rounded-lg bg-[var(--bs-color-social-whatsapp)] text-white text-[13px] font-semibold"
               >
                 Enviármelo por WhatsApp
               </a>
