@@ -1,7 +1,9 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import Image from 'next/image';
+import { OVERLAY_BACKDROP_Z, OVERLAY_SHEET_Z } from '@/lib/ui/overlay-layer';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   IconClose,
@@ -46,8 +48,13 @@ export default function AdisoCardActionsSheet({
   onAction,
 }: AdisoCardActionsSheetProps) {
   const [reportStep, setReportStep] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const title = toDisplayTitle(adiso.titulo);
   const thumb = adiso.imagenesUrls?.[0] || adiso.imagenUrl;
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     if (!open) setReportStep(false);
@@ -55,11 +62,16 @@ export default function AdisoCardActionsSheet({
 
   useEffect(() => {
     if (!open) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
     };
     window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
+    return () => {
+      document.body.style.overflow = prev;
+      window.removeEventListener('keydown', onKey);
+    };
   }, [open, onClose]);
 
   const row = (
@@ -83,14 +95,17 @@ export default function AdisoCardActionsSheet({
     </button>
   );
 
-  return (
+  if (!mounted) return null;
+
+  const layer = (
     <AnimatePresence>
       {open && (
         <>
           <motion.button
             type="button"
             aria-label="Cerrar menú"
-            className="fixed inset-0 z-[200] bg-black/60 backdrop-blur-[2px]"
+            className="fixed inset-0 bg-black/60 backdrop-blur-[2px]"
+            style={{ zIndex: OVERLAY_BACKDROP_Z }}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -100,7 +115,8 @@ export default function AdisoCardActionsSheet({
             role="dialog"
             aria-modal="true"
             aria-label="Opciones del anuncio"
-            className="fixed inset-x-0 bottom-0 z-[201] mx-auto max-h-[min(88vh,640px)] w-full max-w-lg overflow-hidden rounded-t-[28px] bg-[#1c1c1e] pb-[env(safe-area-inset-bottom)] shadow-2xl"
+            className="fixed inset-x-0 bottom-0 mx-auto flex max-h-[min(88vh,640px)] w-full max-w-lg flex-col overflow-hidden rounded-t-[28px] bg-[#1c1c1e] shadow-2xl"
+            style={{ zIndex: OVERLAY_SHEET_Z }}
             initial={{ y: '100%' }}
             animate={{ y: 0 }}
             exit={{ y: '100%' }}
@@ -129,7 +145,9 @@ export default function AdisoCardActionsSheet({
             </div>
 
             {!reportStep ? (
-              <div className="px-4 pb-6 pt-3">
+              <div
+                className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 pb-[max(1.5rem,env(safe-area-inset-bottom))] pt-3"
+              >
                 <div className="mb-3 grid grid-cols-2 gap-2">
                   <button
                     type="button"
@@ -179,7 +197,9 @@ export default function AdisoCardActionsSheet({
                 </div>
               </div>
             ) : (
-              <div className="px-4 pb-6 pt-2">
+              <div
+                className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 pb-[max(1.5rem,env(safe-area-inset-bottom))] pt-2"
+              >
                 <p className="mb-3 text-sm font-semibold text-white">¿Qué problema tiene este anuncio?</p>
                 <div className="flex flex-col gap-1">
                   {REPORT_REASONS.map((r) => (
@@ -210,4 +230,6 @@ export default function AdisoCardActionsSheet({
       )}
     </AnimatePresence>
   );
+
+  return createPortal(layer, document.body);
 }

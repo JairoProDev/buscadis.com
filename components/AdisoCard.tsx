@@ -319,13 +319,13 @@ const AdisoCard = forwardRef<HTMLDivElement, AdisoCardProps>(
               e.preventDefault();
               setMenuOpen(true);
             }}
-            className="absolute bottom-2 right-2 z-30 flex h-9 w-9 items-center justify-center rounded-full bg-black/50 text-white backdrop-blur-sm transition-transform hover:scale-105 active:scale-95"
+            className="absolute right-1 top-1 z-30 flex min-h-[44px] min-w-[44px] items-center justify-center border-0 bg-transparent text-white drop-shadow-[0_1px_4px_rgba(0,0,0,0.85)] transition-transform hover:scale-110 active:scale-95"
             title="Más opciones"
             aria-label="Más opciones"
             aria-haspopup="dialog"
             aria-expanded={menuOpen}
           >
-            <IconEllipsisH size={16} />
+            <IconEllipsisH size={18} />
           </button>
 
           {/* Category accent — 3px bar, never full fill */}

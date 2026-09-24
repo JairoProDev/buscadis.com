@@ -1,7 +1,9 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import { OVERLAY_BACKDROP_Z, OVERLAY_SHEET_Z } from '@/lib/ui/overlay-layer';
 import {
   IconHeartOutline,
   IconEyeOff,
@@ -47,6 +49,12 @@ export default function AdisoCardLongPressMenu({
   onCommit,
   onCancel,
 }: AdisoCardLongPressMenuProps) {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   useEffect(() => {
     if (!active) return;
     const prevent = (e: Event) => e.preventDefault();
@@ -54,12 +62,15 @@ export default function AdisoCardLongPressMenu({
     return () => document.removeEventListener('contextmenu', prevent);
   }, [active]);
 
-  return (
+  if (!mounted) return null;
+
+  const layer = (
     <AnimatePresence>
       {active && (
         <>
           <motion.div
-            className="fixed inset-0 z-[190] bg-black/45"
+            className="fixed inset-0 bg-black/45"
+            style={{ zIndex: OVERLAY_BACKDROP_Z }}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -68,7 +79,11 @@ export default function AdisoCardLongPressMenu({
               else onCancel();
             }}
           />
-          <div className="pointer-events-none fixed inset-0 z-[191]" aria-hidden>
+          <div
+            className="pointer-events-none fixed inset-0"
+            style={{ zIndex: OVERLAY_SHEET_Z }}
+            aria-hidden
+          >
             <motion.div
               className="absolute h-24 w-24 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white/25 bg-white/10 backdrop-blur-sm"
               style={{ left: centerX, top: centerY }}
@@ -115,6 +130,8 @@ export default function AdisoCardLongPressMenu({
       )}
     </AnimatePresence>
   );
+
+  return createPortal(layer, document.body);
 }
 
 export function pickRadialAction(
