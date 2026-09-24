@@ -4,6 +4,7 @@ import {
   forwardRef,
   useEffect,
   useImperativeHandle,
+  useMemo,
   useRef,
   useState,
   type CSSProperties,
@@ -196,7 +197,7 @@ const PublishCoverEditor = forwardRef<PublishCoverEditorHandle, PublishCoverEdit
     ref,
   ) {
     const stageRef = useRef<HTMLDivElement>(null);
-    const texts = (overlay?.texts || []) as TextMark[];
+    const texts = useMemo(() => (overlay?.texts || []) as TextMark[], [overlay?.texts]);
     const stickers = overlay?.stickers || [];
     const strokes = overlay?.strokes || [];
     const [draftStroke, setDraftStroke] = useState<Stroke | null>(null);

@@ -342,7 +342,6 @@ export default function PublishStudio({
       draft.titulo,
       draft.descripcion,
       draft.atributos,
-      draft.plan,
       mergeDraft,
       addChatMessage,
       onNotify,

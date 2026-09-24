@@ -10,7 +10,7 @@
     "predev": "npm run db:migrate",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "eslint \"{app,components,lib}/**/*.{ts,tsx}\" --max-warnings 0",
     "tokens:build": "npm run build --workspace=@buscadis/tokens",
     "storybook": "npx storybook dev -p 6006 -c packages/ui/.storybook",
     "build-storybook": "npx storybook build -c packages/ui/.storybook -o packages/ui/storybook-static",

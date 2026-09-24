@@ -677,7 +677,7 @@ function HomeContent() {
       },
       { enableHighAccuracy: false, maximumAge: 5 * 60 * 1000, timeout: 8000 },
     );
-  }, [ordenamiento, tieneUbicacionPerfil, geoOrigen]);
+  }, [ordenamiento, tieneUbicacionPerfil, geoOrigen, error]);
 
   // Al cambiar el orden, volver al inicio de la lista para ver el nuevo criterio.
   const ordenInicial = useRef(true);

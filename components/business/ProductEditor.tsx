@@ -208,7 +208,7 @@ export function ProductEditor({ product, businessProfileId, userId, onSave, onCa
         setUploadedFiles([]);
         setBgRemovedIdx(new Set());
         setDeleteStep('idle');
-    }, [product?.id, resetBaseline]);
+    }, [product, resetBaseline]);
 
     const update = (field: string, value: any) => setFormData(prev => ({ ...prev, [field]: value }));
 

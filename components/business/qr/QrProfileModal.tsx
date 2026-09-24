@@ -239,7 +239,7 @@ export default function QrProfileModal({
                   ¿Eres el dueño?{' '}
                   <button
                     type="button"
-                    onClick={openAuthModal}
+                    onClick={() => openAuthModal('login')}
                     className="text-blue-600 font-semibold hover:underline"
                   >
                     Inicia sesión

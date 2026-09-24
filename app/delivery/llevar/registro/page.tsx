@@ -53,7 +53,7 @@ export default function ConductorRegistroPage() {
       setDisplayName(data.rider.display_name || '');
       setTelefono(data.rider.telefono_whatsapp || '');
       setPlaca(data.rider.placa || '');
-      setZonas(data.rider.zonas?.length ? data.rider.zonas : zonas);
+      setZonas((prev) => (data.rider.zonas?.length ? data.rider.zonas : prev));
       setAceptaMandados(data.rider.acepta_mandados_compra ?? true);
       if (data.rider.estado === 'aprobado') {
         router.replace('/delivery/llevar');

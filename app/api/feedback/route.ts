@@ -1,5 +1,18 @@
+import { tokens } from '@buscadis/tokens';
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
+
+const EMAIL_UI = {
+  text: tokens['--bs-color-neutral-800'],
+  muted: tokens['--bs-color-neutral-600'],
+  faint: tokens['--bs-color-neutral-500'],
+  surface: tokens['--bs-color-neutral-50'],
+  panel: tokens['--bs-color-neutral-0'],
+  border: tokens['--bs-color-neutral-200'],
+  inset: tokens['--bs-color-neutral-25'],
+  link: tokens['--bs-color-adis-600'],
+  warn: tokens['--bs-color-warning-fg'],
+} as const;
 
 // Email opcional para notificaciones (configurar en .env.local)
 const NOTIFICATION_EMAIL = process.env.FEEDBACK_NOTIFICATION_EMAIL;
@@ -158,21 +171,21 @@ async function enviarNotificacionEmail(feedbacks: any[]) {
         <head>
           <meta charset="utf-8">
           <style>
-            body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333; }
+            body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: ${EMAIL_UI.text}; }
             .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-            .header { background: #f5f5f5; padding: 20px; border-radius: 8px; margin-bottom: 20px; }
-            .content { background: #fff; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px; }
-            .label { font-weight: 600; color: #666; margin-top: 15px; }
-            .value { margin-top: 5px; padding: 10px; background: #f9f9f9; border-radius: 4px; }
-            .footer { margin-top: 20px; padding-top: 20px; border-top: 1px solid #e0e0e0; font-size: 12px; color: #999; }
-            a { color: #0066cc; text-decoration: none; }
+            .header { background: ${EMAIL_UI.surface}; padding: 20px; border-radius: 8px; margin-bottom: 20px; }
+            .content { background: ${EMAIL_UI.panel}; padding: 20px; border: 1px solid ${EMAIL_UI.border}; border-radius: 8px; }
+            .label { font-weight: 600; color: ${EMAIL_UI.muted}; margin-top: 15px; }
+            .value { margin-top: 5px; padding: 10px; background: ${EMAIL_UI.inset}; border-radius: 4px; }
+            .footer { margin-top: 20px; padding-top: 20px; border-top: 1px solid ${EMAIL_UI.border}; font-size: 12px; color: ${EMAIL_UI.faint}; }
+            a { color: ${EMAIL_UI.link}; text-decoration: none; }
           </style>
         </head>
         <body>
           <div class="container">
             <div class="header">
               <h2 style="margin: 0;">${tipoLabel}</h2>
-              <p style="margin: 5px 0 0 0; color: #666;">Nuevo feedback recibido en buscadis.com</p>
+              <p style="margin: 5px 0 0 0; color: ${EMAIL_UI.muted};">Nuevo feedback recibido en buscadis.com</p>
             </div>
             <div class="content">
               <div class="label">Tipo:</div>
@@ -190,7 +203,7 @@ async function enviarNotificacionEmail(feedbacks: any[]) {
               ` : ''}
               
               ${feedbacks.length > 1 ? `
-                <div class="label" style="margin-top: 20px; color: #f59e0b;">
+                <div class="label" style="margin-top: 20px; color: ${EMAIL_UI.warn};">
                   ⚠️ Se recibieron ${feedbacks.length} feedbacks en este lote
                 </div>
               ` : ''}

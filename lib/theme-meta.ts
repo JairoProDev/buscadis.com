@@ -1,6 +1,8 @@
+import { tokens } from '@buscadis/tokens';
+
 export const THEME_COLORS = {
-  light: '#ffffff',
-  dark: '#13171d',
+  light: tokens['--bs-color-neutral-0'],
+  dark: tokens['--bs-color-neutral-900'],
 } as const;
 
 export function isDarkThemeActive(root: HTMLElement = document.documentElement): boolean {

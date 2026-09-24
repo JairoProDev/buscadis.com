@@ -1,13 +1,16 @@
+import { tokens } from '@buscadis/tokens';
 import sharp from 'sharp';
 import type { QrStyleConfig } from './types';
+
+const QR_OPAQUE_WHITE = tokens['--bs-color-neutral-0'];
 
 export function isTransparentBackground(config: QrStyleConfig): boolean {
   return config.transparentBackground === true;
 }
 
 export function resolveBackgroundColor(config: QrStyleConfig): string {
-  if (isTransparentBackground(config)) return '#ffffff00';
-  return config.backgroundColor || '#ffffff';
+  if (isTransparentBackground(config)) return `${QR_OPAQUE_WHITE}00`;
+  return config.backgroundColor || QR_OPAQUE_WHITE;
 }
 
 /** Convierte píxeles blancos (fondo) en alpha 0. */

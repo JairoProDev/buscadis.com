@@ -12,17 +12,17 @@ export const MOTIVO_AYUDA_VISUAL: Record<
   },
   publicar: {
     iconBg: 'rgba(var(--brand-yellow-rgb), 0.28)',
-    iconColor: 'color-mix(in srgb, var(--bs-color-sol-500, #e5a82e) 85%, #5c4208)',
+    iconColor: 'color-mix(in srgb, var(--bs-color-sol-500) 85%, var(--bs-color-sol-900))',
     hoverBorder: 'color-mix(in srgb, var(--brand-yellow) 45%, var(--border-color))',
   },
   sugerencia: {
-    iconBg: 'color-mix(in srgb, var(--brand-blue) 10%, #b8e6c8 55%)',
-    iconColor: 'color-mix(in srgb, #2d8a5c 75%, var(--brand-blue))',
-    hoverBorder: 'color-mix(in srgb, #6bc49a 40%, var(--border-color))',
+    iconBg: 'color-mix(in srgb, var(--brand-blue) 10%, var(--bs-color-success-bg) 55%)',
+    iconColor: 'color-mix(in srgb, var(--bs-color-success-fg) 75%, var(--brand-blue))',
+    hoverBorder: 'color-mix(in srgb, var(--bs-color-success-fg) 40%, var(--border-color))',
   },
   problema: {
     iconBg: 'color-mix(in srgb, var(--bs-danger-fg) 12%, var(--bg-secondary))',
-    iconColor: 'color-mix(in srgb, var(--bs-danger-fg) 88%, #8b3a3a)',
+    iconColor: 'color-mix(in srgb, var(--bs-danger-fg) 88%, var(--bs-color-danger-fg))',
     hoverBorder: 'color-mix(in srgb, var(--bs-danger-fg) 28%, var(--border-color))',
   },
 };
