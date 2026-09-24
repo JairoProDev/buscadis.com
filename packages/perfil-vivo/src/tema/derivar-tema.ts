@@ -1,6 +1,11 @@
+import { tokens } from '@buscadis/tokens';
 import { converter, formatHex, parse } from 'culori';
 import { hex as contrastHex } from 'wcag-contrast';
 import type { TemaMarcaVars, TemaModo } from '../types';
+
+const DEFAULT_SEED = tokens['--bs-action'];
+const INK = tokens['--bs-color-neutral-950'];
+const WHITE = tokens['--bs-color-neutral-0'];
 
 const toOklch = converter('oklch');
 
@@ -15,7 +20,7 @@ function toHexColor(color: {
   h?: number;
 }): string {
   const hex = formatHex(color as Parameters<typeof formatHex>[0]);
-  return (hex || '#1F4FD8').toUpperCase();
+  return (hex || DEFAULT_SEED).toUpperCase();
 }
 
 /**
@@ -39,7 +44,7 @@ export function derivarTema(semillaHex: string, modo: TemaModo): TemaMarcaVars {
 
   const accion = mk(lAccion);
   const sobreAccion =
-    contrastHex('#FFFFFF', accion) >= 4.5 ? '#FFFFFF' : '#131218';
+    contrastHex(WHITE, accion) >= 4.5 ? WHITE : INK;
 
   return {
     '--mk-accion': accion,

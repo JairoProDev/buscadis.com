@@ -18,6 +18,7 @@ import type { HandoffLinks } from '../../modulos/PerfilContext';
 import { formatPrecio } from '../../estado/calcular-estado';
 import { fechaRelativa } from '../../resenas/helpers';
 import { usePerfilFonts } from '../../tema/load-fonts';
+import { tokens } from '@buscadis/tokens';
 import './tiktok-perfil.css';
 
 type TabId = 'catalogo' | 'info' | 'resenas';
@@ -29,7 +30,7 @@ type SocialItem = {
   icon: string;
 };
 
-const BUSCADIS_ACCENT = '#53ACC5';
+const BUSCADIS_ACCENT = tokens['--bs-identity'];
 
 const SOCIAL_ORDER = [
   'web',

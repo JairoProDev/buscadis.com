@@ -17,6 +17,7 @@
     "verify:ia": "node ./scripts/verify-ia.mjs"
   },
   "dependencies": {
+    "@buscadis/tokens": "*",
     "culori": "^4.0.2",
     "wcag-contrast": "^3.0.0",
     "zod": "^3.24.1"

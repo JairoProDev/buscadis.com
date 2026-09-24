@@ -1,10 +1,11 @@
+import { tokens } from '@buscadis/tokens';
 import type { StyleSkinTokens } from '../types/style';
 
 export const STYLE_SKINS: StyleSkinTokens[] = [
   {
     id: 'buscadis_default',
     label: 'Buscadis',
-    color: '#53acc5',
+    color: tokens['--bs-identity'],
     mode: 'light',
     fontFamily: 'sans',
     radius: 'rounded',

@@ -1,3 +1,4 @@
+import { tokens } from '@buscadis/tokens';
 import { derivarTemaTenant } from './derivar-tema-tenant';
 import { getTenantPreset, normalizeTenantPresetId } from './presets';
 import type {
@@ -51,21 +52,21 @@ function surfacesForMode(mode: TenantMode): Omit<
 > {
   if (mode === 'dark') {
     return {
-      '--bp-canvas': '#13171d',
-      '--bp-surface': '#1c2229',
-      '--bp-surface-elevated': '#283038',
-      '--bp-text': '#edf1f5',
-      '--bp-text-muted': '#9dabb8',
+      '--bp-canvas': tokens['--bs-color-neutral-950'],
+      '--bp-surface': tokens['--bs-color-neutral-900'],
+      '--bp-surface-elevated': tokens['--bs-color-neutral-800'],
+      '--bp-text': tokens['--bs-color-neutral-100'],
+      '--bp-text-muted': tokens['--bs-color-neutral-400'],
       '--bp-border': 'rgba(255,255,255,0.10)',
     };
   }
   return {
-    '--bp-canvas': '#f8fafc',
-    '--bp-surface': '#ffffff',
-    '--bp-surface-elevated': '#ffffff',
-    '--bp-text': '#0f172a',
-    '--bp-text-muted': '#64748b',
-    '--bp-border': '#e2e8f0',
+    '--bp-canvas': tokens['--bs-color-neutral-50'],
+    '--bp-surface': tokens['--bs-color-neutral-0'],
+    '--bp-surface-elevated': tokens['--bs-color-neutral-0'],
+    '--bp-text': tokens['--bs-color-neutral-900'],
+    '--bp-text-muted': tokens['--bs-color-neutral-500'],
+    '--bp-border': tokens['--bs-color-neutral-200'],
   };
 }
 
@@ -95,7 +96,7 @@ export function buildStorefrontTheme(input: BuildStorefrontThemeInput = {}): Sto
 
   const r = radiusCss(radius);
   const gap = density === 'compact' ? '0.5rem' : '1rem';
-  const brandAccent = input.accentColor || '#FFC24A';
+  const brandAccent = input.accentColor || tokens['--bs-identity-warm'];
 
   const surfaces: StorefrontSurfaceVars = {
     ...surfacesForMode(mode),

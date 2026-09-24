@@ -1,3 +1,4 @@
+import { tokens } from '@buscadis/tokens';
 import type { Negocio } from '../types';
 import { safeParseNegocio } from '../schemas';
 import {
@@ -23,7 +24,7 @@ export function negocioFromBusinessProfile(row: unknown): Negocio | null {
   const themeColor =
     typeof p.theme_color === 'string' && /^#[0-9A-Fa-f]{6}$/.test(p.theme_color)
       ? p.theme_color
-      : '#1F4FD8';
+      : tokens['--bs-action'];
 
   const themeMode = p.theme_mode;
   const tema =

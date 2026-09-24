@@ -1,10 +1,11 @@
+import { tokens } from '@buscadis/tokens';
 import type { TenantPreset, TenantPresetId, TenantPresetInput } from './types';
 
 export const TENANT_PRESETS: Record<TenantPresetId, TenantPreset> = {
   buscadis: {
     id: 'buscadis',
     label: 'Buscadis',
-    seed: '#53ACC5',
+    seed: tokens['--bs-identity'],
     mode: 'light',
     radius: 'rounded',
     density: 'comfortable',

@@ -9,6 +9,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import * as dotenv from 'dotenv';
+import { tokens } from '@buscadis/tokens';
 import { buildDefaultLayout } from '../packages/profile-engine/src/index';
 
 dotenv.config({ path: path.join(process.cwd(), '.env.local') });
@@ -219,7 +220,7 @@ async function main() {
     contact_email: b.contact_email,
     contact_address: b.contact_address,
     contact_maps_url: b.contact_maps_url,
-    theme_color: b.theme_color || '#53acc5',
+    theme_color: b.theme_color || tokens['--bs-identity'],
     theme_preset: b.theme_preset || 'executive',
     template_id: b.template_id || 'modern_tabs',
     logo_url: logoUrl,

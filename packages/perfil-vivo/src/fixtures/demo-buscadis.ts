@@ -1,3 +1,4 @@
+import { tokens } from '@buscadis/tokens';
 import type {
   ItemFaq,
   PerfilPayload,
@@ -67,7 +68,7 @@ const rawNegocio = {
   plan: 'max' as const,
   estado: 'activo' as const,
   identidad: {
-    colorSemilla: '#53ACC5',
+    colorSemilla: tokens['--bs-identity'],
     tema: 'claro' as const,
     formaCards: 'suave' as const,
     logoUrl: '/logo.png',
@@ -158,8 +159,8 @@ const PRODUCTS: Array<{
     tags: ['popular'],
     grupo: 'Planes',
     destacado: true,
-    c1: '#53ACC5',
-    c2: '#1a4a5c',
+    c1: tokens['--bs-identity'],
+    c2: tokens['--bs-color-adis-800'],
     short: 'Gratis',
   },
   {
@@ -170,8 +171,8 @@ const PRODUCTS: Array<{
     tags: ['nuevo'],
     grupo: 'Crecimiento',
     destacado: false,
-    c1: '#FFC24A',
-    c2: '#8a5a00',
+    c1: tokens['--bs-identity-warm'],
+    c2: tokens['--bs-color-sol-700'],
     short: 'Deals',
   },
   {

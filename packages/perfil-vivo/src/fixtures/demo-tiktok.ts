@@ -1,3 +1,4 @@
+import { tokens } from '@buscadis/tokens';
 import type { PerfilPayload, Producto } from '../types';
 import { buildDemoComidaPayload } from './demo-comida';
 
@@ -95,7 +96,7 @@ export function buildDemoTikTokPayload(now?: Date): PerfilPayload {
       identidad: {
         ...base.negocio.identidad,
         logoUrl: logo,
-        colorSemilla: '#53ACC5',
+        colorSemilla: tokens['--bs-identity'],
         tema: 'claro',
         portadaUrl: BANNER,
       },

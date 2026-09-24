@@ -1,6 +1,11 @@
+import { tokens } from '@buscadis/tokens';
 import { parse, formatHex, converter } from 'culori';
 import { hex as contrastHex } from 'wcag-contrast';
 import type { DerivedTenantTheme, TenantMode } from './types';
+
+const DEFAULT_SEED = tokens['--bs-identity'];
+const INK = tokens['--bs-color-neutral-950'];
+const WHITE = tokens['--bs-color-neutral-0'];
 
 const toOklch = converter('oklch');
 
@@ -10,7 +15,7 @@ function clamp(n: number, min: number, max: number): number {
 
 function toHexColor(color: { mode?: string; l?: number; c?: number; h?: number }): string {
   const hex = formatHex(color as Parameters<typeof formatHex>[0]);
-  return (hex || '#53ACC5').toUpperCase();
+  return (hex || DEFAULT_SEED).toUpperCase();
 }
 
 /**
@@ -41,9 +46,7 @@ export function derivarTemaTenant(seed: string, mode: TenantMode): DerivedTenant
     h,
   });
 
-  const white = '#FFFFFF';
-  const ink = '#0B1418';
-  const onAction = contrastHex(white, accion) >= 4.5 ? white : ink;
+  const onAction = contrastHex(WHITE, accion) >= 4.5 ? WHITE : INK;
 
   return {
     '--bs-tenant-seed': seed,
