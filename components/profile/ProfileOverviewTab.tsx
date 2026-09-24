@@ -1,5 +1,7 @@
 'use client';
 
+import { semantic } from '@/lib/bs-tokens';
+
 import { ProfileDashboardStats } from '@/lib/profile/server';
 import { ProfileCompletionResult, ProfileTask } from '@/lib/profile-completion';
 import {
@@ -34,7 +36,7 @@ export default function ProfileOverviewTab({
       desc: 'Avisos que marcaste con corazón',
       count: stats?.favoritesCount ?? 0,
       tab: 'guardados' as ProfileTabId,
-      icon: <IconHeart size={20} color="#ef4444" />,
+      icon: <IconHeart size={20} color={semantic.dangerFg} />,
       iconBg: 'bg-red-500/10',
     },
     {

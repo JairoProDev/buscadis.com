@@ -20,7 +20,7 @@ const TIER_STYLES: Record<
     title: 'Identidad del administrador confirmada',
   },
   business: {
-    color: 'text-[var(--brand-color,#53acc5)]',
+    color: 'text-[var(--brand-color,var(--bs-identity))]',
     label: 'Negocio verificado',
     title: 'Documentación del negocio validada',
   },

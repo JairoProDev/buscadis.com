@@ -1,5 +1,7 @@
 'use client';
 
+import { semantic } from '@/lib/bs-tokens';
+
 import { useEffect, useState } from 'react';
 import { useFavoritos } from '@/contexts/FavoritosContext';
 import { getAdisoById } from '@/lib/storage';
@@ -56,7 +58,7 @@ export default function ProfileFavoritesTab() {
   if (adisos.length === 0) {
     return (
       <ProfileEmptyState
-        icon={<IconHeart size={24} color="#ef4444" />}
+        icon={<IconHeart size={24} color={semantic.dangerFg} />}
         title="Sin guardados aún"
         description="Marca con corazón los avisos que te interesen para encontrarlos aquí."
         actionLabel="Explorar ofertas"

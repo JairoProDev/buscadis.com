@@ -1,5 +1,7 @@
 'use client';
 
+import { flyer } from '@/lib/bs-tokens';
+
 /**
  * Export a flyer DOM node to JPEG and upload via existing image API.
  * Uses native canvas draw from SVG/HTML via html-to-image if available,
@@ -15,7 +17,7 @@ export async function exportFlyerToBlob(node: HTMLElement): Promise<Blob | null>
       quality: 0.92,
       pixelRatio: EXPORT_SIZE / Math.max(node.offsetWidth || 1, 1),
       cacheBust: true,
-      backgroundColor: '#ffffff',
+      backgroundColor: flyer.surface,
     });
     const res = await fetch(dataUrl);
     return await res.blob();

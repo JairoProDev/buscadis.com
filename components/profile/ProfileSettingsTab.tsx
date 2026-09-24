@@ -1,5 +1,7 @@
 'use client';
 
+import { semantic } from '@/lib/bs-tokens';
+
 import { useEffect, useRef, useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useUser } from '@/hooks/useUser';
@@ -63,7 +65,7 @@ function SettingsSection({
         </div>
         {done && (
           <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-emerald-500/15">
-            <IconCheck size={12} color="#22c55e" />
+            <IconCheck size={12} color={semantic.successFg} />
           </span>
         )}
       </div>
@@ -224,7 +226,7 @@ export default function ProfileSettingsTab({
     <div className="space-y-4">
       {savedFlash && (
         <div className="flex items-center gap-2 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-2.5 text-sm font-medium text-emerald-600">
-          <IconCheck size={14} color="#22c55e" />
+          <IconCheck size={14} color={semantic.successFg} />
           Cambios guardados
         </div>
       )}

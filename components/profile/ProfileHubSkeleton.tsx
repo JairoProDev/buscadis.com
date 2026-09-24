@@ -5,7 +5,7 @@ export default function ProfileHubSkeleton() {
   return (
     <div className="mx-auto max-w-3xl space-y-5" aria-busy="true" aria-label="Cargando perfil">
       <div className="overflow-hidden rounded-2xl border border-[var(--border-color)] bg-[var(--bg-primary)] shadow-sm">
-        <div className="h-24 bg-gradient-to-br from-[var(--brand-blue)]/30 via-[#3b82f6]/20 to-transparent" />
+        <div className="h-24 bg-gradient-to-br from-[var(--brand-blue)]/30 via-[var(--bs-action)]/20 to-transparent" />
         <div className="relative px-5 pb-5">
           <div className="-mt-12 mb-4 flex items-end justify-between gap-3">
             <div className="skeleton-shimmer h-[88px] w-[88px] rounded-full" />

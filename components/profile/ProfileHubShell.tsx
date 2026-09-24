@@ -13,6 +13,7 @@ import {
   ProfileTask,
 } from '@/lib/profile-completion';
 import { buildModeDisplay, resolveUserMode } from '@/lib/user-modes';
+import { semantic } from '@/lib/bs-tokens';
 import ProfileTabs, { ProfileTabId } from './ProfileTabs';
 import ProfileOverviewTab from './ProfileOverviewTab';
 import ProfileFavoritesTab from './ProfileFavoritesTab';
@@ -151,7 +152,7 @@ export default function ProfileHubShell({
     {
       label: 'Guardados',
       value: stats?.favoritesCount ?? 0,
-      icon: <IconHeart size={14} color="#ef4444" />,
+      icon: <IconHeart size={14} color={semantic.dangerFg} />,
       iconBg: 'bg-red-500/10',
       onClick: () => setTab('guardados'),
     },
@@ -174,7 +175,7 @@ export default function ProfileHubShell({
   return (
     <div className="mx-auto max-w-3xl space-y-5">
       <div className="overflow-hidden rounded-2xl border border-[var(--border-color)] bg-[var(--bg-primary)] shadow-sm">
-        <div className="h-24 bg-gradient-to-br from-[var(--brand-blue)] via-[#3b82f6] to-[rgba(var(--brand-primary-rgb),0.6)]" />
+        <div className="h-24 bg-gradient-to-br from-[var(--brand-blue)] via-[var(--bs-action)] to-[rgba(var(--brand-primary-rgb),0.6)]" />
         <div className="relative px-5 pb-5">
           <div className="-mt-12 mb-4 flex items-end justify-between gap-3">
             <div className="relative">

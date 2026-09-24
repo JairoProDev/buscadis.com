@@ -1,3 +1,4 @@
+import { tokens } from '@buscadis/tokens';
 import type { Adiso, Categoria } from '@/types';
 import { getCategoriaThemeTokens } from '@/lib/categoria-theme';
 import {
@@ -7,10 +8,12 @@ import {
   type FlyerTemplateMeta,
 } from './types';
 
+const t = tokens;
+
 /** Soft wash of accent — never flat gray rails */
 export function softWashFromAccent(hex: string): string {
   const raw = hex.replace('#', '');
-  if (raw.length !== 6) return '#f8fafc';
+  if (raw.length !== 6) return t['--bs-color-neutral-50'];
   const r = parseInt(raw.slice(0, 2), 16);
   const g = parseInt(raw.slice(2, 4), 16);
   const b = parseInt(raw.slice(4, 6), 16);
@@ -19,22 +22,98 @@ export function softWashFromAccent(hex: string): string {
 }
 
 export const FLYER_TEMPLATES: FlyerTemplateMeta[] = [
-  { id: 'bold-type', label: 'Bold', defaultConfig: { align: 'left', titleScale: 'l', primary: '#0f172a', secondary: '#0f172a' } },
-  { id: 'diagonal-band', label: 'Diagonal', defaultConfig: { align: 'left', titleScale: 'l', primary: '#0e7490', secondary: '#ecfeff' } },
-  { id: 'minimal-cream', label: 'Minimal', defaultConfig: { align: 'left', titleScale: 'm', primary: '#9a3412', secondary: '#fff7ed' } },
-  { id: 'marketplace-tag', label: 'Tag', defaultConfig: { align: 'center', titleScale: 'm', primary: '#c2410c', secondary: '#ffedd5' } },
-  { id: 'gradient-dusk', label: 'Dusk', defaultConfig: { align: 'left', titleScale: 'l', primary: '#38bdf8', secondary: '#1e3a5f' } },
-  { id: 'split', label: 'Franja', defaultConfig: { align: 'left', titleScale: 'm', primary: '#1d4ed8', secondary: '#f8fafc' } },
-  { id: 'urgent', label: 'Oferta', defaultConfig: { align: 'center', titleScale: 'l', primary: '#b91c1c', secondary: '#fff1f2', badge: 'OFERTA' } },
-  { id: 'negocio', label: 'Negocio', defaultConfig: { align: 'left', titleScale: 'm', primary: '#0f766e', secondary: '#f0fdfa' } },
-  { id: 'poster-serif', label: 'Póster', defaultConfig: { align: 'center', titleScale: 'l', primary: '#312e81', secondary: '#312e81' } },
-  { id: 'ribbon', label: 'Cinta', defaultConfig: { align: 'left', titleScale: 'm', primary: '#6d28d9', secondary: '#f5f3ff' } },
-  { id: 'duo-tone', label: 'Dúo', defaultConfig: { align: 'left', titleScale: 'l', primary: '#0f172a', secondary: '#fde68a' } },
-  { id: 'editorial', label: 'Editorial', defaultConfig: { align: 'left', titleScale: 'm', primary: '#92400e', secondary: '#fef3c7' } },
-  { id: 'stamp', label: 'Sello', defaultConfig: { align: 'center', titleScale: 'm', primary: '#b45309', secondary: '#fffbeb' } },
-  { id: 'soft-wash', label: 'Suave', defaultConfig: { align: 'left', titleScale: 'm', primary: '#0369a1', secondary: '#f0f9ff' } },
-  { id: 'ticket', label: 'Ticket', defaultConfig: { align: 'center', titleScale: 'm', primary: '#be123c', secondary: '#fff1f2', badge: 'ENTRADA' } },
-  { id: 'corner-mark', label: 'Esquina', defaultConfig: { align: 'left', titleScale: 'l', primary: '#ea580c', secondary: '#fff7ed' } },
+  {
+    id: 'bold-type',
+    label: 'Bold',
+    defaultConfig: { align: 'left', titleScale: 'l', primary: t['--bs-color-neutral-900'], secondary: t['--bs-color-neutral-900'] },
+  },
+  {
+    id: 'diagonal-band',
+    label: 'Diagonal',
+    defaultConfig: { align: 'left', titleScale: 'l', primary: t['--bs-action'], secondary: t['--bs-color-adis-50'] },
+  },
+  {
+    id: 'minimal-cream',
+    label: 'Minimal',
+    defaultConfig: { align: 'left', titleScale: 'm', primary: t['--bs-cat-vehiculos-fg'], secondary: t['--bs-cat-vehiculos-bg'] },
+  },
+  {
+    id: 'marketplace-tag',
+    label: 'Tag',
+    defaultConfig: { align: 'center', titleScale: 'm', primary: t['--bs-cat-vehiculos-fg'], secondary: t['--bs-cat-vehiculos-bg'] },
+  },
+  {
+    id: 'gradient-dusk',
+    label: 'Dusk',
+    defaultConfig: { align: 'left', titleScale: 'l', primary: t['--bs-color-adis-300'], secondary: t['--bs-color-adis-900'] },
+  },
+  {
+    id: 'split',
+    label: 'Franja',
+    defaultConfig: { align: 'left', titleScale: 'm', primary: t['--bs-cat-negocios-fg'], secondary: t['--bs-color-neutral-50'] },
+  },
+  {
+    id: 'urgent',
+    label: 'Oferta',
+    defaultConfig: {
+      align: 'center',
+      titleScale: 'l',
+      primary: t['--bs-danger-fg'],
+      secondary: t['--bs-cat-productos-bg'],
+      badge: 'OFERTA',
+    },
+  },
+  {
+    id: 'negocio',
+    label: 'Negocio',
+    defaultConfig: { align: 'left', titleScale: 'm', primary: t['--bs-cat-empleos-fg'], secondary: t['--bs-cat-empleos-bg'] },
+  },
+  {
+    id: 'poster-serif',
+    label: 'Póster',
+    defaultConfig: { align: 'center', titleScale: 'l', primary: t['--bs-cat-negocios-bgDark'], secondary: t['--bs-cat-negocios-bgDark'] },
+  },
+  {
+    id: 'ribbon',
+    label: 'Cinta',
+    defaultConfig: { align: 'left', titleScale: 'm', primary: t['--bs-cat-eventos-fg'], secondary: t['--bs-cat-eventos-bg'] },
+  },
+  {
+    id: 'duo-tone',
+    label: 'Dúo',
+    defaultConfig: { align: 'left', titleScale: 'l', primary: t['--bs-color-neutral-900'], secondary: t['--bs-color-sol-200'] },
+  },
+  {
+    id: 'editorial',
+    label: 'Editorial',
+    defaultConfig: { align: 'left', titleScale: 'm', primary: t['--bs-cat-servicios-fg'], secondary: t['--bs-warning-bg'] },
+  },
+  {
+    id: 'stamp',
+    label: 'Sello',
+    defaultConfig: { align: 'center', titleScale: 'm', primary: t['--bs-color-sol-600'], secondary: t['--bs-color-sol-50'] },
+  },
+  {
+    id: 'soft-wash',
+    label: 'Suave',
+    defaultConfig: { align: 'left', titleScale: 'm', primary: t['--bs-action'], secondary: t['--bs-color-adis-50'] },
+  },
+  {
+    id: 'ticket',
+    label: 'Ticket',
+    defaultConfig: {
+      align: 'center',
+      titleScale: 'm',
+      primary: t['--bs-cat-productos-fg'],
+      secondary: t['--bs-cat-productos-bg'],
+      badge: 'ENTRADA',
+    },
+  },
+  {
+    id: 'corner-mark',
+    label: 'Esquina',
+    defaultConfig: { align: 'left', titleScale: 'l', primary: t['--bs-cat-vehiculos-fg'], secondary: t['--bs-cat-vehiculos-bg'] },
+  },
 ];
 
 export function isFlyerTemplateId(value: unknown): value is FlyerTemplateId {

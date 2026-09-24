@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { requestAndSaveLocation, isGeolocationSupported } from '@/lib/location';
 import { IconClose } from './Icons';
+import { bsMix, semantic } from '@/lib/bs-tokens';
 
 interface LocationPromptProps {
   abierto: boolean;
@@ -96,10 +97,10 @@ export default function LocationPrompt({ abierto, onCerrar, onAceptar }: Locatio
           <div
             style={{
               padding: '0.75rem',
-              backgroundColor: 'rgba(239, 68, 68, 0.1)',
-              border: '1px solid rgba(239, 68, 68, 0.3)',
+              backgroundColor: bsMix('--bs-danger-fg', 10),
+              border: `1px solid ${bsMix('--bs-danger-fg', 30)}`,
               borderRadius: '6px',
-              color: '#ef4444',
+              color: semantic.dangerFg,
               fontSize: '0.875rem',
               marginBottom: '1rem'
             }}

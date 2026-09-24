@@ -1,5 +1,7 @@
 'use client';
 
+import { semantic } from '@/lib/bs-tokens';
+
 import { ProfileCompletionResult, ProfileTask } from '@/lib/profile-completion';
 import { IconCheck, IconZap } from '@/components/Icons';
 
@@ -20,7 +22,7 @@ export default function ProfileCompletionCard({
     return (
       <div className="flex items-center gap-3 rounded-2xl border border-emerald-500/25 bg-emerald-500/8 px-4 py-3">
         <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500/15">
-          <IconCheck size={18} color="#22c55e" />
+          <IconCheck size={18} color={semantic.successFg} />
         </span>
         <div>
           <p className="text-sm font-bold text-[var(--text-primary)]">¡Perfil completo!</p>

@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { semantic } from '@/lib/bs-tokens';
 
 export default function OfflineIndicator() {
     const [isOffline, setIsOffline] = useState(false);
@@ -53,7 +54,7 @@ export default function OfflineIndicator() {
                 >
                     <div
                         style={{
-                            backgroundColor: isOffline ? '#ef4444' : '#10b981',
+                            backgroundColor: isOffline ? semantic.dangerFg : semantic.successFg,
                             color: 'white',
                             padding: '10px 20px',
                             borderRadius: '24px',
