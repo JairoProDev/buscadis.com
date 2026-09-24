@@ -29,6 +29,9 @@ import {
 import { registrarVisualizacion, registrarContacto } from '@/lib/analytics';
 import { trackViewHistory } from '@/lib/profile/view-history-client';
 import SimilarAdisos from '@/components/SimilarAdisos';
+import FlyerCanvas from '@/components/flyer/FlyerCanvas';
+import { buildFlyerContentFromAdiso, flyerStateFromPrivateData } from '@/lib/flyer/layout';
+import { adisoUsesGeneratedCover, resolveFlyerConfig } from '@/lib/flyer/templates';
 import {
   IconArrowLeft,
   IconCamera,
@@ -152,6 +155,8 @@ export default function AdisoLandingPage({ adiso, onVolver }: AdisoLandingPagePr
       : adiso.imagenUrl
         ? [adiso.imagenUrl]
         : [];
+  const usesGeneratedCover = adisoUsesGeneratedCover(adiso);
+  const showPhotoGallery = imagenes.length > 0 && !usesGeneratedCover;
 
   const sellerUserId = adiso.user_id || adiso.usuario_id || adiso.vendedor?.id;
   const leadCapture = isLeadCaptureAd(adiso);
@@ -476,7 +481,7 @@ export default function AdisoLandingPage({ adiso, onVolver }: AdisoLandingPagePr
         <div className="grid gap-8 lg:grid-cols-12 lg:gap-10 xl:gap-14">
           {/* Galería */}
           <div className="lg:col-span-7">
-            {imagenes.length > 0 ? (
+            {showPhotoGallery ? (
               <div className="space-y-3">
                 <button
                   type="button"
@@ -516,8 +521,24 @@ export default function AdisoLandingPage({ adiso, onVolver }: AdisoLandingPagePr
                 )}
               </div>
             ) : (
-              <div className="flex min-h-[280px] items-center justify-center rounded-3xl border-2 border-dashed border-[var(--border-color)] bg-[var(--bg-primary)] text-[var(--text-tertiary)]">
-                Sin imagen
+              <div
+                className="overflow-hidden rounded-3xl border border-[var(--border-color)] bg-[var(--bg-primary)] shadow-sm"
+                style={{ minHeight: isDesktop ? '480px' : '320px', maxHeight: isDesktop ? '640px' : '420px' }}
+              >
+                {(() => {
+                  const flyer = flyerStateFromPrivateData(
+                    adiso.privateData as Record<string, unknown> | undefined,
+                    { categoria: adiso.categoria, adisoId: adiso.id }
+                  );
+                  return (
+                    <FlyerCanvas
+                      templateId={flyer.templateId}
+                      config={resolveFlyerConfig(adiso.categoria, flyer.templateId, flyer.config)}
+                      content={buildFlyerContentFromAdiso(adiso)}
+                      className="h-full min-h-[280px] w-full"
+                    />
+                  );
+                })()}
               </div>
             )}
 
