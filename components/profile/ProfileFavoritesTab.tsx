@@ -40,6 +40,9 @@ export default function ProfileFavoritesTab() {
               const { dbToAdiso } = await import('@/lib/supabase');
               return dbToAdiso(data);
             }
+            const { getBusinessProductAsAdiso } = await import('@/lib/business');
+            const catalog = await getBusinessProductAsAdiso(id);
+            if (catalog) return catalog;
           }
           return getAdisoById(id);
         })

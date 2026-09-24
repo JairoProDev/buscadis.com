@@ -10,7 +10,7 @@ import {
   FaFile, FaCamera, FaTable, FaUpload, FaList, FaFilter, FaMapPin, FaShoppingCart, FaMagic, FaMinus, FaChevronUp,
   FaFileExcel, FaDownload, FaLightbulb, FaSyncAlt, FaBolt, FaTag, FaEyeSlash, FaLayerGroup, FaSquare,
   FaSort, FaSortAmountDown, FaSortAmountUp, FaVideo, FaPaperPlane, FaBell, FaMoon, FaSun, FaUser, FaHandPointUp,
-  FaCog, FaSignOutAlt, FaCompass, FaUserTie, FaUserCog, FaUserEdit, FaEllipsisV,
+  FaCog, FaSignOutAlt, FaCompass, FaUserTie, FaUserCog, FaUserEdit, FaEllipsisV, FaEllipsisH,
   FaHandshake, FaUserPlus, FaUndo, FaRedo, FaCrop, FaPencilAlt, FaSmile,
   FaBed, FaBath, FaRulerCombined, FaCouch, FaKey, FaTree, FaWifi, FaGasPump, FaCogs,
   FaTachometerAlt, FaBicycle, FaTshirt, FaUtensils, FaGraduationCap, FaLaptop, FaPaw,
@@ -220,6 +220,7 @@ export const IconMapPin = (p: IconProps) => <FaMapPin size={getSize(p)} color={p
 export const IconShoppingCart = (p: IconProps) => <FaShoppingCart size={getSize(p)} color={p.color || 'currentColor'} className={p.className} onClick={p.onClick} />;
 export const IconUsers = (p: IconProps) => <FaUsers size={getSize(p)} color={p.color || 'currentColor'} className={p.className} onClick={p.onClick} />;
 export const IconEllipsisV = (p: IconProps) => <FaEllipsisV size={getSize(p)} color={p.color || 'currentColor'} className={p.className} onClick={p.onClick} />;
+export const IconEllipsisH = (p: IconProps) => <FaEllipsisH size={getSize(p)} color={p.color || 'currentColor'} className={p.className} onClick={p.onClick} />;
 export const IconMinus = (p: IconProps) => <FaMinus size={getSize(p)} color={p.color || 'currentColor'} className={p.className} onClick={p.onClick} />;
 export const IconAlertTriangle = (p: IconProps) => <FaExclamationTriangle size={getSize(p)} color={p.color || 'currentColor'} className={p.className} onClick={p.onClick} />;
 export const IconFileSpreadsheet = (p: IconProps) => <FaFileExcel size={getSize(p)} color={p.color || 'currentColor'} className={p.className} onClick={p.onClick} />;

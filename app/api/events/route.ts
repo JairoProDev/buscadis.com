@@ -67,6 +67,10 @@ export async function POST(request: NextRequest) {
     // Near-real-time profile bump for high-signal events (cron still handles decay)
     const HIGH = new Set([
       'ad.favorite',
+      'ad.see_more',
+      'ad.see_less',
+      'ad.share',
+      'ad.report',
       'ad.dismiss',
       'ad.dismiss_reason',
       'ad.contact_whatsapp',

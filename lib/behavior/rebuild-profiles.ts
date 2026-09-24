@@ -114,6 +114,18 @@ export async function rebuildUserBehaviorProfile(userId: string): Promise<void> 
       case 'ad.favorite':
         if (categoria) categoryAffinity = bumpJson(categoryAffinity, categoria, 2);
         break;
+      case 'ad.see_more':
+        if (categoria) categoryAffinity = bumpJson(categoryAffinity, categoria, 2.5);
+        break;
+      case 'ad.see_less':
+        if (categoria) {
+          categoryAffinity = bumpJson(categoryAffinity, categoria, -1.2);
+          negativeSignals = bumpJson(negativeSignals, categoria, 0.5);
+        }
+        break;
+      case 'ad.share':
+        if (categoria) categoryAffinity = bumpJson(categoryAffinity, categoria, 0.8);
+        break;
       case 'ad.dismiss':
       case 'ad.dismiss_reason':
         if (categoria) {
