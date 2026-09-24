@@ -9,6 +9,7 @@ import { ToastContainer } from '@/components/Toast';
 import LeftSidebar from '@/components/LeftSidebar';
 import NavbarMobile from '@/components/NavbarMobile';
 import { enviarFeedbackInmediato, enviarFeedbacksAAPI } from '@/lib/feedback';
+import { catalogUi, semantic } from '@/lib/bs-tokens';
 
 import progresoDataRaw from '@/data/progreso.json';
 
@@ -52,15 +53,15 @@ export default function ProgresoPage() {
   const getTypeIcon = (type: ProgresoEntry['type']) => {
     switch (type) {
       case 'feature':
-        return <FaRocket size={18} color="#3b82f6" />;
+        return <FaRocket size={18} color={semantic.action} />;
       case 'improvement':
-        return <FaStar size={18} color="#10b981" />;
+        return <FaStar size={18} color={semantic.successFg} />;
       case 'fix':
-        return <FaBug size={18} color="#ef4444" />;
+        return <FaBug size={18} color={semantic.dangerFg} />;
       case 'ui':
-        return <FaCog size={18} color="#f59e0b" />;
+        return <FaCog size={18} color={semantic.warningFg} />;
       default:
-        return <FaCheckCircle size={18} color="#6b7280" />;
+        return <FaCheckCircle size={18} color={semantic.muted} />;
     }
   };
 
@@ -81,9 +82,9 @@ export default function ProgresoPage() {
 
   const getImpactBadge = (impact: ProgresoEntry['impact']) => {
     const styles = {
-      major: { bg: '#3b82f6', label: 'Mayor' },
-      minor: { bg: '#10b981', label: 'Menor' },
-      patch: { bg: '#6b7280', label: 'Parche' }
+      major: { bg: semantic.action, label: 'Mayor' },
+      minor: { bg: semantic.successFg, label: 'Menor' },
+      patch: { bg: semantic.muted, label: 'Parche' }
     };
     const style = styles[impact];
     return (
@@ -92,7 +93,7 @@ export default function ProgresoPage() {
         padding: '0.25rem 0.5rem',
         borderRadius: '4px',
         backgroundColor: style.bg,
-        color: 'white',
+        color: catalogUi.onAction,
         fontWeight: 500
       }}>
         {style.label}
@@ -364,7 +365,7 @@ export default function ProgresoPage() {
                 padding: '1rem',
                 backgroundColor: 'var(--bg-secondary)',
                 borderRadius: '8px',
-                borderLeft: '4px solid #10b981'
+                borderLeft: `4px solid ${semantic.successFg}`
               }}>
                 <h3 style={{
                   fontSize: '0.875rem',
@@ -375,7 +376,7 @@ export default function ProgresoPage() {
                   alignItems: 'center',
                   gap: '0.5rem'
                 }}>
-                  <FaHeart size={14} color="#10b981" />
+                  <FaHeart size={14} color={semantic.successFg} />
                   Beneficios para ti
                 </h3>
                 <ul style={{
@@ -395,7 +396,7 @@ export default function ProgresoPage() {
                       <span style={{
                         position: 'absolute',
                         left: 0,
-                        color: '#10b981'
+                        color: semantic.successFg
                       }}>
                         ✓
                       </span>
@@ -595,7 +596,7 @@ export default function ProgresoPage() {
               </>
             ) : (
               <div style={{ textAlign: 'center', padding: '2rem 1rem' }}>
-                <FaCheckCircle size={48} color="#10b981" style={{ marginBottom: '1rem', display: 'inline-block' }} />
+                <FaCheckCircle size={48} color={semantic.successFg} style={{ marginBottom: '1rem', display: 'inline-block' }} />
                 <h3 style={{
                   fontSize: '1.25rem',
                   fontWeight: 600,

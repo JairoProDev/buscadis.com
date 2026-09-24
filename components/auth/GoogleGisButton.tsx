@@ -9,6 +9,7 @@ import {
   type GisCredentialResponse,
 } from '@/lib/auth/google-gis';
 import { IconGoogle } from '@/components/Icons';
+import { semantic, tokens } from '@/lib/bs-tokens';
 
 type Props = {
   label: string;
@@ -137,9 +138,9 @@ export default function GoogleGisButton({ label, disabled, onSuccess, onError }:
         style={{
           width: '100%',
           padding: '0.75rem',
-          backgroundColor: '#fff',
-          color: '#333',
-          border: '1px solid #ddd',
+          backgroundColor: semantic.surface,
+          color: tokens['--bs-color-neutral-800'],
+          border: `1px solid ${tokens['--bs-color-neutral-200']}`,
           borderRadius: '8px',
           fontSize: '0.95rem',
           fontWeight: 500,
@@ -166,10 +167,10 @@ export default function GoogleGisButton({ label, disabled, onSuccess, onError }:
           style={{
             width: '100%',
             padding: '0.75rem',
-            border: '1px solid #ddd',
+            border: `1px solid ${tokens['--bs-color-neutral-200']}`,
             borderRadius: '8px',
-            background: '#fff',
-            color: '#666',
+            background: semantic.surface,
+            color: semantic.muted,
           }}
         >
           Cargando Google…

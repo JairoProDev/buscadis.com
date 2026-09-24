@@ -92,7 +92,7 @@ export default function ContentHubFields({
               onClick={() => toggleMetric(key)}
               className={`text-xs font-bold px-3 py-1.5 rounded-full border transition-colors ${
                 selectedMetrics.includes(key)
-                  ? 'bg-[var(--brand-blue,#53acc5)] text-white border-transparent'
+                  ? 'bg-[var(--brand-blue,var(--bs-identity))] text-white border-transparent'
                   : 'bg-white border-slate-200 text-slate-600'
               }`}
             >
@@ -127,7 +127,7 @@ export default function ContentHubFields({
           <button
             type="button"
             onClick={addHighlight}
-            className="text-xs font-bold text-[var(--brand-blue,#53acc5)] flex items-center gap-1"
+            className="text-xs font-bold text-[var(--brand-blue,var(--bs-identity))] flex items-center gap-1"
           >
             <IconPlus size={12} /> Agregar destacado
           </button>
@@ -152,7 +152,7 @@ export default function ContentHubFields({
             <button
               type="button"
               onClick={() => setEditingProduct?.(null)}
-              className="block mt-2 text-xs font-bold text-[var(--brand-blue,#53acc5)]"
+              className="block mt-2 text-xs font-bold text-[var(--brand-blue,var(--bs-identity))]"
             >
               Cerrar editor de producto
             </button>
@@ -163,7 +163,7 @@ export default function ContentHubFields({
               <button
                 type="button"
                 onClick={onAddProduct}
-                className="flex-1 flex items-center justify-center gap-2 py-3 bg-[var(--brand-blue,#53acc5)] text-white rounded-2xl text-sm font-black"
+                className="flex-1 flex items-center justify-center gap-2 py-3 bg-[var(--brand-blue,var(--bs-identity))] text-white rounded-2xl text-sm font-black"
               >
                 <IconPlus size={18} /> Agregar producto
               </button>
@@ -236,7 +236,7 @@ export default function ContentHubFields({
         <FieldLabel number={5} label="Deals y contenido" complete={false} />
         <Link
           href={`/mi-negocio/deals${profile.id ? `?business=${profile.id}` : ''}`}
-          className="text-sm font-bold text-[var(--brand-blue,#53acc5)] hover:underline"
+          className="text-sm font-bold text-[var(--brand-blue,var(--bs-identity))] hover:underline"
         >
           Gestionar deals →
         </Link>

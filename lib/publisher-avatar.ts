@@ -1,4 +1,5 @@
 import { Adiso, Categoria } from '@/types';
+import { avatarPalettes, semantic, tokens } from '@/lib/bs-tokens';
 
 export type PublisherAvatarKind = 'buscadis' | 'photo' | 'initials';
 
@@ -17,21 +18,7 @@ const COMPANY_HINTS =
 
 const GENERIC_SELLER_NAMES = new Set(['anunciante', 'vendedor', 'usuario', 'sin nombre']);
 
-/** Paleta determinística: cada anuncio obtiene un tono distinto según su id */
-const AVATAR_PALETTES: Array<{ bg: string; fg: string }> = [
-  { bg: '#ecfdf5', fg: '#047857' },
-  { bg: '#eff6ff', fg: '#1d4ed8' },
-  { bg: '#fdf4ff', fg: '#7e22ce' },
-  { bg: '#fff7ed', fg: '#c2410c' },
-  { bg: '#fef2f2', fg: '#b91c1c' },
-  { bg: '#ecfeff', fg: '#0e7490' },
-  { bg: '#f0fdf4', fg: '#15803d' },
-  { bg: '#faf5ff', fg: '#6d28d9' },
-  { bg: '#fffbeb', fg: '#b45309' },
-  { bg: '#f8fafc', fg: '#475569' },
-  { bg: '#f0f9ff', fg: '#0369a1' },
-  { bg: '#fdf2f8', fg: '#be185d' },
-];
+const AVATAR_PALETTES = avatarPalettes;
 
 function hashString(value: string): number {
   let hash = 0;
@@ -107,8 +94,8 @@ export function getPublisherAvatar(adiso: Adiso): PublisherAvatar {
       kind: 'buscadis',
       imageUrl: '/logo.png',
       initials: 'B',
-      backgroundColor: '#ffffff',
-      textColor: '#53acc5',
+      backgroundColor: semantic.surface,
+      textColor: tokens['--bs-identity'],
       label: 'Publicado por Buscadis',
       isCompany: true,
     };

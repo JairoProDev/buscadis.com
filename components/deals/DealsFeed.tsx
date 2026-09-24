@@ -10,6 +10,7 @@ import { useRef, useEffect, useState } from 'react';
 import { IconPlus } from '@/components/Icons';
 import { DealLiveSession } from '@/types';
 import { DEAL_EVENTS, trackDealClientEvent } from '@/lib/deals/client-analytics';
+import { semantic } from '@/lib/bs-tokens';
 
 interface DealsFeedProps {
   initialClipId?: string;
@@ -111,7 +112,7 @@ export default function DealsFeed({ initialClipId }: DealsFeedProps) {
         className="absolute bottom-24 right-4 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-[var(--brand-yellow)] shadow-lg md:bottom-8"
         aria-label="Crear deal"
       >
-        <IconPlus size={28} color="#000" />
+        <IconPlus size={28} color={semantic.ink} />
       </button>
 
       <DealPublishWizard open={showPublish} onClose={() => setShowPublish(false)} />

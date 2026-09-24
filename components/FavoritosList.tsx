@@ -7,6 +7,7 @@ import { Adiso, UbicacionDetallada } from '@/types';
 import { getAdisoByIdFromSupabase } from '@/lib/supabase';
 import ModalAdiso from './ModalAdiso';
 import { IconClose } from './Icons';
+import { semantic } from '@/lib/bs-tokens';
 
 interface FavoritosListProps {
   abierto: boolean;
@@ -188,7 +189,7 @@ export default function FavoritosList({ abierto, onCerrar }: FavoritosListProps)
                         background: 'none',
                         border: 'none',
                         cursor: 'pointer',
-                        color: '#ef4444',
+                        color: semantic.dangerFg,
                         padding: '0.5rem',
                         fontSize: '1.25rem'
                       }}

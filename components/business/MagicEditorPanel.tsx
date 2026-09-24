@@ -13,6 +13,7 @@
 
 import { useState, useRef } from 'react';
 import { IconSparkles, IconCamera, IconX } from '@/components/Icons';
+import { catalogUi, publishUi } from '@/lib/bs-tokens';
 import { supabase } from '@/lib/supabase';
 
 interface MagicEditorPanelProps {
@@ -195,7 +196,7 @@ export default function MagicEditorPanel({
                 className="w-full flex items-center gap-2.5 px-4 py-3 text-left transition-colors"
                 style={{
                     background: panel !== 'closed'
-                        ? 'linear-gradient(135deg, #6d28d9 0%, #4f46e5 100%)'
+                        ? publishUi.magicGradient
                         : 'var(--bg-secondary)',
                     color: panel !== 'closed' ? 'white' : 'var(--text-primary)'
                 }}
@@ -219,8 +220,16 @@ export default function MagicEditorPanel({
                         <div
                             className={`text-sm px-3 py-2 rounded-lg font-medium flex items-start gap-2`}
                             style={{
-                                backgroundColor: message.startsWith('✅') ? '#f0fdf4' : message.startsWith('❌') ? '#fef2f2' : '#fffbeb',
-                                color: message.startsWith('✅') ? '#166534' : message.startsWith('❌') ? '#991b1b' : '#92400e',
+                                backgroundColor: message.startsWith('✅')
+                                  ? catalogUi.successBg
+                                  : message.startsWith('❌')
+                                    ? catalogUi.dangerBg
+                                    : catalogUi.warningBg,
+                                color: message.startsWith('✅')
+                                  ? catalogUi.successFg
+                                  : message.startsWith('❌')
+                                    ? catalogUi.dangerFg
+                                    : catalogUi.warningFg,
                             }}
                         >
                             <span className="flex-1">{message}</span>
@@ -276,7 +285,7 @@ export default function MagicEditorPanel({
                                     onClick={handleUploadAndAnalyze}
                                     disabled={loading}
                                     className="px-4 py-2 rounded-xl text-sm font-bold text-white disabled:opacity-50 hover:brightness-110 transition-all"
-                                    style={{ backgroundColor: '#7c3aed' }}
+                                    style={{ backgroundColor: catalogUi.eventosFg }}
                                 >
                                     {loading ? (
                                         <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />

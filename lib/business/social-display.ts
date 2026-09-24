@@ -2,6 +2,7 @@ import type { BusinessProfile, CustomBlock, SocialLink } from '@/types/business'
 import { normalizeSocialLinks } from '@/lib/business/normalize-profile';
 import { getPublicadisSiteUrl, getBuscadisProfileUrl } from '@/lib/business/publicadis';
 import { getWhatsappUrl } from '@/lib/business/public-utils';
+import { catalogUi, semantic, tokens } from '@/lib/bs-tokens';
 
 const NETWORK_LABELS: Record<SocialLink['network'], string> = {
   instagram: 'Instagram',
@@ -250,22 +251,25 @@ export type SocialBrandColors = {
   border: string;
 };
 
+const socialSurface = semantic.surface;
+const siteInk = tokens['--bs-color-neutral-700'];
+
 /** Colores de marca — aplicar con style inline (no dependen del purge de Tailwind). */
 export const SOCIAL_BRAND_COLORS: Record<SocialBrandKey, SocialBrandColors> = {
-  website: { bg: '#ffffff', text: '#334155', border: '#334155' },
-  whatsapp: { bg: '#ffffff', text: '#25D366', border: '#25D366' },
-  telegram: { bg: '#ffffff', text: '#229ED9', border: '#229ED9' },
-  messenger: { bg: '#ffffff', text: '#0084FF', border: '#0084FF' },
-  instagram: { bg: '#ffffff', text: '#E1306C', border: '#E1306C' },
-  facebook: { bg: '#ffffff', text: '#1877F2', border: '#1877F2' },
-  tiktok: { bg: '#ffffff', text: '#010101', border: '#010101' },
-  twitter: { bg: '#ffffff', text: '#0F1419', border: '#0F1419' },
-  linkedin: { bg: '#ffffff', text: '#0A66C2', border: '#0A66C2' },
-  youtube: { bg: '#ffffff', text: '#FF0000', border: '#FF0000' },
-  pinterest: { bg: '#ffffff', text: '#BD081C', border: '#BD081C' },
-  threads: { bg: '#ffffff', text: '#101010', border: '#101010' },
-  spotify: { bg: '#ffffff', text: '#1DB954', border: '#1DB954' },
-  custom: { bg: 'var(--brand-color)', text: '#ffffff', border: 'var(--brand-color)' },
+  website: { bg: socialSurface, text: siteInk, border: siteInk },
+  whatsapp: { bg: socialSurface, text: semantic.whatsapp, border: semantic.whatsapp },
+  telegram: { bg: socialSurface, text: '#229ED9', border: '#229ED9' },
+  messenger: { bg: socialSurface, text: '#0084FF', border: '#0084FF' },
+  instagram: { bg: socialSurface, text: '#E1306C', border: '#E1306C' },
+  facebook: { bg: socialSurface, text: '#1877F2', border: '#1877F2' },
+  tiktok: { bg: socialSurface, text: '#010101', border: '#010101' },
+  twitter: { bg: socialSurface, text: '#0F1419', border: '#0F1419' },
+  linkedin: { bg: socialSurface, text: '#0A66C2', border: '#0A66C2' },
+  youtube: { bg: socialSurface, text: '#FF0000', border: '#FF0000' },
+  pinterest: { bg: socialSurface, text: '#BD081C', border: '#BD081C' },
+  threads: { bg: socialSurface, text: '#101010', border: '#101010' },
+  spotify: { bg: socialSurface, text: '#1DB954', border: '#1DB954' },
+  custom: { bg: 'var(--brand-color)', text: catalogUi.onAction, border: 'var(--brand-color)' },
 };
 
 export function socialLinksToCustomBlocks(links: SocialLink[]): CustomBlock[] {

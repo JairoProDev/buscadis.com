@@ -10,6 +10,7 @@ import { Adiso } from '@/types';
 import ProductImageGallery from '@/components/catalog/ProductImageGallery';
 import { analyzeProductFromImage, enhanceProductFieldFromImage } from '@/lib/catalog/product-ai';
 import { listBusinessCategories } from '@/lib/catalog/categories';
+import { catalogUi, tokens } from '@/lib/bs-tokens';
 
 const UNITS = ['unidad', 'par', 'caja', 'kg', 'g', 'litro', 'ml', 'metro', 'cm', 'rollo', 'paquete', 'docena', 'servicio'];
 
@@ -426,8 +427,8 @@ export function ProductEditor({ product, businessProfileId, userId, onSave, onCa
                         onClick={() => update('status', formData.status === 'published' ? 'draft' : 'published')}
                         className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all"
                         style={{
-                            backgroundColor: formData.status === 'published' ? '#dcfce7' : '#f3f4f6',
-                            color: formData.status === 'published' ? '#16a34a' : '#6b7280',
+                            backgroundColor: formData.status === 'published' ? catalogUi.successBg : tokens['--bs-color-neutral-100'],
+                            color: formData.status === 'published' ? catalogUi.successFg : catalogUi.mutedFg,
                         }}
                     >
                         <IconEye size={12} />
@@ -479,10 +480,10 @@ export function ProductEditor({ product, businessProfileId, userId, onSave, onCa
                             type="button"
                             disabled={loading || aiLoading !== null}
                             onClick={runAiFillAll}
-                            className="mt-2 flex items-center gap-1.5 text-xs font-bold text-[var(--brand-blue,#53acc5)] hover:opacity-80 disabled:opacity-40"
+                            className="mt-2 flex items-center gap-1.5 text-xs font-bold text-[var(--brand-blue,var(--bs-identity))] hover:opacity-80 disabled:opacity-40"
                         >
                             {aiLoading === 'all' ? (
-                                <div className="w-3.5 h-3.5 border-2 border-[var(--brand-blue,#53acc5)] border-t-transparent rounded-full animate-spin" />
+                                <div className="w-3.5 h-3.5 border-2 border-[var(--brand-blue,var(--bs-identity))] border-t-transparent rounded-full animate-spin" />
                             ) : (
                                 <IconSparkles size={14} />
                             )}
@@ -500,11 +501,11 @@ export function ProductEditor({ product, businessProfileId, userId, onSave, onCa
                         <button
                             type="button"
                             disabled={loading || aiLoading !== null}
-                            className="text-[10px] font-bold flex items-center gap-1 text-[var(--brand-blue,#53acc5)] hover:opacity-80 disabled:opacity-40"
+                            className="text-[10px] font-bold flex items-center gap-1 text-[var(--brand-blue,var(--bs-identity))] hover:opacity-80 disabled:opacity-40"
                             onClick={() => runAiForField('title')}
                         >
                             {aiLoading === 'title' ? (
-                                <div className="w-3 h-3 border-2 border-[var(--brand-blue,#53acc5)] border-t-transparent rounded-full animate-spin" />
+                                <div className="w-3 h-3 border-2 border-[var(--brand-blue,var(--bs-identity))] border-t-transparent rounded-full animate-spin" />
                             ) : (
                                 <IconSparkles size={12} />
                             )}
@@ -678,11 +679,11 @@ export function ProductEditor({ product, businessProfileId, userId, onSave, onCa
                         <button
                             type="button"
                             disabled={loading || aiLoading !== null}
-                            className="text-[10px] font-bold flex items-center gap-1 text-[var(--brand-blue,#53acc5)] hover:opacity-80 disabled:opacity-40"
+                            className="text-[10px] font-bold flex items-center gap-1 text-[var(--brand-blue,var(--bs-identity))] hover:opacity-80 disabled:opacity-40"
                             onClick={() => runAiForField('description')}
                         >
                             {aiLoading === 'description' ? (
-                                <div className="w-3 h-3 border-2 border-[var(--brand-blue,#53acc5)] border-t-transparent rounded-full animate-spin" />
+                                <div className="w-3 h-3 border-2 border-[var(--brand-blue,var(--bs-identity))] border-t-transparent rounded-full animate-spin" />
                             ) : (
                                 <IconSparkles size={12} />
                             )}
@@ -707,7 +708,7 @@ export function ProductEditor({ product, businessProfileId, userId, onSave, onCa
                         <button
                             type="button"
                             onClick={() => update('attributes', [...formData.attributes, { key: '', value: '' }])}
-                            className="text-[10px] font-bold text-[var(--brand-blue,#53acc5)]"
+                            className="text-[10px] font-bold text-[var(--brand-blue,var(--bs-identity))]"
                         >
                             + Agregar
                         </button>

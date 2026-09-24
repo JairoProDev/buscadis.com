@@ -7,6 +7,7 @@ import { IconClose, IconExplore, IconMegaphone, IconStore, IconMotorcycle, IconI
 import type { CapabilityKey } from '@/lib/auth/capability-types';
 import { getStoredReferralCode, clearStoredReferralCode } from '@/lib/auth/referral-capture';
 import type { Genero } from '@/types';
+import { semantic } from '@/lib/bs-tokens';
 
 type Step = 'dni' | 'demographics' | 'whatsapp' | 'capabilities';
 
@@ -299,7 +300,7 @@ export default function OnboardingModal({ abierto, onCerrar }: { abierto: boolea
               borderRadius: 8,
               background: 'rgba(239,68,68,0.1)',
               border: '1px solid rgba(239,68,68,0.3)',
-              color: '#ef4444',
+              color: semantic.dangerFg,
               fontSize: '0.85rem',
             }}
           >

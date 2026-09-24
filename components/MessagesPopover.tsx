@@ -35,7 +35,7 @@ export default function MessagesPopover({ onClose, onOpenConversation }: Message
                     Mensajes
                 </h3>
                 {unreadCount > 0 && (
-                    <span className="rounded-full bg-[var(--brand-yellow)] px-2 py-0.5 text-[10px] font-bold text-[#1e293b]">
+                    <span className="rounded-full bg-[var(--brand-yellow)] px-2 py-0.5 text-[10px] font-bold text-[var(--bs-publish-fg)]">
                         {unreadCount} nuevos
                     </span>
                 )}
@@ -139,7 +139,7 @@ export default function MessagesPopover({ onClose, onOpenConversation }: Message
                                         </p>
                                     </div>
                                     {conversation.unread_count != null && conversation.unread_count > 0 && (
-                                        <span className="flex h-5 min-w-[20px] shrink-0 items-center justify-center rounded-full bg-[var(--brand-yellow)] px-1 text-[10px] font-bold text-[#1e293b]">
+                                        <span className="flex h-5 min-w-[20px] shrink-0 items-center justify-center rounded-full bg-[var(--brand-yellow)] px-1 text-[10px] font-bold text-[var(--bs-publish-fg)]">
                                             {conversation.unread_count > 9 ? '9+' : conversation.unread_count}
                                         </span>
                                     )}

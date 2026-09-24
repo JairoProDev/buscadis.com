@@ -142,6 +142,48 @@ export const contactChannel = {
   whatsapp: tokens['--bs-color-social-whatsapp'],
 } as const;
 
+/** Editor de perfil de negocio · apariencia */
+export const businessTheme = {
+  pickerSwatches: [
+    tokens['--bs-identity'],
+    tokens['--bs-identity-warm'],
+    tokens['--bs-action-hover'],
+    tokens['--bs-success-fg'],
+    tokens['--bs-danger-fg'],
+    tokens['--bs-cat-eventos-fg'],
+    tokens['--bs-color-neutral-900'],
+  ],
+  accentSwatches: [
+    tokens['--bs-identity-warm'],
+    tokens['--bs-cat-vehiculos-fg'],
+    tokens['--bs-cat-eventos-fg'],
+    tokens['--bs-cat-empleos-fg'],
+  ],
+  defaultTheme: tokens['--bs-identity'],
+  defaultAccent: tokens['--bs-identity-warm'],
+  softSurface: tokens['--bs-color-neutral-50'],
+  softBorder: tokens['--bs-color-neutral-200'],
+  gradientSoftGray: `linear-gradient(180deg, ${tokens['--bs-color-neutral-50']} 0%, ${tokens['--bs-color-neutral-200']} 100%)`,
+  gradientBrand: `linear-gradient(135deg, ${tokens['--bs-identity']} 0%, ${tokens['--bs-identity-warm']} 100%)`,
+  gradientDark: `linear-gradient(180deg, ${tokens['--bs-color-neutral-900']} 0%, ${tokens['--bs-color-neutral-800']} 100%)`,
+} as const;
+
+/** Avatares de anunciante (fondo + texto) */
+export const avatarPalettes: ReadonlyArray<{ bg: string; fg: string }> = [
+  { bg: tokens['--bs-cat-inmuebles-bg'], fg: tokens['--bs-cat-inmuebles-fg'] },
+  { bg: tokens['--bs-cat-negocios-bg'], fg: tokens['--bs-cat-negocios-fg'] },
+  { bg: tokens['--bs-cat-comunidad-bg'], fg: tokens['--bs-cat-comunidad-fg'] },
+  { bg: tokens['--bs-cat-vehiculos-bg'], fg: tokens['--bs-cat-vehiculos-fg'] },
+  { bg: tokens['--bs-danger-bg'], fg: tokens['--bs-danger-fg'] },
+  { bg: tokens['--bs-info-bg'], fg: tokens['--bs-action'] },
+  { bg: tokens['--bs-success-bg'], fg: tokens['--bs-success-fg'] },
+  { bg: tokens['--bs-cat-eventos-bg'], fg: tokens['--bs-cat-eventos-fg'] },
+  { bg: tokens['--bs-cat-servicios-bg'], fg: tokens['--bs-cat-servicios-fg'] },
+  { bg: tokens['--bs-color-neutral-50'], fg: tokens['--bs-color-neutral-600'] },
+  { bg: tokens['--bs-color-adis-50'], fg: tokens['--bs-action'] },
+  { bg: tokens['--bs-cat-productos-bg'], fg: tokens['--bs-cat-productos-fg'] },
+];
+
 export const trustBadge = {
   verified: {
     color: semantic.infoFg,

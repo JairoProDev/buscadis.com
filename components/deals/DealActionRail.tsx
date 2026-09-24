@@ -8,6 +8,7 @@ import {
   IconShareAlt,
   IconWhatsApp,
 } from '@/components/Icons';
+import { publishUi, tokens } from '@/lib/bs-tokens';
 
 interface DealActionRailProps {
   clip: DealClip;
@@ -70,9 +71,9 @@ export default function DealActionRail({
     <div className="absolute bottom-28 right-3 z-30 flex flex-col items-center gap-4">
       <RailBtn label={formatCount(clip.like_count)} onClick={onLike} active={clip.liked}>
         {clip.liked ? (
-          <IconHeart size={22} color="#fff" />
+          <IconHeart size={22} color={publishUi.onDark} />
         ) : (
-          <IconHeartOutline size={22} color="#fff" />
+          <IconHeartOutline size={22} color={publishUi.onDark} />
         )}
       </RailBtn>
 
@@ -83,19 +84,19 @@ export default function DealActionRail({
       </RailBtn>
 
       <RailBtn label={formatCount(clip.save_count)} onClick={onSave} active={clip.saved}>
-        <svg width="22" height="22" viewBox="0 0 24 24" fill={clip.saved ? '#FFC24A' : 'none'} stroke="#fff" strokeWidth="2">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill={clip.saved ? tokens['--bs-identity-warm'] : 'none'} stroke={publishUi.onDark} strokeWidth="2">
           <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
         </svg>
       </RailBtn>
 
       {onWhatsApp && (
         <RailBtn label="WhatsApp" onClick={onWhatsApp}>
-          <IconWhatsApp size={22} color="#fff" />
+          <IconWhatsApp size={22} color={publishUi.onDark} />
         </RailBtn>
       )}
 
       <RailBtn label="Compartir" onClick={onShare}>
-        <IconShareAlt size={20} color="#fff" />
+        <IconShareAlt size={20} color={publishUi.onDark} />
       </RailBtn>
 
       <RailBtn label={muted ? 'Sonido' : 'Silencio'} onClick={onToggleMute}>

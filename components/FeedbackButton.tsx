@@ -10,6 +10,7 @@ import {
   IconSearch,
 } from '@/components/Icons';
 import { MOTIVOS_AYUDA, getSoporteWhatsAppUrl, type MotivoAyuda } from '@/lib/soporte';
+import { catalogUi } from '@/lib/bs-tokens';
 import { MOTIVO_AYUDA_VISUAL } from '@/lib/soporte-ui';
 import { useUI } from '@/contexts/UIContext';
 
@@ -169,7 +170,7 @@ export default function FeedbackButton({ variant = 'floating' }: FeedbackButtonP
           transition: 'transform 0.15s ease, box-shadow 0.15s ease',
           boxShadow: '0 6px 20px color-mix(in srgb, var(--brand-blue) 28%, transparent)',
           backgroundColor: 'var(--brand-blue)',
-          color: '#fff',
+          color: catalogUi.onAction,
         }}
         className="motion-reduce:transform-none hover:-translate-y-0.5"
       >

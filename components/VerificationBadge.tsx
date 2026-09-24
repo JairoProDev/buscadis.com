@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { bsMix, semantic } from '@/lib/bs-tokens';
 
 interface VerificationBadgeProps {
   esVerificado: boolean;
@@ -37,9 +38,9 @@ export default function VerificationBadge({ esVerificado, tipo, size = 'small' }
         display: 'inline-flex',
         alignItems: 'center',
         gap: estilo.gap,
-        backgroundColor: 'rgba(34, 197, 94, 0.15)',
-        color: '#22c55e',
-        border: '1px solid rgba(34, 197, 94, 0.3)',
+        backgroundColor: bsMix('--bs-success-fg', 15),
+        color: semantic.successFg,
+        border: `1px solid ${bsMix('--bs-success-fg', 30)}`,
         borderRadius: '6px',
         padding: estilo.padding,
         fontSize: estilo.fontSize,

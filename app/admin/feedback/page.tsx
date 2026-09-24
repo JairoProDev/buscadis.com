@@ -6,6 +6,7 @@ import { FaArrowLeft, FaCheck, FaTimes, FaEye, FaEyeSlash, FaChartBar, FaLightbu
 import Header from '@/components/Header';
 import { useToast } from '@/hooks/useToast';
 import { ToastContainer } from '@/components/Toast';
+import { semantic } from '@/lib/bs-tokens';
 
 interface Feedback {
   id: string;
@@ -186,7 +187,7 @@ export default function AdminFeedbackPage() {
             padding: '1.5rem',
             textAlign: 'center'
           }}>
-            <div style={{ fontSize: '2rem', fontWeight: 700, color: '#3b82f6', marginBottom: '0.5rem' }}>
+            <div style={{ fontSize: '2rem', fontWeight: 700, color: semantic.action, marginBottom: '0.5rem' }}>
               {estadisticas.sugerencias}
             </div>
             <div style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
@@ -201,7 +202,7 @@ export default function AdminFeedbackPage() {
             padding: '1.5rem',
             textAlign: 'center'
           }}>
-            <div style={{ fontSize: '2rem', fontWeight: 700, color: '#ef4444', marginBottom: '0.5rem' }}>
+            <div style={{ fontSize: '2rem', fontWeight: 700, color: semantic.dangerFg, marginBottom: '0.5rem' }}>
               {estadisticas.problemas}
             </div>
             <div style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
@@ -216,7 +217,7 @@ export default function AdminFeedbackPage() {
             padding: '1.5rem',
             textAlign: 'center'
           }}>
-            <div style={{ fontSize: '2rem', fontWeight: 700, color: '#f59e0b', marginBottom: '0.5rem' }}>
+            <div style={{ fontSize: '2rem', fontWeight: 700, color: semantic.warningFg, marginBottom: '0.5rem' }}>
               {estadisticas.noLeidos}
             </div>
             <div style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>No Leídos</div>
@@ -282,7 +283,7 @@ export default function AdminFeedbackPage() {
                 key={feedback.id}
                 style={{
                   backgroundColor: 'var(--bg-primary)',
-                  border: `1px solid ${feedback.leido ? 'var(--border-color)' : '#f59e0b'}`,
+                  border: `1px solid ${feedback.leido ? 'var(--border-color)' : semantic.warningFg}`,
                   borderRadius: '12px',
                   padding: '1.5rem',
                   boxShadow: feedback.leido ? 'none' : '0 2px 8px rgba(245, 158, 11, 0.2)'
@@ -308,13 +309,13 @@ export default function AdminFeedbackPage() {
                         fontWeight: 600,
                         color: 'var(--text-primary)'
                       }}>
-                        {feedback.tipo === 'sugerencia' ? <FaLightbulb size={18} color="#3b82f6" /> : <FaExclamationTriangle size={18} color="#ef4444" />}
+                        {feedback.tipo === 'sugerencia' ? <FaLightbulb size={18} color={semantic.action} /> : <FaExclamationTriangle size={18} color={semantic.dangerFg} />}
                       </span>
                       <span style={{
                         fontSize: '0.875rem',
                         padding: '0.25rem 0.75rem',
                         borderRadius: '6px',
-                        backgroundColor: feedback.tipo === 'sugerencia' ? '#3b82f6' : '#ef4444',
+                        backgroundColor: feedback.tipo === 'sugerencia' ? semantic.action : semantic.dangerFg,
                         color: 'white',
                         fontWeight: 600,
                         textTransform: 'capitalize'
@@ -326,7 +327,7 @@ export default function AdminFeedbackPage() {
                           fontSize: '0.75rem',
                           padding: '0.25rem 0.5rem',
                           borderRadius: '4px',
-                          backgroundColor: '#f59e0b',
+                          backgroundColor: semantic.warningFg,
                           color: 'white',
                           fontWeight: 600
                         }}>
@@ -358,7 +359,7 @@ export default function AdminFeedbackPage() {
                           rel="noopener noreferrer"
                           style={{
                             fontSize: '0.875rem',
-                            color: '#0066cc',
+                            color: semantic.action,
                             textDecoration: 'none'
                           }}
                         >

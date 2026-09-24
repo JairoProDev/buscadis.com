@@ -22,6 +22,7 @@ import {
     IconAlertTriangle, IconLayers, IconFileSpreadsheet
 } from '@/components/Icons';
 import { useToast } from '@/hooks/useToast';
+import { catalogUi, semantic, tokens } from '@/lib/bs-tokens';
 import { supabase } from '@/lib/supabase';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -389,7 +390,7 @@ export default function AddProductModal({ isOpen, onClose, businessProfileId, on
                         )}
                     </div>
                     <button onClick={handleClose} className="p-2 hover:bg-slate-100 rounded-full transition-colors">
-                        <IconX size={20} color="#64748b" />
+                        <IconX size={20} color={semantic.muted} />
                     </button>
                 </div>
 
@@ -420,7 +421,7 @@ export default function AddProductModal({ isOpen, onClose, businessProfileId, on
                             >
                                 <div className="flex items-center gap-4">
                                     <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center flex-shrink-0">
-                                        <IconFileSpreadsheet size={22} color="#16a34a" />
+                                        <IconFileSpreadsheet size={22} color={catalogUi.successFg} />
                                     </div>
                                     <div>
                                         <div className="font-bold text-base text-slate-800">Importar Excel o CSV</div>
@@ -435,7 +436,7 @@ export default function AddProductModal({ isOpen, onClose, businessProfileId, on
                             >
                                 <div className="flex items-center gap-4">
                                     <div className="w-12 h-12 bg-slate-100 rounded-xl flex items-center justify-center flex-shrink-0">
-                                        <IconEdit size={20} color="#475569" />
+                                        <IconEdit size={20} color={tokens['--bs-color-neutral-600']} />
                                     </div>
                                     <div>
                                         <div className="font-bold text-base text-slate-800">Agregar manualmente</div>
@@ -467,7 +468,7 @@ export default function AddProductModal({ isOpen, onClose, businessProfileId, on
                                 <div className="w-12 h-12 mx-auto mb-4 relative">
                                     <div className="w-12 h-12 border-4 border-blue-100 border-t-blue-500 rounded-full animate-spin" />
                                     <div className="absolute inset-2 flex items-center justify-center">
-                                        <IconSparkles size={14} color="#3b82f6" />
+                                        <IconSparkles size={14} color={semantic.action} />
                                     </div>
                                 </div>
                                 <p className="font-bold text-slate-800 text-lg">{statusMsg}</p>
@@ -493,7 +494,7 @@ export default function AddProductModal({ isOpen, onClose, businessProfileId, on
                             )}
                             <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
                                 <div className="flex items-center gap-2 mb-3">
-                                    <IconAlertTriangle size={16} color="#d97706" />
+                                    <IconAlertTriangle size={16} color={semantic.warningFg} />
                                     <span className="font-bold text-amber-800">
                                         Detectamos {multiDetect.count} productos en esta imagen
                                     </span>
@@ -540,7 +541,7 @@ export default function AddProductModal({ isOpen, onClose, businessProfileId, on
                                         <img src={displayImage} alt="producto" className="w-full h-full object-cover" />
                                     ) : (
                                         <div className="w-full h-full flex flex-col items-center justify-center gap-1">
-                                            <IconCamera size={24} color="#94a3b8" />
+                                            <IconCamera size={24} color={tokens['--bs-color-neutral-400']} />
                                             <span className="text-[10px] text-slate-400">Foto</span>
                                         </div>
                                     )}
@@ -583,7 +584,7 @@ export default function AddProductModal({ isOpen, onClose, businessProfileId, on
                             {/* AI badge */}
                             {analysis && (
                                 <div className="flex items-center gap-2 bg-blue-50 border border-blue-100 rounded-xl px-3 py-2">
-                                    <IconSparkles size={13} color="#3b82f6" />
+                                    <IconSparkles size={13} color={semantic.action} />
                                     <span className="text-xs text-blue-700 font-medium">
                                         IA detectó {Math.round(confidence * 100)}% de datos — revisa y ajusta si es necesario
                                     </span>
@@ -600,7 +601,11 @@ export default function AddProductModal({ isOpen, onClose, businessProfileId, on
                                         onChange={(e) => setDraft(d => ({ ...d, title: e.target.value }))}
                                         placeholder="Nombre del producto"
                                         className="w-full px-3 py-2.5 border-2 rounded-xl text-sm outline-none focus:border-blue-400 transition-colors font-semibold"
-                                        style={{ borderColor: draft.title ? '#e2e8f0' : '#fca5a5' }}
+                                        style={{
+                                          borderColor: draft.title
+                                            ? tokens['--bs-color-neutral-200']
+                                            : tokens['--bs-danger-bg'],
+                                        }}
                                         autoFocus
                                     />
                                 </div>
@@ -726,7 +731,7 @@ export default function AddProductModal({ isOpen, onClose, businessProfileId, on
                                     <img src={draft.imageUrl} alt="preview" className="w-full h-full object-contain" />
                                 ) : (
                                     <>
-                                        <IconImage size={36} color="#94a3b8" />
+                                        <IconImage size={36} color={tokens['--bs-color-neutral-400']} />
                                         <p className="text-sm text-slate-400 mt-2 font-medium">Toca para agregar foto</p>
                                         <p className="text-xs text-slate-300 mt-0.5">La IA llenará los campos automáticamente</p>
                                     </>

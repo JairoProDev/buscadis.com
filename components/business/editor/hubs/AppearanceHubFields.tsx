@@ -8,8 +8,10 @@ import ProfileLayoutStyleEditor from '@/components/business/builder/ProfileLayou
 import { isFieldComplete, type ProfileFieldStatus } from '@/lib/business/profile-progress';
 import { IconStore, IconBox, IconEdit } from '@/components/Icons';
 import { cn } from '@/lib/utils';
+import { businessTheme } from '@/lib/bs-tokens';
 
-const BRAND_COLORS = ['#53acc5', '#ffc24a', '#3c6997', '#16a34a', '#dc2626', '#9333ea', '#0f172a'];
+const BRAND_COLORS = [...businessTheme.pickerSwatches];
+const ACCENT_SWATCHES = [...businessTheme.accentSwatches];
 
 interface AppearanceHubFieldsProps {
   profile: Partial<BusinessProfile>;
@@ -186,9 +188,9 @@ export default function AppearanceHubFields({
                 patchBackground(
                   t,
                   t === 'color'
-                    ? '#f8fafc'
+                    ? businessTheme.softSurface
                     : t === 'gradient'
-                      ? 'linear-gradient(180deg, #f8fafc 0%, #e2e8f0 100%)'
+                      ? businessTheme.gradientSoftGray
                       : ''
                 )
               }
@@ -204,7 +206,7 @@ export default function AppearanceHubFields({
         {bg?.type === 'color' && (
           <input
             type="color"
-            value={bg.value?.startsWith('#') ? bg.value : '#f8fafc'}
+            value={bg.value?.startsWith('#') ? bg.value : businessTheme.softSurface}
             onChange={(e) => patchBackground('color', e.target.value)}
             className="w-full h-10 rounded-lg cursor-pointer"
           />
@@ -215,9 +217,9 @@ export default function AppearanceHubFields({
             onChange={(e) => patchBackground('gradient', e.target.value)}
             className="w-full px-3 py-2 rounded-lg border text-sm"
           >
-            <option value="linear-gradient(180deg, #f8fafc 0%, #e2e8f0 100%)">Gris suave</option>
-            <option value="linear-gradient(135deg, #53acc5 0%, #ffc24a 100%)">Buscadis</option>
-            <option value="linear-gradient(180deg, #0f172a 0%, #1e293b 100%)">Oscuro</option>
+            <option value={businessTheme.gradientSoftGray}>Gris suave</option>
+            <option value={businessTheme.gradientBrand}>Buscadis</option>
+            <option value={businessTheme.gradientDark}>Oscuro</option>
           </select>
         )}
         {bg?.type === 'image' && (
@@ -252,7 +254,7 @@ export default function AppearanceHubFields({
               <input
                 type="color"
                 className="sr-only"
-                value={profile.theme_color || '#53acc5'}
+                value={profile.theme_color || businessTheme.defaultTheme}
                 onChange={(e) => setProfile({ ...profile, theme_color: e.target.value })}
               />
             </label>
@@ -261,7 +263,7 @@ export default function AppearanceHubFields({
         <div>
           <FieldLabel number={6} label="Color secundario" complete={done('theme_accent')} />
           <div className="flex flex-wrap gap-2">
-            {['#FFC24A', '#F97316', '#7E22CE', '#0F766E'].map((c) => (
+            {ACCENT_SWATCHES.map((c) => (
               <button
                 key={c}
                 type="button"
@@ -278,7 +280,7 @@ export default function AppearanceHubFields({
               <input
                 type="color"
                 className="sr-only"
-                value={profile.theme_accent_color || '#ffc24a'}
+                value={profile.theme_accent_color || businessTheme.defaultAccent}
                 onChange={(e) => setProfile({ ...profile, theme_accent_color: e.target.value })}
               />
             </label>

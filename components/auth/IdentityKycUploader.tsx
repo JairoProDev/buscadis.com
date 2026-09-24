@@ -9,6 +9,7 @@ import {
   type IdentityKycStatus,
 } from '@/lib/auth/identity-kyc';
 import { IconCamera, IconCheck, IconShield } from '@/components/Icons';
+import { semantic } from '@/lib/bs-tokens';
 
 type Props = {
   /** Compact embed (onboarding / gate) */
@@ -173,7 +174,7 @@ export default function IdentityKycUploader({ onApprovedOrPending, allowPendingC
             <div className="flex items-center gap-2 min-w-0">
               <IconCamera size={18} color="var(--text-secondary)" />
               <span className="text-sm text-[var(--text-primary)]">{IDENTITY_DOC_LABELS[tipo]}</span>
-              {uploaded[tipo] && <IconCheck size={14} color="#16a34a" />}
+              {uploaded[tipo] && <IconCheck size={14} color={semantic.successFg} />}
             </div>
             <div>
               <input
