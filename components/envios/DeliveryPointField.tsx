@@ -89,7 +89,7 @@ export default function DeliveryPointField({
     } else {
       const icon = L.divIcon({
         className: '',
-        html: `<div style="width:18px;height:18px;background:var(--brand-blue,#53acc5);border:2px solid #fff;border-radius:50%;box-shadow:0 1px 6px rgba(0,0,0,.35)"></div>`,
+        html: `<div style="width:18px;height:18px;background:var(--brand-blue,var(--bs-identity));border:2px solid var(--bs-color-neutral-0);border-radius:50%;box-shadow:0 1px 6px rgba(0,0,0,.35)"></div>`,
         iconSize: [18, 18],
         iconAnchor: [9, 9],
       });

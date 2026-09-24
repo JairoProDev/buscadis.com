@@ -7,6 +7,7 @@
 
 import { useState, useEffect } from 'react';
 import { IconCheck, IconX, IconCamera } from '@/components/Icons';
+import { businessTheme } from '@/lib/bs-tokens';
 
 interface InlineEditModalProps {
     title: string;
@@ -46,7 +47,7 @@ export default function InlineEditModal({
         reader.readAsDataURL(file);
     };
 
-    const colors = ['#53ACC5', '#FFC24A', '#0F766E', '#C2410C', '#BE123C', '#7E22CE', '#4F46E5', '#A21CAF'];
+    const colors = [...businessTheme.pickerSwatches, ...businessTheme.accentSwatches];
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm animate-in fade-in duration-200">

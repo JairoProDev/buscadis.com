@@ -13,6 +13,7 @@ import { isPerfilVivoEnabled } from '@/lib/business/perfil-vivo-flag';
 import { loadProductoEnPerfil } from '@/components/business/PerfilVivoPageView';
 import { PerfilVivoWaLink } from '@/components/business/PerfilVivoWaLink';
 import '@buscadis/perfil-vivo/chrome.css';
+import { sfInline } from '@/lib/storefront/inline-theme';
 
 export const revalidate = 60;
 
@@ -138,8 +139,8 @@ export default async function ProductoPerfilVivoPage({ params }: PageProps) {
         maxWidth: 480,
         margin: '0 auto',
         minHeight: '100dvh',
-        background: 'var(--sf-base, #f7f6f9)',
-        color: 'var(--tx-base, #3a3843)',
+        background: `var(--sf-base, ${sfInline.base})`,
+        color: `var(--tx-base, ${sfInline.ink})`,
         paddingBottom: 96,
       }}
     >
@@ -153,7 +154,7 @@ export default async function ProductoPerfilVivoPage({ params }: PageProps) {
           style={{
             fontSize: 14,
             fontWeight: 700,
-            color: 'var(--mk-accion, #1f4fd8)',
+            color: `var(--mk-accion, ${sfInline.action})`,
             textDecoration: 'none',
           }}
         >
@@ -172,7 +173,7 @@ export default async function ProductoPerfilVivoPage({ params }: PageProps) {
           width: '100%',
           aspectRatio: '1 / 1',
           objectFit: 'cover',
-          background: '#eee',
+          background: sfInline.placeholder,
         }}
       />
 
@@ -183,7 +184,7 @@ export default async function ProductoPerfilVivoPage({ params }: PageProps) {
             fontSize: 26,
             lineHeight: 1.2,
             letterSpacing: '-0.02em',
-            color: 'var(--tx-strong, #131218)',
+            color: `var(--tx-strong, ${sfInline.strong})`,
           }}
         >
           {producto.nombre}
@@ -203,7 +204,7 @@ export default async function ProductoPerfilVivoPage({ params }: PageProps) {
                 style={{
                   marginLeft: 8,
                   fontSize: 14,
-                  color: '#8a8794',
+                  color: sfInline.faint,
                   textDecoration: 'line-through',
                   fontWeight: 500,
                 }}
@@ -215,20 +216,20 @@ export default async function ProductoPerfilVivoPage({ params }: PageProps) {
         ) : null}
 
         {producto.disponibilidad === 'agotado' ? (
-          <p style={{ margin: '0 0 12px', fontWeight: 700, color: '#b42318' }}>Agotado</p>
+          <p style={{ margin: '0 0 12px', fontWeight: 700, color: sfInline.danger }}>Agotado</p>
         ) : producto.disponibilidad === 'ultimas_unidades' ? (
-          <p style={{ margin: '0 0 12px', fontWeight: 600, color: '#b54708' }}>
+          <p style={{ margin: '0 0 12px', fontWeight: 600, color: sfInline.warning }}>
             Últimas unidades
           </p>
         ) : null}
 
         {producto.descripcion ? (
-          <p style={{ margin: 0, fontSize: 16, lineHeight: 1.45, color: '#3a3843' }}>
+          <p style={{ margin: 0, fontSize: 16, lineHeight: 1.45, color: sfInline.ink }}>
             {producto.descripcion}
           </p>
         ) : null}
 
-        <p style={{ margin: '16px 0 0', fontSize: 14, color: '#6e6b78' }}>
+        <p style={{ margin: '16px 0 0', fontSize: 14, color: sfInline.muted }}>
           {payload.negocio.categoria.nombre}
           {payload.negocio.ubicacion?.distrito
             ? ` · ${payload.negocio.ubicacion.distrito}`
@@ -245,8 +246,8 @@ export default async function ProductoPerfilVivoPage({ params }: PageProps) {
           maxWidth: 480,
           margin: '0 auto',
           padding: 12,
-          background: 'rgba(247,246,249,0.96)',
-          borderTop: '1px solid #e6e4ec',
+          background: `color-mix(in srgb, ${sfInline.base} 96%, transparent)`,
+          borderTop: `1px solid ${sfInline.border}`,
           display: 'grid',
           gap: 8,
         }}
@@ -261,8 +262,8 @@ export default async function ProductoPerfilVivoPage({ params }: PageProps) {
               justifyContent: 'center',
               minHeight: 52,
               borderRadius: 14,
-              background: '#1F4FD8',
-              color: '#fff',
+              background: sfInline.action,
+              color: sfInline.onAction,
               fontWeight: 700,
               fontSize: 17,
               textDecoration: 'none',
@@ -280,7 +281,7 @@ export default async function ProductoPerfilVivoPage({ params }: PageProps) {
             minHeight: 44,
             fontSize: 15,
             fontWeight: 600,
-            color: '#3a3843',
+            color: sfInline.ink,
             textDecoration: 'none',
           }}
         >

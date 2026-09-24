@@ -13,6 +13,7 @@ import {
   type SocialBrandKey,
 } from '@/lib/business/social-display';
 import { getBuscadisProfileUrl } from '@/lib/business/publicadis';
+import { QR_DEFAULTS } from '@/lib/qr/kit-colors';
 import { blobToDataUrl, hexToRgb, INK, type Rgb } from '@/lib/pdf/canvas-assets';
 import type { PdfIconKey } from '@/lib/pdf/icon-paths';
 
@@ -222,7 +223,7 @@ export async function resolveProfileQr(
       width: 640,
       margin: 1,
       errorCorrectionLevel: 'M',
-      color: { dark: '#0f172aff', light: '#ffffffff' },
+      color: { dark: `${QR_DEFAULTS.dotsDark}ff`, light: `${QR_DEFAULTS.bg}ff` },
     });
   } catch {
     return null;

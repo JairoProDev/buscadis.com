@@ -53,7 +53,10 @@ async function main() {
 
   await run('contrast gate rejects low contrast', async () => {
     const { validateQrContrast } = await import('../quality-gate');
-    const bad = validateQrContrast('#cccccc', '#dddddd');
+    const bad = validateQrContrast(
+      tokens['--bs-color-neutral-300'],
+      tokens['--bs-color-neutral-200']
+    );
     assert.equal(bad.ok, false);
     const good = validateQrContrast(tokens['--bs-color-neutral-900'], QR_DEFAULTS.bg);
     assert.equal(good.ok, true);

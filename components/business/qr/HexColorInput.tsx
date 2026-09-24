@@ -2,6 +2,8 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { cn } from '@/lib/utils';
+import { tokens } from '@buscadis/tokens';
+import { QR_DEFAULTS, QR_KIT } from '@/lib/qr/kit-colors';
 
 interface HexColorInputProps {
   label: string;
@@ -18,17 +20,17 @@ function normalizeHex(v: string): string {
 }
 
 const QUICK_SWATCHES = [
-  '#1e293b',
-  '#0f172a',
-  '#b91c1c',
-  '#dc2626',
-  '#2563eb',
-  '#3c6997',
-  '#059669',
-  '#d97706',
-  '#7c3aed',
-  '#ffffff',
-  '#000000',
+  QR_DEFAULTS.dots,
+  QR_DEFAULTS.dotsDark,
+  tokens['--bs-danger-fg'],
+  tokens['--bs-cat-productos-fg'],
+  tokens['--bs-action'],
+  QR_KIT.defaultTheme,
+  tokens['--bs-success-fg'],
+  tokens['--bs-warning-fg'],
+  tokens['--bs-cat-eventos-fg'],
+  QR_DEFAULTS.bg,
+  tokens['--bs-color-neutral-900'],
 ];
 
 export function HexColorInput({
@@ -87,7 +89,7 @@ export function HexColorInput({
     [commit, debounceMs]
   );
 
-  const safe = /^#[0-9a-fA-F]{6}$/.test(local) ? local : '#1e293b';
+  const safe = /^#[0-9a-fA-F]{6}$/.test(local) ? local : QR_DEFAULTS.dots;
 
   return (
     <div
@@ -127,7 +129,7 @@ export function HexColorInput({
               setLocal(value);
             }
           }}
-          placeholder="#1e293b"
+          placeholder={QR_DEFAULTS.dots}
           className={cn(
             'flex-1 min-w-0 px-2.5 py-2 rounded-lg border border-slate-200',
             'font-mono text-xs uppercase tracking-wide bg-white'

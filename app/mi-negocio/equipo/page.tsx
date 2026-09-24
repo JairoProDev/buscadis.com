@@ -10,6 +10,7 @@ import { isPlatformAdminUser } from '@/lib/platform-admin';
 import AuthModal from '@/components/AuthModal';
 import { IconX } from '@/components/Icons';
 import { useToast } from '@/hooks/useToast';
+import { semantic } from '@/lib/bs-tokens';
 
 type TeamMember = {
     id: string;
@@ -375,7 +376,7 @@ function EquipoPageContent() {
                             onClick={() => router.push('/mi-negocio')}
                             className="p-2 hover:bg-slate-100 rounded-full"
                         >
-                            <IconX size={20} color="#64748b" />
+                            <IconX size={20} color={semantic.muted} />
                         </button>
                         <h1 className="font-bold text-slate-900">Equipo del negocio</h1>
                     </div>

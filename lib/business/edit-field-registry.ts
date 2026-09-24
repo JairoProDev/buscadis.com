@@ -1,6 +1,7 @@
 import type { ProfileHubId } from '@/lib/business/profile-progress';
 import type { InlineFieldType } from '@/contexts/ProfileEditContext';
 import type { BusinessProfile } from '@/types/business';
+import { tokens } from '@buscadis/tokens';
 
 export interface EditFieldDefinition {
   fieldId: string;
@@ -86,7 +87,7 @@ export const EDIT_FIELD_REGISTRY: Record<string, EditFieldDefinition> = {
     hub: 'appearance',
     label: 'Color de marca',
     type: 'color',
-    getValue: (p) => p.theme_color || '#53acc5',
+    getValue: (p) => p.theme_color || tokens['--bs-identity'],
     patch: (p, v) => ({ ...p, theme_color: v }),
   },
   contact_whatsapp: {

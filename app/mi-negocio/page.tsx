@@ -52,7 +52,7 @@ function MiNegocioRedirect() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-50">
-      <div className="w-10 h-10 border-4 border-slate-200 border-t-[var(--brand-blue,#53acc5)] rounded-full animate-spin" />
+      <div className="w-10 h-10 border-4 border-slate-200 border-t-[var(--brand-blue,var(--bs-identity))] rounded-full animate-spin" />
     </div>
   );
 }

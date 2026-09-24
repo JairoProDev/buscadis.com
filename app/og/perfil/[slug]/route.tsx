@@ -1,6 +1,8 @@
 import { formatPrecio } from '@buscadis/perfil-vivo';
 import { ImageResponse } from 'next/og';
 import { loadPerfilVivoPayload } from '@/components/business/PerfilVivoPageView';
+import { tokens } from '@buscadis/tokens';
+import { sfInline } from '@/lib/storefront/inline-theme';
 
 export const runtime = 'nodejs';
 export const revalidate = 60;
@@ -25,8 +27,8 @@ export async function GET(_req: Request, { params }: RouteProps) {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            background: '#131218',
-            color: '#fff',
+            background: sfInline.strong,
+            color: sfInline.onAction,
             fontSize: 48,
             fontFamily: 'sans-serif',
           }}
@@ -39,7 +41,7 @@ export async function GET(_req: Request, { params }: RouteProps) {
   }
 
   const { negocio, productos, metricas } = payload;
-  const seed = negocio.identidad.colorSemilla || '#1F4FD8';
+  const seed = negocio.identidad.colorSemilla || tokens['--bs-action'];
   const distrito = negocio.ubicacion?.distrito || 'Cusco';
   const rating = metricas?.calificacion;
   const top = productos.filter((p) => p.activo).slice(0, 3);
@@ -52,8 +54,8 @@ export async function GET(_req: Request, { params }: RouteProps) {
           height: '100%',
           display: 'flex',
           flexDirection: 'column',
-          background: `linear-gradient(145deg, ${seed} 0%, #131218 72%)`,
-          color: '#FFFFFF',
+          background: `linear-gradient(145deg, ${seed} 0%, ${sfInline.strong} 72%)`,
+          color: sfInline.onAction,
           padding: 56,
           fontFamily: 'sans-serif',
         }}

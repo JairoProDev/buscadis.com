@@ -8,6 +8,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import { businessTheme } from '@/lib/bs-tokens';
 import { IconSparkles, IconCheck, IconArrowRight, IconX, IconCamera } from '@/components/Icons';
 import { BusinessProfile } from '@/types/business';
 
@@ -70,7 +71,7 @@ const ONBOARDING_STEPS: ChatStep[] = [
         question: '¿De qué color quieres tu página?',
         type: 'color',
         field: 'theme_color',
-        options: ['#53acc5', '#ffc24a', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6']
+        options: [...businessTheme.pickerSwatches.slice(0, 6)]
     },
     {
         id: '7',

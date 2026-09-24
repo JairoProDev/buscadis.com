@@ -212,7 +212,7 @@ export default function DuplicateReviewPage() {
                             </Link>
                             <h1 className="text-xl md:text-2xl font-black text-slate-800 flex items-center gap-2">
                                 Revisión de Duplicados
-                                <span className="text-xs font-bold bg-[#ffc24a] text-yellow-900 px-3 py-1 rounded-full">
+                                <span className="text-xs font-bold bg-[var(--bs-identity-warm)] text-[var(--bs-publish-fg)] px-3 py-1 rounded-full">
                                     {duplicates.length} pendientes
                                 </span>
                             </h1>

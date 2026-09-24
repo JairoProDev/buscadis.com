@@ -1,5 +1,9 @@
 'use client';
 
+import { QR_KIT } from '@/lib/qr/kit-colors';
+
+const CHECKER_PREVIEW = `linear-gradient(45deg, ${QR_KIT.borderStrong} 25%, transparent 25%), linear-gradient(-45deg, ${QR_KIT.borderStrong} 25%, transparent 25%)`;
+
 import { IconDownload } from '@/components/Icons';
 import { buildDownloadQuery } from '@/lib/qr/preview-params';
 import type { QrStyleConfig } from '@/lib/qr/types';
@@ -109,7 +113,7 @@ function WireThumb({ type }: { type: DownloadItem['wire'] }) {
           className={`${base} w-12 h-12`}
           style={{
             backgroundImage:
-              'linear-gradient(45deg, #cbd5e1 25%, transparent 25%), linear-gradient(-45deg, #cbd5e1 25%, transparent 25%)',
+              CHECKER_PREVIEW,
             backgroundSize: '8px 8px',
           }}
         >

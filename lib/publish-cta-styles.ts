@@ -17,5 +17,5 @@ export const publishPromoteAccent = {
   iconColor: 'var(--bs-fg-on-warm)',
   labelColor: 'var(--bs-fg-on-warm)',
   background:
-    'linear-gradient(145deg, var(--bs-color-sol-300) 0%, var(--bs-publish-bg, #FFC24A) 50%, var(--bs-color-sol-500) 100%)',
+    'linear-gradient(145deg, var(--bs-color-sol-300) 0%, var(--bs-publish-bg) 50%, var(--bs-color-sol-500) 100%)',
 } as const;

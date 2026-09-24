@@ -11,6 +11,7 @@ import { supabase } from '@/lib/supabase';
 import { uploadProductImage } from '@/lib/business';
 import { Adiso } from '@/types';
 import { findPotentialDuplicate, validatePrice } from '@/lib/business-validation';
+import { publishUi, tokens } from '@/lib/bs-tokens';
 
 type AddMethod = null | 'quick' | 'complete' | 'file';
 
@@ -367,7 +368,7 @@ export default function SimpleCatalogAdd({ businessProfileId, onSuccess, onClose
                             className="w-full p-4 rounded-xl border-2 text-left hover:shadow-lg transition-all relative overflow-hidden group"
                             style={{
                                 borderColor: 'transparent',
-                                background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
+                                background: publishUi.magicGradient,
                                 color: 'white'
                             }}
                         >
@@ -395,7 +396,7 @@ export default function SimpleCatalogAdd({ businessProfileId, onSuccess, onClose
                         <button
                             onClick={() => setMethod('quick')}
                             className="w-full p-4 rounded-xl border-2 text-left hover:shadow-md transition-all group"
-                            style={{ borderColor: 'var(--brand-blue)', backgroundColor: '#ecf8fb' }}
+                            style={{ borderColor: 'var(--brand-blue)', backgroundColor: tokens['--bs-info-bg'] }}
                         >
                             <div className="flex items-center gap-3">
                                 <div className="w-12 h-12 rounded-lg flex items-center justify-center" style={{ backgroundColor: 'var(--brand-blue)' }}>
@@ -411,7 +412,7 @@ export default function SimpleCatalogAdd({ businessProfileId, onSuccess, onClose
                         <button
                             onClick={() => setMethod('complete')}
                             className="w-full p-4 rounded-xl border-2 text-left hover:shadow-md transition-all"
-                            style={{ borderColor: 'var(--brand-yellow)', backgroundColor: '#fffbf0' }}
+                            style={{ borderColor: 'var(--brand-yellow)', backgroundColor: tokens['--bs-color-sol-50'] }}
                         >
                             <div className="flex items-center gap-3">
                                 <div className="w-12 h-12 rounded-lg flex items-center justify-center" style={{ backgroundColor: 'var(--brand-yellow)' }}>

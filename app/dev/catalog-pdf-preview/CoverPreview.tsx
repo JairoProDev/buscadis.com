@@ -3,6 +3,8 @@
 import { useEffect, useRef, useState } from 'react';
 import type { BusinessProfile } from '@/types/business';
 import { drawCatalogCover } from '@/lib/pdf/cover-page';
+import { QR_KIT } from '@/lib/qr/kit-colors';
+import { tokens } from '@buscadis/tokens';
 
 const PDFJS_VERSION = '3.11.174';
 
@@ -87,8 +89,8 @@ export default function CoverPreview({
   }, [profile, productCount]);
 
   return (
-    <main style={{ padding: 24, background: '#e2e8f0', minHeight: '100vh', fontFamily: 'system-ui' }}>
-      <p style={{ marginBottom: 12, fontSize: 13, color: '#334155' }}>
+    <main style={{ padding: 24, background: QR_KIT.border, minHeight: '100vh', fontFamily: 'system-ui' }}>
+      <p style={{ marginBottom: 12, fontSize: 13, color: tokens['--bs-color-neutral-700'] }}>
         <strong data-testid="preview-status">{status}</strong> · {slug} · {productCount} productos
         {pdfUrl ? (
           <>
@@ -105,7 +107,7 @@ export default function CoverPreview({
           width: 640,
           maxWidth: '100%',
           display: 'block',
-          background: '#fff',
+          background: QR_KIT.surface,
           boxShadow: '0 10px 30px rgba(15,23,42,.18)',
         }}
       />

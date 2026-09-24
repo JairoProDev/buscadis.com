@@ -1,4 +1,5 @@
 import type { ProfileBlock, ProfileThemePreset } from '@/types/business';
+import { tokens } from '@buscadis/tokens';
 
 export { normalizeProfileBlocks, getVisibleBlocks, blockTypeToTabId } from '@/lib/business/blocks/normalize';
 
@@ -16,12 +17,12 @@ export const PROFILE_THEME_PRESETS: Record<
   ProfileThemePreset,
   { label: string; color: string; mode: 'light' | 'dark' }
 > = {
-  executive: { label: 'Ejecutivo', color: '#1E3A5F', mode: 'light' },
-  minimal: { label: 'Minimal', color: '#171717', mode: 'light' },
-  organic: { label: 'Orgánico', color: '#2D6A4F', mode: 'light' },
-  nocturno: { label: 'Nocturno', color: '#7C3AED', mode: 'dark' },
+  executive: { label: 'Ejecutivo', color: tokens['--bs-color-adis-900'], mode: 'light' },
+  minimal: { label: 'Minimal', color: tokens['--bs-color-neutral-950'], mode: 'light' },
+  organic: { label: 'Orgánico', color: tokens['--bs-cat-inmuebles-fg'], mode: 'light' },
+  nocturno: { label: 'Nocturno', color: tokens['--bs-cat-eventos-fg'], mode: 'dark' },
   /** @deprecated alias → nocturno */
-  cyberpunk: { label: 'Nocturno', color: '#7C3AED', mode: 'dark' },
+  cyberpunk: { label: 'Nocturno', color: tokens['--bs-cat-eventos-fg'], mode: 'dark' },
 };
 
 // normalizeProfileBlocks lives in lib/business/blocks/normalize.ts

@@ -3,6 +3,7 @@
 import { useState, type CSSProperties } from 'react';
 import type { BusinessProfile } from '@/types/business';
 import type { SocialBrandKey } from '@/lib/business/social-display';
+import { semantic } from '@/lib/bs-tokens';
 import {
   getHeroSocialLinks,
   getWireframeSocialLinks,
@@ -28,7 +29,7 @@ function wireframeButtonStyle(brand: SocialBrandKey, hovered: boolean): CSSPrope
   if (hovered) {
     return {
       backgroundColor: c.border,
-      color: '#ffffff',
+      color: semantic.surface,
       borderColor: c.border,
       borderWidth: 2,
       borderStyle: 'solid',

@@ -8,6 +8,7 @@ import { Profile, UserPreferences } from '@/types';
 import VerificationBadge from './VerificationBadge';
 import LocationPrompt from './LocationPrompt';
 import { IconClose } from './Icons';
+import { semantic, tokens } from '@/lib/bs-tokens';
 
 interface UserProfileProps {
   abierto: boolean;
@@ -230,7 +231,7 @@ export default function UserProfile({ abierto, onCerrar }: UserProfileProps) {
                   style={{
                     width: '100%',
                     padding: '0.75rem',
-                    background: 'linear-gradient(to right, #2563eb, #7c3aed)',
+                    background: `linear-gradient(to right, ${semantic.action}, ${tokens['--bs-cat-eventos-fg']})`,
                     color: 'white',
                     border: 'none',
                     borderRadius: '8px',

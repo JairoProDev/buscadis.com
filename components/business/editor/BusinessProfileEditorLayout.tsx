@@ -118,7 +118,7 @@ export function EditorCloseButton({ onClick }: { onClick: () => void }) {
       className="p-2 hover:bg-slate-100 rounded-full transition-colors"
       title="Cerrar editor"
     >
-      <IconX size={18} color="var(--text-secondary, #64748b)" />
+      <IconX size={18} color="var(--text-secondary, var(--bs-color-neutral-500))" />
     </button>
   );
 }

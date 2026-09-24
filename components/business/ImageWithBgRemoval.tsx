@@ -12,6 +12,7 @@
 
 import { useState } from 'react';
 import { useBackgroundRemoval, blobToFile, BgStyle } from '@/hooks/useBackgroundRemoval';
+import { tokens } from '@buscadis/tokens';
 
 interface ImageWithBgRemovalProps {
     /** Current data URL or http URL of the image */
@@ -47,7 +48,7 @@ export default function ImageWithBgRemoval({
     };
 
     // Background pattern to visualize transparency
-    const checkPattern = 'repeating-conic-gradient(#d1d5db 0% 25%, #f9fafb 0% 50%) 0 0/16px 16px';
+    const checkPattern = `repeating-conic-gradient(${tokens['--bs-color-neutral-300']} 0% 25%, ${tokens['--bs-color-neutral-25']} 0% 50%) 0 0/16px 16px`;
 
     return (
         <div className="relative group">
@@ -105,7 +106,10 @@ export default function ImageWithBgRemoval({
                                     onClick={() => handleRemove('white')}
                                     title="Fondo blanco"
                                     className="px-2 py-1.5 rounded-lg text-[10px] font-bold flex items-center gap-1 shadow-lg transition-all hover:scale-105"
-                                    style={{ backgroundColor: 'rgba(255,255,255,0.95)', color: '#1e293b' }}
+                                    style={{
+                                      backgroundColor: 'rgba(255,255,255,0.95)',
+                                      color: tokens['--bs-color-neutral-800'],
+                                    }}
                                 >
                                     ⬜ Fondo blanco
                                 </button>

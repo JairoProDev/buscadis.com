@@ -110,7 +110,7 @@ export default function EditorTopBar({
               href={`/v/${encodeURIComponent(editableProfile.slug)}`}
               target="_blank"
               rel="noreferrer"
-              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-lg bg-[#131218] text-white hover:opacity-90 transition-opacity shrink-0"
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-lg bg-[var(--bs-color-neutral-950)] text-white hover:opacity-90 transition-opacity shrink-0"
               title="Abrir Perfil Vivo (preview)"
             >
               Perfil Vivo
@@ -136,7 +136,7 @@ export default function EditorTopBar({
               href={`/v/${encodeURIComponent(editableProfile.slug)}`}
               target="_blank"
               rel="noreferrer"
-              className="flex items-center justify-center h-9 w-9 rounded-lg bg-[#131218] text-white text-[10px] font-bold shrink-0"
+              className="flex items-center justify-center h-9 w-9 rounded-lg bg-[var(--bs-color-neutral-950)] text-white text-[10px] font-bold shrink-0"
               title="Perfil Vivo"
               aria-label="Abrir Perfil Vivo"
             >

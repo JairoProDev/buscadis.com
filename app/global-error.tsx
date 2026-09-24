@@ -1,6 +1,7 @@
 'use client';
 
 import * as Sentry from '@sentry/nextjs';
+import { sfInline } from '@/lib/storefront/inline-theme';
 import { useEffect } from 'react';
 
 export default function GlobalError({
@@ -28,8 +29,8 @@ export default function GlobalError({
               padding: '0.75rem 1.5rem',
               borderRadius: '8px',
               border: 'none',
-              background: '#111',
-              color: '#fff',
+              background: sfInline.strong,
+              color: sfInline.onAction,
               cursor: 'pointer',
             }}
           >

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useCallback } from 'react';
+import { QR_DEFAULTS } from '@/lib/qr/kit-colors';
 
 export type BgStyle = 'transparent' | 'white';
 
@@ -85,7 +86,7 @@ async function compositeOnWhite(transparentPng: Blob): Promise<Blob> {
             if (!ctx) { reject(new Error('No canvas context')); return; }
 
             // White background
-            ctx.fillStyle = '#ffffff';
+            ctx.fillStyle = QR_DEFAULTS.bg;
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
             // Draw product on top

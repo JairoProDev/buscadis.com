@@ -60,7 +60,7 @@ export default function BusinessSwitcher({
       <Link
         href="/mi-negocio?new=1"
         className={cn(
-          'inline-flex items-center gap-1.5 rounded-lg bg-[var(--brand-blue,#53acc5)] px-3 py-1.5 text-xs font-bold text-white hover:brightness-110',
+          'inline-flex items-center gap-1.5 rounded-lg bg-[var(--brand-blue,var(--bs-identity))] px-3 py-1.5 text-xs font-bold text-white hover:brightness-110',
           className
         )}
       >
@@ -101,7 +101,7 @@ export default function BusinessSwitcher({
           <button
             type="button"
             onClick={() => router.push('/mi-negocio?new=1')}
-            className="inline-flex items-center gap-1 text-xs font-bold text-[var(--brand-blue,#2563eb)] hover:underline whitespace-nowrap"
+            className="inline-flex items-center gap-1 text-xs font-bold text-[var(--brand-blue,var(--bs-action))] hover:underline whitespace-nowrap"
           >
             <IconPlus size={12} />
             Nuevo

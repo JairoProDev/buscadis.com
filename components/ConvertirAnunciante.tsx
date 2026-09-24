@@ -5,6 +5,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useUser } from '@/hooks/useUser';
 import { updateUserRole } from '@/lib/user';
 import { IconClose } from './Icons';
+import { semantic } from '@/lib/bs-tokens';
 
 interface ConvertirAnuncianteProps {
   abierto: boolean;
@@ -127,7 +128,7 @@ export default function ConvertirAnunciante({ abierto, onCerrar, onExito }: Conv
               backgroundColor: 'rgba(239, 68, 68, 0.1)',
               border: '1px solid rgba(239, 68, 68, 0.3)',
               borderRadius: '6px',
-              color: '#ef4444',
+              color: semantic.dangerFg,
               fontSize: '0.875rem',
               marginBottom: '1rem'
             }}

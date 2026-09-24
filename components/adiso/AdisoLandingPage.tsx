@@ -295,7 +295,7 @@ export default function AdisoLandingPage({ adiso, onVolver }: AdisoLandingPagePr
           type="button"
           onClick={() => void handleMensajeBuscadis()}
           disabled={enviandoMensaje}
-          className={`flex min-w-0 flex-1 items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-[var(--brand-blue)] to-[#3db8d9] px-5 font-bold text-white shadow-lg shadow-[var(--brand-blue)]/25 transition-transform hover:brightness-105 active:scale-[0.98] disabled:opacity-70 ${
+          className={`flex min-w-0 flex-1 items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-[var(--brand-blue)] to-[var(--bs-color-adis-300)] px-5 font-bold text-white shadow-lg shadow-[var(--brand-blue)]/25 transition-transform hover:brightness-105 active:scale-[0.98] disabled:opacity-70 ${
             compact ? 'py-3 text-sm' : 'py-4 text-base'
           }`}
         >

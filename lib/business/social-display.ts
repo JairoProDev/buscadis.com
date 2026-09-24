@@ -3,6 +3,7 @@ import { normalizeSocialLinks } from '@/lib/business/normalize-profile';
 import { getPublicadisSiteUrl, getBuscadisProfileUrl } from '@/lib/business/publicadis';
 import { getWhatsappUrl } from '@/lib/business/public-utils';
 import { catalogUi, semantic, tokens } from '@/lib/bs-tokens';
+import { SOCIAL_NETWORK_BRAND_HEX } from '@/lib/business/social-network-brands';
 
 const NETWORK_LABELS: Record<SocialLink['network'], string> = {
   instagram: 'Instagram',
@@ -258,17 +259,61 @@ const siteInk = tokens['--bs-color-neutral-700'];
 export const SOCIAL_BRAND_COLORS: Record<SocialBrandKey, SocialBrandColors> = {
   website: { bg: socialSurface, text: siteInk, border: siteInk },
   whatsapp: { bg: socialSurface, text: semantic.whatsapp, border: semantic.whatsapp },
-  telegram: { bg: socialSurface, text: '#229ED9', border: '#229ED9' },
-  messenger: { bg: socialSurface, text: '#0084FF', border: '#0084FF' },
-  instagram: { bg: socialSurface, text: '#E1306C', border: '#E1306C' },
-  facebook: { bg: socialSurface, text: '#1877F2', border: '#1877F2' },
-  tiktok: { bg: socialSurface, text: '#010101', border: '#010101' },
-  twitter: { bg: socialSurface, text: '#0F1419', border: '#0F1419' },
-  linkedin: { bg: socialSurface, text: '#0A66C2', border: '#0A66C2' },
-  youtube: { bg: socialSurface, text: '#FF0000', border: '#FF0000' },
-  pinterest: { bg: socialSurface, text: '#BD081C', border: '#BD081C' },
-  threads: { bg: socialSurface, text: '#101010', border: '#101010' },
-  spotify: { bg: socialSurface, text: '#1DB954', border: '#1DB954' },
+  telegram: {
+    bg: socialSurface,
+    text: SOCIAL_NETWORK_BRAND_HEX.telegram,
+    border: SOCIAL_NETWORK_BRAND_HEX.telegram,
+  },
+  messenger: {
+    bg: socialSurface,
+    text: SOCIAL_NETWORK_BRAND_HEX.messenger,
+    border: SOCIAL_NETWORK_BRAND_HEX.messenger,
+  },
+  instagram: {
+    bg: socialSurface,
+    text: SOCIAL_NETWORK_BRAND_HEX.instagram,
+    border: SOCIAL_NETWORK_BRAND_HEX.instagram,
+  },
+  facebook: {
+    bg: socialSurface,
+    text: SOCIAL_NETWORK_BRAND_HEX.facebook,
+    border: SOCIAL_NETWORK_BRAND_HEX.facebook,
+  },
+  tiktok: {
+    bg: socialSurface,
+    text: SOCIAL_NETWORK_BRAND_HEX.tiktok,
+    border: SOCIAL_NETWORK_BRAND_HEX.tiktok,
+  },
+  twitter: {
+    bg: socialSurface,
+    text: SOCIAL_NETWORK_BRAND_HEX.twitter,
+    border: SOCIAL_NETWORK_BRAND_HEX.twitter,
+  },
+  linkedin: {
+    bg: socialSurface,
+    text: SOCIAL_NETWORK_BRAND_HEX.linkedin,
+    border: SOCIAL_NETWORK_BRAND_HEX.linkedin,
+  },
+  youtube: {
+    bg: socialSurface,
+    text: SOCIAL_NETWORK_BRAND_HEX.youtube,
+    border: SOCIAL_NETWORK_BRAND_HEX.youtube,
+  },
+  pinterest: {
+    bg: socialSurface,
+    text: SOCIAL_NETWORK_BRAND_HEX.pinterest,
+    border: SOCIAL_NETWORK_BRAND_HEX.pinterest,
+  },
+  threads: {
+    bg: socialSurface,
+    text: SOCIAL_NETWORK_BRAND_HEX.threads,
+    border: SOCIAL_NETWORK_BRAND_HEX.threads,
+  },
+  spotify: {
+    bg: socialSurface,
+    text: SOCIAL_NETWORK_BRAND_HEX.spotify,
+    border: SOCIAL_NETWORK_BRAND_HEX.spotify,
+  },
   custom: { bg: 'var(--brand-color)', text: catalogUi.onAction, border: 'var(--brand-color)' },
 };
 

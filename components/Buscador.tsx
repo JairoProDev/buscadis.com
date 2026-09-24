@@ -470,7 +470,7 @@ export default function Buscador({
                   : 'rounded-full gap-1 h-8 md:h-9 px-2.5 md:px-3.5 text-[11px] md:text-xs'
               } ${
                 isPublishMode
-                  ? 'bg-[var(--brand-yellow)] text-[#1c1608] shadow-[0_2px_10px_rgba(var(--brand-yellow-rgb),0.45)] hover:brightness-105'
+                  ? 'bg-[var(--brand-yellow)] text-[var(--bs-publish-fg)] shadow-[0_2px_10px_rgba(var(--brand-yellow-rgb),0.45)] hover:brightness-105'
                   : 'bg-[var(--brand-blue)] text-white shadow-[0_2px_10px_rgba(var(--brand-primary-rgb),0.35)] hover:brightness-105'
               }`}
               title={primaryLabel || 'Enviar'}

@@ -6,6 +6,7 @@ import { useState } from 'react';
 import dynamic from 'next/dynamic';
 import { IconDownload, IconShareAlt } from '@/components/Icons';
 import { getBusinessCanonicalUrl } from '@/lib/business/public-utils';
+import { tokens } from '@buscadis/tokens';
 import {
   mensajeCompartirPerfilPropio,
   perfilVivoOgPreviewUrl,
@@ -33,7 +34,7 @@ export default function BusinessShareTools({
   businessName,
   onShare,
   isPro = false,
-  themeColor = '#53acc5',
+  themeColor = tokens['--bs-identity'],
   embedded = false,
   ownerWhatsapp,
 }: BusinessShareToolsProps) {

@@ -4,6 +4,10 @@ import { useMemo, useState } from 'react';
 import { cn } from '@/lib/utils';
 import type { QrQaStatus, QrStyleConfig } from '@/lib/qr/types';
 import { buildPreviewQuery, previewStyleFingerprint } from '@/lib/qr/preview-params';
+import { QR_KIT } from '@/lib/qr/kit-colors';
+
+const CHECKER_TILE = QR_KIT.border;
+const CHECKER_BG = `linear-gradient(45deg, ${CHECKER_TILE} 25%, transparent 25%), linear-gradient(-45deg, ${CHECKER_TILE} 25%, transparent 25%), linear-gradient(45deg, transparent 75%, ${CHECKER_TILE} 75%), linear-gradient(-45deg, transparent 75%, ${CHECKER_TILE} 75%)`;
 
 interface QrPreviewProps {
   slug: string;
@@ -106,7 +110,7 @@ export default function QrPreview({
           styleConfig?.transparentBackground
             ? {
                 backgroundImage:
-                  'linear-gradient(45deg, #e2e8f0 25%, transparent 25%), linear-gradient(-45deg, #e2e8f0 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #e2e8f0 75%), linear-gradient(-45deg, transparent 75%, #e2e8f0 75%)',
+                  CHECKER_BG,
               }
             : undefined
         }

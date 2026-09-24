@@ -8,6 +8,7 @@ import { getBusinessCanonicalUrl } from '@/lib/business/public-utils';
 import { useAuth } from '@/hooks/useAuth';
 import { useUI } from '@/contexts/UIContext';
 import QrPreview from './QrPreview';
+import { semantic } from '@/lib/bs-tokens';
 
 const QrStudio = dynamic(() => import('./QrStudio'), { ssr: false });
 
@@ -82,7 +83,7 @@ export default function QrProfileModal({
       <body style="margin:0;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;font-family:system-ui,sans-serif">
         <img src="${qrPrintUrl}" alt="QR" style="width:min(80vw,400px);height:min(80vw,400px)" />
         <p style="margin-top:24px;font-size:18px;font-weight:bold">${businessName}</p>
-        <p style="color:#64748b;font-size:14px">Escanea para ver nuestro perfil en Buscadis</p>
+        <p style="color:${semantic.muted};font-size:14px">Escanea para ver nuestro perfil en Buscadis</p>
       </body></html>
     `);
     w.document.close();

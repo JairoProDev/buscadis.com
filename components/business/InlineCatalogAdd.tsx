@@ -11,6 +11,7 @@ import { IconCamera, IconSparkles, IconEdit, IconCheck, IconImage, IconX } from 
 import { supabase } from '@/lib/supabase';
 import { findPotentialDuplicate, validatePrice } from '@/lib/business-validation';
 import { Adiso } from '@/types';
+import { catalogUi } from '@/lib/bs-tokens';
 
 type AddMode = 'select' | 'quick' | 'complete' | 'ai';
 
@@ -550,7 +551,7 @@ export default function InlineCatalogAdd({ businessProfileId, onSuccess, onCance
 
                         <div className="bg-gradient-to-br from-purple-50 to-pink-50 p-6 rounded-xl border-2 border-purple-200">
                             <div className="flex items-center gap-3 mb-4">
-                                <IconSparkles size={24} color="#a855f7" />
+                                <IconSparkles size={24} color={catalogUi.eventosFg} />
                                 <div>
                                     <div className="font-bold" style={{ color: 'var(--text-primary)' }}>Procesamiento Inteligente</div>
                                     <div className="text-sm" style={{ color: 'var(--text-secondary)' }}>
@@ -565,7 +566,7 @@ export default function InlineCatalogAdd({ businessProfileId, onSuccess, onCance
                             >
                                 {aiFile ? (
                                     <div>
-                                        <IconCheck size={48} color="#a855f7" className="mx-auto mb-3" />
+                                        <IconCheck size={48} color={catalogUi.eventosFg} className="mx-auto mb-3" />
                                         <p className="font-medium" style={{ color: 'var(--text-primary)' }}>{aiFile.name}</p>
                                         <p className="text-sm mt-1" style={{ color: 'var(--text-secondary)' }}>
                                             {(aiFile.size / 1024).toFixed(1)} KB

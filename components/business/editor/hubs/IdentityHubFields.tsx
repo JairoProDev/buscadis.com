@@ -84,7 +84,7 @@ export default function IdentityHubFields({ profile, setProfile, fields }: Ident
               key={tag}
               type="button"
               onClick={() => removeHashtag(tag)}
-              className="text-xs font-semibold px-2.5 py-1 rounded-full bg-[var(--brand-blue,#53acc5)]/10 text-[var(--brand-blue,#53acc5)] hover:bg-red-50 hover:text-red-600"
+              className="text-xs font-semibold px-2.5 py-1 rounded-full bg-[var(--brand-blue,var(--bs-identity))]/10 text-[var(--brand-blue,var(--bs-identity))] hover:bg-red-50 hover:text-red-600"
             >
               #{tag} ×
             </button>

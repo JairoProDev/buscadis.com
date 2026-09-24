@@ -18,6 +18,7 @@ import {
   type MotoRequestStatus,
 } from '@/lib/envios';
 import { IconArrowLeft, IconStar, IconMessages, IconLocation } from '@/components/Icons';
+import { catalogUi } from '@/lib/bs-tokens';
 
 interface DetailPayload {
   request: MotoRequest;
@@ -338,7 +339,7 @@ export default function DeliveryDetallePage() {
                   onClick={openDeliveryChat}
                   className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-full bg-[var(--brand-blue)] py-3.5 text-sm font-bold text-white"
                 >
-                  <IconMessages size={16} color="#fff" />
+                  <IconMessages size={16} color={catalogUi.onAction} />
                   Abrir chat del pedido
                 </button>
                 <div className="mt-3 flex flex-wrap gap-2">

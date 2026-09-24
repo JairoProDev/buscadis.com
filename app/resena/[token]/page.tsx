@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
+import { tokens } from '@buscadis/tokens';
 
 /**
  * Captura de reseña — una pregunta (estrellas). Spec 06 §8.
@@ -134,7 +135,10 @@ export default function ResenaInvitePage() {
               onClick={() => setRating(n)}
               aria-label={`${n} estrella${n === 1 ? '' : 's'}`}
               className="min-w-[52px] min-h-[56px] text-4xl leading-none transition-transform active:scale-90"
-              style={{ color: n <= rating ? '#E8A317' : '#d4d1db' }}
+              style={{
+                color:
+                  n <= rating ? tokens['--bs-color-sol-500'] : tokens['--bs-color-neutral-300'],
+              }}
             >
               ★
             </button>

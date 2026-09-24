@@ -11,6 +11,8 @@ import QrDownloadMenu from './QrDownloadMenu';
 import QrAnalyticsPanel from './QrAnalyticsPanel';
 import { HexColorInput } from './HexColorInput';
 import { useAuth } from '@/hooks/useAuth';
+import { tokens } from '@buscadis/tokens';
+import { QR_DEFAULTS } from '@/lib/qr/kit-colors';
 
 const QrPreviewLazy = dynamic(() => import('./QrPreview'), { ssr: false });
 
@@ -30,7 +32,7 @@ interface QrStudioProps {
 export default function QrStudio({
   slug,
   businessName,
-  themeColor = '#53acc5',
+  themeColor = tokens['--bs-identity'],
   isPro,
   hasLogo = false,
   compact = false,
@@ -217,7 +219,7 @@ export default function QrStudio({
                 {!styleConfig.transparentBackground && (
                   <HexColorInput
                     label="Fondo"
-                    value={styleConfig.backgroundColor || '#ffffff'}
+                    value={styleConfig.backgroundColor || QR_DEFAULTS.bg}
                     onChange={(hex) => patchStyle({ backgroundColor: hex })}
                   />
                 )}
