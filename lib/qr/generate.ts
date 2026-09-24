@@ -4,6 +4,7 @@ import { normalizeStyleConfig } from './default-style';
 import { runFullQualityGate } from './quality-robust';
 import { isTransparentBackground, resolveBackgroundColor, applyTransparentBackground } from './transparent-bg';
 import { clampLogoSizeRatio } from './logo-constants';
+import { QR_DEFAULTS } from './kit-colors';
 
 export interface GenerateQrOptions {
   data: string;
@@ -32,7 +33,7 @@ async function withCenterLogo(png: Buffer, options: GenerateQrOptions): Promise<
 async function generateClassicPng(options: GenerateQrOptions): Promise<Buffer> {
   const config = options.styleConfig;
   const width = options.width ?? 512;
-  const dark = config.dotsColor || options.themeColor || '#1e293b';
+  const dark = config.dotsColor || options.themeColor || QR_DEFAULTS.dots;
 
   try {
     const { generateProQrPng } = await import('./generate-pro');
@@ -60,7 +61,7 @@ async function generateBrandedPng(options: GenerateQrOptions): Promise<Buffer> {
   const tier = options.tier || 'free';
   const width = options.width ?? 512;
   const config = options.styleConfig;
-  const dark = config.dotsColor || options.themeColor || '#1e293b';
+  const dark = config.dotsColor || options.themeColor || QR_DEFAULTS.dots;
   const logoRatio = clampLogoSizeRatio(config.imageSize);
 
   if (options.logoUrl) {
@@ -124,10 +125,10 @@ async function tryMode(
 
   if (options.skipQa) return { png, qaOk: true };
 
-  const dots = options.styleConfig.dotsColor || options.themeColor || '#1e293b';
+  const dots = options.styleConfig.dotsColor || options.themeColor || QR_DEFAULTS.dots;
   const bg = isTransparentBackground(options.styleConfig)
-    ? '#ffffff'
-    : options.styleConfig.backgroundColor || '#ffffff';
+    ? QR_DEFAULTS.bg
+    : options.styleConfig.backgroundColor || QR_DEFAULTS.bg;
 
   // jsQR no decodifica bien QRs con logo centrado; el escaneo real con ECC-H sí funciona.
   if (mode === 'branded' && options.logoUrl) {
@@ -210,7 +211,7 @@ export async function generateQrSvg(options: GenerateQrOptions): Promise<string>
       skipLogo: false,
     });
   } catch {
-    const dark = config.dotsColor || options.themeColor || '#1e293b';
+    const dark = config.dotsColor || options.themeColor || QR_DEFAULTS.dots;
     return QRCode.toString(options.data, {
       type: 'svg',
       errorCorrectionLevel: 'H',

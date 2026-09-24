@@ -1,5 +1,6 @@
 import type { QrRenderMode, QrStyleConfig } from './types';
 import { buildQrStudioDefaults } from './default-style';
+import { QR_DEFAULTS, QR_KIT } from './kit-colors';
 
 export interface QrPreset {
   id: string;
@@ -17,8 +18,8 @@ export const QR_PRESETS: QrPreset[] = [
     tier: 'free',
     config: {
       renderMode: 'classic',
-      dotsColor: '#1e293b',
-      backgroundColor: '#ffffff',
+      dotsColor: QR_DEFAULTS.dots,
+      backgroundColor: QR_DEFAULTS.bg,
       dotType: 'square',
       cornerSquareType: 'square',
       cornerDotType: 'square',
@@ -76,8 +77,8 @@ export const QR_PRESETS: QrPreset[] = [
     tier: 'pro',
     config: {
       renderMode: 'branded',
-      dotsColor: '#0f172a',
-      backgroundColor: '#ffffff',
+      dotsColor: QR_DEFAULTS.dotsDark,
+      backgroundColor: QR_DEFAULTS.bg,
       dotType: 'rounded',
       cornerSquareType: 'extra-rounded',
       cornerDotType: 'dot',
@@ -93,7 +94,7 @@ export const QR_PRESETS: QrPreset[] = [
     tier: 'pro',
     config: {
       renderMode: 'branded',
-      backgroundColor: '#0f172a',
+      backgroundColor: QR_DEFAULTS.dotsDark,
       dotType: 'classy-rounded',
       cornerSquareType: 'extra-rounded',
       cornerDotType: 'dot',
@@ -101,8 +102,8 @@ export const QR_PRESETS: QrPreset[] = [
         type: 'linear',
         rotation: 45,
         colorStops: [
-          { offset: 0, color: '#53ACC5' },
-          { offset: 1, color: '#FFC24A' },
+          { offset: 0, color: QR_DEFAULTS.identity },
+          { offset: 1, color: QR_DEFAULTS.warm },
         ],
       },
       hideBackgroundDots: true,
@@ -117,8 +118,8 @@ export const QR_PRESETS: QrPreset[] = [
     tier: 'pro',
     config: {
       renderMode: 'branded',
-      dotsColor: '#334155',
-      backgroundColor: '#f8fafc',
+      dotsColor: QR_DEFAULTS.mutedDots,
+      backgroundColor: QR_KIT.softBg,
       dotType: 'dots',
       cornerSquareType: 'dot',
       cornerDotType: 'dot',
@@ -134,8 +135,8 @@ export const QR_PRESETS: QrPreset[] = [
     tier: 'pro',
     config: {
       renderMode: 'branded',
-      dotsColor: '#1e3a5f',
-      backgroundColor: '#ffffff',
+      dotsColor: QR_DEFAULTS.executive,
+      backgroundColor: QR_DEFAULTS.bg,
       dotType: 'classy',
       cornerSquareType: 'extra-rounded',
       cornerDotType: 'square',

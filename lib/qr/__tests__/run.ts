@@ -5,6 +5,8 @@ import { config } from 'dotenv';
 config({ path: '.env.local' });
 
 import assert from 'node:assert/strict';
+import { QR_DEFAULTS } from '../kit-colors';
+import { tokens } from '@buscadis/tokens';
 
 async function run(name: string, fn: () => void | Promise<void>) {
   try {
@@ -32,7 +34,7 @@ async function main() {
     const base = {
       targetUrl: 'https://www.buscadis.com/q/test',
       shortCode: 'test',
-      styleConfig: { dotsColor: '#000', backgroundColor: '#fff' },
+      styleConfig: { dotsColor: tokens['--bs-color-neutral-900'], backgroundColor: QR_DEFAULTS.bg },
       tier: 'free' as const,
       width: 512,
     };
@@ -53,7 +55,7 @@ async function main() {
     const { validateQrContrast } = await import('../quality-gate');
     const bad = validateQrContrast('#cccccc', '#dddddd');
     assert.equal(bad.ok, false);
-    const good = validateQrContrast('#000000', '#ffffff');
+    const good = validateQrContrast(tokens['--bs-color-neutral-900'], QR_DEFAULTS.bg);
     assert.equal(good.ok, true);
   });
 
@@ -62,7 +64,7 @@ async function main() {
     const data = 'https://www.buscadis.com/q/3hqmfd';
     const result = await generateQrPng({
       data,
-      styleConfig: { renderMode: 'classic', dotsColor: '#1e293b', backgroundColor: '#ffffff' },
+      styleConfig: { renderMode: 'classic', dotsColor: QR_DEFAULTS.dots, backgroundColor: QR_DEFAULTS.bg },
       width: 512,
       renderMode: 'classic',
     });
@@ -82,15 +84,15 @@ async function main() {
       data,
       styleConfig: {
         renderMode: 'visual',
-        dotsColor: '#1e3a5f',
-        backgroundColor: '#ffffff',
+        dotsColor: QR_DEFAULTS.executive,
+        backgroundColor: QR_DEFAULTS.bg,
         halftoneIntensity: 0.75,
         dotScale: 0.35,
         buscadisFinderMark: true,
       },
       width: 512,
       logoUrl,
-      themeColor: '#1e3a5f',
+      themeColor: QR_DEFAULTS.executive,
       renderMode: 'visual',
     });
     assert.ok(result.png.length > 5000);

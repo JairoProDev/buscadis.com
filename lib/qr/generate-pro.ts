@@ -2,6 +2,7 @@ import type { QrStyleConfig } from './types';
 import { fetchLogoDataUrl } from './logo-image';
 import { clampLogoSizeRatio } from './logo-constants';
 import { resolveBackgroundColor } from './transparent-bg';
+import { QR_DEFAULTS } from './kit-colors';
 
 export interface GenerateProQrOptions {
   data: string;
@@ -40,7 +41,7 @@ async function buildStylingOptions(
   if (styleConfig.gradient) {
     dotsOptions.gradient = styleConfig.gradient;
   } else {
-    dotsOptions.color = styleConfig.dotsColor || '#0f172a';
+    dotsOptions.color = styleConfig.dotsColor || QR_DEFAULTS.dotsDark;
   }
 
   const base: Record<string, unknown> = {
@@ -58,11 +59,11 @@ async function buildStylingOptions(
     },
     cornersSquareOptions: {
       type: styleConfig.cornerSquareType || 'extra-rounded',
-      color: styleConfig.dotsColor || '#0f172a',
+      color: styleConfig.dotsColor || QR_DEFAULTS.dotsDark,
     },
     cornersDotOptions: {
       type: styleConfig.cornerDotType || 'dot',
-      color: styleConfig.dotsColor || '#0f172a',
+      color: styleConfig.dotsColor || QR_DEFAULTS.dotsDark,
     },
   };
 

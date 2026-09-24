@@ -5,6 +5,7 @@ import { ensureQrCodeForBusiness } from '@/lib/qr/service';
 import { getQrTargetUrl } from '@/lib/qr/resolve-url';
 import { buildKitSvg } from '@/lib/qr/templates';
 import { canUseProQr } from '@/lib/business/subscription';
+import { QR_KIT } from '@/lib/qr/kit-colors';
 
 /** businessId is the public business slug for this route */
 export async function GET(
@@ -30,7 +31,7 @@ export async function GET(
   const kit = await buildKitSvg('flyer-basic', {
     businessName: profile.name,
     tagline: profile.tagline || profile.description?.slice(0, 80) || 'Visítanos en Buscadis',
-    themeColor: profile.theme_color || '#3c6997',
+    themeColor: profile.theme_color || QR_KIT.defaultTheme,
     profileUrl: url,
     qrTargetUrl: getQrTargetUrl(qr.short_code),
     styleConfig: qr.style_config || {},

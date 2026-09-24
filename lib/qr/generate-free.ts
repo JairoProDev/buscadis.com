@@ -4,6 +4,7 @@ import { buildFreeStyleConfig } from './presets';
 import { compositeLogoOnQr, plainQrPng } from './composite-logo';
 import { clampLogoSizeRatio } from './logo-constants';
 import { generateProQrPng } from './generate-pro';
+import { QR_DEFAULTS } from './kit-colors';
 
 export interface GenerateFreeQrOptions {
   data: string;
@@ -17,7 +18,7 @@ export interface GenerateFreeQrOptions {
 export async function generateFreeQrPng(options: GenerateFreeQrOptions): Promise<Buffer> {
   const config = options.styleConfig || buildFreeStyleConfig(options.themeColor);
   const width = options.width ?? 512;
-  const dark = config.dotsColor || options.themeColor || '#1e293b';
+  const dark = config.dotsColor || options.themeColor || QR_DEFAULTS.dots;
 
   if (config.renderMode === 'classic') {
     return plainQrPng(options.data, width, dark, config);
@@ -80,8 +81,8 @@ export async function generateFreeQrSvg(options: GenerateFreeQrOptions): Promise
   }
 
   const config = options.styleConfig || buildFreeStyleConfig(options.themeColor);
-  const dark = config.dotsColor || options.themeColor || '#1e293b';
-  const light = config.backgroundColor || '#ffffff';
+  const dark = config.dotsColor || options.themeColor || QR_DEFAULTS.dots;
+  const light = config.backgroundColor || QR_DEFAULTS.bg;
   const width = options.width ?? 400;
 
   return QRCode.toString(options.data, {

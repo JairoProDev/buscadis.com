@@ -4,10 +4,21 @@ import { getUserFromRouteRequest } from '@/lib/supabase-route-auth';
 import { supabaseAdmin } from '@/lib/supabase-admin';
 import { getAdisoUrl } from '@/lib/url';
 import { generateFreeQrPng } from '@/lib/qr/generate-free';
+import { tokens } from '@buscadis/tokens';
 
 const bodySchema = z.object({
   adisoId: z.string().min(1),
 });
+
+const FLYER_SVG = {
+  action: tokens['--bs-action'],
+  warm: tokens['--bs-color-sol-300'],
+  surface: tokens['--bs-color-neutral-0'],
+  brandInk: tokens['--bs-color-adis-800'],
+  ink: tokens['--bs-color-neutral-900'],
+  muted: tokens['--bs-color-neutral-500'],
+  body: tokens['--bs-color-neutral-700'],
+} as const;
 
 function buildFlyerSvg(params: {
   titulo: string;
@@ -22,21 +33,21 @@ function buildFlyerSvg(params: {
 <svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1350" viewBox="0 0 1080 1350">
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#2563eb"/>
-      <stop offset="100%" stop-color="#facc15"/>
+      <stop offset="0%" stop-color="${FLYER_SVG.action}"/>
+      <stop offset="100%" stop-color="${FLYER_SVG.warm}"/>
     </linearGradient>
   </defs>
   <rect width="1080" height="1350" fill="url(#bg)"/>
-  <rect x="60" y="60" width="960" height="1230" rx="32" fill="#ffffff" opacity="0.97"/>
-  <text x="100" y="160" font-family="Arial,sans-serif" font-size="42" font-weight="bold" fill="#1e3a8a">BUSCADIS</text>
-  <text x="100" y="280" font-family="Arial,sans-serif" font-size="52" font-weight="bold" fill="#111827">${title}</text>
-  <text x="100" y="340" font-family="Arial,sans-serif" font-size="28" fill="#6b7280">${params.categoria}</text>
+  <rect x="60" y="60" width="960" height="1230" rx="32" fill="${FLYER_SVG.surface}" opacity="0.97"/>
+  <text x="100" y="160" font-family="Arial,sans-serif" font-size="42" font-weight="bold" fill="${FLYER_SVG.brandInk}">BUSCADIS</text>
+  <text x="100" y="280" font-family="Arial,sans-serif" font-size="52" font-weight="bold" fill="${FLYER_SVG.ink}">${title}</text>
+  <text x="100" y="340" font-family="Arial,sans-serif" font-size="28" fill="${FLYER_SVG.muted}">${params.categoria}</text>
   <foreignObject x="100" y="380" width="880" height="200">
-    <div xmlns="http://www.w3.org/1999/xhtml" style="font-family:Arial;font-size:26px;color:#374151;line-height:1.4">${desc}</div>
+    <div xmlns="http://www.w3.org/1999/xhtml" style="font-family:Arial;font-size:26px;color:${FLYER_SVG.body};line-height:1.4">${desc}</div>
   </foreignObject>
   <image href="${params.qrUrl}" x="740" y="1000" width="240" height="240"/>
-  <text x="100" y="1180" font-family="Arial,sans-serif" font-size="22" fill="#2563eb">${params.adisoUrl}</text>
-  <text x="100" y="1220" font-family="Arial,sans-serif" font-size="20" fill="#6b7280">Escanea el QR · Publicado en Buscadis</text>
+  <text x="100" y="1180" font-family="Arial,sans-serif" font-size="22" fill="${FLYER_SVG.action}">${params.adisoUrl}</text>
+  <text x="100" y="1220" font-family="Arial,sans-serif" font-size="20" fill="${FLYER_SVG.muted}">Escanea el QR · Publicado en Buscadis</text>
 </svg>`;
 }
 
@@ -85,7 +96,7 @@ export async function POST(request: NextRequest) {
 
     const qrPng = await generateFreeQrPng({
       data: adisoUrl,
-      themeColor: '#2563eb',
+      themeColor: FLYER_SVG.action,
       width: 300,
     });
     const qrUrl = `data:image/png;base64,${qrPng.toString('base64')}`;

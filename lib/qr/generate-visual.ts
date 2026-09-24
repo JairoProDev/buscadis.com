@@ -5,6 +5,7 @@ import { drawDataHalftone, drawLogoUnderlay } from './halftone';
 import { drawFinderPatterns, drawTimingPatterns } from './finder-brand';
 import { clampLogoSizeRatio } from './logo-constants';
 import { isTransparentBackground, resolveBackgroundColor } from './transparent-bg';
+import { QR_DEFAULTS } from './kit-colors';
 
 export interface GenerateVisualQrOptions {
   data: string;
@@ -25,7 +26,7 @@ export async function generateVisualQrPng(options: GenerateVisualQrOptions): Pro
   const dotsColor =
     options.styleConfig.dotsColor ||
     options.themeColor ||
-    '#1e293b';
+    QR_DEFAULTS.dots;
   const finderColor =
     options.styleConfig.finderBrandColor ||
     options.themeColor ||

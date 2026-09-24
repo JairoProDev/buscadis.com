@@ -9,6 +9,7 @@ import { getQrTargetUrl } from '@/lib/qr/resolve-url';
 import { normalizeStyleConfig } from '@/lib/qr/default-style';
 import { QR_PRESETS } from '@/lib/qr/presets';
 import type { QrStyleConfig } from '@/lib/qr/types';
+import { QR_DEFAULTS } from '@/lib/qr/kit-colors';
 
 /** businessId is slug */
 export async function GET(
@@ -63,8 +64,8 @@ export async function PUT(
 
   const isPro = canUseProQr(profile);
   const contrast = validateQrContrast(
-    styleConfig.dotsColor || '#0f172a',
-    styleConfig.transparentBackground ? '#ffffff' : styleConfig.backgroundColor || '#ffffff'
+    styleConfig.dotsColor || QR_DEFAULTS.dotsDark,
+    styleConfig.transparentBackground ? QR_DEFAULTS.bg : styleConfig.backgroundColor || QR_DEFAULTS.bg
   );
   if (!contrast.ok) {
     return NextResponse.json({ error: contrast.message }, { status: 422 });

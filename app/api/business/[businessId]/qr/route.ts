@@ -7,6 +7,7 @@ import { canUseProQr } from '@/lib/business/subscription';
 import { buildFreeStyleConfig } from '@/lib/qr/presets';
 import { normalizeStyleConfig } from '@/lib/qr/default-style';
 import { applyStyleQueryOverrides } from '@/lib/qr/preview-params';
+import { QR_DEFAULTS } from '@/lib/qr/kit-colors';
 import {
   computeQrAssetHash,
   downloadCachedQrPng,
@@ -68,7 +69,7 @@ export async function GET(
         {
           ...buildFreeStyleConfig(profile.theme_color),
           ...(qr.style_config || {}),
-          dotsColor: qr.style_config?.dotsColor || profile.theme_color || '#1e293b',
+          dotsColor: qr.style_config?.dotsColor || profile.theme_color || QR_DEFAULTS.dots,
         },
         req.nextUrl.searchParams
       ),

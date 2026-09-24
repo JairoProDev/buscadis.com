@@ -1,4 +1,5 @@
 import type { QrStyleConfig } from './types';
+import { QR_DEFAULTS } from './kit-colors';
 
 function readStyleParams(params: URLSearchParams, next: QrStyleConfig): void {
   const dots = params.get('dots');
@@ -36,8 +37,8 @@ export function applyPreviewStyleOverrides(
 }
 
 function appendStyleParams(p: URLSearchParams, styleConfig: QrStyleConfig): void {
-  p.set('dots', styleConfig.dotsColor || '#1e293b');
-  p.set('bg', styleConfig.backgroundColor || '#ffffff');
+  p.set('dots', styleConfig.dotsColor || QR_DEFAULTS.dots);
+  p.set('bg', styleConfig.backgroundColor || QR_DEFAULTS.bg);
   if (styleConfig.transparentBackground) p.set('tbg', '1');
 }
 

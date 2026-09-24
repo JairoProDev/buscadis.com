@@ -7,6 +7,7 @@ import { ensureQrCodeForBusiness } from '@/lib/qr/service';
 import { getQrTargetUrl } from '@/lib/qr/resolve-url';
 import { buildKitSvg } from '@/lib/qr/templates';
 import type { QrKitTemplate } from '@/lib/qr/types';
+import { QR_KIT } from '@/lib/qr/kit-colors';
 
 export const runtime = 'nodejs';
 
@@ -50,7 +51,7 @@ export async function GET(
     const kit = await buildKitSvg(template, {
       businessName: profile.name,
       tagline: profile.tagline || profile.description?.slice(0, 80) || 'Visítanos en Buscadis',
-      themeColor: profile.theme_color || '#3c6997',
+      themeColor: profile.theme_color || QR_KIT.defaultTheme,
       profileUrl: getBusinessCanonicalUrl(profile.slug),
       qrTargetUrl: getQrTargetUrl(qr.short_code),
       styleConfig: qr.style_config || {},
