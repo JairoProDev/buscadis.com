@@ -8,6 +8,7 @@ import { sanitizeBusinessProfilePayload } from '@/lib/business';
 import { mapAdisoAPerfil } from '@/lib/business/adiso-a-perfil';
 import { dbToAdiso } from '@/lib/supabase';
 import { ensureQrCodeForBusiness } from '@/lib/qr/service';
+import { withNewCatalogProductIds } from '@/lib/catalog/product-id';
 
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -105,7 +106,7 @@ export async function POST(req: NextRequest) {
       }));
       const { data: products, error: prodError } = await supabaseAdmin
         .from('catalog_products')
-        .insert(rows)
+        .insert(withNewCatalogProductIds(rows))
         .select('id');
       if (prodError) {
         console.error('[from-adiso] products', prodError);

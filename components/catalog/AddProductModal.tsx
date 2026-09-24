@@ -24,6 +24,7 @@ import {
 import { useToast } from '@/hooks/useToast';
 import { catalogUi, semantic, tokens } from '@/lib/bs-tokens';
 import { supabase } from '@/lib/supabase';
+import { withNewCatalogProductId, withNewCatalogProductIds } from '@/lib/catalog/product-id';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -263,26 +264,28 @@ export default function AddProductModal({ isOpen, onClose, businessProfileId, on
 
             const { error } = await supabase
                 .from('catalog_products')
-                .insert({
-                    business_profile_id: businessProfileId,
-                    title: draft.title.trim(),
-                    description: draft.description.trim() || null,
-                    price: draft.price ? parseFloat(draft.price) : null,
-                    category: draft.category.trim() || null,
-                    brand: draft.brand.trim() || null,
-                    sku: draft.sku.trim() || null,
-                    stock: draft.stock ? parseInt(draft.stock) : null,
-                    tags: tagsArr,
-                    images: imageUrl ? [{ url: imageUrl, is_primary: true, ai_enhanced: !!enhancedUrl, alt_text: draft.title }] : [],
-                    attributes: analysis?.attributes || {},
-                    status: saveStatus,
-                    import_source: imageFile ? 'manual_photo' : 'manual_complete',
-                    ai_metadata: analysis ? {
-                        extracted_from: 'photo',
-                        confidence_score: analysis.confidence,
-                        auto_generated: ['title', 'description', 'category']
-                    } : {}
-                });
+                .insert(
+                    withNewCatalogProductId({
+                        business_profile_id: businessProfileId,
+                        title: draft.title.trim(),
+                        description: draft.description.trim() || null,
+                        price: draft.price ? parseFloat(draft.price) : null,
+                        category: draft.category.trim() || null,
+                        brand: draft.brand.trim() || null,
+                        sku: draft.sku.trim() || null,
+                        stock: draft.stock ? parseInt(draft.stock) : null,
+                        tags: tagsArr,
+                        images: imageUrl ? [{ url: imageUrl, is_primary: true, ai_enhanced: !!enhancedUrl, alt_text: draft.title }] : [],
+                        attributes: analysis?.attributes || {},
+                        status: saveStatus,
+                        import_source: imageFile ? 'manual_photo' : 'manual_complete',
+                        ai_metadata: analysis ? {
+                            extracted_from: 'photo',
+                            confidence_score: analysis.confidence,
+                            auto_generated: ['title', 'description', 'category']
+                        } : {},
+                    })
+                );
 
             if (error) throw error;
             showSuccess(saveStatus === 'published' ? '¡Producto publicado!' : 'Guardado como borrador');
@@ -301,18 +304,20 @@ export default function AddProductModal({ isOpen, onClose, businessProfileId, on
         setStep('saving');
         try {
             const imageUrl = enhancedUrl || uploadedUrl;
-            const productsToInsert = multiDetect.products.map(p => ({
-                business_profile_id: businessProfileId,
-                title: p.name,
-                description: p.description,
-                category: p.category,
-                images: imageUrl ? [{ url: imageUrl, is_primary: true, ai_enhanced: false, alt_text: p.name }] : [],
-                tags: [],
-                attributes: {},
-                status: 'draft' as const,
-                import_source: 'manual_photo_multi',
-                ai_metadata: { extracted_from: 'photo', confidence_score: 0.7 }
-            }));
+            const productsToInsert = withNewCatalogProductIds(
+                multiDetect.products.map(p => ({
+                    business_profile_id: businessProfileId,
+                    title: p.name,
+                    description: p.description,
+                    category: p.category,
+                    images: imageUrl ? [{ url: imageUrl, is_primary: true, ai_enhanced: false, alt_text: p.name }] : [],
+                    tags: [],
+                    attributes: {},
+                    status: 'draft' as const,
+                    import_source: 'manual_photo_multi',
+                    ai_metadata: { extracted_from: 'photo', confidence_score: 0.7 },
+                }))
+            );
 
             const { error } = await supabase.from('catalog_products').insert(productsToInsert);
             if (error) throw error;

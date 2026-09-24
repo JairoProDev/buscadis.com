@@ -10,6 +10,7 @@ import { useState, useRef } from 'react';
 import { IconCamera, IconSparkles, IconEdit, IconCheck, IconImage, IconX } from '@/components/Icons';
 import { supabase } from '@/lib/supabase';
 import { findPotentialDuplicate, validatePrice } from '@/lib/business-validation';
+import { withNewCatalogProductId } from '@/lib/catalog/product-id';
 import { Adiso } from '@/types';
 import { catalogUi } from '@/lib/bs-tokens';
 
@@ -131,13 +132,15 @@ export default function InlineCatalogAdd({ businessProfileId, onSuccess, onCance
             if (!supabase) throw new Error('Supabase no está configurado');
             const { error: insertError } = await supabase
                 .from('catalog_products')
-                .insert({
-                    business_profile_id: businessProfileId,
-                    title: quickName,
-                    status: 'published',
-                    images: imageUrl ? [{ url: imageUrl, alt: quickName }] : [],
-                    import_source: 'manual_quick'
-                });
+                .insert(
+                    withNewCatalogProductId({
+                        business_profile_id: businessProfileId,
+                        title: quickName,
+                        status: 'published',
+                        images: imageUrl ? [{ url: imageUrl, alt: quickName }] : [],
+                        import_source: 'manual_quick',
+                    })
+                );
 
             if (insertError) throw insertError;
 
@@ -210,19 +213,21 @@ export default function InlineCatalogAdd({ businessProfileId, onSuccess, onCance
             if (!supabase) throw new Error('Supabase no está configurado');
             const { error: insertError } = await supabase
                 .from('catalog_products')
-                .insert({
-                    business_profile_id: businessProfileId,
-                    title: completeForm.title,
-                    description: completeForm.description || null,
-                    price: completeForm.price ? parseFloat(completeForm.price) : null,
-                    sku: completeForm.sku || null,
-                    category: completeForm.category || null,
-                    brand: completeForm.brand || null,
-                    stock: completeForm.stock ? parseInt(completeForm.stock) : null,
-                    status: 'published',
-                    images: imageUrl ? [{ url: imageUrl, alt: completeForm.title }] : [],
-                    import_source: 'manual_complete'
-                });
+                .insert(
+                    withNewCatalogProductId({
+                        business_profile_id: businessProfileId,
+                        title: completeForm.title,
+                        description: completeForm.description || null,
+                        price: completeForm.price ? parseFloat(completeForm.price) : null,
+                        sku: completeForm.sku || null,
+                        category: completeForm.category || null,
+                        brand: completeForm.brand || null,
+                        stock: completeForm.stock ? parseInt(completeForm.stock) : null,
+                        status: 'published',
+                        images: imageUrl ? [{ url: imageUrl, alt: completeForm.title }] : [],
+                        import_source: 'manual_complete',
+                    })
+                );
 
             if (insertError) throw insertError;
 

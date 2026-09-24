@@ -18,6 +18,7 @@ import { getUserFromRouteRequest } from '@/lib/supabase-route-auth';
 import { getBusinessIdFromRequest, resolveBusinessForUser } from '@/lib/business-server-auth';
 import { hasPermission } from '@/lib/business-access';
 import { ExcelParser } from '@/lib/ai/excel-parser';
+import { withNewCatalogProductIds } from '@/lib/catalog/product-id';
 import { ProductNormalizer } from '@/lib/ai/product-normalizer';
 import { DuplicateDetector } from '@/lib/ai/duplicate-detector';
 import { supabaseAdmin } from '@/lib/supabase-admin';
@@ -216,7 +217,7 @@ export async function POST(request: NextRequest) {
 
             const { error: insertError } = await supabaseAdmin
                 .from('catalog_products')
-                .insert(productsToInsert);
+                .insert(withNewCatalogProductIds(productsToInsert));
 
             if (insertError) {
                 console.error('Insert error details:', JSON.stringify(insertError, null, 2));

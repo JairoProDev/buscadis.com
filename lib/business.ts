@@ -5,6 +5,7 @@ import type { BusinessMemberRole, BusinessWithRole } from './business-access';
 import { normalizeBusinessProfile } from '@/lib/business/normalize-profile';
 import { normalizeBusinessSlug } from '@/lib/business/normalize-slug';
 import { compareRecientesFeed, isCatalogProduct } from '@/lib/feed/ranking';
+import { withNewCatalogProductId } from '@/lib/catalog/product-id';
 
 export const BUSINESS_TABLE = 'business_profiles';
 
@@ -776,7 +777,7 @@ export async function createCatalogProduct(product: any): Promise<any> {
     // product should include business_profile_id and user_id
     const { data, error } = await supabase
         .from('catalog_products')
-        .insert([{ ...product }])
+        .insert([withNewCatalogProductId(product)])
         .select()
         .single();
 

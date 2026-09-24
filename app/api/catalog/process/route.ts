@@ -15,6 +15,7 @@ import {
     generateProductContent
 } from '@/lib/ai/gemini';
 import type { SupabaseClient } from '@supabase/supabase-js';
+import { withNewCatalogProductIds } from '@/lib/catalog/product-id';
 
 async function getBackgroundSupabase(): Promise<SupabaseClient | null> {
     if (process.env.SUPABASE_SERVICE_ROLE_KEY) {
@@ -217,7 +218,7 @@ async function processFilesInBackground(
 
         const { data: insertedProducts, error: insertError } = await supabase
             .from('catalog_products')
-            .insert(productsToInsert)
+            .insert(withNewCatalogProductIds(productsToInsert))
             .select();
 
         if (insertError) {

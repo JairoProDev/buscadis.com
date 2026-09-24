@@ -2,7 +2,7 @@
  * Papelera del catálogo de negocio.
  *
  * El catálogo mostrado al dueño mezcla dos orígenes:
- *   - `catalog_product`  → fila en `catalog_products` (id uuid)
+ *   - `catalog_product`  → fila en `catalog_products` (id nanoid, legacy uuid)
  *   - `classified_ad`    → fila en `adisos` (id text, ej. "lNhoY-7HDw")
  *
  * Antes se borraba siempre contra `catalog_products`, así que eliminar un

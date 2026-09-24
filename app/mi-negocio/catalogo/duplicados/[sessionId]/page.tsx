@@ -8,6 +8,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
+import { withNewCatalogProductId } from '@/lib/catalog/product-id';
 import {
     IconArrowLeft, IconCheck, IconX, IconAlertTriangle,
     IconCopy, IconTrash, IconEdit, IconArrowRight
@@ -124,7 +125,7 @@ export default function DuplicateReviewPage() {
 
                 const { error: insertError } = await supabase!
                     .from('catalog_products')
-                    .insert(newProduct);
+                    .insert(withNewCatalogProductId(newProduct));
 
                 if (insertError) throw insertError;
             }

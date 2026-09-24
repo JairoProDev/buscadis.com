@@ -9,6 +9,7 @@ import type { BusinessProfile, SocialLink } from '@/types/business';
 import { normalizeBusinessSlug } from '@/lib/business/normalize-slug';
 import type { TargetAdapter } from '../types';
 import type { CatalogProductDraft } from '../schema';
+import { withNewCatalogProductId } from '@/lib/catalog/product-id';
 
 function isEmpty(v: unknown): boolean {
   if (v === null || v === undefined) return true;
@@ -101,7 +102,7 @@ export const buscadisTarget: TargetAdapter = {
       const attributes: Record<string, unknown> = { ...(p.attributes || {}) };
       if (p.brand) attributes.brand = p.brand;
 
-      return {
+      return withNewCatalogProductId({
         business_profile_id: businessProfileId,
         title: p.title,
         description: p.description || null,
@@ -120,7 +121,7 @@ export const buscadisTarget: TargetAdapter = {
           confidence_score: p.confidence ?? null,
           seeded_at: new Date().toISOString(),
         },
-      };
+      });
     });
   },
 };

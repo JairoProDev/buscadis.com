@@ -18,6 +18,7 @@ import { useToast } from '@/hooks/useToast';
 import { ToastContainer } from '@/components/Toast';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
+import { withNewCatalogProductId } from '@/lib/catalog/product-id';
 import { listBusinessProfilesForUser, uploadProductImage } from '@/lib/business';
 import { useAuth } from '@/hooks/useAuth';
 
@@ -157,13 +158,15 @@ function CatalogImportPageContent() {
 
                     const { error } = await supabase!
                         .from('catalog_products')
-                        .insert({
-                            business_profile_id: selectedBusinessId,
-                            title: img.title,
-                            status: 'published',
-                            images: [{ url: imageUrl, alt: img.title }],
-                            import_source: 'bulk_images'
-                        });
+                        .insert(
+                            withNewCatalogProductId({
+                                business_profile_id: selectedBusinessId,
+                                title: img.title,
+                                status: 'published',
+                                images: [{ url: imageUrl, alt: img.title }],
+                                import_source: 'bulk_images',
+                            })
+                        );
 
                     if (error) throw error;
                     
@@ -345,15 +348,17 @@ function CatalogImportPageContent() {
 
             const { error: insertError } = await supabase
                 .from('catalog_products')
-                .insert({
-                    business_profile_id: selectedBusinessId,
-                    title: manualForm.title,
-                    price: manualForm.price ? parseFloat(manualForm.price) : null,
-                    sku: manualForm.sku || null,
-                    status: 'published',
-                    images: imageUrl ? [{ url: imageUrl, alt: manualForm.title }] : [],
-                    import_source: 'manual'
-                });
+                .insert(
+                    withNewCatalogProductId({
+                        business_profile_id: selectedBusinessId,
+                        title: manualForm.title,
+                        price: manualForm.price ? parseFloat(manualForm.price) : null,
+                        sku: manualForm.sku || null,
+                        status: 'published',
+                        images: imageUrl ? [{ url: imageUrl, alt: manualForm.title }] : [],
+                        import_source: 'manual',
+                    })
+                );
 
             if (insertError) throw insertError;
 

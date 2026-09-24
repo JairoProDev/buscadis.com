@@ -8,6 +8,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
+import { withNewCatalogProductId } from '@/lib/catalog/product-id';
 import {
     IconArrowLeft, IconCheck, IconX, IconUpload, IconTrash,
     IconPlus, IconImage, IconSparkles, IconBox, IconGrid
@@ -119,7 +120,7 @@ export default function ProductForm({ initialData, mode }: ProductFormProps) {
             if (mode === 'create') {
                 const { error } = await supabase
                     .from('catalog_products')
-                    .insert(productData);
+                    .insert(withNewCatalogProductId(productData));
                 if (error) throw error;
                 success('Producto creado correctamente');
             } else {

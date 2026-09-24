@@ -7,6 +7,7 @@ import { createServerClient } from '@/lib/supabase-server';
 import { getUserFromRouteRequest } from '@/lib/supabase-route-auth';
 import { getBusinessIdFromRequest, resolveBusinessForUser } from '@/lib/business-server-auth';
 import { hasPermission } from '@/lib/business-access';
+import { withNewCatalogProductId } from '@/lib/catalog/product-id';
 
 const UPDATABLE_FIELDS = [
     'title',
@@ -191,24 +192,26 @@ export async function POST(request: NextRequest) {
 
         const { data: product, error } = await supabase
             .from('catalog_products')
-            .insert({
-                business_profile_id: profile.id,
-                title: body.title,
-                description: body.description,
-                price: body.price,
-                compare_at_price: body.compare_at_price,
-                currency: body.currency || 'PEN',
-                category: body.category,
-                tags: body.tags || [],
-                attributes: body.attributes || {},
-                images: body.images || [],
-                sku: body.sku,
-                barcode: body.barcode,
-                stock: body.stock,
-                track_inventory: body.track_inventory || false,
-                status: body.status || 'draft',
-                ai_metadata: body.ai_metadata || {},
-            })
+            .insert(
+                withNewCatalogProductId({
+                    business_profile_id: profile.id,
+                    title: body.title,
+                    description: body.description,
+                    price: body.price,
+                    compare_at_price: body.compare_at_price,
+                    currency: body.currency || 'PEN',
+                    category: body.category,
+                    tags: body.tags || [],
+                    attributes: body.attributes || {},
+                    images: body.images || [],
+                    sku: body.sku,
+                    barcode: body.barcode,
+                    stock: body.stock,
+                    track_inventory: body.track_inventory || false,
+                    status: body.status || 'draft',
+                    ai_metadata: body.ai_metadata || {},
+                })
+            )
             .select()
             .single();
 

@@ -12,6 +12,7 @@ import { uploadProductImage } from '@/lib/business';
 import { Adiso } from '@/types';
 import { findPotentialDuplicate, validatePrice } from '@/lib/business-validation';
 import { publishUi, tokens } from '@/lib/bs-tokens';
+import { withNewCatalogProductId } from '@/lib/catalog/product-id';
 
 type AddMethod = null | 'quick' | 'complete' | 'file';
 
@@ -124,13 +125,15 @@ export default function SimpleCatalogAdd({ businessProfileId, onSuccess, onClose
             if (!supabase) throw new Error('Supabase no está configurado');
             const { error } = await supabase
                 .from('catalog_products')
-                .insert({
-                    business_profile_id: businessProfileId,
-                    title: quickName,
-                    status: 'published',
-                    images: imageUrl ? [{ url: imageUrl, alt: quickName }] : [],
-                    import_source: 'manual_quick'
-                });
+                .insert(
+                    withNewCatalogProductId({
+                        business_profile_id: businessProfileId,
+                        title: quickName,
+                        status: 'published',
+                        images: imageUrl ? [{ url: imageUrl, alt: quickName }] : [],
+                        import_source: 'manual_quick',
+                    })
+                );
 
             if (error) throw error;
 
@@ -201,15 +204,17 @@ export default function SimpleCatalogAdd({ businessProfileId, onSuccess, onClose
             if (!supabase) throw new Error('Supabase no está configurado');
             const { error } = await supabase
                 .from('catalog_products')
-                .insert({
-                    business_profile_id: businessProfileId,
-                    title: form.title,
-                    description: form.description || null,
-                    price: form.price ? parseFloat(form.price) : null,
-                    status: 'published',
-                    images: imageUrl ? [{ url: imageUrl, alt: form.title }] : [],
-                    import_source: 'manual_complete'
-                });
+                .insert(
+                    withNewCatalogProductId({
+                        business_profile_id: businessProfileId,
+                        title: form.title,
+                        description: form.description || null,
+                        price: form.price ? parseFloat(form.price) : null,
+                        status: 'published',
+                        images: imageUrl ? [{ url: imageUrl, alt: form.title }] : [],
+                        import_source: 'manual_complete',
+                    })
+                );
 
             if (error) throw error;
 
