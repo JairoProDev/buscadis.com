@@ -8,8 +8,6 @@ import { useUI } from '@/contexts/UIContext';
 import {
   IconStore,
   IconChevronDown,
-  IconUser,
-  IconMessages,
   IconHeartOutline,
   IconSettings,
   IconSignOut,
@@ -110,27 +108,6 @@ function UserMenuContent({ onProgressClick }: UserMenuProps) {
       },
     },
     {
-      icon: <IconStore size={16} color="var(--text-secondary)" />,
-      iconBg: 'bg-[var(--bg-tertiary)]',
-      label: 'Mis negocios',
-      onClick: () => {
-        setMostrarMenu(false);
-        goTo('negocios');
-      },
-    },
-    {
-      icon: <IconUser size={16} color="var(--brand-blue)" />,
-      iconBg: 'bg-[rgba(var(--brand-primary-rgb),0.12)]',
-      label: 'Mi perfil',
-      onClick: () => goTo(),
-    },
-    {
-      icon: <IconMessages size={16} color="var(--brand-yellow)" />,
-      iconBg: 'bg-[rgba(var(--brand-yellow-rgb),0.15)]',
-      label: 'Mensajes',
-      onClick: () => goTo('mensajes'),
-    },
-    {
       icon: <IconHeartOutline size={16} color="var(--brand-blue)" />,
       iconBg: 'bg-[rgba(var(--brand-primary-rgb),0.12)]',
       label: 'Guardados',
@@ -196,11 +173,13 @@ function UserMenuContent({ onProgressClick }: UserMenuProps) {
           className="absolute right-0 top-[calc(100%+0.5rem)] z-[1001] w-[min(100vw-1.5rem,300px)] overflow-hidden rounded-2xl border border-[var(--border-color)] bg-[var(--bg-primary)] shadow-[var(--popover-shadow)]"
         >
           {/* Cabecera */}
-          <div className="border-b border-[var(--border-color)] px-4 py-3.5">
+          <div className="border-b border-[var(--border-color)] p-1.5">
             <button
               type="button"
+              role="menuitem"
               onClick={() => goTo()}
-              className="flex w-full items-start gap-3 text-left"
+              aria-label="Ir a mi perfil"
+              className="flex w-full items-start gap-3 rounded-xl px-2.5 py-2.5 text-left transition-colors hover:bg-[var(--hover-bg)]"
             >
               <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-full bg-[rgba(var(--brand-primary-rgb),0.1)]">
                 {identity.avatarUrl ? (
