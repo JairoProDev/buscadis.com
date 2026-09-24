@@ -14,8 +14,9 @@ import type { FlyerConfig, FlyerTemplateId } from '@/lib/flyer/types';
 import { softWashFromAccent } from '@/lib/flyer/templates';
 import { categoryAsksLocation } from '@/lib/publish/category-tree';
 import { flyerMetaFontSize, flyerPriceFontSize, flyerTitleFontSize } from '@/lib/flyer/typography';
+import { flyer, publishUi } from '@/lib/bs-tokens';
 
-const COLORS = ['#53acc5', '#111827', '#ffffff', '#b91c1c', '#166534', '#1d4ed8', '#c2410c', '#7c3aed'];
+const COLORS = [...publishUi.cardPalette];
 
 interface PublishCardCanvasProps {
   heroUrl?: string;
@@ -69,7 +70,7 @@ function TemplateBackdrop({
     return (
       <div
         className="pointer-events-none absolute inset-0"
-        style={{ background: `linear-gradient(160deg, ${color} 0%, ${background} 55%, #020617 100%)` }}
+        style={{ background: `linear-gradient(160deg, ${color} 0%, ${background} 55%, ${flyer.deep} 100%)` }}
       />
     );
   }
@@ -130,7 +131,7 @@ function TemplateBackdrop({
     return (
       <div
         className="pointer-events-none absolute inset-0"
-        style={{ background: `radial-gradient(120% 80% at 10% 0%, ${color}33 0%, ${background} 45%, #ffffff 100%)` }}
+        style={{ background: `radial-gradient(120% 80% at 10% 0%, ${color}33 0%, ${background} 45%, ${flyer.surface} 100%)` }}
       />
     );
   }
@@ -349,7 +350,7 @@ function CardPiece({
     (id === 'precio' && !(draft.precio && draft.precio > 0)) ||
     (id === 'ubicacion' && !draft.ubicacion);
 
-  const ink = onDark ? '#ffffff' : color;
+  const ink = onDark ? publishUi.onDark : color;
   const fontSize =
     id === 'titulo'
       ? flyerTitleFontSize(titleScale, 'comfortable', place.scale)
@@ -368,7 +369,7 @@ function CardPiece({
     >
       <div
         className={`relative px-1 ${selected ? 'rounded-md ring-2 ring-[var(--brand-blue)] ring-offset-2' : ''}`}
-        style={{ color: missing ? (onDark ? 'rgba(255,255,255,0.55)' : 'rgba(15,23,42,0.45)') : id === 'precio' || id === 'titulo' || onDark ? ink : '#0f172a' }}
+        style={{ color: missing ? (onDark ? 'rgba(255,255,255,0.55)' : 'rgba(15,23,42,0.45)') : id === 'precio' || id === 'titulo' || onDark ? ink : flyer.ink }}
       >
         {id === 'categoria' && (
           <span className="inline-flex items-center gap-1 font-bold">

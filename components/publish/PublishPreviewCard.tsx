@@ -141,7 +141,7 @@ export default function PublishPreviewCard({
         {/* Body */}
         <div className="flex flex-col flex-1 min-w-0 p-2.5">
           {isPaid && (
-            <span className="inline-flex items-center self-start mb-1 px-1.5 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wide bg-[rgba(var(--brand-yellow-rgb),0.18)] text-[#b8860b]">
+            <span className="inline-flex items-center self-start mb-1 px-1.5 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wide bg-[rgba(var(--brand-yellow-rgb),0.18)] text-[var(--bs-color-sol-600)]">
               Destacado
             </span>
           )}

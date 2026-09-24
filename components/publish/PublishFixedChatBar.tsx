@@ -4,6 +4,7 @@ import { useRef, useState } from 'react';
 import { IconAdis, IconChevronDown, IconMicrophone, IconSparkles } from '@/components/Icons';
 import PublishChatInput from './PublishChatInput';
 import PublishImagePreview from './PublishImagePreview';
+import { publishUi } from '@/lib/bs-tokens';
 
 interface PublishFixedChatBarProps {
   onSend: (text: string, imageUrl?: string) => void;
@@ -101,7 +102,7 @@ export default function PublishFixedChatBar({
         className="fixed bottom-4 right-4 z-[1100] w-12 h-12 rounded-full shadow-[var(--shadow-hover)] flex items-center justify-center bg-[var(--brand-blue)] ring-2 ring-white/20"
         aria-label="Abrir asistente ADIS"
       >
-        <IconAdis size={20} color="#fff" />
+        <IconAdis size={20} color={publishUi.onDark} />
       </button>
     );
   }

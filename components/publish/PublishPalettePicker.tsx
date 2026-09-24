@@ -13,6 +13,7 @@ import {
 } from '@/lib/flyer/color-palettes';
 import { softWashFromAccent } from '@/lib/flyer/templates';
 import type { FlyerConfig } from '@/lib/flyer/types';
+import { publishUi } from '@/lib/bs-tokens';
 
 interface PublishPalettePickerProps {
   config: FlyerConfig;
@@ -169,7 +170,7 @@ function CustomPaletteSheet({
 export default function PublishPalettePicker({ config, onChange, compact }: PublishPalettePickerProps) {
   const [customOpen, setCustomOpen] = useState(false);
 
-  const primary = config.primary || '#53acc5';
+  const primary = config.primary || publishUi.defaultPrimary;
   const secondary = config.secondary || softWashFromAccent(primary);
   const customActive = config.paletteId === 'custom';
 

@@ -55,7 +55,7 @@ import { getBusinessProfilePath } from '@/lib/seo/business-metadata';
 import { FIELD_QUESTIONS, type RevealField } from '@/lib/interactions/field-reveal';
 import { chatContextFromAdiso } from '@/lib/chat/context-from-adiso';
 import FlyerCanvas from '@/components/flyer/FlyerCanvas';
-import { semantic } from '@/lib/bs-tokens';
+import { categoriaFg, contactChannel, publishUi } from '@/lib/bs-tokens';
 import { buildFlyerContentFromAdiso, flyerStateFromPrivateData } from '@/lib/flyer/layout';
 import { resolveFlyerConfig } from '@/lib/flyer/templates';
 import {
@@ -282,21 +282,7 @@ export default function ModalAdiso({
   }, [user?.id, adiso.id, session?.access_token]);
 
 
-  const getCategoriaTheme = (categoria: Categoria) => {
-    const themes: Record<Categoria, { color: string; bg: string; iconBg: string }> = {
-      empleos: { color: '#2c3e50', bg: 'rgba(44, 62, 80, 0.05)', iconBg: 'from-[#2c3e50] to-[#4b79a1]' },
-      inmuebles: { color: '#134E5E', bg: 'rgba(19, 78, 94, 0.05)', iconBg: 'from-[#134E5E] to-[#71B280]' },
-      vehiculos: { color: '#1A2980', bg: 'rgba(26, 41, 128, 0.05)', iconBg: 'from-[#1A2980] to-[#26D0CE]' },
-      servicios: { color: '#f2994a', bg: 'rgba(242, 153, 74, 0.05)', iconBg: 'from-[#f2994a] to-[#f2c94c]' },
-      productos: { color: '#b31217', bg: 'rgba(179, 18, 23, 0.05)', iconBg: 'from-[#e52d27] to-[#b31217]' },
-      eventos: { color: '#4facfe', bg: 'rgba(79, 172, 254, 0.05)', iconBg: 'from-[#4facfe] to-[#00f2fe]' },
-      negocios: { color: '#434343', bg: 'rgba(67, 67, 67, 0.05)', iconBg: 'from-[#434343] to-[#000000]' },
-      comunidad: { color: '#0072ff', bg: 'rgba(0, 114, 255, 0.05)', iconBg: 'from-[#00c6ff] to-[#0072ff]' },
-    };
-    return themes[categoria] || themes.productos;
-  };
-
-  const theme = getCategoriaTheme(adiso.categoria);
+  const categoryAccent = categoriaFg(adiso.categoria);
 
   const getCategoriaIcon = (categoria: Categoria): React.ComponentType<{ size?: number; color?: string; className?: string }> => {
     const iconMap: Record<Categoria, React.ComponentType<{ size?: number; color?: string; className?: string }>> = {
@@ -622,7 +608,7 @@ export default function ModalAdiso({
       <button
         type="button"
         onClick={handleCopiarLink}
-        className={`${actionBtnClass}${copiado ? ' bg-[#22c55e] text-white hover:bg-[#22c55e] active:bg-[#16a34a]' : ''}`}
+        className={`${actionBtnClass}${copiado ? ' bg-[var(--bs-success-fg)] text-white hover:bg-[var(--bs-success-fg)] active:brightness-90' : ''}`}
         title="Copiar enlace"
         aria-label="Copiar enlace"
       >
@@ -655,12 +641,12 @@ export default function ModalAdiso({
 
   const externalBtnAccent =
     externalContact?.kind === 'email'
-      ? '#6366f1'
+      ? contactChannel.email
       : externalContact?.kind === 'telefono'
-        ? '#0ea5e9'
+        ? contactChannel.telefono
         : externalContact?.kind === 'link'
           ? 'var(--brand-blue)'
-          : semantic.whatsapp;
+          : contactChannel.whatsapp;
 
   const ContactFooter = () => {
     const isOwnerView = esMiAdiso || esPropietario;
@@ -786,7 +772,7 @@ export default function ModalAdiso({
 
     return (
       <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-        <div style={{ color: theme.color, flexShrink: 0 }}>
+        <div style={{ color: categoryAccent, flexShrink: 0 }}>
           <Icon size={18} />
         </div>
         {revealed ? (
@@ -911,7 +897,7 @@ export default function ModalAdiso({
             fontWeight: 800,
             textTransform: 'uppercase',
             letterSpacing: '0.05em',
-            color: promotionTier === 'premium' ? '#fff' : '#b8860b',
+            color: promotionTier === 'premium' ? publishUi.onDark : publishUi.destacadoFg,
             background: promotionTier === 'premium'
               ? 'linear-gradient(135deg, var(--brand-blue), var(--brand-yellow))'
               : 'rgba(var(--brand-yellow-rgb), 0.18)',

@@ -14,6 +14,7 @@ import {
 import { IconChevronLeft, IconCrop, IconForms, IconLayers, IconPen, IconRedo, IconSmile, IconText, IconUndo } from '@/components/Icons';
 import { EMPTY_COVER_OVERLAY, type PublishCoverOverlay } from '@/lib/publish/publish-draft-types';
 import CardDeleteZone, { hitTrash } from '@/components/publish/CardDeleteZone';
+import { publishUi } from '@/lib/bs-tokens';
 
 export type CoverTool = 'crop' | 'sticker' | 'text' | 'draw' | null;
 
@@ -54,7 +55,7 @@ interface Stroke {
 }
 
 const STICKERS = ['😀', '😍', '🔥', '⭐', '✅', '❤️', '🏠', '🚗', '💼', '📍', '🎉', '👀'];
-const COLORS = ['#ffffff', '#111827', '#facc15', '#ef4444', '#2563eb', '#16a34a', '#a855f7', '#f97316'];
+const COLORS = [...publishUi.coverPalette];
 
 const TEXT_FONTS: Array<{ id: CoverFont; label: string; fontFamily: string; fontWeight: number }> = [
   { id: 'classic', label: 'Clásica', fontFamily: 'Georgia, "Times New Roman", serif', fontWeight: 700 },
@@ -100,7 +101,7 @@ function uid() {
 }
 
 function blankText(id = uid()): TextMark {
-  return { id, text: '', x: 0.5, y: 0.46, color: '#ffffff', font: 'strong', size: 1, align: 'center', bg: 'none' };
+  return { id, text: '', x: 0.5, y: 0.46, color: publishUi.onDark, font: 'strong', size: 1, align: 'center', bg: 'none' };
 }
 
 function fontOf(id: CoverFont) {
@@ -109,11 +110,11 @@ function fontOf(id: CoverFont) {
 
 function contrastColor(hex: string) {
   const raw = hex.replace('#', '');
-  if (raw.length !== 6) return '#111827';
+  if (raw.length !== 6) return publishUi.ink;
   const r = parseInt(raw.slice(0, 2), 16);
   const g = parseInt(raw.slice(2, 4), 16);
   const b = parseInt(raw.slice(4, 6), 16);
-  return (r * 299 + g * 587 + b * 114) / 1000 > 150 ? '#111827' : '#ffffff';
+  return (r * 299 + g * 587 + b * 114) / 1000 > 150 ? publishUi.ink : publishUi.onDark;
 }
 
 function textLook(mark: TextMark, stageSize: number): CSSProperties {
@@ -131,7 +132,7 @@ function textLook(mark: TextMark, stageSize: number): CSSProperties {
     return { ...shared, color: contrastColor(mark.color), background: mark.color, padding: '0.12em 0.38em', borderRadius: '0.2em' };
   }
   if (mark.bg === 'soft') {
-    return { ...shared, color: '#ffffff', background: `${mark.color}99`, padding: '0.12em 0.38em', borderRadius: '0.2em' };
+    return { ...shared, color: publishUi.onDark, background: `${mark.color}99`, padding: '0.12em 0.38em', borderRadius: '0.2em' };
   }
   return { ...shared, color: mark.color, textShadow: '0 1px 6px rgba(0,0,0,0.55)' };
 }
@@ -202,7 +203,7 @@ const PublishCoverEditor = forwardRef<PublishCoverEditorHandle, PublishCoverEdit
     const strokes = overlay?.strokes || [];
     const [draftStroke, setDraftStroke] = useState<Stroke | null>(null);
     const draftStrokeRef = useRef<Stroke | null>(null);
-    const [penColor, setPenColor] = useState('#ffffff');
+    const [penColor, setPenColor] = useState<string>(publishUi.onDark);
     const [penWidth, setPenWidth] = useState(6);
     const [selectedTextId, setSelectedTextId] = useState<string | null>(null);
     const [cropZoom, setCropZoom] = useState(1);
@@ -280,7 +281,7 @@ const PublishCoverEditor = forwardRef<PublishCoverEditorHandle, PublishCoverEdit
           quality: 0.92,
           pixelRatio: 2,
           cacheBust: true,
-          backgroundColor: '#ffffff',
+          backgroundColor: publishUi.onDark,
         });
         const res = await fetch(dataUrl);
         return await res.blob();
@@ -349,7 +350,7 @@ const PublishCoverEditor = forwardRef<PublishCoverEditorHandle, PublishCoverEdit
       canvas.height = size;
       const ctx = canvas.getContext('2d');
       if (!ctx) return null;
-      ctx.fillStyle = '#111827';
+      ctx.fillStyle = publishUi.ink;
       ctx.fillRect(0, 0, size, size);
       const rect = cropDrawRect(size, photoSize, cropZoom, {
         x: cropPan.x * (size / stage),
@@ -695,7 +696,7 @@ const PublishCoverEditor = forwardRef<PublishCoverEditorHandle, PublishCoverEdit
                       placeholder="Texto"
                       onChange={(event) => patchText(mark.id, { text: event.target.value })}
                       className="absolute inset-0 resize-none overflow-hidden bg-transparent outline-none"
-                      style={{ ...look, color: 'transparent', background: 'transparent', caretColor: String(look.color || '#fff') }}
+                      style={{ ...look, color: 'transparent', background: 'transparent', caretColor: String(look.color || publishUi.onDark) }}
                     />
                   )}
                   {selected && (

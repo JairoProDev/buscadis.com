@@ -507,7 +507,7 @@ export function PublishChatSummary({
         <button
           type="button"
           onClick={onPublish}
-          className={`w-full rounded-xl bg-[var(--brand-yellow)] py-2.5 text-sm font-bold text-[#1a1508] transition-all hover:brightness-105 active:scale-[0.99] ${compact ? 'py-2 text-xs' : ''}`}
+          className={`w-full rounded-xl bg-[var(--brand-yellow)] py-2.5 text-sm font-bold text-[var(--bs-publish-fg)] transition-all hover:brightness-105 active:scale-[0.99] ${compact ? 'py-2 text-xs' : ''}`}
         >
           Elegir plan y publicar
         </button>

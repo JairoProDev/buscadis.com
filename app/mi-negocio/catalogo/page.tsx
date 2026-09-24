@@ -23,6 +23,7 @@ import SortableProductList from '@/components/catalog/SortableProductList';
 import CatalogTrashPanel from '@/components/catalog/CatalogTrashPanel';
 import { reorderCatalogProducts } from '@/lib/catalog/reorder';
 import type { Adiso } from '@/types';
+import { catalogUi, semantic, tokens } from '@/lib/bs-tokens';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -589,10 +590,10 @@ function CatalogPageContent() {
                         {quickFilters.map(f => {
                             const isActive = quickFilter === f.id;
                             const colorMap: Record<string, string> = {
-                                green: isActive ? '#16a34a' : '#16a34a22',
-                                yellow: isActive ? '#ca8a04' : '#ca8a0422',
-                                red: isActive ? '#dc2626' : '#dc262622',
-                                orange: isActive ? '#ea580c' : '#ea580c22',
+                                green: catalogUi.filterGreen(isActive),
+                                yellow: catalogUi.filterYellow(isActive),
+                                red: catalogUi.filterRed(isActive),
+                                orange: catalogUi.filterOrange(isActive),
                             };
                             return (
                                 <button
@@ -604,7 +605,7 @@ function CatalogPageContent() {
                                             ? (f.color ? colorMap[f.color] : 'var(--brand-blue)')
                                             : (f.color ? colorMap[f.color] : 'var(--bg-primary)'),
                                         color: isActive
-                                            ? (f.color ? '#fff' : '#fff')
+                                            ? catalogUi.onAction
                                             : 'var(--text-secondary)',
                                         border: `2px solid ${isActive
                                             ? (f.color ? colorMap[f.color] : 'var(--brand-blue)')
@@ -650,14 +651,14 @@ function CatalogPageContent() {
                             <button
                                 onClick={() => setViewMode('grid')}
                                 className="px-2.5 py-2 transition-colors"
-                                style={{ backgroundColor: viewMode === 'grid' ? 'var(--brand-blue)' : 'transparent', color: viewMode === 'grid' ? '#fff' : 'var(--text-secondary)' }}
+                                style={{ backgroundColor: viewMode === 'grid' ? 'var(--brand-blue)' : 'transparent', color: viewMode === 'grid' ? catalogUi.onAction : 'var(--text-secondary)' }}
                             >
                                 <IconGrid size={16} />
                             </button>
                             <button
                                 onClick={() => setViewMode('list')}
                                 className="px-2.5 py-2 transition-colors"
-                                style={{ backgroundColor: viewMode === 'list' ? 'var(--brand-blue)' : 'transparent', color: viewMode === 'list' ? '#fff' : 'var(--text-secondary)' }}
+                                style={{ backgroundColor: viewMode === 'list' ? 'var(--brand-blue)' : 'transparent', color: viewMode === 'list' ? catalogUi.onAction : 'var(--text-secondary)' }}
                             >
                                 <IconList size={16} />
                             </button>
@@ -665,7 +666,7 @@ function CatalogPageContent() {
                                 onClick={() => setViewMode('order')}
                                 className="px-2.5 py-2 transition-colors text-xs font-bold"
                                 title="Ordenar catálogo"
-                                style={{ backgroundColor: viewMode === 'order' ? 'var(--brand-blue)' : 'transparent', color: viewMode === 'order' ? '#fff' : 'var(--text-secondary)' }}
+                                style={{ backgroundColor: viewMode === 'order' ? 'var(--brand-blue)' : 'transparent', color: viewMode === 'order' ? catalogUi.onAction : 'var(--text-secondary)' }}
                             >
                                 ⠿
                             </button>
@@ -1060,7 +1061,7 @@ function ProductCard({ group, viewMode, isSelecting, isSelected, onToggleSelect,
                             backgroundColor: isSelected ? 'var(--brand-blue)' : 'transparent'
                         }}
                     >
-                        {isSelected && <IconCheck size={10} color="#fff" />}
+                        {isSelected && <IconCheck size={10} color={catalogUi.onAction} />}
                     </button>
                 )}
 
@@ -1102,8 +1103,8 @@ function ProductCard({ group, viewMode, isSelecting, isSelected, onToggleSelect,
                         onClick={() => onTogglePublish(currentProduct)}
                         className="text-xs px-2 py-1 rounded-lg font-bold transition-colors"
                         style={{
-                            backgroundColor: isPublished ? '#dcfce7' : '#fef9c3',
-                            color: isPublished ? '#16a34a' : '#92400e'
+                            backgroundColor: isPublished ? catalogUi.successBg : catalogUi.warningBg,
+                            color: isPublished ? catalogUi.successFg : catalogUi.warningFg
                         }}
                     >
                         {isPublished ? 'Visible' : 'Borrador'}
@@ -1118,7 +1119,7 @@ function ProductCard({ group, viewMode, isSelecting, isSelected, onToggleSelect,
                     <button
                         onClick={() => onDelete(currentProduct.id)}
                         className="p-1.5 rounded-lg transition-colors hover:bg-red-50"
-                        style={{ color: '#ef4444' }}
+                        style={{ color: semantic.dangerFg }}
                     >
                         <IconTrash size={15} />
                     </button>
@@ -1131,7 +1132,7 @@ function ProductCard({ group, viewMode, isSelecting, isSelected, onToggleSelect,
     return (
         <div
             className="bg-white rounded-xl overflow-hidden border-2 hover:shadow-md transition-all flex flex-col"
-            style={{ borderColor: isSelected ? 'var(--brand-blue)' : health.isIncomplete ? '#fcd34d' : 'var(--border-color)' }}
+            style={{ borderColor: isSelected ? 'var(--brand-blue)' : health.isIncomplete ? tokens['--bs-color-sol-300'] : 'var(--border-color)' }}
         >
             {/* Image area */}
             <div className="relative aspect-square bg-slate-100">
@@ -1150,11 +1151,11 @@ function ProductCard({ group, viewMode, isSelecting, isSelected, onToggleSelect,
                         onClick={onToggleSelect}
                         className="absolute top-2 left-2 w-6 h-6 rounded-lg border-2 flex items-center justify-center shadow-sm transition-colors"
                         style={{
-                            borderColor: isSelected ? 'var(--brand-blue)' : '#fff',
+                            borderColor: isSelected ? 'var(--brand-blue)' : semantic.surface,
                             backgroundColor: isSelected ? 'var(--brand-blue)' : 'rgba(255,255,255,0.9)'
                         }}
                     >
-                        {isSelected && <IconCheck size={12} color="#fff" />}
+                        {isSelected && <IconCheck size={12} color={catalogUi.onAction} />}
                     </button>
                 )}
 
@@ -1164,8 +1165,8 @@ function ProductCard({ group, viewMode, isSelecting, isSelected, onToggleSelect,
                         onClick={() => onTogglePublish(currentProduct)}
                         className="text-[10px] font-bold px-1.5 py-0.5 rounded-md shadow-sm transition-all hover:scale-105"
                         style={{
-                            backgroundColor: isPublished ? '#16a34a' : '#6b7280',
-                            color: '#fff'
+                            backgroundColor: isPublished ? catalogUi.successFg : catalogUi.mutedFg,
+                            color: catalogUi.onAction
                         }}
                     >
                         {isPublished ? '✓ Visible' : 'Borrador'}
@@ -1230,9 +1231,9 @@ function ProductCard({ group, viewMode, isSelecting, isSelected, onToggleSelect,
 
 function HealthTag({ label, color }: { label: string; color: 'red' | 'orange' | 'yellow' }) {
     const colorMap = {
-        red: { bg: '#fee2e2', text: '#dc2626' },
-        orange: { bg: '#ffedd5', text: '#ea580c' },
-        yellow: { bg: '#fef9c3', text: '#92400e' },
+        red: { bg: catalogUi.dangerBg, text: catalogUi.dangerFg },
+        orange: { bg: catalogUi.vehiculosBg, text: catalogUi.vehiculosFg },
+        yellow: { bg: catalogUi.warningBg, text: catalogUi.warningFg },
     };
     const c = colorMap[color];
     return (
@@ -1355,7 +1356,7 @@ function AIOrganizeModal({
                 {/* Header */}
                 <div className="flex items-center gap-3 px-5 py-4 border-b" style={{ borderColor: 'var(--border-color)' }}>
                     <div className="w-8 h-8 bg-purple-100 rounded-xl flex items-center justify-center flex-shrink-0">
-                        <IconZap size={16} color="#7c3aed" />
+                        <IconZap size={16} color={catalogUi.eventosFg} />
                     </div>
                     <div className="flex-1">
                         <h2 className="font-bold text-base" style={{ color: 'var(--text-primary)' }}>
@@ -1416,7 +1417,7 @@ function AIOrganizeModal({
                                         backgroundColor: allSelected ? 'var(--brand-blue)' : 'transparent'
                                     }}
                                 >
-                                    {allSelected && <IconCheck size={9} color="#fff" />}
+                                    {allSelected && <IconCheck size={9} color={catalogUi.onAction} />}
                                 </div>
                                 {allSelected ? 'Deseleccionar todo' : 'Seleccionar todo'}
                             </button>
@@ -1431,7 +1432,7 @@ function AIOrganizeModal({
                                             className="w-full flex items-center gap-3 px-3 py-3 rounded-xl border-2 text-left transition-all"
                                             style={{
                                                 borderColor: isSelected ? 'var(--brand-blue)' : 'var(--border-color)',
-                                                backgroundColor: isSelected ? '#eff6ff' : 'white',
+                                                backgroundColor: isSelected ? catalogUi.selectedTint : semantic.surface,
                                             }}
                                         >
                                             <div
@@ -1441,7 +1442,7 @@ function AIOrganizeModal({
                                                     backgroundColor: isSelected ? 'var(--brand-blue)' : 'transparent'
                                                 }}
                                             >
-                                                {isSelected && <IconCheck size={10} color="#fff" />}
+                                                {isSelected && <IconCheck size={10} color={catalogUi.onAction} />}
                                             </div>
                                             <IconTag size={13} color={isSelected ? 'var(--brand-blue)' : 'var(--text-tertiary)'} />
                                             <div className="flex-1 min-w-0">
@@ -1457,7 +1458,7 @@ function AIOrganizeModal({
                                                 className="text-xs font-bold px-2 py-0.5 rounded-full flex-shrink-0"
                                                 style={{
                                                     backgroundColor: isSelected ? 'var(--brand-blue)' : 'var(--bg-secondary)',
-                                                    color: isSelected ? '#fff' : 'var(--text-secondary)'
+                                                    color: isSelected ? catalogUi.onAction : 'var(--text-secondary)'
                                                 }}
                                             >
                                                 {s.products.length}
@@ -1495,7 +1496,7 @@ function AIOrganizeModal({
                             onClick={onApply}
                             disabled={selectedCount === 0 || applying}
                             className="flex-2 flex items-center justify-center gap-2 px-5 py-2.5 text-sm font-bold rounded-xl text-white transition-all disabled:opacity-40"
-                            style={{ backgroundColor: '#7c3aed', flex: 2 }}
+                            style={{ backgroundColor: catalogUi.eventosFg, flex: 2 }}
                         >
                             {applying ? (
                                 <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -1560,17 +1561,17 @@ function FixModeModal({ product, current, total, businessProfileId, userId, onSa
                 <div className="px-5 pb-3">
                     <div className="flex flex-wrap gap-1.5">
                         {health.missingImage && (
-                            <span className="text-xs font-bold px-2 py-1 rounded-lg" style={{ backgroundColor: '#ffedd5', color: '#ea580c' }}>
+                            <span className="text-xs font-bold px-2 py-1 rounded-lg" style={{ backgroundColor: catalogUi.vehiculosBg, color: catalogUi.vehiculosFg }}>
                                 📷 Falta foto
                             </span>
                         )}
                         {health.missingPrice && (
-                            <span className="text-xs font-bold px-2 py-1 rounded-lg" style={{ backgroundColor: '#fee2e2', color: '#dc2626' }}>
+                            <span className="text-xs font-bold px-2 py-1 rounded-lg" style={{ backgroundColor: catalogUi.dangerBg, color: catalogUi.dangerFg }}>
                                 💰 Falta precio
                             </span>
                         )}
                         {health.missingCategory && (
-                            <span className="text-xs font-bold px-2 py-1 rounded-lg" style={{ backgroundColor: '#fef9c3', color: '#92400e' }}>
+                            <span className="text-xs font-bold px-2 py-1 rounded-lg" style={{ backgroundColor: catalogUi.warningBg, color: catalogUi.warningFg }}>
                                 🏷️ Falta categoría
                             </span>
                         )}

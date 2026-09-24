@@ -2,6 +2,7 @@
 
 import { forwardRef } from 'react';
 import { IconTrash } from '@/components/Icons';
+import { publishUi } from '@/lib/bs-tokens';
 
 const CardDeleteZone = forwardRef<HTMLDivElement, { active?: boolean; hot?: boolean }>(
   function CardDeleteZone({ active, hot }, ref) {
@@ -16,7 +17,7 @@ const CardDeleteZone = forwardRef<HTMLDivElement, { active?: boolean; hot?: bool
         }`}
         aria-hidden
       >
-        <IconTrash size={18} color={hot ? '#ffffff' : '#fecaca'} />
+        <IconTrash size={18} color={hot ? publishUi.onDark : publishUi.deleteIcon} />
       </div>
     );
   },

@@ -71,6 +71,77 @@ export function confidenceColor(level?: string): string {
 
 export const chatGradient = `linear-gradient(135deg, ${semantic.chatStart} 0%, ${semantic.chatEnd} 100%)`;
 
+/** Flyer / export canvas typography & surfaces */
+export const flyer = {
+  ink: tokens['--bs-color-neutral-900'],
+  deep: tokens['--bs-color-neutral-950'],
+  surface: tokens['--bs-color-neutral-0'],
+  muted: tokens['--bs-color-neutral-500'],
+  warmBg: tokens['--bs-color-sol-50'],
+  cautionBg: tokens['--bs-color-warning-bg'],
+  onPrimary: tokens['--bs-color-neutral-0'],
+} as const;
+
+/** Mi negocio · catálogo chips & health */
+export const catalogUi = {
+  successFg: tokens['--bs-success-fg'],
+  successBg: tokens['--bs-success-bg'],
+  warningFg: tokens['--bs-warning-fg'],
+  warningBg: tokens['--bs-warning-bg'],
+  dangerFg: tokens['--bs-danger-fg'],
+  dangerBg: tokens['--bs-danger-bg'],
+  vehiculosFg: tokens['--bs-cat-vehiculos-fg'],
+  vehiculosBg: tokens['--bs-cat-vehiculos-bg'],
+  eventosFg: tokens['--bs-cat-eventos-fg'],
+  selectedTint: tokens['--bs-cat-negocios-bg'],
+  onAction: tokens['--bs-color-neutral-0'],
+  mutedFg: tokens['--bs-color-neutral-500'],
+  filterGreen: (active: boolean) =>
+    active ? tokens['--bs-success-fg'] : bsMix('--bs-success-fg', 13),
+  filterYellow: (active: boolean) =>
+    active ? tokens['--bs-cat-servicios-fg'] : bsMix('--bs-cat-servicios-fg', 13),
+  filterRed: (active: boolean) =>
+    active ? tokens['--bs-danger-fg'] : bsMix('--bs-danger-fg', 13),
+  filterOrange: (active: boolean) =>
+    active ? tokens['--bs-cat-vehiculos-fg'] : bsMix('--bs-cat-vehiculos-fg', 13),
+} as const;
+
+export const publishUi = {
+  onWarmInk: tokens['--bs-publish-fg'],
+  onDark: tokens['--bs-color-neutral-0'],
+  ink: tokens['--bs-color-neutral-900'],
+  defaultPrimary: tokens['--bs-identity'],
+  coverPalette: [
+    tokens['--bs-color-neutral-0'],
+    tokens['--bs-color-neutral-900'],
+    tokens['--bs-color-sol-300'],
+    tokens['--bs-danger-fg'],
+    tokens['--bs-action'],
+    tokens['--bs-success-fg'],
+    tokens['--bs-cat-eventos-fg'],
+    tokens['--bs-cat-vehiculos-fg'],
+  ],
+  cardPalette: [
+    tokens['--bs-identity'],
+    tokens['--bs-color-neutral-900'],
+    tokens['--bs-color-neutral-0'],
+    tokens['--bs-danger-fg'],
+    tokens['--bs-success-fg'],
+    tokens['--bs-cat-negocios-fg'],
+    tokens['--bs-cat-vehiculos-fg'],
+    tokens['--bs-cat-eventos-fg'],
+  ],
+  magicGradient: `linear-gradient(135deg, ${tokens['--bs-cat-negocios-fg']} 0%, ${tokens['--bs-action']} 100%)`,
+  deleteIcon: tokens['--bs-danger-bg'],
+  destacadoFg: tokens['--bs-color-sol-600'],
+} as const;
+
+export const contactChannel = {
+  email: tokens['--bs-cat-negocios-fg'],
+  telefono: tokens['--bs-info-fg'],
+  whatsapp: tokens['--bs-color-social-whatsapp'],
+} as const;
+
 export const trustBadge = {
   verified: {
     color: semantic.infoFg,

@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { IconCamera, IconMegaphone, IconMicrophone, IconSend } from '@/components/Icons';
 import PublishMediaSheet from './PublishMediaSheet';
+import { publishUi } from '@/lib/bs-tokens';
 
 interface PublishStudioComposerProps {
   value: string;
@@ -132,7 +133,7 @@ export default function PublishStudioComposer({
             aria-label="Enviar a la IA"
             title="Enviar a la IA"
           >
-            <IconSend size={17} color="#ffffff" />
+            <IconSend size={17} color={publishUi.onDark} />
           </button>
         </div>
 
@@ -142,7 +143,7 @@ export default function PublishStudioComposer({
           disabled={publishing}
           className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-[var(--brand-blue)] text-sm font-bold text-white shadow-[0_8px_22px_-6px_rgba(var(--brand-primary-rgb),0.55)] transition-transform active:scale-[0.99] disabled:opacity-50"
         >
-          <IconMegaphone size={18} color="#ffffff" />
+          <IconMegaphone size={18} color={publishUi.onDark} />
           {publishing ? 'Publicando…' : 'Publicar aviso'}
         </button>
       </div>

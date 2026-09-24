@@ -28,6 +28,7 @@ import { IconCamera, IconImage, IconLayers, IconMegaphone, IconMicrophone, IconV
 import type { Adiso } from '@/types';
 import { FLYER_TEMPLATES, defaultFlyerForCategory, resolveFlyerConfig } from '@/lib/flyer/templates';
 import { getPaletteOverrides } from '@/lib/flyer/color-palettes';
+import { flyer, tokens } from '@/lib/bs-tokens';
 import PublishPalettePicker from '@/components/publish/PublishPalettePicker';
 import { exportAndUploadFlyer } from '@/lib/flyer/export-client';
 import type { FlyerConfig, FlyerTemplateId } from '@/lib/flyer/types';
@@ -843,8 +844,8 @@ export default function PublishStudio({
                     heroUrl={coverUrl}
                     templateId={exportTemplateId}
                     badge={exportConfig.badge}
-                    background={exportConfig.secondary || '#f8fafc'}
-                    color={exportConfig.primary || '#0f172a'}
+                    background={exportConfig.secondary || tokens['--bs-color-neutral-50']}
+                    color={exportConfig.primary || flyer.ink}
                     titleScale={exportConfig.titleScale}
                     draft={draft}
                     onFlyer={(patch) => setDraft({ flyerConfig: { ...exportConfig, ...patch } })}

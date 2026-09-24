@@ -105,10 +105,10 @@ export default function PublishReviewStep({ draft, publisher }: PublishReviewSte
 
         {missing.length > 0 && (
           <div className="rounded-xl bg-[rgba(234,179,8,0.1)] ring-1 ring-[rgba(234,179,8,0.25)] px-3 py-2.5">
-            <p className="text-[11px] font-semibold text-[#a16207] m-0 mb-1">
+            <p className="text-[11px] font-semibold text-[var(--bs-warning-fg)] m-0 mb-1">
               Falta para un aviso más completo
             </p>
-            <p className="text-[11px] text-[#a16207]/90 m-0">
+            <p className="text-[11px] text-[var(--bs-warning-fg)]/90 m-0">
               {missing.map((f) => FIELD_LABELS[f] || f).join(' · ')}
             </p>
           </div>

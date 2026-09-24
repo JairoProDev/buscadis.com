@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { IconSparkles } from '@/components/Icons';
 import { PublishDraft } from '@/lib/publish/publish-draft-types';
+import { publishUi } from '@/lib/bs-tokens';
 
 interface PublishMagicEditorPanelProps {
   draft: PublishDraft;
@@ -56,7 +57,7 @@ export default function PublishMagicEditorPanel({
   return (
     <div
       className="rounded-2xl overflow-hidden"
-      style={{ background: 'linear-gradient(135deg, #6366f1 0%, #3b82f6 100%)' }}
+      style={{ background: publishUi.magicGradient }}
     >
       <button
         type="button"

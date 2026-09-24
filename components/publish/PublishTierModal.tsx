@@ -110,7 +110,7 @@ export default function PublishTierModal({
               type="button"
               disabled={loading}
               onClick={onChoosePro}
-              className="w-full py-2.5 rounded-xl bg-[var(--brand-yellow)] text-[#1c1608] font-bold text-sm shadow-[0_2px_10px_rgba(var(--brand-yellow-rgb),0.4)] hover:brightness-105 disabled:opacity-50"
+              className="w-full py-2.5 rounded-xl bg-[var(--brand-yellow)] text-[var(--bs-publish-fg)] font-bold text-sm shadow-[0_2px_10px_rgba(var(--brand-yellow-rgb),0.4)] hover:brightness-105 disabled:opacity-50"
             >
               {loadingTier === 'pro' ? 'Preparando…' : 'Publicar con IA'}
             </button>

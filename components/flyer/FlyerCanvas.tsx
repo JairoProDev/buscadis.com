@@ -6,6 +6,7 @@ import { resolveFlyerConfig } from '@/lib/flyer/templates';
 import { truncateFlyerTitle } from '@/lib/flyer/layout';
 import { flyerMetaFontSize, flyerPriceFontSize, flyerTitleFontSize } from '@/lib/flyer/typography';
 import type { FlyerDensity } from '@/lib/flyer/types';
+import { flyer } from '@/lib/bs-tokens';
 
 export type { FlyerDensity };
 
@@ -56,7 +57,7 @@ export default function FlyerCanvas({
   const rootStyle: CSSProperties = {
     containerType: 'inline-size',
     background: secondary,
-    color: '#0f172a',
+    color: flyer.ink,
     fontFamily: 'Georgia, "Times New Roman", ui-serif, serif',
   };
 
@@ -147,7 +148,7 @@ export default function FlyerCanvas({
       body = (
         <div
           className="absolute inset-0 flex min-h-0 flex-col justify-between overflow-hidden"
-          style={{ background: secondary || '#fff7ed', padding: pad }}
+          style={{ background: secondary || flyer.warmBg, padding: pad }}
         >
           <div className="h-1 w-[28%] shrink-0" style={{ background: primary }} />
           <div className="min-h-0 overflow-hidden">
@@ -167,7 +168,7 @@ export default function FlyerCanvas({
             )}
           </div>
           {cfg.showLocation && content.locationLabel && (
-            <p className="m-0 font-sans" style={{ ...metaStyle, color: '#64748b', textAlign: align }}>
+            <p className="m-0 font-sans" style={{ ...metaStyle, color: flyer.muted, textAlign: align }}>
               {content.locationLabel}
             </p>
           )}
@@ -189,7 +190,7 @@ export default function FlyerCanvas({
               {badge || content.categoryLabel}
             </span>
           )}
-          <Title className="max-w-full" style={{ color: '#0f172a', textAlign: 'center' }}>
+          <Title className="max-w-full" style={{ color: flyer.ink, textAlign: 'center' }}>
             {title}
           </Title>
           {price && (
@@ -211,7 +212,7 @@ export default function FlyerCanvas({
         <div
           className="absolute inset-0 flex min-h-0 flex-col justify-end overflow-hidden"
           style={{
-            background: `linear-gradient(160deg, ${primary} 0%, ${secondary} 55%, #020617 100%)`,
+            background: `linear-gradient(160deg, ${primary} 0%, ${secondary} 55%, ${flyer.deep} 100%)`,
             padding: pad,
           }}
         >
@@ -270,7 +271,7 @@ export default function FlyerCanvas({
             </div>
           </div>
           <div className="flex min-h-0 flex-1 flex-col justify-between overflow-hidden" style={{ padding: pad }}>
-            <Title style={{ color: '#0f172a' }}>{title}</Title>
+            <Title style={{ color: flyer.ink }}>{title}</Title>
             <div className="shrink-0">
               {price && (
                 <p className="m-0 font-sans" style={{ ...priceStyle, color: primary }}>
@@ -309,7 +310,7 @@ export default function FlyerCanvas({
             >
               {badge || 'DISPONIBLE'}
             </span>
-            <Title className="text-center" style={{ textAlign: 'center', color: '#0f172a' }}>
+            <Title className="text-center" style={{ textAlign: 'center', color: flyer.ink }}>
               {title}
             </Title>
             {price && (
@@ -331,7 +332,7 @@ export default function FlyerCanvas({
       body = (
         <div
           className="absolute inset-0 flex min-h-0 flex-col overflow-hidden"
-          style={{ background: '#ffffff', padding: pad }}
+          style={{ background: flyer.surface, padding: pad }}
         >
           <div
             className={`mb-2 w-full shrink-0 rounded-full ${compact ? 'h-1' : 'h-2'}`}
@@ -342,7 +343,7 @@ export default function FlyerCanvas({
               {content.categoryLabel}
             </p>
           )}
-          <Title className="min-h-0 flex-1" style={{ color: '#0f172a', fontFamily: 'system-ui, sans-serif' }}>
+          <Title className="min-h-0 flex-1" style={{ color: flyer.ink, fontFamily: 'system-ui, sans-serif' }}>
             {title}
           </Title>
           <div
@@ -408,7 +409,7 @@ export default function FlyerCanvas({
           </div>
           <span className="invisible shrink-0">.</span>
           <div className={`min-h-0 overflow-hidden ${compact ? 'mt-[14%]' : 'mt-[18%]'}`}>
-            <Title style={{ color: '#0f172a' }}>{title}</Title>
+            <Title style={{ color: flyer.ink }}>{title}</Title>
             {price && (
               <p className="mt-2 m-0 font-sans" style={{ ...priceStyle, color: primary }}>
                 {price}
@@ -468,7 +469,7 @@ export default function FlyerCanvas({
       body = (
         <div
           className="absolute inset-0 flex min-h-0 flex-col justify-between overflow-hidden"
-          style={{ background: secondary || '#fef3c7', padding: pad }}
+          style={{ background: secondary || flyer.cautionBg, padding: pad }}
         >
           <div className="flex shrink-0 items-baseline justify-between gap-2 border-b-2 pb-1" style={{ borderColor: primary }}>
             <span className="font-sans font-bold uppercase tracking-[0.16em]" style={{ ...metaStyle, color: primary }}>
@@ -480,7 +481,7 @@ export default function FlyerCanvas({
               </span>
             )}
           </div>
-          <Title className="min-h-0 py-2" style={{ color: '#0f172a', fontFamily: 'Georgia, ui-serif, serif' }}>
+          <Title className="min-h-0 py-2" style={{ color: flyer.ink, fontFamily: 'Georgia, ui-serif, serif' }}>
             {title}
           </Title>
           <div className="flex shrink-0 items-end justify-between gap-2 border-t border-black/10 pt-2">
@@ -519,7 +520,7 @@ export default function FlyerCanvas({
                 {badge || content.categoryLabel}
               </span>
             )}
-            <Title className="text-center" style={{ textAlign: 'center', color: '#0f172a' }}>
+            <Title className="text-center" style={{ textAlign: 'center', color: flyer.ink }}>
               {title}
             </Title>
             {price && (
@@ -542,7 +543,7 @@ export default function FlyerCanvas({
         <div
           className="absolute inset-0 flex min-h-0 flex-col justify-between overflow-hidden"
           style={{
-            background: `radial-gradient(120% 80% at 10% 0%, ${primary}33 0%, ${secondary} 45%, #ffffff 100%)`,
+            background: `radial-gradient(120% 80% at 10% 0%, ${primary}33 0%, ${secondary} 45%, ${flyer.surface} 100%)`,
             padding: pad,
           }}
         >
@@ -554,7 +555,7 @@ export default function FlyerCanvas({
               {content.categoryLabel}
             </p>
           )}
-          <Title style={{ color: '#0f172a' }}>{title}</Title>
+          <Title style={{ color: flyer.ink }}>{title}</Title>
           <div className="shrink-0">
             {price && (
               <p className="m-0 font-sans" style={{ ...priceStyle, color: primary }}>
@@ -587,7 +588,7 @@ export default function FlyerCanvas({
               </span>
               {!compact && <span className="font-sans text-[clamp(0.55rem,2.5cqi,0.7rem)] text-slate-400">★★★</span>}
             </div>
-            <Title style={{ color: '#0f172a' }}>{title}</Title>
+            <Title style={{ color: flyer.ink }}>{title}</Title>
             {price && (
               <p className="mt-2 m-0 font-sans font-black" style={{ ...priceStyle, color: primary }}>
                 {price}
@@ -623,7 +624,7 @@ export default function FlyerCanvas({
                 {badge || content.categoryLabel}
               </span>
             )}
-            <Title className="max-w-[92%]" style={{ color: '#0f172a' }}>
+            <Title className="max-w-[92%]" style={{ color: flyer.ink }}>
               {title}
             </Title>
             <div className="flex shrink-0 items-end justify-between gap-2">
@@ -650,7 +651,7 @@ export default function FlyerCanvas({
       body = (
         <div
           className="absolute inset-0 flex min-h-0 flex-col justify-between overflow-hidden"
-          style={{ background: primary, color: '#fff', padding: pad }}
+          style={{ background: primary, color: flyer.onPrimary, padding: pad }}
         >
           <div className="flex shrink-0 items-start justify-between gap-2">
             {(badge || (cfg.showCategory && content.categoryLabel)) && (

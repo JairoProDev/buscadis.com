@@ -2,6 +2,7 @@
 
 import { useRef, type KeyboardEvent } from 'react';
 import { IconImage, IconSend } from '@/components/Icons';
+import { publishUi } from '@/lib/bs-tokens';
 
 interface PublishChatInputProps {
   value: string;
@@ -84,7 +85,7 @@ export default function PublishChatInput({
             : 'bg-[var(--bg-tertiary)] text-[var(--text-tertiary)]'
         }`}
       >
-        <IconSend size={15} color={canSend ? '#fff' : undefined} />
+        <IconSend size={15} color={canSend ? publishUi.onDark : undefined} />
       </button>
     </div>
   );
