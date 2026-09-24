@@ -3,6 +3,7 @@ export const SOPORTE_WHATSAPP_NUMERO = '51937054328';
 
 export type MotivoAyuda = 'sugerencia' | 'problema' | 'duda' | 'publicar';
 
+/** Orden: tareas frecuentes del marketplace → feedback → incidencias */
 export const MOTIVOS_AYUDA: Array<{
   id: MotivoAyuda;
   label: string;
@@ -10,28 +11,28 @@ export const MOTIVOS_AYUDA: Array<{
   mensaje: string;
 }> = [
   {
-    id: 'sugerencia',
-    label: 'Enviar una sugerencia',
-    descripcion: 'Ideas para mejorar la plataforma',
-    mensaje: 'Hola, tengo una sugerencia para Buscadis: ',
-  },
-  {
-    id: 'problema',
-    label: 'Reportar un problema',
-    descripcion: 'Algo no funciona como debería',
-    mensaje: 'Hola, encontré un problema en Buscadis: ',
-  },
-  {
     id: 'duda',
     label: 'Ayuda para buscar',
-    descripcion: 'Encuentra lo que necesitas en el marketplace',
-    mensaje: 'Hola, necesito ayuda para buscar en Buscadis: ',
+    descripcion: 'Ayuda para encontrar lo que necesito.',
+    mensaje: 'Hola, necesito ayuda para encontrar lo que busco en Buscadis: ',
   },
   {
     id: 'publicar',
     label: 'Ayuda para publicar',
     descripcion: 'Necesito apoyo con mi anuncio',
     mensaje: 'Hola, necesito ayuda para publicar mi anuncio en Buscadis: ',
+  },
+  {
+    id: 'sugerencia',
+    label: 'Enviar una sugerencia',
+    descripcion: 'Ideas para mejorar Buscadis.com',
+    mensaje: 'Hola, tengo una sugerencia para mejorarBuscadis: ',
+  },
+  {
+    id: 'problema',
+    label: 'Reportar un problema',
+    descripcion: 'Algo no funciona como debería',
+    mensaje: 'Hola, encontré un problema en Buscadis: ',
   },
 ];
 

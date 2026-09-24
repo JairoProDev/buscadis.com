@@ -1,10 +1,24 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type ComponentType } from 'react';
 import { FaTimes, FaWhatsapp } from 'react-icons/fa';
-import { IconClose } from '@/components/Icons';
+import {
+  IconAlertTriangle,
+  IconClose,
+  IconLightbulb,
+  IconMegaphone,
+  IconSearch,
+} from '@/components/Icons';
 import { MOTIVOS_AYUDA, getSoporteWhatsAppUrl, type MotivoAyuda } from '@/lib/soporte';
+import { MOTIVO_AYUDA_VISUAL } from '@/lib/soporte-ui';
 import { useUI } from '@/contexts/UIContext';
+
+const MOTIVO_ICON: Record<MotivoAyuda, ComponentType<{ size?: number; color?: string }>> = {
+  duda: IconSearch,
+  publicar: IconMegaphone,
+  sugerencia: IconLightbulb,
+  problema: IconAlertTriangle,
+};
 
 interface FeedbackButtonProps {
   variant?: 'floating';
@@ -103,34 +117,37 @@ export default function FeedbackButton({ variant = 'floating' }: FeedbackButtonP
             </button>
           </div>
 
-          {MOTIVOS_AYUDA.map((motivo) => (
-            <button
-              key={motivo.id}
-              type="button"
-              onClick={() => abrirWhatsApp(motivo.id)}
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'flex-start',
-                gap: '0.15rem',
-                padding: '0.75rem 0.85rem',
-                borderRadius: '12px',
-                border: '1px solid var(--border-color)',
-                backgroundColor: 'var(--bg-secondary)',
-                cursor: 'pointer',
-                textAlign: 'left',
-                transition: 'background-color 0.15s ease, border-color 0.15s ease',
-              }}
-              className="hover:border-sky-300 hover:bg-sky-50 dark:hover:bg-sky-950/30"
-            >
-              <span style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-primary)' }}>
-                {motivo.label}
-              </span>
-              <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
-                {motivo.descripcion}
-              </span>
-            </button>
-          ))}
+          {MOTIVOS_AYUDA.map((motivo) => {
+            const visual = MOTIVO_AYUDA_VISUAL[motivo.id];
+            const Icon = MOTIVO_ICON[motivo.id];
+            return (
+              <button
+                key={motivo.id}
+                type="button"
+                onClick={() => abrirWhatsApp(motivo.id)}
+                className="group flex w-full items-center gap-3 rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)] p-3 text-left transition-colors hover:bg-[var(--hover-bg)]"
+                style={{ ['--motivo-hover-border' as string]: visual.hoverBorder }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.borderColor = visual.hoverBorder;
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.borderColor = 'var(--border-color)';
+                }}
+              >
+                <span
+                  className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full"
+                  style={{ backgroundColor: visual.iconBg }}
+                  aria-hidden
+                >
+                  <Icon size={18} color={visual.iconColor} />
+                </span>
+                <span className="min-w-0 flex flex-col gap-0.5">
+                  <span className="text-sm font-semibold text-[var(--text-primary)]">{motivo.label}</span>
+                  <span className="text-xs leading-snug text-[var(--text-secondary)]">{motivo.descripcion}</span>
+                </span>
+              </button>
+            );
+          })}
         </div>
       )}
 
@@ -142,7 +159,7 @@ export default function FeedbackButton({ variant = 'floating' }: FeedbackButtonP
         style={{
           padding: '0.7rem 1rem',
           borderRadius: '999px',
-          border: '1px solid rgba(56, 189, 248, 0.35)',
+          border: '1px solid color-mix(in srgb, var(--brand-blue) 35%, transparent)',
           cursor: 'pointer',
           fontSize: '0.875rem',
           fontWeight: 600,
@@ -150,7 +167,7 @@ export default function FeedbackButton({ variant = 'floating' }: FeedbackButtonP
           alignItems: 'center',
           gap: '0.5rem',
           transition: 'transform 0.15s ease, box-shadow 0.15s ease',
-          boxShadow: '0 6px 20px rgba(56, 189, 248, 0.25)',
+          boxShadow: '0 6px 20px color-mix(in srgb, var(--brand-blue) 28%, transparent)',
           backgroundColor: 'var(--brand-blue)',
           color: '#fff',
         }}
