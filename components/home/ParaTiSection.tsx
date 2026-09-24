@@ -40,8 +40,7 @@ export default function ParaTiSection({ onAbrirAdiso }: ParaTiSectionProps) {
   if (!user || loading || adisos.length === 0) return null;
 
   return (
-    <section className="mb-6">
-      <h2 className="text-lg font-bold mb-3 px-1">Para ti</h2>
+    <section className="mb-4">
       <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
         {adisos.map((adiso) => (
           <AdisoCard
