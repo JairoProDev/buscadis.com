@@ -5,9 +5,9 @@ import type { Map as LeafletMap, Marker as LeafletMarker } from 'leaflet';
 import { FaCrosshairs } from 'react-icons/fa';
 import { detectZoneFromText } from '@/lib/envios/zones';
 import { IconLocation, IconSearch } from '@/components/Icons';
+import { getMapTileLayerOptions } from '@/lib/map-basemap';
 
 const DEFAULT_CENTER: [number, number] = [-13.5319, -71.9675];
-const TILE_URL = 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png';
 
 export interface DeliveryMapPoint {
   lat: number;
@@ -141,7 +141,11 @@ export default function DeliveryPointField({
           attributionControl: false,
         }).setView(value ? [value.lat, value.lng] : DEFAULT_CENTER, value ? 15 : 13);
 
-        L.tileLayer(TILE_URL, { maxZoom: 19 }).addTo(map);
+        const tile = getMapTileLayerOptions();
+        L.tileLayer(tile.url, {
+          maxZoom: tile.maxZoom,
+          subdomains: tile.subdomains,
+        }).addTo(map);
         L.control.zoom({ position: 'bottomright' }).addTo(map);
 
         map.on('click', (e: { latlng: { lat: number; lng: number } }) => {

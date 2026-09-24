@@ -7,6 +7,7 @@ import { getCategoriaIcon, PUBLISH_CATEGORIAS } from '@/lib/categoria-icons';
 import { getCategoriaThemeTokens } from '@/lib/categoria-theme';
 import { IconMapPin, IconMinus, IconPlus } from '@/components/Icons';
 import { bsMix, semantic, tokens } from '@/lib/bs-tokens';
+import { getMapTileLayerOptions } from '@/lib/map-basemap';
 
 const MAP_FILTERS: { id: Categoria | 'todos'; label: string }[] = [
   { id: 'todos', label: 'Todos' },
@@ -15,10 +16,6 @@ const MAP_FILTERS: { id: Categoria | 'todos'; label: string }[] = [
 
 const DEFAULT_CENTER: [number, number] = [-13.5319, -71.9675];
 const DEFAULT_ZOOM = 13;
-
-const TILE_URL = 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png';
-const TILE_ATTRIBUTION =
-  '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; <a href="https://carto.com/">CARTO</a>';
 
 interface MapaInteractivoProps {
   adisos: Adiso[];
@@ -97,9 +94,11 @@ export default function MapaInteractivo({ adisos, onAbrirAdiso }: MapaInteractiv
           attributionControl: true,
         }).setView(DEFAULT_CENTER, DEFAULT_ZOOM);
 
-        L.tileLayer(TILE_URL, {
-          attribution: TILE_ATTRIBUTION,
-          maxZoom: 19,
+        const tile = getMapTileLayerOptions();
+        L.tileLayer(tile.url, {
+          attribution: tile.attribution,
+          maxZoom: tile.maxZoom,
+          subdomains: tile.subdomains,
         }).addTo(map);
 
         mapInstance.current = map;
