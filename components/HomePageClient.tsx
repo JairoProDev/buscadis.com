@@ -37,7 +37,6 @@ import {
   IconEventos,
   IconNegocios,
   IconComunidad,
-  IconShare,
   IconGrid,
   IconFeed,
   IconList,
@@ -45,7 +44,6 @@ import {
   IconClose,
   IconFilterFunnel,
 } from '@/components/Icons';
-import { getCategoriaLabel } from '@/lib/adiso-display';
 import { getCategoriaThemeTokens } from '@/lib/categoria-theme';
 import {
   applyBrowseFilters,
@@ -107,32 +105,12 @@ type SeccionMobile = 'adiso' | 'mapa' | 'publicar' | 'chatbot' | 'gratuitos';
 
 import { formatLocationShort } from '@/lib/geo/format';
 import { getLocationCountryCode } from '@/lib/geo/flags';
-import { getCountryByCode, DEFAULT_COUNTRY_CODE } from '@/lib/geo/countries-data';
+import { DEFAULT_COUNTRY_CODE } from '@/lib/geo/countries-data';
 import BrowseEmptyState from '@/components/BrowseEmptyState';
+import BrowseResultsLine from '@/components/browse/BrowseResultsLine';
 import ParaTiSection from '@/components/home/ParaTiSection';
 import BusinessDirectorySection from '@/components/home/BusinessDirectorySection';
 const TEST_REGEX = /toyota test|test adiso|test anuncio/i;
-
-function getBrowseCountLabel(
-  categoria: Categoria | 'todos',
-  filtro?: {
-    distrito?: string;
-    departamento?: string;
-    provincia?: string;
-    countryCode?: string;
-  },
-): string {
-  const ubic =
-    filtro?.distrito ||
-    filtro?.provincia ||
-    filtro?.departamento ||
-    (filtro?.countryCode ? getCountryByCode(filtro.countryCode)?.name : null) ||
-    'Cusco';
-  if (categoria !== 'todos') {
-    return `· ${getCategoriaLabel(categoria)}`;
-  }
-  return `en ${ubic}`;
-}
 
 function HomeContent() {
   const router = useRouter();
@@ -238,6 +216,21 @@ function HomeContent() {
     if (categoriaFiltro === 'todos') return adisos.length;
     return adisos.filter((a) => a.categoria === categoriaFiltro).length;
   }, [adisos, categoriaFiltro]);
+  const browseHasMoreResults = hayMasAdisos && !cargando;
+  const showShareSearch =
+    Boolean(committedQuery.trim()) ||
+    categoriaFiltro !== 'todos' ||
+    activeFiltersCount > 0;
+
+  const handleShareSearch = useCallback(async () => {
+    const url = getBusquedaUrl(categoriaFiltro, committedQuery || busqueda);
+    try {
+      await navigator.clipboard.writeText(url);
+      success('Link de búsqueda copiado');
+    } catch {
+      error('Error al copiar link');
+    }
+  }, [categoriaFiltro, committedQuery, busqueda, success, error]);
   const [isOnlineState, setIsOnlineState] = useState(() => {
     if (typeof window !== 'undefined') {
       return navigator.onLine;
@@ -1356,6 +1349,17 @@ function HomeContent() {
                       else success(message);
                     }}
                   />
+                  <BrowseResultsLine
+                    loading={cargando}
+                    resultCount={adisosFiltrados.length}
+                    hasMore={browseHasMoreResults}
+                    categoria={categoriaFiltro}
+                    filters={browseFilters}
+                    committedQuery={committedQuery}
+                    ordenamiento={ordenamiento}
+                    showShare={showShareSearch}
+                    onShare={() => void handleShareSearch()}
+                  />
                   {committedQuery && (
                     <button
                       type="button"
@@ -1492,7 +1496,7 @@ function HomeContent() {
                   onCerrar={() => setMostrarFiltroUbicacion(false)}
                 />
               )}
-              {/* ── Toolbar: una sola línea ── */}
+              {/* ── Toolbar: filtros · orden · vista ── */}
               <div style={{
                 marginBottom: '1rem',
                 display: 'flex',
@@ -1505,102 +1509,6 @@ function HomeContent() {
                 overflow: 'visible',
               }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px', minWidth: 0, flexShrink: 1, overflow: 'hidden' }}>
-                  {cargando ? (
-                    <div className="skeleton-shimmer" style={{ width: 100, height: 42, borderRadius: '18px', flexShrink: 0 }} />
-                  ) : (
-                    <div style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '6px',
-                      padding: '4px 12px 4px 6px',
-                      borderRadius: '14px',
-                      boxShadow: '0 4px 12px rgba(0,0,0,0.03)',
-                      height: '42px',
-                      flexShrink: 0,
-                    }}
-                    className="brand-pill-glass"
-                    >
-                      <div style={{
-                        backgroundColor: 'var(--brand-blue)',
-                        color: 'white',
-                        height: '28px',
-                        minWidth: '28px',
-                        padding: '0 8px',
-                        borderRadius: '14px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        fontSize: '0.8rem',
-                        fontWeight: 800,
-                        boxShadow: '0 0 0 2px var(--brand-yellow)',
-                      }}>
-                        {adisosFiltrados.length}
-                      </div>
-                      <span style={{
-                        fontSize: '0.8rem',
-                        fontWeight: 600,
-                        color: 'var(--text-secondary)',
-                        whiteSpace: 'nowrap',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                      }}>
-                        {getBrowseCountLabel(categoriaFiltro, browseFilters.ubicacion)}
-                      </span>
-
-                      <button
-                        type="button"
-                        onClick={() => setInlineFiltersVisible((v) => !v)}
-                        className="relative flex h-[26px] w-[26px] shrink-0 items-center justify-center rounded-full border-0 transition-colors"
-                        style={{
-                          marginLeft: '2px',
-                          backgroundColor: inlineFiltersVisible
-                            ? 'rgba(var(--brand-primary-rgb), 0.18)'
-                            : 'rgba(var(--brand-primary-rgb), 0.12)',
-                          color: 'var(--brand-blue)',
-                        }}
-                        title={inlineFiltersVisible ? 'Ocultar filtros' : 'Mostrar filtros'}
-                        aria-label={inlineFiltersVisible ? 'Ocultar filtros' : 'Mostrar filtros'}
-                        aria-pressed={inlineFiltersVisible}
-                      >
-                        <IconFilterFunnel size={14} />
-                        {activeFiltersCount > 0 && (
-                          <span className="absolute right-0.5 top-0.5 h-1.5 w-1.5 rounded-full border border-white bg-[var(--brand-blue)]" />
-                        )}
-                      </button>
-
-                      {!cargando && (
-                        <button
-                          className="hidden lg:flex hover:opacity-90"
-                          onClick={async () => {
-                            const url = getBusquedaUrl(categoriaFiltro, busqueda);
-                            try {
-                              await navigator.clipboard.writeText(url);
-                              success('Link de búsqueda copiado');
-                            } catch (err) {
-                              error('Error al copiar link');
-                            }
-                          }}
-                          style={{
-                            marginLeft: '4px',
-                            width: '26px',
-                            height: '26px',
-                            borderRadius: '50%',
-                            border: 'none',
-                            backgroundColor: 'rgba(var(--brand-primary-rgb), 0.12)',
-                            color: 'var(--brand-blue)',
-                            cursor: 'pointer',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            transition: 'all 0.2s'
-                          }}
-                          title="Compartir búsqueda"
-                        >
-                          <IconShare size={14} />
-                        </button>
-                      )}
-                    </div>
-                  )}
                   {!cargando && marketplacePulse && (
                     <div
                       className="hidden xl:flex"
@@ -1627,7 +1535,26 @@ function HomeContent() {
                 </div>
 
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (!isDesktop) setIsMobileFiltersOpen(true);
+                      else setInlineFiltersVisible((v) => !v);
+                    }}
+                    className={`relative flex h-[42px] w-[42px] shrink-0 items-center justify-center rounded-[14px] brand-pill-glass text-[var(--text-tertiary)] transition-colors hover:text-[var(--text-secondary)] ${
+                      inlineFiltersVisible ? 'ring-1 ring-[var(--brand-blue)]/30' : ''
+                    }`}
+                    title="Filtros"
+                    aria-label="Filtros"
+                    aria-pressed={inlineFiltersVisible || isMobileFiltersOpen}
+                  >
+                    <IconFilterFunnel size={16} />
+                    {activeFiltersCount > 0 && (
+                      <span className="absolute right-2 top-2 h-1.5 w-1.5 rounded-full bg-[var(--brand-blue)]" />
+                    )}
+                  </button>
                   <Ordenamiento
+                    variant="icon"
                     valor={ordenamiento}
                     note={notaCercanos}
                     onChange={(v) => {

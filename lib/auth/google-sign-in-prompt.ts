@@ -14,6 +14,7 @@ type PromptNotification = {
 let nonceRef: string | null = null;
 let initPromise: Promise<boolean> | null = null;
 let afterSignIn: (() => void | Promise<void>) | null = null;
+let promptInFlight: Promise<boolean> | null = null;
 
 function isMobileViewport(): boolean {
   if (typeof window === 'undefined') return false;
@@ -69,13 +70,17 @@ async function ensureInitialized(): Promise<boolean> {
   return initPromise;
 }
 
-/** Selector de cuentas Google (One Tap). `false` si el navegador no lo muestra. */
-export async function promptGoogleSignIn(
-  onAuthenticated?: () => void | Promise<void>
-): Promise<boolean> {
-  afterSignIn = onAuthenticated ?? null;
+async function runPrompt(): Promise<boolean> {
   const ready = await ensureInitialized();
   if (!ready || !window.google?.accounts?.id) return false;
+
+  try {
+    window.google.accounts.id.cancel();
+  } catch {
+    /* ignore */
+  }
+
+  await new Promise((r) => setTimeout(r, 80));
 
   return new Promise((resolve) => {
     window.google!.accounts!.id!.prompt((notification: PromptNotification) => {
@@ -89,6 +94,23 @@ export async function promptGoogleSignIn(
       }
     });
   });
+}
+
+/** Selector de cuentas Google (One Tap). Una sola petición FedCM a la vez. */
+export async function promptGoogleSignIn(
+  onAuthenticated?: () => void | Promise<void>
+): Promise<boolean> {
+  afterSignIn = onAuthenticated ?? null;
+
+  if (promptInFlight) {
+    return promptInFlight;
+  }
+
+  promptInFlight = runPrompt().finally(() => {
+    promptInFlight = null;
+  });
+
+  return promptInFlight;
 }
 
 export function requestGoogleSignInPrompt(

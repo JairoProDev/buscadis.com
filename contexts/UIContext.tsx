@@ -9,9 +9,6 @@ import { promptGoogleSignIn } from '@/lib/auth/google-sign-in-prompt';
 
 const AuthModal = dynamic(() => import('@/components/AuthModal'), { ssr: false });
 const ChatDock = dynamic(() => import('@/components/ChatDock'), { ssr: false });
-const AuthSessionPrompt = dynamic(() => import('@/components/auth/AuthSessionPrompt'), {
-  ssr: false,
-});
 
 export interface ChatOpenContext {
   matchScore?: number;
@@ -113,7 +110,6 @@ export function UIProvider({ children }: { children: ReactNode }) {
       }}
     >
       {children}
-      <AuthSessionPrompt />
       <AuthModal
         abierto={isAuthModalOpen}
         onCerrar={closeAuthModal}

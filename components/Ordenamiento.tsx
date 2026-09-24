@@ -192,7 +192,7 @@ export default function Ordenamiento<V extends string = TipoOrdenamiento>({
         }
         className={
           iconOnly
-            ? 'p-2.5 rounded-xl text-slate-400 hover:text-slate-600 transition-colors shrink-0 inline-flex items-center justify-center'
+            ? 'flex h-[42px] w-[42px] shrink-0 items-center justify-center rounded-[14px] brand-pill-glass text-[var(--text-tertiary)] transition-colors hover:text-[var(--text-secondary)]'
             : 'brand-pill-glass hover:shadow-md motion-reduce:hover:translate-y-0 hover:-translate-y-0.5'
         }
       >
