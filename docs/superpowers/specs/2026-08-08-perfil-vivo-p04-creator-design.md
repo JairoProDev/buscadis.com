@@ -14,7 +14,7 @@ Experiencia creador completa (no panel cosmético): 6 pantallas + puertas de ent
 
 ## In scope
 
-1. **Puerta 1 — Aviso Buscadis:** prefill &lt;60 s (nombre, categoría, teléfono, ubicación, fotos).
+1. **Puerta 1 — Adiso Buscadis:** prefill &lt;60 s (nombre, categoría, teléfono, ubicación, fotos).
 2. **6 pantallas:** qué vendes → nombre/logo → dónde → cuándo → catálogo (fotos + precio S/) → listo (preview `/v` + “Enviármelo por WhatsApp”).
 3. **Preview vivo** en `/v/{slug}` (no storefront legacy como destino emocional).
 4. **§17 completitud:** score alineado a lo que `/v` muestra; una sola tarea-beneficio.
@@ -39,7 +39,7 @@ Import Instagram/Google completo, modo voz end-to-end, pipeline LQIP pro, “que
 ## DoD
 
 - [x] Flujo 6 pasos publica borrador visible en `/v`
-- [x] Puerta aviso → preview confirmable &lt;60 s (`/api/business/from-adiso`)
+- [x] Puerta adiso → preview confirmable &lt;60 s (`/api/business/from-adiso`)
 - [x] Paso catálogo admite ≥10 fotos + precio
 - [x] §17: una tarea-beneficio en panel (`CompletitudMeter` / `EditorProgressWidget`)
 - [x] “Enviármelo por WhatsApp” con `/v/{slug}`

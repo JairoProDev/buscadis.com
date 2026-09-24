@@ -86,4 +86,4 @@ Regla: nada se declara ganador con menos de 2 semanas y 3,000 visitas por varian
 
 ## 6. Privacidad
 
-Sin identificación personal del visitante. Sin cookies de terceros. Sin píxeles de redes en el perfil público (rompen rendimiento y confianza). Aviso de privacidad accesible desde el pie. Los datos agregados que ve el negocio nunca permiten identificar a un visitante individual, y esto se le dice explícitamente en el panel: es un argumento de confianza, no una limitación.
+Sin identificación personal del visitante. Sin cookies de terceros. Sin píxeles de redes en el perfil público (rompen rendimiento y confianza). Adiso de privacidad accesible desde el pie. Los datos agregados que ve el negocio nunca permiten identificar a un visitante individual, y esto se le dice explícitamente en el panel: es un argumento de confianza, no una limitación.

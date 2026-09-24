@@ -72,8 +72,8 @@ export default async function Home({ searchParams }: PageProps) {
 
   const listPath = categoria ? `/?categoria=${categoria}` : '/';
   const listName = categoria
-    ? `Avisos de ${categoria} en Buscadis`
-    : 'Avisos recientes en Buscadis';
+    ? `Adisos de ${categoria} en Buscadis`
+    : 'Adisos recientes en Buscadis';
 
   return (
     <>

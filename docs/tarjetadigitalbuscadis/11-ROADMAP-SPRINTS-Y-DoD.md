@@ -44,7 +44,7 @@ El orden no es por dificultad, es por **riesgo de invalidación**. Primero lo qu
 
 **Entrega:** el negocio puede crear y editar su perfil desde el celular sin ayuda.
 
-- Onboarding en 6 pasos, con **conversión desde aviso clasificado existente** (prioridad máxima)
+- Onboarding en 6 pasos, con **conversión desde adiso clasificado existente** (prioridad máxima)
 - Editor de identidad, contacto, horario, módulos (arrastrar para ordenar)
 - Carga de productos: individual, por lote (CSV/Excel) y por fotos múltiples
 - Pipeline de imágenes: recorte inteligente, normalización, compresión, variantes, LQIP

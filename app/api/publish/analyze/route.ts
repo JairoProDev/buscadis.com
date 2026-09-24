@@ -76,7 +76,7 @@ export async function POST(request: NextRequest) {
         const { object } = await generateObject({
           model: openai(AI_MODELS.REASONING),
           schema: AnalyzeSchema,
-          prompt: `Analiza este texto de aviso clasificado peruano y extrae datos estructurados.
+          prompt: `Analiza este texto de adiso clasificado peruano y extrae datos estructurados.
 
 IMPORTANTE — atributos:
 - Si la categoría es empleos: modalidad (presencial/remoto/híbrido), jornada, sueldo aproximado → keys empleos_modalidad, empleos_jornada, empleos_sueldo

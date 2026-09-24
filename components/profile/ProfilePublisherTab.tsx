@@ -6,7 +6,7 @@ import StoryArchiveGrid from '@/components/stories/StoryArchiveGrid';
 import ProfileMyAdisosGrid from './ProfileMyAdisosGrid';
 import Link from 'next/link';
 
-type PublisherSubTab = 'avisos' | 'historias' | 'promocionar';
+type PublisherSubTab = 'adisos' | 'historias' | 'promocionar';
 
 interface ProfilePublisherTabProps {
   token?: string;
@@ -14,7 +14,7 @@ interface ProfilePublisherTabProps {
 }
 
 export default function ProfilePublisherTab({ token, highlightId }: ProfilePublisherTabProps) {
-  const [subTab, setSubTab] = useState<PublisherSubTab>('avisos');
+  const [subTab, setSubTab] = useState<PublisherSubTab>('adisos');
   const [stories, setStories] = useState<Story[]>([]);
   const [storiesLoading, setStoriesLoading] = useState(false);
 
@@ -39,7 +39,7 @@ export default function ProfilePublisherTab({ token, highlightId }: ProfilePubli
   }, [subTab, fetchStories]);
 
   const subs: { id: PublisherSubTab; label: string }[] = [
-    { id: 'avisos', label: 'Mis avisos' },
+    { id: 'adisos', label: 'Mis adisos' },
     { id: 'historias', label: 'Mis historias' },
     { id: 'promocionar', label: 'Promocionar' },
   ];
@@ -63,14 +63,14 @@ export default function ProfilePublisherTab({ token, highlightId }: ProfilePubli
         ))}
       </div>
 
-      {subTab === 'avisos' && (
+      {subTab === 'adisos' && (
         <>
           <div className="flex justify-end">
             <Link
               href="/publicar"
               className="text-sm font-semibold text-[var(--brand-blue)] hover:underline"
             >
-              + Nuevo aviso
+              + Nuevo adiso
             </Link>
           </div>
           <ProfileMyAdisosGrid token={token} highlightId={highlightId} />
@@ -90,10 +90,10 @@ export default function ProfilePublisherTab({ token, highlightId }: ProfilePubli
       {subTab === 'promocionar' && (
         <div className="rounded-2xl border border-[var(--border-color)] bg-[var(--bg-primary)] p-6 text-center">
           <p className="text-sm text-[var(--text-secondary)]">
-            Destaca tus avisos e historias para llegar a más personas.
+            Destaca tus adisos e historias para llegar a más personas.
           </p>
           <p className="mt-2 text-xs text-[var(--text-tertiary)]">
-            Abre un aviso o historia y usa el botón Promocionar.
+            Abre un adiso o historia y usa el botón Promocionar.
           </p>
         </div>
       )}

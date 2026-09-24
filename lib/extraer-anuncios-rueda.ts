@@ -300,7 +300,7 @@ export function fragmentarBloqueEnorme(chunk: string): string[] {
   return forced.length ? forced : [chunk];
 }
 
-/** Último recurso: un aviso por cada teléfono (texto desde el anterior). */
+/** Último recurso: un adiso por cada teléfono (texto desde el anterior). */
 function fragmentarUnoPorTelefono(chunk: string): string[] {
   const phones = [...chunk.matchAll(/\b9\d{8}\b/g)];
   if (phones.length < 2) return [chunk];

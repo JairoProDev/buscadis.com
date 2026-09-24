@@ -45,7 +45,7 @@ export async function POST(request: NextRequest) {
       days: order.days,
       dailyRate: order.daily_rate,
       whatsappUrl: `https://wa.me/51${yapePhone.replace(/\D/g, '')}?text=${whatsappMessage}`,
-      message: 'Envía tu captura de Yape por WhatsApp para activar el contacto de tu aviso.',
+      message: 'Envía tu captura de Yape por WhatsApp para activar el contacto de tu adiso.',
     });
   } catch (e) {
     const message = e instanceof Error ? e.message : 'Error';

@@ -1,6 +1,6 @@
 /**
  * POST /api/business/from-adiso
- * Convierte un aviso del usuario en borrador de negocio + productos semilla.
+ * Convierte un adiso del usuario en borrador de negocio + productos semilla.
  */
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
@@ -43,12 +43,12 @@ export async function POST(req: NextRequest) {
       .maybeSingle();
 
     if (adisoError || !row) {
-      return NextResponse.json({ error: 'Aviso no encontrado' }, { status: 404 });
+      return NextResponse.json({ error: 'Adiso no encontrado' }, { status: 404 });
     }
 
     const ownerId = row.user_id || row.usuario_id;
     if (ownerId !== user.id) {
-      return NextResponse.json({ error: 'No es tu aviso' }, { status: 403 });
+      return NextResponse.json({ error: 'No es tu adiso' }, { status: 403 });
     }
 
     const adiso = dbToAdiso(row);

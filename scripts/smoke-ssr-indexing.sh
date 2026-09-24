@@ -32,7 +32,7 @@ check_route() {
 
 echo "Smoke SSR against ${BASE_URL}"
 
-check_route "/" "ItemList|Avisos recientes|/a/" "Home"
+check_route "/" "ItemList|Adisos recientes|/a/" "Home"
 check_route "/categoria/productos" "ItemList|Productos|/a/" "Category"
 
 HOME_HTML="$(curl -fsSL --max-time 45 "${BASE_URL}/")"

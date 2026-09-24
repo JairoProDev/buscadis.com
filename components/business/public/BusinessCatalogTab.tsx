@@ -569,7 +569,7 @@ export default function BusinessCatalogTab({
             setFilteredAdisos((prev) => prev.filter((a) => a.id !== adiso.id));
             toastSuccess(
                 result.kind === 'classified_ad'
-                    ? `Aviso eliminado. Queda ${TRASH_RETENTION_DAYS} días en la papelera.`
+                    ? `Adiso eliminado. Queda ${TRASH_RETENTION_DAYS} días en la papelera.`
                     : `Producto eliminado. Queda ${TRASH_RETENTION_DAYS} días en la papelera.`
             );
             await onCatalogRefresh?.();

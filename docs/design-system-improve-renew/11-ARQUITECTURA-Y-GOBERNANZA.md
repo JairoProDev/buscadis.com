@@ -87,7 +87,7 @@ Cuatro transformaciones automáticas en el build:
 
 **SemVer en `@buscadis/tokens`.** Renombrar o eliminar un token es un cambio mayor. Añadir es menor. Cambiar el valor de un token existente es menor si el rol se mantiene, mayor si cambia el significado.
 
-**Depreciación con puente:** un token que se retira se mantiene un ciclo apuntando al nuevo, con aviso en consola en desarrollo.
+**Depreciación con puente:** un token que se retira se mantiene un ciclo apuntando al nuevo, con adiso en consola en desarrollo.
 
 **Excepciones con fecha.** Cualquier desviación se documenta en el PR con motivo y fecha de caducidad. Una excepción sin fecha se convierte en la deuda que hoy documenta tu archivo 09.
 

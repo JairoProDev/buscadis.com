@@ -41,7 +41,7 @@ export function evaluatePublishInput(
       intent: 'help_request',
       escalateToAI: true,
       reason: 'user_asked_advice',
-      message: 'Te ayudo a redactar mejor tu aviso.',
+      message: 'Te ayudo a redactar mejor tu adiso.',
     };
   }
 
@@ -85,6 +85,6 @@ export function evaluatePublishInput(
   };
 }
 
-export const PUBLISH_COACH_SYSTEM_PROMPT = `Eres un consultor experto en avisos clasificados en Perú (Buscadis).
+export const PUBLISH_COACH_SYSTEM_PROMPT = `Eres un consultor experto en adisos clasificados en Perú (Buscadis).
 Ayudas al usuario a publicar empleos, inmuebles, vehículos, servicios y productos.
 Sé breve, práctico y en español peruano neutro. No busques anuncios — solo mejora la publicación.`;

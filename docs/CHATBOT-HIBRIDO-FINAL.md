@@ -29,7 +29,7 @@ Resultado: 100% preciso, 3 clics
 ```
 Usuario: [Escribe "departamento 2 habitaciones wanchaq"]
 🤖: 🔍 Buscando...
-🤖: ✨ Encontré 8 avisos relacionados con "departamento 2 habitaciones wanchaq"
+🤖: ✨ Encontré 8 adisos relacionados con "departamento 2 habitaciones wanchaq"
 
 Resultado: Usa NLU mejorado, extrae términos, filtra, rankea
 ```
@@ -130,7 +130,7 @@ Resultado: Departamentos de 2 habitaciones cerca UNSAAC
 4. Ve resultados
    ↓
 5. Puede:
-   - Ver un aviso (click)
+   - Ver un adiso (click)
    - Nueva búsqueda (botón)
    - Búsqueda diferente (texto)
 ```

@@ -33,7 +33,7 @@ export function buildFlyerContent(input: {
   categoria?: Categoria | string | null;
 }): FlyerContent {
   const fakeAdiso = {
-    titulo: input.titulo || 'Tu aviso',
+    titulo: input.titulo || 'Tu adiso',
     precio: input.precio ?? undefined,
     moneda: (input.moneda as Adiso['moneda']) || 'PEN',
     tipoPrecio: input.tipoPrecio as Adiso['tipoPrecio'],
@@ -41,7 +41,7 @@ export function buildFlyerContent(input: {
     categoria: (input.categoria as Categoria) || 'productos',
   } as Adiso;
 
-  const title = toDisplayTitle(fakeAdiso.titulo) || fakeAdiso.titulo || 'Aviso en Buscadis';
+  const title = toDisplayTitle(fakeAdiso.titulo) || fakeAdiso.titulo || 'Adiso en Buscadis';
   const categoria = fakeAdiso.categoria;
   return {
     title,

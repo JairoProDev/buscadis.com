@@ -466,7 +466,7 @@ export function PublishChatSummary({
         <span className="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-500/15 text-emerald-600">
           <FaCheck size={10} />
         </span>
-        <span className="text-xs font-semibold text-[var(--text-primary)]">Vista previa del aviso</span>
+        <span className="text-xs font-semibold text-[var(--text-primary)]">Vista previa del adiso</span>
       </div>
       <div className={`space-y-3 ${compact ? 'p-3' : 'p-4'}`}>
         <div>

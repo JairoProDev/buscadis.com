@@ -88,7 +88,7 @@ export default function PublishPhotoZone({
   const templateId = flyerTemplateId || defaults.templateId;
   const config = flyerConfig || defaults.config;
   const content = buildFlyerContent({
-    titulo: draftPreview?.titulo || 'Tu aviso en Buscadis',
+    titulo: draftPreview?.titulo || 'Tu adiso en Buscadis',
     precio: draftPreview?.precio,
     moneda: draftPreview?.moneda,
     tipoPrecio: draftPreview?.tipoPrecio,

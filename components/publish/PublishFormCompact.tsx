@@ -307,7 +307,7 @@ export default function PublishFormCompact({
                 onChange={(event) => onAutoDownloadChange(event.target.checked)}
                 className="rounded border-[var(--border-color)]"
               />
-              Descargar el aviso al publicar
+              Descargar el adiso al publicar
             </label>
           )}
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">

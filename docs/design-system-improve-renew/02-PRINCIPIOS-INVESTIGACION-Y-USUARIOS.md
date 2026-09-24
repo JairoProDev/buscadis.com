@@ -110,9 +110,9 @@ Ninguna decisión estética puede empujar el LCP por encima de 1.8 s en 4G. *Por
 
 Cinco estudios baratos que valen más que cualquier opinión, incluida la mía:
 
-**Prueba de cinco segundos sobre la tarjeta de aviso** con 10 personas en la calle: qué recuerdan. Mide el principio 2.
+**Prueba de cinco segundos sobre la tarjeta de adiso** con 10 personas en la calle: qué recuerdan. Mide el principio 2.
 **Prueba de árbol de las 8 categorías** con 15 personas: dónde buscarían "alquiler de andamios" o "clases de guitarra". Valida si tu taxonomía coincide con el modelo mental local.
-**Prueba de publicación cronometrada** con 5 vendedores particulares: tiempo hasta aviso publicado, y dónde abandonan.
+**Prueba de publicación cronometrada** con 5 vendedores particulares: tiempo hasta adiso publicado, y dónde abandonan.
 **Prueba del tendero** con 5 dueños de negocio: crear un perfil sin ayuda, cronometrado, grabando la pantalla.
 **Prueba de contraste en campo:** llevar el teléfono a la puerta de un local al mediodía y confirmar qué se lee y qué no. Cuesta una hora y va a cambiar decisiones.
 

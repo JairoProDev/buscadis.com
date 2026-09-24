@@ -29,7 +29,7 @@ export const metadata: Metadata = {
     template: '%s | Buscadis',
   },
   description: 'Publica y encuentra adisos clasificados en Perú. Empleos, inmuebles, vehículos, servicios, productos, eventos, negocios y más.',
-  keywords: ['clasificados', 'avisos', 'empleos', 'inmuebles', 'vehículos', 'servicios', 'productos', 'eventos', 'negocios', 'Perú', 'Cusco'],
+  keywords: ['clasificados', 'adisos', 'empleos', 'inmuebles', 'vehículos', 'servicios', 'productos', 'eventos', 'negocios', 'Perú', 'Cusco'],
   authors: [{ name: 'Buscadis' }],
   creator: 'Buscadis',
   publisher: 'Buscadis',

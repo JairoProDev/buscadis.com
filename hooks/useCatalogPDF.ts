@@ -204,7 +204,7 @@ async function drawProductPage(
   doc.setFontSize(7);
   doc.setTextColor(148, 163, 184);
   doc.setFont('helvetica', 'normal');
-  doc.text('Precios sujetos a cambios sin previo aviso', margin, pageH - 5);
+  doc.text('Precios sujetos a cambios sin previo adiso', margin, pageH - 5);
 
   const profileUrl = getBuscadisProfileUrl(profile);
   if (profileUrl) {

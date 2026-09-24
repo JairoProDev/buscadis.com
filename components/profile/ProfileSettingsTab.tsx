@@ -456,7 +456,7 @@ export default function ProfileSettingsTab({
             Oportunidades personalizadas
           </p>
           <p className="text-xs text-[var(--text-secondary)] m-0 mb-2">
-            Recibe avisos cuando publiquen algo que coincide con lo que buscas.
+            Recibe adisos cuando publiquen algo que coincide con lo que buscas.
           </p>
           {[
             {

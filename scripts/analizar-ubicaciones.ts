@@ -98,7 +98,7 @@ console.log('                  ANÁLISIS DE UBICACIONES                      ');
 console.log('═══════════════════════════════════════════════════════════════\n');
 
 console.log(`📈 RESUMEN GENERAL:`);
-console.log(`   Total de avisos: ${total.toLocaleString()}`);
+console.log(`   Total de adisos: ${total.toLocaleString()}`);
 console.log(`   Con ubicación específica: ${totalConDetalle.toLocaleString()} (${((totalConDetalle / total) * 100).toFixed(1)}%)`);
 console.log(`   Ubicación genérica: ${totalGenerico.toLocaleString()} (${((totalGenerico / total) * 100).toFixed(1)}%)\n`);
 
@@ -155,5 +155,5 @@ ejemplos.forEach((ej, index) => {
 });
 
 console.log('═══════════════════════════════════════════════════════════════');
-console.log(`✅ Mejora lograda: ${((totalConDetalle / total) * 100).toFixed(1)}% de avisos con ubicación específica`);
+console.log(`✅ Mejora lograda: ${((totalConDetalle / total) * 100).toFixed(1)}% de adisos con ubicación específica`);
 console.log('═══════════════════════════════════════════════════════════════\n');

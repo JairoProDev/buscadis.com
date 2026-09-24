@@ -30,7 +30,7 @@ export async function POST(request: NextRequest) {
     let listing = await resolveListingForInteraction(adisoId);
 
     if (!listing) {
-      return NextResponse.json({ error: 'Aviso no encontrado' }, { status: 404 });
+      return NextResponse.json({ error: 'Adiso no encontrado' }, { status: 404 });
     }
 
     let sellerId = listing.sellerUserId;

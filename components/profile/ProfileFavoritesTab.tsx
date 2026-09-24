@@ -60,7 +60,7 @@ export default function ProfileFavoritesTab() {
       <ProfileEmptyState
         icon={<IconHeart size={24} color={semantic.dangerFg} />}
         title="Sin guardados aún"
-        description="Marca con corazón los avisos que te interesen para encontrarlos aquí."
+        description="Marca con corazón los adisos que te interesen para encontrarlos aquí."
         actionLabel="Explorar ofertas"
         actionHref="/"
       />

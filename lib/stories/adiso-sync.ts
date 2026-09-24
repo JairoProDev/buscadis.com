@@ -16,8 +16,8 @@ function defaultObjectiveForCategory(): StoryObjective {
 }
 
 /**
- * Crea una historia automática al publicar un aviso clasificado.
- * Gratis: visible 1h. Promoción pagada del aviso: hereda tier (24h/48h).
+ * Crea una historia automática al publicar un adiso clasificado.
+ * Gratis: visible 1h. Promoción pagada del adiso: hereda tier (24h/48h).
  */
 export async function createStoryFromAdiso(
   userId: string,

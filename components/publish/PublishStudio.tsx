@@ -53,7 +53,7 @@ interface PublishStudioProps {
   onNotify?: (msg: string, type?: 'info' | 'error' | 'success') => void;
   onPublished?: (adiso: Adiso) => void;
   onClose?: () => void;
-  /** Aviso ya publicado que se abre para modificar. */
+  /** Adiso ya publicado que se abre para modificar. */
   reeditId?: string | null;
 }
 
@@ -170,7 +170,7 @@ export default function PublishStudio({
     fetch(`/api/adisos/${reeditId}`)
       .then(async (res) => {
         const data = await res.json();
-        if (!res.ok) throw new Error(data.error || 'No se pudo abrir el aviso');
+        if (!res.ok) throw new Error(data.error || 'No se pudo abrir el adiso');
         return data as Adiso;
       })
       .then((adiso) => {
@@ -179,11 +179,11 @@ export default function PublishStudio({
         setSourcePaid(loaded.paid);
         setDraft(() => loaded.draft, { history: false });
         if (!loaded.paid) {
-          onNotify?.('Este aviso era gratis. Para modificarlo y volver a publicarlo, queda de pago.', 'info');
+          onNotify?.('Este adiso era gratis. Para modificarlo y volver a publicarlo, queda de pago.', 'info');
         }
       })
       .catch((error: unknown) => {
-        if (!cancel) onNotify?.(error instanceof Error ? error.message : 'No se pudo abrir el aviso', 'error');
+        if (!cancel) onNotify?.(error instanceof Error ? error.message : 'No se pudo abrir el adiso', 'error');
       });
     return () => {
       cancel = true;
@@ -315,11 +315,11 @@ export default function PublishStudio({
             opts.source === 'photo'
               ? 'Listo: extraje datos de tu foto.'
               : opts.source === 'voice'
-                ? 'Listo: convertí tu audio en aviso.'
-                : 'Listo, actualicé tu aviso.';
+                ? 'Listo: convertí tu audio en adiso.'
+                : 'Listo, actualicé tu adiso.';
           addChatMessage('assistant', msg);
           setChatStatus(msg);
-          onNotify?.('Aviso actualizado por ADIS', 'success');
+          onNotify?.('Adiso actualizado por ADIS', 'success');
           return true;
         }
 
@@ -389,7 +389,7 @@ export default function PublishStudio({
     }
     if (added > 0) {
       onNotify?.(
-        added === 1 ? 'Foto subida (galería del aviso).' : `${added} fotos añadidas al aviso.`,
+        added === 1 ? 'Foto subida (galería del adiso).' : `${added} fotos añadidas al adiso.`,
         'success',
       );
     }
@@ -404,7 +404,7 @@ export default function PublishStudio({
       onNotify?.('Escribe algo o adjunta una foto para que la IA trabaje.', 'info');
       return;
     }
-    addChatMessage('user', pending || '(fotos del aviso)');
+    addChatMessage('user', pending || '(fotos del adiso)');
     setAiChatMinimized(false);
     void runAnalyze({
       text: text || undefined,
@@ -578,7 +578,7 @@ export default function PublishStudio({
             imagenes = [coverUrl];
             coverForDownload = coverUrl;
           } else {
-            onNotify?.('No se pudo generar la portada; el aviso usará el flyer en pantalla.', 'info');
+            onNotify?.('No se pudo generar la portada; el adiso usará el flyer en pantalla.', 'info');
           }
         }
 
@@ -638,7 +638,7 @@ export default function PublishStudio({
         }
 
         if (autoDownload && coverForDownload) {
-          void downloadCoverImage(coverForDownload, `buscadis-${created?.id || 'aviso'}.jpg`);
+          void downloadCoverImage(coverForDownload, `buscadis-${created?.id || 'adiso'}.jpg`);
         }
 
         if (saveExisting) {
@@ -704,7 +704,7 @@ export default function PublishStudio({
       : draft.flyerConfig || flyerDefaults.config,
   );
   const exportContent = buildFlyerContent({
-    titulo: draft.titulo || 'Aviso en Buscadis',
+    titulo: draft.titulo || 'Adiso en Buscadis',
     precio: draft.precio,
     moneda: draft.moneda,
     tipoPrecio: draft.tipoPrecio,
@@ -734,7 +734,7 @@ export default function PublishStudio({
 
       {onClose && !immersive && (
         <div className="mb-2 flex shrink-0 items-center justify-between px-1">
-          <h2 className="m-0 text-base font-bold text-[var(--text-primary)]">Publicar aviso</h2>
+          <h2 className="m-0 text-base font-bold text-[var(--text-primary)]">Publicar adiso</h2>
           <button
             type="button"
             onClick={requestLeave}
@@ -1059,7 +1059,7 @@ export default function PublishStudio({
               <>
               {reeditId && !sourcePaid && (
                 <p className="m-0 px-4 pt-2 text-center text-xs text-[var(--text-secondary)]">
-                  Este aviso era gratis. Al publicarlo otra vez queda de pago.
+                  Este adiso era gratis. Al publicarlo otra vez queda de pago.
                 </p>
               )}
               <PublishAiChatPanel
@@ -1157,7 +1157,7 @@ export default function PublishStudio({
                     ? 'animate-pulse bg-red-500 text-white'
                     : 'bg-[var(--bg-secondary)] text-[var(--text-primary)]'
                 }`}
-                aria-label={isListening || recordingAudio ? 'Detener dictado' : 'Dictar aviso'}
+                aria-label={isListening || recordingAudio ? 'Detener dictado' : 'Dictar adiso'}
                 aria-pressed={isListening || recordingAudio}
                 title={isListening || recordingAudio ? 'Detener' : 'Dictar'}
               >
@@ -1183,7 +1183,7 @@ export default function PublishStudio({
               <div className={`${publishCard} w-full max-w-md space-y-3 p-4`}>
                 <p className="m-0 text-base font-bold text-[var(--text-primary)]">¡Publicado!</p>
                 <p className="m-0 text-sm text-[var(--text-secondary)]">
-                  Tu aviso ya está en el feed. ¿Quieres más fotos, más días o más visibilidad?
+                  Tu adiso ya está en el feed. ¿Quieres más fotos, más días o más visibilidad?
                 </p>
                 <button
                   type="button"

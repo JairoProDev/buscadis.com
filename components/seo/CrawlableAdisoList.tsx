@@ -28,7 +28,7 @@ function priceFor(adiso: Adiso): string | null {
  */
 export function CrawlableAdisoList({
   adisos,
-  heading = 'Avisos',
+  heading = 'Adisos',
   visuallyHidden = false,
 }: CrawlableAdisoListProps) {
   if (!adisos.length) return null;

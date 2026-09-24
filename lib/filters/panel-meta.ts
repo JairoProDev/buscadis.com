@@ -18,20 +18,20 @@ export function buildFilterInsight(
   const active = countActiveFilters(filters, categoria);
   if (active === 0) {
     return totalPool > 0
-      ? `Explorando ${totalPool} avisos. Añade filtros para afinar.`
-      : 'No hay avisos en esta vista.';
+      ? `Explorando ${totalPool} adisos. Añade filtros para afinar.`
+      : 'No hay adisos en esta vista.';
   }
   if (resultCount === 0) {
-    return 'Ningún aviso coincide. Prueba relajar un filtro.';
+    return 'Ningún adiso coincide. Prueba relajar un filtro.';
   }
   const pct = totalPool > 0 ? Math.round((resultCount / totalPool) * 100) : 100;
   if (pct <= 15) {
-    return `Selección muy específica: ${resultCount} de ${totalPool} avisos (${pct}%).`;
+    return `Selección muy específica: ${resultCount} de ${totalPool} adisos (${pct}%).`;
   }
   if (filters.destacado && filters.conFotos === true) {
     return `${resultCount} opciones curadas con foto y calidad.`;
   }
-  return `${resultCount} avisos coinciden con tus ${active} filtro${active === 1 ? '' : 's'}.`;
+  return `${resultCount} adisos coinciden con tus ${active} filtro${active === 1 ? '' : 's'}.`;
 }
 
 export function getSectionCompletion(

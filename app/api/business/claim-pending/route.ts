@@ -34,7 +34,7 @@ export async function POST(req: NextRequest) {
   };
   const claimedIds = new Set((claim.business_ids || []).map(String));
 
-  // Negocios donde el usuario es miembro activo (para el aviso de bienvenida)
+  // Negocios donde el usuario es miembro activo (para el adiso de bienvenida)
   const { data: memberships } = await supabaseAdmin
     .from('business_members')
     .select('role, business_profile_id, business_profiles!inner(id, slug, name, logo_url, is_published)')

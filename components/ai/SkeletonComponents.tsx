@@ -56,7 +56,7 @@ export function SearchingSkeleton() {
             fontSize: '12px',
             color: 'var(--text-secondary)',
           }}>
-            Analizando miles de avisos para ti
+            Analizando miles de adisos para ti
           </div>
         </div>
       </motion.div>

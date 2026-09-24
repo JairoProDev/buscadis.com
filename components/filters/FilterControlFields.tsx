@@ -156,7 +156,7 @@ export default function FilterControlFields({
           enabled={hasUbi && userLat != null && userLng != null}
         />
         <p className="m-0 text-[10px] leading-relaxed text-[var(--text-tertiary)]">
-          Empieza por zona para ver avisos cerca de ti.
+          Empieza por zona para ver adisos cerca de ti.
         </p>
       </FilterSectionCard>
 
@@ -255,7 +255,7 @@ export default function FilterControlFields({
         </div>
         <TriStateSegment
           compact
-          label="Precio indicado en el aviso"
+          label="Precio indicado en el adiso"
           value={filters.soloConPrecio}
           onChange={(v) => onChange({ ...filters, soloConPrecio: v })}
           labels={['Todos', 'Con precio', 'Sin precio']}
@@ -265,7 +265,7 @@ export default function FilterControlFields({
       <FilterSectionCard
         sectionId="calidad"
         step={step++}
-        title="Calidad del aviso"
+        title="Calidad del adiso"
         subtitle="Fotos y presentación"
         icon={<IconImage size={14} />}
         active={filters.conFotos !== undefined}
@@ -307,7 +307,7 @@ export default function FilterControlFields({
         sectionId="fecha"
         step={step++}
         title="Publicación reciente"
-        subtitle="Antigüedad del aviso"
+        subtitle="Antigüedad del adiso"
         icon={<IconCalendar size={14} />}
         active={Boolean(filters.publicadoEn)}
         completed={Boolean(filters.publicadoEn)}

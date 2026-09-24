@@ -1,5 +1,5 @@
 /**
- * Sube imágenes locales a avisos Eco Terra y crea historias premium (48h).
+ * Sube imágenes locales a adisos Eco Terra y crea historias premium (48h).
  *
  * Uso:
  *   npx tsx scripts/upload-eco-terra-media.ts
@@ -22,7 +22,7 @@ dotenv.config({ path: path.join(process.cwd(), '.env') });
 const BATCH_ID = 'eco-terra-jobs-2026-06';
 const STORY_TIER = 'premium' as const;
 
-/** slug del aviso → nombre de archivo en scripts/data/ */
+/** slug del adiso → nombre de archivo en scripts/data/ */
 const IMAGE_BY_SLUG: Record<string, string> = {
   'atencion-cliente': 'atencion-cliente.png',
   recepcionista: 'recepcionista.png',
@@ -104,11 +104,11 @@ async function main() {
 
   const adisos = await fetchBatchAdisos();
   if (adisos.length === 0) {
-    console.error('No se encontraron avisos con este batch_id.');
+    console.error('No se encontraron adisos con este batch_id.');
     process.exit(1);
   }
 
-  console.log(`Avisos encontrados: ${adisos.length}\n`);
+  console.log(`Adisos encontrados: ${adisos.length}\n`);
 
   const results: { slug: string; id: string; imageUrl?: string; story: string }[] = [];
 
@@ -133,7 +133,7 @@ async function main() {
     }
 
     if (!userId) {
-      console.warn('  ⚠ Aviso sin user_id');
+      console.warn('  ⚠ Adiso sin user_id');
       results.push({ slug, id: adiso.id, story: 'skipped' });
       continue;
     }
@@ -177,7 +177,7 @@ async function main() {
     let storyStatus = 'skipped';
 
     if (alreadyHasStory && !force) {
-      console.log('  Historia ya existe para este aviso');
+      console.log('  Historia ya existe para este adiso');
       storyStatus = 'exists';
     } else if (dryRun) {
       console.log(`  (dry-run) Crearía historia ${STORY_TIER} (48h)`);

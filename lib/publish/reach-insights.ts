@@ -6,7 +6,7 @@ export function pickReachInsight(
   ctx: { categoria?: string; subcategoria?: string; titulo?: string }
 ): string {
   const lines = getReachInsightLines(funnel, ctx);
-  return lines[lines.length - 1] ?? 'Completa tu aviso para ver el potencial de alcance.';
+  return lines[lines.length - 1] ?? 'Completa tu adiso para ver el potencial de alcance.';
 }
 
 /** Progressive reach lines for review step — no A/B/C labels */
@@ -29,7 +29,7 @@ export function getReachInsightLines(
     lines.push(`${funnel.D.toLocaleString()} interesados en esta subcategoría.`);
   }
   if (funnel.E > 0 && ctx.titulo?.trim()) {
-    lines.push(`${funnel.E.toLocaleString()} podrían estar interesados en tu aviso ahora mismo.`);
+    lines.push(`${funnel.E.toLocaleString()} podrían estar interesados en tu adiso ahora mismo.`);
   }
 
   return lines;

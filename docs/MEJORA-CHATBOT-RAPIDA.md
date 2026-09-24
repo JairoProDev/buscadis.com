@@ -83,7 +83,7 @@ function rankearResultados(resultados: Adiso[], terminos: string[]): Adiso[] {
         if (adiso.descripcion?.toLowerCase().includes(termino)) score += 5;
       });
       
-      // Bonus por avisos recientes
+      // Bonus por adisos recientes
       const diasDesdePublicacion = daysSince(adiso.fechaPublicacion);
       if (diasDesdePublicacion < 7) score += 3;
       

@@ -28,7 +28,7 @@ const CAP_CARDS: Array<{
   {
     key: 'publish',
     title: 'Publicar un adiso',
-    subtitle: 'Aviso clasificado',
+    subtitle: 'Adiso clasificado',
     Icon: IconMegaphone,
   },
   {

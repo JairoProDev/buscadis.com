@@ -1,7 +1,7 @@
 export const FIELD_QUESTIONS: Record<string, string> = {
-  categoria: '¿En qué categoría encaja mejor tu aviso? (empleos, inmuebles, vehículos, etc.)',
+  categoria: '¿En qué categoría encaja mejor tu adiso? (empleos, inmuebles, vehículos, etc.)',
   subcategoria: '¿Qué tipo específico es? (ej. apartamento, moto, tiempo completo)',
-  titulo: '¿Cómo titularías tu aviso en una línea?',
+  titulo: '¿Cómo titularías tu adiso en una línea?',
   descripcion: 'Cuéntame más detalles: condiciones, características, horarios…',
   contacto: '¿Cuál es tu WhatsApp para que te contacten?',
   ubicacion: '¿En qué zona o distrito está?',

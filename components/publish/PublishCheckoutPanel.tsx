@@ -49,7 +49,7 @@ export default function PublishCheckoutPanel({
 
   if (publishedOrderId && publishedAdisoId) {
     const waMsg = encodeURIComponent(
-      `Hola, publiqué mi aviso ${publishedAdisoId}. Adjunto captura de pago Yape por ${formatPrice(total)}.`
+      `Hola, publiqué mi adiso ${publishedAdisoId}. Adjunto captura de pago Yape por ${formatPrice(total)}.`
     );
     return (
       <div className="space-y-4">
@@ -60,7 +60,7 @@ export default function PublishCheckoutPanel({
           <div>
             <p className="font-bold text-lg text-[var(--text-primary)] m-0">¡Ya está en el feed!</p>
             <p className="text-sm text-[var(--text-secondary)] m-0 mt-1 leading-snug">
-              Tu aviso aparece arriba en Inicio. Verifica el pago Yape para activar el contacto con interesados.
+              Tu adiso aparece arriba en Inicio. Verifica el pago Yape para activar el contacto con interesados.
             </p>
           </div>
           <div className="pt-1">
@@ -97,7 +97,7 @@ export default function PublishCheckoutPanel({
     <div className="space-y-4">
       <div className={`${publishCard} p-4`}>
         <div className="mb-3 flex items-center justify-between gap-2">
-          <p className="text-sm font-bold text-[var(--text-primary)] m-0">Compara tu aviso</p>
+          <p className="text-sm font-bold text-[var(--text-primary)] m-0">Compara tu adiso</p>
           <div className="flex overflow-hidden rounded-full ring-1 ring-[var(--border-color)]">
             {(
               [

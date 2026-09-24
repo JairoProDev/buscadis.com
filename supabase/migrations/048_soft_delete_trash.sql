@@ -1,10 +1,10 @@
 -- 048_soft_delete_trash.sql
--- Papelera de 30 días para productos de catálogo y avisos.
+-- Papelera de 30 días para productos de catálogo y adisos.
 --
 -- Contexto del bug: el catálogo de un negocio mezcla `catalog_products` (id uuid)
 -- con los clasificados del dueño en `adisos` (id text). El botón de eliminar
 -- llamaba siempre a catalog_products, así que borrar un clasificado fallaba en
--- silencio (cast uuid inválido) y el aviso reaparecía en el catálogo y el PDF.
+-- silencio (cast uuid inválido) y el adiso reaparecía en el catálogo y el PDF.
 
 alter table public.catalog_products
   add column if not exists deleted_at timestamptz,

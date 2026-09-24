@@ -33,7 +33,7 @@ export async function generateMetadata(props: PageProps): Promise<Metadata> {
 }
 
 /**
- * Página dedicada del aviso.
+ * Página dedicada del adiso.
  * - `/a/{id}` — id corto → redirige a `/a/{id}/{slug}`
  * - `/a/{id}/{titulo-slug}` — canónica SEO
  */

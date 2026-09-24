@@ -472,7 +472,7 @@ export default function StoryViewer({ groups, initialGroupIndex, onClose }: Stor
           style={{ bottom: BOTTOM_CHROME_PX + 12 }}
         >
           {hasAdiso && (
-            <RailAction label="Ver aviso" onClick={handleViewAdiso}>
+            <RailAction label="Ver adiso" onClick={handleViewAdiso}>
               <IconExternalLink size={20} />
             </RailAction>
           )}
@@ -489,7 +489,7 @@ export default function StoryViewer({ groups, initialGroupIndex, onClose }: Stor
           </RailAction>
         </div>
 
-        {/* Swipe up pill (TikTok) — solo si hay aviso */}
+        {/* Swipe up pill (TikTok) — solo si hay adiso */}
         {hasAdiso && !sheetOpen && (
           <button
             type="button"
@@ -559,7 +559,7 @@ export default function StoryViewer({ groups, initialGroupIndex, onClose }: Stor
           )}
         </AnimatePresence>
 
-        {/* Sheet detalle aviso (swipe up) */}
+        {/* Sheet detalle adiso (swipe up) */}
         <AnimatePresence>
           {sheetOpen && (
             <>
@@ -621,7 +621,7 @@ export default function StoryViewer({ groups, initialGroupIndex, onClose }: Stor
                         onClick={handleViewAdiso}
                         className="w-full rounded-xl bg-[var(--brand-blue)] py-3 text-sm font-semibold text-white"
                       >
-                        Ver aviso completo
+                        Ver adiso completo
                       </button>
                     )}
                     <div className={`grid gap-2 ${hasWhatsApp ? 'grid-cols-2' : 'grid-cols-1'}`}>

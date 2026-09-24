@@ -33,7 +33,7 @@ export default function ProfileHistoryTab({ token }: { token?: string }) {
       <ProfileEmptyState
         icon={<IconEye size={24} color="var(--brand-blue)" />}
         title="Sin historial"
-        description="Los avisos que abras aparecerán aquí para que los retomes fácilmente."
+        description="Los adisos que abras aparecerán aquí para que los retomes fácilmente."
         actionLabel="Buscar ofertas"
         actionHref="/"
       />

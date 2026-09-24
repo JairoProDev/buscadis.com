@@ -1,5 +1,5 @@
 /**
- * Transfiere avisos de un batch (private_data.batch_id) a un nuevo user_id.
+ * Transfiere adisos de un batch (private_data.batch_id) a un nuevo user_id.
  *
  * Uso:
  *   npx tsx scripts/transfer-adisos-owner.ts --batch eco-terra-jobs-2026-06 --email cliente@ejemplo.com
@@ -52,11 +52,11 @@ async function main() {
 
   if (fetchError) throw fetchError;
   if (!rows?.length) {
-    console.log('No se encontraron avisos para batch:', batch);
+    console.log('No se encontraron adisos para batch:', batch);
     process.exit(0);
   }
 
-  console.log(`Transfiriendo ${rows.length} avisos a ${email} (${newOwnerId})`);
+  console.log(`Transfiriendo ${rows.length} adisos a ${email} (${newOwnerId})`);
 
   for (const row of rows) {
     const privateData = {

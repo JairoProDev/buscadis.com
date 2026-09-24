@@ -25,7 +25,7 @@ export default function PublishReviewStep({ draft, publisher }: PublishReviewSte
     <div className="space-y-4">
       <div className={`${publishCard} p-4`}>
         <p className="text-sm font-bold text-[var(--text-primary)] m-0 mb-1">
-          Así se verá tu aviso
+          Así se verá tu adiso
         </p>
         <p className="text-xs text-[var(--text-secondary)] m-0 mb-3 leading-snug">
           Compara gratis vs promocionado. El plan pago destaca de verdad en el feed.
@@ -50,11 +50,11 @@ export default function PublishReviewStep({ draft, publisher }: PublishReviewSte
 
       <div className={`${publishCard} p-4 space-y-3`}>
         <p className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-tertiary)] m-0">
-          Resumen del aviso
+          Resumen del adiso
         </p>
         {!hasContent && (
           <p className="text-sm text-[var(--text-secondary)] m-0">
-            Aún no hay datos. Vuelve a editar o usa ADIS para completar el aviso.
+            Aún no hay datos. Vuelve a editar o usa ADIS para completar el adiso.
           </p>
         )}
         {draft.titulo && (
@@ -106,7 +106,7 @@ export default function PublishReviewStep({ draft, publisher }: PublishReviewSte
         {missing.length > 0 && (
           <div className="rounded-xl bg-[rgba(234,179,8,0.1)] ring-1 ring-[rgba(234,179,8,0.25)] px-3 py-2.5">
             <p className="text-[11px] font-semibold text-[var(--bs-warning-fg)] m-0 mb-1">
-              Falta para un aviso más completo
+              Falta para un adiso más completo
             </p>
             <p className="text-[11px] text-[var(--bs-warning-fg)]/90 m-0">
               {missing.map((f) => FIELD_LABELS[f] || f).join(' · ')}

@@ -36,7 +36,7 @@ Todo lo que sigue se deriva de eso.
 
 Nadie empieza de cero si se puede evitar. La primera pantalla pregunta dónde está el negocio hoy y ofrece traer todo de ahí.
 
-**Puerta 1 — Su aviso de Buscadis.** Es la más rápida y la más importante para el lanzamiento. El negocio ya publicó un aviso clasificado: nombre, categoría, teléfono, ubicación y fotos pasan directo. En menos de sesenta segundos ve un perfil armado que solo tiene que confirmar. Esta puerta se construye **antes** que el editor completo, porque convierte tu base de avisos existente en perfiles sin esfuerzo del usuario.
+**Puerta 1 — Su adiso de Buscadis.** Es la más rápida y la más importante para el lanzamiento. El negocio ya publicó un adiso clasificado: nombre, categoría, teléfono, ubicación y fotos pasan directo. En menos de sesenta segundos ve un perfil armado que solo tiene que confirmar. Esta puerta se construye **antes** que el editor completo, porque convierte tu base de adisos existente en perfiles sin esfuerzo del usuario.
 
 **Puerta 2 — Sus redes.** Pega el enlace de su Instagram, su Facebook o su ficha de Google, y el sistema extrae nombre, foto de perfil, descripción, horarios, dirección y las últimas fotos. Lo que el usuario percibe es magia; lo que en realidad estamos haciendo es eliminar el trabajo de tipeo, que es la barrera real.
 

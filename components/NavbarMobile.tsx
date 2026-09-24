@@ -98,7 +98,7 @@ export default function NavbarMobile({
               key={seccion.id}
               type="button"
               onClick={handleClick}
-              aria-label="Publicar aviso"
+              aria-label="Publicar adiso"
               aria-current={estaActiva ? 'page' : undefined}
               className="navbar-item navbar-item--cta"
               style={{

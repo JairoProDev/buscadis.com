@@ -249,7 +249,7 @@ export default function ChatWindow({
               />
             ) : (
               <span className="flex h-full w-full items-center justify-center text-[10px] text-[var(--text-tertiary)]">
-                Aviso
+                Adiso
               </span>
             )}
           </div>
@@ -298,7 +298,7 @@ export default function ChatWindow({
                 >
                   {isAuto && !isMe && (
                     <span className="mb-0.5 px-1 text-[10px] font-medium text-[var(--text-tertiary)]">
-                      Respuesta automática del aviso
+                      Respuesta automática del adiso
                     </span>
                   )}
                   <div

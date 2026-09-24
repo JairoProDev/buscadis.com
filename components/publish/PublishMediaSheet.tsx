@@ -80,7 +80,7 @@ export default function PublishMediaSheet({
           {(galleryUrls.length > 0 || uploading) && (
             <div>
               <p className="m-0 mb-2 text-[10px] font-bold uppercase tracking-wider text-[var(--text-tertiary)]">
-                En este aviso
+                En este adiso
               </p>
               <div className="flex gap-2 overflow-x-auto pb-1">
                 {uploading && (

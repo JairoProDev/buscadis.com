@@ -95,7 +95,7 @@ export default function PublishAudienceFunnel({ draft }: PublishAudienceFunnelPr
           ))}
         </div>
       ) : (
-        <p className="text-xs text-[var(--text-secondary)] m-0">Completa tu aviso para ver el potencial</p>
+        <p className="text-xs text-[var(--text-secondary)] m-0">Completa tu adiso para ver el potencial</p>
       )}
     </div>
   );

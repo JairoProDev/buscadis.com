@@ -419,7 +419,7 @@ function HomeContent() {
           setHayMasAdisos(adisosDesdeAPI.length >= ITEMS_POR_PAGINA);
           setVisibleCount(ITEMS_POR_PAGINA);
 
-          // API manda: no mezclar caché vieja que sepulta avisos nuevos
+          // API manda: no mezclar caché vieja que sepulta adisos nuevos
           setAdisos(adisosDesdeAPI);
 
           // Si hay adisoId, buscar en la lista actualizada
@@ -673,7 +673,7 @@ function HomeContent() {
       },
       () => {
         setGeoEstado('denied');
-        error('Activa la ubicación para ver primero los avisos cercanos.');
+        error('Activa la ubicación para ver primero los adisos cercanos.');
       },
       { enableHighAccuracy: false, maximumAge: 5 * 60 * 1000, timeout: 8000 },
     );

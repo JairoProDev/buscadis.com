@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
 
     const adisoId = String(formData.get('adisoId') || '').trim();
     if (!adisoId) {
-      return NextResponse.json({ error: 'Vincula un aviso comercial' }, { status: 400 });
+      return NextResponse.json({ error: 'Vincula un adiso comercial' }, { status: 400 });
     }
 
     const { data: adisoRow } = await supabaseAdmin
@@ -51,7 +51,7 @@ export async function POST(request: NextRequest) {
       .maybeSingle();
 
     if (!adisoRow) {
-      return NextResponse.json({ error: 'Aviso no encontrado' }, { status: 404 });
+      return NextResponse.json({ error: 'Adiso no encontrado' }, { status: 404 });
     }
 
     const adiso = dbToAdiso(adisoRow);

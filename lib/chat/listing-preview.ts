@@ -54,7 +54,7 @@ export async function fetchListingPreviews(
       (Array.isArray(priv.imagenesUrls) ? (priv.imagenesUrls[0] as string) : undefined) ||
       parseImageUrls(row.imagenes_urls);
     map.set(String(row.id), {
-      title: (row.titulo as string) || 'Aviso',
+      title: (row.titulo as string) || 'Adiso',
       imageUrl: img,
       priceLabel: formatPrice(priv.precio ?? row.precio, priv.moneda ?? row.moneda),
     });

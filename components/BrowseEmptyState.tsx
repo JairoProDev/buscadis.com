@@ -80,21 +80,21 @@ export default function BrowseEmptyState({
 
   const headline =
     variant === 'location' && isForeignCountry
-      ? `Aún no hay avisos en ${country?.name || locationLabel}`
+      ? `Aún no hay adisos en ${country?.name || locationLabel}`
       : variant === 'search' && hasSearch
         ? `Nadie publicó «${busqueda.trim()}» todavía`
         : variant === 'category' && categoria !== 'todos'
           ? `Sin resultados en esta categoría`
           : activeFilterCount > 0
-            ? 'Ningún aviso coincide con tus filtros'
-            : 'Aún no hay avisos aquí';
+            ? 'Ningún adiso coincide con tus filtros'
+            : 'Aún no hay adisos aquí';
 
   const subline =
     variant === 'location' && isForeignCountry
       ? `Buscadis está creciendo. Sé de los primeros en ${country?.name || 'tu país'} o cuéntanos qué buscas para que te encuentren.`
       : hasSearch
         ? 'Publica lo que necesitas y deja que los vendedores te contacten, o amplía tu búsqueda.'
-        : 'Prueba quitar filtros, cambiar la zona o publica tú el primer aviso.';
+        : 'Prueba quitar filtros, cambiar la zona o publica tú el primer adiso.';
 
   return (
     <div className="brand-mesh-glass mx-auto my-6 max-w-[520px] rounded-[20px] border border-[rgba(var(--brand-primary-rgb),0.15)] px-[clamp(1.25rem,4vw,2rem)] py-[clamp(1.25rem,4vw,2rem)] text-center">
@@ -163,7 +163,7 @@ export default function BrowseEmptyState({
             </button>
           )}
           <Link href="/publicar" className={secondaryBtnClass}>
-            Publicar aviso
+            Publicar adiso
           </Link>
         </div>
 

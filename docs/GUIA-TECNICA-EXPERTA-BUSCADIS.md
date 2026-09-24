@@ -373,7 +373,7 @@ Comandos en `package.json`:
 
 ### Storage buckets (archivos)
 
-Típicamente: `catalog-images`, `avisos-images` (ver `.env.example`), buckets de QR, etc.
+Típicamente: `catalog-images`, `adisos-images` (ver `.env.example`), buckets de QR, etc.
 
 ---
 
@@ -540,7 +540,7 @@ publicadis.com/quival
 | `*Tab.tsx` | Pestaña de UI |
 | `*Modal.tsx` | Overlay |
 | `[id]` / `[slug]` / `[businessId]` | Parámetro dinámico (a veces `businessId` en URL es slug) |
-| `privateData.source === 'catalog_product'` | Aviso que en realidad es producto de catálogo |
+| `privateData.source === 'catalog_product'` | Adiso que en realidad es producto de catálogo |
 
 ---
 
@@ -574,7 +574,7 @@ rg "catalog_products" -g'*.{ts,tsx,sql}'
 
 - **No** es el host completo de `publicadis.com` (eso vive en `/proyectos/publicadis.com`).
 - **No** es la tienda Agrilsur completa (`/proyectos/agrilsur`).
-- **Sí** es la fuente de verdad de perfiles/productos/avisos de Buscadis y de APIs públicas para Publicadis.
+- **Sí** es la fuente de verdad de perfiles/productos/adisos de Buscadis y de APIs públicas para Publicadis.
 
 ---
 

@@ -74,7 +74,7 @@ export async function resolveListingForInteraction(
 
     return {
       id: adiso.id as string,
-      titulo: (adiso.titulo as string) || 'Aviso',
+      titulo: (adiso.titulo as string) || 'Adiso',
       descripcion: (adiso.descripcion as string) || '',
       precio: (priv.precio as number) ?? (adiso.precio as number | null) ?? null,
       moneda: ((priv.moneda as string) ?? (adiso.moneda as string)) || null,

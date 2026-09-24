@@ -82,7 +82,7 @@ Recuerda: usa casco, no compartas tu ubicación en tiempo real por este chat,
 y confirma el pago directo con el conductor al finalizar.
 ```
 
-**Aviso de seguridad recurrente (una vez por semana al grupo/lista):**
+**Adiso de seguridad recurrente (una vez por semana al grupo/lista):**
 ```
 🔒 Recordatorio de seguridad: nunca compartas tu ubicación exacta ni datos
 personales en el grupo público. Todo el proceso de coordinación va por

@@ -38,13 +38,13 @@ Análisis:
   - Sinónimos: +2 puntos
   - Categoría exacta: +15 puntos
   - Ubicación: +8 puntos
-  - Avisos recientes: +5 puntos
-  - Avisos activos: +3 puntos
+  - Adisos recientes: +5 puntos
+  - Adisos activos: +3 puntos
   - Penalización históricos: -5 puntos
 
 #### Ejemplo de Scoring:
 ```
-Aviso 1: "VENDO CASA EN WANCHAQ" (score: 43)
+Adiso 1: "VENDO CASA EN WANCHAQ" (score: 43)
 - Título contiene "casa": +10
 - Categoría inmuebles: +15
 - Ubicación Wanchaq: +8
@@ -52,7 +52,7 @@ Aviso 1: "VENDO CASA EN WANCHAQ" (score: 43)
 - Reciente (5 días): +5
 - Descripción contiene "casa": +5
 
-Aviso 2: "Departamento en alquiler" (score: 15)
+Adiso 2: "Departamento en alquiler" (score: 15)
 - Categoría inmuebles: +15
 ```
 
@@ -82,7 +82,7 @@ Análisis:
   - Categoría: "inmuebles"
   - Ubicación: "Cusco"
 Búsqueda: categoria=inmuebles AND ubicacion LIKE '%Cusco%' AND (titulo LIKE '%departamento%' OR descripcion LIKE '%departamento%')
-Resultados: 15 avisos rankeados por relevancia
+Resultados: 15 adisos rankeados por relevancia
 ```
 
 ## 🎯 Mejoras en Precisión

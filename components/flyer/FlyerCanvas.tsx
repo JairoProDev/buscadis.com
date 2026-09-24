@@ -36,7 +36,7 @@ export default function FlyerCanvas({
 }: FlyerCanvasProps) {
   const cfg = resolveFlyerConfig(content.categoria, templateId, config);
   const compact = density === 'compact';
-  const rawTitle = (content.title || 'Aviso en Buscadis').trim().replace(/\s+/g, ' ');
+  const rawTitle = (content.title || 'Adiso en Buscadis').trim().replace(/\s+/g, ' ');
   // En el feed el título se envuelve: no cortar con puntos si todavía cabe en el cuadrado.
   const title = compact ? rawTitle : truncateFlyerTitle(rawTitle, 90);
   const align = cfg.align === 'center' ? 'center' : 'left';
@@ -473,7 +473,7 @@ export default function FlyerCanvas({
         >
           <div className="flex shrink-0 items-baseline justify-between gap-2 border-b-2 pb-1" style={{ borderColor: primary }}>
             <span className="font-sans font-bold uppercase tracking-[0.16em]" style={{ ...metaStyle, color: primary }}>
-              {badge || content.categoryLabel || 'Aviso'}
+              {badge || content.categoryLabel || 'Adiso'}
             </span>
             {showBrand && (
               <span className="font-sans text-slate-500" style={metaStyle}>

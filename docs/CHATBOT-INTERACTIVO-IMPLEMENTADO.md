@@ -39,7 +39,7 @@ Paso 3: ¿En qué zona?
 ↓ Usuario selecciona "Todas"
 
 Resultado:
-✨ Encontré 3 avisos de empleos de cocinero en Cusco
+✨ Encontré 3 adisos de empleos de cocinero en Cusco
 
 [POLLERIA DAYANA - Requiere maestro pollero...]
 [Restaurant busca cocinero...]
@@ -97,7 +97,7 @@ LIMIT 20
 ### Ejemplo 1: Buscar empleo de cocinero
 ```
 Usuario: [Abre chatbot]
-🤖: ¿Qué tipo de aviso te interesa?
+🤖: ¿Qué tipo de adiso te interesa?
 
 Usuario: [Click en 💼 Empleos]
 🤖: ¿Qué tipo de empleo buscas?
@@ -106,7 +106,7 @@ Usuario: [Click en 👨‍🍳 Cocinero]
 🤖: ¿En qué zona?
 
 Usuario: [Click en 🌍 Todas]
-🤖: ✨ Encontré 3 avisos de empleos de cocinero
+🤖: ✨ Encontré 3 adisos de empleos de cocinero
 
 Resultado: SOLO empleos de cocinero, 100% precisión
 ```

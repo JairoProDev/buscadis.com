@@ -58,7 +58,7 @@ export function buildWhatsAppPaymentMessage(params: {
 }): string {
   const phone = getYapePhone();
   return encodeURIComponent(
-    `Hola, acabo de publicar mi aviso en Buscadis (${params.adisoId}). ` +
+    `Hola, acabo de publicar mi adiso en Buscadis (${params.adisoId}). ` +
       `Pagé S/ ${params.total} por ${params.days} día(s) a S/ ${params.dailyRate}/día. ` +
       `Adjunto captura de Yape al ${phone}.`
   );

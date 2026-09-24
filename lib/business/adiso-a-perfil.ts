@@ -1,5 +1,5 @@
 /**
- * Mapea un aviso clasificado → campos de business_profiles + semillas de catálogo.
+ * Mapea un adiso clasificado → campos de business_profiles + semillas de catálogo.
  */
 import type { Adiso } from '@/types';
 import type { BusinessProfile } from '@/types/business';

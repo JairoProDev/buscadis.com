@@ -22,13 +22,13 @@ La última es la que realmente importa: **el sistema existe para que construir s
 
 | Métrica | Por qué importa |
 |---|---|
-| Tasa de apertura de aviso desde la rejilla | mide la calidad de `AdisoCard` |
+| Tasa de apertura de adiso desde la rejilla | mide la calidad de `AdisoCard` |
 | Tasa de contacto por sesión (WhatsApp, llamada, chat) | métrica norte del marketplace |
 | Publicaciones completadas / iniciadas | mide la fricción del composer |
 | Perfiles publicados / iniciados | mide la experiencia del creador |
 | Tiempo hasta primer resultado útil | velocidad percibida |
 | LCP e INP en campo (CrUX) | velocidad real en dispositivos reales |
-| Avisos indexados en Google | consecuencia directa del renderizado en servidor |
+| Adisos indexados en Google | consecuencia directa del renderizado en servidor |
 
 ---
 
@@ -40,9 +40,9 @@ Ordenados por valor esperado sobre esfuerzo. Regla común: nada se declara ganad
 Hipótesis: el botón con `adis-600` y texto blanco convierte igual o mejor que el `#53acc5` actual, y es legible con sol. Riesgo de que el cambio "se sienta menos de marca" — se mide con una pregunta de reconocimiento, no con opinión propia.
 *Métrica:* clics en la acción primaria por sesión.
 
-**E2 · Densidad de la rejilla de avisos.**
+**E2 · Densidad de la rejilla de adisos.**
 Dos columnas con tarjeta de 162px contra tres columnas con tarjeta de 106px, en móvil. Valida la restricción de ancho mínimo de `08 §1`.
-*Métrica:* aperturas de aviso por sesión y profundidad de scroll.
+*Métrica:* aperturas de adiso por sesión y profundidad de scroll.
 
 **E3 · Colores de categoría.**
 Set completo re-afinado contra el cambio mínimo. Se acompaña de una prueba de árbol con 15 personas para validar que la taxonomía coincide con el modelo mental local antes de imprimir material físico.
@@ -50,10 +50,10 @@ Set completo re-afinado contra el cambio mínimo. Se acompaña de una prueba de 
 
 **E4 · Altura del chrome.**
 Header 56 + nav 56 contra el 72 + 64 actual.
-*Métrica:* avisos vistos por sesión y tasa de contacto.
+*Métrica:* adisos vistos por sesión y tasa de contacto.
 
 **E5 · Mensaje pre-armado en el handoff a WhatsApp.**
-Con contexto de aviso contra chat vacío.
+Con contexto de adiso contra chat vacío.
 *Métrica:* respuestas del vendedor dentro de la primera hora — la métrica que le importa al que paga.
 
 **E6 · Composer: texto libre primero contra formulario estructurado.**
@@ -84,9 +84,9 @@ Tres estudios que cuestan horas, no dinero, y que deben correr **antes** de los 
 Eventos con nombre en `snake_case`, verbo en pasado, y propiedades comunes (`sesion_id`, `dispositivo`, `origen`, `modo`, `densidad`).
 
 ```
-aviso_impreso        {aviso_id, posicion, vista}
-aviso_abierto        {aviso_id, origen}
-contacto_click       {canal, aviso_id, origen_modulo}
+adiso_impreso        {adiso_id, posicion, vista}
+adiso_abierto        {adiso_id, origen}
+contacto_click       {canal, adiso_id, origen_modulo}
 handoff_redirigido   {canal, token}
 filtro_aplicado      {tipo, valor, resultados}
 busqueda_realizada   {termino, resultados, categoria}

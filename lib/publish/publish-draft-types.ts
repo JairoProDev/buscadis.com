@@ -19,7 +19,7 @@ export interface PublishDraft {
   descripcion?: string;
   contacto?: string;
   ubicacion?: Ubicacion;
-  /** Fotos del aviso (galería). No sustituyen la plantilla hasta que elijas portada. */
+  /** Fotos del adiso (galería). No sustituyen la plantilla hasta que elijas portada. */
   imagenes: string[];
   /** Foto opcional sobre la plantilla (portada manual). */
   portadaUrl?: string;
@@ -112,7 +112,7 @@ export function draftToAdisoPreview(draft: PublishDraft): {
 } {
   return {
     categoria: draft.categoria || 'productos',
-    titulo: draft.titulo || 'Tu aviso',
+    titulo: draft.titulo || 'Tu adiso',
     descripcion: draft.descripcion || '',
     contacto: draft.contacto || '',
     imagenesUrls: draft.imagenes.length > 0 ? draft.imagenes : undefined,

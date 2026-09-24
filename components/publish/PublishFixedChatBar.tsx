@@ -80,7 +80,7 @@ export default function PublishFixedChatBar({
     rec.start();
   };
 
-  // Minimizado embebido: botón en flujo (no FAB encima de "Revisar aviso")
+  // Minimizado embebido: botón en flujo (no FAB encima de "Revisar adiso")
   if (minimized) {
     if (embedded) {
       return (
@@ -138,7 +138,7 @@ export default function PublishFixedChatBar({
                 : 'bg-[var(--bg-secondary)] text-[var(--text-secondary)]'
             }`}
           >
-            {sending ? 'ADIS está leyendo tu aviso y rellenando los campos…' : statusMessage}
+            {sending ? 'ADIS está leyendo tu adiso y rellenando los campos…' : statusMessage}
           </div>
         )}
 
@@ -167,7 +167,7 @@ export default function PublishFixedChatBar({
               onSend={handleSend}
               sending={sending}
               disabled={sending}
-              placeholder="Escribe tu aviso y la IA lo mejorará"
+              placeholder="Escribe tu adiso y la IA lo mejorará"
               onAttachImage={handleFilePick}
               imageAttached={Boolean(pendingImage)}
               imageUploading={uploading}

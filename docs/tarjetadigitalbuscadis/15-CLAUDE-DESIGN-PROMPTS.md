@@ -205,7 +205,7 @@ Debe sentirse como un chat de WhatsApp, no como un formulario.
 **D2 · Importar desde lo que ya tiene**
 ```
 Diseña la primera pantalla del onboarding: "¿Dónde está tu negocio ahora?"
-con 4 opciones grandes: mi aviso de Buscadis · mi Instagram · mi Facebook ·
+con 4 opciones grandes: mi adiso de Buscadis · mi Instagram · mi Facebook ·
 mi negocio en Google. Y debajo, "Empezar de cero".
 Luego la pantalla de confirmación donde ve su perfil YA ARMADO con esos datos
 y solo tiene que revisar. Objetivo: menos de 60 segundos.

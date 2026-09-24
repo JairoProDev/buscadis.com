@@ -84,7 +84,7 @@ function distanciaKm(lat1: number, lon1: number, lat2: number, lon2: number): nu
 }
 
 /**
- * Primero lo que está cerca. Sin coordenadas del aviso, al final.
+ * Primero lo que está cerca. Sin coordenadas del adiso, al final.
  * Sin ubicación del usuario, cae a recencia: no inventamos cercanía.
  */
 export function compareCercanos(
@@ -106,7 +106,7 @@ export function compareCercanos(
 }
 
 /**
- * Vistas y consultas, con decaimiento. Un aviso de hoy con poca atención
+ * Vistas y consultas, con decaimiento. Un adiso de hoy con poca atención
  * le gana a uno del archivo que acumuló visitas hace años.
  */
 export function scoreInteres(adiso: Adiso, now = Date.now()): number {

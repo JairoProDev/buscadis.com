@@ -22,7 +22,7 @@ function toAbsoluteUrl(url: string): string {
   return `${getSiteUrl()}${trimmed.startsWith('/') ? trimmed : `/${trimmed}`}`;
 }
 
-/** Usa la foto del aviso si existe; si no, cover de flyer; si no, banner genérico */
+/** Usa la foto del adiso si existe; si no, cover de flyer; si no, banner genérico */
 export function resolveAdisoOgImage(adiso: {
   imagenUrl?: string | null;
   imagenesUrls?: string[] | null;

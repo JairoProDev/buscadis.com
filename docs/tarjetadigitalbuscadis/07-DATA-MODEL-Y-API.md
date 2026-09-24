@@ -211,4 +211,4 @@ POST  /api/negocio/:id/qr              → genera piezas (PNG/PDF/A4/sticker/sto
 
 ## 7. Migración desde datos existentes
 
-Los negocios ya presentes en Buscadis como avisos clasificados deben poder convertirse en perfil con un clic: nombre, categoría, teléfono, ubicación y fotos del aviso pasan directo. **Esta es la palanca de adopción más importante del lanzamiento**: un negocio que ya publicó un aviso obtiene su perfil pre-llenado en cinco segundos y solo tiene que confirmarlo. Diséñalo antes que el editor completo.
+Los negocios ya presentes en Buscadis como adisos clasificados deben poder convertirse en perfil con un clic: nombre, categoría, teléfono, ubicación y fotos del adiso pasan directo. **Esta es la palanca de adopción más importante del lanzamiento**: un negocio que ya publicó un adiso obtiene su perfil pre-llenado en cinco segundos y solo tiene que confirmarlo. Diséñalo antes que el editor completo.

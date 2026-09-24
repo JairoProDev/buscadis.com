@@ -16,7 +16,7 @@ export default function StoryMetricsPanel({ story, metrics, onClose }: StoryMetr
 
   const rows = [
     { label: 'Vistas', value: metrics.views, key: 'views' },
-    { label: 'Clics al aviso', value: metrics.cta_clicks, key: 'cta' },
+    { label: 'Clics al adiso', value: metrics.cta_clicks, key: 'cta' },
     { label: 'WhatsApp', value: metrics.whatsapp_clicks, key: 'wa' },
     { label: 'Chats', value: metrics.chat_opens, key: 'chat' },
     { label: 'Guardados', value: metrics.favorites, key: 'fav' },

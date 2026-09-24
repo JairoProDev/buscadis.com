@@ -98,7 +98,7 @@ Aparece **una vez** por pantalla de navegación (header o tab bar), nunca duplic
 
 ## 6. FilterPanel y FilterChips
 
-**Razón de ser.** El filtrado es lo que convierte un montón de avisos en un resultado. Es también donde más se abandona.
+**Razón de ser.** El filtrado es lo que convierte un montón de adisos en un resultado. Es también donde más se abandona.
 
 **Reglas.** Máximo 5 filtros visibles; el resto tras "Más filtros". Los filtros aplicados aparecen siempre como chips removibles sobre los resultados: un filtro invisible que devuelve cero resultados es la causa más común de "esta app no tiene nada". El contador de resultados se actualiza **antes** de aplicar ("Ver 34 resultados"), lo que reduce el miedo a filtrar.
 
@@ -110,7 +110,7 @@ Aparece **una vez** por pantalla de navegación (header o tab bar), nunca duplic
 
 **Razón de ser.** En Perú, la conversión termina en un chat de WhatsApp. Tratarlo como un enlace suelto es dejar el momento más valioso del producto sin diseñar.
 
-**Contrato:** todo enlace pasa por `/r/{token}` firmado, con mensaje pre-armado que incluye el contexto (aviso o producto, precio, origen), redirección en menos de 30 ms y evento asíncrono. El negocio recibe una conversación que ya empezó; la plataforma recibe el dato.
+**Contrato:** todo enlace pasa por `/r/{token}` firmado, con mensaje pre-armado que incluye el contexto (adiso o producto, precio, origen), redirección en menos de 30 ms y evento asíncrono. El negocio recibe una conversación que ya empezó; la plataforma recibe el dato.
 
 Fuera de horario, el texto cambia a "Escribir (responden mañana 9:00 a. m.)" en lugar de deshabilitarse.
 

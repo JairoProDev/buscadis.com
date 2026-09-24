@@ -218,7 +218,7 @@ async function main() {
     .select('id', { count: 'exact', head: true })
     .eq('edicion_numero', edicion)
     .eq('fuente_original', 'rueda_negocios');
-  console.log(`DB ahora tiene ${count} avisos de ${edicion}`);
+  console.log(`DB ahora tiene ${count} adisos de ${edicion}`);
 }
 
 main().catch((e) => {

@@ -32,7 +32,7 @@ export default function PublishMagicInput({
       >
         <div className="flex items-center gap-2 px-3 pt-3">
           <IconSparkles size={16} color="var(--brand-blue)" />
-          <span className="text-xs font-bold text-[var(--brand-blue)]">Describe tu aviso como quieras</span>
+          <span className="text-xs font-bold text-[var(--brand-blue)]">Describe tu adiso como quieras</span>
         </div>
         <textarea
           value={value}
@@ -58,7 +58,7 @@ export default function PublishMagicInput({
         </div>
       </div>
       <p className="text-[11px] text-[var(--text-tertiary)] m-0">
-        Pega tu aviso tal cual, con errores y en cualquier orden. La IA lo organizará.
+        Pega tu adiso tal cual, con errores y en cualquier orden. La IA lo organizará.
       </p>
     </div>
   );

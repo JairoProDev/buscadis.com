@@ -92,7 +92,7 @@ export default function PublishStudioComposer({
             <input
               value={value}
               onChange={(event) => onChange(event.target.value)}
-              placeholder="Escribe tu aviso y la IA lo mejorará"
+              placeholder="Escribe tu adiso y la IA lo mejorará"
               className="h-11 min-w-0 flex-1 bg-transparent text-sm text-[var(--text-primary)] outline-none placeholder:text-[var(--text-tertiary)]"
               aria-label="Mensaje para la IA"
               onKeyDown={(event) => {
@@ -144,7 +144,7 @@ export default function PublishStudioComposer({
           className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-[var(--brand-blue)] text-sm font-bold text-white shadow-[0_8px_22px_-6px_rgba(var(--brand-primary-rgb),0.55)] transition-transform active:scale-[0.99] disabled:opacity-50"
         >
           <IconMegaphone size={18} color={publishUi.onDark} />
-          {publishing ? 'Publicando…' : 'Publicar aviso'}
+          {publishing ? 'Publicando…' : 'Publicar adiso'}
         </button>
       </div>
 

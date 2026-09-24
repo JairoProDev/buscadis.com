@@ -39,11 +39,11 @@ function buildTitleAndDescription(draft: PublishDraft): { titulo: string; descri
   if (combined.trim()) {
     const split = heuristicSplitAdText(combined);
     return {
-      titulo: (split.titulo || 'Aviso').slice(0, 120),
+      titulo: (split.titulo || 'Adiso').slice(0, 120),
       descripcion: (split.descripcion || combined).slice(0, 2000),
     };
   }
-  return { titulo: 'Aviso en Buscadis', descripcion: '' };
+  return { titulo: 'Adiso en Buscadis', descripcion: '' };
 }
 
 export async function publishFromStudio(input: PublishStudioInput): Promise<{

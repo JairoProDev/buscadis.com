@@ -297,14 +297,14 @@ function EquipoPageContent() {
             if (json.mode === 'transferred') {
                 success(
                     json.emailWarning
-                        ? 'Dueño asignado (revisa el correo de aviso)'
-                        : 'Dueño asignado y aviso enviado'
+                        ? 'Dueño asignado (revisa el correo de adiso)'
+                        : 'Dueño asignado y adiso enviado'
                 );
             } else {
                 success(
                     json.emailWarning
                         ? 'Correo reservado. Cuando inicie sesión, el negocio se vinculará solo.'
-                        : 'Correo reservado y aviso enviado. Se vinculará al iniciar sesión.'
+                        : 'Correo reservado y adiso enviado. Se vinculará al iniciar sesión.'
                 );
             }
             setAssignOwnerEmail('');
@@ -392,7 +392,7 @@ function EquipoPageContent() {
                         <h2 className="font-semibold mb-1">Buscadis · Asignar dueño por correo</h2>
                         <p className="text-xs text-slate-300 mb-4">
                             Busca el negocio por slug (ej. agrilsur) y asigna el correo del dueño. Si aún no
-                            tiene cuenta, se reserva; al iniciar sesión se vincula solo y verá un aviso para
+                            tiene cuenta, se reserva; al iniciar sesión se vincula solo y verá un adiso para
                             editar.
                         </p>
                         <form
@@ -566,7 +566,7 @@ function EquipoPageContent() {
                                 <p className="text-xs text-sky-900/80 mb-3">
                                     Escribe el correo de la persona. Si ya tiene cuenta en Buscadis, recibe el
                                     negocio al instante. Si no, queda reservado hasta que inicie sesión con ese
-                                    correo (verá un aviso para ver y editar su página).
+                                    correo (verá un adiso para ver y editar su página).
                                 </p>
                                 {pendingOwnerEmail && (
                                     <p className="text-xs font-medium text-amber-800 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 mb-3">

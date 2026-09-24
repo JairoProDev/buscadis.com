@@ -57,7 +57,7 @@ export async function POST(request: NextRequest) {
         const { object } = await generateObject({
           model: openai(AI_MODELS.ROUTER),
           schema: QuestionSchema,
-          prompt: `Genera preguntas naturales en español peruano para completar un aviso. Contexto: ${body.context}. Campos faltantes: ${body.missingFields.join(', ')}`,
+          prompt: `Genera preguntas naturales en español peruano para completar un adiso. Contexto: ${body.context}. Campos faltantes: ${body.missingFields.join(', ')}`,
         });
         const merged = body.missingFields.slice(0, 3).map((fieldId, i) => ({
           fieldId,

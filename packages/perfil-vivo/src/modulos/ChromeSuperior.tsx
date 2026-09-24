@@ -255,7 +255,7 @@ function MenuMas() {
         }
         if (Notification.permission === 'granted') {
           setFollowMsg(
-            'Campanita activada. Recibirás avisos cuando publique en Buscadis.'
+            'Campanita activada. Recibirás adisos cuando publique en Buscadis.'
           );
         }
       }
@@ -287,7 +287,7 @@ function MenuMas() {
             {following ? 'Campanita activada' : 'Activar campanita'}
           </span>
           <span className="pv-menu-mas__hint">
-            Avisos de lo que publique este negocio
+            Adisos de lo que publique este negocio
           </span>
         </button>
         {followMsg ? <p className="pv-menu-mas__toast">{followMsg}</p> : null}
@@ -296,7 +296,7 @@ function MenuMas() {
   );
 }
 
-/** Chrome superior: atrás + hamburguesa + más (compartir / copiar / avisos). */
+/** Chrome superior: atrás + hamburguesa + más (compartir / copiar / adisos). */
 export function ChromeSuperior() {
   const { payload } = usePerfil();
   const { openSecciones, openMas } = useChromeUI();

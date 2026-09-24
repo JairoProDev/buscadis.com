@@ -38,7 +38,7 @@ export async function POST(request: NextRequest) {
     const listing = await resolveListingForInteraction(adisoId);
 
     if (!listing) {
-      return NextResponse.json({ error: 'Aviso no encontrado' }, { status: 404 });
+      return NextResponse.json({ error: 'Adiso no encontrado' }, { status: 404 });
     }
 
     if (listing.contactLocked && (field === 'contacto' || field === 'whatsapp')) {
@@ -56,7 +56,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Vendedor no registrado en la app' }, { status: 422 });
     }
     if (sellerId === user.id) {
-      return NextResponse.json({ error: 'No aplica en tu propio aviso' }, { status: 400 });
+      return NextResponse.json({ error: 'No aplica en tu propio adiso' }, { status: 400 });
     }
 
     let session = await getInteractionSession(user.id, listing.id);

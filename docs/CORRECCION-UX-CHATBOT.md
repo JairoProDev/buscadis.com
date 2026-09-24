@@ -3,10 +3,10 @@
 ## ✅ Cambios Implementados
 
 ### 1. Navegación al Sidebar
-Al hacer clic en un aviso dentro del chat, ahora ocurre lo siguiente:
+Al hacer clic en un adiso dentro del chat, ahora ocurre lo siguiente:
 - **El chat se cierra/minimiza automáticamente.**
-- **La aplicación navega a la URL del aviso.**
-- Esto permite ver el detalle del aviso en la interfaz principal (sidebar) en lugar de una ventana modal comprimida dentro del chat.
+- **La aplicación navega a la URL del adiso.**
+- Esto permite ver el detalle del adiso en la interfaz principal (sidebar) en lugar de una ventana modal comprimida dentro del chat.
 
 ### 2. Archivos Modificados
 - `components/ChatbotInteractivo.tsx`:
@@ -28,7 +28,7 @@ Al hacer clic en un aviso dentro del chat, ahora ocurre lo siguiente:
 2. **Abre el Chatbot**.
 3. **Busca algo** (ej: "trabajadora de hogar" o usa botones).
 4. **Haz clic en un resultado**.
-5. **Resultado esperado**: El chat se cierra y ves el aviso en el panel principal (sidebar) de la web.
+5. **Resultado esperado**: El chat se cierra y ves el adiso en el panel principal (sidebar) de la web.
 
 ## 🎯 Objetivo Logrado
 - Chatbot profesional con NLU avanzado.

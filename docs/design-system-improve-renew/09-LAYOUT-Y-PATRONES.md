@@ -23,7 +23,7 @@
 
 ## 2. Rejillas
 
-### Listado de avisos
+### Listado de adisos
 
 | Viewport | Columnas | Gap | Justificación |
 |---|---|---|---|
@@ -47,15 +47,15 @@ Definidos en `03 §9`. Regla adicional: **el perfil de negocio no se estira en e
 
 ## 3. Patrones de navegación
 
-**Scroll vertical único con anclas, no pestañas**, para contenido de una misma entidad (perfil de negocio, detalle de aviso). *Por qué:* los usuarios rara vez exploran pestañas —se quedan en la primera—, y el contenido de pestañas ocultas queda fuera del alcance de los crawlers y de los modelos que responden preguntas.
+**Scroll vertical único con anclas, no pestañas**, para contenido de una misma entidad (perfil de negocio, detalle de adiso). *Por qué:* los usuarios rara vez exploran pestañas —se quedan en la primera—, y el contenido de pestañas ocultas queda fuera del alcance de los crawlers y de los modelos que responden preguntas.
 
-**Pestañas solo para contenido paralelo y comparable** (Mis avisos / Guardados / Mensajes).
+**Pestañas solo para contenido paralelo y comparable** (Mis adisos / Guardados / Mensajes).
 
-**Hojas modales para detalle rápido, rutas reales para detalle profundo.** Un aviso abierto desde la rejilla se ve en hoja (el usuario mantiene su posición y puede ver cinco seguidos); la URL directa del aviso es una ruta real indexable. Ambas comparten el mismo componente.
+**Hojas modales para detalle rápido, rutas reales para detalle profundo.** Un adiso abierto desde la rejilla se ve en hoja (el usuario mantiene su posición y puede ver cinco seguidos); la URL directa del adiso es una ruta real indexable. Ambas comparten el mismo componente.
 
 **Botón atrás siempre funciona.** Toda hoja y todo modal empujan estado al historial.
 
-**Volver conserva la posición del scroll y el estado de los filtros.** Es el error más caro y más común en marketplaces: el usuario abre un aviso, vuelve, y aterriza arriba de todo con los filtros perdidos. Se abandona ahí.
+**Volver conserva la posición del scroll y el estado de los filtros.** Es el error más caro y más común en marketplaces: el usuario abre un adiso, vuelve, y aterriza arriba de todo con los filtros perdidos. Se abandona ahí.
 
 ---
 
@@ -113,4 +113,4 @@ Tres niveles de énfasis, y solo tres. Cada pantalla tiene exactamente un elemen
 
 Consecuencia directa del hallazgo de que hoy el HTML no contiene contenido.
 
-El contenido crítico va en el HTML del servidor: título, precio, ubicación, descripción, imagen principal. La rejilla de avisos se sirve renderizada, no montada en cliente. Un `<h1>` por página. Los datos comparables (precio, atributos, horarios) en tablas o listas de definición semánticas, no en divs con estilo, porque los modelos de lenguaje extraen estructura. El contenido de los acordeones va en el HTML aunque esté colapsado. La paginación usa enlaces reales, no solo scroll infinito: el scroll infinito sin enlaces deja páginas 2 en adelante inalcanzables para cualquier crawler.
+El contenido crítico va en el HTML del servidor: título, precio, ubicación, descripción, imagen principal. La rejilla de adisos se sirve renderizada, no montada en cliente. Un `<h1>` por página. Los datos comparables (precio, atributos, horarios) en tablas o listas de definición semánticas, no en divs con estilo, porque los modelos de lenguaje extraen estructura. El contenido de los acordeones va en el HTML aunque esté colapsado. La paginación usa enlaces reales, no solo scroll infinito: el scroll infinito sin enlaces deja páginas 2 en adelante inalcanzables para cualquier crawler.

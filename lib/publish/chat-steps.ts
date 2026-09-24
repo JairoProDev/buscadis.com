@@ -50,7 +50,7 @@ export const STEP_ORDER: PublishChatStepId[] = [
 export function botQuestion(step: PublishChatStepId): string {
   switch (step) {
     case 'categoria':
-      return '¿En qué categoría encaja tu aviso?';
+      return '¿En qué categoría encaja tu adiso?';
     case 'titulo':
       return '¿Cómo lo titularías en una frase corta?';
     case 'descripcion':

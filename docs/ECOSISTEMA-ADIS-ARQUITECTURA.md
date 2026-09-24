@@ -65,7 +65,7 @@ Un negocio = **un `business_profile_id`** en base de datos. Dos presentaciones d
 | Productos             | `catalog_products`                |                                     |
 | Imágenes producto     | Supabase `catalog-images`         | `public/*/images/` solo transitorio |
 | Anuncios clasificados | `adisos`                          |                                     |
-| Imágenes avisos       | `avisos-images` / `adisos-images` |                                     |
+| Imágenes adisos       | `adisos-images` / `adisos-images` |                                     |
 | Equipo / permisos     | `business_members`                |                                     |
 | Bloques perfil        | `profile_blocks` JSONB            |                                     |
 | Sitio Publicadis      | `publicadis_sites` *(nueva)*      | HTML estático en `public/`          |

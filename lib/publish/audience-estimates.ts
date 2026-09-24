@@ -55,7 +55,7 @@ export const FUNNEL_LABELS = {
   B: 'Búsquedas registradas en marketplace y ADIS AI',
   C: 'Interesados en esta categoría',
   D: 'Interesados en esta subcategoría',
-  E: 'Match específico con tu aviso',
+  E: 'Match específico con tu adiso',
 } as const;
 
 export const FUNNEL_CHANNELS = [

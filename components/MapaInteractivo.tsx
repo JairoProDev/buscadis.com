@@ -189,7 +189,7 @@ export default function MapaInteractivo({ adisos, onAbrirAdiso }: MapaInteractiv
           <p class="map-popup__cat">${adiso.categoria}</p>
           <h3 class="map-popup__title">${escapeHtml(adiso.titulo)}</h3>
           <p class="map-popup__price">${escapeHtml(priceLabel)}</p>
-          <button type="button" class="map-popup__btn" id="map-btn-${adiso.id}">Ver aviso</button>
+          <button type="button" class="map-popup__btn" id="map-btn-${adiso.id}">Ver adiso</button>
         </div>
       `,
         { className: 'map-popup-wrapper', maxWidth: 240 },
@@ -318,7 +318,7 @@ export default function MapaInteractivo({ adisos, onAbrirAdiso }: MapaInteractiv
           <div className="min-w-0">
             <p className="m-0 text-xs font-semibold text-[var(--text-primary)]">
               {adisosFiltrados.length}{' '}
-              {adisosFiltrados.length === 1 ? 'aviso en el mapa' : 'avisos en el mapa'}
+              {adisosFiltrados.length === 1 ? 'adiso en el mapa' : 'adisos en el mapa'}
             </p>
             <p className="m-0 truncate text-[10px] text-[var(--text-tertiary)]">
               {adisosConCoords.length < adisos.length

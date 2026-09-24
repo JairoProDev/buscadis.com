@@ -1,12 +1,12 @@
-# Resumen de Mejoras - Script de Exportación de Avisos Históricos
+# Resumen de Mejoras - Script de Exportación de Adisos Históricos
 
 ## 📊 Resultados Finales
 
 ### Datos Procesados
-- **Total de avisos procesados**: 22,425
+- **Total de adisos procesados**: 22,425
 - **Carpetas procesadas**: 47 revistas
 - **Período**: Año 2024
-- **Avisos filtrados (spam/editorial)**: 52
+- **Adisos filtrados (spam/editorial)**: 52
 
 ### Distribución por Categoría
 | Categoría | Cantidad | Porcentaje |
@@ -32,10 +32,10 @@
 ### 2. Extracción Inteligente de Ubicaciones
 
 #### Antes
-- **100%** de avisos con ubicación genérica: "Cusco, Perú"
+- **100%** de adisos con ubicación genérica: "Cusco, Perú"
 
 #### Después
-- **45.4%** de avisos con ubicación específica
+- **45.4%** de adisos con ubicación específica
 - **54.6%** con ubicación genérica (cuando no se detecta patrón)
 
 #### Patrones Detectados
@@ -61,20 +61,20 @@ El script ahora reconoce y extrae:
 ### 3. Filtrado de Contenido Editorial
 - Detecta y filtra automáticamente:
   - Recomendaciones de la revista
-  - Avisos institucionales
+  - Adisos institucionales
   - Contenido sin información de contacto
-- **52 avisos filtrados** de 22,477 totales
+- **52 adisos filtrados** de 22,477 totales
 
 ### 4. Tamaño Automático
-- **Pequeño**: Por defecto para avisos históricos (contenido < 250 caracteres)
-- **Mediano**: Para avisos más extensos (> 400 caracteres)
+- **Pequeño**: Por defecto para adisos históricos (contenido < 250 caracteres)
+- **Mediano**: Para adisos más extensos (> 400 caracteres)
 - Ya no usa "miniatura" para históricos
 
 ## 📈 Comparación de Resultados
 
 ### Ubicaciones Mejoradas
-De una muestra de 22,425 avisos:
-- **10,188 avisos** (45.4%) ahora tienen ubicación específica
+De una muestra de 22,425 adisos:
+- **10,188 adisos** (45.4%) ahora tienen ubicación específica
 - Antes: "Cusco, Perú"
 - Ahora: "Urb. Larapa, San Jerónimo, Cusco, Perú"
 
@@ -156,7 +156,7 @@ adisos_export_todas-las-carpetas_2024_2025-12-15T22-38-43-279Z.csv
 - Limpieza de descripción (remueve contactos del texto)
 
 ### Rendimiento
-- Procesamiento de 22,425 avisos en ~6 segundos
+- Procesamiento de 22,425 adisos en ~6 segundos
 - Sin errores de procesamiento
 - Memoria eficiente con streaming de CSV
 
@@ -165,8 +165,8 @@ adisos_export_todas-las-carpetas_2024_2025-12-15T22-38-43-279Z.csv
 El script mejorado logró:
 - ✅ **45.4% de mejora** en ubicaciones específicas
 - ✅ **100% de precisión** en categorización por página
-- ✅ **52 avisos spam** filtrados automáticamente
+- ✅ **52 adisos spam** filtrados automáticamente
 - ✅ **0 errores** en procesamiento
-- ✅ **22,425 avisos** listos para importar
+- ✅ **22,425 adisos** listos para importar
 
 **Archivo listo para subir a Supabase**: `adisos_export_todas-las-carpetas_2024_2025-12-15T22-38-43-279Z.csv`

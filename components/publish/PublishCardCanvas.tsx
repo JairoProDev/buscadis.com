@@ -168,7 +168,7 @@ function TemplateBackdrop({
     return (
       <div className="pointer-events-none absolute inset-0" style={{ background }}>
         <div className="absolute left-1/2 top-[10%] -translate-x-1/2 rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-wide text-white" style={{ background: color }}>
-          {mark || 'Aviso'}
+          {mark || 'Adiso'}
         </div>
       </div>
     );

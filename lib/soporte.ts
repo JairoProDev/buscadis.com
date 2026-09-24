@@ -13,7 +13,7 @@ export const MOTIVOS_AYUDA: Array<{
   {
     id: 'duda',
     label: 'Ayuda para buscar',
-    descripcion: 'Ayuda para encontrar lo que necesito.',
+    descripcion: 'No encuentro lo que necesito.',
     mensaje: 'Hola, necesito ayuda para encontrar lo que busco en Buscadis: ',
   },
   {

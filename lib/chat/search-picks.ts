@@ -13,16 +13,16 @@ export function buildSearchIntroMessage(total: number, query: string): string {
   const q = query.trim();
   if (total === 0) {
     return q
-      ? `No encontré avisos claros para «${q}». Puedo ampliar la búsqueda si me das más detalle (zona, presupuesto o tipo).`
+      ? `No encontré adisos claros para «${q}». Puedo ampliar la búsqueda si me das más detalle (zona, presupuesto o tipo).`
       : 'No encontré resultados. Cuéntame qué buscas con un poco más de detalle.';
   }
 
   if (total === 1) {
-    return `Encontré 1 aviso que encaja con «${q}». Te lo resumo abajo para que decidas rápido:`;
+    return `Encontré 1 adiso que encaja con «${q}». Te lo resumo abajo para que decidas rápido:`;
   }
 
   const shown = Math.min(total, SEARCH_PICKS_LIMIT);
-  return `Revisé ${total} avisos sobre «${q}». Te destaco las ${shown} mejores opciones según relevancia, precio y calidad del anuncio:`;
+  return `Revisé ${total} adisos sobre «${q}». Te destaco las ${shown} mejores opciones según relevancia, precio y calidad del anuncio:`;
 }
 
 export function getPickRankLabel(index: number): string {

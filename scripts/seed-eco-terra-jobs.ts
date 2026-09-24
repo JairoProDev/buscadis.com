@@ -1,5 +1,5 @@
 /**
- * Publica avisos de empleo Eco Terra Lodge (6 vacantes + 1 captador).
+ * Publica adisos de empleo Eco Terra Lodge (6 vacantes + 1 captador).
  *
  * Uso:
  *   npx tsx scripts/seed-eco-terra-jobs.ts
@@ -181,12 +181,12 @@ async function main() {
   const dataPath = path.join(__dirname, 'data', 'eco-terra-jobs.json');
   const data = JSON.parse(fs.readFileSync(dataPath, 'utf-8')) as JobData;
 
-  console.log('Eco Terra Lodge — publicación de avisos');
+  console.log('Eco Terra Lodge — publicación de adisos');
   console.log(`Batch: ${data.batchId}`);
   console.log(`Owner placeholder: ${data.ownerEmail}`);
 
   if (await batchExists(data.batchId)) {
-    console.log('⚠️  Ya existen avisos con este batch_id. Abortando para evitar duplicados.');
+    console.log('⚠️  Ya existen adisos con este batch_id. Abortando para evitar duplicados.');
     console.log('   Para transferir: npx tsx scripts/transfer-adisos-owner.ts --batch', data.batchId, '--email NUEVO@EMAIL');
     process.exit(0);
   }

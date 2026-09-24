@@ -260,7 +260,7 @@ export async function chat(
 
               return {
                 success: true,
-                message: `Analicé tu imagen. He creado un borrador de aviso arriba. ¡Puedes publicarlo con un clic o editarlo primero!`,
+                message: `Analicé tu imagen. He creado un borrador de adiso arriba. ¡Puedes publicarlo con un clic o editarlo primero!`,
               };
             } catch (error: any) {
               uiStream.done(<ErrorCard message={error.message || "Error al analizar imagen"} />);
@@ -299,8 +299,8 @@ export async function chat(
             const draftData = {
               imageUrl: '', // No image yet
               categoria: categoria || 'productos',
-              titulo: titulo || 'Nuevo Aviso',
-              descripcion: 'Escribe aquí los detalles de tu aviso...',
+              titulo: titulo || 'Nuevo Adiso',
+              descripcion: 'Escribe aquí los detalles de tu adiso...',
               precio: 0,
               condicion: 'usado',
               confidence: 'media' as const,
@@ -319,7 +319,7 @@ export async function chat(
 
             return {
               success: true,
-              message: `He creado un borrador para tu aviso de "${titulo}". Rellena los detalles y publícalo.`,
+              message: `He creado un borrador para tu adiso de "${titulo}". Rellena los detalles y publícalo.`,
             };
           },
         }),

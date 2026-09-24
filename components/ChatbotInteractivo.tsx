@@ -348,7 +348,7 @@ export default function ChatbotInteractivo({ onPublicar, onError, onSuccess, onM
         {
             id: '1',
             tipo: 'asistente',
-            contenido: '¡Hola! Te ayudaré a encontrar lo que buscas. ¿Qué tipo de aviso te interesa?',
+            contenido: '¡Hola! Te ayudaré a encontrar lo que buscas. ¿Qué tipo de adiso te interesa?',
             timestamp: new Date()
         },
         {
@@ -436,7 +436,7 @@ export default function ChatbotInteractivo({ onPublicar, onError, onSuccess, onM
         setMensajes(prev => [...prev, nuevoMensaje]);
     };
 
-    const buscarAvisos = async (estado: EstadoBusqueda) => {
+    const buscarAdisos = async (estado: EstadoBusqueda) => {
         setProcesando(true);
 
         try {
@@ -487,7 +487,7 @@ export default function ChatbotInteractivo({ onPublicar, onError, onSuccess, onM
 
             // 1. Intento Exacto
             let resultados = await ejecutarQuery(estado);
-            let mensajeTitulo = `✨ Encontré ${resultados.length} aviso${resultados.length !== 1 ? 's' : ''} que te pueden interesar:`;
+            let mensajeTitulo = `✨ Encontré ${resultados.length} adiso${resultados.length !== 1 ? 's' : ''} que te pueden interesar:`;
 
             // 2. Intento Relax: Sin Ubicación (si se pidió ubicación y no hubo resultados)
             if (resultados.length === 0 && estado.ubicacion && estado.ubicacion !== 'todas') {
@@ -542,7 +542,7 @@ export default function ChatbotInteractivo({ onPublicar, onError, onSuccess, onM
         setModo(nuevoModo);
         setProcesando(false);
         if (nuevoModo === 'publicar') {
-            agregarMensaje('asistente', '📢 Modo Publicación Activado.\n\n¿Qué te gustaría publicar hoy? Puedo ayudarte a crear un aviso para empleos, inmuebles o productos.\n\n📸 Sube una foto o simplemente dime "Vendo mi bicicleta".');
+            agregarMensaje('asistente', '📢 Modo Publicación Activado.\n\n¿Qué te gustaría publicar hoy? Puedo ayudarte a crear un adiso para empleos, inmuebles o productos.\n\n📸 Sube una foto o simplemente dime "Vendo mi bicicleta".');
         } else {
             agregarMensaje('asistente', '🔍 Modo Búsqueda Activado.\n\n¿Qué estás buscando hoy?');
             agregarMensaje('botones', '', { botones: CATEGORIAS });
@@ -558,7 +558,7 @@ export default function ChatbotInteractivo({ onPublicar, onError, onSuccess, onM
             const draftData = {
                 imageUrl: '', // No image yet
                 categoria: 'productos' as const,
-                titulo: texto.length > 4 ? texto : `Aviso de ${texto}`,
+                titulo: texto.length > 4 ? texto : `Adiso de ${texto}`,
                 descripcion: `Vendo ${texto}. Contactar para más detalles.`,
                 precio: 0,
                 condicion: 'usado',
@@ -588,7 +588,7 @@ export default function ChatbotInteractivo({ onPublicar, onError, onSuccess, onM
 
         if (valor === 'nueva_busqueda') {
             setEstadoBusqueda({});
-            agregarMensaje('asistente', '¿Qué tipo de aviso te interesa?');
+            agregarMensaje('asistente', '¿Qué tipo de adiso te interesa?');
             agregarMensaje('botones', '', { botones: CATEGORIAS });
             return;
         }
@@ -662,7 +662,7 @@ export default function ChatbotInteractivo({ onPublicar, onError, onSuccess, onM
             const ubicacionSeleccionada = UBICACIONES.find(u => u.valor === valor);
             agregarMensaje('usuario', `${ubicacionSeleccionada?.emoji} ${ubicacionSeleccionada?.label}`);
             agregarMensaje('asistente', '🔍 Buscando las mejores opciones para ti...');
-            await buscarAvisos(nuevoEstado);
+            await buscarAdisos(nuevoEstado);
         }
     };
 
@@ -686,14 +686,14 @@ export default function ChatbotInteractivo({ onPublicar, onError, onSuccess, onM
             const resultados = await buscarMejorada(analisis, 20);
 
             if (resultados.length > 0) {
-                agregarMensaje('asistente', `✨ Encontré ${resultados.length} aviso${resultados.length !== 1 ? 's' : ''} relacionados con "${texto}":`, { resultados });
+                agregarMensaje('asistente', `✨ Encontré ${resultados.length} adiso${resultados.length !== 1 ? 's' : ''} relacionados con "${texto}":`, { resultados });
                 agregarMensaje('botones', '', {
                     botones: [
                         { label: 'Nueva Búsqueda', emoji: '🔄', valor: 'nueva_busqueda' }
                     ]
                 });
             } else {
-                agregarMensaje('asistente', `😕 No encontré avisos relacionados con "${texto}". Intenta con otros términos o usa los botones para una búsqueda guiada.`);
+                agregarMensaje('asistente', `😕 No encontré adisos relacionados con "${texto}". Intenta con otros términos o usa los botones para una búsqueda guiada.`);
                 agregarMensaje('botones', '', {
                     botones: [
                         { label: 'Búsqueda Guiada', emoji: '🎯', valor: 'nueva_busqueda' }

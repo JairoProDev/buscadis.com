@@ -10,7 +10,7 @@
 
 | # | Hallazgo | Impacto | Acción | Estado |
 |---|---|---|---|---|
-| **N1** | El shell no se renderiza en servidor: buscadis.com entrega `Cargando…` | SEO y AEO nulos; ningún aviso indexable | Migrar rutas clave a Server Components con datos en el HTML | ✅ Sprint 6 (parcial: hidratación RSC de grilla home diferida) |
+| **N1** | El shell no se renderiza en servidor: buscadis.com entrega `Cargando…` | SEO y AEO nulos; ningún adiso indexable | Migrar rutas clave a Server Components con datos en el HTML | ✅ Sprint 6 (parcial: hidratación RSC de grilla home diferida) |
 | **N2** | Blanco sobre `#53acc5` ≈ 2.3:1 | Falla AA; botones ilegibles con sol | Separar identidad (`adis-400`) de acción (`adis-600`) | ✅ Sprint 2 |
 | **N3** | CTA Publicar: celeste sobre amarillo ≈ 1.5:1 | El botón más importante del producto es inaccesible | Texto tinta `#10242B` sobre el amarillo | ✅ Sprint 2 |
 | **N4** | `logo.svg` de ~3 MB | Penaliza LCP en toda sesión | Optimizar a <15 KB | ✅ Sprint 2 |
@@ -82,9 +82,9 @@ Reconstruir `AdisoCard` con anatomía fija y tres vistas; eliminar `styled-jsx`;
 *Terminado cuando:* una prueba de cinco segundos con tres personas recupera precio y ubicación.
 
 ### Sprint 6 · Renderizado en servidor e indexación ✅
-Migrar home, listado, detalle de aviso y perfil de negocio a Server Components con datos en el HTML. Añadir paginación con enlaces. JSON-LD.
+Migrar home, listado, detalle de adiso y perfil de negocio a Server Components con datos en el HTML. Añadir paginación con enlaces. JSON-LD.
 **Hecho:** 2026-08-08 · ItemList/Product/LocalBusiness; listas crawlables; `npm run smoke:ssr`.
-*Terminado cuando:* `curl` de las cuatro rutas devuelve contenido real y Search Console empieza a indexar avisos.
+*Terminado cuando:* `curl` de las cuatro rutas devuelve contenido real y Search Console empieza a indexar adisos.
 
 ### Sprint 7 · Chrome y composer ✅
 Header a 56/64, nav inferior a 56, composer con estados completos y accesible por teclado, barra de categorías con los colores nuevos, filtros migrados a CSS.

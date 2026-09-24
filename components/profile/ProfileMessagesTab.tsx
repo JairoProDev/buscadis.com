@@ -16,8 +16,8 @@ export default function ProfileMessagesTab() {
       <ProfileEmptyState
         icon={<IconMessages size={24} color="var(--brand-yellow)" />}
         title="Sin conversaciones"
-        description="Contacta a un vendedor desde un aviso o una historia para iniciar un chat aquí."
-        actionLabel="Explorar avisos"
+        description="Contacta a un vendedor desde un adiso o una historia para iniciar un chat aquí."
+        actionLabel="Explorar adisos"
         actionHref="/"
       />
     );

@@ -65,8 +65,8 @@ Reglas: se importa `Icon`, nunca un ícono suelto. `currentColor` por defecto, s
 
 | Uso | Proporción | Formato | Peso máx |
 |---|---|---|---|
-| Foto de aviso (rejilla) | 4:3 | AVIF + WebP, 400/800w | 45 KB |
-| Foto de aviso (detalle) | libre, contenida | AVIF + WebP, 800/1200w | 110 KB |
+| Foto de adiso (rejilla) | 4:3 | AVIF + WebP, 400/800w | 45 KB |
+| Foto de adiso (detalle) | libre, contenida | AVIF + WebP, 800/1200w | 110 KB |
 | Portada de negocio | 16:9 | AVIF + WebP, 400/800/1200w | 90 KB |
 | Logo de negocio | 1:1 | WebP/PNG 256px | 25 KB |
 | Producto | 1:1 | AVIF + WebP, 300/600w | 45 KB |
@@ -84,6 +84,6 @@ Reglas: se importa `Icon`, nunca un ícono suelto. `currentColor` por defecto, s
 
 Hoy no hay lenguaje ilustrativo: la atmósfera la dan los mesh gradients. Recomendación: **no inventar uno todavía**. Un sistema de ilustración es caro de crear y más caro de mantener consistente, y no resuelve ningún problema actual. Los estados vacíos se resuelven con ícono grande + texto claro + acción, que es más rápido de leer y pesa 1 KB.
 
-Cuando llegue el momento (después de tener tracción y equipo de diseño), el lenguaje debe salir del vocabulario del producto: avisos, papel, mural, poste, lupa, mapa — no de personajes genéricos flotando.
+Cuando llegue el momento (después de tener tracción y equipo de diseño), el lenguaje debe salir del vocabulario del producto: adisos, papel, mural, poste, lupa, mapa — no de personajes genéricos flotando.
 
 El sistema de mascota "Lupo" que ya tienes es un activo de marketing, no de interfaz. Vive en contenido, piezas físicas y onboarding; no dentro de los estados de producto.

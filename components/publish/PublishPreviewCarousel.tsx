@@ -50,7 +50,7 @@ function StoryFrame({ draft }: { draft: PublishDraft }) {
         <img src={draft.imagenes[0]} alt="" className="absolute inset-0 w-full h-full object-cover opacity-80" />
       )}
       <div className="absolute bottom-0 inset-x-0 p-3 bg-gradient-to-t from-black/80 to-transparent">
-        <p className="text-white font-bold text-sm m-0">{draft.titulo || 'Tu aviso'}</p>
+        <p className="text-white font-bold text-sm m-0">{draft.titulo || 'Tu adiso'}</p>
         <p className="text-white/80 text-xs m-0 mt-1 line-clamp-2">{draft.descripcion}</p>
       </div>
     </div>
@@ -72,7 +72,7 @@ function SocialFrame({ draft, network }: { draft: PublishDraft; network: string 
         <img src={draft.imagenes[0]} alt="" className="w-full aspect-video object-cover" />
       )}
       <div className="p-3">
-        <p className="font-bold text-sm m-0">{draft.titulo || 'Tu aviso'}</p>
+        <p className="font-bold text-sm m-0">{draft.titulo || 'Tu adiso'}</p>
         <p className="text-xs text-gray-600 m-0 mt-1 line-clamp-2">{draft.descripcion}</p>
       </div>
     </div>
@@ -113,7 +113,7 @@ export default function PublishPreviewCarousel({ draft }: PublishPreviewCarousel
         {active === 'story' && <StoryFrame draft={draft} />}
         {active === 'panel' && (
           <div className="space-y-2 p-2">
-            <p className="font-bold text-sm m-0">{draft.titulo || 'Tu aviso'}</p>
+            <p className="font-bold text-sm m-0">{draft.titulo || 'Tu adiso'}</p>
             <p className="text-xs text-[var(--text-secondary)] m-0 line-clamp-4">{draft.descripcion || 'Sin descripción'}</p>
             {draft.precio && <p className="text-sm font-bold text-[var(--brand-blue)] m-0">S/ {draft.precio}</p>}
           </div>
@@ -124,14 +124,14 @@ export default function PublishPreviewCarousel({ draft }: PublishPreviewCarousel
               // eslint-disable-next-line @next/next/no-img-element
               <img src={draft.imagenes[0]} alt="" className="w-full h-32 object-cover rounded-xl" />
             )}
-            <h3 className="font-bold m-0">{draft.titulo || 'Tu aviso'}</h3>
+            <h3 className="font-bold m-0">{draft.titulo || 'Tu adiso'}</h3>
             <p className="text-sm text-[var(--text-secondary)] m-0">{draft.descripcion}</p>
           </div>
         )}
         {active === 'chat' && (
           <div className="rounded-xl bg-[var(--bg-primary)] p-3 border border-[var(--border-color)]">
             <p className="text-xs text-[var(--text-tertiary)] m-0 mb-2">Encontré esto para ti:</p>
-            <p className="font-bold text-sm m-0">{draft.titulo || 'Aviso'}</p>
+            <p className="font-bold text-sm m-0">{draft.titulo || 'Adiso'}</p>
             <p className="text-xs m-0 mt-1">{draft.descripcion?.slice(0, 80)}…</p>
           </div>
         )}
@@ -140,8 +140,8 @@ export default function PublishPreviewCarousel({ draft }: PublishPreviewCarousel
         )}
         {active === 'web' && (
           <div className="rounded-lg border border-gray-200 p-2 bg-gray-50">
-            <p className="text-[10px] text-green-700 m-0">buscadis.com › aviso</p>
-            <p className="text-sm font-medium text-blue-700 m-0 mt-1">{draft.titulo || 'Tu aviso'}</p>
+            <p className="text-[10px] text-green-700 m-0">buscadis.com › adiso</p>
+            <p className="text-sm font-medium text-blue-700 m-0 mt-1">{draft.titulo || 'Tu adiso'}</p>
             <p className="text-xs text-gray-600 m-0">{draft.descripcion?.slice(0, 100)}</p>
           </div>
         )}

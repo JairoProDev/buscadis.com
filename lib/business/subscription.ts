@@ -44,7 +44,7 @@ export const PERFIL_VIVO_PLANS: readonly PerfilVivoPlan[] = [
       'Muestra en el pasillo (perfil básico)',
       `Hasta ${FREE_PRODUCT_CAP} productos`,
       'Indexable en Google',
-      '1 aviso clasificado',
+      '1 adiso clasificado',
       'Métricas básicas',
     ],
   },

@@ -95,8 +95,8 @@ export async function GET(request: NextRequest) {
     channels: FUNNEL_CHANNELS,
     message:
       funnel.E > 0
-        ? `${funnel.E} personas podrían estar interesadas en tu aviso específico`
-        : 'Completa tu aviso para ver el potencial de alcance',
+        ? `${funnel.E} personas podrían estar interesadas en tu adiso específico`
+        : 'Completa tu adiso para ver el potencial de alcance',
   };
 
   setPreviewCache(`funnel-${cacheKey}`, payload);

@@ -1,7 +1,7 @@
 /** Trigger a browser download for a remote image URL or data URL. */
 export async function downloadCoverImage(
   sourceUrl: string,
-  filename = `buscadis-aviso-${Date.now()}.jpg`,
+  filename = `buscadis-adiso-${Date.now()}.jpg`,
 ): Promise<boolean> {
   if (typeof window === 'undefined' || !sourceUrl) return false;
   try {

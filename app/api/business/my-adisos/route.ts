@@ -1,6 +1,6 @@
 /**
  * GET /api/business/my-adisos
- * Lista avisos activos del usuario para la puerta de entrada del creador.
+ * Lista adisos activos del usuario para la puerta de entrada del creador.
  */
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';

@@ -22,7 +22,7 @@ El chatbot mejorado NO se está usando porque:
 ```
 🤖: ¿Qué te gustaría hacer?
 
-[🔍 Buscar Avisos]  [📝 Publicar Aviso]
+[🔍 Buscar Adisos]  [📝 Publicar Adiso]
 ```
 
 ### Paso 2: Seleccionar Categoría
@@ -75,11 +75,11 @@ El chatbot mejorado NO se está usando porque:
 
 ### Paso 5: Mostrar Resultados
 ```
-🤖: Encontré 15 avisos de empleos de cocinero en Cusco
+🤖: Encontré 15 adisos de empleos de cocinero en Cusco
 
-[Aviso 1]
-[Aviso 2]
-[Aviso 3]
+[Adiso 1]
+[Adiso 2]
+[Adiso 3]
 ...
 
 [🔄 Nueva Búsqueda]  [🔍 Refinar]

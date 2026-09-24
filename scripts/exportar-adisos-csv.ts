@@ -61,7 +61,7 @@ function esContenidoEditorial(titulo: string, descripcion: string): boolean {
     /recomendaciones.*revista/i,
     /consejos.*seguridad/i,
     /advertencia.*lectores/i,
-    /aviso.*importante/i
+    /adiso.*importante/i
   ];
 
   // Si el texto es muy largo (>500 caracteres) y no tiene contacto, probablemente es editorial

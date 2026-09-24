@@ -44,7 +44,7 @@ function matchUbicacion(
   userLng?: number,
 ): boolean {
   if (!adiso.ubicacion) {
-    // Sin ubicación explícita: no excluir (avisos importados / catálogo nacional)
+    // Sin ubicación explícita: no excluir (adisos importados / catálogo nacional)
     return !filtro.distrito && !filtro.provincia;
   }
 
@@ -76,7 +76,7 @@ function matchUbicacion(
     .map((s) => s!.toLowerCase().trim())
     .join(' | ');
 
-  // Distrito: match exacto o contenido en haystack (evita perder avisos "Cusco, Cusco, Cusco")
+  // Distrito: match exacto o contenido en haystack (evita perder adisos "Cusco, Cusco, Cusco")
   if (filtro.distrito) {
     const d = filtro.distrito.toLowerCase().trim();
     if (ubi.distrito?.toLowerCase().trim() === d) return true;
@@ -138,7 +138,7 @@ export function applyBrowseFilters({
     filtrados = filtrados.filter((a) => !hiddenAdIds.has(a.id));
   }
 
-  // No excluir categorías enteras por señales negativas: eso dejaba el feed en 3–4 avisos.
+  // No excluir categorías enteras por señales negativas: eso dejaba el feed en 3–4 adisos.
   // La personalización solo reordena (personalizeAdisos / compareRecientesFeed).
 
   if (categoria !== 'todos') {

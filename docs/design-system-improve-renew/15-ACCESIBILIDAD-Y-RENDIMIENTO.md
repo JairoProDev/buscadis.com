@@ -52,7 +52,7 @@ Dispositivo de referencia: Android de gama media, 4G simulada, 360px de ancho.
 
 | Métrica | Presupuesto | Ruta |
 |---|---|---|
-| LCP | < 1.8 s | home, listado, aviso, perfil |
+| LCP | < 1.8 s | home, listado, adiso, perfil |
 | INP | < 200 ms | todas |
 | CLS | < 0.05 | todas |
 | TTFB | < 600 ms | todas |

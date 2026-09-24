@@ -30,7 +30,7 @@ interface OrdenamientoProps<V extends string = TipoOrdenamiento> {
   /** `icon` = solo icono fijo, sin pill ni etiqueta */
   variant?: 'pill' | 'icon';
   triggerIcon?: SortIconComponent;
-  /** Aviso bajo la lista, por ejemplo si falta la ubicación para "Más cercanos". */
+  /** Adiso bajo la lista, por ejemplo si falta la ubicación para "Más cercanos". */
   note?: string;
 }
 

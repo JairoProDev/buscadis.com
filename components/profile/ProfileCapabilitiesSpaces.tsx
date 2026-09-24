@@ -30,7 +30,7 @@ const CARDS: Array<{
   {
     key: 'publish',
     title: 'Publicar un adiso',
-    subtitle: 'Aviso clasificado',
+    subtitle: 'Adiso clasificado',
     href: '/publicar',
     Icon: IconMegaphone,
   },

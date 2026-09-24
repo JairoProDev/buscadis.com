@@ -9,14 +9,14 @@
 ## 1. En una frase
 
 **ADIS** es un ecosistema digital para personas y negocios en Perú (y luego LatAm):  
-encontrar oportunidades, publicar avisos, tener perfil/catálogo de negocio, y —para quienes lo necesitan— una página web profesional, todo conectado a la misma cuenta y a los mismos datos.
+encontrar oportunidades, publicar adisos, tener perfil/catálogo de negocio, y —para quienes lo necesitan— una página web profesional, todo conectado a la misma cuenta y a los mismos datos.
 
 Piensa en esto:
 
 | Si eres… | En ADIS consigues… |
 |----------|---------------------|
 | Persona que busca | Empleo, cuarto, moto, servicio, producto, evento… en un solo lugar |
-| Persona que vende / ofrece | Avisos (clasificados) que la gente encuentra en el feed y la búsqueda |
+| Persona que vende / ofrece | Adisos (clasificados) que la gente encuentra en el feed y la búsqueda |
 | Negocio | Tarjeta digital + catálogo + WhatsApp + presencia en el marketplace |
 | Negocio que quiere “web de verdad” | Sitio en Publicadis (más bonito / más ecommerce), alimentado por los mismos productos |
 
@@ -80,15 +80,15 @@ Buscadis y Publicadis son **dos formas de mostrar** lo mismo, no dos bases de cl
 
 ## 3. ¿Para quién es? (personas y roles)
 
-### 3.1 Persona común (busca o publica un aviso)
+### 3.1 Persona común (busca o publica un adiso)
 
 - Entra al feed, busca, filtra por categoría (empleos, inmuebles, vehículos, servicios, productos, eventos, negocios, comunidad).
-- Abre un aviso, ve fotos, comparte, escribe por WhatsApp.
+- Abre un adiso, ve fotos, comparte, escribe por WhatsApp.
 - Puede marcar favoritos, ver mapa, chats, deals (ofertas/clips), etc.
 
 ### 3.2 Anunciante individual
 
-- Publica un “adiso” (aviso clasificado).
+- Publica un “adiso” (adiso clasificado).
 - Puede tener tiers de publicación (gratis / pago / destacar), expiraciones, promoción.
 
 ### 3.3 Dueña o dueño de negocio
@@ -114,7 +114,7 @@ Buscadis y Publicadis son **dos formas de mostrar** lo mismo, no dos bases de cl
 - Buscador grande.
 - Categorías horizontales.
 - Stories / deals (según diseño actual).
-- Grilla de avisos: **mezcla de clasificados clásicos + productos de catálogo** de negocios.
+- Grilla de adisos: **mezcla de clasificados clásicos + productos de catálogo** de negocios.
 - Orden típico “Más recientes” (con toques de personalización e imágenes).
 - Contadores tipo “X anuncios con actividad – Y vistas” (pulso social).
 
@@ -139,7 +139,7 @@ puede reordenar productos arrastrando, editar campos, agregar productos, publica
 
 | Puerta | Para qué sirve |
 |--------|----------------|
-| Publicar | Crear un aviso clasificado |
+| Publicar | Crear un adiso clasificado |
 | Mi negocio | Panel del negocio / catálogo / equipo |
 | Favoritos | Guardados |
 | Mapa | Explorar por ubicación |
@@ -157,9 +157,9 @@ Imagina tres cajones en el mismo almacén:
 
 ### 5.1 Adisos (clasificados)
 
-- Un aviso suelto: “Busco cajera”, “Alquilo local”, “Vendo moto”.
+- Un adiso suelto: “Busco cajera”, “Alquilo local”, “Vendo moto”.
 - Vive en el feed y la búsqueda.
-- Históricamente Buscadis nació de aquí (incluso de digitalizar avisos de revistas).
+- Históricamente Buscadis nació de aquí (incluso de digitalizar adisos de revistas).
 
 ### 5.2 Perfiles de negocio
 
@@ -206,15 +206,15 @@ Esto no es desorden por capricho: es la etapa en la que **vários modelos de pá
 ### Para quien busca
 
 - Buscar y filtrar por categoría, texto, filtros avanzados, fotos, precio, ubicación.
-- Ver detalle del aviso / producto.
+- Ver detalle del adiso / producto.
 - Contactar por WhatsApp sin exponer números al azar de forma torpe.
 - Favoritos, historial, mapa, compartir links.
 
-### Para quien publica avisos
+### Para quien publica adisos
 
 - Flujo de publicación (incluyendo ayuda con IA en varios puntos del producto).
 - Promoción / destacar / planes.
-- Control de avisos gratis vs pagados, expiración.
+- Control de adisos gratis vs pagados, expiración.
 
 ### Para negocios
 
@@ -242,8 +242,8 @@ Esto no es desorden por capricho: es la etapa en la que **vários modelos de pá
 
 Modelo típico de este tipo de plataforma (mezcla de lo ya construido y la visión):
 
-1. **Gratuito generoso** para crecer marketplace (perfiles, catálogos básicos, avisos free limitados).  
-2. **Pago por destacar / promover** avisos y visibilidad.  
+1. **Gratuito generoso** para crecer marketplace (perfiles, catálogos básicos, adisos free limitados).  
+2. **Pago por destacar / promover** adisos y visibilidad.  
 3. **Planes de negocio** (más productos, analítica, equipo, plantillas Publicadis, dominio propio…).  
 4. **Publicadis / sitios** como producto premium o incluido en planes altos.  
 5. A futuro: publicidad, leads, servicios de agencia (Publicadis también nace con ADN de marketing).
@@ -304,7 +304,7 @@ No necesitas programar; sí conviene saber **dónde se decide cada cosa**.
 | **Buscadis (producto)** | La app que la gente usa | Carpeta/repo `buscadis.com` → internet en Vercel → dominio buscadis.com |
 | **Publicadis (host)** | La casa de las webs y marketing Publicadis | Repo `publicadis.com` → Vercel proyecto publicadis → publicadis.com |
 | **Agrilsur web** | Tienda hecha a medida | Repo `agrilsur` → su propio Vercel → se muestra bajo Publicadis |
-| **Base de datos** | El almacén de perfiles, productos, avisos, visitas | **Supabase** (proyecto activo de Buscadis) |
+| **Base de datos** | El almacén de perfiles, productos, adisos, visitas | **Supabase** (proyecto activo de Buscadis) |
 | **Fotos** | Archivos de imágenes | “Storage” de Supabase (no en WhatsApp ni en el código) |
 | **GitHub** | Historial y copia del código | Repos del equipo |
 | **Vercel** | “La fábrica que pone la web en internet” | Deploys automáticos al subir cambios |
@@ -343,8 +343,8 @@ Dominios (.com) = la dirección del restaurante.
 
 | Palabra | Significado humano |
 |---------|-------------------|
-| **Adiso** | Aviso clasificado |
-| **Feed** | Timeline / muro de avisos de la home |
+| **Adiso** | Adiso clasificado |
+| **Feed** | Timeline / muro de adisos de la home |
 | **Slug** | Apodo corto de URL (`villachaco`) |
 | **Perfil / business profile** | Ficha del negocio |
 | **Catálogo** | Lista de productos del negocio |

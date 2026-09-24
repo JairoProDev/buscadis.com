@@ -44,7 +44,7 @@ interface DraftProduct {
   savedId?: string;
 }
 
-interface AvisoLite {
+interface AdisoLite {
   id: string;
   titulo: string;
   categoria?: string;
@@ -76,8 +76,8 @@ export default function CreadorOnboarding() {
   });
   const [productCount, setProductCount] = useState(0);
   const [draftProducts, setDraftProducts] = useState<DraftProduct[]>([]);
-  const [avisos, setAvisos] = useState<AvisoLite[]>([]);
-  const [loadingAvisos, setLoadingAvisos] = useState(true);
+  const [adisos, setAdisos] = useState<AdisoLite[]>([]);
+  const [loadingAdisos, setLoadingAdisos] = useState(true);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [savedFlash, setSavedFlash] = useState(false);
@@ -172,11 +172,11 @@ export default function CreadorOnboarding() {
           headers: { Authorization: `Bearer ${token}` },
         });
         const json = await res.json();
-        if (!cancelled && json.adisos) setAvisos(json.adisos);
+        if (!cancelled && json.adisos) setAdisos(json.adisos);
       } catch {
         /* ignore */
       } finally {
-        if (!cancelled) setLoadingAvisos(false);
+        if (!cancelled) setLoadingAdisos(false);
       }
     })();
     return () => {
@@ -197,7 +197,7 @@ export default function CreadorOnboarding() {
     setPaso(next);
   };
 
-  const fromAviso = async (adisoId: string) => {
+  const fromAdiso = async (adisoId: string) => {
     setBusy(true);
     setError(null);
     try {
@@ -214,7 +214,7 @@ export default function CreadorOnboarding() {
         body: JSON.stringify({ adisoId }),
       });
       const json = await res.json();
-      if (!res.ok) throw new Error(json.error || 'No se pudo usar el aviso');
+      if (!res.ok) throw new Error(json.error || 'No se pudo usar el adiso');
       setProfile(json.profile);
       setProductCount(json.productosCreados || 0);
       trackEvent('publish.draft_update', {
@@ -404,7 +404,7 @@ export default function CreadorOnboarding() {
               ¿Por dónde empezamos?
             </h1>
             <p className="text-[17px] text-slate-600 leading-snug">
-              Si ya tienes un aviso en Buscadis, lo convertimos en tu perfil en menos de un minuto.
+              Si ya tienes un adiso en Buscadis, lo convertimos en tu perfil en menos de un minuto.
             </p>
 
             {profile.id && profile.slug && (
@@ -417,17 +417,17 @@ export default function CreadorOnboarding() {
               </button>
             )}
 
-            {loadingAvisos ? (
+            {loadingAdisos ? (
               <div className="h-24 rounded-2xl bg-white border border-slate-200 animate-pulse" />
-            ) : avisos.length > 0 ? (
+            ) : adisos.length > 0 ? (
               <div className="space-y-3">
-                <p className="text-sm font-bold text-slate-700">Tus avisos</p>
-                {avisos.map((a) => (
+                <p className="text-sm font-bold text-slate-700">Tus adisos</p>
+                {adisos.map((a) => (
                   <button
                     key={a.id}
                     type="button"
                     disabled={busy}
-                    onClick={() => fromAviso(a.id)}
+                    onClick={() => fromAdiso(a.id)}
                     className="w-full flex items-center gap-3 min-h-[72px] rounded-2xl border border-slate-200 bg-white p-3 text-left hover:border-teal-400 hover:bg-teal-50/40 transition-colors"
                   >
                     <div className="w-14 h-14 rounded-xl bg-slate-100 overflow-hidden shrink-0">
@@ -720,7 +720,7 @@ export default function CreadorOnboarding() {
             )}
             {productCount > 0 && draftProducts.length === 0 && (
               <p className="text-[15px] text-emerald-700 font-semibold mt-3">
-                Ya tienes {productCount} producto{productCount === 1 ? '' : 's'} del aviso. Puedes
+                Ya tienes {productCount} producto{productCount === 1 ? '' : 's'} del adiso. Puedes
                 agregar más fotos o continuar.
               </p>
             )}

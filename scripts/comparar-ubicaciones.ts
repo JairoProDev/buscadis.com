@@ -109,6 +109,6 @@ for (let i = 1; i < Math.min(nuevoLines.length, anteriorLines.length); i++) {
 }
 
 console.log('\n=== ESTADÍSTICAS ===');
-console.log(`Total de avisos: ${total}`);
+console.log(`Total de adisos: ${total}`);
 console.log(`Ubicaciones mejoradas: ${mejoradas} (${((mejoradas / total) * 100).toFixed(1)}%)`);
 console.log(`Ubicaciones con detalle específico: ${mejoradas}`);

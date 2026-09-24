@@ -38,7 +38,7 @@ export async function openAdInteraction(params: {
     };
   }
 
-  const initialMessage = `Hola, vi tu aviso "${adisoTitle}" y me interesa saber más.`;
+  const initialMessage = `Hola, vi tu adiso "${adisoTitle}" y me interesa saber más.`;
 
   let conversationId: string | undefined;
 

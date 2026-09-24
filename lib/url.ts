@@ -14,8 +14,8 @@ export const normalizeString = (str: string): string => {
 
 /** Slug legible del título (sin el id). */
 export const createAdisoTitleSlug = (titulo: string): string => {
-  const slug = normalizeString(titulo || 'aviso').slice(0, 72);
-  return slug || 'aviso';
+  const slug = normalizeString(titulo || 'adiso').slice(0, 72);
+  return slug || 'adiso';
 };
 
 /**
@@ -80,7 +80,7 @@ export const getAdisoAbsoluteUrl = (adiso: Adiso): string => {
   return `${getSiteUrl()}${getAdisoUrl(adiso)}`;
 };
 
-/** Genera id corto para nuevos avisos (nanoid 10). */
+/** Genera id corto para nuevos adisos (nanoid 10). */
 export const newAdisoId = (): string => nanoid(10);
 
 /**

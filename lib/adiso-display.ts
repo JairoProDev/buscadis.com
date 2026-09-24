@@ -177,7 +177,7 @@ export function formatRelativePublishedAt(
   return date.toLocaleDateString('es-PE', { day: 'numeric', month: 'short' });
 }
 
-/** Parsea sueldo desde descripción de avisos importados/seed */
+/** Parsea sueldo desde descripción de adisos importados/seed */
 export function parseJobSalaryFromText(text: string): number | null {
   const patterns = [
     /sueldo\s+base:?\s*S\/\s*([\d,.]+)/i,

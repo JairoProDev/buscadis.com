@@ -12,7 +12,7 @@ Este plan detalla la implementación de las 20 funcionalidades solicitadas para 
 - [ ] **Botón Flotante WhatsApp**: Añadir opción de configuración para mensaje predefinido. (Visualmente ya existe en preview).
 - [ ] **Generador de QR**: Añadir botón en header para descargar QR del slug actual.
 - [ ] **Links a Redes Sociales**: Añadir sección de "Redes Sociales" en el editor (Instagram, TikTok, FB) con inputs.
-- [ ] **Barra de Anuncios (Sticky Bar)**: Añadir campo "Aviso Global" en el editor y renderizarlo en `BusinessPublicView`.
+- [ ] **Barra de Anuncios (Sticky Bar)**: Añadir campo "Adiso Global" en el editor y renderizarlo en `BusinessPublicView`.
 
 ## 2. Personalización y Diseño
 

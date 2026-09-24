@@ -124,7 +124,7 @@ export async function GET(request: NextRequest) {
     ...(adisosRes.data || []).map((a: any) => ({
       id: a.id as string,
       kind: 'classified_ad' as TrashKind,
-      title: (a.titulo as string) || 'Aviso',
+      title: (a.titulo as string) || 'Adiso',
       imageUrl: Array.isArray(a.imagenes_urls) ? a.imagenes_urls[0] || null : null,
       price: a.precio ?? null,
       currency: (a.moneda as string) || 'PEN',

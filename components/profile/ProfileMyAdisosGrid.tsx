@@ -36,7 +36,7 @@ export default function ProfileMyAdisosGrid({ token, highlightId }: ProfileMyAdi
       <ProfileEmptyState
         icon={<IconMegaphone size={24} color="var(--brand-yellow)" />}
         title="Aún no has publicado"
-        description="Publica tu primer aviso y llega a miles de personas en tu ciudad."
+        description="Publica tu primer adiso y llega a miles de personas en tu ciudad."
         actionLabel="Publicar ahora"
         actionHref="/publicar"
       />

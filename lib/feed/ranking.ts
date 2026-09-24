@@ -11,7 +11,7 @@ const PACKAGE_RANK: Record<TamañoPaquete, number> = {
   gigante: 4,
 };
 
-/** Aviso de catálogo de negocio (marketplace desde perfil comercial). */
+/** Adiso de catálogo de negocio (marketplace desde perfil comercial). */
 export function isCatalogProduct(adiso: Adiso): boolean {
   return adiso.privateData?.source === 'catalog_product';
 }
@@ -45,7 +45,7 @@ export function getPublishedTimestamp(adiso: Adiso): number {
 
 /**
  * Adelanto temporal por calidad visual — SOLO desempate dentro del mismo día.
- * Un aviso de hoy sin foto siempre gana a uno de ayer con foto.
+ * Un adiso de hoy sin foto siempre gana a uno de ayer con foto.
  */
 const IMAGE_BOOST_MS = 2 * 60 * 60 * 1000; // 2 h (desempate suave)
 const CATALOG_EXTRA_BOOST_MS = 30 * 60 * 1000; // 30 min

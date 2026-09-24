@@ -35,7 +35,7 @@ export default function FilterSortPanel({ value, onChange, note }: FilterSortPan
         <span className="min-w-0 flex-1">
           <span className="block text-xs font-bold text-[var(--text-primary)]">Ordenar resultados</span>
           <span className="block truncate text-[10px] text-[var(--text-tertiary)]">
-            {note && !open ? note : open ? 'Elige cómo ver los avisos' : `Actual: ${current.label}`}
+            {note && !open ? note : open ? 'Elige cómo ver los adisos' : `Actual: ${current.label}`}
           </span>
         </span>
         <motion.span

@@ -65,7 +65,7 @@ export default function DealPublishWizard({
       // fallback
     }
     if (!title && adisoId) {
-      setTitle(`Oferta especial — aviso ${adisoId.slice(0, 8)}`);
+      setTitle(`Oferta especial — adiso ${adisoId.slice(0, 8)}`);
     }
     setCaption((c) => c || 'Aprovecha antes de que se acabe. Escríbeme por WhatsApp.');
     setHashtags((h) => h || 'oferta, deal, peru');
@@ -73,7 +73,7 @@ export default function DealPublishWizard({
 
   const publish = async () => {
     if (!token || !file || !adisoId.trim()) {
-      setError('Completa media y aviso vinculado');
+      setError('Completa media y adiso vinculado');
       return;
     }
     setLoading(true);
@@ -158,11 +158,11 @@ export default function DealPublishWizard({
 
         {step === 'link' && (
           <div className="space-y-4">
-            <label className="block text-sm font-medium">ID del aviso vinculado *</label>
+            <label className="block text-sm font-medium">ID del adiso vinculado *</label>
             <input
               value={adisoId}
               onChange={(e) => setAdisoId(e.target.value)}
-              placeholder="Pega el ID de tu aviso publicado"
+              placeholder="Pega el ID de tu adiso publicado"
               className="w-full rounded-xl border border-[var(--border-color)] px-3 py-2 text-sm"
             />
             <button type="button" onClick={() => setStep('media')} className="text-sm text-[var(--brand-blue)]">

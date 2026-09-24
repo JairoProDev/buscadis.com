@@ -50,7 +50,7 @@
 - [x] Multi-photo pick → upload → draft products → price keypad
 - [x] Persist via catalog API
 
-### Task 4: Step 6 + WA + puerta aviso
+### Task 4: Step 6 + WA + puerta adiso
 
 - [x] Preview link `/v`, publish soft, `wa.me` self-send
 - [x] `from-adiso` API + door UI

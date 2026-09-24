@@ -6,7 +6,7 @@
  *   - `classified_ad`    → fila en `adisos` (id text, ej. "lNhoY-7HDw")
  *
  * Antes se borraba siempre contra `catalog_products`, así que eliminar un
- * clasificado fallaba con un cast uuid inválido y el aviso reaparecía en el
+ * clasificado fallaba con un cast uuid inválido y el adiso reaparecía en el
  * catálogo y en el PDF. Aquí el borrado se enruta a la tabla correcta y se
  * verifica que la fila realmente cambió antes de dar el borrado por bueno.
  *

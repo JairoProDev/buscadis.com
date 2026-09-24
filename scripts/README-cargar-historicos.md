@@ -149,19 +149,19 @@ El script ahora utiliza la estructura conocida de la revista para mejorar la pre
 
 Automáticamente filtra:
 - Recomendaciones de la revista (ej: "COMO EVITAR ESTAFAS INMOBILIARIAS")
-- Avisos institucionales
+- Adisos institucionales
 - Contenido sin información de contacto
 
 ### 📏 Tamaño Automático
 
 - **Pequeño**: Por defecto para históricos (contenido < 250 caracteres)
-- **Mediano**: Para avisos más largos (> 400 caracteres)
+- **Mediano**: Para adisos más largos (> 400 caracteres)
 
 ### 📊 Estadísticas Detalladas
 
 El script muestra:
-- Total de avisos procesados
-- Avisos filtrados (editorial/spam)
+- Total de adisos procesados
+- Adisos filtrados (editorial/spam)
 - Distribución por categoría
 - Errores encontrados
 
@@ -199,7 +199,7 @@ El archivo CSV maneja correctamente los campos complejos como JSON y saltos de l
 ## Ejemplo de Resultado
 
 Procesando las 47 carpetas completas:
-- **Total avisos**: ~22,000+
+- **Total adisos**: ~22,000+
 - **Inmuebles**: ~10,600
 - **Empleos**: ~10,300
 - **Servicios**: ~1,100

@@ -162,7 +162,7 @@ export default function CatalogTrashPanel({
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-sm font-bold text-slate-800">{item.title}</p>
                     <p className="text-[11px] text-slate-500">
-                      {item.kind === 'classified_ad' ? 'Aviso clasificado' : 'Producto'}
+                      {item.kind === 'classified_ad' ? 'Adiso clasificado' : 'Producto'}
                       {' · '}
                       {daysLeft(item.purgeAt)} días para su eliminación
                     </p>

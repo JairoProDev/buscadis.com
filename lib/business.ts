@@ -631,7 +631,7 @@ export async function getCatalogProductsAsAdisos(options?: {
     }
 }
 
-/** Feed unificado: avisos + catálogo de negocios para el marketplace. */
+/** Feed unificado: adisos + catálogo de negocios para el marketplace. */
 export async function getMarketplaceFeed(options: {
     limit: number;
     offset: number;

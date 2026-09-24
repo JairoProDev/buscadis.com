@@ -27,7 +27,7 @@ export async function GET() {
     // Verificar Storage
     try {
       const { data, error } = await supabase!.storage
-        .from('avisos-images')
+        .from('adisos-images')
         .list('', { limit: 1 });
 
       health.services.storage = error ? 'error' : 'ok';

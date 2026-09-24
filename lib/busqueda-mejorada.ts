@@ -15,7 +15,7 @@ function diasDesde(fecha: string): number {
 }
 
 /**
- * Calcula score de relevancia para un aviso
+ * Calcula score de relevancia para un adiso
  */
 function calcularScore(adiso: Adiso, analisis: AnalisisBusqueda): number {
     let score = 0;
@@ -159,13 +159,13 @@ export function generarRespuestaBusqueda(resultados: Adiso[], analisis: Analisis
         (analisis.categoria ? analisis.categoria : 'tu búsqueda');
 
     if (resultados.length === 0) {
-        return `No encontré avisos claros para «${term}». Si me das zona o presupuesto, puedo afinar la búsqueda.`;
+        return `No encontré adisos claros para «${term}». Si me das zona o presupuesto, puedo afinar la búsqueda.`;
     }
 
     const shown = Math.min(resultados.length, 3);
     if (resultados.length === 1) {
-        return `Encontré 1 aviso que encaja con «${term}». Te lo resumo para que decidas rápido:`;
+        return `Encontré 1 adiso que encaja con «${term}». Te lo resumo para que decidas rápido:`;
     }
 
-    return `Revisé ${resultados.length} avisos sobre «${term}». Te destaco las ${shown} mejores opciones según relevancia y calidad del anuncio:`;
+    return `Revisé ${resultados.length} adisos sobre «${term}». Te destaco las ${shown} mejores opciones según relevancia y calidad del anuncio:`;
 }

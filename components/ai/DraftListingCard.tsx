@@ -94,17 +94,17 @@ export function DraftListingCard({
             color: 'var(--text-primary)',
             marginBottom: '8px'
           }}>
-            ¡Aviso Publicado!
+            ¡Adiso Publicado!
           </h3>
           <p style={{
             fontSize: '14px',
             color: 'var(--text-secondary)',
             marginBottom: '20px'
           }}>
-            Tu aviso &quot;{editedData.titulo}&quot; ya está visible para miles de usuarios.
+            Tu adiso &quot;{editedData.titulo}&quot; ya está visible para miles de usuarios.
           </p>
           <button
-            onClick={() => window.open('/mis-avisos', '_blank')}
+            onClick={() => window.open('/mis-adisos', '_blank')}
             style={{
               padding: '10px 20px',
               borderRadius: '8px',
@@ -116,7 +116,7 @@ export function DraftListingCard({
               width: '100%',
             }}
           >
-            Ver mi aviso
+            Ver mi adiso
           </button>
         </div>
       </motion.div>
@@ -155,7 +155,7 @@ export function DraftListingCard({
               fontWeight: 700,
               color: 'var(--text-primary)',
             }}>
-              ¡Listo! Aquí está tu aviso
+              ¡Listo! Aquí está tu adiso
             </div>
             <div style={{
               fontSize: '12px',

@@ -90,9 +90,9 @@ export const CATEGORY_SHARE_COPY: Record<Categoria, CategoryShareCopy> = {
   },
   comunidad: {
     label: 'Comunidad',
-    title: 'Comunidad — Avisos y clasificados locales',
+    title: 'Comunidad — Adisos y clasificados locales',
     description:
-      'Anuncios de la comunidad, trueques, avisos vecinales y clasificados generales en Perú.',
+      'Anuncios de la comunidad, trueques, adisos vecinales y clasificados generales en Perú.',
     imageAlt: 'Comunidad en Buscadis Perú',
   },
 };

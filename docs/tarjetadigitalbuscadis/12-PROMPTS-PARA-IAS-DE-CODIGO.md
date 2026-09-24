@@ -115,7 +115,7 @@ Incluye:
 Implementa el onboarding y el editor del negocio, pensado para alguien que
 nunca ha usado un panel de administración, desde un celular.
 
-Prioridad 1: conversión desde un aviso clasificado existente de Buscadis
+Prioridad 1: conversión desde un adiso clasificado existente de Buscadis
 (nombre, categoría, teléfono, ubicación y fotos pre-llenados; el usuario solo
 confirma). Este flujo debe tomar menos de 60 segundos.
 

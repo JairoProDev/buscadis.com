@@ -70,7 +70,7 @@ export async function POST(request: NextRequest) {
       .maybeSingle();
 
     if (!adiso) {
-      return NextResponse.json({ error: 'Aviso no encontrado' }, { status: 404 });
+      return NextResponse.json({ error: 'Adiso no encontrado' }, { status: 404 });
     }
 
     if (adiso.user_id !== user.id) {

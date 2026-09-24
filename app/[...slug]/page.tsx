@@ -17,7 +17,7 @@ import { getPublishedBusinessProfileBySlug } from '@/lib/business/get-public-pro
 
 const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL || 'https://buscadis.com').replace(/\/$/, '');
 
-/** Rutas servidas desde public/ — no interpretar como negocio/aviso */
+/** Rutas servidas desde public/ — no interpretar como negocio/adiso */
 const RESERVED_STATIC_PREFIXES = new Set([
   'og',
   'api',

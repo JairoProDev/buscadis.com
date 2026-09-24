@@ -100,7 +100,7 @@
     {
       "sku": "TAY-CASA-COMPLETA",
       "title": "Espacio para eventos — baby shower, watia, noche de pizza",
-      "description": "El predio de Casa de Tay, Larespampa, para eventos al aire libre. Baby shower, noche de pizza o watia: ustedes traen todo y se alquila el espacio, hasta unas 50 personas. Cumpleaños con aviso previo y horario. Tania ayuda a armar actividades. Consultar por WhatsApp.",
+      "description": "El predio de Casa de Tay, Larespampa, para eventos al aire libre. Baby shower, noche de pizza o watia: ustedes traen todo y se alquila el espacio, hasta unas 50 personas. Cumpleaños con adiso previo y horario. Tania ayuda a armar actividades. Consultar por WhatsApp.",
       "category": "Eventos",
       "tags": ["eventos", "urubamba", "larespampa", "baby-shower", "watia"],
       "brand": "Casa de Tay",
@@ -108,7 +108,7 @@
         "tipo": "Alquiler de espacio",
         "capacidad": "Hasta unas 50 personas",
         "formato": "Ustedes traen todo",
-        "aviso": "Previo, con condiciones de horario",
+        "adiso": "Previo, con condiciones de horario",
         "zona": "Larespampa, Urubamba"
       },
       "images": [

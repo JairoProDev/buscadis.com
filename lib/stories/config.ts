@@ -42,13 +42,13 @@ export const STORY_OBJECTIVES: Record<
 > = {
   ventas: {
     label: 'Vender',
-    description: 'Prioriza ver el aviso y contactar al vendedor.',
-    primaryCta: 'Ver aviso',
+    description: 'Prioriza ver el adiso y contactar al vendedor.',
+    primaryCta: 'Ver adiso',
   },
   clicks: {
     label: 'Atraer visitas',
-    description: 'Mide clics al aviso vinculado.',
-    primaryCta: 'Ver aviso',
+    description: 'Mide clics al adiso vinculado.',
+    primaryCta: 'Ver adiso',
   },
   contactos: {
     label: 'Conseguir contactos',

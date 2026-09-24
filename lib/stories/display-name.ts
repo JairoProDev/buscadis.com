@@ -28,7 +28,7 @@ function isGenericPublisherName(name: string | undefined | null): boolean {
   return GENERIC_NAMES.has(name.trim().toLowerCase());
 }
 
-/** Extrae nombre de empresa/marca desde título de aviso o caption de historia */
+/** Extrae nombre de empresa/marca desde título de adiso o caption de historia */
 export function extractPublisherFromCaption(caption: string | undefined | null): string | null {
   if (!caption?.trim()) return null;
   const text = normalizeName(caption);

@@ -255,7 +255,7 @@ Ningún número fuera de la escala. El truco actual de bajar header y sticky a `
 | Contenedor | Ancho máx | Uso |
 |---|---|---|
 | `container-prose` | 640 | perfil de negocio, lectura |
-| `container-feed` | 480 | modo feed de avisos |
+| `container-feed` | 480 | modo feed de adisos |
 | `container-app` | 1440 | shell del marketplace |
 | `container-panel` | 420 | panel de detalle en escritorio |
 
@@ -273,4 +273,4 @@ Dos modos, tokenizados a nivel de sistema (no solo del storefront):
 | `--bs-density-pad` | 12px | 16px |
 | `--bs-density-row` | 44px | 52px |
 
-Compacto por defecto en rejillas de avisos (más resultados a la vista = más comparación). Cómodo por defecto en el editor y en el perfil de negocio.
+Compacto por defecto en rejillas de adisos (más resultados a la vista = más comparación). Cómodo por defecto en el editor y en el perfil de negocio.

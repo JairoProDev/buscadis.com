@@ -29,7 +29,7 @@ async function findProfileIdByPhone(phone: string): Promise<string | null> {
 }
 
 /**
- * Crea (o reutiliza) una cuenta stub del anunciante a partir del teléfono del aviso.
+ * Crea (o reutiliza) una cuenta stub del anunciante a partir del teléfono del adiso.
  * Si no hay teléfono, usa la cuenta de operaciones Buscadis.
  */
 export async function ensureRuedaAdvertiserUser(params: {
@@ -93,7 +93,7 @@ export async function ensureRuedaAdvertiserUser(params: {
   return { userId, created: true, phone };
 }
 
-/** Asigna user_id al aviso (y reutiliza stub) si faltaba. */
+/** Asigna user_id al adiso (y reutiliza stub) si faltaba. */
 export async function ensureAdisoSellerUserId(adisoId: string): Promise<{
   sellerUserId: string;
   phone: string | null;

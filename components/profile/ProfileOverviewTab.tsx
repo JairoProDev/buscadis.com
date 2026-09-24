@@ -33,7 +33,7 @@ export default function ProfileOverviewTab({
   const cards = [
     {
       title: 'Guardados',
-      desc: 'Avisos que marcaste con corazón',
+      desc: 'Adisos que marcaste con corazón',
       count: stats?.favoritesCount ?? 0,
       tab: 'guardados' as ProfileTabId,
       icon: <IconHeart size={20} color={semantic.dangerFg} />,
@@ -61,7 +61,7 @@ export default function ProfileOverviewTab({
       ? [
           {
             title: 'Mis publicaciones',
-            desc: `${stats?.adsCount ?? 0} avisos · ${stats?.storiesCount ?? 0} historias`,
+            desc: `${stats?.adsCount ?? 0} adisos · ${stats?.storiesCount ?? 0} historias`,
             tab: 'publicar' as ProfileTabId,
             icon: <IconMegaphone size={20} color="var(--brand-yellow)" />,
             iconBg: 'bg-[rgba(var(--brand-yellow-rgb),0.15)]',
@@ -70,7 +70,7 @@ export default function ProfileOverviewTab({
         ]
       : [
           {
-            title: 'Publica tu primer aviso',
+            title: 'Publica tu primer adiso',
             desc: 'Llega a miles de personas en tu ciudad',
             href: '/publicar',
             icon: <IconSparkles size={20} color="var(--brand-blue)" />,
