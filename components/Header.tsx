@@ -165,7 +165,7 @@ export default function Header({
         transition: 'background-color 0.2s, border-color 0.2s',
         textAlign: 'left',
         minWidth: 0,
-        maxWidth: isDesktop ? '280px' : '100%',
+        maxWidth: isDesktop ? '280px' : 'min(100%, calc(100vw - 12.5rem))',
       }}
       className={onUbicacionClick ? 'hover:bg-[var(--hover-bg)] hover:border-[var(--border-color)]' : undefined}
       aria-label="Cambiar ubicación y contexto de búsqueda"
@@ -240,17 +240,20 @@ export default function Header({
 
   const navItems = MAIN_NAV_ITEMS;
 
+  const iconBtnSize = isDesktop ? 'md' : 'sm';
+
   const actionButtons = (
-    <div className="flex items-center gap-0.5">
+    <div className="flex shrink-0 items-center gap-0.5 sm:gap-1">
       <HeaderIconButton
         onClick={() => router.push('/delivery')}
         active={enviosActive}
         accent="blue"
+        size={iconBtnSize}
         title="Delivery"
         aria-label="Delivery"
       >
         <IconMotorcycle
-          size={24}
+          size={isDesktop ? 22 : 20}
           color={enviosActive ? 'var(--brand-blue)' : 'var(--text-secondary)'}
         />
       </HeaderIconButton>
@@ -258,6 +261,7 @@ export default function Header({
       <HeaderIconButton
         onClick={toggleTheme}
         accent="neutral"
+        size={iconBtnSize}
         title={themeMode === 'dark' ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}
         aria-label={themeMode === 'dark' ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}
       >
@@ -274,6 +278,7 @@ export default function Header({
             <HeaderIconButton
               onClick={onChangelogClick}
               accent="blue"
+              size={iconBtnSize}
               title={t('header.progress')}
               aria-label={t('header.progress')}
             >
@@ -288,6 +293,7 @@ export default function Header({
               }
               active={activePopover === 'notifications'}
               accent="blue"
+              size={iconBtnSize}
               badge={unreadNotifications}
               badgeAccent="blue"
               aria-label="Notificaciones"
@@ -315,6 +321,7 @@ export default function Header({
               onClick={() => setActivePopover(activePopover === 'messages' ? null : 'messages')}
               active={activePopover === 'messages'}
               accent="yellow"
+              size={iconBtnSize}
               badge={unreadMessages}
               badgeAccent="yellow"
               aria-label="Mensajes"
@@ -360,14 +367,17 @@ export default function Header({
         display: 'grid',
         gridTemplateColumns: isDesktop ? '1fr auto 1fr' : 'minmax(0, 1fr) auto',
         alignItems: 'center',
-        padding: isDesktop ? '0 1.25rem' : '0 0.65rem',
-        columnGap: '12px',
+        padding: isDesktop ? '0 1.25rem' : '0 0.5rem',
+        columnGap: isDesktop ? '12px' : '8px',
         transform: headerVisible ? 'translateY(0)' : 'translateY(-100%)',
         transition: 'transform 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
       }}
     >
       {/* LEFT: marca + contexto (botón de ubicación) */}
-      <div style={{ display: 'flex', alignItems: 'center', minWidth: 0, justifySelf: 'start' }}>
+      <div
+        className="min-w-0 overflow-hidden"
+        style={{ display: 'flex', alignItems: 'center', justifySelf: 'start' }}
+      >
         {brandBlock}
       </div>
 
@@ -501,13 +511,13 @@ export default function Header({
 
       {/* RIGHT: acciones + usuario */}
       <div
-        className="flex min-w-0 items-center justify-end justify-self-end"
-        style={{ gap: isDesktop ? '4px' : '2px' }}
+        className="flex shrink-0 items-center justify-end justify-self-end"
+        style={{ gap: isDesktop ? '6px' : '4px' }}
       >
         {actionButtons}
         {mounted && isAuthenticated && (
           <span
-            className="mx-1 hidden h-6 w-px shrink-0 bg-[var(--border-color)] sm:block"
+            className="mx-0.5 hidden h-6 w-px shrink-0 bg-[var(--border-color)] sm:block"
             aria-hidden
           />
         )}

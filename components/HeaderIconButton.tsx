@@ -13,6 +13,7 @@ interface HeaderIconButtonProps {
   title?: string;
   accent?: HeaderAccent;
   badgeAccent?: HeaderAccent;
+  size?: 'sm' | 'md' | 'lg';
   'aria-label'?: string;
 }
 
@@ -41,6 +42,7 @@ export default function HeaderIconButton({
   title,
   accent = 'blue',
   badgeAccent,
+  size = 'md',
   'aria-label': ariaLabel,
 }: HeaderIconButtonProps) {
   const label = ariaLabel ?? title;
@@ -56,7 +58,7 @@ export default function HeaderIconButton({
       badge={badge}
       badgeTone={BADGE_TONE[badgeAccent ?? accent]}
       variant="ghost"
-      size="md"
+      size={size}
       className={cn(
         active
           ? ACTIVE[accent]
