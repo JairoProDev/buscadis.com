@@ -9,6 +9,7 @@ import {
   FaTimes
 } from 'react-icons/fa';
 import { useAuth } from '@/hooks/useAuth';
+import { useNavigation } from '@/contexts/NavigationContext';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import ThemeToggle from './ThemeToggle';
@@ -78,6 +79,7 @@ export default function ModalNavegacionMobile({
 }: ModalNavegacionMobileProps) {
   const isDesktop = useMediaQuery('(min-width: 768px)');
   const { user, signOut } = useAuth();
+  const { abrirAdiso } = useNavigation();
   const router = useRouter();
   const isAuthenticated = !!user;
 
@@ -364,7 +366,8 @@ export default function ModalNavegacionMobile({
                   <MapaInteractivo
                     adisos={todosLosAdisos}
                     onAbrirAdiso={(adiso) => {
-                      if (onCambiarSeccion) onCambiarSeccion('adiso');
+                      abrirAdiso(adiso.id);
+                      onCambiarSeccion?.('adiso');
                     }}
                   />
                 )}

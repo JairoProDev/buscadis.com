@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 import { Adiso, AdisoGratuito, AdisoPromotionTier, InteresAnuncioCaducado } from '@/types';
+import { coordenadasValidas, resolveStoredPoint, textoUbicaEnZona } from '@/lib/map/resolve-point';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -196,6 +197,33 @@ export function adisoToDb(adiso: Adiso): any {
     }
     if (ubicacionDetallada.longitud !== null && ubicacionDetallada.longitud !== undefined) {
       dbData.longitud = ubicacionDetallada.longitud;
+    }
+  }
+
+  const explicitPoint = coordenadasValidas(dbData.latitud, dbData.longitud) || coordenadasValidas(ubicacionDetallada.latitud, ubicacionDetallada.longitud);
+  const explicitDistrict = Boolean(dbData.distrito || ubicacionDetallada.distrito);
+  const resolvedPoint = resolveStoredPoint({
+    latitud: typeof dbData.latitud === 'number' ? dbData.latitud : ubicacionDetallada.latitud,
+    longitud: typeof dbData.longitud === 'number' ? dbData.longitud : ubicacionDetallada.longitud,
+    distrito: dbData.distrito || ubicacionDetallada.distrito,
+    text: ubicacionString,
+  });
+  const textNamesZone =
+    resolvedPoint?.distrito &&
+    textoUbicaEnZona(ubicacionString, {
+      nombre: resolvedPoint.distrito,
+      variantes: [],
+      provincia: resolvedPoint.provincia || '',
+      coordenadas: { lat: resolvedPoint.lat, lng: resolvedPoint.lng },
+    });
+  if (resolvedPoint && (explicitPoint || explicitDistrict || textNamesZone)) {
+    dbData.latitud = resolvedPoint.lat;
+    dbData.longitud = resolvedPoint.lng;
+    if (!dbData.distrito && resolvedPoint.distrito) {
+      dbData.pais = 'Perú';
+      dbData.departamento = resolvedPoint.departamento || dbData.departamento;
+      dbData.provincia = resolvedPoint.provincia || dbData.provincia;
+      dbData.distrito = resolvedPoint.distrito;
     }
   }
 
