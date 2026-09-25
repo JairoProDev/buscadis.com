@@ -1,10 +1,11 @@
 /**
  * Buckets en Supabase Storage.
- * El bucket de anuncios en producción se llama `adisos-images` (legacy).
+ * En producción el bucket público de anuncios e historias es `avisos-images`.
+ * `adisos-images` queda como alias por si el entorno aún apunta al nombre viejo.
  * Se puede sobreescribir con NEXT_PUBLIC_ADISO_IMAGES_BUCKET.
  */
 export const ADISO_IMAGES_BUCKET =
-  process.env.NEXT_PUBLIC_ADISO_IMAGES_BUCKET || 'adisos-images';
+  process.env.NEXT_PUBLIC_ADISO_IMAGES_BUCKET || 'avisos-images';
 
 export const FEEDBACK_IMAGES_BUCKET = 'feedback-images';
 
@@ -14,9 +15,9 @@ export const MOTO_KYC_BUCKET = 'moto-kyc';
 /** Fotos públicas opcionales de paquetes */
 export const MOTO_PACKAGES_BUCKET = 'moto-packages';
 
-/** Intenta el bucket configurado y, si no existe, el alias histórico. */
+/** Intenta el bucket configurado, el real de producción y el alias. */
 export const ADISO_IMAGES_BUCKET_FALLBACKS = [
   ADISO_IMAGES_BUCKET,
-  'adisos-images',
+  'avisos-images',
   'adisos-images',
 ].filter((name, index, arr) => arr.indexOf(name) === index);

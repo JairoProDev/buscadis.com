@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
+import { ADISO_IMAGES_BUCKET_FALLBACKS } from '@/lib/storage-buckets';
 
 export async function GET() {
   const health = {
@@ -24,13 +25,17 @@ export async function GET() {
       health.services.database = 'error';
     }
 
-    // Verificar Storage
+    // Verificar Storage (avisos-images en prod; adisos-images es el alias)
     try {
-      const { data, error } = await supabase!.storage
-        .from('adisos-images')
-        .list('', { limit: 1 });
-
-      health.services.storage = error ? 'error' : 'ok';
+      let storageOk = false;
+      for (const bucketName of ADISO_IMAGES_BUCKET_FALLBACKS) {
+        const { error } = await supabase!.storage.from(bucketName).list('', { limit: 1 });
+        if (!error) {
+          storageOk = true;
+          break;
+        }
+      }
+      health.services.storage = storageOk ? 'ok' : 'error';
     } catch (error) {
       health.services.storage = 'error';
     }
