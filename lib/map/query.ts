@@ -1,5 +1,5 @@
+import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import { createAdisoTitleSlug } from '@/lib/url';
-import { supabase } from '@/lib/supabase';
 import type { Categoria } from '@/types';
 import { displayCoordinate, precisionFor } from '@/lib/map/precision';
 import { coordenadasValidas, distritoMasEspecifico, resolveStoredPoint, textoUbicaEnZona } from '@/lib/map/resolve-point';
@@ -7,7 +7,21 @@ import type { MapBounds, MapListing, MapQuery } from '@/lib/map/types';
 import { directionsUrl, whatsappUrlFromContact } from '@/lib/map/format';
 
 const SELECT =
-  'id,titulo,categoria,precio,moneda,tipo_precio,distrito,provincia,departamento,direccion,latitud,longitud,ubicacion,imagen_url,imagenes_urls,promotion_tier,contacto,esta_activo';
+  'id,titulo,categoria,precio,moneda,tipo_precio,distrito,latitud,longitud,ubicacion,imagen_url,promotion_tier,contacto,esta_activo';
+
+let mapDb: SupabaseClient | null = null;
+
+/** Cliente sin sesión. El de la app refresca auth y, en el servidor, eso falla a ratos. */
+function getMapDb(): SupabaseClient | null {
+  if (mapDb) return mapDb;
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  if (!url || !key) return null;
+  mapDb = createClient(url, key, {
+    auth: { persistSession: false, autoRefreshToken: false },
+  });
+  return mapDb;
+}
 
 const CATEGORIES = new Set<Categoria>([
   'empleos',
@@ -91,10 +105,10 @@ function rowToListing(row: Record<string, unknown>, bounds: MapBounds): MapListi
 }
 
 function applyFilters(
-  query: ReturnType<NonNullable<typeof supabase>['from']>,
+  query: ReturnType<SupabaseClient['from']>,
   input: MapQuery,
 ) {
-  let q = query.select(SELECT).or('esta_activo.eq.true,esta_activo.is.null');
+  let q = query.select(SELECT);
   if (input.categoria && input.categoria !== 'todos' && CATEGORIES.has(input.categoria)) {
     q = q.eq('categoria', input.categoria);
   }
@@ -138,31 +152,41 @@ export function parseMapQuery(params: URLSearchParams): MapQuery | { error: stri
   };
 }
 
-export async function queryMapListings(input: MapQuery): Promise<MapListing[]> {
-  if (!supabase) return [];
+async function fetchGeo(db: SupabaseClient, input: MapQuery) {
   const { bounds } = input;
-
-  const geo = applyFilters(supabase.from('adisos'), input)
+  return applyFilters(db.from('adisos'), input)
     .gte('latitud', bounds.south)
     .lte('latitud', bounds.north)
     .gte('longitud', bounds.west)
     .lte('longitud', bounds.east)
     .limit(400);
+}
 
-  const missing = applyFilters(supabase.from('adisos'), input)
+export async function queryMapListings(input: MapQuery): Promise<MapListing[]> {
+  const db = getMapDb();
+  if (!db) return [];
+  const { bounds } = input;
+
+  let withCoords = await fetchGeo(db, input);
+  if (withCoords.error) {
+    withCoords = await fetchGeo(db, input);
+  }
+  if (withCoords.error) throw withCoords.error;
+
+  const missing = await applyFilters(db.from('adisos'), input)
     .is('latitud', null)
     .order('fecha_publicacion', { ascending: false })
-    .limit(250);
-
-  const [withCoords, withoutCoords] = await Promise.all([geo, missing]);
-  if (withCoords.error) throw withCoords.error;
-  if (withoutCoords.error) throw withoutCoords.error;
+    .limit(120);
+  if (missing.error) {
+    console.error('[map/listings] anuncios sin coordenada omitidos', missing.error.message);
+  }
 
   const seen = new Set<string>();
   const listings: MapListing[] = [];
 
-  for (const row of [...(withCoords.data || []), ...(withoutCoords.data || [])]) {
+  for (const row of [...(withCoords.data || []), ...(missing.error ? [] : missing.data || [])]) {
     const record = row as Record<string, unknown>;
+    if (record.esta_activo === false) continue;
     if (input.q && !matchesText(record, input.q)) continue;
     const listing = rowToListing(record, bounds);
     if (!listing || seen.has(listing.id)) continue;

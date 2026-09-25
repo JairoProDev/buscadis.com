@@ -37,6 +37,8 @@ export default function MapExperience({ variant = 'panel', onOpen }: MapExperien
   const [wide, setWide] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
   const boundsRef = useRef<MapBounds | null>(null);
+  const listingsRef = useRef<MapListing[]>([]);
+  listingsRef.current = listings;
 
   useEffect(() => {
     const mq = window.matchMedia('(min-width: 1024px)');
@@ -65,14 +67,23 @@ export default function MapExperience({ variant = 'panel', onOpen }: MapExperien
       if (maxPrice) params.set('max', maxPrice);
       if (photoOnly) params.set('foto', '1');
       try {
-        const res = await fetch(`/api/map/listings?${params}`, { signal: controller.signal });
+        let res = await fetch(`/api/map/listings?${params}`, { signal: controller.signal });
+        if (res.status >= 500) {
+          await new Promise((resolve) => setTimeout(resolve, 350));
+          if (controller.signal.aborted) return;
+          res = await fetch(`/api/map/listings?${params}`, { signal: controller.signal });
+        }
         const data = (await res.json()) as { listings?: MapListing[]; error?: string };
-        if (!res.ok) throw new Error(data.error || 'Error al cargar el mapa');
+        if (!res.ok) {
+          if (listingsRef.current.length > 0) return;
+          throw new Error(data.error || 'Error al cargar el mapa');
+        }
         setListings(data.listings || []);
         setFetchedKey(boundsKey(next));
         setStale(false);
       } catch (err) {
         if ((err as Error).name === 'AbortError') return;
+        if (listingsRef.current.length > 0) return;
         setError((err as Error).message);
       } finally {
         if (!controller.signal.aborted) setLoading(false);
