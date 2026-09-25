@@ -23,11 +23,12 @@ const sample = (id: string, lat: number, lng: number): MapListing => ({
   directionsUrl: null,
 });
 
-assert.equal(cellDegrees(16), 0);
+assert.equal(cellDegrees(17), 0);
+assert.equal(cellDegrees(16) > 0, true);
 assert.equal(cellDegrees(10) > cellDegrees(14), true);
 
 const spread = clusterListings(
-  [sample('a', -13.53, -71.97), sample('b', -13.531, -71.971)],
+  [sample('a', -13.532, -71.972), sample('b', -13.533, -71.973)],
   12,
 );
 assert.equal(spread.length, 1);

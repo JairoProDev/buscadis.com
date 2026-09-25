@@ -29,6 +29,7 @@ export default function MapExperience({ variant = 'panel', onOpen }: MapExperien
   const [minPrice, setMinPrice] = useState('');
   const [maxPrice, setMaxPrice] = useState('');
   const [photoOnly, setPhotoOnly] = useState(false);
+  const [filtersOpen, setFiltersOpen] = useState(false);
   const [selected, setSelected] = useState<MapListing | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -116,8 +117,13 @@ export default function MapExperience({ variant = 'panel', onOpen }: MapExperien
     map.flyTo([cluster.lat, cluster.lng], Math.min(map.getZoom() + 2, 17), { duration: 0.4 });
   };
 
+  const dock = !wide && selected ? '12.25rem' : '0px';
+
   return (
-    <div className={`map-shell relative flex h-full min-h-[320px] w-full ${wide ? 'flex-row' : 'flex-col'}`}>
+    <div
+      className={`map-shell relative flex h-full min-h-[320px] w-full ${wide ? 'flex-row' : 'flex-col'} ${variant === 'page' ? 'map-shell--page' : ''}`}
+      style={{ ['--map-dock' as string]: dock }}
+    >
       <div className="relative min-h-0 min-w-0 flex-1">
         <MapCanvas
           clusters={clusters}
@@ -131,76 +137,106 @@ export default function MapExperience({ variant = 'panel', onOpen }: MapExperien
           onExpandCluster={expandCluster}
         />
 
-        <div className="pointer-events-none absolute inset-x-0 top-0 z-[500] flex flex-col gap-2 p-3 pr-14">
-          <form
-            className="pointer-events-auto flex gap-2"
-            onSubmit={(e) => {
-              e.preventDefault();
-              if (bounds) void load(bounds);
-            }}
-          >
-            <input
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Zona, barrio o palabra"
-              className="h-10 min-w-0 flex-1 rounded-full border border-[var(--border-color)] bg-[var(--bg-primary)]/95 px-4 text-sm text-[var(--text-primary)] shadow-sm outline-none backdrop-blur-md placeholder:text-[var(--text-tertiary)]"
-            />
-            <button
-              type="submit"
-              className="h-10 shrink-0 rounded-full bg-[var(--brand-blue)] px-4 text-xs font-bold text-white"
+        <div className="pointer-events-none absolute inset-x-0 top-0 z-[500] p-3">
+          <div className="pointer-events-auto rounded-2xl border border-[var(--border-color)] bg-[var(--bg-primary)]/95 p-2 shadow-md backdrop-blur-md">
+            <form
+              className="flex items-center gap-2"
+              onSubmit={(e) => {
+                e.preventDefault();
+                if (bounds) void load(bounds);
+              }}
             >
-              Buscar
-            </button>
-          </form>
-          <div className="pointer-events-auto no-scrollbar flex gap-1.5 overflow-x-auto pb-1">
-            <FilterChip active={filter === 'todos'} label="Todos" onClick={() => setFilter('todos')} icon={<IconMapPin size={12} color={filter === 'todos' ? tokens['--bs-color-neutral-0'] : 'var(--brand-blue)'} />} />
-            {PUBLISH_CATEGORIAS.map((c) => {
-              const Icon = getCategoriaIcon(c.value);
-              const active = filter === c.value;
-              return (
-                <FilterChip
-                  key={c.value}
-                  active={active}
-                  label={c.label}
-                  onClick={() => setFilter(c.value)}
-                  icon={<Icon size={12} color={active ? tokens['--bs-color-neutral-0'] : 'currentColor'} />}
+              <input
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Zona, barrio o palabra"
+                aria-label="Buscar en el mapa"
+                className="h-10 min-w-0 flex-1 rounded-full bg-[var(--bg-secondary)] px-4 text-sm text-[var(--text-primary)] outline-none placeholder:text-[var(--text-tertiary)]"
+              />
+              <button
+                type="submit"
+                className="h-10 shrink-0 rounded-full bg-[var(--brand-blue)] px-4 text-xs font-bold text-white"
+              >
+                Buscar
+              </button>
+            </form>
+            <div className="mt-2 flex items-center gap-2">
+              <div className="no-scrollbar flex min-w-0 flex-1 gap-1.5 overflow-x-auto">
+                <FilterChip active={filter === 'todos'} label="Todos" onClick={() => setFilter('todos')} icon={<IconMapPin size={12} color={filter === 'todos' ? tokens['--bs-color-neutral-0'] : 'var(--brand-blue)'} />} />
+                {PUBLISH_CATEGORIAS.map((c) => {
+                  const Icon = getCategoriaIcon(c.value);
+                  const active = filter === c.value;
+                  return (
+                    <FilterChip
+                      key={c.value}
+                      active={active}
+                      label={c.label}
+                      onClick={() => setFilter(c.value)}
+                      icon={<Icon size={12} color={active ? tokens['--bs-color-neutral-0'] : 'currentColor'} />}
+                    />
+                  );
+                })}
+              </div>
+              <button
+                type="button"
+                onClick={() => setFiltersOpen((v) => !v)}
+                className={`h-8 shrink-0 rounded-full border px-3 text-[11px] font-semibold ${filtersOpen || minPrice || maxPrice || photoOnly ? 'border-[var(--brand-blue)] bg-[var(--brand-blue)] text-white' : 'border-[var(--border-color)] text-[var(--text-secondary)]'}`}
+              >
+                Precio
+              </button>
+            </div>
+            {filtersOpen && (
+              <div className="mt-2 flex items-center gap-1.5">
+                <input
+                  inputMode="numeric"
+                  value={minPrice}
+                  onChange={(e) => setMinPrice(e.target.value.replace(/[^\d]/g, ''))}
+                  placeholder="Mín"
+                  aria-label="Precio mínimo"
+                  className="h-9 w-full min-w-0 rounded-full bg-[var(--bg-secondary)] px-3 text-xs text-[var(--text-primary)] outline-none"
                 />
-              );
-            })}
-          </div>
-          <div className="pointer-events-auto flex flex-wrap items-center gap-1.5">
-            <input
-              inputMode="numeric"
-              value={minPrice}
-              onChange={(e) => setMinPrice(e.target.value.replace(/[^\d]/g, ''))}
-              placeholder="Mín S/"
-              className="h-8 w-20 rounded-full border border-[var(--border-color)] bg-[var(--bg-primary)]/95 px-3 text-[11px] text-[var(--text-primary)]"
-            />
-            <input
-              inputMode="numeric"
-              value={maxPrice}
-              onChange={(e) => setMaxPrice(e.target.value.replace(/[^\d]/g, ''))}
-              placeholder="Máx S/"
-              className="h-8 w-20 rounded-full border border-[var(--border-color)] bg-[var(--bg-primary)]/95 px-3 text-[11px] text-[var(--text-primary)]"
-            />
-            <button
-              type="button"
-              onClick={() => setPhotoOnly((v) => !v)}
-              className={`h-8 rounded-full border px-3 text-[11px] font-semibold ${photoOnly ? 'border-[var(--brand-blue)] bg-[var(--brand-blue)] text-white' : 'border-[var(--border-color)] bg-[var(--bg-primary)]/95 text-[var(--text-secondary)]'}`}
-            >
-              Con foto
-            </button>
-            <button
-              type="button"
-              onClick={() => bounds && void load(bounds)}
-              className="h-8 rounded-full border border-[var(--border-color)] bg-[var(--bg-primary)]/95 px-3 text-[11px] font-semibold text-[var(--text-secondary)]"
-            >
-              Aplicar precio
-            </button>
+                <input
+                  inputMode="numeric"
+                  value={maxPrice}
+                  onChange={(e) => setMaxPrice(e.target.value.replace(/[^\d]/g, ''))}
+                  placeholder="Máx"
+                  aria-label="Precio máximo"
+                  className="h-9 w-full min-w-0 rounded-full bg-[var(--bg-secondary)] px-3 text-xs text-[var(--text-primary)] outline-none"
+                />
+                <button
+                  type="button"
+                  onClick={() => setPhotoOnly((v) => !v)}
+                  className={`h-9 shrink-0 rounded-full px-3 text-[11px] font-semibold ${photoOnly ? 'bg-[var(--brand-blue)] text-white' : 'bg-[var(--bg-secondary)] text-[var(--text-secondary)]'}`}
+                >
+                  Con foto
+                </button>
+                <button
+                  type="button"
+                  onClick={() => bounds && void load(bounds)}
+                  className="h-9 shrink-0 rounded-full bg-[var(--brand-blue)] px-3 text-[11px] font-bold text-white"
+                >
+                  Aplicar
+                </button>
+              </div>
+            )}
+            <div className="mt-2 flex items-center justify-between gap-2 px-1">
+              <p className="m-0 truncate text-[11px] font-semibold text-[var(--text-secondary)]">
+                {loading ? 'Buscando…' : `${listings.length} en esta zona`}
+              </p>
+              {stale && (
+                <button
+                  type="button"
+                  onClick={() => bounds && void load(bounds)}
+                  className="h-8 shrink-0 rounded-full bg-[var(--brand-blue)] px-3 text-[11px] font-bold text-white"
+                >
+                  Buscar aquí
+                </button>
+              )}
+            </div>
           </div>
         </div>
 
-        <div className="absolute right-3 top-3 z-[500] flex flex-col gap-1.5">
+        <div className="map-zoom absolute right-3 z-[500] flex flex-col gap-1.5">
           <RoundBtn label="Acercar" onClick={() => mapRef.current?.zoomIn()}>
             <IconPlus size={14} />
           </RoundBtn>
@@ -217,40 +253,19 @@ export default function MapExperience({ variant = 'panel', onOpen }: MapExperien
               });
             }}
           >
-            <span className="block h-2.5 w-2.5 rounded-full border-2 border-current" />
+            <span className="block h-3 w-3 rounded-full border-2 border-current" />
           </RoundBtn>
         </div>
 
-        {stale && (
-          <button
-            type="button"
-            onClick={() => bounds && void load(bounds)}
-            className="absolute left-1/2 top-[8.5rem] z-[500] -translate-x-1/2 rounded-full bg-[var(--brand-blue)] px-4 py-2 text-xs font-bold text-white shadow-lg"
-          >
-            Buscar en esta zona
-          </button>
-        )}
-
         {error && (
-          <p className="absolute bottom-16 left-3 right-3 z-[500] rounded-xl bg-[var(--bg-primary)] px-3 py-2 text-xs text-red-600 shadow">
+          <p className="map-dock absolute left-3 right-3 z-[500] rounded-xl bg-[var(--bg-primary)] px-3 py-2 text-xs text-[var(--bs-danger-fg,var(--text-primary))] shadow">
             {error}
           </p>
         )}
 
-        {!wide && (
-          <div className="absolute bottom-3 left-3 right-3 z-[500]">
-            {selected ? (
-              <ListingCard listing={selected} onClose={() => setSelected(null)} onOpen={onOpen} />
-            ) : (
-              <div className="rounded-xl border border-[var(--border-color)] bg-[var(--bg-primary)]/95 px-3.5 py-2.5 shadow-sm backdrop-blur-md">
-                <p className="m-0 text-xs font-semibold text-[var(--text-primary)]">
-                  {loading ? 'Buscando anuncios…' : `${listings.length} ${listings.length === 1 ? 'anuncio' : 'anuncios'} en esta zona`}
-                </p>
-                <p className="m-0 text-[10px] text-[var(--text-tertiary)]">
-                  Toca un precio para ver la ficha. Inmuebles y empleos se muestran por zona, no en la puerta.
-                </p>
-              </div>
-            )}
+        {!wide && selected && (
+          <div className="map-dock absolute left-3 right-3 z-[500]">
+            <ListingCard listing={selected} onClose={() => setSelected(null)} onOpen={onOpen} />
           </div>
         )}
       </div>
@@ -315,6 +330,20 @@ export default function MapExperience({ variant = 'panel', onOpen }: MapExperien
           border: 3px solid white; box-shadow: 0 4px 16px rgba(0,0,0,.25);
         }
         .leaflet-control-attribution { font-size: 9px !important; opacity: .7; }
+        .map-zoom { top: 46%; }
+        .map-dock { bottom: 12px; }
+        @media (max-width: 767px) {
+          .map-shell--page .map-dock {
+            bottom: calc(var(--bs-nav-visible-offset, 72px) + 10px);
+          }
+          .map-shell--page .map-zoom {
+            top: auto;
+            bottom: calc(var(--bs-nav-visible-offset, 72px) + var(--map-dock, 0px) + 12px);
+          }
+          .map-shell--page .leaflet-bottom {
+            bottom: calc(var(--bs-nav-visible-offset, 72px) + var(--map-dock, 0px) + 2px) !important;
+          }
+        }
       `}</style>
     </div>
   );
@@ -363,7 +392,7 @@ function RoundBtn({
       type="button"
       aria-label={label}
       onClick={onClick}
-      className={`flex h-9 w-9 items-center justify-center rounded-xl border border-[var(--border-color)] bg-[var(--bg-primary)]/95 shadow-sm ${accent ? 'text-[var(--brand-blue)]' : 'text-[var(--text-secondary)]'}`}
+      className={`flex h-10 w-10 items-center justify-center rounded-full border border-[var(--border-color)] bg-[var(--bg-primary)]/95 shadow-md ${accent ? 'text-[var(--brand-blue)]' : 'text-[var(--text-secondary)]'}`}
     >
       {children}
     </button>
@@ -387,7 +416,7 @@ function ListingCopy({ listing }: { listing: MapListing }) {
         {getCategoriaLabel(listing.categoria)}
         {listing.distrito ? ` · ${listing.distrito}` : ''}
       </span>
-      <span className="block truncate text-sm font-semibold text-[var(--text-primary)]">{listing.titulo}</span>
+      <span className="line-clamp-2 text-sm font-semibold leading-snug text-[var(--text-primary)]">{listing.titulo}</span>
       <span className="block text-xs font-bold text-[var(--brand-blue)]">{formatMapPrice(listing)}</span>
       <span className="block text-[10px] text-[var(--text-tertiary)]">
         {listing.precision === 'exact' ? 'Ubicación del local' : 'Zona aproximada'}
@@ -402,7 +431,7 @@ function ListingActions({ listing, onOpen }: { listing: MapListing; onOpen?: (li
       <button
         type="button"
         onClick={() => onOpen?.(listing)}
-        className="h-9 flex-1 rounded-lg bg-[var(--brand-blue)] px-3 text-xs font-bold text-white"
+        className="h-11 flex-1 rounded-xl bg-[var(--brand-blue)] px-3 text-sm font-bold text-white"
       >
         Ver anuncio
       </button>
@@ -411,7 +440,7 @@ function ListingActions({ listing, onOpen }: { listing: MapListing; onOpen?: (li
           href={listing.whatsappUrl}
           target="_blank"
           rel="noreferrer"
-          className="flex h-9 items-center rounded-lg border border-[var(--border-color)] px-3 text-xs font-bold text-[var(--text-primary)]"
+          className="flex h-11 items-center rounded-xl border border-[var(--border-color)] px-3 text-xs font-bold text-[var(--text-primary)]"
         >
           WhatsApp
         </a>
@@ -421,7 +450,7 @@ function ListingActions({ listing, onOpen }: { listing: MapListing; onOpen?: (li
           href={listing.directionsUrl}
           target="_blank"
           rel="noreferrer"
-          className="flex h-9 items-center rounded-lg border border-[var(--border-color)] px-3 text-xs font-bold text-[var(--text-primary)]"
+          className="flex h-11 items-center rounded-xl border border-[var(--border-color)] px-3 text-xs font-bold text-[var(--text-primary)]"
         >
           Cómo llegar
         </a>

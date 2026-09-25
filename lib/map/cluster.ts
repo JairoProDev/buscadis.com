@@ -2,12 +2,13 @@ import type { MapCluster, MapListing } from '@/lib/map/types';
 
 /** Grados de celda según zoom. 0 = un pin por anuncio. */
 export function cellDegrees(zoom: number): number {
-  if (zoom >= 16) return 0;
-  if (zoom >= 15) return 0.0022;
-  if (zoom >= 14) return 0.0045;
-  if (zoom >= 13) return 0.009;
-  if (zoom >= 12) return 0.018;
-  return 0.04;
+  if (zoom >= 17) return 0;
+  if (zoom >= 16) return 0.0016;
+  if (zoom >= 15) return 0.0032;
+  if (zoom >= 14) return 0.006;
+  if (zoom >= 13) return 0.012;
+  if (zoom >= 12) return 0.022;
+  return 0.045;
 }
 
 export function clusterListings(listings: MapListing[], zoom: number): MapCluster[] {
