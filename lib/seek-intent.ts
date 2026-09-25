@@ -39,7 +39,7 @@ export function buildSeekDescription(query: string, context?: string): string {
     'Publico esto porque estoy buscando y aún no encuentro ofertas en Buscadis.',
     query.trim() ? `Detalle: ${query.trim()}` : '',
     context ? `Contexto: ${context}` : '',
-    'Si tienes lo que busco, contáctame por este anuncio.',
+    'Si tienes lo que busco, contáctame por este adiso.',
   ].filter(Boolean);
   return lines.join('\n\n');
 }

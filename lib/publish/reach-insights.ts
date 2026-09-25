@@ -17,7 +17,7 @@ export function getReachInsightLines(
   const lines: string[] = [];
 
   if (funnel.A > 0) {
-    lines.push(`${funnel.A.toLocaleString()} personas ven anuncios en todos nuestros canales.`);
+    lines.push(`${funnel.A.toLocaleString()} personas ven adisos en todos nuestros canales.`);
   }
   if (funnel.B > 0) {
     lines.push(`${funnel.B.toLocaleString()} búsquedas registradas en marketplace y ADIS AI.`);

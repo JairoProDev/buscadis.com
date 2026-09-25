@@ -658,14 +658,14 @@ export default function FormularioPublicar({
             color: 'var(--text-primary)',
             marginBottom: '0.5rem'
           }}>
-            ¿Qué tipo de anuncio quieres publicar?
+            ¿Qué tipo de adiso quieres publicar?
           </h3>
           <p style={{
             fontSize: '0.875rem',
             color: 'var(--text-secondary)',
             margin: 0
           }}>
-            Selecciona la categoría que mejor describe tu anuncio
+            Selecciona la categoría que mejor describe tu adiso
           </p>
         </div>
 
@@ -735,7 +735,7 @@ export default function FormularioPublicar({
           color: 'var(--text-primary)',
           marginBottom: '0.5rem'
         }}>
-          Cuéntanos sobre tu anuncio
+          Cuéntanos sobre tu adiso
         </h3>
         <p style={{
           fontSize: '0.875rem',
@@ -744,7 +744,7 @@ export default function FormularioPublicar({
         }}>
           {modoGratuito
             ? 'Escribe un título claro y atractivo (máximo 30 caracteres)'
-            : 'Describe tu anuncio de manera clara y atractiva para que más personas lo vean'}
+            : 'Describe tu adiso de manera clara y atractiva para que más personas lo vean'}
         </p>
       </div>
 
@@ -843,7 +843,7 @@ export default function FormularioPublicar({
               if (errors.descripcion) setErrors({ ...errors, descripcion: undefined });
             }}
             required
-            placeholder="Describe tu anuncio con detalles importantes..."
+            placeholder="Describe tu adiso con detalles importantes..."
             rows={5}
             style={{
               width: '100%',
@@ -923,7 +923,7 @@ export default function FormularioPublicar({
                 color: 'var(--text-secondary)',
                 lineHeight: 1.5
               }}>
-                En el siguiente paso podrás elegir un paquete de publicación. Los paquetes más grandes tienen mayor visibilidad y permiten más imágenes, lo que aumenta las posibilidades de que tu anuncio sea visto.
+                En el siguiente paso podrás elegir un paquete de publicación. Los paquetes más grandes tienen mayor visibilidad y permiten más imágenes, lo que aumenta las posibilidades de que tu adiso sea visto.
               </div>
             </div>
           </div>
@@ -1129,10 +1129,10 @@ export default function FormularioPublicar({
             margin: 0,
             paddingLeft: '1.25rem'
           }}>
-            <li>Mayor visibilidad: tu anuncio ocupa más espacio y llama más la atención</li>
+            <li>Mayor visibilidad: tu adiso ocupa más espacio y llama más la atención</li>
             <li>Más imágenes: las imágenes aumentan las conversiones hasta 3x</li>
-            <li>Mejor posicionamiento: los anuncios grandes aparecen primero en búsquedas</li>
-            <li>Mayor confianza: los anuncios con imágenes generan más confianza</li>
+            <li>Mejor posicionamiento: los adisos grandes aparecen primero en búsquedas</li>
+            <li>Mayor confianza: los adisos con imágenes generan más confianza</li>
           </ul>
         </div>
       </div>
@@ -1226,7 +1226,7 @@ export default function FormularioPublicar({
               }
             }}
             required={false}
-            label="Ubicación del anuncio (opcional)"
+            label="Ubicación del adiso (opcional)"
           />
           {errors.ubicacion && (
             <span role="alert" style={{
@@ -1264,7 +1264,7 @@ export default function FormularioPublicar({
             color: 'var(--text-primary)',
             marginBottom: '0.5rem'
           }}>
-            Agrega imágenes a tu anuncio
+            Agrega imágenes a tu adiso
           </h3>
           <p style={{
             fontSize: '0.875rem',
@@ -1405,7 +1405,7 @@ export default function FormularioPublicar({
               color: 'var(--text-secondary)',
               textAlign: 'center'
             }}>
-              💡 Tip: Los anuncios con imágenes reciben hasta 3x más contactos
+              💡 Tip: Los adisos con imágenes reciben hasta 3x más contactos
             </div>
           </div>
         )}
@@ -1427,7 +1427,7 @@ export default function FormularioPublicar({
             color: 'var(--text-primary)',
             marginBottom: '0.5rem'
           }}>
-            Revisa tu anuncio
+            Revisa tu adiso
           </h3>
           <p style={{
             fontSize: '0.875rem',
@@ -1555,7 +1555,7 @@ export default function FormularioPublicar({
             color: 'var(--text-secondary)',
             lineHeight: 1.6
           }}>
-            ✅ Al publicar, tu anuncio será visible inmediatamente para todos los usuarios.
+            ✅ Al publicar, tu adiso será visible inmediatamente para todos los usuarios.
             {!modoGratuito && ` El costo de S/ ${paqueteSeleccionado.precio} se aplicará al publicar.`}
           </div>
         </div>

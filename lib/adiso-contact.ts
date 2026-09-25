@@ -38,7 +38,7 @@ export function resolveExternalContact(adiso: Adiso): ExternalContactChannel | n
   return { kind: 'whatsapp', valor: contacto, ariaLabel: 'Contactar por WhatsApp' };
 }
 
-/** Anuncios caducados / inactivos / Rueda fuera de ventana: lead via chat + WhatsApp ops. */
+/** Adisos caducados / inactivos / Rueda fuera de ventana: lead via chat + WhatsApp ops. */
 export function isLeadCaptureAd(adiso: {
   estaActivo?: boolean;
   fechaExpiracion?: string | null;
@@ -86,7 +86,7 @@ export function buildOpsLeadWhatsAppMessage(
       ? `\nTel. anunciante: ${adiso.contacto}`
       : '';
 
-  return `Hola! Interés en anuncio caducado: ${interest}
+  return `Hola! Interés en adiso caducado: ${interest}
 
 ${adisoUrl}
 ${phoneLine}

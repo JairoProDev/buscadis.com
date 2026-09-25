@@ -13,7 +13,7 @@ export type DismissReason =
 export const DISMISS_REASONS: { id: DismissReason; label: string }[] = [
     { id: 'no_interesa', label: 'No me interesa esta categoría' },
     { id: 'ya_lo_tengo', label: 'Ya tengo algo así' },
-    { id: 'repetido', label: 'Anuncio repetido' },
+    { id: 'repetido', label: 'Adiso repetido' },
     { id: 'precio', label: 'El precio no me conviene' },
     { id: 'ubicacion', label: 'Está muy lejos de mí' },
     { id: 'otro', label: 'Otro motivo' },

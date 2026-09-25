@@ -427,7 +427,7 @@ export default function Buscador({
                   : 'text-[var(--text-secondary)] hover:text-[var(--brand-blue)] hover:bg-[var(--hover-bg)]'
               } ${publishImageUploading ? 'animate-pulse' : ''}`}
               title={publishImageAttached ? 'Foto adjunta · tocar para cambiar' : 'Adjuntar foto'}
-              aria-label="Adjuntar foto al anuncio"
+              aria-label="Adjuntar foto al adiso"
             >
               <IconImage size={iconSize} />
               {publishImageAttached && (

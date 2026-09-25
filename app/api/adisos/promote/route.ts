@@ -55,7 +55,7 @@ export async function POST(request: NextRequest) {
 
     const owns = await verifyAdisoOwnership(adisoId, user.id);
     if (!owns) {
-      return NextResponse.json({ error: 'No eres el dueño de este anuncio' }, { status: 403 });
+      return NextResponse.json({ error: 'No eres el dueño de este adiso' }, { status: 403 });
     }
 
     // Quitar promoción (gratis)

@@ -38,7 +38,7 @@ export default function DismissedCardPlaceholder({
             ) : (
                 <>
                     <p className="text-sm font-medium text-[var(--text-primary)]">
-                        Anuncio ocultado. ¿Por qué?
+                        Adiso ocultado. ¿Por qué?
                     </p>
                     <div className="flex flex-wrap items-center justify-center gap-2">
                         {DISMISS_REASONS.map((reason) => (

@@ -107,7 +107,7 @@ export default function ModalNavegacionMobile({
         },
         {
           id: 'buscar',
-          label: 'Buscar Anuncios',
+          label: 'Buscar Adisos',
           icon: FaSearch,
           href: '/'
         },
@@ -119,7 +119,7 @@ export default function ModalNavegacionMobile({
         },
         {
           id: 'gratuitos',
-          label: 'Anuncios Gratuitos',
+          label: 'Adisos Gratuitos',
           icon: FaGift,
           href: '/gratuitos'
         },
@@ -130,7 +130,7 @@ export default function ModalNavegacionMobile({
       items: [
         {
           id: 'publicar',
-          label: 'Publicar Anuncio',
+          label: 'Publicar adiso',
           icon: FaBullhorn,
           href: '/publicar',
           authenticated: true
@@ -151,7 +151,7 @@ export default function ModalNavegacionMobile({
         },
         {
           id: 'ocultos',
-          label: 'Anuncios Ocultos',
+          label: 'Adisos Ocultos',
           icon: FaEyeSlash,
           href: '/ocultos',
           authenticated: true

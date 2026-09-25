@@ -294,7 +294,7 @@ export default function AdisosGratuitos({ onPublicarGratuito, todosLosAdisos = [
                 opacity: publicando ? 0.6 : 1
               }}
             >
-              {publicando ? 'Publicando...' : 'Publicar Gratis'}
+              {publicando ? 'Publicando...' : 'Publicar gratis'}
             </button>
             <button
               type="button"
@@ -334,7 +334,7 @@ export default function AdisosGratuitos({ onPublicarGratuito, todosLosAdisos = [
             marginBottom: '1rem'
           }}
         >
-          + Publicar Adiso Gratuito
+          + Publicar adiso gratuito
         </button>
       )}
 

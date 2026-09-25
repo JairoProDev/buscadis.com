@@ -9,7 +9,7 @@ interface NotificacionAnunciante {
 }
 
 /**
- * Envía notificación a un anunciante sobre intereses en su anuncio caducado
+ * Envía notificación a un anunciante sobre intereses en su adiso caducado
  */
 export async function enviarNotificacionAnunciante(
   notificacion: NotificacionAnunciante
@@ -21,9 +21,9 @@ export async function enviarNotificacionAnunciante(
     const mensaje = `
 Hola,
 
-Tu anuncio "${notificacion.tituloAnuncio}" ha recibido ${notificacion.cantidadIntereses} ${notificacion.cantidadIntereses === 1 ? 'interés' : 'intereses'} de personas interesadas.
+Tu adiso "${notificacion.tituloAnuncio}" ha recibido ${notificacion.cantidadIntereses} ${notificacion.cantidadIntereses === 1 ? 'interés' : 'intereses'} de personas interesadas.
 
-¡Aún hay personas buscando lo que ofreces! Renueva tu anuncio para volver a estar visible:
+¡Aún hay personas buscando lo que ofreces! Renueva tu adiso para volver a estar visible:
 
 ${notificacion.urlRenovar}
 
@@ -39,7 +39,7 @@ Equipo de Rueda de Negocios
     await resend.emails.send({
       from: 'notificaciones@adis.lat',
       to: notificacion.contactoAnunciante,
-      subject: `¡${notificacion.cantidadIntereses} personas interesadas en tu anuncio!`,
+      subject: `¡${notificacion.cantidadIntereses} personas interesadas en tu adiso!`,
       text: mensaje
     });
     */
@@ -47,7 +47,7 @@ Equipo de Rueda de Negocios
     // Por ahora, solo loguear (implementar envío real después)
     console.log('Notificación a enviar:', {
       to: notificacion.contactoAnunciante,
-      subject: `¡${notificacion.cantidadIntereses} personas interesadas en tu anuncio!`,
+      subject: `¡${notificacion.cantidadIntereses} personas interesadas en tu adiso!`,
       message: mensaje
     });
     
@@ -59,7 +59,7 @@ Equipo de Rueda de Negocios
 }
 
 /**
- * Obtiene anuncios con intereses acumulados y envía notificaciones
+ * Obtiene adisos con intereses acumulados y envía notificaciones
  */
 export async function procesarNotificacionesPendientes(
   minimoIntereses: number = 3
@@ -69,7 +69,7 @@ export async function procesarNotificacionesPendientes(
   }
   
   try {
-    // Obtener intereses agrupados por anuncio usando la función SQL
+    // Obtener intereses agrupados por adiso usando la función SQL
     const { data: interesesAgrupados, error } = await supabase
       .rpc('obtener_intereses_por_notificar', { minimo_intereses: minimoIntereses });
     
@@ -86,11 +86,11 @@ export async function procesarNotificacionesPendientes(
     
     for (const grupo of interesesAgrupados) {
       try {
-        // Obtener datos del anuncio
+        // Obtener datos del adiso
         const adiso = await getAdisoByIdFromSupabase(grupo.adiso_id);
         
         if (!adiso) {
-          console.error(`Anuncio no encontrado: ${grupo.adiso_id}`);
+          console.error(`Adiso no encontrado: ${grupo.adiso_id}`);
           errores++;
           continue;
         }
@@ -100,7 +100,7 @@ export async function procesarNotificacionesPendientes(
                                    adiso.contacto;
         
         if (!contactoAnunciante) {
-          console.error(`Sin contacto para anuncio: ${grupo.adiso_id}`);
+          console.error(`Sin contacto para adiso: ${grupo.adiso_id}`);
           errores++;
           continue;
         }

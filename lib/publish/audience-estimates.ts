@@ -51,7 +51,7 @@ export function scaleReachByRate(baseReach: number, dailyRate: number): number {
 }
 
 export const FUNNEL_LABELS = {
-  A: 'Personas que ven anuncios en todos nuestros canales',
+  A: 'Personas que ven adisos en todos nuestros canales',
   B: 'Búsquedas registradas en marketplace y ADIS AI',
   C: 'Interesados en esta categoría',
   D: 'Interesados en esta subcategoría',

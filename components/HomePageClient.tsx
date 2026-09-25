@@ -363,7 +363,7 @@ function HomeContent() {
       });
       setAdisos(nuevosFiltrados);
       setHayMasAdisos(adisosDesdeAPI.length >= ITEMS_POR_PAGINA);
-      success('Buscando anuncios recientes...');
+      success('Buscando adisos recientes...');
     } catch (e) {
       console.error(e);
       error('Error al actualizar datos.');
@@ -510,7 +510,7 @@ function HomeContent() {
         return;
       }
 
-      // Solo cerrar y avisar si el anuncio no estaba en la grilla (enlace directo fantasma)
+      // Solo cerrar y avisar si el adiso no estaba en la grilla (enlace directo fantasma)
       if (!adisoEnLista) {
         setAdisoAbierto(null);
         if (isDesktop) {
@@ -521,7 +521,7 @@ function HomeContent() {
         router.replace(params.toString() ? `/?${params.toString()}` : '/', { scroll: false });
         if (ultimoErrorAdisoRef.current !== adisoId) {
           ultimoErrorAdisoRef.current = adisoId;
-          error('Este anuncio no está disponible. Puede que no se haya guardado correctamente.');
+          error('Este adiso no está disponible. Puede que no se haya guardado correctamente.');
         }
       }
     }).catch(console.error);
@@ -1032,13 +1032,13 @@ function HomeContent() {
   // Estado para paginación
   const [paginaActual, setPaginaActual] = useState(1);
 
-  // Función optimizada para cargar más anuncios (scroll infinito)
+  // Función optimizada para cargar más adisos (scroll infinito)
   const cargarMasAdisos = useCallback(async () => {
     if (cargandoMas) return;
     if (searchResults !== null) return;
     if (adisosFiltrados.length === 0) return;
 
-    // Caso 1: Todavía hay anuncios en memoria que no se están mostrando (Client-side)
+    // Caso 1: Todavía hay adisos en memoria que no se están mostrando (Client-side)
     if (visibleCount < adisosFiltrados.length) {
       setCargandoMas(true);
       // Simular un pequeño delay para una mejor UX (opcional)

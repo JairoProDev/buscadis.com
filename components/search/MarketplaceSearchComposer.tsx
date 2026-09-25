@@ -228,7 +228,7 @@ export default function MarketplaceSearchComposer({
   const handlePrimaryAction = () => {
     if (composerMode === 'publish') {
       if (!hasText) {
-        onNotify?.('Escribe tu anuncio primero.', 'info');
+        onNotify?.('Escribe tu adiso primero.', 'info');
         return;
       }
       if (publishBehavior === 'chat') {

@@ -47,7 +47,7 @@ export async function GET(request: NextRequest) {
   } catch (error: any) {
     console.error('Error en API v1/adisos:', error);
     return NextResponse.json(
-      { error: 'Error al obtener anuncios' },
+      { error: 'Error al obtener adisos' },
       { status: 500 }
     );
   }

@@ -3,7 +3,7 @@ import { compareRecientesFeed, getFeedRecencyAnchorMs } from '@/lib/feed/ranking
 
 /**
  * Mantiene el orden visible al paginar: los IDs ya mostrados no se reordenan;
- * los anuncios nuevos se añaden al final solo si son más antiguos que el último visible.
+ * los adisos nuevos se añaden al final solo si son más antiguos que el último visible.
  */
 export function mergeStableFeedOrder(
   previousOrder: string[],

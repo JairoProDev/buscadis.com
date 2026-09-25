@@ -140,7 +140,7 @@ export default function SearchSuggestionsDropdown({
                 : ''
             }`}
           >
-            Anuncios
+            Adisos
           </li>
           {adisos.map((adiso) => {
             const itemIndex = idx++;

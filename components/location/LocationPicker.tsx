@@ -461,7 +461,7 @@ export function LocationPickerHeader() {
         Ubicación de búsqueda
       </h3>
       <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', lineHeight: 1.4, margin: 0 }}>
-        Encuentra anuncios cerca de ti. Elige tu país con orgullo y afina la zona.
+        Encuentra adisos cerca de ti. Elige tu país con orgullo y afina la zona.
       </p>
     </div>
   );

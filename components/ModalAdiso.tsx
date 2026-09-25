@@ -394,7 +394,7 @@ export default function ModalAdiso({
       return;
     }
 
-    // Anuncio activo - contacto directo normal
+    // Adiso activo - contacto directo normal
     setContactosLocales(prev => prev + 1);
     registrarContacto(user?.id, adiso.id, adiso.categoria, 'whatsapp');
 
@@ -591,8 +591,8 @@ export default function ModalAdiso({
         type="button"
         onClick={handleAbrirPagina}
         className={actionBtnClass}
-        title="Ver página del anuncio"
-        aria-label="Ver página del anuncio"
+        title="Ver página del adiso"
+        aria-label="Ver página del adiso"
       >
         <IconExternalLink size={18} />
       </button>
@@ -1014,7 +1014,7 @@ export default function ModalAdiso({
           }}
         >
           <IconZap size={16} color="var(--brand-yellow)" />
-          {promotionTier === 'gratis' ? 'Promocionar este anuncio' : 'Gestionar promoción'}
+          {promotionTier === 'gratis' ? 'Promocionar este adiso' : 'Gestionar promoción'}
         </button>
       )}
     </div>

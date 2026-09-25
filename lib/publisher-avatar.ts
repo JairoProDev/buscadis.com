@@ -82,7 +82,7 @@ function paletteForAdiso(adiso: Adiso): { bg: string; fg: string } {
 
 /**
  * Avatar del anunciante para la esquina de la imagen del card.
- * Prioridad: logo Buscadis (plataforma) → foto real → iniciales únicas por anuncio.
+ * Prioridad: logo Buscadis (plataforma) → foto real → iniciales únicas por adiso.
  */
 export function getPublisherAvatar(adiso: Adiso): PublisherAvatar {
   const sellerName = cleanSellerName(adiso);

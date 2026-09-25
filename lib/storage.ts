@@ -159,12 +159,12 @@ export const saveAdiso = async (adiso: Adiso): Promise<Adiso> => {
       }
 
       if (!resultado?.id) {
-        throw new Error('El servidor no confirmó el guardado del anuncio.');
+        throw new Error('El servidor no confirmó el guardado del adiso.');
       }
 
       const verificacion = await fetchAdisoById(resultado.id);
       if (verificacion.status !== 'ok') {
-        throw new Error('El anuncio no quedó disponible en el servidor. Revisa tu conexión e intenta de nuevo.');
+        throw new Error('El adiso no quedó disponible en el servidor. Revisa tu conexión e intenta de nuevo.');
       }
 
       console.log('✅ Adiso guardado en Supabase:', resultado.id);
@@ -188,7 +188,7 @@ export const saveAdiso = async (adiso: Adiso): Promise<Adiso> => {
     }
   }
 
-  throw new Error('No se pudo guardar el anuncio en este entorno.');
+  throw new Error('No se pudo guardar el adiso en este entorno.');
 };
 
 export const getAdisoById = async (id: string): Promise<Adiso | null> => {

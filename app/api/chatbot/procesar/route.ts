@@ -22,7 +22,7 @@ function detectarIntencion(mensaje: string): 'buscar' | 'publicar' | 'cancelar' 
   }
 
   // Palabras clave para publicar
-  const palabrasPublicar = ['publicar', 'publica', 'crear', 'nuevo adiso', 'nuevo anuncio', 'quiero publicar', 'necesito publicar', 'agregar'];
+  const palabrasPublicar = ['adisar', 'adisa', 'publicar', 'publica', 'crear', 'nuevo adiso', 'nuevo anuncio', 'quiero publicar', 'necesito publicar', 'agregar'];
   if (palabrasPublicar.some(palabra => texto.includes(palabra))) {
     return 'publicar';
   }

@@ -88,7 +88,7 @@ export function dbToAdiso(row: any): Adiso {
     contactosMultiples: contactosMultiples || undefined,
     vistas: row.vistas || 0,
     contactos: row.contactos || 0,
-    // Anuncios destacados/promocionados
+    // Adisos destacados/promocionados
     promotionTier: row.promotion_tier || 'gratis',
     promotionRank: row.promotion_rank || 0,
     promotionExpiresAt: row.promotion_expires_at || undefined,

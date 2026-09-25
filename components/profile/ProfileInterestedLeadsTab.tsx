@@ -36,7 +36,7 @@ export default function ProfileInterestedLeadsTab() {
   if (leads.length === 0) {
     return (
       <div className="p-6 text-center text-[var(--text-secondary)] text-sm">
-        Cuando publiques un anuncio, aquí verás las personas interesadas en tu oferta con match score y
+        Cuando publiques un adiso, aquí verás las personas interesadas en tu oferta con match score y
         acciones para contactarlas.
       </div>
     );

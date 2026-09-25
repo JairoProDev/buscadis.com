@@ -18,7 +18,7 @@ export async function GET(
     
     if (!adiso) {
       return NextResponse.json(
-        { error: 'Anuncio no encontrado' },
+        { error: 'Adiso no encontrado' },
         { status: 404 }
       );
     }
@@ -27,7 +27,7 @@ export async function GET(
   } catch (error: any) {
     console.error('Error en API v1/adisos/[id]:', error);
     return NextResponse.json(
-      { error: 'Error al obtener anuncio' },
+      { error: 'Error al obtener adiso' },
       { status: 500 }
     );
   }

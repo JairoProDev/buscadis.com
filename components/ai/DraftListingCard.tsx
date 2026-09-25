@@ -336,7 +336,7 @@ export function DraftListingCard({
                   <span>{getConfidenceText(data.confidence)}</span>
                   {data.similarListings && data.similarListings > 0 && (
                     <span style={{ opacity: 0.8 }}>
-                      • {data.similarListings} anuncios similares
+                      • {data.similarListings} adisos similares
                     </span>
                   )}
                 </div>
@@ -422,7 +422,7 @@ export function DraftListingCard({
                   boxShadow: '0 4px 12px rgba(102, 126, 234, 0.4)',
                 }}
               >
-                Guardar y Publicar
+                Guardar y publicar
               </button>
             </>
           ) : (
@@ -465,7 +465,7 @@ export function DraftListingCard({
                   e.currentTarget.style.transform = 'scale(1)';
                 }}
               >
-                ✨ Publicar Ahora
+                ✨ Publicar ahora
               </button>
             </>
           )}

@@ -50,7 +50,7 @@ export const CATEGORY_SHARE_COPY: Record<Categoria, CategoryShareCopy> = {
     label: 'Inmuebles',
     title: 'Inmuebles en Perú — Casas, departamentos y terrenos',
     description:
-      'Compra, vende o alquila propiedades. Anuncios de inmuebles en Cusco, Lima y regiones. Rápido y gratis.',
+      'Compra, vende o alquila propiedades. Publica tu adiso de inmuebles en Cusco, Lima y regiones.',
     imageAlt: 'Inmuebles en Buscadis Perú',
   },
   vehiculos: {
@@ -92,7 +92,7 @@ export const CATEGORY_SHARE_COPY: Record<Categoria, CategoryShareCopy> = {
     label: 'Comunidad',
     title: 'Comunidad — Adisos y clasificados locales',
     description:
-      'Anuncios de la comunidad, trueques, adisos vecinales y clasificados generales en Perú.',
+      'Adisos de la comunidad: anuncios, trueques y avisos vecinales en Perú.',
     imageAlt: 'Comunidad en Buscadis Perú',
   },
 };

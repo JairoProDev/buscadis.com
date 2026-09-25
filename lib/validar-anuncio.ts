@@ -1,7 +1,7 @@
 /**
- * Validaciones Pre-Insert para Anuncios
+ * Validaciones Pre-Insert para Adisos
  * 
- * Valida que un anuncio cumpla con todos los requisitos antes de insertarlo en la BD
+ * Valida que un adiso cumpla con todos los requisitos antes de insertarlo en la BD
  */
 
 import { Adiso, Categoria, TamañoPaquete, ContactoMultiple } from '@/types';
@@ -43,7 +43,7 @@ export interface ResultadoValidacion {
 }
 
 /**
- * Valida el título de un anuncio
+ * Valida el título de un adiso
  * 
  * @param titulo - Título a validar
  * @returns Array de errores (vacío si es válido)
@@ -70,7 +70,7 @@ function validarTitulo(titulo: string | undefined): string[] {
 }
 
 /**
- * Valida la descripción de un anuncio
+ * Valida la descripción de un adiso
  * 
  * @param descripcion - Descripción a validar
  * @returns Array de errores (vacío si es válido)
@@ -102,7 +102,7 @@ function validarDescripcion(descripcion: string | undefined): string[] {
 }
 
 /**
- * Valida los contactos de un anuncio
+ * Valida los contactos de un adiso
  * 
  * @param contactos - Contactos a validar (puede ser string, array de ContactoMultiple, o undefined)
  * @returns Array de errores (vacío si es válido)
@@ -150,7 +150,7 @@ function validarContactos(contactos: (ContactoMultiple | string)[] | string | un
 }
 
 /**
- * Valida la categoría de un anuncio
+ * Valida la categoría de un adiso
  * 
  * @param categoria - Categoría a validar
  * @returns Array de errores (vacío si es válido)
@@ -171,7 +171,7 @@ function validarCategoria(categoria: Categoria | undefined): string[] {
 }
 
 /**
- * Valida el tamaño de un anuncio
+ * Valida el tamaño de un adiso
  * 
  * @param tamaño - Tamaño a validar
  * @returns Array de errores (vacío si es válido)
@@ -188,7 +188,7 @@ function validarTamaño(tamaño: TamañoPaquete | undefined): string[] {
 }
 
 /**
- * Valida la ubicación de un anuncio
+ * Valida la ubicación de un adiso
  * 
  * @param ubicacion - Ubicación a validar
  * @returns Array de errores (vacío si es válido)
@@ -224,7 +224,7 @@ function validarUbicacion(ubicacion: any): string[] {
 }
 
 /**
- * Valida las fechas de un anuncio
+ * Valida las fechas de un adiso
  * 
  * @param fechaPublicacion - Fecha de publicación
  * @param fechaExpiracion - Fecha de expiración (opcional)
@@ -259,9 +259,9 @@ function validarFechas(fechaPublicacion: string | undefined, fechaExpiracion?: s
 }
 
 /**
- * Valida un anuncio completo antes de insertarlo en la BD
+ * Valida un adiso completo antes de insertarlo en la BD
  * 
- * @param adiso - Anuncio a validar
+ * @param adiso - Adiso a validar
  * @returns Resultado de validación con errores y advertencias
  */
 export function validarAnuncio(adiso: Partial<Adiso>): ResultadoValidacion {
@@ -289,13 +289,13 @@ export function validarAnuncio(adiso: Partial<Adiso>): ResultadoValidacion {
   // Validar que si es histórico, tenga los campos requeridos
   if (adiso.esHistorico) {
     if (!adiso.fuenteOriginal) {
-      advertencias.push('Anuncio histórico sin fuente_original especificada');
+      advertencias.push('Adiso histórico sin fuente_original especificada');
     }
     if (!adiso.edicionNumero) {
-      advertencias.push('Anuncio histórico sin edicion_numero especificada');
+      advertencias.push('Adiso histórico sin edicion_numero especificada');
     }
     if (!adiso.fechaPublicacionOriginal) {
-      advertencias.push('Anuncio histórico sin fecha_publicacion_original especificada');
+      advertencias.push('Adiso histórico sin fecha_publicacion_original especificada');
     }
   }
 
@@ -307,16 +307,16 @@ export function validarAnuncio(adiso: Partial<Adiso>): ResultadoValidacion {
 }
 
 /**
- * Valida y normaliza un anuncio antes de insertarlo
+ * Valida y normaliza un adiso antes de insertarlo
  * 
- * @param adiso - Anuncio a validar y normalizar
- * @returns Anuncio normalizado o null si no es válido
+ * @param adiso - Adiso a validar y normalizar
+ * @returns Adiso normalizado o null si no es válido
  */
 export function validarYNormalizarAnuncio(adiso: Partial<Adiso>): Adiso | null {
   const validacion = validarAnuncio(adiso);
 
   if (!validacion.valido) {
-    console.error('Anuncio inválido:', validacion.errores);
+    console.error('Adiso inválido:', validacion.errores);
     return null;
   }
 

@@ -323,7 +323,7 @@ export const ADISO_PROMOTION_TIERS: Record<AdisoPromotionTier, AdisoPromotionTie
     nombre: 'Destacada',
     precioPorDia: 2,
     duracionDiasSugerida: 7,
-    descripcion: 'Aparece antes que los anuncios gratuitos, con etiqueta "Destacado"',
+    descripcion: 'Aparece antes que los adisos gratuitos, con etiqueta "Destacado"',
   },
   premium: {
     tier: 'premium',
@@ -353,15 +353,15 @@ export interface Adiso {
   // Mantener imagenUrl para compatibilidad hacia atrás
   imagenUrl?: string;
   esGratuito?: boolean; // Indica si es un adiso gratuito
-  // Nuevos campos para sistema de anuncios históricos
+  // Nuevos campos para sistema de adisos históricos
   fechaExpiracion?: string; // Fecha de expiración en formato ISO
-  estaActivo?: boolean; // Indica si el anuncio está activo
-  esHistorico?: boolean; // Indica si es un anuncio histórico (de PDFs)
-  fuenteOriginal?: 'rueda_negocios' | 'usuario' | 'otro'; // Origen del anuncio
+  estaActivo?: boolean; // Indica si el adiso está activo
+  esHistorico?: boolean; // Indica si es un adiso histórico (de PDFs)
+  fuenteOriginal?: 'rueda_negocios' | 'usuario' | 'otro'; // Origen del adiso
   edicionNumero?: string; // Número de edición de la revista
   fechaPublicacionOriginal?: string; // Fecha original de publicación en formato YYYY-MM-DD
   contactosMultiples?: ContactoMultiple[]; // Array de contactos múltiples
-  usuario_id?: string; // ID del usuario que creó el anuncio (Supabase Auth ID)
+  usuario_id?: string; // ID del usuario que creó el adiso (Supabase Auth ID)
   user_id?: string; // Alias para usuario_id (compatible con Supabase)
 
   // Propiedades visuales y de negocio
@@ -419,7 +419,7 @@ export interface AdisoFormData {
   ubicacion?: UbicacionDetallada; // Opcional: el anunciante puede decidir no incluir ubicación
   tamaño?: TamañoPaquete; // Tamaño del paquete seleccionado
   imagenes?: File[]; // Archivos de imagen (opcional, múltiples)
-  usuario_id?: string; // ID del usuario que creó el anuncio
+  usuario_id?: string; // ID del usuario que creó el adiso
 }
 
 // ============================================

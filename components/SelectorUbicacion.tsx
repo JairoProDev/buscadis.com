@@ -207,7 +207,7 @@ export default function SelectorUbicacion({
               fontWeight: 500,
               color: 'var(--text-primary)'
             }}>
-              Ubicación del anuncio
+              Ubicación del adiso
             </span>
             {!required && (
               <button

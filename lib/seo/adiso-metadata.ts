@@ -23,7 +23,7 @@ function formatDescription(adiso: Adiso): string {
     const text = adiso.descripcion.trim();
     return text.length > 160 ? `${text.substring(0, 160)}...` : text;
   }
-  return `Anuncio de ${adiso.categoria}: ${adiso.titulo}`;
+  return `Adiso de ${adiso.categoria}: ${adiso.titulo}. Anuncio publicado en Buscadis.`;
 }
 
 /** Metadata OG/Twitter para compartir un adiso (WhatsApp, Facebook, iMessage, etc.) */

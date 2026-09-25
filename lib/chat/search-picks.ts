@@ -22,7 +22,7 @@ export function buildSearchIntroMessage(total: number, query: string): string {
   }
 
   const shown = Math.min(total, SEARCH_PICKS_LIMIT);
-  return `Revisé ${total} adisos sobre «${q}». Te destaco las ${shown} mejores opciones según relevancia, precio y calidad del anuncio:`;
+  return `Revisé ${total} adisos sobre «${q}». Te destaco las ${shown} mejores opciones según relevancia, precio y calidad del adiso:`;
 }
 
 export function getPickRankLabel(index: number): string {
@@ -41,7 +41,7 @@ export function getPickReason(adiso: Adiso, index: number, picks: Adiso[]): stri
   }
 
   if (adiso.esDestacado || adiso.promotionTier) {
-    reasons.push('Anuncio destacado');
+    reasons.push('Adiso destacado');
   }
 
   if (getAdisoImageUrl(adiso)) {

@@ -167,5 +167,5 @@ export function generarRespuestaBusqueda(resultados: Adiso[], analisis: Analisis
         return `Encontré 1 adiso que encaja con «${term}». Te lo resumo para que decidas rápido:`;
     }
 
-    return `Revisé ${resultados.length} adisos sobre «${term}». Te destaco las ${shown} mejores opciones según relevancia y calidad del anuncio:`;
+    return `Revisé ${resultados.length} adisos sobre «${term}». Te destaco las ${shown} mejores opciones según relevancia y calidad del adiso:`;
 }

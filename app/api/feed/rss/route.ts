@@ -8,7 +8,7 @@ export async function GET(request: NextRequest) {
     const searchParams = request.nextUrl.searchParams;
     const limit = parseInt(searchParams.get('limit') || '50', 10);
 
-    // Obtener anuncios activos más recientes
+    // Obtener adisos activos más recientes
     const adisos = await getAdisosFromSupabase({
       limit: Math.min(limit, 100),
       offset: 0,
@@ -22,9 +22,9 @@ export async function GET(request: NextRequest) {
     const rss = `<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Rueda de Negocios - Anuncios Clasificados</title>
+    <title>Rueda de Negocios - Adisos Clasificados</title>
     <link>${siteUrl}</link>
-    <description>Anuncios clasificados de Cusco, Perú</description>
+    <description>Adisos clasificados de Cusco, Perú</description>
     <language>es-PE</language>
     <lastBuildDate>${fechaActual}</lastBuildDate>
     <atom:link href="${siteUrl}/api/feed/rss" rel="self" type="application/rss+xml"/>

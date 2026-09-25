@@ -41,12 +41,12 @@ export default function HelpCenterPage() {
                     <HelpCard
                         icon={<FaBook />}
                         title="Primeros Pasos"
-                        description="Aprende a crear tu cuenta, configurar tu perfil y publicar tu primer anuncio."
+                        description="Aprende a crear tu cuenta, configurar tu perfil y publicar tu primer adiso."
                     />
                     <HelpCard
                         icon={<FaBook />}
                         title="Ventas y Pagos"
-                        description="Gestión de transacciones, seguridad en pagos y cómo destacar tus anuncios."
+                        description="Gestión de transacciones, seguridad en pagos y cómo destacar tus adisos."
                     />
                 </div>
 

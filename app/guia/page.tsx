@@ -24,7 +24,7 @@ export default function GuidePage() {
                     </div>
                     <h1 className="text-4xl md:text-5xl font-black text-gray-900 dark:text-white mb-6 tracking-tight">Cómo utilizar Buscadis</h1>
                     <p className="text-xl text-gray-600 dark:text-gray-400 mb-8 leading-relaxed">
-                        Bienvenido a la plataforma más moderna de anuncios clasificados. Aquí tienes una guía rápida para que empieces a vender y comprar con éxito.
+                        En Buscadis publicas un adiso: es tu anuncio, el aviso de lo que ofreces o buscas. Aquí tienes una guía rápida para vender y comprar con más claridad.
                     </p>
                 </div>
 
@@ -33,7 +33,7 @@ export default function GuidePage() {
                         number="01"
                         icon={<FaBullhorn />}
                         title="Cómo Publicar"
-                        content="Simplemente presiona el botón 'Publicar' en el menú. Puedes usar nuestro Asistente IA para que redacte el anuncio por ti o hacerlo manualmente. No olvides subir fotos de buena calidad."
+                        content="Simplemente presiona el botón 'Publicar' en el menú. Puedes usar nuestro Asistente IA para que redacte el adiso por ti o hacerlo manualmente. No olvides subir fotos de buena calidad."
                     />
                     <GuideStep
                         number="02"

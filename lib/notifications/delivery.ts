@@ -197,7 +197,7 @@ export async function deliverOpportunityToUser(params: {
     user_id: params.userId,
     type: 'system',
     title: params.title,
-    message: `${params.body} Ver anuncio: ${adisoLink}`,
+    message: `${params.body} Ver adiso: ${adisoLink}`,
     data,
   });
 

@@ -9,7 +9,7 @@ export interface DistritoCusco {
   variantes: string[]; // Nombres alternativos y variantes ortográficas
   provincia: string;
   coordenadas: { lat: number; lng: number }; // Coordenadas aproximadas del centro del distrito
-  referencias?: string[]; // Referencias comunes mencionadas en anuncios
+  referencias?: string[]; // Referencias comunes mencionadas en adisos
 }
 
 export interface ProvinciaCusco {
@@ -18,9 +18,9 @@ export interface ProvinciaCusco {
 }
 
 // Base de datos completa de distritos de Cusco
-// Provincias principales donde se publican la mayoría de anuncios
+// Provincias principales donde se publican la mayoría de adisos
 export const DISTRITOS_CUSCO: DistritoCusco[] = [
-  // PROVINCIA DE CUSCO (Principal - 99.99% de los anuncios)
+  // PROVINCIA DE CUSCO (Principal - 99.99% de los adisos)
   {
     nombre: 'Cusco',
     variantes: ['Cusco', 'Cuzco', 'Cuzco', 'CUSCO', 'cusco', 'Cercado de Cusco', 'Centro de Cusco', 'Plaza de Armas'],

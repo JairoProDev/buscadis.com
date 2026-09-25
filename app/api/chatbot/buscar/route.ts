@@ -36,6 +36,6 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error('Error en chatbot/buscar (deprecated):', error);
-    return NextResponse.json({ error: 'Error al buscar anuncios' }, { status: 500 });
+    return NextResponse.json({ error: 'Error al buscar adisos' }, { status: 500 });
   }
 }

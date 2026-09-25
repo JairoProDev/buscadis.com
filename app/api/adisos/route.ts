@@ -225,7 +225,7 @@ export async function POST(request: NextRequest) {
         imagenesUrls: sanitizedData.imagenesUrls || undefined,
         // Compatibilidad hacia atrás
         imagenUrl: sanitizedData.imagenUrl || sanitizedData.imagenesUrls?.[0] || undefined,
-        // Los gratuitos van por /api/adisos-gratuitos; aquí solo anuncios de pago
+        // Los gratuitos van por /api/adisos-gratuitos; aquí solo adisos de pago
         esGratuito: false,
         // Ensure user ID is passed to DB function
         user_id: sanitizedData.user_id,

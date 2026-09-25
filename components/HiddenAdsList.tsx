@@ -60,10 +60,10 @@ export default function HiddenAdsList({ abierto, onCerrar }: HiddenAdsListProps)
         try {
             await restaurarAdisoOculto(user.id, adisoId);
             setAdisos(adisos.filter(a => a.id !== adisoId));
-            success('Anuncio restaurado. Volverá a aparecer en las búsquedas.');
+            success('Adiso restaurado. Volverá a aparecer en las búsquedas.');
         } catch (err) {
             console.error('Error al restaurar:', err);
-            error('Error al restaurar el anuncio');
+            error('Error al restaurar el adiso');
         }
     };
 
@@ -103,7 +103,7 @@ export default function HiddenAdsList({ abierto, onCerrar }: HiddenAdsListProps)
                     {/* Header */}
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
                         <h2 style={{ fontSize: '1.5rem', fontWeight: 600, color: 'var(--text-primary)', margin: 0 }}>
-                            🚫 Anuncios que no te interesan
+                            🚫 Adisos que no te interesan
                         </h2>
                         <button
                             onClick={onCerrar}
@@ -124,7 +124,7 @@ export default function HiddenAdsList({ abierto, onCerrar }: HiddenAdsListProps)
                     </div>
 
                     <p style={{ color: 'var(--text-secondary)', marginBottom: '1rem', fontSize: '0.9rem' }}>
-                        Estos anuncios están ocultos de tu vista. Puedes restaurarlos si cambias de opinión.
+                        Estos adisos están ocultos de tu vista. Puedes restaurarlos si cambias de opinión.
                     </p>
 
                     {/* Lista */}
@@ -134,7 +134,7 @@ export default function HiddenAdsList({ abierto, onCerrar }: HiddenAdsListProps)
                         </div>
                     ) : adisos.length === 0 ? (
                         <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-secondary)' }}>
-                            No has ocultado ningún anuncio.
+                            No has ocultado ningún adiso.
                         </div>
                     ) : (
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>

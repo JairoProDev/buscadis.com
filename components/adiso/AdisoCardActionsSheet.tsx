@@ -114,7 +114,7 @@ export default function AdisoCardActionsSheet({
           <motion.div
             role="dialog"
             aria-modal="true"
-            aria-label="Opciones del anuncio"
+            aria-label="Opciones del adiso"
             className="fixed inset-x-0 bottom-0 mx-auto flex max-h-[min(88vh,640px)] w-full max-w-lg flex-col overflow-hidden rounded-t-[28px] bg-[#1c1c1e] shadow-2xl"
             style={{ zIndex: OVERLAY_SHEET_Z }}
             initial={{ y: '100%' }}
@@ -182,8 +182,8 @@ export default function AdisoCardActionsSheet({
                   {row(<IconShare size={20} />, 'Compartir', 'share')}
                   {canDownloadImage && row(<IconDownload size={20} />, 'Descargar imagen', 'download')}
                   {row(<IconCopy size={20} />, 'Copiar enlace', 'copy_link')}
-                  {row(<IconExternalLink size={20} />, 'Abrir página del anuncio', 'open_page')}
-                  {row(<IconDismiss size={20} />, 'Ocultar este anuncio', 'hide')}
+                  {row(<IconExternalLink size={20} />, 'Abrir página del adiso', 'open_page')}
+                  {row(<IconDismiss size={20} />, 'Ocultar este adiso', 'hide')}
                   <button
                     type="button"
                     className="flex w-full items-center gap-4 rounded-xl px-2 py-3.5 text-left text-[15px] font-medium text-red-300 hover:bg-white/10"
@@ -200,7 +200,7 @@ export default function AdisoCardActionsSheet({
               <div
                 className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 pb-[max(1.5rem,env(safe-area-inset-bottom))] pt-2"
               >
-                <p className="mb-3 text-sm font-semibold text-white">¿Qué problema tiene este anuncio?</p>
+                <p className="mb-3 text-sm font-semibold text-white">¿Qué problema tiene este adiso?</p>
                 <div className="flex flex-col gap-1">
                   {REPORT_REASONS.map((r) => (
                     <button

@@ -207,7 +207,7 @@ export async function chat(
                 message: `Encontré ${results.length} resultados. Aquí están los primeros:\n${topResults}\n\n${randomTip}\n\nLos he mostrado visualmente arriba.`,
               };
             } catch (error: any) {
-              uiStream.done(<ErrorCard message={error.message || "Error al buscar anuncios"} />);
+              uiStream.done(<ErrorCard message={error.message || "Error al buscar adisos"} />);
               return {
                 found: 0,
                 message: `Error al buscar: ${error.message}`,

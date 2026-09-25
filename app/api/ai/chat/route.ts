@@ -83,7 +83,7 @@ const categorias: Categoria[] = [
 function detectIntent(msg: string, hasImage: boolean): { intent: AIIntent; confidence: number } {
   const t = msg.toLowerCase();
   if (hasImage || t.includes('foto') || t.includes('imagen')) return { intent: 'vision', confidence: 0.8 };
-  if (/(publicar|vender|crear anuncio|subir anuncio)/.test(t)) return { intent: 'publish', confidence: 0.85 };
+  if (/(publicar|vender|adisar|adisa|crear adiso|subir adiso|crear anuncio|subir anuncio)/.test(t)) return { intent: 'publish', confidence: 0.85 };
   if (/(recom|sugerir|algo para mi|para mí)/.test(t)) return { intent: 'recommend', confidence: 0.7 };
   if (/(hola|buenas|ayuda|cómo funciona)/.test(t)) return { intent: 'help', confidence: 0.75 };
   if (t.length > 3) return { intent: 'search', confidence: 0.7 };
@@ -322,8 +322,8 @@ export async function POST(request: NextRequest) {
       }
 
       const text = topCategorias.length > 0
-        ? `Según tus intereses, estos anuncios de ${topCategorias[0]} podrían gustarte.`
-        : 'Aquí tienes algunos anuncios recientes que podrían interesarte.';
+        ? `Según tus intereses, estos adisos de ${topCategorias[0]} podrían gustarte.`
+        : 'Aquí tienes algunos adisos recientes que podrían interesarte.';
 
       const resp: AIChatResponse = {
         sessionId: session.sessionId,
@@ -353,7 +353,7 @@ export async function POST(request: NextRequest) {
     const fallbackText =
       intent === 'help'
         ? 'Puedo ayudarte a buscar, recomendar o preparar una publicación. Dime qué necesitas.'
-        : 'No capté bien la intención. ¿Quieres buscar anuncios o publicar uno nuevo?';
+        : 'No capté bien la intención. ¿Quieres buscar adisos o publicar uno nuevo?';
 
     const fallback: AIChatResponse = {
       sessionId: session.sessionId,

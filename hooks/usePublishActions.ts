@@ -76,7 +76,7 @@ export function usePublishActions(onNotify?: (msg: string, type?: 'info' | 'erro
       const clean = removePhonesFromText(text).trim();
       const phone = resolveContacto(text, contacto);
       if (!clean) {
-        onNotify?.('Escribe tu anuncio primero.', 'error');
+        onNotify?.('Escribe tu adiso primero.', 'error');
         return false;
       }
       if (!phone) {
@@ -102,7 +102,7 @@ export function usePublishActions(onNotify?: (msg: string, type?: 'info' | 'erro
         });
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || 'Error');
-        onNotify?.('¡Anuncio publicado gratis por 24h!', 'success');
+        onNotify?.('¡Adiso publicado gratis por 24h!', 'success');
         setPublishImageUrl(null);
         return true;
       } catch (e) {
@@ -155,7 +155,7 @@ export function usePublishActions(onNotify?: (msg: string, type?: 'info' | 'erro
         }
         window.location.href = `/publicar?descripcion=${encodeURIComponent(text)}&tier=pro`;
       } catch {
-        onNotify?.('No se pudo preparar el anuncio con IA.', 'error');
+        onNotify?.('No se pudo preparar el adiso con IA.', 'error');
       } finally {
         setLoadingTier(null);
       }

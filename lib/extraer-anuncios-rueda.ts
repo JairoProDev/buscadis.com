@@ -1,6 +1,6 @@
 /**
- * Extracción/separación de anuncios de Rueda de Negocios (texto de página).
- * Enfocado en: 1 anuncio = 1 contacto+oferta, títulos útiles, sin masthead.
+ * Extracción/separación de adisos de Rueda de Negocios (texto de página).
+ * Enfocado en: 1 adiso = 1 contacto+oferta, títulos útiles, sin masthead.
  */
 export type CalidadIssue =
   | 'sin_telefono'
@@ -22,7 +22,7 @@ export interface AnuncioExtraido {
   score: number; // 0–100
 }
 
-/** Starters fuertes: sirven para CORTAR anuncios (evitar Casa/Local sueltos). */
+/** Starters fuertes: sirven para CORTAR adisos (evitar Casa/Local sueltos). */
 const SPLIT_START =
   String.raw`¡?(?:Urgente!?|GRAN(?:DE)?(?:\s+OPORTUNIDAD(?:\s+DE\s+INVERSI[OÓ]N)?)?|REMATO|Remato|SE\s+REMATA|Vendo|VENDO|Se\s+vende|SE\s+VENDE|En\s+venta|Alquilo|ALQUILO|Se\s+alquila|SE\s+ALQUILA|Por\s+(?:motivo|viaje|emergencia|ocasi[oó]n)|Por\s+ocasi[oó]n|OCASI[OÓ]N(?:\s*[-–])?\s*(?:VENDO|Vendo|SE\s+VENDE)?|¡?GRAN\s+REMAT|A\s+solo\s+S|Anticresis|Traspaso\s+de|Busco\s+(?:local|terreno|casa|departamento|personal)|Necesito\s+(?:personal|operador|mozo|Operador)|AMPLIAMOS|AGENCIA\s+DE|¡?TRABAJO\s+INMEDIATO|DISTRIBUIDORA|SE\s+SOLICITA|SE\s+REQUIERE|REQUIERE(?:\s+PERSONAL)?|BUSCAMOS|CAFETER[IÍ]A|RESTAURANTE|HOTEL\s+\w+\s+SOLICITA|HOSTAL\s+\w+|MACHU\s+TRAVEL|¡URGENTE!\s+BUSCAMOS|VENDO\s+(?:TERRENO|CASA|LOTE|DEPARTAMENTO|LOCAL|LOTES)|SE\s+VENDE\s+TERRENO|EN\s+VENTA\s+(?:MODERNOS\s+)?DEPARTAMENT|INMOBILIARIA|INSTITUCI[OÓ]N|¡?OPORTUNIDAD\s+LABORAL|¡?ÚNETE)`;
 
@@ -140,7 +140,7 @@ function extraerTelefonos9(texto: string): string[] {
 }
 
 /**
- * Parte el texto en anuncios con escaneo lineal (sin lookahead pesado).
+ * Parte el texto en adisos con escaneo lineal (sin lookahead pesado).
  */
 export function separarAnuncios(textoPagina: string): string[] {
   const limpio = filtrarMetadatos(normalizarTelefonosEnTexto(textoPagina));
@@ -178,7 +178,7 @@ export function separarAnuncios(textoPagina: string): string[] {
     });
 }
 
-/** Corta tras cada teléfono si lo que sigue parece un anuncio nuevo. */
+/** Corta tras cada teléfono si lo que sigue parece un adiso nuevo. */
 function cortarTrasTelefonos(text: string): string[] {
   const phones = [...text.matchAll(/\b9\d{8}\b/g)];
   if (!phones.length) return text.length > 50 ? [text] : [];
@@ -246,7 +246,7 @@ function empiezaNuevoAnuncio(slice: string): boolean {
 
 /**
  * Parte bloques largos sin regex de lookahead complejos (evita backtracking).
- * Recorre teléfonos; si tras el teléfono(s) empieza un nuevo anuncio, corta.
+ * Recorre teléfonos; si tras el teléfono(s) empieza un nuevo adiso, corta.
  */
 export function fragmentarBloqueEnorme(chunk: string): string[] {
   const phones = [...chunk.matchAll(/\b9\d{8}\b/g)];
@@ -288,7 +288,7 @@ export function fragmentarBloqueEnorme(chunk: string): string[] {
         : fragmentarPorMarcadoresExtra(chunk);
   }
 
-  // Forzar 1 anuncio por teléfono en piezas que sigan enormes
+  // Forzar 1 adiso por teléfono en piezas que sigan enormes
   const forced: string[] = [];
   for (const p of result) {
     if (p.length > 1000 && (p.match(/\b9\d{8}\b/g) || []).length >= 2) {

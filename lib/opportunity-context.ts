@@ -44,7 +44,7 @@ export function peekOpportunityContext(adisoId?: string): OpportunityContext | n
 export function buildMatchInitialMessage(title: string, matchScore?: number): string {
   const pct = matchScore != null ? Math.round(matchScore * 100) : null;
   if (pct && pct >= 50) {
-    return `Hola, vi tu anuncio "${title}" y coincide ${pct}% con lo que busco. ¿Sigue disponible?`;
+    return `Hola, vi tu adiso "${title}" y coincide ${pct}% con lo que busco. ¿Sigue disponible?`;
   }
-  return `Hola, me interesa tu anuncio: ${title}. ¿Sigue disponible?`;
+  return `Hola, me interesa tu adiso: ${title}. ¿Sigue disponible?`;
 }

@@ -99,7 +99,7 @@ export function useInfiniteScroll({
   }, [isLoading]);
 
   // Si sigue intersectando después de cargar, volver a intentar (por si no se llenó la pantalla)
-  // Esto es crucial para categorías con pocos anuncios por página
+  // Esto es crucial para categorías con pocos adisos por página
   useEffect(() => {
     if (isIntersecting && !isLoading && hasMore && enabled) {
       // Usamos un pequeño delay para evitar bucles infinitos agresivos 

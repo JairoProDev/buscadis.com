@@ -195,7 +195,7 @@ export function galeriaFromProfile(
   return out.slice(0, 12);
 }
 
-/** story_highlights + anuncio activo → novedades (P16 lite). */
+/** story_highlights + adiso activo → novedades (P16 lite). */
 export function novedadesFromProfile(row: Record<string, unknown>): Novedad[] {
   const out: Novedad[] = [];
   const updated =

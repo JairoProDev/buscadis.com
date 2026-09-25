@@ -58,7 +58,7 @@ const MAX_BOOST_MS = 3 * 24 * 60 * 60 * 1000; // tope de 3 días, para no romper
 /**
  * Convierte la afinidad de un adiso con el perfil del usuario en un
  * adelanto temporal (ms) que se suma a su fecha de publicación al
- * ordenar el feed por "recientes". Así, anuncios afines a los intereses
+ * ordenar el feed por "recientes". Así, adisos afines a los intereses
  * del usuario aparecen un poco antes sin desordenar por completo el feed.
  */
 export function personalizationFreshnessBoostMs(adiso: Adiso, profile: UserInterestProfile | null | undefined): number {

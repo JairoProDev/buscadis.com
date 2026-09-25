@@ -175,8 +175,8 @@ export function getMarketplacePulse(adisos: Adiso[]): string | null {
 
   const label =
     withActivity === 1
-      ? '1 anuncio con actividad'
-      : `${withActivity} anuncios con actividad`;
+      ? '1 adiso con actividad'
+      : `${withActivity} adisos con actividad`;
 
   return `${label} · ${formatCompactNumber(viewsTotal)} vistas`;
 }

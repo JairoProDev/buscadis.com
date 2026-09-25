@@ -25,7 +25,7 @@ export async function GET() {
       health.services.database = 'error';
     }
 
-    // Verificar Storage (avisos-images en prod; adisos-images es el alias)
+    // Verificar Storage (adisos-images; avisos-images es el almacén legado)
     try {
       let storageOk = false;
       for (const bucketName of ADISO_IMAGES_BUCKET_FALLBACKS) {

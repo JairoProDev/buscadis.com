@@ -30,7 +30,7 @@ export function resolveUbicacionForPublish(
 
 export function parseAdisoApiError(payload: unknown): string {
   if (!payload || typeof payload !== 'object') {
-    return 'No se pudo publicar el anuncio. Intenta de nuevo.';
+    return 'No se pudo publicar el adiso. Intenta de nuevo.';
   }
 
   const data = payload as {
@@ -57,5 +57,5 @@ export function parseAdisoApiError(payload: unknown): string {
     return data.error;
   }
 
-  return 'No se pudo publicar el anuncio. Intenta de nuevo.';
+  return 'No se pudo publicar el adiso. Intenta de nuevo.';
 }

@@ -19,8 +19,8 @@ export const MOTIVOS_AYUDA: Array<{
   {
     id: 'publicar',
     label: 'Ayuda para publicar',
-    descripcion: 'Necesito apoyo con mi anuncio',
-    mensaje: 'Hola, necesito ayuda para publicar mi anuncio en Buscadis: ',
+    descripcion: 'Necesito apoyo con mi adiso',
+    mensaje: 'Hola, necesito ayuda para publicar mi adiso en Buscadis: ',
   },
   {
     id: 'sugerencia',

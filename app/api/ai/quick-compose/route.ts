@@ -15,9 +15,9 @@ const CATEGORIAS = [
 ] as const;
 
 const DraftSchema = z.object({
-  titulo: z.string().describe('Título atractivo para el anuncio (máx 80 caracteres)'),
-  descripcion: z.string().describe('Descripción del anuncio (100-300 caracteres)'),
-  categoria: z.enum(CATEGORIAS).describe('Categoría más apropiada para este anuncio'),
+  titulo: z.string().describe('Título atractivo para el adiso (máx 80 caracteres)'),
+  descripcion: z.string().describe('Descripción del adiso (100-300 caracteres)'),
+  categoria: z.enum(CATEGORIAS).describe('Categoría más apropiada para este adiso'),
   precio: z.number().optional().describe('Precio en soles si se menciona o se puede inferir'),
   condicion: z.string().optional().describe('Condición del producto/servicio si aplica'),
   tags: z.array(z.string()).optional().describe('Hasta 5 etiquetas de búsqueda relevantes'),
@@ -30,7 +30,7 @@ const PRICE_PATTERN = /\b(s\/\.?|soles?|\$)\s*\d/i;
 
 /**
  * Heurística rápida: decide si el texto parece una búsqueda o la descripción
- * de un anuncio que el usuario quiere publicar.
+ * de un adiso que el usuario quiere publicar.
  */
 function detectComposeIntent(text: string): { intent: 'search' | 'publish'; confidence: number } {
   const trimmed = text.trim();
@@ -48,7 +48,7 @@ function detectComposeIntent(text: string): { intent: 'search' | 'publish'; conf
 }
 
 /**
- * Construye un borrador de anuncio sin IA, a partir de heurísticas locales
+ * Construye un borrador de adiso sin IA, a partir de heurísticas locales
  * (categoría, precio y términos detectados por el NLU del chatbot).
  */
 function buildHeuristicDraft(text: string) {
@@ -94,9 +94,11 @@ export async function POST(request: NextRequest) {
         messages: [
           {
             role: 'system',
-            content: `Eres un asistente que ayuda a redactar anuncios para Buscadis, un marketplace de clasificados en Perú.
-A partir del texto del usuario, genera un borrador de anuncio claro y atractivo en español.
-Si el usuario menciona un precio, inclúyelo en soles (S/). Si no hay categoría clara, usa "productos".`,
+            content: `Eres un asistente que ayuda a publicar un adiso en Buscadis.
+Un adiso es la publicación de Buscadis. En otros sitios lo llamarían anuncio, aviso o clasificado.
+A partir del texto del usuario, genera un borrador claro y atractivo en español y llámalo adiso.
+Si el usuario dice anuncio o aviso, entiéndelo como adiso, sin corregirlo de forma brusca.
+Si menciona un precio, inclúyelo en soles (S/). Si no hay categoría clara, usa "productos".`,
           },
           { role: 'user', content: text },
         ],

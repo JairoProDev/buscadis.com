@@ -25,13 +25,13 @@ export default function GratuitosPage() {
             />
             <main className="flex-1 container mx-auto px-4 py-6">
                 <div className="bg-white dark:bg-zinc-800 rounded-xl shadow-sm p-6">
-                    <h1 className="text-2xl font-bold mb-6 dark:text-white">Anuncios Gratuitos</h1>
+                    <h1 className="text-2xl font-bold mb-6 dark:text-white">Adisos Gratuitos</h1>
 
                     {!isDesktop ? (
                         <div className="rounded-lg border border-amber-200 bg-amber-50 dark:bg-amber-950/30 dark:border-amber-800 p-4 text-amber-900 dark:text-amber-100">
                             <p className="font-medium mb-2">Disponible en escritorio</p>
                             <p className="text-sm text-amber-800 dark:text-amber-200">
-                                Los anuncios gratuitos de prueba están pensados para verse y publicarse desde una
+                                Los adisos gratuitos de prueba están pensados para verse y publicarse desde una
                                 pantalla ancha (tablet o PC). Abre Buscadis desde un navegador en escritorio o amplía la
                                 ventana para usar esta sección.
                             </p>

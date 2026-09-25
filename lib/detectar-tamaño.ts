@@ -1,5 +1,5 @@
 /**
- * Algoritmo de Detección Automática de Tamaño Visual de Anuncios
+ * Algoritmo de Detección Automática de Tamaño Visual de Adisos
  * 
  * Detecta el tamaño basado en cantidad de texto, estructura y contenido
  */
@@ -48,7 +48,7 @@ function tieneEstructuraCompleja(texto: string): boolean {
 }
 
 /**
- * Detecta si el anuncio tiene títulos destacados
+ * Detecta si el adiso tiene títulos destacados
  * 
  * @param texto - Texto a analizar
  * @returns true si tiene títulos destacados
@@ -98,10 +98,10 @@ function contarMencionesPrecio(texto: string): number {
 }
 
 /**
- * Detecta el tamaño visual de un anuncio basado en su contenido
+ * Detecta el tamaño visual de un adiso basado en su contenido
  * 
- * @param texto - Texto completo del anuncio (antes de limpiar contactos)
- * @param titulo - Título del anuncio (opcional)
+ * @param texto - Texto completo del adiso (antes de limpiar contactos)
+ * @param titulo - Título del adiso (opcional)
  * @returns Tamaño detectado
  */
 export function detectarTamañoVisual(texto: string, titulo?: string): TamañoPaquete {
@@ -121,8 +121,8 @@ export function detectarTamañoVisual(texto: string, titulo?: string): TamañoPa
   const tieneTitulos = tieneTitulosDestacados(texto);
   const mencionesPrecio = contarMencionesPrecio(textoCompleto);
   
-  // Criterios de detección (ajustados para reflejar la realidad de anuncios clasificados)
-  // La mayoría de anuncios clasificados son pequeños o miniatura
+  // Criterios de detección (ajustados para reflejar la realidad de adisos clasificados)
+  // La mayoría de adisos clasificados son pequeños o miniatura
   
   // MINIATURA: 1-3 líneas, muy compacto, sin estructura
   if (lineas <= 3 && caracteres < 150 && palabras < 25) {
@@ -130,7 +130,7 @@ export function detectarTamañoVisual(texto: string, titulo?: string): TamañoPa
   }
   
   // PEQUEÑO: 4-8 líneas, estructura básica
-  // La mayoría de anuncios clasificados caen aquí
+  // La mayoría de adisos clasificados caen aquí
   if (lineas <= 8 && caracteres < 400 && palabras < 60) {
     return 'pequeño';
   }
@@ -154,7 +154,7 @@ export function detectarTamañoVisual(texto: string, titulo?: string): TamañoPa
   }
   
   // GIGANTE: +25 líneas, muy detallado, múltiples secciones
-  // Solo para anuncios realmente extensos (pocos casos)
+  // Solo para adisos realmente extensos (pocos casos)
   if (lineas > 25 && caracteres > 1200 && palabras > 200) {
     return 'gigante';
   }

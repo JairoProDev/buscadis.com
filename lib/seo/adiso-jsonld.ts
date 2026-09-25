@@ -26,7 +26,7 @@ export function buildAdisoProductJsonLd(adiso: Adiso): Record<string, unknown> {
   const title = toDisplayTitle(adiso.titulo) || adiso.titulo;
   const description =
     sanitizeAdisoDescripcion(adiso.descripcion)?.slice(0, 300) ||
-    `Anuncio de ${adiso.categoria}: ${title}`;
+    `Adiso de ${adiso.categoria}: ${title}. Anuncio publicado en Buscadis.`;
   const image = resolveAdisoOgImage(adiso);
   const hasPrice = typeof adiso.precio === 'number' && adiso.precio > 0;
 

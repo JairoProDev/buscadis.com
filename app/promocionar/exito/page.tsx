@@ -67,7 +67,7 @@ function PromocionarExitoContent() {
           <p className="text-4xl mb-3">✅</p>
           <h1 className="text-xl font-bold text-[var(--text-primary)] mb-2">¡Promoción activada!</h1>
           <p className="text-sm text-[var(--text-secondary)] mb-6 max-w-sm">
-            Tu anuncio ya aparece con mayor visibilidad en Buscadis.
+            Tu adiso ya aparece con mayor visibilidad en Buscadis.
           </p>
           <Link href="/" className="px-6 py-3 rounded-full bg-[var(--brand-blue)] text-white font-semibold">
             Ver mis resultados
@@ -79,7 +79,7 @@ function PromocionarExitoContent() {
           <p className="text-4xl mb-3">⏳</p>
           <h1 className="text-xl font-bold text-[var(--text-primary)] mb-2">Pago en proceso</h1>
           <p className="text-sm text-[var(--text-secondary)] mb-6 max-w-sm">
-            Si ya pagaste, la promoción se activará en unos minutos. También puedes volver al inicio y revisar tu anuncio.
+            Si ya pagaste, la promoción se activará en unos minutos. También puedes volver al inicio y revisar tu adiso.
           </p>
           <Link href="/" className="px-6 py-3 rounded-full bg-[var(--brand-blue)] text-white font-semibold">
             Ir al inicio

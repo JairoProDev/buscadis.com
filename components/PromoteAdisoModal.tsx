@@ -35,7 +35,7 @@ export default function PromoteAdisoModal({ adiso, onClose, onPromoted }: Promot
 
     const token = session?.access_token;
     if (!token) {
-      toastError('Inicia sesión para promocionar tu anuncio.');
+      toastError('Inicia sesión para promocionar tu adiso.');
       return;
     }
 
@@ -82,22 +82,22 @@ export default function PromoteAdisoModal({ adiso, onClose, onPromoted }: Promot
       if (data.status === 'fulfilled') {
         success(
           tier === 'gratis'
-            ? 'Tu anuncio volvió al orden estándar.'
-            : `¡Listo! Tu anuncio ahora es ${info.nombre.toLowerCase()} por ${dias} días.`
+            ? 'Tu adiso volvió al orden estándar.'
+            : `¡Listo! Tu adiso ahora es ${info.nombre.toLowerCase()} por ${dias} días.`
         );
         onPromoted(data.tier || tier, data.expiresAt ?? null);
         onClose();
       }
     } catch {
-      toastError('No se pudo promocionar el anuncio. Intenta de nuevo.');
+      toastError('No se pudo promocionar el adiso. Intenta de nuevo.');
     } finally {
       setPromoting(false);
     }
   };
 
   const whatsappMessage = encodeURIComponent(
-    `Hola, quiero promocionar mi anuncio en Buscadis:\n` +
-      `• Anuncio: ${adiso.titulo}\n` +
+    `Hola, quiero promocionar mi adiso en Buscadis:\n` +
+      `• Adiso: ${adiso.titulo}\n` +
       `• Plan: ${info.nombre} · ${dias} días\n` +
       `• Total: S/ ${total}`
   );
@@ -109,7 +109,7 @@ export default function PromoteAdisoModal({ adiso, onClose, onPromoted }: Promot
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between mb-1">
-          <h2 className="text-lg font-semibold text-[var(--text-primary)]">Promocionar anuncio</h2>
+          <h2 className="text-lg font-semibold text-[var(--text-primary)]">Promocionar adiso</h2>
           <button type="button" onClick={onClose} aria-label="Cerrar" className="min-w-[36px] min-h-[36px] flex items-center justify-center text-[var(--text-secondary)]">
             <IconClose size={18} />
           </button>
@@ -172,7 +172,7 @@ export default function PromoteAdisoModal({ adiso, onClose, onPromoted }: Promot
               <span className="text-lg font-bold text-[var(--brand-blue)]">S/ {total}</span>
             </div>
             <p className="text-xs text-[var(--text-tertiary)] mb-4">
-              El pago se procesa de forma segura con Mercado Pago. Tu anuncio se activará al confirmarse el pago.
+              El pago se procesa de forma segura con Mercado Pago. Tu adiso se activará al confirmarse el pago.
             </p>
           </>
         )}

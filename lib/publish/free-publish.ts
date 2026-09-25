@@ -23,7 +23,7 @@ export interface FreePublishInput {
 
 export function validateFreePublishInput(input: FreePublishInput): string | null {
   const text = input.text.trim();
-  if (!text) return 'Escribe algo sobre tu anuncio';
+  if (!text) return 'Escribe algo sobre tu adiso';
   if (text.length > FREE_TIER_LIMITS.maxDescChars + FREE_TIER_LIMITS.maxTitleChars) {
     return `Máximo ${FREE_TIER_LIMITS.maxDescChars + FREE_TIER_LIMITS.maxTitleChars} caracteres en plan gratis`;
   }

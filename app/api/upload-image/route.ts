@@ -150,7 +150,7 @@ export async function POST(request: NextRequest) {
       const msg = uploadError?.message?.toLowerCase() ?? '';
       if (msg.includes('bucket') || msg.includes('not found')) {
         errorMessage =
-          'No encontramos el bucket de imágenes en Supabase. Crea el bucket público "avisos-images" o contacta soporte.';
+          'No encontramos el bucket de imágenes en Supabase. Crea el bucket público "adisos-images" o contacta soporte.';
       } else if (msg.includes('permission') || msg.includes('403')) {
         errorMessage = 'No hay permiso para subir imágenes. Revisa las políticas de Storage en Supabase.';
       }

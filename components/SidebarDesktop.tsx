@@ -298,7 +298,7 @@ export default function SidebarDesktop({
 
             {seccionActiva === 'gratuitos' && (
               <div className="min-h-0 flex-1 overflow-y-auto p-4 text-center text-sm text-[var(--text-secondary)]">
-                Usa el menú superior para ver anuncios gratuitos en página completa.
+                Usa el menú superior para ver adisos gratuitos en página completa.
               </div>
             )}
 

@@ -60,7 +60,7 @@ export function useAdisoCardActions(adiso: Adiso, opts?: { onHidden?: () => void
       await recordInterestSignal(user.id, adiso, 1);
       await registrarInteraccion(user.id, adiso.id, 'view');
     }
-    success('Verás más anuncios como este');
+    success('Verás más adisos como este');
   }, [adiso, user?.id, success]);
 
   const seeLess = useCallback(async () => {
@@ -74,7 +74,7 @@ export function useAdisoCardActions(adiso: Adiso, opts?: { onHidden?: () => void
     if (user?.id) {
       await recordInterestSignal(user.id, adiso, -1);
     }
-    success('Verás menos anuncios como este');
+    success('Verás menos adisos como este');
   }, [adiso, user?.id, success]);
 
   const save = useCallback(async () => {
@@ -138,7 +138,7 @@ export function useAdisoCardActions(adiso: Adiso, opts?: { onHidden?: () => void
   const downloadImage = useCallback(async () => {
     const url = adiso.imagenesUrls?.[0] || adiso.imagenUrl;
     if (!url || url.startsWith('data:')) {
-      toastError('Este anuncio no tiene imagen para descargar');
+      toastError('Este adiso no tiene imagen para descargar');
       return;
     }
     trackEvent('ad.download_image', {
@@ -167,7 +167,7 @@ export function useAdisoCardActions(adiso: Adiso, opts?: { onHidden?: () => void
 
   const hide = useCallback(async () => {
     await opts?.onHidden?.();
-    success('Ocultamos este anuncio');
+    success('Ocultamos este adiso');
   }, [opts, success]);
 
   const report = useCallback(

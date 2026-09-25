@@ -307,7 +307,7 @@ function DeliveryPedirInner() {
 
         {sourceAdisoId && (
           <p className="mb-4 rounded-xl bg-[rgba(var(--brand-primary-rgb),0.08)] px-3 py-2 text-xs text-[var(--text-secondary)]">
-            Entrega vinculada a un anuncio de Buscadis.
+            Entrega vinculada a un adiso de Buscadis.
           </p>
         )}
 

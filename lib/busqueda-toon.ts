@@ -2,7 +2,7 @@ import { supabase } from './supabase';
 import { Adiso } from '@/types';
 
 /**
- * Busca anuncios usando datos TOON para búsquedas semánticas
+ * Busca adisos usando datos TOON para búsquedas semánticas
  */
 export async function buscarEnTOON(
   consulta: string,
@@ -36,7 +36,7 @@ export async function buscarEnTOON(
         throw errorLike || error;
       }
       
-      // Obtener anuncios correspondientes
+      // Obtener adisos correspondientes
       const adisoIds = resultadosLike.map(r => r.adiso_id);
       const { data: adisosData, error: adisosError } = await supabase
         .from('adisos')
@@ -44,7 +44,7 @@ export async function buscarEnTOON(
         .in('id', adisoIds);
       
       if (adisosError || !adisosData) {
-        throw adisosError || new Error('Error al obtener anuncios');
+        throw adisosError || new Error('Error al obtener adisos');
       }
       
       const { dbToAdiso } = await import('./supabase');
@@ -55,7 +55,7 @@ export async function buscarEnTOON(
       return [];
     }
     
-    // Obtener anuncios correspondientes
+    // Obtener adisos correspondientes
     const adisoIds = resultadosToon.map(r => r.adiso_id);
     const { data: adisosData, error: adisosError } = await supabase
       .from('adisos')
@@ -63,7 +63,7 @@ export async function buscarEnTOON(
       .in('id', adisoIds);
     
     if (adisosError || !adisosData) {
-      throw adisosError || new Error('Error al obtener anuncios');
+      throw adisosError || new Error('Error al obtener adisos');
     }
     
     const { dbToAdiso } = await import('./supabase');
@@ -75,7 +75,7 @@ export async function buscarEnTOON(
 }
 
 /**
- * Busca anuncios usando múltiples términos en TOON
+ * Busca adisos usando múltiples términos en TOON
  */
 export async function buscarMultiplesTerminos(
   terminos: string[],
@@ -103,14 +103,14 @@ export async function buscarMultiplesTerminos(
       .slice(0, limite)
       .map(([id]) => id);
     
-    // Obtener anuncios en orden de relevancia
+    // Obtener adisos en orden de relevancia
     const { data: adisosData, error } = await supabase
       .from('adisos')
       .select('*')
       .in('id', adisoIdsOrdenados);
     
     if (error || !adisosData) {
-      throw error || new Error('Error al obtener anuncios');
+      throw error || new Error('Error al obtener adisos');
     }
     
     // Ordenar según el orden de relevancia

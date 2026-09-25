@@ -4,7 +4,7 @@ import { DraftListingData } from '@/components/ai/DraftListingCard';
 import { newAdisoId } from '@/lib/url';
 
 /**
- * Publica un anuncio "rápido" generado a partir del buscador unificado
+ * Publica un adiso "rápido" generado a partir del buscador unificado
  * (búsqueda / publicación con IA).
  */
 export async function publishQuickAd(

@@ -27,7 +27,7 @@ export default function ProfileHiddenTab() {
       <ProfileEmptyState
         icon={<IconEyeOff size={24} color="var(--text-secondary)" />}
         title="No tienes adisos ocultos"
-        description="Cuando ocultes un anuncio que no te interesa, aparecerá aquí para restaurarlo."
+        description="Cuando ocultes un adiso que no te interesa, aparecerá aquí para restaurarlo."
         actionLabel="Ir al inicio"
         actionHref="/"
       />

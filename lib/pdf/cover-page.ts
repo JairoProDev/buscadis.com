@@ -473,7 +473,7 @@ function drawBuscadisBand(doc: jsPDF, buscadisMark: string | null) {
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(7.4);
   doc.setTextColor(SLATE_400.r, SLATE_400.g, SLATE_400.b);
-  doc.text('Catálogos, perfiles y anuncios de negocios reales', textX, BAND_Y + 17.2);
+  doc.text('Catálogos, perfiles y adisos de negocios reales', textX, BAND_Y + 17.2);
 
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(10);

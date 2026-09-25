@@ -116,7 +116,7 @@ function getPublishedDayKey(adiso: Adiso): string {
  * Comparador del feed por defecto ("recientes"):
  * 1. Día de recencia (publicación o último destacado pagado)
  * 2. Dentro del mismo día: timestamp efectivo (foto/catálogo/personalización)
- * 3. Tier de promoción (desempate suave entre anuncios del mismo momento)
+ * 3. Tier de promoción (desempate suave entre adisos del mismo momento)
  * 4. Tamaño de paquete legacy
  * 5. id estable
  */
