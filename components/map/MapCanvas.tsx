@@ -65,11 +65,18 @@ export default function MapCanvas({
         attributionControl: true,
       }).setView([-13.5319, -71.9675], 13);
       const tile = getMapTileLayerOptions();
-      L.tileLayer(tile.url, {
+      const layer = L.tileLayer(tile.url, {
         attribution: tile.attribution,
         maxZoom: tile.maxZoom,
         subdomains: tile.subdomains,
-      }).addTo(map);
+      });
+      const createTile = layer.createTile.bind(layer);
+      layer.createTile = (coords, done) => {
+        const img = createTile(coords, done);
+        if (img instanceof HTMLImageElement) img.referrerPolicy = 'origin';
+        return img;
+      };
+      layer.addTo(map);
       mapRef.current = map;
       callbacks.current.onMap(map);
       const emit = () => callbacks.current.onViewChange(readBounds(map), map.getZoom());

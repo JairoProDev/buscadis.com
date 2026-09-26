@@ -74,6 +74,7 @@ export default async function PublicBusinessPage({ params, searchParams }: PageP
         slug={slug}
         canonicalPath={`/@${slug}`}
         indexable={initialProfile.is_published !== false}
+        skin={firstParam(sp.skin)}
       />
     );
   }

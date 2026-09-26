@@ -276,9 +276,12 @@ function productThumb(p: Producto, index: number): string {
 export function TikTokPerfilShell({
   payload,
   handoffs,
+  compareHref,
 }: {
   payload: PerfilPayload;
   handoffs: HandoffLinks;
+  /** Enlace a la vitrina de módulos (misma ficha, más secciones). */
+  compareHref?: string;
 }) {
   const { negocio, productos, nosotros, metricas, estadoVivo, faqs, resenas, publicaciones } =
     payload;
@@ -1050,6 +1053,11 @@ export function TikTokPerfilShell({
         <p>
           {negocio.nombre} · {category} en Buscadis
         </p>
+        {compareHref ? (
+          <a className="tt-foot__compare" href={compareHref}>
+            Ver versión completa
+          </a>
+        ) : null}
       </footer>
 
       {/* ———— Sticky WhatsApp bar ———— */}

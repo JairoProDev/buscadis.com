@@ -18,4 +18,4 @@ La respuesta del mapa no incluye la dirección ni el punto original de un inmueb
 
 ## Coste
 
-Tiles por defecto: OpenStreetMap. Con `NEXT_PUBLIC_CARTO_API_KEY` se usa CARTO Voyager. No hay Google Maps en este corte.
+Tiles: OpenStreetMap, sin clave. Carto pinta "API KEY REQUIRED" y no se usa.

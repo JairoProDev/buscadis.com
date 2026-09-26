@@ -187,15 +187,29 @@ export async function loadProductoEnPerfil(slug: string, productoId: string) {
 }
 
 /** Render compartido /v y cutover /@ */
+const TIKTOK_SKIN_SLUGS = new Set(['demo-tiktok', 'demo-buscadis', 'buscadis']);
+
+export function resolvePerfilSkin(
+  slug: string,
+  requested?: string | null
+): 'tiktok' | 'vivo' {
+  if (requested === 'vivo') return 'vivo';
+  if (requested === 'tiktok' && TIKTOK_SKIN_SLUGS.has(slug)) return 'tiktok';
+  return TIKTOK_SKIN_SLUGS.has(slug) ? 'tiktok' : 'vivo';
+}
+
 export async function PerfilVivoPageView({
   slug,
   canonicalPath,
   indexable,
+  skin: requestedSkin,
 }: {
   slug: string;
   /** Path canónico para JSON-LD (ej. /@slug o /v/slug) */
   canonicalPath: string;
   indexable: boolean;
+  /** `vivo` fuerza la vitrina de módulos; `tiktok` solo en slugs sociales. */
+  skin?: string | null;
 }) {
   const payload = await loadPerfilVivoPayload(slug);
   if (!payload) notFound();
@@ -234,12 +248,20 @@ export async function PerfilVivoPageView({
         slug={payload.negocio.slug}
         arquetipo={payload.negocio.arquetipo}
       />
-      {payload.negocio.slug === 'demo-tiktok' ||
-      payload.negocio.slug === 'demo-buscadis' ||
-      payload.negocio.slug === 'buscadis' ? (
-        <TikTokPerfilShell payload={payload} handoffs={handoffs} />
+      {resolvePerfilSkin(payload.negocio.slug, requestedSkin) === 'tiktok' ? (
+        <TikTokPerfilShell
+          payload={payload}
+          handoffs={handoffs}
+          compareHref={`${canonicalPath}?skin=vivo`}
+        />
       ) : (
-        <PerfilVivoRoot payload={payload} handoffs={handoffs} />
+        <PerfilVivoRoot
+          payload={payload}
+          handoffs={handoffs}
+          compareHref={
+            TIKTOK_SKIN_SLUGS.has(payload.negocio.slug) ? canonicalPath : undefined
+          }
+        />
       )}
     </>
   );

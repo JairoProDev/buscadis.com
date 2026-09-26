@@ -142,10 +142,18 @@ export default function DeliveryPointField({
         }).setView(value ? [value.lat, value.lng] : DEFAULT_CENTER, value ? 15 : 13);
 
         const tile = getMapTileLayerOptions();
-        L.tileLayer(tile.url, {
+        const layer = L.tileLayer(tile.url, {
           maxZoom: tile.maxZoom,
           subdomains: tile.subdomains,
-        }).addTo(map);
+          attribution: tile.attribution,
+        });
+        const createTile = layer.createTile.bind(layer);
+        layer.createTile = (coords, done) => {
+          const img = createTile(coords, done);
+          if (img instanceof HTMLImageElement) img.referrerPolicy = 'origin';
+          return img;
+        };
+        layer.addTo(map);
         L.control.zoom({ position: 'bottomright' }).addTo(map);
 
         map.on('click', (e: { latlng: { lat: number; lng: number } }) => {

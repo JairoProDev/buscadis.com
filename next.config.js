@@ -149,6 +149,8 @@ const withPwa = require('@ducanh2912/next-pwa').default({
   reloadOnOnline: false,
   disable: process.env.NODE_ENV === 'development',
   workboxOptions: {
+    skipWaiting: true,
+    clientsClaim: true,
     disableDevLogs: true,
     maximumFileSizeToCacheInBytes: 25 * 1024 * 1024,
     runtimeCaching: [

@@ -38,7 +38,13 @@ function formatActualizado(iso: string): string {
   }
 }
 
-function PieDeConfianza({ actualizadoEn }: { actualizadoEn: string }) {
+function PieDeConfianza({
+  actualizadoEn,
+  compareHref,
+}: {
+  actualizadoEn: string;
+  compareHref?: string;
+}) {
   const fecha = formatActualizado(actualizadoEn);
   return (
     <footer className="pv-pie" id="pie-confianza">
@@ -47,6 +53,11 @@ function PieDeConfianza({ actualizadoEn }: { actualizadoEn: string }) {
         Vitrina en Buscadis
         {fecha ? ` · Actualizado ${fecha}` : ''}
       </p>
+      {compareHref ? (
+        <p className="pv-pie__meta">
+          <a href={compareHref}>Ver versión social</a>
+        </p>
+      ) : null}
     </footer>
   );
 }
@@ -68,9 +79,12 @@ function stickyLabel(arquetipo: PerfilPayload['negocio']['arquetipo']): string {
 export function PerfilVivoRoot({
   payload,
   handoffs,
+  compareHref,
 }: {
   payload: PerfilPayload;
   handoffs: HandoffLinks;
+  /** Enlace de vuelta al skin social, solo en fichas que lo tienen. */
+  compareHref?: string;
 }) {
   const { negocio } = payload;
   const modo = modoFromIdentidad(negocio.identidad.tema);
@@ -97,7 +111,10 @@ export function PerfilVivoRoot({
               <BarraSecciones />
             </Suspense>
             <RenderizadorModulos />
-            <PieDeConfianza actualizadoEn={negocio.actualizadoEn} />
+            <PieDeConfianza
+              actualizadoEn={negocio.actualizadoEn}
+              compareHref={compareHref}
+            />
             <BarraAccion label={stickyLabel(negocio.arquetipo)} />
             <PvCartToast />
             <PvCartDrawer />

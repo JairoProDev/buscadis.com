@@ -11,6 +11,7 @@ export const revalidate = 60;
 
 type PageProps = {
   params: Promise<{ slug: string }>;
+  searchParams: Promise<{ skin?: string | string[] }>;
 };
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
@@ -52,8 +53,10 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   });
 }
 
-export default async function PerfilVivoPreviewPage({ params }: PageProps) {
+export default async function PerfilVivoPreviewPage({ params, searchParams }: PageProps) {
   const { slug: raw } = await params;
+  const sp = await searchParams;
+  const skin = Array.isArray(sp.skin) ? sp.skin[0] : sp.skin;
   const slug = normalizeBusinessSlug(raw) || raw.toLowerCase();
 
   if (!isDemoPerfilVivoSlug(slug)) {
@@ -64,6 +67,11 @@ export default async function PerfilVivoPreviewPage({ params }: PageProps) {
   }
 
   return (
-    <PerfilVivoPageView slug={slug} canonicalPath={`/v/${slug}`} indexable={false} />
+    <PerfilVivoPageView
+      slug={slug}
+      canonicalPath={`/v/${slug}`}
+      indexable={false}
+      skin={skin}
+    />
   );
 }
