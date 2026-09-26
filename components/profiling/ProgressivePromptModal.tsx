@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { IconClose, IconExplore, IconMegaphone, IconStore, IconMotorcycle, IconInfluencer } from '@/components/Icons';
@@ -26,6 +26,53 @@ type DniPreview = {
   dni: string;
   nombreCompleto: string;
 };
+
+function MiniSignal({
+  message,
+  tone,
+  onDone,
+}: {
+  message: string;
+  tone: 'ok' | 'err';
+  onDone: () => void;
+}) {
+  const [visible, setVisible] = useState(false);
+  const onDoneRef = useRef(onDone);
+  onDoneRef.current = onDone;
+
+  useEffect(() => {
+    const enter = requestAnimationFrame(() => setVisible(true));
+    const hide = window.setTimeout(() => setVisible(false), 1600);
+    const done = window.setTimeout(() => onDoneRef.current(), 1900);
+    return () => {
+      cancelAnimationFrame(enter);
+      window.clearTimeout(hide);
+      window.clearTimeout(done);
+    };
+  }, []);
+
+  return createPortal(
+    <div
+      role="status"
+      aria-live="polite"
+      className="pointer-events-none fixed left-1/2 z-[21000] -translate-x-1/2"
+      style={{ bottom: 'calc(5.25rem + env(safe-area-inset-bottom, 0px))' }}
+    >
+      <span
+        className={`inline-flex items-center rounded-full px-3 py-1.5 text-xs font-semibold shadow-lg transition-all duration-200 ${
+          visible ? 'translate-y-0 opacity-100' : 'translate-y-1 opacity-0'
+        } ${
+          tone === 'ok'
+            ? 'bg-[var(--text-primary)] text-[var(--bg-primary)]'
+            : 'bg-red-600 text-white'
+        }`}
+      >
+        {message}
+      </span>
+    </div>,
+    document.body
+  );
+}
 
 const CAP_CARDS: Array<{
   key: CapabilityKey;
@@ -61,6 +108,12 @@ const CAP_CARDS: Array<{
 
 export default function ProgressivePromptModal() {
   const { user, session, refreshProfile } = useAuth();
+  const [signal, setSignal] = useState<{ id: number; message: string; tone: 'ok' | 'err' } | null>(
+    null
+  );
+  const clearSignal = useCallback((id: number) => {
+    setSignal((current) => (current?.id === id ? null : current));
+  }, []);
   const [prompt, setPrompt] = useState<NextPrompt | null>(null);
   const [usefulness, setUsefulness] = useState<Usefulness | null>(null);
   const [open, setOpen] = useState(false);
@@ -148,25 +201,46 @@ export default function ProgressivePromptModal() {
     return () => window.clearTimeout(t);
   }, [user, session?.access_token, loadNext]);
 
-  const dismiss = async () => {
-    if (!prompt || !session?.access_token) {
-      closeModal();
-      return;
-    }
-    setCargando(true);
-    try {
-      await fetch('/api/profiling/prompts/dismiss', {
-        method: 'POST',
-        headers: authHeaders,
-        credentials: 'include',
-        body: JSON.stringify({ prompt_id: prompt.id }),
-      });
-    } catch {
-      /* still close */
-    } finally {
-      setCargando(false);
-      closeModal();
-    }
+  const dismiss = () => {
+    const promptId = prompt?.id;
+    const headers = authHeaders;
+    closeModal();
+    if (!promptId || !session?.access_token) return;
+    // Omitir no guarda preferencias: el cierre es inmediato y el cooldown va en segundo plano.
+    void fetch('/api/profiling/prompts/dismiss', {
+      method: 'POST',
+      headers,
+      credentials: 'include',
+      body: JSON.stringify({ prompt_id: promptId }),
+    }).catch(() => {
+      /* el modal ya está cerrado */
+    });
+  };
+
+  const saveIntentsInBackground = (selected: CapabilityKey[]) => {
+    const headers = authHeaders;
+    void (async () => {
+      try {
+        const res = await fetch('/api/profiling/prompts/complete', {
+          method: 'POST',
+          headers,
+          credentials: 'include',
+          body: JSON.stringify({ prompt_id: 'intents', interests: selected }),
+        });
+        if (!res.ok) {
+          setSignal({
+            id: Date.now(),
+            message: 'No se guardó',
+            tone: 'err',
+          });
+          return;
+        }
+        setSignal({ id: Date.now(), message: 'Guardado', tone: 'ok' });
+        void refreshProfile();
+      } catch {
+        setSignal({ id: Date.now(), message: 'No se guardó', tone: 'err' });
+      }
+    })();
   };
 
   const phoneForApi = () => {
@@ -232,6 +306,12 @@ export default function ProgressivePromptModal() {
 
   const complete = async () => {
     if (!prompt) return;
+    if (prompt.id === 'intents') {
+      const selected = [...interests];
+      closeModal();
+      saveIntentsInBackground(selected);
+      return;
+    }
     setError(null);
     setCargando(true);
     try {
@@ -316,9 +396,6 @@ export default function ProgressivePromptModal() {
         payload.fecha_nacimiento = fechaNacimiento || undefined;
         payload.genero = genero || undefined;
       }
-      if (prompt.id === 'intents') {
-        payload.interests = interests;
-      }
 
       const res = await fetch('/api/profiling/prompts/complete', {
         method: 'POST',
@@ -346,7 +423,18 @@ export default function ProgressivePromptModal() {
     );
   };
 
-  if (!open || !prompt || typeof document === 'undefined') return null;
+  if (typeof document === 'undefined') return null;
+
+  const signalNode = signal ? (
+    <MiniSignal
+      key={signal.id}
+      message={signal.message}
+      tone={signal.tone}
+      onDone={() => clearSignal(signal.id)}
+    />
+  ) : null;
+
+  if (!open || !prompt) return signalNode;
 
   const primaryLabel = (() => {
     if (prompt.id === 'whatsapp') {
@@ -359,7 +447,10 @@ export default function ProgressivePromptModal() {
     return prompt.cta;
   })();
 
-  return createPortal(
+  return (
+    <>
+      {signalNode}
+      {createPortal(
     <div
       className="fixed inset-0 flex items-center justify-center p-4"
       style={{
@@ -378,8 +469,7 @@ export default function ProgressivePromptModal() {
       >
         <button
           type="button"
-          onClick={() => void dismiss()}
-          disabled={cargando}
+          onClick={dismiss}
           aria-label="Omitir por ahora"
           className="absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full text-[var(--text-secondary)] hover:bg-[var(--bg-tertiary)] hover:text-[var(--text-primary)]"
         >
@@ -540,6 +630,7 @@ export default function ProgressivePromptModal() {
           <div className="grid max-h-[50vh] grid-cols-2 gap-2 overflow-y-auto pr-0.5">
             <button
               type="button"
+              aria-pressed={interests.length === 0}
               onClick={() => setInterests([])}
               className={`rounded-xl border p-3 text-left transition ${
                 interests.length === 0
@@ -557,6 +648,7 @@ export default function ProgressivePromptModal() {
                 <button
                   key={key}
                   type="button"
+                  aria-pressed={active}
                   onClick={() => toggleInterest(key)}
                   className={`rounded-xl border p-3 text-left transition ${
                     active
@@ -598,5 +690,7 @@ export default function ProgressivePromptModal() {
       </div>
     </div>,
     document.body
+      )}
+    </>
   );
 }

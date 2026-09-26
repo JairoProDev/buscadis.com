@@ -56,7 +56,7 @@ export const PROMPT_DEFINITIONS: PromptDefinition[] = [
     id: 'intents',
     priority: 4,
     title: '¿Qué te interesa en Buscadis?',
-    subtitle: 'Elige lo que quieres hacer. Puedes cambiarlo después en tu perfil.',
+    subtitle: 'Elige una o varias. Puedes cambiarlo después en tu perfil.',
     cta: 'Guardar preferencias',
   },
 ];
