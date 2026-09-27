@@ -1,9 +1,14 @@
 import type { MapCluster, MapListing } from '@/lib/map/types';
 
-/** Grados de celda según zoom. 0 = un pin por anuncio. */
+/**
+ * Grados de celda según zoom. 0 = un pin por anuncio.
+ * Los pines sueltos solo aparecen en zoom 19, cuando ya se pueden tocar.
+ */
 export function cellDegrees(zoom: number): number {
-  if (zoom >= 17) return 0;
-  if (zoom >= 16) return 0.0016;
+  if (zoom >= 19) return 0;
+  if (zoom >= 18) return 0.0005;
+  if (zoom >= 17) return 0.001;
+  if (zoom >= 16) return 0.0018;
   if (zoom >= 15) return 0.0032;
   if (zoom >= 14) return 0.006;
   if (zoom >= 13) return 0.012;

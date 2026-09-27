@@ -2,7 +2,7 @@ import type { MapListing } from '@/lib/map/types';
 
 export function formatMapPrice(listing: Pick<MapListing, 'precio' | 'moneda' | 'tipoPrecio'>): string {
   if (listing.tipoPrecio === 'gratis') return 'Gratis';
-  if (listing.tipoPrecio === 'a_convenir' || listing.precio == null) return 'Consultar';
+  if (listing.tipoPrecio === 'a_convenir' || listing.precio == null) return 'Precio a consultar';
   const symbol = listing.moneda === 'USD' ? 'US$' : 'S/';
   return `${symbol} ${Math.round(listing.precio).toLocaleString('es-PE')}`;
 }

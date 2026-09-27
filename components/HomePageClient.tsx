@@ -29,14 +29,6 @@ import { onOnlineStatusChange, getOfflineMessage } from '@/lib/offline';
 import dynamicImport from 'next/dynamic';
 import Header from '@/components/Header';
 import {
-  IconEmpleos,
-  IconInmuebles,
-  IconVehiculos,
-  IconServicios,
-  IconProductos,
-  IconEventos,
-  IconNegocios,
-  IconComunidad,
   IconGrid,
   IconFeed,
   IconList,
@@ -44,7 +36,7 @@ import {
   IconClose,
   IconFilterFunnel,
 } from '@/components/Icons';
-import { getCategoriaThemeTokens } from '@/lib/categoria-theme';
+import CategoryRail from '@/components/CategoryRail';
 import { mergeStableFeedOrder, resetStableFeedOrderRefs } from '@/lib/feed/stable-order';
 import {
   applyBrowseFilters,
@@ -1242,119 +1234,21 @@ function HomeContent() {
               />
             )}
             <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
-            <div
-              className="no-scrollbar"
-              style={{
-                display: 'flex',
-                justifyContent:isDesktop ? 'center' : 'flex-start',
-                overflowX: 'auto',
-                overflowY: 'hidden',
-                gap: isDesktop ? '1.125rem' : '0.5rem',
-                padding: isDesktop ? '0.875rem 1rem 0.5rem' : '0.625rem 0.75rem 0.375rem',
-                scrollbarWidth: 'none',
-                msOverflowStyle: 'none',
-                WebkitOverflowScrolling: 'touch',
-                alignItems: 'center',
-              }}
-            >
-              {[
-                { id: 'empleos', label: 'Empleos', Icon: IconEmpleos },
-                { id: 'inmuebles', label: 'Inmuebles', Icon: IconInmuebles },
-                { id: 'vehiculos', label: 'Vehículos', Icon: IconVehiculos },
-                { id: 'servicios', label: 'Servicios', Icon: IconServicios },
-                { id: 'productos', label: 'Productos', Icon: IconProductos },
-                { id: 'eventos', label: 'Eventos', Icon: IconEventos },
-                { id: 'negocios', label: 'Negocios', Icon: IconNegocios },
-                { id: 'comunidad', label: 'Comunidad', Icon: IconComunidad },
-              ].map(({ id, label, Icon }) => {
-                const isActive = categoriaFiltro === id;
-                const catTheme = getCategoriaThemeTokens(id as Categoria);
-                return (
-                <button
-                  key={id}
-                  type="button"
-                  onClick={() => {
-                    const nuevaCategoria = categoriaFiltro === id ? 'todos' : (id as Categoria);
-                    setCategoriaFiltro(nuevaCategoria);
-
-                    // Actualizar URL sin recargar
-                    const params = new URLSearchParams(searchParams.toString());
-                    if (nuevaCategoria === 'todos') {
-                      params.delete('categoria');
-                    } else {
-                      params.set('categoria', nuevaCategoria);
-                    }
-                    // Mantener búsqueda si existe
-                    if (busqueda.trim()) {
-                      params.set('buscar', busqueda.trim());
-                    } else {
-                      params.delete('buscar');
-                    }
-                    router.push(`/?${params.toString()}`, { scroll: false });
-                  }}
-                  style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    gap: isDesktop ? '0.45rem' : '0.3rem',
-                    background: 'none',
-                    border: 'none',
-                    cursor: 'pointer',
-                    minWidth: isDesktop ? '76px' : '62px',
-                    flexShrink: 0,
-                    padding: '2px',
-                    borderRadius: '12px',
-                    opacity: isActive ? 1 : 0.85,
-                    transition: 'opacity 0.2s ease',
-                  }}
-                  className="group"
-                  aria-pressed={isActive}
-                >
-                  <div
-                    style={{
-                      width: isDesktop ? '52px' : '44px',
-                      height: isDesktop ? '52px' : '44px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      borderRadius: isDesktop ? '16px' : '14px',
-                      boxSizing: 'border-box',
-                      border: `1.5px solid ${isActive ? catTheme.accent : 'var(--bs-border-default, var(--border-color))'}`,
-                      backgroundColor: isActive ? catTheme.placeholderBg : 'var(--bs-bg-sunken, var(--bg-tertiary))',
-                      color: isActive ? catTheme.accent : 'var(--text-secondary)',
-                      transition: 'border-color 0.2s ease, background-color 0.2s ease, color 0.2s ease',
-                      position: 'relative',
-                      overflow: 'hidden',
-                    }}
-                  >
-                    <Icon size={isDesktop ? 26 : 22} color={isActive ? catTheme.accent : undefined} />
-                    {/* Active: 3px bottom bar — never full blue fill (doc 08) */}
-                    <span
-                      aria-hidden
-                      style={{
-                        position: 'absolute',
-                        left: 0,
-                        right: 0,
-                        bottom: 0,
-                        height: '3px',
-                        backgroundColor: catTheme.accent,
-                        opacity: isActive ? 1 : 0,
-                        transition: 'opacity 0.2s ease',
-                      }}
-                    />
-                  </div>
-                  <span style={{
-                    fontSize: isDesktop ? '0.8125rem' : '0.6875rem',
-                    fontWeight: isActive ? 600 : 500,
-                    textAlign: 'center',
-                    whiteSpace: 'nowrap',
-                    color: isActive ? catTheme.accent : 'var(--text-secondary)',
-                  }}>
-                    {label}
-                  </span>
-                </button>
-                );
-              })}
+            <div style={{ padding: isDesktop ? '0.875rem 1rem 0.5rem' : '0.625rem 0.75rem 0.375rem' }}>
+              <CategoryRail
+                selected={categoriaFiltro}
+                desktop={isDesktop}
+                onSelect={(id) => {
+                  const nuevaCategoria = categoriaFiltro === id ? 'todos' : id;
+                  setCategoriaFiltro(nuevaCategoria);
+                  const params = new URLSearchParams(searchParams.toString());
+                  if (nuevaCategoria === 'todos') params.delete('categoria');
+                  else params.set('categoria', nuevaCategoria);
+                  if (busqueda.trim()) params.set('buscar', busqueda.trim());
+                  else params.delete('buscar');
+                  router.push(`/?${params.toString()}`, { scroll: false });
+                }}
+              />
             </div>
             <div
               className="no-scrollbar"

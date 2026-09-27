@@ -96,7 +96,10 @@ export default function GoogleGisButton({ label, disabled, onSuccess, onError }:
             }
           },
           nonce: hashedNonce,
-          use_fedcm_for_prompt: true,
+          use_fedcm_for_prompt:
+            typeof window !== 'undefined' &&
+            window.location.hostname !== 'localhost' &&
+            window.location.hostname !== '127.0.0.1',
           context: 'signin',
         });
 

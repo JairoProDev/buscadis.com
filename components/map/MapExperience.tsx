@@ -1,15 +1,16 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { useRouter } from 'next/navigation';
 import type { Map as LeafletMap } from 'leaflet';
 import { PUBLISH_CATEGORIAS, getCategoriaIcon, getCategoriaLabel } from '@/lib/categoria-icons';
-import { IconMapPin, IconMinus, IconPlus } from '@/components/Icons';
+import { IconFilterFunnel, IconMinus, IconPlus } from '@/components/Icons';
+import MarketplaceSearchComposer from '@/components/search/MarketplaceSearchComposer';
 import MapCanvas from '@/components/map/MapCanvas';
 import { clusterListings } from '@/lib/map/cluster';
 import { boundsKey, formatMapPrice } from '@/lib/map/format';
 import type { MapBounds, MapCluster, MapListing } from '@/lib/map/types';
 import type { Categoria } from '@/types';
-import { tokens } from '@/lib/bs-tokens';
 
 type FilterId = Categoria | 'todos';
 
@@ -19,6 +20,7 @@ interface MapExperienceProps {
 }
 
 export default function MapExperience({ variant = 'panel', onOpen }: MapExperienceProps) {
+  const router = useRouter();
   const mapRef = useRef<LeafletMap | null>(null);
   const [listings, setListings] = useState<MapListing[]>([]);
   const [zoom, setZoom] = useState(13);
@@ -34,6 +36,8 @@ export default function MapExperience({ variant = 'panel', onOpen }: MapExperien
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [stale, setStale] = useState(false);
+  const [moving, setMoving] = useState(false);
+  const [sheetOpen, setSheetOpen] = useState(false);
   const [wide, setWide] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
   const boundsRef = useRef<MapBounds | null>(null);
@@ -49,7 +53,7 @@ export default function MapExperience({ variant = 'panel', onOpen }: MapExperien
   }, [variant]);
 
   const load = useCallback(
-    async (next: MapBounds) => {
+    async (next: MapBounds, q?: string) => {
       abortRef.current?.abort();
       const controller = new AbortController();
       abortRef.current = controller;
@@ -62,7 +66,8 @@ export default function MapExperience({ variant = 'panel', onOpen }: MapExperien
         east: String(next.east),
       });
       if (filter !== 'todos') params.set('categoria', filter);
-      if (query.trim()) params.set('q', query.trim());
+      const text = (q ?? query).trim();
+      if (text) params.set('q', text);
       if (minPrice) params.set('min', minPrice);
       if (maxPrice) params.set('max', maxPrice);
       if (photoOnly) params.set('foto', '1');
@@ -107,6 +112,7 @@ export default function MapExperience({ variant = 'panel', onOpen }: MapExperien
       boundsRef.current = next;
       setBounds(next);
       setZoom(nextZoom);
+      setMoving(false);
       if (fetchedKey && boundsKey(next) !== fetchedKey) setStale(true);
     },
     [fetchedKey],
@@ -125,10 +131,12 @@ export default function MapExperience({ variant = 'panel', onOpen }: MapExperien
   const expandCluster = (cluster: MapCluster) => {
     const map = mapRef.current;
     if (!map) return;
-    map.flyTo([cluster.lat, cluster.lng], Math.min(map.getZoom() + 2, 17), { duration: 0.4 });
+    map.flyTo([cluster.lat, cluster.lng], Math.min(map.getZoom() + 2, 19), { duration: 0.4 });
   };
 
-  const dock = !wide && selected ? '12.25rem' : '0px';
+  const compactChrome = moving || (!wide && Boolean(selected));
+  const dock = !wide && selected ? (sheetOpen ? '15.5rem' : '5.75rem') : '0px';
+  const activeFilterCount = (minPrice ? 1 : 0) + (maxPrice ? 1 : 0) + (photoOnly ? 1 : 0);
 
   return (
     <div
@@ -144,128 +152,148 @@ export default function MapExperience({ variant = 'panel', onOpen }: MapExperien
           }}
           onReady={onReady}
           onViewChange={onViewChange}
-          onSelectListing={setSelected}
+          onSelectListing={(listing) => {
+            setSheetOpen(false);
+            setSelected(listing);
+          }}
           onExpandCluster={expandCluster}
+          onGestureStart={() => {
+            setMoving(true);
+            setFiltersOpen(false);
+          }}
         />
 
-        <div className="pointer-events-none absolute inset-x-0 top-0 z-[500] p-3">
-          <div className="pointer-events-auto rounded-2xl border border-[var(--border-color)] bg-[var(--bg-primary)]/95 p-2 shadow-md backdrop-blur-md">
-            <form
-              className="flex items-center gap-2"
-              onSubmit={(e) => {
-                e.preventDefault();
-                if (bounds) void load(bounds);
-              }}
-            >
-              <input
+        <div className="pointer-events-none absolute inset-x-0 top-0 z-[500] flex flex-col gap-2 px-3 pt-3">
+          <div className="pointer-events-auto flex items-center gap-2">
+            <div className="map-search min-w-0 flex-1">
+              <MarketplaceSearchComposer
+                searchOnly
+                flat
+                compact
+                placeholder="Buscar en el mapa"
                 value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder="Zona, barrio o palabra"
-                aria-label="Buscar en el mapa"
-                className="h-10 min-w-0 flex-1 rounded-full bg-[var(--bg-secondary)] px-4 text-sm text-[var(--text-primary)] outline-none placeholder:text-[var(--text-tertiary)]"
+                onChange={setQuery}
+                searchLoading={loading}
+                onSearchSubmit={(text) => {
+                  setQuery(text);
+                  if (bounds) void load(bounds, text);
+                }}
+                onCategoryDetected={(categoria) => setFilter(categoria)}
+                onOpenAdiso={(id) => {
+                  const hit = listings.find((item) => item.id === id);
+                  if (hit && onOpen) onOpen(hit);
+                  else router.push(`/a/${id}`);
+                }}
+              />
+            </div>
+            <button
+              type="button"
+              onClick={() => setFiltersOpen((open) => !open)}
+              className={`map-float relative flex h-11 shrink-0 items-center gap-1.5 rounded-full px-3 text-sm font-semibold ${filtersOpen || activeFilterCount ? 'text-[var(--brand-blue)]' : 'text-[var(--text-primary)]'}`}
+              aria-expanded={filtersOpen}
+            >
+              <IconFilterFunnel size={16} />
+              Filtros
+              {activeFilterCount > 0 && (
+                <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-[var(--brand-blue)] px-1 text-[11px] font-bold text-white">
+                  {activeFilterCount}
+                </span>
+              )}
+            </button>
+          </div>
+
+          {!compactChrome && (
+            <div className="no-scrollbar pointer-events-auto -mx-3 flex gap-1.5 overflow-x-auto px-3 pb-0.5">
+              <CategoryChip active={filter === 'todos'} label="Todos" onClick={() => setFilter('todos')} />
+              {PUBLISH_CATEGORIAS.map((c) => {
+                const Icon = getCategoriaIcon(c.value);
+                const active = filter === c.value;
+                return (
+                  <CategoryChip
+                    key={c.value}
+                    active={active}
+                    label={c.label}
+                    onClick={() => setFilter((current) => (current === c.value ? 'todos' : c.value))}
+                    icon={<Icon size={14} />}
+                  />
+                );
+              })}
+            </div>
+          )}
+
+          {!compactChrome && filtersOpen && (
+            <div className="map-float pointer-events-auto flex items-center gap-2 rounded-2xl p-2">
+              <input
+                inputMode="numeric"
+                value={minPrice}
+                onChange={(e) => setMinPrice(e.target.value.replace(/[^\d]/g, ''))}
+                placeholder="Mín"
+                aria-label="Precio mínimo"
+                className="h-10 w-full min-w-0 rounded-full bg-[var(--bg-secondary)] px-3 text-sm text-[var(--text-primary)] outline-none"
+              />
+              <input
+                inputMode="numeric"
+                value={maxPrice}
+                onChange={(e) => setMaxPrice(e.target.value.replace(/[^\d]/g, ''))}
+                placeholder="Máx"
+                aria-label="Precio máximo"
+                className="h-10 w-full min-w-0 rounded-full bg-[var(--bg-secondary)] px-3 text-sm text-[var(--text-primary)] outline-none"
               />
               <button
-                type="submit"
-                className="h-10 shrink-0 rounded-full bg-[var(--brand-blue)] px-4 text-xs font-bold text-white"
+                type="button"
+                onClick={() => setPhotoOnly((v) => !v)}
+                className={`h-10 shrink-0 rounded-full px-3 text-sm font-semibold ${photoOnly ? 'bg-[var(--brand-blue)] text-white' : 'bg-[var(--bg-secondary)] text-[var(--text-secondary)]'}`}
               >
-                Buscar
+                Con foto
               </button>
-            </form>
-            <div className="mt-2 flex items-center gap-2">
-              <div className="no-scrollbar flex min-w-0 flex-1 gap-1.5 overflow-x-auto">
-                <FilterChip active={filter === 'todos'} label="Todos" onClick={() => setFilter('todos')} icon={<IconMapPin size={12} color={filter === 'todos' ? tokens['--bs-color-neutral-0'] : 'var(--brand-blue)'} />} />
-                {PUBLISH_CATEGORIAS.map((c) => {
-                  const Icon = getCategoriaIcon(c.value);
-                  const active = filter === c.value;
-                  return (
-                    <FilterChip
-                      key={c.value}
-                      active={active}
-                      label={c.label}
-                      onClick={() => setFilter(c.value)}
-                      icon={<Icon size={12} color={active ? tokens['--bs-color-neutral-0'] : 'currentColor'} />}
-                    />
-                  );
-                })}
-              </div>
               <button
                 type="button"
-                onClick={() => setFiltersOpen((v) => !v)}
-                className={`h-8 shrink-0 rounded-full border px-3 text-[11px] font-semibold ${filtersOpen || minPrice || maxPrice || photoOnly ? 'border-[var(--brand-blue)] bg-[var(--brand-blue)] text-white' : 'border-[var(--border-color)] text-[var(--text-secondary)]'}`}
+                onClick={() => {
+                  setFiltersOpen(false);
+                  if (bounds) void load(bounds);
+                }}
+                className="h-10 shrink-0 rounded-full bg-[var(--text-primary)] px-4 text-sm font-semibold text-[var(--bg-primary)]"
               >
-                Precio
+                Aplicar
               </button>
             </div>
-            {filtersOpen && (
-              <div className="mt-2 flex items-center gap-1.5">
-                <input
-                  inputMode="numeric"
-                  value={minPrice}
-                  onChange={(e) => setMinPrice(e.target.value.replace(/[^\d]/g, ''))}
-                  placeholder="Mín"
-                  aria-label="Precio mínimo"
-                  className="h-9 w-full min-w-0 rounded-full bg-[var(--bg-secondary)] px-3 text-xs text-[var(--text-primary)] outline-none"
-                />
-                <input
-                  inputMode="numeric"
-                  value={maxPrice}
-                  onChange={(e) => setMaxPrice(e.target.value.replace(/[^\d]/g, ''))}
-                  placeholder="Máx"
-                  aria-label="Precio máximo"
-                  className="h-9 w-full min-w-0 rounded-full bg-[var(--bg-secondary)] px-3 text-xs text-[var(--text-primary)] outline-none"
-                />
-                <button
-                  type="button"
-                  onClick={() => setPhotoOnly((v) => !v)}
-                  className={`h-9 shrink-0 rounded-full px-3 text-[11px] font-semibold ${photoOnly ? 'bg-[var(--brand-blue)] text-white' : 'bg-[var(--bg-secondary)] text-[var(--text-secondary)]'}`}
-                >
-                  Con foto
-                </button>
-                <button
-                  type="button"
-                  onClick={() => bounds && void load(bounds)}
-                  className="h-9 shrink-0 rounded-full bg-[var(--brand-blue)] px-3 text-[11px] font-bold text-white"
-                >
-                  Aplicar
-                </button>
-              </div>
-            )}
-            <div className="mt-2 flex items-center justify-between gap-2 px-1">
-              <p className="m-0 truncate text-[11px] font-semibold text-[var(--text-secondary)]">
-                {loading ? 'Buscando…' : `${listings.length} en esta zona`}
-              </p>
-              {stale && (
-                <button
-                  type="button"
-                  onClick={() => bounds && void load(bounds)}
-                  className="h-8 shrink-0 rounded-full bg-[var(--brand-blue)] px-3 text-[11px] font-bold text-white"
-                >
-                  Buscar aquí
-                </button>
-              )}
+          )}
+
+          {stale && !moving && (
+            <div className="pointer-events-none flex justify-center">
+              <button
+                type="button"
+                onClick={() => bounds && void load(bounds)}
+                className="pointer-events-auto h-10 rounded-full bg-[var(--text-primary)] px-4 text-sm font-semibold text-[var(--bg-primary)] shadow-lg"
+              >
+                Buscar en esta zona
+              </button>
             </div>
-          </div>
+          )}
         </div>
 
-        <div className="map-zoom absolute right-3 z-[500] flex flex-col gap-1.5">
-          <RoundBtn label="Acercar" onClick={() => mapRef.current?.zoomIn()}>
-            <IconPlus size={14} />
-          </RoundBtn>
-          <RoundBtn label="Alejar" onClick={() => mapRef.current?.zoomOut()}>
-            <IconMinus size={14} />
-          </RoundBtn>
-          <RoundBtn
-            label="Mi ubicación"
-            accent
+        <div className="map-controls absolute right-3 z-[500] flex flex-col items-center gap-2">
+          <div className="map-zoom">
+            <button type="button" aria-label="Acercar" onClick={() => mapRef.current?.zoomIn()} className="map-zoom__btn">
+              <IconPlus size={16} />
+            </button>
+            <button type="button" aria-label="Alejar" onClick={() => mapRef.current?.zoomOut()} className="map-zoom__btn">
+              <IconMinus size={16} />
+            </button>
+          </div>
+          <button
+            type="button"
+            aria-label="Mi ubicación"
             onClick={() => {
               if (!navigator.geolocation || !mapRef.current) return;
               navigator.geolocation.getCurrentPosition((pos) => {
-                mapRef.current?.setView([pos.coords.latitude, pos.coords.longitude], 15);
+                mapRef.current?.setView([pos.coords.latitude, pos.coords.longitude], 16);
               });
             }}
+            className="map-locate"
           >
-            <span className="block h-3 w-3 rounded-full border-2 border-current" />
-          </RoundBtn>
+            <TargetGlyph />
+          </button>
         </div>
 
         {error && (
@@ -276,22 +304,45 @@ export default function MapExperience({ variant = 'panel', onOpen }: MapExperien
 
         {!wide && selected && (
           <div className="map-dock absolute left-3 right-3 z-[500]">
-            <ListingCard listing={selected} onClose={() => setSelected(null)} onOpen={onOpen} />
+            <ListingCard
+              listing={selected}
+              expanded={sheetOpen}
+              onExpand={() => setSheetOpen(true)}
+              onClose={() => {
+                setSheetOpen(false);
+                setSelected(null);
+              }}
+              onOpen={onOpen}
+            />
           </div>
         )}
       </div>
 
       {wide && (
-        <aside className="flex w-[min(380px,38vw)] shrink-0 flex-col border-l border-[var(--border-color)] bg-[var(--bg-primary)]">
-          <div className="border-b border-[var(--border-color)] px-4 py-3">
-            <p className="m-0 text-sm font-semibold text-[var(--text-primary)]">
-              {loading ? 'Actualizando…' : `${listings.length} en el mapa`}
+        <aside className="flex w-[min(400px,36vw)] shrink-0 flex-col border-l border-[var(--border-color)] bg-[var(--bg-primary)]">
+          <div className="border-b border-[var(--border-color)] px-5 py-4">
+            <p className="m-0 text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--text-tertiary)]">
+              En esta zona
             </p>
-            <p className="m-0 text-[11px] text-[var(--text-tertiary)]">
-              Precio en el pin. Negocios en su local; el resto, zona aproximada.
+            <p className="m-0 mt-1 text-lg font-semibold text-[var(--text-primary)]">
+              {loading ? 'Buscando anuncios' : `${listings.length} ${listings.length === 1 ? 'anuncio' : 'anuncios'}`}
+            </p>
+            <p className="m-0 mt-1 text-xs leading-relaxed text-[var(--text-tertiary)]">
+              El precio va en el pin. Los negocios marcan su local; el resto, una zona aproximada.
             </p>
           </div>
           <div className="min-h-0 flex-1 overflow-y-auto">
+            {loading && listings.length === 0 &&
+              [0, 1, 2, 3].map((i) => (
+                <div key={i} className="flex gap-3 border-b border-[var(--border-color)] px-4 py-3">
+                  <div className="h-14 w-14 shrink-0 animate-pulse rounded-xl bg-[var(--bg-secondary)]" />
+                  <div className="flex flex-1 flex-col justify-center gap-2">
+                    <div className="h-2.5 w-24 animate-pulse rounded-full bg-[var(--bg-secondary)]" />
+                    <div className="h-3.5 w-full animate-pulse rounded-full bg-[var(--bg-secondary)]" />
+                    <div className="h-3 w-16 animate-pulse rounded-full bg-[var(--bg-secondary)]" />
+                  </div>
+                </div>
+              ))}
             {listings.map((listing) => (
               <button
                 key={listing.id}
@@ -324,10 +375,13 @@ export default function MapExperience({ variant = 'panel', onOpen }: MapExperien
       <style jsx global>{`
         .bs-map-marker { background: transparent !important; border: none !important; }
         .bs-map-pin {
-          width: 18px; height: 18px; border: 2.5px solid white; border-radius: 50% 50% 50% 0;
-          transform: rotate(-45deg); box-shadow: 0 2px 8px rgba(0,0,0,.28); margin: 6px auto 0;
+          width: 30px; height: 30px; display: flex; align-items: center; justify-content: center;
+          background: var(--brand-blue); color: white; border: 2px solid white;
+          border-radius: 50% 50% 50% 0; transform: rotate(-45deg);
+          box-shadow: 0 2px 8px rgba(0,0,0,.28);
         }
-        .bs-map-pin.is-selected { outline: 3px solid var(--brand-blue); outline-offset: 2px; }
+        .bs-map-pin__glyph { display: flex; transform: rotate(45deg); }
+        .bs-map-pin.is-selected { background: var(--text-primary); outline: 3px solid var(--brand-blue); outline-offset: 2px; }
         .bs-map-pin--price {
           width: auto; height: auto; transform: none; border-radius: 999px; background: white;
           color: var(--text-primary); font: 700 12px/1 system-ui, sans-serif; padding: 6px 8px;
@@ -336,19 +390,61 @@ export default function MapExperience({ variant = 'panel', onOpen }: MapExperien
         .bs-map-pin--price.is-selected { background: var(--brand-blue); color: white; }
         .bs-map-pin.is-promoted, .bs-map-pin--price.is-promoted { box-shadow: 0 0 0 2px var(--bs-warning-fg), 0 4px 14px rgba(0,0,0,.16); }
         .bs-map-cluster {
-          width: 40px; height: 40px; border-radius: 999px; background: var(--brand-blue); color: white;
+          width: 36px; height: 36px; border-radius: 999px; background: var(--brand-blue); color: white;
           display: flex; align-items: center; justify-content: center; font: 700 13px/1 system-ui, sans-serif;
-          border: 3px solid white; box-shadow: 0 4px 16px rgba(0,0,0,.25);
+          border: 2px solid white; box-shadow: 0 4px 16px rgba(0,0,0,.25);
         }
-        .leaflet-control-attribution { font-size: 9px !important; opacity: .7; }
-        .map-zoom { top: 46%; }
+        .leaflet-container { background: var(--bg-secondary); }
+        .leaflet-control-attribution {
+          font-size: 9px !important; opacity: .75; max-width: calc(100% - 72px);
+          background: var(--bg-primary) !important; border-radius: 8px; margin: 0 0 2px 8px !important;
+        }
+        .map-float {
+          background: var(--bg-primary);
+          box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+        }
+        .map-search .brand-search-shell {
+          border-radius: 999px;
+          box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+        }
+        .map-controls { top: auto; bottom: 28px; }
+        .map-zoom {
+          display: flex;
+          flex-direction: column;
+          overflow: hidden;
+          border-radius: 14px;
+          background: var(--bg-primary);
+          box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+        }
+        .map-zoom__btn {
+          display: flex;
+          width: 40px;
+          height: 36px;
+          align-items: center;
+          justify-content: center;
+          color: var(--text-primary);
+          background: transparent;
+        }
+        .map-locate {
+          display: flex;
+          width: 40px;
+          height: 40px;
+          align-items: center;
+          justify-content: center;
+          border-radius: 14px;
+          color: var(--text-primary);
+          background: var(--bg-primary);
+          box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+        }
+        .map-zoom__btn + .map-zoom__btn {
+          border-top: 1px solid var(--border-color);
+        }
         .map-dock { bottom: 12px; }
         @media (max-width: 767px) {
           .map-shell--page .map-dock {
             bottom: calc(var(--bs-nav-visible-offset, 72px) + 10px);
           }
-          .map-shell--page .map-zoom {
-            top: auto;
+          .map-shell--page .map-controls {
             bottom: calc(var(--bs-nav-visible-offset, 72px) + var(--map-dock, 0px) + 12px);
           }
           .map-shell--page .leaflet-bottom {
@@ -360,7 +456,7 @@ export default function MapExperience({ variant = 'panel', onOpen }: MapExperien
   );
 }
 
-function FilterChip({
+function CategoryChip({
   active,
   label,
   onClick,
@@ -369,16 +465,15 @@ function FilterChip({
   active: boolean;
   label: string;
   onClick: () => void;
-  icon: ReactNode;
+  icon?: ReactNode;
 }) {
   return (
     <button
       type="button"
       onClick={onClick}
-      className={`flex shrink-0 items-center gap-1.5 rounded-full border px-2.5 py-1.5 text-[11px] font-semibold ${
-        active
-          ? 'border-[var(--brand-blue)] bg-[var(--brand-blue)] text-white'
-          : 'border-[var(--border-color)] bg-[var(--bg-primary)]/95 text-[var(--text-secondary)] backdrop-blur-md'
+      aria-pressed={active}
+      className={`flex h-9 shrink-0 items-center gap-1.5 rounded-full px-3 text-[13px] font-semibold ${
+        active ? 'bg-[var(--brand-blue)] text-white' : 'map-float text-[var(--text-primary)]'
       }`}
     >
       {icon}
@@ -387,50 +482,50 @@ function FilterChip({
   );
 }
 
-function RoundBtn({
-  children,
-  label,
-  onClick,
-  accent,
-}: {
-  children: ReactNode;
-  label: string;
-  onClick: () => void;
-  accent?: boolean;
-}) {
+function TargetGlyph() {
   return (
-    <button
-      type="button"
-      aria-label={label}
-      onClick={onClick}
-      className={`flex h-10 w-10 items-center justify-center rounded-full border border-[var(--border-color)] bg-[var(--bg-primary)]/95 shadow-md ${accent ? 'text-[var(--brand-blue)]' : 'text-[var(--text-secondary)]'}`}
-    >
-      {children}
-    </button>
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
+      <circle cx="12" cy="12" r="3" />
+      <path d="M12 2v3M12 19v3M2 12h3M19 12h3" />
+    </svg>
   );
 }
 
-function Thumb({ listing }: { listing: MapListing }) {
+function WhatsAppGlyph() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+      <path d="M20.5 3.5A11 11 0 0 0 2.1 16.8L1 23l6.4-1.1A11 11 0 0 0 20.5 3.5zM12 20.2a8.2 8.2 0 0 1-4.2-1.1l-.3-.2-3.8.6.6-3.7-.2-.3A8.2 8.2 0 1 1 12 20.2zm4.5-6.1c-.2-.1-1.4-.7-1.6-.8s-.4-.1-.5.1-.6.8-.7.9-.3.2-.5.1a6.7 6.7 0 0 1-2-1.2 7.4 7.4 0 0 1-1.4-1.7c-.1-.2 0-.4.1-.5l.4-.4.2-.3a.5.5 0 0 0 0-.5c0-.1-.5-1.2-.7-1.6s-.4-.4-.5-.4h-.4a.8.8 0 0 0-.6.3 2.5 2.5 0 0 0-.8 1.8 4.3 4.3 0 0 0 .9 2.3 9.8 9.8 0 0 0 3.8 3.3 4.3 4.3 0 0 0 2.6.7 2.2 2.2 0 0 0 1.5-.7 1.8 1.8 0 0 0 .4-1.3c0-.1 0-.3-.2-.4z" />
+    </svg>
+  );
+}
+
+function Thumb({ listing, size = 56 }: { listing: MapListing; size?: number }) {
+  const Icon = getCategoriaIcon(listing.categoria);
   if (!listing.imageUrl) {
-    return <div className="h-14 w-14 shrink-0 rounded-lg bg-[var(--bg-secondary)]" />;
+    return (
+      <span
+        className="flex shrink-0 items-center justify-center rounded-xl bg-[var(--bg-secondary)] text-[var(--brand-blue)]"
+        style={{ width: size, height: size }}
+      >
+        <Icon size={22} />
+      </span>
+    );
   }
   return (
     // eslint-disable-next-line @next/next/no-img-element
-    <img src={listing.imageUrl} alt="" className="h-14 w-14 shrink-0 rounded-lg object-cover" />
+    <img src={listing.imageUrl} alt="" className="shrink-0 rounded-xl object-cover" style={{ width: size, height: size }} />
   );
 }
 
 function ListingCopy({ listing }: { listing: MapListing }) {
+  const place = listing.distrito || 'Cusco';
+  const precision = listing.precision === 'exact' ? 'Local' : 'Zona aproximada';
   return (
     <span className="min-w-0">
-      <span className="block truncate text-[10px] font-semibold uppercase tracking-wide text-[var(--text-tertiary)]">
-        {getCategoriaLabel(listing.categoria)}
-        {listing.distrito ? ` · ${listing.distrito}` : ''}
-      </span>
       <span className="line-clamp-2 text-sm font-semibold leading-snug text-[var(--text-primary)]">{listing.titulo}</span>
-      <span className="block text-xs font-bold text-[var(--brand-blue)]">{formatMapPrice(listing)}</span>
-      <span className="block text-[10px] text-[var(--text-tertiary)]">
-        {listing.precision === 'exact' ? 'Ubicación del local' : 'Zona aproximada'}
+      <span className="mt-0.5 block text-sm font-bold text-[var(--brand-blue)]">{formatMapPrice(listing)}</span>
+      <span className="mt-0.5 block truncate text-xs text-[var(--text-tertiary)]">
+        {getCategoriaLabel(listing.categoria)} · {place} · {precision}
       </span>
     </span>
   );
@@ -442,7 +537,7 @@ function ListingActions({ listing, onOpen }: { listing: MapListing; onOpen?: (li
       <button
         type="button"
         onClick={() => onOpen?.(listing)}
-        className="h-11 flex-1 rounded-xl bg-[var(--brand-blue)] px-3 text-sm font-bold text-white"
+        className="h-11 flex-1 rounded-full bg-[var(--text-primary)] px-4 text-sm font-semibold text-[var(--bg-primary)]"
       >
         Ver anuncio
       </button>
@@ -451,8 +546,9 @@ function ListingActions({ listing, onOpen }: { listing: MapListing; onOpen?: (li
           href={listing.whatsappUrl}
           target="_blank"
           rel="noreferrer"
-          className="flex h-11 items-center rounded-xl border border-[var(--border-color)] px-3 text-xs font-bold text-[var(--text-primary)]"
+          className="flex h-11 items-center gap-1.5 rounded-full bg-[var(--bs-color-social-whatsapp)] px-3.5 text-sm font-semibold text-white"
         >
+          <WhatsAppGlyph />
           WhatsApp
         </a>
       )}
@@ -461,7 +557,7 @@ function ListingActions({ listing, onOpen }: { listing: MapListing; onOpen?: (li
           href={listing.directionsUrl}
           target="_blank"
           rel="noreferrer"
-          className="flex h-11 items-center rounded-xl border border-[var(--border-color)] px-3 text-xs font-bold text-[var(--text-primary)]"
+          className="map-float flex h-11 items-center rounded-full px-3.5 text-sm font-semibold text-[var(--text-primary)]"
         >
           Cómo llegar
         </a>
@@ -472,23 +568,57 @@ function ListingActions({ listing, onOpen }: { listing: MapListing; onOpen?: (li
 
 function ListingCard({
   listing,
+  expanded,
+  onExpand,
   onClose,
   onOpen,
 }: {
   listing: MapListing;
+  expanded: boolean;
+  onExpand: () => void;
   onClose: () => void;
   onOpen?: (listing: MapListing) => void;
 }) {
   return (
-    <div className="rounded-2xl border border-[var(--border-color)] bg-[var(--bg-primary)] p-3 shadow-lg">
-      <div className="mb-2 flex gap-3">
-        <Thumb listing={listing} />
-        <ListingCopy listing={listing} />
-        <button type="button" onClick={onClose} aria-label="Cerrar" className="h-7 w-7 text-[var(--text-tertiary)]">
+    <div className="map-float rounded-[22px] p-2.5">
+      <div className="flex items-center gap-2.5">
+        <button type="button" onClick={onExpand} className="flex min-w-0 flex-1 items-center gap-2.5 text-left">
+          <Thumb listing={listing} size={expanded ? 56 : 48} />
+          <span className="min-w-0">
+            <span className="block truncate text-sm font-semibold text-[var(--text-primary)]">{listing.titulo}</span>
+            <span className="block truncate text-sm font-bold text-[var(--brand-blue)]">{formatMapPrice(listing)}</span>
+          </span>
+        </button>
+        {listing.whatsappUrl && (
+          <a
+            href={listing.whatsappUrl}
+            target="_blank"
+            rel="noreferrer"
+            aria-label="WhatsApp"
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[var(--bs-color-social-whatsapp)] text-white"
+          >
+            <WhatsAppGlyph />
+          </a>
+        )}
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label="Cerrar"
+          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-lg text-[var(--text-secondary)]"
+        >
           ×
         </button>
       </div>
-      <ListingActions listing={listing} onOpen={onOpen} />
+      {expanded && (
+        <div className="mt-2 px-1">
+          <p className="m-0 mb-2 text-xs text-[var(--text-tertiary)]">
+            {getCategoriaLabel(listing.categoria)}
+            {listing.distrito ? ` · ${listing.distrito}` : ''}
+            {listing.precision === 'exact' ? ' · Local' : ' · Zona aproximada'}
+          </p>
+          <ListingActions listing={listing} onOpen={onOpen} />
+        </div>
+      )}
     </div>
   );
 }

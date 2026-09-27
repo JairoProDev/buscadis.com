@@ -19,5 +19,7 @@ export function getMapTileLayerOptions(): LeafletTileLayerOptions {
     url: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
     attribution: OSM_ATTRIBUTION,
     maxZoom: 19,
+    // Leaflet lee subdomains.length al armar cada tesela. Si llega undefined, el mapa queda gris.
+    subdomains: 'abc',
   };
 }

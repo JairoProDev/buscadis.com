@@ -23,8 +23,10 @@ const sample = (id: string, lat: number, lng: number): MapListing => ({
   directionsUrl: null,
 });
 
-assert.equal(cellDegrees(17), 0);
-assert.equal(cellDegrees(16) > 0, true);
+assert.equal(cellDegrees(19), 0);
+assert.equal(cellDegrees(17) > 0, true);
+assert.equal(cellDegrees(18) > 0 && cellDegrees(18) < cellDegrees(17), true);
+assert.equal(cellDegrees(16) > cellDegrees(17), true);
 assert.equal(cellDegrees(10) > cellDegrees(14), true);
 
 const spread = clusterListings(
@@ -39,6 +41,13 @@ const split = clusterListings(
   16,
 );
 assert.equal(split.length, 2);
+
+const street = clusterListings(
+  [sample('a', -13.5315, -71.9675), sample('b', -13.5316, -71.9676)],
+  17,
+);
+assert.equal(street.length, 1);
+assert.equal(clusterListings([sample('a', -13.5315, -71.9675), sample('b', -13.5316, -71.9676)], 19).length, 2);
 
 assert.equal(precisionFor('negocios', 'exact'), 'exact');
 assert.equal(precisionFor('inmuebles', 'exact'), 'area');

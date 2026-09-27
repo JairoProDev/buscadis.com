@@ -36,6 +36,9 @@ interface MarketplaceSearchComposerProps {
   onPublishToChat?: (payload: { text: string; imageUrl: string | null }) => void;
   /** En home browse: solo buscar (Publicar vive en nav/sidebar) */
   searchOnly?: boolean;
+  /** Barra plana, sin el borde degradado del inicio */
+  flat?: boolean;
+  placeholder?: string;
 }
 
 type SuggestItem =
@@ -63,6 +66,8 @@ export default function MarketplaceSearchComposer({
   publishBehavior = 'modal',
   onPublishToChat,
   searchOnly = false,
+  flat = false,
+  placeholder,
 }: MarketplaceSearchComposerProps) {
   const [composerMode, setComposerMode] = useState<ComposerMode>(initialMode);
   const [tierModalOpen, setTierModalOpen] = useState(false);
@@ -328,6 +333,8 @@ export default function MarketplaceSearchComposer({
           value={value}
           onChange={handleComposerChange}
           compact={compact}
+          flat={flat}
+          placeholder={placeholder}
           searchOnly={searchOnly}
           composerMode={searchOnly ? 'search' : composerMode}
           onComposerModeChange={
