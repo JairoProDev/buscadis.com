@@ -4,7 +4,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { motion, AnimatePresence, PanInfo } from 'framer-motion';
+import { animate, motion, useDragControls, useMotionValue, useTransform } from 'framer-motion';
 import { Adiso, AdisoPromotionTier } from '@/types';
 import { getWhatsAppUrl, copiarLink, compartirNativo } from '@/lib/utils';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
@@ -222,6 +222,12 @@ export default function ModalAdiso({
   const [mostrarConfirmarEliminar, setMostrarConfirmarEliminar] = useState(false);
   const [eliminando, setEliminando] = useState(false);
   const modalRef = useRef<HTMLDivElement>(null);
+  const sheetScrollerRef = useRef<HTMLDivElement>(null);
+  const sheetY = useMotionValue(800);
+  const dragControls = useDragControls();
+  const closingSheet = useRef(false);
+  const sheetGesture = useRef<{ y: number; pointerId: number } | null>(null);
+  const backdropOpacity = useTransform(sheetY, [0, 280], [1, 0]);
   const isDesktop = useMediaQuery('(min-width: 768px)');
   const esMiAdiso = isMyAdiso(adiso.id);
   const { user, session } = useAuth();
@@ -280,6 +286,35 @@ export default function ModalAdiso({
       }
     };
   }, [user?.id, adiso.id, session?.access_token]);
+
+  useEffect(() => {
+    if (isDesktop || dentroSidebar) return;
+    closingSheet.current = false;
+    const from = typeof window !== 'undefined' ? window.innerHeight : 800;
+    sheetY.set(from);
+    const enter = animate(sheetY, 0, { type: 'spring', stiffness: 420, damping: 38, mass: 0.72 });
+    return () => enter.stop();
+  }, [isDesktop, dentroSidebar, sheetY]);
+
+  const dismissSheet = () => {
+    if (isDesktop || dentroSidebar) {
+      onCerrar();
+      return;
+    }
+    if (closingSheet.current) return;
+    closingSheet.current = true;
+    const travel = typeof window !== 'undefined' ? window.innerHeight : 800;
+    animate(sheetY, travel, {
+      duration: 0.26,
+      ease: [0.32, 0.72, 0, 1],
+      onComplete: () => onCerrar(),
+    });
+  };
+
+  const startSheetDrag = (event: React.PointerEvent) => {
+    if (closingSheet.current) return;
+    dragControls.start(event);
+  };
 
 
   const categoryAccent = categoriaFg(adiso.categoria);
@@ -1070,32 +1105,27 @@ export default function ModalAdiso({
   if (!isDesktop && !dentroSidebar) {
     return (
       <>
-        <AnimatePresence>
           <div style={{ position: 'fixed', inset: 0, zIndex: 2000 }}>
-            {/* Backdrop */}
             <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(2px)' }}
-              onClick={onCerrar}
+              style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(0,0,0,0.6)', opacity: backdropOpacity }}
+              onClick={dismissSheet}
             />
 
-            {/* Sheet */}
             <motion.div
               drag="y"
-              dragConstraints={{ top: 0, bottom: 0 }}
-              dragElastic={0.2}
-              onDragEnd={(e, { offset, velocity }) => {
-                if (offset.y > 100 || velocity.y > 500) {
-                  onCerrar();
+              dragControls={dragControls}
+              dragListener={false}
+              dragConstraints={{ top: 0, bottom: 1400 }}
+              dragElastic={0}
+              dragMomentum={false}
+              onDragEnd={(_, info) => {
+                if (info.offset.y > 90 || info.velocity.y > 650) dismissSheet();
+                else if (!closingSheet.current) {
+                  animate(sheetY, 0, { duration: 0.22, ease: [0.32, 0.72, 0, 1] });
                 }
               }}
-              initial={{ y: "100%" }}
-              animate={{ y: 0 }}
-              exit={{ y: "100%" }}
-              transition={{ type: "spring", damping: 30, stiffness: 300, mass: 0.8 }}
               style={{
+                y: sheetY,
                 position: 'absolute',
                 bottom: 0,
                 left: 0,
@@ -1106,21 +1136,23 @@ export default function ModalAdiso({
                 display: 'flex',
                 flexDirection: 'column',
                 boxShadow: '0 -10px 40px rgba(0,0,0,0.2)',
-                overflow: 'hidden'
+                overflow: 'hidden',
               }}
             >
-              {/* Header Fixed */}
               <div style={{
-                padding: '12px 16px',
+                padding: '0 16px 12px',
                 borderBottom: '1px solid var(--border-color)',
                 display: 'flex',
                 flexDirection: 'column',
-                gap: '12px',
+                gap: '8px',
                 backgroundColor: 'var(--bg-primary)',
                 zIndex: 10
               }}>
-                {/* Handle */}
-                <div style={{ width: '100%', display: 'flex', justifyContent: 'center', padding: '4px 0' }}>
+                <div
+                  data-sheet-handle
+                  onPointerDown={startSheetDrag}
+                  style={{ width: '100%', display: 'flex', justifyContent: 'center', padding: '14px 0 8px', touchAction: 'none', cursor: 'grab' }}
+                >
                   <div style={{ width: '40px', height: '4px', borderRadius: '4px', backgroundColor: 'var(--border-color)' }} />
                 </div>
 
@@ -1143,9 +1175,9 @@ export default function ModalAdiso({
                     <div style={{ width: '1px', height: '24px', backgroundColor: 'var(--border-color)', margin: '0 4px' }} />
                     <button
                       type="button"
-                      onClick={onCerrar}
+                      onClick={dismissSheet}
                       aria-label="Cerrar detalle"
-                      className="flex h-9 w-9 items-center justify-center rounded-lg text-[var(--text-secondary)] transition-colors hover:bg-[var(--hover-bg)] active:bg-[var(--bg-secondary)]"
+                      className="flex h-11 w-11 items-center justify-center rounded-lg text-[var(--text-secondary)] transition-colors hover:bg-[var(--hover-bg)] active:bg-[var(--bg-secondary)]"
                     >
                       <IconClose size={20} />
                     </button>
@@ -1154,7 +1186,28 @@ export default function ModalAdiso({
               </div>
 
               {/* Scrollable Content */}
-              <div style={{ flex: 1, overflowY: 'auto', padding: '16px', paddingBottom: '32px' }}>
+              <div
+                ref={sheetScrollerRef}
+                onPointerDown={(event) => {
+                  if ((sheetScrollerRef.current?.scrollTop ?? 0) > 1) return;
+                  sheetGesture.current = { y: event.clientY, pointerId: event.pointerId };
+                }}
+                onPointerMove={(event) => {
+                  const gesture = sheetGesture.current;
+                  if (!gesture || gesture.pointerId !== event.pointerId) return;
+                  if (event.clientY - gesture.y < 12) return;
+                  if ((sheetScrollerRef.current?.scrollTop ?? 0) > 1) {
+                    sheetGesture.current = null;
+                    return;
+                  }
+                  sheetGesture.current = null;
+                  startSheetDrag(event);
+                }}
+                onPointerUp={() => {
+                  sheetGesture.current = null;
+                }}
+                style={{ flex: 1, overflowY: 'auto', padding: '16px', paddingBottom: '32px', touchAction: 'pan-y' }}
+              >
                 <ContentBody />
               </div>
 
@@ -1162,7 +1215,6 @@ export default function ModalAdiso({
               <ContactFooter />
             </motion.div>
           </div>
-        </AnimatePresence>
 
         {/* Image Viewer Component (Standalone) */}
         {imagenAmpliada && (

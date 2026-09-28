@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
-import { useRouter } from 'next/navigation';
+import dynamic from 'next/dynamic';
 import type { Map as LeafletMap } from 'leaflet';
 import { PUBLISH_CATEGORIAS, getCategoriaIcon, getCategoriaLabel } from '@/lib/categoria-icons';
 import { IconFilterFunnel, IconMinus, IconPlus } from '@/components/Icons';
@@ -9,8 +9,11 @@ import MarketplaceSearchComposer from '@/components/search/MarketplaceSearchComp
 import MapCanvas from '@/components/map/MapCanvas';
 import { clusterListings } from '@/lib/map/cluster';
 import { boundsKey, formatMapPrice } from '@/lib/map/format';
+import { getAdisoById } from '@/lib/storage';
 import type { MapBounds, MapCluster, MapListing } from '@/lib/map/types';
-import type { Categoria } from '@/types';
+import type { Adiso, Categoria } from '@/types';
+
+const ModalAdiso = dynamic(() => import('@/components/ModalAdiso'), { ssr: false });
 
 type FilterId = Categoria | 'todos';
 
@@ -19,9 +22,9 @@ interface MapExperienceProps {
   onOpen?: (listing: MapListing) => void;
 }
 
-export default function MapExperience({ variant = 'panel', onOpen }: MapExperienceProps) {
-  const router = useRouter();
+export default function MapExperience({ variant = 'panel' }: MapExperienceProps) {
   const mapRef = useRef<LeafletMap | null>(null);
+  const cardRef = useRef<HTMLDivElement>(null);
   const [listings, setListings] = useState<MapListing[]>([]);
   const [zoom, setZoom] = useState(13);
   const [bounds, setBounds] = useState<MapBounds | null>(null);
@@ -37,7 +40,9 @@ export default function MapExperience({ variant = 'panel', onOpen }: MapExperien
   const [error, setError] = useState<string | null>(null);
   const [stale, setStale] = useState(false);
   const [moving, setMoving] = useState(false);
-  const [sheetOpen, setSheetOpen] = useState(false);
+  const [detail, setDetail] = useState<Adiso | null>(null);
+  const adisoCache = useRef(new Map<string, Adiso>());
+  const [dockPx, setDockPx] = useState(0);
   const [wide, setWide] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
   const boundsRef = useRef<MapBounds | null>(null);
@@ -134,8 +139,51 @@ export default function MapExperience({ variant = 'panel', onOpen }: MapExperien
     map.flyTo([cluster.lat, cluster.lng], Math.min(map.getZoom() + 2, 19), { duration: 0.4 });
   };
 
+  const openDetail = useCallback((id: string) => {
+    const cached = adisoCache.current.get(id);
+    if (cached) {
+      setDetail(cached);
+      return;
+    }
+    const listing = listingsRef.current.find((item) => item.id === id);
+    if (listing) setDetail(listingToAdiso(listing));
+    void getAdisoById(id).then((adiso) => {
+      if (!adiso) {
+        if (!listing) setError('No se pudo abrir el anuncio');
+        return;
+      }
+      adisoCache.current.set(id, adiso);
+      setDetail((current) => (current?.id === id ? adiso : current));
+    });
+  }, []);
+
+  useEffect(() => {
+    if (!selected || adisoCache.current.has(selected.id)) return;
+    let cancel = false;
+    void getAdisoById(selected.id).then((adiso) => {
+      if (!cancel && adiso) adisoCache.current.set(selected.id, adiso);
+    });
+    return () => {
+      cancel = true;
+    };
+  }, [selected]);
+
+  useEffect(() => {
+    const el = cardRef.current;
+    if (!selected || wide || !el) {
+      setDockPx(0);
+      return;
+    }
+    const update = () => setDockPx(el.offsetHeight + 8);
+    update();
+    const observer = new ResizeObserver(update);
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [selected, wide]);
+
+  const detailIndex = detail ? listings.findIndex((item) => item.id === detail.id) : -1;
   const compactChrome = moving || (!wide && Boolean(selected));
-  const dock = !wide && selected ? (sheetOpen ? '15.5rem' : '5.75rem') : '0px';
+  const dock = dockPx > 0 ? `${dockPx}px` : '0px';
   const activeFilterCount = (minPrice ? 1 : 0) + (maxPrice ? 1 : 0) + (photoOnly ? 1 : 0);
 
   return (
@@ -152,10 +200,7 @@ export default function MapExperience({ variant = 'panel', onOpen }: MapExperien
           }}
           onReady={onReady}
           onViewChange={onViewChange}
-          onSelectListing={(listing) => {
-            setSheetOpen(false);
-            setSelected(listing);
-          }}
+          onSelectListing={setSelected}
           onExpandCluster={expandCluster}
           onGestureStart={() => {
             setMoving(true);
@@ -180,9 +225,7 @@ export default function MapExperience({ variant = 'panel', onOpen }: MapExperien
                 }}
                 onCategoryDetected={(categoria) => setFilter(categoria)}
                 onOpenAdiso={(id) => {
-                  const hit = listings.find((item) => item.id === id);
-                  if (hit && onOpen) onOpen(hit);
-                  else router.push(`/a/${id}`);
+                  void openDetail(id);
                 }}
               />
             </div>
@@ -303,16 +346,11 @@ export default function MapExperience({ variant = 'panel', onOpen }: MapExperien
         )}
 
         {!wide && selected && (
-          <div className="map-dock absolute left-3 right-3 z-[500]">
+          <div ref={cardRef} className="map-dock absolute left-3 right-3 z-[500]">
             <ListingCard
               listing={selected}
-              expanded={sheetOpen}
-              onExpand={() => setSheetOpen(true)}
-              onClose={() => {
-                setSheetOpen(false);
-                setSelected(null);
-              }}
-              onOpen={onOpen}
+              onOpen={() => openDetail(selected.id)}
+              onClose={() => setSelected(null)}
             />
           </div>
         )}
@@ -351,7 +389,7 @@ export default function MapExperience({ variant = 'panel', onOpen }: MapExperien
                   setSelected(listing);
                   mapRef.current?.panTo([listing.lat, listing.lng]);
                 }}
-                onDoubleClick={() => onOpen?.(listing)}
+                onDoubleClick={() => void openDetail(listing.id)}
                 className={`flex w-full gap-3 border-b border-[var(--border-color)] px-3 py-3 text-left ${selected?.id === listing.id ? 'bg-[var(--bg-secondary)]' : ''}`}
               >
                 <Thumb listing={listing} />
@@ -366,10 +404,26 @@ export default function MapExperience({ variant = 'panel', onOpen }: MapExperien
           </div>
           {selected && (
             <div className="border-t border-[var(--border-color)] p-3">
-              <ListingActions listing={selected} onOpen={onOpen} />
+              <ListingActions listing={selected} onOpen={() => void openDetail(selected.id)} />
             </div>
           )}
         </aside>
+      )}
+
+      {detail && (
+        <ModalAdiso
+          adiso={detail}
+          onCerrar={() => setDetail(null)}
+          onAnterior={detailIndex > 0 ? () => void openDetail(listings[detailIndex - 1].id) : undefined}
+          onSiguiente={
+            detailIndex >= 0 && detailIndex < listings.length - 1
+              ? () => void openDetail(listings[detailIndex + 1].id)
+              : undefined
+          }
+          puedeAnterior={detailIndex > 0}
+          puedeSiguiente={detailIndex >= 0 && detailIndex < listings.length - 1}
+          preservarUrlQuery
+        />
       )}
 
       <style jsx global>{`
@@ -531,12 +585,12 @@ function ListingCopy({ listing }: { listing: MapListing }) {
   );
 }
 
-function ListingActions({ listing, onOpen }: { listing: MapListing; onOpen?: (listing: MapListing) => void }) {
+function ListingActions({ listing, onOpen }: { listing: MapListing; onOpen: () => void }) {
   return (
     <div className="flex flex-wrap gap-2">
       <button
         type="button"
-        onClick={() => onOpen?.(listing)}
+        onClick={onOpen}
         className="h-11 flex-1 rounded-full bg-[var(--text-primary)] px-4 text-sm font-semibold text-[var(--bg-primary)]"
       >
         Ver anuncio
@@ -566,40 +620,52 @@ function ListingActions({ listing, onOpen }: { listing: MapListing; onOpen?: (li
   );
 }
 
+function listingToAdiso(listing: MapListing): Adiso {
+  return {
+    id: listing.id,
+    categoria: listing.categoria,
+    titulo: listing.titulo,
+    descripcion: '',
+    contacto: '',
+    ubicacion: listing.distrito || 'Cusco',
+    fechaPublicacion: '',
+    horaPublicacion: '',
+    imagenUrl: listing.imageUrl || undefined,
+    imagenesUrls: listing.imageUrl ? [listing.imageUrl] : undefined,
+    precio: listing.precio ?? undefined,
+    moneda: listing.moneda ?? undefined,
+    tipoPrecio: listing.tipoPrecio ?? undefined,
+    esDestacado: listing.promoted,
+    promotionTier: listing.promoted ? 'destacada' : 'gratis',
+  };
+}
+
 function ListingCard({
   listing,
-  expanded,
-  onExpand,
-  onClose,
   onOpen,
+  onClose,
 }: {
   listing: MapListing;
-  expanded: boolean;
-  onExpand: () => void;
+  onOpen: () => void;
   onClose: () => void;
-  onOpen?: (listing: MapListing) => void;
 }) {
+  const place = listing.distrito || 'Cusco';
+  const precision = listing.precision === 'exact' ? 'Local' : 'Zona aproximada';
   return (
-    <div className="map-float rounded-[22px] p-2.5">
-      <div className="flex items-center gap-2.5">
-        <button type="button" onClick={onExpand} className="flex min-w-0 flex-1 items-center gap-2.5 text-left">
-          <Thumb listing={listing} size={expanded ? 56 : 48} />
+    <div className="map-float rounded-[22px] p-3">
+      <div className="flex items-start gap-2">
+        <button type="button" onClick={onOpen} className="flex min-w-0 flex-1 items-start gap-3 text-left">
+          <Thumb listing={listing} size={64} />
           <span className="min-w-0">
-            <span className="block truncate text-sm font-semibold text-[var(--text-primary)]">{listing.titulo}</span>
-            <span className="block truncate text-sm font-bold text-[var(--brand-blue)]">{formatMapPrice(listing)}</span>
+            <span className="block whitespace-normal break-words text-[15px] font-semibold leading-snug text-[var(--text-primary)]">
+              {listing.titulo}
+            </span>
+            <span className="mt-1 block text-sm font-bold text-[var(--brand-blue)]">{formatMapPrice(listing)}</span>
+            <span className="mt-0.5 block text-xs text-[var(--text-tertiary)]">
+              {getCategoriaLabel(listing.categoria)} · {place} · {precision}
+            </span>
           </span>
         </button>
-        {listing.whatsappUrl && (
-          <a
-            href={listing.whatsappUrl}
-            target="_blank"
-            rel="noreferrer"
-            aria-label="WhatsApp"
-            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[var(--bs-color-social-whatsapp)] text-white"
-          >
-            <WhatsAppGlyph />
-          </a>
-        )}
         <button
           type="button"
           onClick={onClose}
@@ -609,16 +675,9 @@ function ListingCard({
           ×
         </button>
       </div>
-      {expanded && (
-        <div className="mt-2 px-1">
-          <p className="m-0 mb-2 text-xs text-[var(--text-tertiary)]">
-            {getCategoriaLabel(listing.categoria)}
-            {listing.distrito ? ` · ${listing.distrito}` : ''}
-            {listing.precision === 'exact' ? ' · Local' : ' · Zona aproximada'}
-          </p>
-          <ListingActions listing={listing} onOpen={onOpen} />
-        </div>
-      )}
+      <div className="mt-3">
+        <ListingActions listing={listing} onOpen={onOpen} />
+      </div>
     </div>
   );
 }
