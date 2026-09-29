@@ -1,5 +1,7 @@
 import type { Metadata } from 'next';
+import { Suspense } from 'react';
 import HomePageClient from '@/components/HomePageClient';
+import HomeRouteFallback from '@/components/home/HomeRouteFallback';
 import { CrawlableAdisoList } from '@/components/seo/CrawlableAdisoList';
 import { JsonLd } from '@/components/seo/JsonLd';
 import { buildAdisoMetadata } from '@/lib/seo/adiso-metadata';
@@ -83,14 +85,16 @@ export default async function Home({ searchParams }: PageProps) {
         heading={listName}
         visuallyHidden
       />
-      <HomePageClient
-        initialSearchParams={{
-          adiso: typeof params.adiso === 'string' ? params.adiso : undefined,
-          categoria: typeof params.categoria === 'string' ? params.categoria : undefined,
-          buscar: typeof params.buscar === 'string' ? params.buscar : undefined,
-          seccion: typeof params.seccion === 'string' ? params.seccion : undefined,
-        }}
-      />
+      <Suspense fallback={<HomeRouteFallback />}>
+        <HomePageClient
+          initialSearchParams={{
+            adiso: typeof params.adiso === 'string' ? params.adiso : undefined,
+            categoria: typeof params.categoria === 'string' ? params.categoria : undefined,
+            buscar: typeof params.buscar === 'string' ? params.buscar : undefined,
+            seccion: typeof params.seccion === 'string' ? params.seccion : undefined,
+          }}
+        />
+      </Suspense>
     </>
   );
 }

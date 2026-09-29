@@ -13,6 +13,7 @@ import InstallPrompt from '@/components/pwa/InstallPrompt';
 import SessionTracker from '@/components/SessionTracker';
 import AnalyticsProvider from '@/components/analytics/AnalyticsProvider';
 import ReferralCapture from '@/components/auth/ReferralCapture';
+import NativeWebViewBootstrap from '@/components/NativeWebViewBootstrap';
 import {
   buildDefaultOgImageMeta,
   buildDefaultTwitterImageMeta,
@@ -128,6 +129,19 @@ export default function RootLayout({
             __html: `
               (function() {
                 try {
+                  var isApp = localStorage.getItem('isBuscadisApp') === 'true' || /BuscadisApp\\//i.test(navigator.userAgent || '');
+                  if (isApp) {
+                    document.documentElement.setAttribute('data-buscadis-app', 'true');
+                    if ('serviceWorker' in navigator) {
+                      navigator.serviceWorker.getRegistrations().then(function(regs) {
+                        regs.forEach(function(r) { r.unregister(); });
+                      });
+                    }
+                  }
+                } catch (e) {}
+              })();
+              (function() {
+                try {
                   const theme = localStorage.getItem('theme') || 'auto';
                   const root = document.documentElement;
                   const meta = document.querySelector('meta[name="theme-color"]');
@@ -165,6 +179,7 @@ export default function RootLayout({
                 <UIProvider>
                   <AdisosGratuitosCacheProvider>
                     <NavigationProvider>
+                      <NativeWebViewBootstrap />
                       <SessionTracker />
                       <AnalyticsProvider />
                       <ReferralCapture />

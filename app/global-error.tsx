@@ -23,7 +23,23 @@ export default function GlobalError({
           <p>Ha ocurrido un error inesperado. Nuestro equipo ya fue notificado.</p>
           <button
             type="button"
-            onClick={() => reset()}
+            onClick={() => {
+              void (async () => {
+                try {
+                  if ('serviceWorker' in navigator) {
+                    const regs = await navigator.serviceWorker.getRegistrations();
+                    await Promise.all(regs.map((r) => r.unregister()));
+                  }
+                  if ('caches' in window) {
+                    const keys = await caches.keys();
+                    await Promise.all(keys.map((k) => caches.delete(k)));
+                  }
+                } catch {
+                  /* ignore */
+                }
+                reset();
+              })();
+            }}
             style={{
               marginTop: '1rem',
               padding: '0.75rem 1.5rem',

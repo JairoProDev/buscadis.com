@@ -1,7 +1,8 @@
 // Utilidades para i18n del lado del cliente
 import { Locale } from '@/i18n';
+import esMessages from '@/messages/es.json';
 
-let messages: Record<string, any> = {};
+let messages: Record<string, any> = esMessages;
 let currentLocale: Locale = 'es';
 
 export async function loadMessages(locale: Locale): Promise<void> {

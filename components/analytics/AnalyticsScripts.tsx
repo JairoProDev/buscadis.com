@@ -10,7 +10,7 @@ import {
   type ConsentState,
 } from '@/lib/analytics/consent';
 import { captureUtmFromUrl } from '@/lib/analytics/attribution';
-import { isBuscadisNativeApp } from '@/lib/mobile-app-bridge';
+import { isNativeWebViewClient } from '@/lib/native-webview-bootstrap';
 
 function ClarityScript({ projectId }: { projectId: string }) {
   return (
@@ -38,7 +38,7 @@ export default function AnalyticsScripts() {
   }, []);
 
   const analyticsAllowed = hasAnalyticsConsent() && consent !== null;
-  const skipThirdParty = isBuscadisNativeApp();
+  const skipThirdParty = isNativeWebViewClient();
 
   return (
     <>

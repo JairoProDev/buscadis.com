@@ -1,12 +1,11 @@
 'use client';
 
-import { usePathname } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
 import { isBuscadisNativeApp } from '@/lib/mobile-app-bridge';
 
-function toSearchString(initial?: Record<string, string | undefined>): string {
+function readSearchString(initial?: Record<string, string | undefined>): string {
   if (typeof window !== 'undefined') {
-    return window.location.search;
+    return window.location.search || '';
   }
   const params = new URLSearchParams();
   if (initial) {
@@ -26,26 +25,21 @@ function toSearchString(initial?: Record<string, string | undefined>): string {
 export function useStableSearchParams(
   initial?: Record<string, string | undefined>
 ): URLSearchParams {
-  const pathname = usePathname();
-  const [search, setSearch] = useState(() => toSearchString(initial));
+  const [search, setSearch] = useState(() => readSearchString(initial));
 
   useEffect(() => {
-    setSearch(window.location.search);
-  }, [pathname]);
-
-  useEffect(() => {
-    if (!isBuscadisNativeApp()) return;
-    const sync = () => {
-      const next = window.location.search;
-      setSearch((prev) => (prev !== next ? next : prev));
-    };
-    const id = window.setInterval(sync, 400);
+    const sync = () => setSearch(window.location.search || '');
+    sync();
     window.addEventListener('popstate', sync);
+    const id = window.setInterval(sync, isBuscadisNativeApp() ? 350 : 2000);
     return () => {
-      window.clearInterval(id);
       window.removeEventListener('popstate', sync);
+      window.clearInterval(id);
     };
-  }, [pathname]);
+  }, []);
 
-  return useMemo(() => new URLSearchParams(search.replace(/^\?/, '')), [search]);
+  return useMemo(() => {
+    const raw = search.startsWith('?') ? search.slice(1) : search;
+    return new URLSearchParams(raw);
+  }, [search]);
 }

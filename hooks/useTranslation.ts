@@ -1,27 +1,20 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Locale, defaultLocale } from '@/i18n';
 import { loadMessages, t as translate, getCurrentLocale, setCurrentLocale } from '@/lib/i18n';
 
 export function useTranslation() {
   const [locale, setLocaleState] = useState<Locale>(defaultLocale);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
 
-  useEffect(() => {
-    // Cargar idioma guardado
-    const savedLocale = (localStorage.getItem('locale') as Locale) || defaultLocale;
-    changeLocale(savedLocale);
-  }, []);
-
-  const changeLocale = async (newLocale: Locale) => {
+  const changeLocale = useCallback(async (newLocale: Locale) => {
     setIsLoading(true);
     try {
       await loadMessages(newLocale);
       setCurrentLocale(newLocale);
       setLocaleState(newLocale);
       localStorage.setItem('locale', newLocale);
-      // Actualizar lang del HTML
       if (typeof document !== 'undefined') {
         document.documentElement.lang = newLocale;
       }
@@ -30,7 +23,16 @@ export function useTranslation() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    const savedLocale = (localStorage.getItem('locale') as Locale) || defaultLocale;
+    if (savedLocale !== defaultLocale) {
+      void changeLocale(savedLocale);
+    } else {
+      setLocaleState(getCurrentLocale());
+    }
+  }, [changeLocale]);
 
   const t = (key: string, params?: Record<string, string | number>): string => {
     return translate(key, params);
@@ -43,18 +45,3 @@ export function useTranslation() {
     isLoading,
   };
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
