@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from 'react';
 import type { Map as LeafletMap, Marker as LeafletMarker } from 'leaflet';
-import { getMapTileLayerOptions } from '@/lib/map-basemap';
+import { createMapTileLayer } from '@/lib/map-basemap';
 import type { MapBounds, MapCluster, MapListing } from '@/lib/map/types';
 import { formatMapPrice } from '@/lib/map/format';
 
@@ -75,19 +75,7 @@ export default function MapCanvas({
         zoomControl: false,
         attributionControl: true,
       }).setView([-13.5319, -71.9675], 13);
-      const tile = getMapTileLayerOptions();
-      const layer = L.tileLayer(tile.url, {
-        attribution: tile.attribution,
-        maxZoom: tile.maxZoom,
-        subdomains: tile.subdomains,
-      });
-      const createTile = layer.createTile.bind(layer);
-      layer.createTile = (coords, done) => {
-        const img = createTile(coords, done);
-        if (img instanceof HTMLImageElement) img.referrerPolicy = 'origin';
-        return img;
-      };
-      layer.addTo(map);
+      createMapTileLayer(L).addTo(map);
       mapRef.current = map;
       callbacks.current.onMap(map);
       const emit = () => callbacks.current.onViewChange(readBounds(map), map.getZoom());

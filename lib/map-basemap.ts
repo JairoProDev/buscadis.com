@@ -23,3 +23,22 @@ export function getMapTileLayerOptions(): LeafletTileLayerOptions {
     subdomains: 'abc',
   };
 }
+
+type LeafletModule = typeof import('leaflet');
+
+/** OSM tiles with referrerPolicy on images (typed-safe; no protected createTile override). */
+export function createMapTileLayer(L: LeafletModule) {
+  const tile = getMapTileLayerOptions();
+  const layer = L.tileLayer(tile.url, {
+    attribution: tile.attribution,
+    maxZoom: tile.maxZoom,
+    subdomains: tile.subdomains,
+  });
+  layer.on('tileload', (e) => {
+    const el = e.tile;
+    if (el instanceof HTMLImageElement) {
+      el.referrerPolicy = 'origin';
+    }
+  });
+  return layer;
+}
