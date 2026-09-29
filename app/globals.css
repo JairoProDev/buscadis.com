@@ -77,6 +77,10 @@ body {
   line-height: 1.6;
 }
 
+html[data-buscadis-app] body {
+  min-height: var(--app-vh, 100dvh);
+}
+
 button {
   font-family: inherit;
   cursor: pointer;

@@ -83,7 +83,14 @@ export default async function Home({ searchParams }: PageProps) {
         heading={listName}
         visuallyHidden
       />
-      <HomePageClient />
+      <HomePageClient
+        initialSearchParams={{
+          adiso: typeof params.adiso === 'string' ? params.adiso : undefined,
+          categoria: typeof params.categoria === 'string' ? params.categoria : undefined,
+          buscar: typeof params.buscar === 'string' ? params.buscar : undefined,
+          seccion: typeof params.seccion === 'string' ? params.seccion : undefined,
+        }}
+      />
     </>
   );
 }

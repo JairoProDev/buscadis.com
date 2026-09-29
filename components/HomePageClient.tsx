@@ -4,8 +4,9 @@
 export const dynamic = 'force-dynamic';
 export const fetchCache = 'force-no-store';
 
-import { Suspense, useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import { useRouter } from 'next/navigation';
+import { useStableSearchParams } from '@/hooks/useStableSearchParams';
 import { Adiso, Categoria } from '@/types';
 import { getAdisos, getAdisoById, saveAdiso, getAdisosCache } from '@/lib/storage';
 import { getAdisosFromSupabase } from '@/lib/supabase';
@@ -105,9 +106,13 @@ import ParaTiSection from '@/components/home/ParaTiSection';
 import BusinessDirectorySection from '@/components/home/BusinessDirectorySection';
 const TEST_REGEX = /toyota test|test adiso|test anuncio/i;
 
-function HomeContent() {
+type HomeContentProps = {
+  initialSearchParams?: Record<string, string | undefined>;
+};
+
+function HomeContent({ initialSearchParams }: HomeContentProps) {
   const router = useRouter();
-  const searchParams = useSearchParams();
+  const searchParams = useStableSearchParams(initialSearchParams);
   const { user, session } = useAuth();
   const { profile } = useUser();
   const adisoId = searchParams.get('adiso');
@@ -368,6 +373,10 @@ function HomeContent() {
     cargadoInicialmente.current = true;
 
     const cargarTodo = async () => {
+      const feedWatchdog = window.setTimeout(() => {
+        setCargando(false);
+      }, 22_000);
+
       // Mostrar cache primero (instantáneo, síncrono)
       let cache = getAdisosCache();
 
@@ -452,12 +461,24 @@ function HomeContent() {
         }
         setHayMasAdisos(false);
       } finally {
+        window.clearTimeout(feedWatchdog);
         setCargando(false);
       }
     };
 
     cargarTodo();
   }, [adisoId, categoriaUrl]);
+
+  useEffect(() => {
+    if (cargando) return;
+    try {
+      window.ReactNativeWebView?.postMessage(
+        JSON.stringify({ type: 'web_app_ready', payload: { path: '/' }, ts: Date.now() })
+      );
+    } catch {
+      // Browser only.
+    }
+  }, [cargando]);
 
   // Manejar cambios en adisoId cuando ya está cargado (solo actualizar modal, no recargar página)
   useEffect(() => {
@@ -1709,10 +1730,10 @@ function HomeContent() {
   );
 }
 
-export default function HomePageClient() {
-  return (
-    <Suspense fallback={<div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-secondary)' }}>Cargando...</div>}>
-      <HomeContent />
-    </Suspense>
-  );
+export default function HomePageClient({
+  initialSearchParams,
+}: {
+  initialSearchParams?: Record<string, string | undefined>;
+}) {
+  return <HomeContent initialSearchParams={initialSearchParams} />;
 }
