@@ -43,14 +43,11 @@ export default function ChatPage() {
                     seccionActiva={'chatbot' as any}
                     tieneAdisoAbierto={false}
                     onCambiarSeccion={(seccion: any) => {
-                        // Handle sections that require redirection to home
-                        // If navigating to home ('adiso'), NavbarMobile handles it via href
-                        // If navigating to 'mapa' or 'publicar', redirect
                         if (seccion === 'adiso') {
-                            window.location.href = '/';
-                        } else {
-                            window.location.href = `/?seccion=${seccion}`;
+                            router.push('/');
+                            return;
                         }
+                        router.push(`/?seccion=${seccion}`);
                     }}
                 />
             </div>

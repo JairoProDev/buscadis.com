@@ -12,18 +12,19 @@ import { useAuth } from '@/hooks/useAuth';
 import { useNavigation } from '@/contexts/NavigationContext';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import dynamic from 'next/dynamic';
 import ThemeToggle from './ThemeToggle';
 import LanguageSelector from './LanguageSelector';
 import { Adiso } from '@/types';
 import { SeccionSidebar } from './SidebarDesktop';
 import ModalAdiso from './ModalAdiso';
-import MapaInteractivo from './MapaInteractivo';
 import { semantic } from '@/lib/bs-tokens';
-import FormularioPublicar from './FormularioPublicar';
-import PublishStudioShell from './publish/PublishStudioShell';
-import AdisosGratuitos from './AdisosGratuitos';
-import ChatbotIANew from './ChatbotIANew';
 import { IconSparkles, IconAdis } from './Icons';
+
+const MapaInteractivo = dynamic(() => import('./MapaInteractivo'), { ssr: false });
+const PublishStudioShell = dynamic(() => import('./publish/PublishStudioShell'), { ssr: false });
+const AdisosGratuitos = dynamic(() => import('./AdisosGratuitos'), { ssr: false });
+const ChatbotIANew = dynamic(() => import('./ChatbotIANew'), { ssr: false });
 
 interface ModalNavegacionMobileProps {
   abierto: boolean;

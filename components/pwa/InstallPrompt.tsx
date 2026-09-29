@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { isBuscadisNativeApp } from '@/lib/mobile-app-bridge';
 
 export default function InstallPrompt() {
     const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
@@ -9,6 +10,10 @@ export default function InstallPrompt() {
     const [isInstalled, setIsInstalled] = useState(false);
 
     useEffect(() => {
+        if (isBuscadisNativeApp()) {
+            setIsInstalled(true);
+            return;
+        }
         // Comprobar si ya está instalada
         if (window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any).standalone) {
             setIsInstalled(true);

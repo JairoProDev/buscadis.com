@@ -5,7 +5,6 @@ import { AuthProvider } from '@/contexts/AuthContext';
 import { AdisosGratuitosCacheProvider } from '@/contexts/AdisosGratuitosCache';
 import { defaultLocale } from '@/i18n';
 import MotionProvider from '@/components/MotionProvider';
-import FloatingChatbot from '@/components/FloatingChatbot';
 import { NavigationProvider } from '@/contexts/NavigationContext';
 import { UIProvider } from '@/contexts/UIContext';
 import { FavoritosProvider } from '@/contexts/FavoritosContext';

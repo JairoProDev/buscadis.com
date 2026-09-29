@@ -10,6 +10,7 @@ import {
   type ConsentState,
 } from '@/lib/analytics/consent';
 import { captureUtmFromUrl } from '@/lib/analytics/attribution';
+import { isBuscadisNativeApp } from '@/lib/mobile-app-bridge';
 
 function ClarityScript({ projectId }: { projectId: string }) {
   return (
@@ -37,11 +38,12 @@ export default function AnalyticsScripts() {
   }, []);
 
   const analyticsAllowed = hasAnalyticsConsent() && consent !== null;
+  const skipThirdParty = isBuscadisNativeApp();
 
   return (
     <>
-      {analyticsAllowed && gaId ? <GoogleAnalytics gaId={gaId} /> : null}
-      {analyticsAllowed && clarityId ? <ClarityScript projectId={clarityId} /> : null}
+      {!skipThirdParty && analyticsAllowed && gaId ? <GoogleAnalytics gaId={gaId} /> : null}
+      {!skipThirdParty && analyticsAllowed && clarityId ? <ClarityScript projectId={clarityId} /> : null}
     </>
   );
 }

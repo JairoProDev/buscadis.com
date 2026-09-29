@@ -9,6 +9,7 @@ import {
   saveConsent,
   type ConsentState,
 } from '@/lib/analytics/consent';
+import { isBuscadisNativeApp } from '@/lib/mobile-app-bridge';
 
 export default function CookieConsentBanner() {
   const [visible, setVisible] = useState(false);
@@ -17,6 +18,10 @@ export default function CookieConsentBanner() {
   const [marketing, setMarketing] = useState(false);
 
   useEffect(() => {
+    if (isBuscadisNativeApp()) {
+      setVisible(false);
+      return;
+    }
     // Show banner if user has NOT accepted analytics (Accept All).
     // If user chose a non-accept-all option previously, show only once per browser session.
     const consent = getConsent();

@@ -31,7 +31,16 @@ export default function NavbarMobile({
 
   React.useEffect(() => {
     setMounted(true);
-    router.prefetch('/publicar');
+    const prefetchTabs = () => {
+      for (const item of MAIN_NAV_ITEMS) {
+        router.prefetch(item.href);
+      }
+    };
+    if (typeof requestIdleCallback !== 'undefined') {
+      requestIdleCallback(prefetchTabs);
+    } else {
+      setTimeout(prefetchTabs, 0);
+    }
   }, [router]);
 
   React.useEffect(() => {
@@ -68,7 +77,6 @@ export default function NavbarMobile({
         backgroundColor: 'var(--bg-primary)',
         transform: navVisible ? 'translateY(0)' : 'translateY(100%)',
         transition: 'transform 0.28s ease-out',
-        willChange: 'transform',
       }}
     >
       {MAIN_NAV_ITEMS.map((seccion) => {

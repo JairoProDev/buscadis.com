@@ -1,5 +1,7 @@
 'use client';
 
+import 'leaflet/dist/leaflet.css';
+
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import dynamic from 'next/dynamic';
 import type { Map as LeafletMap } from 'leaflet';
