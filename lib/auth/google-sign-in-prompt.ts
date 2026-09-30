@@ -1,4 +1,5 @@
 import { signInWithGoogleIdToken } from '@/lib/auth';
+import { isBuscadisNativeApp } from '@/lib/mobile-app-bridge';
 import {
   createGoogleNonce,
   getGoogleClientId,
@@ -105,6 +106,9 @@ async function runPrompt(): Promise<boolean> {
 export async function promptGoogleSignIn(
   onAuthenticated?: () => void | Promise<void>
 ): Promise<boolean> {
+  if (isBuscadisNativeApp()) {
+    return false;
+  }
   afterSignIn = onAuthenticated ?? null;
 
   if (promptInFlight) {

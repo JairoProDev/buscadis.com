@@ -6,6 +6,7 @@ import { useToast } from '@/hooks/useToast';
 import { ToastContainer } from '@/components/Toast';
 import { markAuthPromptDismissed } from '@/lib/auth-session-prompt';
 import { promptGoogleSignIn } from '@/lib/auth/google-sign-in-prompt';
+import { isBuscadisNativeApp } from '@/lib/mobile-app-bridge';
 
 const AuthModal = dynamic(() => import('@/components/AuthModal'), { ssr: false });
 const ChatDock = dynamic(() => import('@/components/ChatDock'), { ssr: false });
@@ -50,8 +51,11 @@ export function UIProvider({ children }: { children: ReactNode }) {
   const [chatDock, setChatDock] = useState<DockedChat[]>([]);
 
   const openAuthModal = useCallback(async (mode?: 'login' | 'signup') => {
-    const shown = await promptGoogleSignIn();
-    if (shown) return;
+    // GIS / FedCM abre Chrome en WebView — en la app nativa solo usamos el modal + bridge.
+    if (!isBuscadisNativeApp()) {
+      const shown = await promptGoogleSignIn();
+      if (shown) return;
+    }
     if (mode) setAuthModalMode(mode);
     setIsAuthModalOpen(true);
   }, []);
