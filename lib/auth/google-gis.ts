@@ -13,7 +13,7 @@ function isLocalDevHost(): boolean {
 }
 
 /** FedCM en GIS provoca AbortError en consola (GSI_LOGGER) en dev. */
-export function useFedcmForGooglePrompt(): boolean {
+export function fedcmForGooglePrompt(): boolean {
   return false;
 }
 

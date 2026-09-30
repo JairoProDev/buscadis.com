@@ -4,7 +4,7 @@ import {
   createGoogleNonce,
   getGoogleClientId,
   loadGisScript,
-  useFedcmForGooglePrompt,
+  fedcmForGooglePrompt,
   type GisCredentialResponse,
 } from '@/lib/auth/google-gis';
 
@@ -47,7 +47,7 @@ async function ensureInitialized(): Promise<boolean> {
           await afterSignIn?.();
         },
         nonce: hashedNonce,
-        use_fedcm_for_prompt: useFedcmForGooglePrompt(),
+        use_fedcm_for_prompt: fedcmForGooglePrompt(),
         auto_select: false,
         cancel_on_tap_outside: true,
         context: 'signin',
