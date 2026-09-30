@@ -12,32 +12,32 @@ function isLocalDevHost(): boolean {
   return host === 'localhost' || host === '127.0.0.1';
 }
 
-function isMobileViewport(): boolean {
-  if (typeof window === 'undefined') return false;
-  return (
-    window.matchMedia('(max-width: 767px)').matches ||
-    /Android|iPhone|iPad|iPod/i.test(navigator.userAgent)
-  );
-}
-
-/** FedCM en GIS provoca AbortError en consola (GSI_LOGGER) en móvil y dev. */
+/** FedCM en GIS provoca AbortError en consola (GSI_LOGGER) en dev. */
 export function useFedcmForGooglePrompt(): boolean {
   return false;
 }
 
-/** One Tap automático al cargar (solo desktop producción). */
-export function shouldAutoPromptGoogleOneTap(): boolean {
+function googleOneTapGloballyEnabled(): boolean {
   if (typeof window === 'undefined') return false;
   if (!getGoogleClientId()) return false;
   if (process.env.NEXT_PUBLIC_DISABLE_GOOGLE_ONE_TAP === '1') return false;
   if (isLocalDevHost()) return false;
-  if (isMobileViewport()) return false;
   return true;
 }
 
-/** One Tap antes de abrir el modal de login (mismas reglas que auto-prompt). */
+/** One Tap GIS al cargar (web móvil + desktop). No en localhost ni WebView nativa. */
+export function shouldAutoPromptGoogleOneTap(): boolean {
+  return googleOneTapGloballyEnabled();
+}
+
+/** Login Google nativo automático al abrir la app (WebView). GIS no funciona ahí. */
+export function shouldAutoPromptNativeGoogleSignIn(): boolean {
+  return googleOneTapGloballyEnabled();
+}
+
+/** One Tap / nativo antes de abrir el modal de login. */
 export function shouldTryGoogleOneTapBeforeModal(): boolean {
-  return shouldAutoPromptGoogleOneTap();
+  return googleOneTapGloballyEnabled();
 }
 
 export async function createGoogleNonce(): Promise<{ nonce: string; hashedNonce: string }> {

@@ -6,6 +6,10 @@ import { usePathname } from 'next/navigation';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
 import { useUI } from '@/contexts/UIContext';
 import { BUSCADIS_SOCIAL_LINKS, shouldShowBuscadisSocialChrome } from '@/lib/buscadis-social';
+import {
+  markSocialFloatIntroSessionIfNeeded,
+  shouldAutoOpenSocialFloatOnMobile,
+} from '@/lib/buscadis-social-float-intro';
 import { SOCIAL_NETWORK_BRAND_HEX } from '@/lib/business/social-network-brands';
 import { getSocialIconByBrand } from '@/components/business/public/social-icons';
 import type { SocialBrandKey } from '@/lib/business/social-display';
@@ -84,6 +88,15 @@ export default function BuscadisSocialFloat() {
   const { isAuthModalOpen } = useUI();
   const [abierto, setAbierto] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
+  const introAppliedRef = useRef(false);
+
+  useEffect(() => {
+    if (isDesktop || introAppliedRef.current) return;
+    if (!shouldAutoOpenSocialFloatOnMobile()) return;
+    introAppliedRef.current = true;
+    setAbierto(true);
+    markSocialFloatIntroSessionIfNeeded();
+  }, [isDesktop]);
 
   useEffect(() => {
     if (!abierto || isDesktop) return;
