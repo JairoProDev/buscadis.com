@@ -9,7 +9,7 @@ import { useRouter } from 'next/navigation';
 import { useStableSearchParams } from '@/hooks/useStableSearchParams';
 import { Adiso, Categoria } from '@/types';
 import { getAdisos, getAdisoById, saveAdiso, getAdisosCache } from '@/lib/storage';
-import { getAdisosFromSupabase } from '@/lib/supabase';
+import { formatSupabaseError, getAdisosFromSupabase } from '@/lib/supabase';
 import { getMarketplaceFeed, getCatalogProductsAsAdisos } from '@/lib/business';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
 import { useToast } from '@/hooks/useToast';
@@ -456,7 +456,7 @@ function HomeContent({ initialSearchParams }: HomeContentProps) {
       } catch (error) {
         // Solo mostrar errores en desarrollo
         if (process.env.NODE_ENV === 'development') {
-          console.error('Error al actualizar desde API:', error);
+          console.error('Error al actualizar desde API:', formatSupabaseError(error));
         }
         setHayMasAdisos(false);
       } finally {

@@ -17,19 +17,6 @@ let initPromise: Promise<boolean> | null = null;
 let afterSignIn: (() => void | Promise<void>) | null = null;
 let promptInFlight: Promise<boolean> | null = null;
 
-function isLocalHost(): boolean {
-  if (typeof window === 'undefined') return false;
-  return window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-}
-
-function isMobileViewport(): boolean {
-  if (typeof window === 'undefined') return false;
-  return (
-    window.matchMedia('(max-width: 767px)').matches ||
-    /Android|iPhone|iPad|iPod/i.test(navigator.userAgent)
-  );
-}
-
 async function ensureInitialized(): Promise<boolean> {
   const clientId = getGoogleClientId();
   if (!clientId) return false;
@@ -59,7 +46,8 @@ async function ensureInitialized(): Promise<boolean> {
           await afterSignIn?.();
         },
         nonce: hashedNonce,
-        use_fedcm_for_prompt: !isMobileViewport() && !isLocalHost(),
+        // FedCM suele abortar en móvil, localhost y navegación rápida (GSI_LOGGER AbortError).
+        use_fedcm_for_prompt: false,
         auto_select: false,
         cancel_on_tap_outside: true,
         context: 'signin',

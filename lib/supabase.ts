@@ -21,6 +21,14 @@ export const supabase = supabaseUrl && supabaseAnonKey
   })
   : null;
 
+/** PostgrestError no siempre serializa bien en console.error (aparece `{}`). */
+export function formatSupabaseError(error: unknown): string {
+  if (!error || typeof error !== 'object') return String(error);
+  const e = error as { message?: string; code?: string; details?: string; hint?: string };
+  const parts = [e.message, e.code && `code=${e.code}`, e.details, e.hint].filter(Boolean);
+  return parts.length > 0 ? parts.join(' | ') : JSON.stringify(error);
+}
+
 // Función para convertir de la base de datos a Adiso
 export function dbToAdiso(row: any): Adiso {
   // Soporte para múltiples imágenes (array JSON) o imagen única (string)
@@ -247,49 +255,56 @@ export async function getAdisosFromSupabase(options?: {
   }
 
   try {
-    await clearExpiredPromotions();
+    // No bloquear el feed: la RPC puede tardar >1s y provocar statement timeout en la query.
+    void clearExpiredPromotions();
 
-    let query = supabase
-      .from('adisos')
-      .select('*');
+    const runQuery = (usePromotionOrder: boolean) => {
+      let query = supabase.from('adisos').select('*');
 
-    // Filtrar por activos si se solicita (sin cortar por fecha_expiracion:
-    // los caducados deben seguir visibles; el contacto se enruta a ops).
-    if (options?.soloActivos === true) {
-      query = query.eq('esta_activo', true);
+      if (options?.soloActivos === true) {
+        query = query.eq('esta_activo', true);
+      }
+
+      if (options?.categoria && options.categoria !== 'todos') {
+        query = query.eq('categoria', options.categoria);
+      }
+
+      if (options?.busqueda) {
+        const q = options.busqueda;
+        query = query.or(`titulo.ilike.%${q}%,descripcion.ilike.%${q}%,ubicacion.ilike.%${q}%`);
+      }
+
+      if (usePromotionOrder) {
+        query = query
+          .order('promotion_rank', { ascending: false })
+          .order('promoted_at', { ascending: false, nullsFirst: false })
+          .order('fecha_publicacion', { ascending: false })
+          .order('hora_publicacion', { ascending: false });
+      } else {
+        query = query
+          .order('fecha_publicacion', { ascending: false })
+          .order('hora_publicacion', { ascending: false });
+      }
+
+      if (options?.limit) {
+        const from = options.offset || 0;
+        const to = from + options.limit - 1;
+        query = query.range(from, to);
+      } else {
+        query = query.limit(50);
+      }
+
+      return query;
+    };
+
+    let { data, error } = await runQuery(true);
+
+    if (error?.code === '57014') {
+      ({ data, error } = await runQuery(false));
     }
-
-    // Filtrar por categoría
-    if (options?.categoria && options.categoria !== 'todos') {
-      query = query.eq('categoria', options.categoria);
-    }
-
-    // Filtrar por búsqueda (título, descripción, ubicación texto)
-    if (options?.busqueda) {
-      const q = options.busqueda;
-      query = query.or(`titulo.ilike.%${q}%,descripcion.ilike.%${q}%,ubicacion.ilike.%${q}%`);
-    }
-
-    // Ordenar por promoción (premium/destacados primero) y luego por fecha
-    query = query.order('promotion_rank', { ascending: false })
-      .order('promoted_at', { ascending: false, nullsFirst: false })
-      .order('fecha_publicacion', { ascending: false })
-      .order('hora_publicacion', { ascending: false });
-
-    // Aplicar paginación si se proporciona (optimizado)
-    if (options?.limit) {
-      const from = options.offset || 0;
-      const to = from + options.limit - 1;
-      query = query.range(from, to);
-    } else {
-      // Por defecto, limitar a 50 para mejor rendimiento
-      query = query.limit(50);
-    }
-
-    const { data, error } = await query;
 
     if (error) {
-      console.error('Error al obtener adisos:', error);
+      console.error('Error al obtener adisos:', formatSupabaseError(error));
       throw error;
     }
 
@@ -316,7 +331,7 @@ export async function getAdisosPageFromSupabase(options: {
   }
 
   try {
-    await clearExpiredPromotions();
+    void clearExpiredPromotions();
 
     let query = supabase
       .from('adisos')
@@ -348,7 +363,7 @@ export async function getAdisosPageFromSupabase(options: {
     const { data, error, count } = await query;
 
     if (error) {
-      console.error('Error al obtener página de adisos:', error);
+      console.error('Error al obtener página de adisos:', formatSupabaseError(error));
       throw error;
     }
 
@@ -487,13 +502,37 @@ export async function updateAdisoInSupabase(adiso: Adiso): Promise<Adiso> {
  * ordenamiento del feed sea correcto sin depender de un cron externo.
  * Es de "mejor esfuerzo": si falla no debe bloquear la carga del feed.
  */
+let lastClearExpiredPromotionsAt = 0;
+const CLEAR_EXPIRED_PROMOTIONS_MS = 10 * 60 * 1000;
+let clearExpiredPromotionsInFlight: Promise<void> | null = null;
+
 async function clearExpiredPromotions(): Promise<void> {
   if (!supabase) return;
-  try {
-    await supabase.rpc('fn_clear_expired_promotions');
-  } catch {
-    // Ignorar: no es crítico para mostrar el feed
+
+  const now = Date.now();
+  if (now - lastClearExpiredPromotionsAt < CLEAR_EXPIRED_PROMOTIONS_MS) return;
+
+  if (clearExpiredPromotionsInFlight) {
+    await clearExpiredPromotionsInFlight;
+    return;
   }
+
+  clearExpiredPromotionsInFlight = (async () => {
+    try {
+      const { error } = await supabase.rpc('fn_clear_expired_promotions');
+      if (error && process.env.NODE_ENV === 'development') {
+        console.warn('[supabase] fn_clear_expired_promotions:', formatSupabaseError(error));
+      } else if (!error) {
+        lastClearExpiredPromotionsAt = Date.now();
+      }
+    } catch {
+      // No crítico para el feed
+    } finally {
+      clearExpiredPromotionsInFlight = null;
+    }
+  })();
+
+  await clearExpiredPromotionsInFlight;
 }
 
 /**
