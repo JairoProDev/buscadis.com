@@ -6,6 +6,7 @@ import {
   createGoogleNonce,
   getGoogleClientId,
   loadGisScript,
+  useFedcmForGooglePrompt,
   type GisCredentialResponse,
 } from '@/lib/auth/google-gis';
 import { IconGoogle } from '@/components/Icons';
@@ -96,10 +97,7 @@ export default function GoogleGisButton({ label, disabled, onSuccess, onError }:
             }
           },
           nonce: hashedNonce,
-          use_fedcm_for_prompt:
-            typeof window !== 'undefined' &&
-            window.location.hostname !== 'localhost' &&
-            window.location.hostname !== '127.0.0.1',
+          use_fedcm_for_prompt: useFedcmForGooglePrompt(),
           context: 'signin',
         });
 
@@ -163,7 +161,7 @@ export default function GoogleGisButton({ label, disabled, onSuccess, onError }:
           onSuccess?.();
         },
         nonce: hashedNonce,
-        use_fedcm_for_prompt: true,
+        use_fedcm_for_prompt: useFedcmForGooglePrompt(),
       });
       window.google?.accounts.id.prompt();
     } catch (e: unknown) {

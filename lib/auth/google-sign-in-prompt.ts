@@ -4,6 +4,7 @@ import {
   createGoogleNonce,
   getGoogleClientId,
   loadGisScript,
+  useFedcmForGooglePrompt,
   type GisCredentialResponse,
 } from '@/lib/auth/google-gis';
 
@@ -46,8 +47,7 @@ async function ensureInitialized(): Promise<boolean> {
           await afterSignIn?.();
         },
         nonce: hashedNonce,
-        // FedCM suele abortar en móvil, localhost y navegación rápida (GSI_LOGGER AbortError).
-        use_fedcm_for_prompt: false,
+        use_fedcm_for_prompt: useFedcmForGooglePrompt(),
         auto_select: false,
         cancel_on_tap_outside: true,
         context: 'signin',
@@ -68,13 +68,7 @@ async function runPrompt(): Promise<boolean> {
   const ready = await ensureInitialized();
   if (!ready || !window.google?.accounts?.id) return false;
 
-  try {
-    window.google.accounts.id.cancel();
-  } catch {
-    /* ignore */
-  }
-
-  await new Promise((r) => setTimeout(r, 80));
+  // No llamar cancel() aquí: aborta FedCM/GIS en curso y dispara GSI_LOGGER AbortError.
 
   return new Promise((resolve) => {
     window.google!.accounts!.id!.prompt((notification: PromptNotification) => {
