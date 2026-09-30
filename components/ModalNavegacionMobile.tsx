@@ -20,6 +20,7 @@ import { SeccionSidebar } from './SidebarDesktop';
 import ModalAdiso from './ModalAdiso';
 import { semantic } from '@/lib/bs-tokens';
 import { IconSparkles, IconAdis } from './Icons';
+import BuscadisSocialLinksRow from '@/components/BuscadisSocialLinksRow';
 
 const MapaInteractivo = dynamic(() => import('./MapaInteractivo'), { ssr: false });
 const PublishStudioShell = dynamic(() => import('./publish/PublishStudioShell'), { ssr: false });
@@ -520,6 +521,15 @@ export default function ModalNavegacionMobile({
             borderTop: '1px solid var(--border-color)',
             backgroundColor: 'var(--bg-primary)'
           }}>
+            <div style={{ marginBottom: '1rem' }}>
+              <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-tertiary)', marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.5px', paddingLeft: '0.75rem' }}>
+                Buscadis en redes
+              </div>
+              <div style={{ paddingLeft: '0.75rem', paddingRight: '0.75rem' }}>
+                <BuscadisSocialLinksRow onLinkClick={onCerrar} />
+              </div>
+            </div>
+
             <div style={{ marginBottom: '1rem' }}>
               <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-tertiary)', marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.5px', paddingLeft: '0.75rem' }}>
                 ⚙️ Preferencias

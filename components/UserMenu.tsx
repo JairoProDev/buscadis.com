@@ -22,6 +22,7 @@ import { useTranslation } from '@/hooks/useTranslation';
 import ThemeToggle from './ThemeToggle';
 import LanguageSelector from './LanguageSelector';
 import ModeIndicator, { ModeSubtitle } from '@/components/profile/ModeIndicator';
+import BuscadisSocialLinksRow from '@/components/BuscadisSocialLinksRow';
 import { semantic } from '@/lib/bs-tokens';
 
 interface UserMenuProps {
@@ -231,6 +232,19 @@ function UserMenuContent({ onProgressClick }: UserMenuProps) {
                 }}
               />
             )}
+          </div>
+
+          <div className="mx-3 h-px bg-[var(--border-color)]" />
+
+          <div className="px-4 py-3">
+            <p className="mb-2.5 text-[10px] font-bold uppercase tracking-wider text-[var(--text-tertiary)]">
+              Buscadis en redes
+            </p>
+            <BuscadisSocialLinksRow
+              iconSize={17}
+              buttonSize={38}
+              onLinkClick={() => setMostrarMenu(false)}
+            />
           </div>
 
           <div className="mx-3 h-px bg-[var(--border-color)]" />

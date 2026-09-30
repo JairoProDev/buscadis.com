@@ -61,7 +61,6 @@ import FiltroUbicacion from '@/components/FiltroUbicacion';
 import GrillaAdisos from '@/components/GrillaAdisos';
 import SkeletonAdisos, { SkeletonToolbar } from '@/components/SkeletonAdisos';
 import { ToastContainer } from '@/components/Toast';
-import FeedbackButton from '@/components/FeedbackButton';
 import NavbarMobile from '@/components/NavbarMobile';
 import LeftSidebar from '@/components/LeftSidebar';
 import PullToRefresh from '@/components/pwa/PullToRefresh';
@@ -1672,7 +1671,6 @@ function HomeContent({ initialSearchParams }: HomeContentProps) {
               />
             )}
           </div>
-          <FeedbackButton />
 
           {/* Left Sidebar (Desktop/Mobile if requested) */}
           <LeftSidebar

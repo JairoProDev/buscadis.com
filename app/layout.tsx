@@ -14,6 +14,7 @@ import SessionTracker from '@/components/SessionTracker';
 import AnalyticsProvider from '@/components/analytics/AnalyticsProvider';
 import ReferralCapture from '@/components/auth/ReferralCapture';
 import NativeWebViewBootstrap from '@/components/NativeWebViewBootstrap';
+import SiteFloatingActions from '@/components/SiteFloatingActions';
 import {
   buildDefaultOgImageMeta,
   buildDefaultTwitterImageMeta,
@@ -185,6 +186,7 @@ export default function RootLayout({
                       <ReferralCapture />
                       <OfflineIndicator />
                       {children}
+                      <SiteFloatingActions />
                       <InstallPrompt />
                     </NavigationProvider>
                   </AdisosGratuitosCacheProvider>
