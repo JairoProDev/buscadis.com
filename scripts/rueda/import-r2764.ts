@@ -11,7 +11,6 @@ import * as dotenv from 'dotenv';
 import * as fs from 'fs';
 import * as path from 'path';
 import { nanoid } from 'nanoid';
-import { supabaseAdmin } from '../../lib/supabase-admin';
 import { adisoToDb } from '../../lib/supabase';
 import { featuresForTier } from '../../lib/publish/tiers';
 import type { Adiso, ContactoMultiple } from '../../types';
@@ -28,6 +27,11 @@ import type { FlyerTemplateId } from '../../lib/flyer/types';
 dotenv.config({ path: path.join(process.cwd(), '.env.local') });
 dotenv.config({ path: path.join(process.cwd(), '.env') });
 
+async function getSupabaseAdmin() {
+  const { supabaseAdmin } = await import('../../lib/supabase-admin');
+  return supabaseAdmin;
+}
+
 const OPS_USER_ID = process.env.RUEDA_OPS_USER_ID || 'ef81f31b-a11d-4417-9325-e737daaad32e';
 
 function hasFlag(name: string) {
@@ -41,6 +45,7 @@ function argNum(name: string, def: number): number {
 }
 
 async function batchExists(): Promise<boolean> {
+  const supabaseAdmin = await getSupabaseAdmin();
   const { data } = await supabaseAdmin
     .from('adisos')
     .select('id')
@@ -116,6 +121,7 @@ export function toAdiso(
 }
 
 async function main() {
+  const supabaseAdmin = await getSupabaseAdmin();
   const dryRun = !hasFlag('--apply');
   const startInMinutes = argNum('start-in-minutes', 1);
   const intervalMs = argNum('interval-seconds', 60) * 1000;
@@ -144,7 +150,7 @@ async function main() {
   if (missingOnly) {
     const { data: existing } = await supabaseAdmin
       .from('adisos')
-      .select('private_data')
+      .select('contacto, private_data')
       .contains('private_data', { batch_id: RUEDA_R2764_BATCH_ID });
     const seen = new Set(
       (existing || []).map((r) => {
@@ -156,7 +162,7 @@ async function main() {
     );
     avisosToImport = avisos.filter((a) => {
       const phone = (a.telefonos[0] || '').replace(/\D/g, '').slice(-9);
-      return phone && !seen.has(`${a.pagina}:${phone}`);
+      return phone && !seen.has(`${String(a.pagina)}:${phone}`);
     });
     if (!avisosToImport.length) {
       console.log(JSON.stringify({ missing: 0 }));
