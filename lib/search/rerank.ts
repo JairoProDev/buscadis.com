@@ -2,6 +2,7 @@ import { Adiso } from '@/types';
 import type { UserInterestProfile } from '@/lib/interactions';
 import { personalizationFreshnessBoostMs } from '@/lib/ai/personalization';
 import { getFeedVisualBoostMs } from '@/lib/feed/ranking';
+import { searchQueryRelevanceScore } from '@/lib/search/query-match';
 
 export interface ScoredAdiso {
   adiso: Adiso;
@@ -57,9 +58,11 @@ export function rerankSearchResults(
   options?: {
     interestProfile?: UserInterestProfile | null;
     inferredCategory?: string;
+    query?: string;
   },
 ): ScoredAdiso[] {
-  const { interestProfile, inferredCategory } = options ?? {};
+  const { interestProfile, inferredCategory, query } = options ?? {};
+  const q = query?.trim() ?? '';
 
   return [...items]
     .map((item) => {
@@ -69,10 +72,12 @@ export function rerankSearchResults(
       const promo = promotionBoost(item.adiso);
       const categoryMatch =
         inferredCategory && item.adiso.categoria === inferredCategory ? 0.1 : 0;
+      const phrase = q ? searchQueryRelevanceScore(item.adiso, q) * 0.65 : 0;
       const recencyPersonal = personalizationFreshnessBoostMs(item.adiso, interestProfile ?? null) / 1e12;
       const visualBoost = getFeedVisualBoostMs(item.adiso) / 1e12;
 
-      const finalScore = base + fresh + interest + promo + categoryMatch + recencyPersonal + visualBoost;
+      const finalScore =
+        base + fresh + interest + promo + categoryMatch + phrase + recencyPersonal + visualBoost;
       return { ...item, rerank_score: finalScore, score: finalScore };
     })
     .sort((a, b) => (b.rerank_score ?? 0) - (a.rerank_score ?? 0));

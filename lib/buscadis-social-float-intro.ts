@@ -1,6 +1,6 @@
 const INTRO_SESSIONS_KEY = 'buscadis.social-float.intro-sessions-shown';
 const INTRO_SESSION_MARK = 'buscadis.social-float.intro-marked-session';
-export const SOCIAL_FLOAT_INTRO_MAX_SESSIONS = 3;
+export const SOCIAL_FLOAT_INTRO_MAX_SESSIONS = 0;
 
 /** Primeras N sesiones en móvil: menú de redes abierto para descubrir el cierre (X). */
 export function shouldAutoOpenSocialFloatOnMobile(): boolean {

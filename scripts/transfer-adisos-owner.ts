@@ -75,6 +75,8 @@ async function main() {
     if (error) {
       console.error(`Error en ${row.id}:`, error.message);
     } else {
+      const { applyClaimRepublish } = await import('../lib/rueda/go-live');
+      await applyClaimRepublish(row.id as string, newOwnerId);
       console.log(`✓ ${row.titulo?.slice(0, 50)}…`);
     }
   }

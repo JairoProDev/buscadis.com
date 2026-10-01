@@ -37,8 +37,7 @@ export default function FlyerCanvas({
   const cfg = resolveFlyerConfig(content.categoria, templateId, config);
   const compact = density === 'compact';
   const rawTitle = (content.title || 'Adiso en Buscadis').trim().replace(/\s+/g, ' ');
-  // En el feed el título se envuelve: no cortar con puntos si todavía cabe en el cuadrado.
-  const title = compact ? rawTitle : truncateFlyerTitle(rawTitle, 90);
+  const title = compact ? truncateFlyerTitle(rawTitle, 72) : truncateFlyerTitle(rawTitle, 90);
   const align = cfg.align === 'center' ? 'center' : 'left';
   const primary = cfg.primary;
   const secondary = cfg.secondary;
@@ -506,10 +505,10 @@ export default function FlyerCanvas({
       body = (
         <div
           className="absolute inset-0 flex min-h-0 flex-col items-center justify-center overflow-hidden"
-          style={{ background: secondary, padding: compact ? '5%' : '8%' }}
+          style={{ background: secondary, padding: compact ? '5%' : '6%' }}
         >
           <div
-            className="flex max-h-full max-w-full flex-col items-center gap-2 overflow-hidden rounded-[1.25rem] border-dashed px-[6%] py-[8%]"
+            className="flex min-h-0 max-h-[88%] w-full max-w-full flex-col items-center gap-1.5 overflow-hidden rounded-[1.25rem] border-dashed px-[5%] py-[5%]"
             style={{ borderColor: primary, borderWidth: compact ? 2 : 3 }}
           >
             {(badge || (cfg.showCategory && content.categoryLabel)) && (
@@ -520,7 +519,17 @@ export default function FlyerCanvas({
                 {badge || content.categoryLabel}
               </span>
             )}
-            <Title className="text-center" style={{ textAlign: 'center', color: flyer.ink }}>
+            <Title
+              className="min-h-0 max-h-full overflow-hidden text-center"
+              style={{
+                textAlign: 'center',
+                color: flyer.ink,
+                fontSize: compact
+                  ? titleStyle.fontSize
+                  : `min(${typeof titleStyle.fontSize === 'string' ? titleStyle.fontSize : '1.25rem'}, 4.8cqi)`,
+                lineHeight: compact ? 1.12 : 1.1,
+              }}
+            >
               {title}
             </Title>
             {price && (

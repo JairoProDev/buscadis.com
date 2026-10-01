@@ -1,3 +1,5 @@
+import { classifyRuedaListing } from '@/lib/rueda/classify-from-text';
+
 /**
  * Extracción/separación de adisos de Rueda de Negocios (texto de página).
  * Enfocado en: 1 adiso = 1 contacto+oferta, títulos útiles, sin masthead.
@@ -81,38 +83,10 @@ export function filtrarMetadatos(texto: string): string {
 }
 
 export function detectarCategoria(texto: string): string {
-  const t = texto.toLowerCase();
-  // Empleos primero (requiere/CV pisan “vendo”)
-  if (
-    /trabajo|empleo|necesito personal|requiere|requeri|solicita|vacante|cocinero|mozo|ayudante|asistente|vendedor|chofer|conductor|curriculum|currículum|\bcv\b|sueldo|postul|housekeeping|briefing|recepcionista|operador para/.test(
-      t
-    )
-  ) {
-    return 'empleos';
-  }
-  if (
-    /anticresis|habitaci[oó]n|departamento|alquilo|se alquila|en alquiler|terreno|casa ampl|vendo casa|vendo edificio|se vende terreno|en venta terreno|vendo terreno|vendo lote|local comercial|oficina en |inmueble|canch[oó]n|lote de |lote \d|airbnb|condominio|m²|m2|hect[aá]reas?|registros p[uú]blicos|rr\.?\s*pp/.test(
-      t
-    )
-  ) {
-    return 'inmuebles';
-  }
-  if (/auto |carro |camioneta|\bmoto\b|motocicleta|kilometraje|toyota|hyundai|nissan|blubier/.test(t)) {
-    return 'vehiculos';
-  }
-  if (/traspaso|negocio en marcha|buscar socio|fondo de comercio/.test(t)) {
-    return 'negocios';
-  }
-  if (/servicio de |reparaci[oó]n|limpieza|veterinario|clases de |gasfiter|electricista/.test(t)) {
-    return 'servicios';
-  }
-  if (/fiesta|evento|show|concierto/.test(t)) {
-    return 'eventos';
-  }
-  if (/vendo|venta|remato/.test(t) && !/departamento|casa |terreno|local |oficina|habitaci|alquilo/.test(t)) {
-    return 'productos';
-  }
-  return 'productos';
+  const flat = texto.replace(/\s+/g, ' ').trim();
+  const cut = flat.search(/[.!?]\s/);
+  const titulo = cut > 10 && cut < 90 ? flat.slice(0, cut + 1) : flat.slice(0, 80);
+  return classifyRuedaListing(titulo, flat);
 }
 
 function contarIniciosFusion(texto: string): number {
@@ -515,24 +489,65 @@ export function esPublicable(a: AnuncioExtraido): boolean {
   return true;
 }
 
+function mapTextoRawToAnuncio(textoRaw: string): AnuncioExtraido {
+  const { titulo, descripcion } = tituloYDesc(textoRaw);
+  const telefonos = extraerTelefonos9(textoRaw);
+  let desc = descripcion;
+  for (const tel of telefonos) {
+    desc = desc.replace(new RegExp(tel, 'g'), '');
+  }
+  desc = desc
+    .replace(/\b(?:Cel|Cels|Cel\.|Cels\.|Telf|Telf\.|Tel|Tel\.|WhatsApp|WA)\s*:?\s*[-–,/\s]*\.?/gi, '')
+    .replace(/\s{2,}/g, ' ')
+    .replace(/\s+([.,])/g, '$1')
+    .trim();
+
+  const categoria = detectarCategoria(textoRaw);
+  const { issues, score } = evaluarCalidad(textoRaw, titulo, desc, telefonos, categoria);
+  return { textoRaw, titulo, descripcion: desc.slice(0, 2000), categoria, telefonos, issues, score };
+}
+
 export function estructurarAnuncios(textoPagina: string): AnuncioExtraido[] {
   const partes = separarAnuncios(textoPagina);
-  return partes.map((textoRaw) => {
-    const { titulo, descripcion } = tituloYDesc(textoRaw);
-    const telefonos = extraerTelefonos9(textoRaw);
-    // Quitar teléfonos de descripción (simple)
-    let desc = descripcion;
-    for (const tel of telefonos) {
-      desc = desc.replace(new RegExp(tel, 'g'), '');
-    }
-    desc = desc
-      .replace(/\b(?:Cel|Cels|Cel\.|Cels\.|Telf|Telf\.|Tel|Tel\.|WhatsApp|WA)\s*:?\s*[-–,/\s]*\.?/gi, '')
-      .replace(/\s{2,}/g, ' ')
-      .replace(/\s+([.,])/g, '$1')
-      .trim();
+  return partes.map((textoRaw) => mapTextoRawToAnuncio(textoRaw));
+}
 
-    const categoria = detectarCategoria(textoRaw);
-    const { issues, score } = evaluarCalidad(textoRaw, titulo, desc, telefonos, categoria);
-    return { textoRaw, titulo, descripcion: desc.slice(0, 2000), categoria, telefonos, issues, score };
-  });
+/**
+ * Import Rueda: split extra por teléfono y rescata números no cubiertos en la página.
+ */
+export function estructurarAnunciosMaximo(textoPagina: string): AnuncioExtraido[] {
+  const limpio = filtrarMetadatos(normalizarTelefonosEnTexto(textoPagina));
+  const flat = limpio.replace(/\n/g, ' ').replace(/\s{2,}/g, ' ').trim();
+  const partesBase = separarAnuncios(textoPagina);
+  const expanded: string[] = [];
+
+  for (const chunk of partesBase) {
+    const byPhone = fragmentarUnoPorTelefono(chunk);
+    expanded.push(...(byPhone.length > 1 ? byPhone : [chunk]));
+  }
+
+  const byPrimary = new Map<string, AnuncioExtraido>();
+  for (const textoRaw of expanded) {
+    const ad = mapTextoRawToAnuncio(textoRaw);
+    const primary = ad.telefonos[0];
+    if (!primary) continue;
+    const prev = byPrimary.get(primary);
+    if (!prev || ad.score > prev.score) byPrimary.set(primary, ad);
+  }
+
+  const used = new Set(byPrimary.keys());
+  for (const phone of extraerTelefonos9(flat)) {
+    if (used.has(phone)) continue;
+    const idx = flat.indexOf(phone);
+    if (idx < 0) continue;
+    const start = Math.max(0, idx - 380);
+    const piece = flat.slice(start, idx + 9).trim();
+    if (piece.length < 35) continue;
+    const ad = mapTextoRawToAnuncio(piece);
+    if (!ad.telefonos[0]) continue;
+    byPrimary.set(ad.telefonos[0], ad);
+    used.add(ad.telefonos[0]);
+  }
+
+  return [...byPrimary.values()].sort((a, b) => (a.telefonos[0] || '').localeCompare(b.telefonos[0] || ''));
 }

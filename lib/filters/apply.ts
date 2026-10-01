@@ -7,6 +7,7 @@ import { compareRecientesFeed, injectFeedExploration } from '@/lib/feed/ranking'
 import { compareCercanos, compareConFotos, comparePrecio, compareVistos } from './sort-compare';
 import type { UserInterestProfile } from '@/lib/interactions';
 import { getCountryByCode, DEFAULT_COUNTRY_CODE } from '@/lib/geo/countries-data';
+import { adisoMatchesSearchQuery } from '@/lib/search/query-match';
 
 const TEST_REGEX = /toyota test|test adiso|test anuncio/i;
 
@@ -193,24 +194,9 @@ export function applyBrowseFilters({
     filtrados = filtrados.filter((a) => adisoMatchesFacets(a, filters.facets));
   }
 
-  const q = busqueda.trim().toLowerCase();
+  const q = busqueda.trim();
   if (q) {
-    filtrados = filtrados.filter((a) => {
-      const tituloMatch = a.titulo.toLowerCase().includes(q);
-      const descripcionMatch = a.descripcion.toLowerCase().includes(q);
-      let ubicacionMatch = false;
-      if (typeof a.ubicacion === 'string') {
-        ubicacionMatch = a.ubicacion.toLowerCase().includes(q);
-      } else if (a.ubicacion && typeof a.ubicacion === 'object') {
-        const ubi = a.ubicacion;
-        ubicacionMatch =
-          (ubi.departamento?.toLowerCase().includes(q) ?? false) ||
-          (ubi.provincia?.toLowerCase().includes(q) ?? false) ||
-          (ubi.distrito?.toLowerCase().includes(q) ?? false) ||
-          (ubi.direccion?.toLowerCase().includes(q) ?? false);
-      }
-      return tituloMatch || descripcionMatch || ubicacionMatch;
-    });
+    filtrados = filtrados.filter((a) => adisoMatchesSearchQuery(a, q));
   }
 
   // Preserve API relevance order (search results already ranked)

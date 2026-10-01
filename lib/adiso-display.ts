@@ -1,5 +1,7 @@
 import { Adiso, Categoria, UbicacionDetallada } from '@/types';
 import { pickCardSignal } from '@/lib/social-proof';
+import { maskPhonesInText, removePhonesFromText } from '@/lib/phone';
+import { isGenericCuscoUbicacion } from '@/lib/rueda/parse-ubicacion';
 
 const CATEGORIA_LABELS: Record<Categoria, string> = {
   empleos: 'Empleos',
@@ -68,7 +70,7 @@ export function sanitizeAdisoDescripcion(descripcion: string | undefined | null)
 
 /** Títulos en MAYÚSCULAS → formato legible */
 export function toDisplayTitle(titulo: string | null | undefined): string {
-  const t = (titulo ?? '').trim();
+  const t = maskPhonesInText(removePhonesFromText((titulo ?? '').trim()));
   if (!t) return '';
   const letters = t.replace(/[^a-zA-ZáéíóúñÁÉÍÓÚÑ]/g, '');
   if (letters.length === 0) return t;
@@ -269,13 +271,18 @@ export function shouldShowPriceOnCard(adiso?: Adiso): boolean {
 export function shouldShowLocationOnCard(adiso?: Adiso): boolean {
   if (!adiso) return false;
   if (adiso.categoria === 'empleos' || adiso.categoria === 'inmuebles') {
+    const u =
+      adiso.ubicacion && typeof adiso.ubicacion === 'object'
+        ? (adiso.ubicacion as UbicacionDetallada)
+        : undefined;
+    if (u && isGenericCuscoUbicacion(u)) return false;
     return Boolean(formatUbicacionCorta(adiso.ubicacion));
   }
   return false;
 }
 
 export function getCardDescriptionSnippet(descripcion: string, maxLen = 100): string {
-  const clean = sanitizeAdisoDescripcion(descripcion);
+  const clean = maskPhonesInText(sanitizeAdisoDescripcion(removePhonesFromText(descripcion)));
   if (clean.length <= maxLen) return clean;
   return `${clean.slice(0, maxLen).trim()}…`;
 }

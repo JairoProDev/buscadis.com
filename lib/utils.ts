@@ -51,7 +51,12 @@ export const getWhatsAppUrl = (
       : adisoOrCategoria.categoria;
   const mensajeBase = `Hola, vi tu adiso de ${categoria} "${titulo}" en ${url} y me interesa. ¿Podrías brindarme más información, por favor?`;
   const mensaje = encodeURIComponent(mensajeBase);
-  const numero = contacto.replace(/\D/g, '');
+  let numero = contacto.replace(/\D/g, '');
+  if (numero.startsWith('51') && numero.length >= 11) {
+    numero = numero.slice(0, 11);
+  } else if (numero.length === 9 && numero.startsWith('9')) {
+    numero = `51${numero}`;
+  }
   return `https://wa.me/${numero}?text=${mensaje}`;
 };
 

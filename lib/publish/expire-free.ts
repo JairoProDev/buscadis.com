@@ -15,7 +15,7 @@ export async function expireFreeAds(): Promise<{ ads: number; stories: number }>
   for (const row of expiredAds || []) {
     const { error } = await supabaseAdmin
       .from('adisos')
-      .update({ esta_activo: false, es_historico: true })
+      .update({ contact_locked: true, es_historico: false, esta_activo: true })
       .eq('id', row.id);
     if (!error) ads += 1;
   }

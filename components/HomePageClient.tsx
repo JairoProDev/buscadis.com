@@ -26,6 +26,7 @@ import { getUserInterestProfile, getInteraccionesUsuario, UserInterestProfile } 
 import { persistDemandIntent } from '@/lib/demand-intents/client';
 import { trackEvent } from '@/lib/events';
 import { trackSearchEvent } from '@/lib/search/analytics';
+import { adisoMatchesSearchQuery, searchQueryRelevanceScore } from '@/lib/search/query-match';
 import { onOnlineStatusChange, getOfflineMessage } from '@/lib/offline';
 import dynamicImport from 'next/dynamic';
 import Header from '@/components/Header';
@@ -608,22 +609,13 @@ function HomeContent({ initialSearchParams }: HomeContentProps) {
         })
       ).filter((a) => typeof a.titulo === 'string' && a.titulo.trim().length > 0);
 
-      const qNorm = q.toLowerCase();
-      const matchesQuery = (a: Adiso) => {
-        const title = (a.titulo || '').toLowerCase();
-        const desc = (a.descripcion || '').toLowerCase();
-        if (title.includes(qNorm) || desc.includes(qNorm)) return true;
-        // Require at least one significant token (≥4 chars) in title/desc
-        const tokens = qNorm.split(/\s+/).filter((t) => t.length >= 4);
-        if (tokens.length === 0) return title.includes(qNorm);
-        return tokens.some((t) => title.includes(t) || desc.includes(t));
-      };
-
       const merged = new Map<string, Adiso>();
       [...apiResults, ...catalogResults].forEach((item) => {
-        if (matchesQuery(item)) merged.set(item.id, item);
+        if (adisoMatchesSearchQuery(item, q)) merged.set(item.id, item);
       });
-      const results = Array.from(merged.values());
+      const results = Array.from(merged.values()).sort(
+        (a, b) => searchQueryRelevanceScore(b, q) - searchQueryRelevanceScore(a, q),
+      );
       setSearchResults(results);
       const alts = Array.isArray(data.alternativeQueries)
         ? (data.alternativeQueries as string[]).filter((s) => typeof s === 'string' && s.trim())
@@ -742,14 +734,17 @@ function HomeContent({ initialSearchParams }: HomeContentProps) {
       return;
     }
 
-    const baseAdisos = searchResults !== null ? searchResults : adisos;
+    const inSearchMode = Boolean(committedQuery.trim());
+    const baseAdisos = inSearchMode
+      ? (searchResults !== null ? searchResults : [])
+      : adisos;
     const stableChronological =
-      searchResults === null && ordenamiento === 'recientes';
+      !inSearchMode && ordenamiento === 'recientes';
     // Keep API ranking when searching; "recientes" would destroy relevance
     const filtrados = applyBrowseFilters({
       adisos: baseAdisos,
       categoria: categoriaFiltro,
-      busqueda: '',
+      busqueda: inSearchMode && searchResults === null ? committedQuery : '',
       filters: browseFilters,
       ordenamiento,
       preserveOrder: searchResults !== null && ordenamiento === 'recientes',

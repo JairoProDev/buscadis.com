@@ -155,6 +155,7 @@ export async function executeSearch(params: ExecuteSearchParams): Promise<Execut
   const reranked = rerankSearchResults(scored, {
     interestProfile,
     inferredCategory: filterCategory,
+    query: normalized.raw,
   });
 
   const adisos = reranked.map((r) => r.adiso);

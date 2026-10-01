@@ -35,11 +35,14 @@ export function buildAdisoMetadata(adiso: Adiso): Metadata {
   const title = `${adiso.titulo} en ${ubicacion} | Buscadis`;
   const description = formatDescription(adiso);
   const imageUrl = resolveAdisoOgImage(adiso);
+  const priv = adiso.privateData as { noindex_until_claimed?: boolean; pending_owner_transfer?: boolean } | undefined;
+  const noindex = Boolean(priv?.noindex_until_claimed && priv?.pending_owner_transfer);
 
   return {
     title,
     description,
     alternates: { canonical: path },
+    robots: noindex ? { index: false, follow: false } : undefined,
     openGraph: {
       title,
       description,

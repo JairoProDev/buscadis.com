@@ -5,6 +5,7 @@ import {
   getCategoriaLabel,
   toDisplayTitle,
 } from '@/lib/adiso-display';
+import { removePhonesFromText } from '@/lib/phone';
 import {
   DEFAULT_FLYER_TEMPLATE,
   type FlyerConfig,
@@ -41,7 +42,8 @@ export function buildFlyerContent(input: {
     categoria: (input.categoria as Categoria) || 'productos',
   } as Adiso;
 
-  const title = toDisplayTitle(fakeAdiso.titulo) || fakeAdiso.titulo || 'Adiso en Buscadis';
+  const title =
+    toDisplayTitle(removePhonesFromText(fakeAdiso.titulo)) || fakeAdiso.titulo || 'Adiso en Buscadis';
   const categoria = fakeAdiso.categoria;
   return {
     title,

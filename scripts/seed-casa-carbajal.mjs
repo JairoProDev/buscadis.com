@@ -23,8 +23,9 @@ const PUBLISHED = '2026-09-25T21:40:00.000Z'; // 16:40 Lima
 const EXPIRES = '2026-10-02T21:40:00.000Z';
 const FLYER = '/tmp/carbajal/flyer.jpg';
 
-const TITULO = 'Restaurante busca personal en el Centro Histórico';
+const TITULO = 'Casa Carbajal — Restaurante busca personal en el Centro Histórico';
 const DESCRIPCION = [
+  'Casa Carbajal (Centro Histórico de Cusco).',
   'Estamos en búsqueda de personal para las siguientes áreas:',
   '• CAJA',
   '• Ayudantes de cocina',

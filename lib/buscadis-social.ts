@@ -15,6 +15,7 @@ export function getBuscadisSocialWhatsAppUrl(): string {
 }
 
 /** Redes oficiales de la marca Buscadis (no confundir con WhatsApp de soporte / Ayuda). */
+/** Sin WhatsApp: en ficha/móvil se confunde con el contacto del anunciante (soporte va en Ayuda). */
 export const BUSCADIS_SOCIAL_LINKS: BuscadisSocialLink[] = [
   {
     network: 'instagram',
@@ -36,11 +37,6 @@ export const BUSCADIS_SOCIAL_LINKS: BuscadisSocialLink[] = [
     label: 'LinkedIn de Buscadis',
     href: 'https://linkedin.com/company/buscadis',
   },
-  {
-    network: 'whatsapp',
-    label: 'WhatsApp de Buscadis',
-    href: getBuscadisSocialWhatsAppUrl(),
-  },
 ];
 
 /** Ocultar chrome de marca en vitrinas de negocio / preview perfil vivo. */
@@ -48,5 +44,7 @@ export function shouldShowBuscadisSocialChrome(pathname: string): boolean {
   if (!pathname) return true;
   if (pathname.startsWith('/v/')) return false;
   if (pathname.startsWith('/negocio/')) return false;
+  /** En ficha de adiso el float tapa el CTA de contacto del anunciante. */
+  if (pathname.startsWith('/a/')) return false;
   return true;
 }

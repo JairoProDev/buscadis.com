@@ -23,7 +23,7 @@ import {
   getCtaLabelPorCategoria,
   getInAppCtaLabelPorCategoria,
   pickSocialBadge,
-  sanitizeAdisoDescripcion,
+  getCardDescriptionSnippet,
   toDisplayTitle,
 } from '@/lib/adiso-display';
 import { registrarVisualizacion, registrarContacto } from '@/lib/analytics';
@@ -137,7 +137,7 @@ export default function AdisoLandingPage({ adiso, onVolver }: AdisoLandingPagePr
   const [enviandoMensaje, setEnviandoMensaje] = useState(false);
 
   const displayTitle = toDisplayTitle(adiso.titulo);
-  const displayDescription = sanitizeAdisoDescripcion(adiso.descripcion);
+  const displayDescription = getCardDescriptionSnippet(adiso.descripcion, 2000);
   const priceLabel = formatPrecioDisplay(adiso);
   const locationLabel = formatUbicacionCorta(adiso.ubicacion) || 'Perú';
   const publishedLabel = formatRelativePublishedAt(adiso) || 'Recientemente';
@@ -440,8 +440,29 @@ export default function AdisoLandingPage({ adiso, onVolver }: AdisoLandingPagePr
     </div>
   );
 
+  const claimPriv = adiso.privateData as {
+    pending_owner_transfer?: boolean;
+    claim_token?: string;
+    source_label?: string;
+  } | undefined;
+  const showClaimBanner = Boolean(claimPriv?.pending_owner_transfer && claimPriv?.claim_token);
+
   return (
     <>
+      {showClaimBanner && (
+        <div className="border-b border-amber-200 bg-amber-50 px-4 py-3 text-center text-sm text-amber-950 dark:border-amber-900/50 dark:bg-amber-950/40 dark:text-amber-100">
+          <p className="font-medium">
+            {claimPriv?.source_label ||
+              'Publicado por Buscadis. ¿Eres el anunciante? Reclámalo o retíralo.'}
+          </p>
+          <a
+            href={`/reclamar/${claimPriv?.claim_token}`}
+            className="mt-1 inline-block font-bold text-[var(--brand-blue)] underline"
+          >
+            Reclamar este aviso (republicación gratis al verificar)
+          </a>
+        </div>
+      )}
       {/* Toolbar — fluye con la página (no sticky) */}
       <div className="border-b border-[var(--border-color)] bg-[var(--bg-primary)]">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3 lg:px-8">
@@ -521,24 +542,24 @@ export default function AdisoLandingPage({ adiso, onVolver }: AdisoLandingPagePr
                 )}
               </div>
             ) : (
-              <div
-                className="overflow-hidden rounded-3xl border border-[var(--border-color)] bg-[var(--bg-primary)] shadow-sm"
-                style={{ minHeight: isDesktop ? '480px' : '320px', maxHeight: isDesktop ? '640px' : '420px' }}
-              >
-                {(() => {
-                  const flyer = flyerStateFromPrivateData(
-                    adiso.privateData as Record<string, unknown> | undefined,
-                    { categoria: adiso.categoria, adisoId: adiso.id }
-                  );
-                  return (
-                    <FlyerCanvas
-                      templateId={flyer.templateId}
-                      config={resolveFlyerConfig(adiso.categoria, flyer.templateId, flyer.config)}
-                      content={buildFlyerContentFromAdiso(adiso)}
-                      className="h-full min-h-[280px] w-full"
-                    />
-                  );
-                })()}
+              <div className="overflow-hidden rounded-3xl border border-[var(--border-color)] bg-[var(--bg-primary)] shadow-sm">
+                <div className="relative aspect-square w-full max-h-[min(640px,72vh)]">
+                  {(() => {
+                    const flyer = flyerStateFromPrivateData(
+                      adiso.privateData as Record<string, unknown> | undefined,
+                      { categoria: adiso.categoria, adisoId: adiso.id }
+                    );
+                    return (
+                      <FlyerCanvas
+                        templateId={flyer.templateId}
+                        config={resolveFlyerConfig(adiso.categoria, flyer.templateId, flyer.config)}
+                        content={buildFlyerContentFromAdiso(adiso)}
+                        density="comfortable"
+                        className="absolute inset-0 h-full w-full"
+                      />
+                    );
+                  })()}
+                </div>
               </div>
             )}
 

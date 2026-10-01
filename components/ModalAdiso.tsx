@@ -63,6 +63,7 @@ import {
   getCtaLabelPorCategoria,
   getInAppCtaLabelPorCategoria,
   sanitizeAdisoDescripcion,
+  getCardDescriptionSnippet,
   toDisplayTitle,
   formatPrecioDisplay,
   getCategoriaLabel,
@@ -254,7 +255,7 @@ export default function ModalAdiso({
   const inAppCtaLabel = getInAppCtaLabelPorCategoria(adiso.categoria);
   const externalContact = resolveExternalContact(adiso);
   const displayTitle = toDisplayTitle(adiso.titulo);
-  const displayDescription = sanitizeAdisoDescripcion(adiso.descripcion);
+  const displayDescription = getCardDescriptionSnippet(adiso.descripcion, 2000);
   const priceLabel = formatPrecioDisplay(adiso);
 
   const imagenesGaleria =
@@ -903,19 +904,23 @@ export default function ModalAdiso({
         </div>
       ) : (
         <div className="overflow-hidden rounded-2xl" style={{ border: '1px solid var(--border-color)' }}>
-          {(() => {
-            const flyer = flyerStateFromPrivateData(adiso.privateData as Record<string, unknown>, {
-              categoria: adiso.categoria,
-              adisoId: adiso.id,
-            });
-            return (
-              <FlyerCanvas
-                templateId={flyer.templateId}
-                config={resolveFlyerConfig(adiso.categoria, flyer.templateId, flyer.config)}
-                content={buildFlyerContentFromAdiso(adiso)}
-              />
-            );
-          })()}
+          <div className="relative aspect-square w-full max-h-[min(420px,55vh)]">
+            {(() => {
+              const flyer = flyerStateFromPrivateData(adiso.privateData as Record<string, unknown>, {
+                categoria: adiso.categoria,
+                adisoId: adiso.id,
+              });
+              return (
+                <FlyerCanvas
+                  templateId={flyer.templateId}
+                  config={resolveFlyerConfig(adiso.categoria, flyer.templateId, flyer.config)}
+                  content={buildFlyerContentFromAdiso(adiso)}
+                  density="comfortable"
+                  className="absolute inset-0 h-full w-full"
+                />
+              );
+            })()}
+          </div>
         </div>
       )}
 
