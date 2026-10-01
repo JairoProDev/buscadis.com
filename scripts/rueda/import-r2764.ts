@@ -5,6 +5,7 @@
  *   npx tsx scripts/rueda/import-r2764.ts --dry-run
  *   npx tsx scripts/rueda/import-r2764.ts --apply
  *   npx tsx scripts/rueda/import-r2764.ts --apply --start-in-minutes=2
+ *   npx tsx scripts/rueda/import-r2764.ts --apply --missing-only
  */
 import * as dotenv from 'dotenv';
 import * as fs from 'fs';
@@ -48,7 +49,7 @@ async function batchExists(): Promise<boolean> {
   return (data?.length ?? 0) > 0;
 }
 
-function toAdiso(
+export function toAdiso(
   item: RuedaExtractedAd,
   scheduledGoLiveAt: string,
   claimToken: string
@@ -133,12 +134,42 @@ async function main() {
   const avisos = payload.avisos.sort((a, b) => a.pagina - b.pagina || a.titulo.localeCompare(b.titulo));
   const baseTime = Date.now() + startInMinutes * 60 * 1000;
 
-  if (await batchExists()) {
+  const missingOnly = hasFlag('--missing-only');
+  if (!missingOnly && (await batchExists())) {
     console.log(JSON.stringify({ skipped: true, reason: 'batch_already_imported', batch: RUEDA_R2764_BATCH_ID }));
     if (!dryRun) process.exit(0);
   }
 
-  const rows = avisos.map((item, index) => {
+  let avisosToImport = avisos;
+  if (missingOnly) {
+    const { data: existing } = await supabaseAdmin
+      .from('adisos')
+      .select('private_data')
+      .contains('private_data', { batch_id: RUEDA_R2764_BATCH_ID });
+    const keys = new Set(
+      (existing || [])
+        .map((r) => (r.private_data as Record<string, unknown>)?.import_key)
+        .filter(Boolean) as string[],
+    );
+    avisosToImport = avisos.filter((a) => !keys.has(a.import_key));
+    if (!avisosToImport.length) {
+      console.log(JSON.stringify({ missing: 0 }));
+      return;
+    }
+    const { data: lastScheduled } = await supabaseAdmin
+      .from('adisos')
+      .select('private_data')
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .contains('private_data', { batch_id: RUEDA_R2764_BATCH_ID });
+    const lastAt = (lastScheduled?.[0]?.private_data as Record<string, unknown>)?.scheduled_go_live_at;
+    if (typeof lastAt === 'string') {
+      const t = new Date(lastAt).getTime();
+      if (t + intervalMs > baseTime) baseTime = t + intervalMs;
+    }
+  }
+
+  const rows = avisosToImport.map((item, index) => {
     const scheduledGoLiveAt = new Date(baseTime + index * intervalMs).toISOString();
     const claimToken = nanoid(24);
     return toAdiso(item, scheduledGoLiveAt, claimToken);

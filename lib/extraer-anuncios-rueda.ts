@@ -526,28 +526,40 @@ export function estructurarAnunciosMaximo(textoPagina: string): AnuncioExtraido[
     expanded.push(...(byPhone.length > 1 ? byPhone : [chunk]));
   }
 
-  const byPrimary = new Map<string, AnuncioExtraido>();
+  const dedupeKey = (ad: AnuncioExtraido) =>
+    `${ad.telefonos[0] || 'x'}:${ad.titulo.toLowerCase().replace(/\s+/g, ' ').slice(0, 48)}`;
+
+  const byKey = new Map<string, AnuncioExtraido>();
   for (const textoRaw of expanded) {
     const ad = mapTextoRawToAnuncio(textoRaw);
     const primary = ad.telefonos[0];
     if (!primary) continue;
-    const prev = byPrimary.get(primary);
-    if (!prev || ad.score > prev.score) byPrimary.set(primary, ad);
+    const key = dedupeKey(ad);
+    const prev = byKey.get(key);
+    if (!prev || ad.score > prev.score) byKey.set(key, ad);
   }
 
-  const used = new Set(byPrimary.keys());
+  const usedPhones = new Set(
+    [...byKey.values()].flatMap((a) => a.telefonos),
+  );
   for (const phone of extraerTelefonos9(flat)) {
-    if (used.has(phone)) continue;
+    if (usedPhones.has(phone)) continue;
     const idx = flat.indexOf(phone);
     if (idx < 0) continue;
-    const start = Math.max(0, idx - 380);
-    const piece = flat.slice(start, idx + 9).trim();
-    if (piece.length < 35) continue;
+    const start = Math.max(0, idx - 520);
+    let piece = flat.slice(start, idx + 9).trim();
+    if (piece.length < 20 && idx > 0) {
+      piece = flat.slice(Math.max(0, idx - 80), Math.min(flat.length, idx + 120)).trim();
+    }
+    if (piece.length < 18) continue;
     const ad = mapTextoRawToAnuncio(piece);
     if (!ad.telefonos[0]) continue;
-    byPrimary.set(ad.telefonos[0], ad);
-    used.add(ad.telefonos[0]);
+    const key = dedupeKey(ad);
+    if (!byKey.has(key)) {
+      byKey.set(key, ad);
+      for (const t of ad.telefonos) usedPhones.add(t);
+    }
   }
 
-  return [...byPrimary.values()].sort((a, b) => (a.telefonos[0] || '').localeCompare(b.telefonos[0] || ''));
+  return [...byKey.values()].sort((a, b) => (a.telefonos[0] || '').localeCompare(b.telefonos[0] || ''));
 }

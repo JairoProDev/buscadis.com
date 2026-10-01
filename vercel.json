@@ -9,10 +9,6 @@
       "schedule": "0 0 * * *"
     },
     {
-      "path": "/api/cron/rueda-go-live",
-      "schedule": "* * * * *"
-    },
-    {
       "path": "/api/envios/cron/scheduled",
       "schedule": "0 8 * * *"
     },

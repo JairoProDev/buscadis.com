@@ -3,11 +3,17 @@
  *
  *   npx tsx scripts/rueda/extract-edition.ts
  *   npx tsx scripts/rueda/extract-edition.ts --pdf=/path/to.pdf --edicion=R2764
+ *   npx tsx scripts/rueda/extract-edition.ts --vision   # GPT-4o en portada/páginas imagen
+ *   npx tsx scripts/rueda/extract-edition.ts --ocr      # requiere tesseract-ocr-spa en el sistema
  */
+import * as dotenv from 'dotenv';
 import * as fs from 'fs';
 import * as path from 'path';
+import * as os from 'os';
 import { execFileSync } from 'child_process';
-import { estructurarAnunciosMaximo } from '../../lib/extraer-anuncios-rueda';
+import { estructurarAnunciosMaximo, type AnuncioExtraido } from '../../lib/extraer-anuncios-rueda';
+import { extractRuedaAdsFromPagePng } from '../../lib/rueda/pdf-page-vision';
+import { classifyRuedaListing } from '../../lib/rueda/classify-from-text';
 import { polishRuedaListing } from '../../lib/rueda/listing-quality';
 import { esWhatsApp } from '../../lib/limpiar-contactos';
 import {
@@ -16,6 +22,9 @@ import {
   RUEDA_R2764_FECHA_ORIGINAL,
   RUEDA_R2764_PDF,
 } from '../../lib/rueda/batch-constants';
+
+dotenv.config({ path: path.join(process.cwd(), '.env.local') });
+dotenv.config({ path: path.join(process.cwd(), '.env') });
 
 export interface RuedaExtractedAd {
   batch_id: string;
@@ -67,11 +76,53 @@ function extractEmail(text: string): string | null {
   return m ? m[0].toLowerCase() : null;
 }
 
-function main() {
+function visionCandidate(page: { pagina: number; texto: string; images?: number; chars?: number }): boolean {
+  if (page.pagina === 1) return true;
+  if ((page.images ?? 0) >= 4 && (page.chars ?? 0) < 4000) return true;
+  if ((page.chars ?? page.texto.length) < 2100) return true;
+  return false;
+}
+
+function visionToAnuncio(v: {
+  titulo: string;
+  descripcion: string;
+  telefonos: string[];
+  categoria?: string;
+}): AnuncioExtraido {
+  const telefonos = v.telefonos
+    .map((t) => t.replace(/\D/g, '').slice(-9))
+    .filter((t) => /^9\d{8}$/.test(t));
+  const textoRaw = `${v.titulo}. ${v.descripcion} ${telefonos.join(' ')}`.trim();
+  const categoria = v.categoria || classifyRuedaListing(v.titulo, v.descripcion);
+  return {
+    textoRaw,
+    titulo: v.titulo.slice(0, 100),
+    descripcion: v.descripcion.slice(0, 2000),
+    categoria,
+    telefonos,
+    issues: telefonos.length ? [] : ['sin_telefono'],
+    score: telefonos.length ? 72 : 40,
+  };
+}
+
+async function visionForPage(pdf: string, pagina: number): Promise<AnuncioExtraido[]> {
+  const tmp = path.join(os.tmpdir(), `rueda-p${pagina}-${Date.now()}.png`);
+  execFileSync('python3', ['scripts/rueda/render-pdf-page.py', pdf, String(pagina), tmp, '150'], {
+    stdio: 'pipe',
+  });
+  const png = fs.readFileSync(tmp);
+  fs.unlinkSync(tmp);
+  const ads = await extractRuedaAdsFromPagePng(png.toString('base64'), pagina);
+  return ads.map(visionToAnuncio).filter((a) => a.telefonos.length > 0);
+}
+
+async function main() {
   const pdf = arg('pdf') || RUEDA_R2764_PDF;
   const edicion = arg('edicion') || RUEDA_R2764_EDICION;
   const batchId = arg('batch') || RUEDA_R2764_BATCH_ID;
   const fechaOriginal = arg('fecha') || RUEDA_R2764_FECHA_ORIGINAL;
+  const useOcr = process.argv.includes('--ocr');
+  const useVision = process.argv.includes('--vision');
 
   if (!fs.existsSync(pdf)) {
     console.error('PDF no encontrado:', pdf);
@@ -81,18 +132,38 @@ function main() {
   const outDir = path.join(process.cwd(), 'output', 'rueda', edicion);
   fs.mkdirSync(outDir, { recursive: true });
 
-  const rawJson = execFileSync('python3', ['scripts/rueda/pdf-pages-text.py', pdf], {
+  const pyArgs = ['scripts/rueda/pdf-pages-text.py', pdf];
+  if (useOcr) pyArgs.push('--ocr');
+
+  const rawJson = execFileSync('python3', pyArgs, {
     encoding: 'utf8',
     maxBuffer: 80 * 1024 * 1024,
   });
-  const { pages } = JSON.parse(rawJson) as { pages: { pagina: number; texto: string }[] };
+  const { pages } = JSON.parse(rawJson) as {
+    pages: { pagina: number; texto: string; images?: number; chars?: number }[];
+  };
 
   const byPage: { pagina: number; count: number }[] = [];
   const byImportKey = new Map<string, RuedaExtractedAd>();
   const phonePages = new Map<string, Set<number>>();
 
   for (const p of pages) {
-    const anuncios = estructurarAnunciosMaximo(p.texto);
+    let anuncios = estructurarAnunciosMaximo(p.texto);
+    if (useVision && visionCandidate(p)) {
+      try {
+        const fromVision = await visionForPage(pdf, p.pagina);
+        const seen = new Set(anuncios.map((a) => `${a.telefonos[0]}:${a.titulo.slice(0, 40)}`));
+        for (const v of fromVision) {
+          const k = `${v.telefonos[0]}:${v.titulo.slice(0, 40)}`;
+          if (!seen.has(k)) {
+            anuncios.push(v);
+            seen.add(k);
+          }
+        }
+      } catch (e) {
+        console.warn(`[vision] página ${p.pagina}:`, e);
+      }
+    }
     byPage.push({ pagina: p.pagina, count: anuncios.length });
 
     for (let idx = 0; idx < anuncios.length; idx++) {
@@ -189,4 +260,7 @@ function main() {
   );
 }
 
-main();
+main().catch((e) => {
+  console.error(e);
+  process.exit(1);
+});

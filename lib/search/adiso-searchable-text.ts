@@ -28,7 +28,6 @@ export function adisoSearchableText(adiso: Adiso): string {
     adiso.descripcion,
     negocioAttr,
     adiso.vendedor?.nombre,
-    adiso.vendedor?.negocio,
     pickPrivateString(adiso.privateData, 'advertiser_name'),
     pickPrivateString(adiso.privateData, 'business_name'),
     pickPrivateString(adiso.privateData, 'brand_name'),

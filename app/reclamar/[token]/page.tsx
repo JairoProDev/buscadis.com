@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { supabaseAdmin } from '@/lib/supabase-admin';
-import { getAdisoUrl } from '@/lib/url';
+import { createAdisoTitleSlug } from '@/lib/url';
 
 interface PageProps {
   params: Promise<{ token: string }>;
@@ -33,7 +33,7 @@ export default async function ReclamarPage(props: PageProps) {
     );
   }
 
-  const adisoUrl = getAdisoUrl({ id: row.id as string, titulo: row.titulo as string });
+  const adisoUrl = `/a/${row.id as string}/${createAdisoTitleSlug(row.titulo as string)}`;
 
   return (
     <main className="mx-auto max-w-lg px-4 py-16">
