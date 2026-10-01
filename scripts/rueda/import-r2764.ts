@@ -146,12 +146,18 @@ async function main() {
       .from('adisos')
       .select('private_data')
       .contains('private_data', { batch_id: RUEDA_R2764_BATCH_ID });
-    const keys = new Set(
-      (existing || [])
-        .map((r) => (r.private_data as Record<string, unknown>)?.import_key)
-        .filter(Boolean) as string[],
+    const seen = new Set(
+      (existing || []).map((r) => {
+        const priv = (r.private_data || {}) as Record<string, unknown>;
+        const pagina = String(priv.pagina_revista ?? '');
+        const phone = String(r.contacto || '').replace(/\D/g, '').slice(-9);
+        return `${pagina}:${phone}`;
+      }),
     );
-    avisosToImport = avisos.filter((a) => !keys.has(a.import_key));
+    avisosToImport = avisos.filter((a) => {
+      const phone = (a.telefonos[0] || '').replace(/\D/g, '').slice(-9);
+      return phone && !seen.has(`${a.pagina}:${phone}`);
+    });
     if (!avisosToImport.length) {
       console.log(JSON.stringify({ missing: 0 }));
       return;
