@@ -132,7 +132,7 @@ async function main() {
   };
 
   const avisos = payload.avisos.sort((a, b) => a.pagina - b.pagina || a.titulo.localeCompare(b.titulo));
-  const baseTime = Date.now() + startInMinutes * 60 * 1000;
+  let baseTime = Date.now() + startInMinutes * 60 * 1000;
 
   const missingOnly = hasFlag('--missing-only');
   if (!missingOnly && (await batchExists())) {
