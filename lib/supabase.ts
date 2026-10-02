@@ -243,26 +243,6 @@ export function adisoToDb(adiso: Adiso): any {
   return dbData;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function applyAdisoListFilters(query: any, options?: {
-    soloActivos?: boolean;
-    categoria?: string;
-    busqueda?: string;
-  }): any {
-  let q = query;
-  if (options?.soloActivos === true) {
-    q = q.eq('esta_activo', true);
-  }
-  if (options?.categoria && options.categoria !== 'todos') {
-    q = q.eq('categoria', options.categoria);
-  }
-  if (options?.busqueda) {
-    const term = options.busqueda;
-    q = q.or(`titulo.ilike.%${term}%,descripcion.ilike.%${term}%,ubicacion.ilike.%${term}%`);
-  }
-  return q;
-}
-
 export async function getAdisosFromSupabase(options?: {
   limit?: number;
   offset?: number;
@@ -283,18 +263,35 @@ export async function getAdisosFromSupabase(options?: {
     const poolSize = options?.limit ?? 50;
     const { isEligibleForMarketplaceFeed } = await import('@/lib/feed/eligibility');
 
+    const selectFilteredAdisos = () => {
+      let query = supabase.from('adisos').select('*');
+      if (options?.soloActivos === true) {
+        query = query.eq('esta_activo', true);
+      }
+      if (options?.categoria && options.categoria !== 'todos') {
+        query = query.eq('categoria', options.categoria);
+      }
+      if (options?.busqueda) {
+        const term = options.busqueda;
+        query = query.or(
+          `titulo.ilike.%${term}%,descripcion.ilike.%${term}%,ubicacion.ilike.%${term}%`,
+        );
+      }
+      return query;
+    };
+
     if (options?.marketplaceFeed) {
       const paidCap = Math.min(80, Math.max(24, Math.floor(poolSize * 0.2)));
       const recentCap = poolSize;
 
       const runRecent = () =>
-        applyAdisoListFilters(supabase.from('adisos').select('*'), options)
+        selectFilteredAdisos()
           .order('fecha_publicacion', { ascending: false })
           .order('hora_publicacion', { ascending: false })
           .range(0, recentCap - 1);
 
       const runPaid = () =>
-        applyAdisoListFilters(supabase.from('adisos').select('*'), options)
+        selectFilteredAdisos()
           .neq('promotion_tier', 'gratis')
           .gt('promotion_rank', 0)
           .order('promoted_at', { ascending: false, nullsFirst: false })
@@ -317,7 +314,7 @@ export async function getAdisosFromSupabase(options?: {
     }
 
     const runQuery = () => {
-      let query = applyAdisoListFilters(supabase.from('adisos').select('*'), options)
+      let query = selectFilteredAdisos()
         .order('fecha_publicacion', { ascending: false })
         .order('hora_publicacion', { ascending: false });
 
