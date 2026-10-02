@@ -4,6 +4,7 @@
 
 import { Adiso, Categoria } from '@/types';
 import type { UserInterestProfile } from '@/lib/interactions';
+import { getPublishedTimestamp } from '@/lib/feed/ranking';
 
 /**
  * Calcula un puntaje de afinidad de un adiso con el perfil del usuario:
@@ -63,6 +64,8 @@ const MAX_BOOST_MS = 3 * 24 * 60 * 60 * 1000; // tope de 3 días, para no romper
  */
 export function personalizationFreshnessBoostMs(adiso: Adiso, profile: UserInterestProfile | null | undefined): number {
   if (!profile) return 0;
+  const published = getPublishedTimestamp(adiso);
+  if (published > 0 && Date.now() - published > 30 * 24 * 60 * 60 * 1000) return 0;
   const boost = personalizationBoost(adiso, profile);
   if (boost <= 0) return 0;
   return Math.min(boost * HORAS_POR_PUNTO_AFINIDAD, MAX_BOOST_MS);

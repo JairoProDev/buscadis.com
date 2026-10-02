@@ -27,6 +27,8 @@ import { persistDemandIntent } from '@/lib/demand-intents/client';
 import { trackEvent } from '@/lib/events';
 import { trackSearchEvent } from '@/lib/search/analytics';
 import { adisoMatchesSearchQuery, searchQueryRelevanceScore } from '@/lib/search/query-match';
+import { isEligibleForMarketplaceFeed } from '@/lib/feed/eligibility';
+import { compareRecientesFeed } from '@/lib/feed/ranking';
 import { onOnlineStatusChange, getOfflineMessage } from '@/lib/offline';
 import dynamicImport from 'next/dynamic';
 import Header from '@/components/Header';
@@ -440,6 +442,10 @@ function HomeContent({ initialSearchParams, initialFeedAdisos = [] }: HomeConten
           console.log('🧹 Filtrando adisos de prueba detectados en API...');
           adisosDesdeAPI = adisosDesdeAPI.filter(a => !TEST_REGEX.test(a.titulo || ''));
         }
+
+        adisosDesdeAPI = adisosDesdeAPI
+          .filter(isEligibleForMarketplaceFeed)
+          .sort((a, b) => compareRecientesFeed(a, b));
 
         if (adisosDesdeAPI.length > 0 || cache.length === 0) {
           // Si hay menos de ITEMS_POR_PAGINA, no hay más páginas

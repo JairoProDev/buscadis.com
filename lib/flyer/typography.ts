@@ -11,7 +11,7 @@ export function flyerTitleFontSize(
   pieceScale = 1,
 ): string {
   if (density === 'compact') {
-    return scaled(pieceScale, 0.78, 8.8, 1.45);
+    return scaled(pieceScale, 0.62, 6.8, 1.05);
   }
   if (titleScale === 's') return scaled(pieceScale, 1.1, 7, 2.4);
   if (titleScale === 'l') return scaled(pieceScale, 1.55, 9.5, 3.2);

@@ -2,7 +2,6 @@ import { Adiso, UbicacionDetallada } from '@/types';
 import { TipoOrdenamiento } from '@/components/Ordenamiento';
 import { BrowseFilterState } from './types';
 import { adisoMatchesFacets, adisoPublicadoDentroDe, adisoTieneImagen } from './matchers';
-import { personalizeAdisos } from '@/lib/ai/personalization';
 import { compareRecientesFeed, injectFeedExploration } from '@/lib/feed/ranking';
 import { compareCercanos, compareConFotos, comparePrecio, compareVistos } from './sort-compare';
 import type { UserInterestProfile } from '@/lib/interactions';
@@ -229,9 +228,7 @@ export function applyBrowseFilters({
     return sorted;
   }
 
-  if (interestProfile) {
-    return injectFeedExploration(personalizeAdisos(sorted, interestProfile));
-  }
+  // No reordenar con personalizeAdisos: ya usamos compareRecientesFeed (+ boost suave).
   return injectFeedExploration(sorted);
 }
 

@@ -395,7 +395,7 @@ const AdisoCard = forwardRef<HTMLDivElement, AdisoCardProps>(
             vista === 'feed' ? 'pt-3' : vista === 'list' ? 'flex-1 py-1 pr-1' : 'flex-1 pt-2'
           }`}
         >
-          <h3 className="text-[15px] font-semibold leading-snug line-clamp-2 text-[var(--bs-fg-default,var(--text-primary))]">
+          <h3 className="text-[15px] font-semibold leading-snug line-clamp-2 break-words [overflow-wrap:anywhere] text-[var(--bs-fg-default,var(--text-primary))]">
             {displayTitle}
           </h3>
 

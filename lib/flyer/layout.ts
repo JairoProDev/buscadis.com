@@ -22,7 +22,12 @@ import {
 export function truncateFlyerTitle(title: string, max = 72): string {
   const t = title.trim().replace(/\s+/g, ' ');
   if (t.length <= max) return t;
-  return `${t.slice(0, max - 1).trimEnd()}…`;
+  const slice = t.slice(0, max - 1);
+  const lastSpace = slice.lastIndexOf(' ');
+  if (lastSpace > Math.floor(max * 0.45)) {
+    return `${slice.slice(0, lastSpace).trimEnd()}…`;
+  }
+  return `${slice.trimEnd()}…`;
 }
 
 export function buildFlyerContent(input: {

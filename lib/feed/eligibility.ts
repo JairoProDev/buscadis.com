@@ -26,6 +26,14 @@ export function isActivePaidPromotion(adiso: Adiso): boolean {
   if (expRaw) {
     const exp = new Date(expRaw).getTime();
     if (!Number.isNaN(exp) && exp < Date.now()) return false;
+  } else {
+    // Legacy sin fecha de fin: solo cuenta si el bump o la publicación son recientes
+    const bumpRaw = adiso.promotedAt;
+    const bump = bumpRaw ? new Date(bumpRaw).getTime() : 0;
+    const pub = publishedMs(adiso);
+    const anchor = bump > 0 ? bump : pub;
+    const maxLegacyPromoMs = 45 * 24 * 60 * 60 * 1000;
+    if (anchor <= 0 || Date.now() - anchor > maxLegacyPromoMs) return false;
   }
 
   return true;

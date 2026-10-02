@@ -34,12 +34,12 @@ function grillaClassName(vista: 'grid' | 'list' | 'feed', withPanel: boolean): s
   if (vista === 'feed') {
     return 'mx-auto grid max-w-[480px] grid-cols-1 gap-6';
   }
-  // Doc 09: 2 → 3 → 4 → 5 (or 4 with panel); gaps 12/16/20
+  // Doc 09: 2 → 3 → 4 (desktop); con panel lateral una columna menos
   return [
     'grid grid-cols-2 gap-3 min-[480px]:gap-4',
     'md:grid-cols-3 md:gap-4',
-    'lg:grid-cols-4',
-    withPanel ? 'xl:grid-cols-4 xl:gap-5' : 'xl:grid-cols-5 xl:gap-5',
+    'lg:grid-cols-4 lg:gap-4',
+    withPanel ? 'xl:grid-cols-3 xl:gap-4' : 'xl:grid-cols-4 xl:gap-4',
   ].join(' ');
 }
 
