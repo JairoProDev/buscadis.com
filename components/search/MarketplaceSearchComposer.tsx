@@ -79,7 +79,7 @@ export default function MarketplaceSearchComposer({
   const wrapperRef = useRef<HTMLDivElement>(null);
 
   const isSearchMode = composerMode === 'search';
-  const isTyping = value.trim().length >= 2;
+  const isTyping = value.trim().length >= 1;
   const isEmptyQuery = value.trim().length === 0;
   const collapseToggle = isTyping && !toggleExpanded;
 
@@ -88,6 +88,7 @@ export default function MarketplaceSearchComposer({
     queries: suggestQueries,
     completion: suggestCompletion,
     popular: suggestPopular,
+    loading: suggestionsLoading,
     loadPopular,
   } = useSearchSuggestions(value, isSearchMode);
 
@@ -116,7 +117,8 @@ export default function MarketplaceSearchComposer({
     isSearchMode &&
     (isEmptyQuery
       ? recent.length > 0 || suggestPopular.length > 0
-      : isTyping && (suggestAdisos.length > 0 || suggestQueries.length > 0));
+      : isTyping &&
+        (suggestionsLoading || suggestAdisos.length > 0 || suggestQueries.length > 0));
 
   useEffect(() => {
     if (!dropdownVisible || suggestItems.length === 0) return;
@@ -405,6 +407,7 @@ export default function MarketplaceSearchComposer({
           setRecent([]);
         }}
         visible={dropdownVisible}
+        loading={suggestionsLoading}
       />
 
       {composerMode === 'publish' && publishImageUrl && (

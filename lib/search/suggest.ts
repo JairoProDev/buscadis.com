@@ -71,11 +71,13 @@ export async function getSearchSuggestions(prefix: string, limit = 8): Promise<S
   if (trimmed.length === 0) {
     return getPopularQueries(limit);
   }
-  if (trimmed.length < 2) {
+  if (trimmed.length < 1) {
     return { adisos: [], queries: [], completion: null, hits: [] };
   }
 
-  const tsHits = await typesenseSuggest(trimmed, limit);
+  const pg = await postgresSuggest(trimmed, limit);
+
+  const tsHits = await typesenseSuggest(trimmed, limit).catch(() => [] as SuggestHit[]);
   if (tsHits.length > 0) {
     const adisos = tsHits
       .filter((h) => h.type === 'adiso' && h.id && h.titulo)
@@ -85,16 +87,33 @@ export async function getSearchSuggestions(prefix: string, limit = 8): Promise<S
       .filter((h) => h.type === 'query' && h.query)
       .map((h) => h.query!);
 
-    const topTitle = adisos[0]?.titulo ?? queries[0] ?? null;
+    const mergedAdisos = [...adisos];
+    const seen = new Set(mergedAdisos.map((a) => a.id));
+    for (const a of pg.adisos) {
+      if (!seen.has(a.id)) {
+        seen.add(a.id);
+        mergedAdisos.push(a);
+      }
+    }
+    const mergedQueries = [...new Set([...queries, ...pg.queries])].slice(0, 5);
+    const topTitle = mergedAdisos[0]?.titulo ?? mergedQueries[0] ?? null;
     let completion: string | null = null;
-    if (topTitle && topTitle.toLowerCase().startsWith(trimmed.toLowerCase()) && topTitle.length > trimmed.length) {
+    if (
+      topTitle &&
+      topTitle.toLowerCase().startsWith(trimmed.toLowerCase()) &&
+      topTitle.length > trimmed.length
+    ) {
       completion = topTitle.slice(trimmed.length);
     }
-
-    return { adisos, queries, completion, hits: tsHits };
+    return {
+      adisos: mergedAdisos.slice(0, limit),
+      queries: mergedQueries,
+      completion,
+      hits: [...tsHits, ...pg.hits],
+    };
   }
 
-  return postgresSuggest(trimmed, limit);
+  return pg;
 }
 
 export async function syncAdisoToTypesense(adiso: Pick<Adiso, 'id' | 'titulo' | 'categoria'>): Promise<void> {

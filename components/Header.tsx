@@ -393,6 +393,7 @@ export default function Header({
             const accentColor = 'var(--brand-blue)';
 
             if (isPublishCta) {
+              const publishHighlight = isActive || isHovered;
               return (
                 <Link
                   href={item.href}
@@ -402,8 +403,10 @@ export default function Header({
                   aria-current={isActive ? 'page' : undefined}
                   style={{
                     height: '100%',
-                    padding: '0 8px',
+                    padding: '0 14px',
+                    position: 'relative',
                     display: 'flex',
+                    flexDirection: 'column',
                     alignItems: 'center',
                     justifyContent: 'center',
                     textDecoration: 'none',
@@ -412,35 +415,51 @@ export default function Header({
                   <span
                     style={{
                       display: 'flex',
-                      flexDirection: 'column',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      gap: '1px',
-                      boxSizing: 'border-box',
-                      padding: '2px',
-                      height: 'calc(100% - 6px)',
-                      aspectRatio: '1',
-                      borderRadius: '14px',
-                      background: isActive ? publishCta.backgroundActive : publishCta.background,
-                      boxShadow: isActive ? publishCta.shadowActive : publishCta.shadow,
-                      transform: isHovered ? 'scale(1.05)' : 'scale(1)',
-                      transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+                      height: '26px',
+                      marginBottom: '2px',
+                      padding: '0 10px',
+                      borderRadius: '999px',
+                      background: publishHighlight
+                        ? isActive
+                          ? publishCta.backgroundActive
+                          : publishCta.background
+                        : 'transparent',
+                      boxShadow: publishHighlight && isActive ? publishCta.shadowActive : 'none',
+                      transform: isHovered ? 'scale(1.04)' : 'scale(1)',
+                      transition: 'transform 0.2s ease, background 0.2s ease, box-shadow 0.2s ease',
                     }}
                   >
-                    <IconMegaphone size={30} color={publishCta.iconColor} />
-                    <span
-                      style={{
-                        fontSize: '14px',
-                        fontWeight: 600,
-                        color: publishCta.labelColor,
-                        lineHeight: 1,
-                        letterSpacing: '-0.02em',
-                        whiteSpace: 'nowrap',
-                      }}
-                    >
-                      {t(item.labelKey)}
-                    </span>
+                    <IconMegaphone
+                      size={22}
+                      color={publishHighlight ? publishCta.iconColor : 'var(--brand-yellow)'}
+                    />
                   </span>
+                  <span
+                    style={{
+                      fontSize: '11px',
+                      fontWeight: isActive ? 600 : 500,
+                      color: publishHighlight ? publishCta.labelColor : 'var(--text-secondary)',
+                      opacity: publishHighlight ? 1 : 0.85,
+                    }}
+                  >
+                    {t(item.labelKey)}
+                  </span>
+                  <span
+                    style={{
+                      position: 'absolute',
+                      bottom: 0,
+                      left: '12px',
+                      right: '12px',
+                      height: '3px',
+                      backgroundColor: 'var(--brand-yellow)',
+                      opacity: isActive ? 1 : 0,
+                      transition: 'opacity 0.2s',
+                      borderTopLeftRadius: '3px',
+                      borderTopRightRadius: '3px',
+                    }}
+                  />
                 </Link>
               );
             }

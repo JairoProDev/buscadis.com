@@ -5,10 +5,7 @@ export async function GET(req: NextRequest) {
   const q = req.nextUrl.searchParams.get('q')?.trim() ?? '';
   const limit = Math.min(parseInt(req.nextUrl.searchParams.get('limit') ?? '8', 10) || 8, 12);
 
-  // q vacío → populares; 1 char → vacío; ≥2 → suggest normal
-  if (q.length === 1) {
-    return NextResponse.json({ adisos: [], queries: [], completion: null, hits: [] });
-  }
+  // q vacío → populares; ≥1 → suggest (trgm / Typesense)
 
   try {
     const result = await getSearchSuggestions(q, limit);

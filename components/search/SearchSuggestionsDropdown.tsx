@@ -16,6 +16,7 @@ interface SearchSuggestionsDropdownProps {
   onRemoveRecent?: (query: string) => void;
   onClearRecent?: () => void;
   visible: boolean;
+  loading?: boolean;
   listboxId?: string;
 }
 
@@ -30,10 +31,11 @@ export default function SearchSuggestionsDropdown({
   onRemoveRecent,
   onClearRecent,
   visible,
+  loading = false,
   listboxId = 'search-suggestions',
 }: SearchSuggestionsDropdownProps) {
   const hasContent =
-    recent.length > 0 || popular.length > 0 || adisos.length > 0 || queries.length > 0;
+    loading || recent.length > 0 || popular.length > 0 || adisos.length > 0 || queries.length > 0;
   if (!visible || !hasContent) return null;
 
   let idx = 0;
@@ -44,6 +46,11 @@ export default function SearchSuggestionsDropdown({
       role="listbox"
       className="absolute left-0 right-0 top-full z-[950] mt-1 max-h-[min(360px,55vh)] overflow-y-auto rounded-xl border border-[var(--border-color)] bg-[var(--bg-primary)] py-1 shadow-lg"
     >
+      {loading && (
+        <li className="px-3 py-2 text-sm text-[var(--text-tertiary)]" aria-live="polite">
+          Buscando sugerencias…
+        </li>
+      )}
       {recent.length > 0 && (
         <>
           <li className="flex items-center justify-between px-3 py-1.5 text-[10px] font-bold uppercase tracking-wide text-[var(--text-tertiary)]">

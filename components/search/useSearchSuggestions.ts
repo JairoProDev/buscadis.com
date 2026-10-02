@@ -100,11 +100,11 @@ export function useSearchSuggestions(query: string, enabled = true) {
       }));
       return;
     }
-    if (trimmed.length < 2) {
+    if (trimmed.length < 1) {
       setState(emptyState());
       return;
     }
-    const t = window.setTimeout(() => void fetchSuggestions(trimmed, 'prefix'), 120);
+    const t = window.setTimeout(() => void fetchSuggestions(trimmed, 'prefix'), 50);
     return () => window.clearTimeout(t);
   }, [query, enabled, fetchSuggestions]);
 

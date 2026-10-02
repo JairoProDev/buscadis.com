@@ -63,7 +63,10 @@ export function removePhonesFromText(text: string): string {
   }
 
   return result
-    .replace(/(?:whatsapp|wsp|cel|tel|telf|telefono|móvil|movil)\s*:?\s*/gi, ' ')
+    .replace(
+      /\b(?:whatsapp|wsp|cel|tel|telf|telefono|móvil|movil)\b\s*:?\s*/gi,
+      ' ',
+    )
     .replace(/\s{2,}/g, ' ')
     .replace(/^\s*[,.\-–]\s*/g, '')
     .trim();

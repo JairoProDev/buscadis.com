@@ -213,6 +213,9 @@ function HomeContent({ initialSearchParams, initialFeedAdisos = [] }: HomeConten
     router.replace(params.toString() ? `/?${params.toString()}` : '/', { scroll: false });
   }, [router, searchParams]);
 
+  const searchAwaitingResults =
+    Boolean(committedQuery.trim()) && (searchLoading || searchResults === null);
+
   const marketplacePulse = getMarketplacePulse(adisosFiltrados);
   const activeFiltersCount = countActiveFilters(browseFilters, categoriaFiltro);
   const browseTotalPool = useMemo(() => {
@@ -585,6 +588,7 @@ function HomeContent({ initialSearchParams, initialFeedAdisos = [] }: HomeConten
     }
 
     setSearchLoading(true);
+    setSearchResults(null);
     setCommittedQuery(q);
     setFiltrando(true);
 
@@ -1333,7 +1337,7 @@ function HomeContent({ initialSearchParams, initialFeedAdisos = [] }: HomeConten
                     }}
                   />
                   <BrowseResultsLine
-                    loading={cargando}
+                    loading={cargando || searchAwaitingResults}
                     resultCount={adisosFiltrados.length}
                     hasMore={browseHasMoreResults}
                     categoria={categoriaFiltro}
@@ -1598,7 +1602,7 @@ function HomeContent({ initialSearchParams, initialFeedAdisos = [] }: HomeConten
               </div>
 
               {/* ── Cards: skeleton breve al filtrar, grilla o estado vacío ── */}
-              {cargando || filtrando ? (
+              {cargando || filtrando || searchAwaitingResults ? (
                 <SkeletonAdisos isDesktop={isDesktop} />
               ) : adisosFiltrados.length === 0 ? (
                 <>
