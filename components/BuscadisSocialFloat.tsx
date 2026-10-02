@@ -25,21 +25,6 @@ function brandColor(network: SocialBrandKey): string {
   return hex ?? 'var(--brand-blue)';
 }
 
-function floatShellStyle(): CSSProperties {
-  return {
-    position: 'fixed',
-    bottom:
-      'calc(var(--bs-nav-visible-offset, calc(var(--bs-nav-height, 56px) + env(safe-area-inset-bottom, 0px))) + 0.75rem)',
-    right: 'max(1rem, env(safe-area-inset-right))',
-    zIndex: 1599,
-    display: 'flex',
-    flexDirection: 'column-reverse',
-    alignItems: 'flex-end',
-    gap: '0.55rem',
-    transition: 'bottom 0.28s ease-out',
-  };
-}
-
 function circleLinkStyle(color: string, delayMs: number): CSSProperties {
   return {
     width: BTN,
@@ -82,7 +67,9 @@ function SocialLinkButton({
   );
 }
 
-export default function BuscadisSocialFloat() {
+type Layout = 'fixed' | 'stacked';
+
+export default function BuscadisSocialFloat({ layout = 'fixed' }: { layout?: Layout }) {
   const pathname = usePathname();
   const isDesktop = useMediaQuery('(min-width: 768px)');
   const { isAuthModalOpen } = useUI();
@@ -99,7 +86,7 @@ export default function BuscadisSocialFloat() {
   }, [isDesktop]);
 
   useEffect(() => {
-    if (!abierto || isDesktop) return;
+    if (!abierto) return;
 
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') setAbierto(false);
@@ -116,62 +103,77 @@ export default function BuscadisSocialFloat() {
       document.removeEventListener('keydown', onKey);
       document.removeEventListener('mousedown', onClickOutside);
     };
-  }, [abierto, isDesktop]);
+  }, [abierto]);
 
   if (!shouldShowBuscadisSocialChrome(pathname ?? '')) return null;
   if (isAuthModalOpen) return null;
 
-  return (
-    <div ref={rootRef} style={floatShellStyle()} aria-label="Redes sociales de Buscadis">
-      {!isDesktop && (
-        <button
-          type="button"
-          onClick={() => setAbierto((v) => !v)}
-          aria-expanded={abierto}
-          aria-haspopup="true"
-          aria-label={abierto ? 'Cerrar redes de Buscadis' : 'Ver redes de Buscadis'}
-          className="motion-reduce:transform-none hover:-translate-y-0.5"
-          style={{
-            width: BTN,
-            height: BTN,
-            borderRadius: '999px',
-            border: '1px solid color-mix(in srgb, var(--brand-blue) 35%, transparent)',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            boxShadow: '0 6px 20px color-mix(in srgb, var(--brand-blue) 22%, transparent)',
-            backgroundColor: 'var(--bg-primary)',
-            color: 'var(--brand-blue)',
-            transition: 'transform 0.15s ease, box-shadow 0.15s ease',
-          }}
-        >
-          {abierto ? (
-            <FaTimes size={16} aria-hidden />
-          ) : (
-            <IconShareAlt size={18} color="var(--brand-blue)" />
-          )}
-        </button>
-      )}
+  const shellStyle: CSSProperties =
+    layout === 'stacked'
+      ? {
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'flex-start',
+          gap: '0.5rem',
+        }
+      : {
+          position: 'fixed',
+          bottom:
+            'calc(var(--bs-nav-visible-offset, calc(var(--bs-nav-height, 56px) + env(safe-area-inset-bottom, 0px))) + 0.75rem)',
+          left: 'max(1rem, env(safe-area-inset-left))',
+          zIndex: 1599,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'flex-start',
+          gap: '0.5rem',
+          transition: 'bottom 0.28s ease-out',
+        };
 
-      {(isDesktop || abierto) &&
+  const toggleButton = (
+    <button
+      type="button"
+      onClick={() => setAbierto((v) => !v)}
+      aria-expanded={abierto}
+      aria-haspopup="true"
+      aria-label={abierto ? 'Cerrar redes de Buscadis' : 'Redes oficiales de Buscadis'}
+      title="Redes de Buscadis (no es contacto del anuncio)"
+      className="motion-reduce:transform-none hover:-translate-y-0.5"
+      style={{
+        width: BTN,
+        height: BTN,
+        borderRadius: '999px',
+        border: '1px solid color-mix(in srgb, var(--brand-blue) 35%, transparent)',
+        cursor: 'pointer',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        boxShadow: '0 6px 20px color-mix(in srgb, var(--brand-blue) 22%, transparent)',
+        backgroundColor: 'var(--bg-primary)',
+        color: 'var(--brand-blue)',
+        transition: 'transform 0.15s ease, box-shadow 0.15s ease',
+      }}
+    >
+      {abierto ? (
+        <FaTimes size={16} aria-hidden />
+      ) : (
+        <IconShareAlt size={18} color="var(--brand-blue)" />
+      )}
+    </button>
+  );
+
+  return (
+    <div ref={rootRef} style={shellStyle} aria-label="Redes sociales de Buscadis">
+      {abierto &&
         BUSCADIS_SOCIAL_LINKS.map((link, index) => (
           <SocialLinkButton
             key={link.network}
             link={link}
-            delayMs={isDesktop ? 0 : index * 35}
+            delayMs={index * 35}
             onNavigate={() => setAbierto(false)}
           />
         ))}
 
-      {isDesktop && (
-        <p
-          className="pointer-events-none select-none text-[10px] font-semibold uppercase tracking-wide text-[var(--text-tertiary)]"
-          style={{ marginBottom: '0.15rem', paddingRight: '0.15rem' }}
-        >
-          Síguenos
-        </p>
-      )}
+      {toggleButton}
     </div>
   );
 }

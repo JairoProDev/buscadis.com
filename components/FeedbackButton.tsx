@@ -23,9 +23,14 @@ const MOTIVO_ICON: Record<MotivoAyuda, ComponentType<{ size?: number; color?: st
 
 interface FeedbackButtonProps {
   variant?: 'floating';
+  /** Sin posición fixed; va dentro de SiteFloatingActions */
+  layout?: 'floating' | 'stacked';
 }
 
-export default function FeedbackButton({ variant = 'floating' }: FeedbackButtonProps) {
+export default function FeedbackButton({
+  variant = 'floating',
+  layout = 'floating',
+}: FeedbackButtonProps) {
   const [abierto, setAbierto] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
   const { isAuthModalOpen } = useUI();
@@ -58,17 +63,20 @@ export default function FeedbackButton({ variant = 'floating' }: FeedbackButtonP
   if (variant !== 'floating') return null;
   if (isAuthModalOpen) return null;
 
+  const shellStyle =
+    layout === 'stacked'
+      ? { position: 'relative' as const }
+      : {
+          position: 'fixed' as const,
+          bottom:
+            'calc(var(--bs-nav-visible-offset, calc(var(--bs-nav-height, 56px) + env(safe-area-inset-bottom, 0px))) + 0.75rem)',
+          left: 'max(1rem, env(safe-area-inset-left))',
+          zIndex: 1600,
+          transition: 'bottom 0.28s ease-out',
+        };
+
   return (
-    <div
-      ref={panelRef}
-      style={{
-        position: 'fixed',
-        bottom: 'calc(var(--bs-nav-visible-offset, calc(var(--bs-nav-height, 56px) + env(safe-area-inset-bottom, 0px))) + 0.75rem)',
-        left: 'max(1rem, env(safe-area-inset-left))',
-        zIndex: 1600,
-        transition: 'bottom 0.28s ease-out',
-      }}
-    >
+    <div ref={panelRef} style={shellStyle}>
       {abierto && (
         <div
           role="dialog"
