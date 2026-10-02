@@ -1,4 +1,5 @@
 import { removePhonesFromText, maskPhonesInText } from '@/lib/phone';
+import { isMidWordTitleFragment, repairMidWordTitle } from '@/lib/adiso-title-repair';
 import { sanitizeAdisoDescripcion } from '@/lib/adiso-display';
 import type { FlyerTemplateId } from '@/lib/flyer/types';
 import { parseUbicacionFromText, isGenericCuscoUbicacion } from './parse-ubicacion';
@@ -20,7 +21,7 @@ const RUEDA_FLYER_POOL: FlyerTemplateId[] = [
 ];
 
 const STARTER_RE =
-  /(?:^|[\s.])(Vendo|VENDO|Alquilo|ALQUILO|Se alquila|SE ALQUILA|Se vende|SE VENDE|Busco|BUSCO|Se requiere|SE REQUIERE|Se solicita|SE SOLICITA|Necesito|NECESITO|Oportunidad|OPORTUNIDAD|Restaurante|RESTAURANTE|Hotel|HOTEL|Distribuidora|Importante empresa|¡?ÚNETE|Traspaso|Anticresis|ECONOMICOS|ECONÓMICOS|Remato|REMATO)/;
+  /(?:^|[\s.])(Vendo|VENDO|Alquilo|ALQUILO|Se alquila|SE ALQUILA|Se vende|SE VENDE|Busco|BUSCO|Se requiere|SE REQUIERE|Se solicita|SE SOLICITA|Se necesita|SE NECESITA|Necesito|NECESITO|Oportunidad|OPORTUNIDAD|Restaurante|RESTAURANTE|Hotel|HOTEL|Distribuidora|Importante empresa|¡?ÚNETE|Traspaso|Anticresis|ECONOMICOS|ECONÓMICOS|Antigüedad|ANTIGÜEDAD|Administramos|ADMINISTRAMOS|Remato|REMATO)/;
 
 export function flyerTemplateForRuedaImport(adisoId: string, categoria?: string): FlyerTemplateId {
   let pool = RUEDA_FLYER_POOL;
@@ -54,11 +55,14 @@ export function repairListingTitle(titulo: string, textoRaw: string, descripcion
     /^[a-z]/.test(t) ||
     /^(al|el|la|de|en|por|con)\s/i.test(t) ||
     /^(razón|razon)\s/i.test(t) ||
-    /^CONOMICOS/i.test(t);
+    /^CONOMICOS/i.test(t) ||
+    isMidWordTitleFragment(t);
 
   if (badStart || t.length < 18) {
     t = pickBetterTitleStart(textoRaw, descripcion || textoRaw);
   }
+
+  t = repairMidWordTitle(t, { descripcion, textoRaw });
 
   t = t.replace(/^\d+\.\s*/, '');
   t = removePhonesFromText(t);

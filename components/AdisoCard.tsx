@@ -107,7 +107,14 @@ const AdisoCard = forwardRef<HTMLDivElement, AdisoCardProps>(
     const usesGeneratedCover = adisoUsesGeneratedCover(adiso);
     const showUserPhoto = Boolean(imagenUrl) && !usesGeneratedCover;
     const extraFotos = Math.max(0, (adiso.imagenesUrls?.length ?? 0) - 1);
-    const displayTitle = toDisplayTitle(adiso.titulo);
+    const textoRaw =
+      adiso.privateData && typeof adiso.privateData === 'object'
+        ? String((adiso.privateData as Record<string, unknown>).texto_raw || '')
+        : '';
+    const displayTitle = toDisplayTitle(adiso.titulo, {
+      descripcion: adiso.descripcion,
+      textoRaw: textoRaw || undefined,
+    });
     const locationShort = shouldShowLocationOnCard(adiso)
       ? formatUbicacionCorta(adiso.ubicacion)
       : '';

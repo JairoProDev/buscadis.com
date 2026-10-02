@@ -1,6 +1,7 @@
 import { Adiso, Categoria, UbicacionDetallada } from '@/types';
 import { pickCardSignal } from '@/lib/social-proof';
 import { maskPhonesInText, removePhonesFromText } from '@/lib/phone';
+import { resolveAdisoDisplayTitle } from '@/lib/adiso-title-repair';
 import { isGenericCuscoUbicacion } from '@/lib/rueda/parse-ubicacion';
 
 const CATEGORIA_LABELS: Record<Categoria, string> = {
@@ -68,9 +69,18 @@ export function sanitizeAdisoDescripcion(descripcion: string | undefined | null)
   return text.trim();
 }
 
+export type DisplayTitleContext = {
+  descripcion?: string | null;
+  textoRaw?: string | null;
+};
+
 /** Títulos en MAYÚSCULAS → formato legible */
-export function toDisplayTitle(titulo: string | null | undefined): string {
-  const t = maskPhonesInText(removePhonesFromText((titulo ?? '').trim()));
+export function toDisplayTitle(
+  titulo: string | null | undefined,
+  context?: DisplayTitleContext,
+): string {
+  const repaired = resolveAdisoDisplayTitle(titulo, context);
+  const t = maskPhonesInText(removePhonesFromText(repaired));
   if (!t) return '';
   const letters = t.replace(/[^a-zA-ZáéíóúñÁÉÍÓÚÑ]/g, '');
   if (letters.length === 0) return t;

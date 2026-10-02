@@ -5,6 +5,7 @@ import {
   getCategoriaLabel,
   toDisplayTitle,
 } from '@/lib/adiso-display';
+import { resolveAdisoDisplayTitle } from '@/lib/adiso-title-repair';
 import { removePhonesFromText } from '@/lib/phone';
 import {
   DEFAULT_FLYER_TEMPLATE,
@@ -64,6 +65,12 @@ export function buildFlyerContentFromAdiso(adiso: Adiso): FlyerContent {
     adiso.privateData && typeof adiso.privateData === 'object'
       ? (adiso.privateData as Record<string, unknown>)
       : {};
+  const textoRaw =
+    typeof priv.texto_raw === 'string' ? priv.texto_raw : undefined;
+  const tituloReparado = resolveAdisoDisplayTitle(adiso.titulo, {
+    descripcion: adiso.descripcion,
+    textoRaw,
+  });
   const precio =
     adiso.precio ??
     (typeof priv.precio === 'number' ? priv.precio : undefined);
@@ -72,7 +79,7 @@ export function buildFlyerContentFromAdiso(adiso: Adiso): FlyerContent {
     (priv.ubicacion as Adiso['ubicacion'] | undefined);
 
   return buildFlyerContent({
-    titulo: adiso.titulo,
+    titulo: tituloReparado || adiso.titulo,
     precio,
     moneda: adiso.moneda || (priv.moneda as string | undefined),
     tipoPrecio: adiso.tipoPrecio,
