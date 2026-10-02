@@ -27,6 +27,26 @@ function isElementInViewport(el: HTMLElement): boolean {
   return rect.top >= 0 && rect.bottom <= vh;
 }
 
+/** Primeras 2 filas del home: tarjetas un poco más grandes (4 cols desktop). */
+export function marketplaceFeaturedGridClass(withPanel: boolean): string {
+  return [
+    'grid grid-cols-2 gap-3 min-[480px]:gap-4',
+    'md:grid-cols-3 md:gap-4',
+    'lg:grid-cols-4 lg:gap-4',
+    withPanel ? 'xl:grid-cols-3 xl:gap-4' : 'xl:grid-cols-4 xl:gap-4',
+  ].join(' ');
+}
+
+/** Resto del feed: densidad habitual (5 cols en desktop ancho). */
+export function marketplaceStandardGridClass(withPanel: boolean): string {
+  return [
+    'grid grid-cols-2 gap-3 min-[480px]:gap-4',
+    'md:grid-cols-3 md:gap-4',
+    'lg:grid-cols-4',
+    withPanel ? 'xl:grid-cols-4 xl:gap-5' : 'xl:grid-cols-5 xl:gap-5',
+  ].join(' ');
+}
+
 function grillaClassName(vista: 'grid' | 'list' | 'feed', withPanel: boolean): string {
   if (vista === 'list') {
     return 'grid grid-cols-1 gap-4';
@@ -34,13 +54,14 @@ function grillaClassName(vista: 'grid' | 'list' | 'feed', withPanel: boolean): s
   if (vista === 'feed') {
     return 'mx-auto grid max-w-[480px] grid-cols-1 gap-6';
   }
-  // Doc 09: 2 → 3 → 4 (desktop); con panel lateral una columna menos
-  return [
-    'grid grid-cols-2 gap-3 min-[480px]:gap-4',
-    'md:grid-cols-3 md:gap-4',
-    'lg:grid-cols-4 lg:gap-4',
-    withPanel ? 'xl:grid-cols-3 xl:gap-4' : 'xl:grid-cols-4 xl:gap-4',
-  ].join(' ');
+  return marketplaceStandardGridClass(withPanel);
+}
+
+const FEATURED_ROWS = 2;
+
+function featuredCountForWidth(isDesktop: boolean, withPanel: boolean): number {
+  if (!isDesktop) return 4;
+  return withPanel ? FEATURED_ROWS * 3 : FEATURED_ROWS * 4;
 }
 
 export default function GrillaAdisos({
@@ -57,7 +78,12 @@ export default function GrillaAdisos({
   const impressedRef = useRef<Set<string>>(new Set());
   const isDesktop = useMediaQuery('(min-width: 768px)');
   const { user } = useAuth();
-  const layoutClass = grillaClassName(vista, withPanel);
+  const standardClass = grillaClassName(vista, withPanel);
+  const featuredClass = marketplaceFeaturedGridClass(withPanel);
+  const featuredCount =
+    vista === 'grid' ? featuredCountForWidth(isDesktop, withPanel) : 0;
+  const featuredAdisos = vista === 'grid' ? adisos.slice(0, featuredCount) : [];
+  const restAdisos = vista === 'grid' ? adisos.slice(featuredCount) : adisos;
 
   const handleClickAdiso = (adiso: Adiso) => {
     registrarClick(user?.id, adiso.id, adiso.categoria);
@@ -110,30 +136,39 @@ export default function GrillaAdisos({
     return () => clearTimeout(timer);
   }, [adisoSeleccionadoId]);
 
+  const renderCard = (adiso: Adiso) => (
+    <div
+      key={adiso.id}
+      ref={(el) => {
+        adisoRefs.current[adiso.id] = el;
+      }}
+      data-adiso-id={adiso.id}
+      className={vista === 'grid' ? 'h-full min-w-[156px]' : undefined}
+    >
+      <AdisoCard
+        adiso={adiso}
+        onClick={() => handleClickAdiso(adiso)}
+        estaSeleccionado={adisoSeleccionadoId === adiso.id}
+        vista={vista}
+      />
+    </div>
+  );
+
   return (
     <>
-      <div className={layoutClass}>
-        {adisos.map((adiso) => (
-          <div
-            key={adiso.id}
-            ref={(el) => {
-              adisoRefs.current[adiso.id] = el;
-            }}
-            data-adiso-id={adiso.id}
-            className={vista === 'grid' ? 'h-full min-w-[156px]' : undefined}
-          >
-            <AdisoCard
-              adiso={adiso}
-              onClick={() => handleClickAdiso(adiso)}
-              estaSeleccionado={adisoSeleccionadoId === adiso.id}
-              vista={vista}
-            />
-          </div>
-        ))}
-      </div>
+      {featuredAdisos.length > 0 && (
+        <div className={featuredClass}>{featuredAdisos.map(renderCard)}</div>
+      )}
+      {restAdisos.length > 0 && (
+        <div
+          className={`${standardClass}${featuredAdisos.length > 0 ? ' mt-3 md:mt-4' : ''}`}
+        >
+          {restAdisos.map(renderCard)}
+        </div>
+      )}
 
       {cargandoMas && (
-        <div className={`${layoutClass} mt-3`} aria-hidden="true">
+        <div className={`${standardClass} mt-3`} aria-hidden="true">
           {Array.from({ length: isDesktop ? 4 : 2 }).map((_, i) => (
             <SkeletonCard key={`sk-${i}`} />
           ))}

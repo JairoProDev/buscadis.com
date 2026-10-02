@@ -1663,7 +1663,10 @@ function HomeContent({ initialSearchParams, initialFeedAdisos = [] }: HomeConten
                 {categoriaFiltro === 'negocios' && (
                   <BusinessDirectorySection className="mb-4 px-1" />
                 )}
-                <ParaTiSection onAbrirAdiso={handleAbrirAdiso} />
+                <ParaTiSection
+                  onAbrirAdiso={handleAbrirAdiso}
+                  withPanel={isDesktop && !isSidebarMinimizado}
+                />
                 <GrillaAdisos
                   adisos={adisosFiltrados.slice(0, visibleCount)}
                   onAbrirAdiso={handleAbrirAdiso}

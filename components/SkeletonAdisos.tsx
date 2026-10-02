@@ -118,7 +118,7 @@ export default function SkeletonAdisos({ count, isDesktop, showToolbar = false }
       <div
         className={
           isDesktop
-            ? 'grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4'
+            ? 'grid grid-cols-2 gap-3 min-[480px]:gap-4 md:grid-cols-3 md:gap-4 lg:grid-cols-4 xl:grid-cols-5 xl:gap-5'
             : 'grid grid-cols-2 gap-3'
         }
       >

@@ -37,7 +37,7 @@ export default function FlyerCanvas({
   const cfg = resolveFlyerConfig(content.categoria, templateId, config);
   const compact = density === 'compact';
   const rawTitle = (content.title || 'Adiso en Buscadis').trim().replace(/\s+/g, ' ');
-  const title = compact ? truncateFlyerTitle(rawTitle, 52) : truncateFlyerTitle(rawTitle, 90);
+  const title = compact ? truncateFlyerTitle(rawTitle, 72) : truncateFlyerTitle(rawTitle, 90);
   const align = cfg.align === 'center' ? 'center' : 'left';
   const primary = cfg.primary;
   const secondary = cfg.secondary;
@@ -677,7 +677,7 @@ export default function FlyerCanvas({
               </span>
             )}
           </div>
-          <div className="flex min-h-0 flex-1 flex-col justify-center overflow-hidden py-1">
+          <div className="flex min-h-0 flex-1 flex-col justify-start overflow-hidden">
             <Title className="line-clamp-4 text-white">{title}</Title>
           </div>
           <div className="flex shrink-0 items-end justify-between gap-2">
