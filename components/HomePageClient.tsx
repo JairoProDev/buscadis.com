@@ -390,7 +390,7 @@ function HomeContent({ initialSearchParams, initialFeedAdisos = [] }: HomeConten
         cache = cache.filter(a => !TEST_REGEX.test(a.titulo || ''));
         // Actualizar localStorage para que no vuelvan a aparecer
         if (typeof window !== 'undefined') {
-          localStorage.setItem('buscadis_adisos_v2', JSON.stringify(cache));
+          localStorage.setItem('buscadis_adisos_v4', JSON.stringify(cache));
         }
       }
 
