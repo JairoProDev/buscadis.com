@@ -1,7 +1,9 @@
 import { supabaseAdmin } from '@/lib/supabase-admin';
 import { hybridSearch } from '@/actions/ai-search';
+import { dbToAdiso } from '@/lib/supabase';
 import { normalizeQuery } from './normalize-query';
 import { rerankSearchResults, type ScoredAdiso } from './rerank';
+import { adisoMatchesSearchQuery, searchQueryRelevanceScore } from '@/lib/search/query-match';
 import { Adiso, Categoria } from '@/types';
 import type { UserInterestProfile } from '@/lib/interactions';
 
@@ -40,6 +42,43 @@ function mapRowToAdiso(row: Record<string, unknown>): Adiso {
     imagenesUrls: Array.isArray(imagenes) ? imagenes : undefined,
     imagenUrl: Array.isArray(imagenes) ? imagenes[0] : undefined,
   };
+}
+
+/** Coincidencia lexical directa (marca, título, descripción) — evita “0 resultados” con híbridos ruidosos. */
+async function keywordSearchAdisos(
+  query: string,
+  limit: number,
+  category?: Categoria,
+): Promise<ScoredAdiso[]> {
+  if (!supabaseAdmin) return [];
+  const q = query.trim();
+  if (q.length < 2) return [];
+
+  const pattern = `%${q.replace(/[%_]/g, '')}%`;
+  let request = supabaseAdmin
+    .from('adisos')
+    .select('*')
+    .eq('esta_activo', true)
+    .or(`titulo.ilike.${pattern},descripcion.ilike.${pattern}`)
+    .order('fecha_publicacion', { ascending: false })
+    .limit(Math.min(limit, 40));
+
+  if (category) {
+    request = request.eq('categoria', category);
+  }
+
+  const { data, error } = await request;
+  if (error || !data?.length) return [];
+
+  return data
+    .map((row) => dbToAdiso(row))
+    .filter((adiso) => adisoMatchesSearchQuery(adiso, q))
+    .map((adiso) => ({
+      adiso,
+      score: searchQueryRelevanceScore(adiso, q),
+      hybrid_score: searchQueryRelevanceScore(adiso, q),
+      rerank_score: searchQueryRelevanceScore(adiso, q) + 0.5,
+    }));
 }
 
 async function trgmFallback(query: string, limit: number): Promise<ScoredAdiso[]> {
@@ -149,6 +188,21 @@ export async function executeSearch(params: ExecuteSearchParams): Promise<Execut
     if (trgm.length > 0) {
       scored = trgm.filter((item) => (item.score ?? 0) >= 0.2);
       source = 'trgm';
+    }
+  }
+
+  const lexical = await keywordSearchAdisos(normalized.raw, maxResults, filterCategory);
+  if (lexical.length > 0) {
+    const byId = new Map(scored.map((s) => [s.adiso.id, s]));
+    for (const hit of lexical) {
+      const prev = byId.get(hit.adiso.id);
+      if (!prev || (hit.rerank_score ?? 0) > (prev.rerank_score ?? prev.score ?? 0)) {
+        byId.set(hit.adiso.id, hit);
+      }
+    }
+    scored = [...byId.values()];
+    if (source === 'hybrid' && lexical.some((l) => (l.rerank_score ?? 0) >= 0.85)) {
+      source = 'hybrid+trgm';
     }
   }
 

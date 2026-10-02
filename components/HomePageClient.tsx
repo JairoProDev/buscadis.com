@@ -620,9 +620,20 @@ function HomeContent({ initialSearchParams, initialFeedAdisos = [] }: HomeConten
       ).filter((a) => typeof a.titulo === 'string' && a.titulo.trim().length > 0);
 
       const merged = new Map<string, Adiso>();
-      [...apiResults, ...catalogResults].forEach((item) => {
+      apiResults.forEach((item) => {
         if (adisoMatchesSearchQuery(item, q)) merged.set(item.id, item);
       });
+      catalogResults.forEach((item) => {
+        if (adisoMatchesSearchQuery(item, q)) merged.set(item.id, item);
+      });
+      if (merged.size === 0) {
+        adisos.forEach((item) => {
+          if (adisoMatchesSearchQuery(item, q)) merged.set(item.id, item);
+        });
+      }
+      if (merged.size === 0 && apiResults.length > 0) {
+        apiResults.forEach((item) => merged.set(item.id, item));
+      }
       const results = Array.from(merged.values()).sort(
         (a, b) => searchQueryRelevanceScore(b, q) - searchQueryRelevanceScore(a, q),
       );
@@ -664,7 +675,7 @@ function HomeContent({ initialSearchParams, initialFeedAdisos = [] }: HomeConten
       setSearchLoading(false);
       setFiltrando(false);
     }
-  }, [browseFilters, categoriaFiltro, error, user?.id, resetSearch]);
+  }, [adisos, browseFilters, categoriaFiltro, error, user?.id, resetSearch]);
 
   useEffect(() => {
     // Si el usuario borra el texto manualmente, quitar también el estado de búsqueda aplicada
