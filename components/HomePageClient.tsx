@@ -40,6 +40,7 @@ import {
 } from '@/components/Icons';
 import CategoryRail from '@/components/CategoryRail';
 import { mergeStableFeedOrder, resetStableFeedOrderRefs } from '@/lib/feed/stable-order';
+import { feedLocalCacheLooksStale } from '@/lib/feed/cache-freshness';
 import {
   applyBrowseFilters,
   browseFiltersFromSearchParams,
@@ -108,9 +109,11 @@ const TEST_REGEX = /toyota test|test adiso|test anuncio/i;
 
 type HomeContentProps = {
   initialSearchParams?: Record<string, string | undefined>;
+  /** Feed SSR (misma orden que producción) para evitar flash de cache vieja. */
+  initialFeedAdisos?: Adiso[];
 };
 
-function HomeContent({ initialSearchParams }: HomeContentProps) {
+function HomeContent({ initialSearchParams, initialFeedAdisos = [] }: HomeContentProps) {
   const router = useRouter();
   const searchParams = useStableSearchParams(initialSearchParams);
   const { user, session } = useAuth();
@@ -124,7 +127,7 @@ function HomeContent({ initialSearchParams }: HomeContentProps) {
   const ultimoErrorAdisoRef = useRef<string | null>(null);
   const adisoAperturaPendienteRef = useRef<string | null>(null);
 
-  const [adisos, setAdisos] = useState<Adiso[]>([]);
+  const [adisos, setAdisos] = useState<Adiso[]>(initialFeedAdisos);
   const [adisosFiltrados, setAdisosFiltrados] = useState<Adiso[]>([]);
   const [busqueda, setBusqueda] = useState(buscarUrl);
   const [committedQuery, setCommittedQuery] = useState(buscarUrl);
@@ -391,14 +394,21 @@ function HomeContent({ initialSearchParams }: HomeContentProps) {
         }
       }
 
-      if (cache.length > 0) {
-        // Solo actualizar adisos - el useEffect de ordenamiento se encargará de adisosFiltrados
+      const seedFromCache =
+        cache.length > 0 && initialFeedAdisos.length === 0 && !feedLocalCacheLooksStale(cache);
+
+      if (initialFeedAdisos.length > 0) {
+        setAdisos(initialFeedAdisos);
+        setCargando(false);
+        setHayMasAdisos(initialFeedAdisos.length >= ITEMS_POR_PAGINA);
+      } else if (seedFromCache) {
         setAdisos(cache);
         setCargando(false);
 
         // Si hay adisoId, buscarlo en cache
         if (adisoId) {
-          const adisoCache = cache.find(a => a.id === adisoId);
+          const pool = initialFeedAdisos.length > 0 ? initialFeedAdisos : cache;
+          const adisoCache = pool.find(a => a.id === adisoId);
           if (adisoCache) {
             setAdisoAbierto(adisoCache);
           } else {
@@ -1725,8 +1735,15 @@ function HomeContent({ initialSearchParams }: HomeContentProps) {
 
 export default function HomePageClient({
   initialSearchParams,
+  initialFeedAdisos,
 }: {
   initialSearchParams?: Record<string, string | undefined>;
+  initialFeedAdisos?: Adiso[];
 }) {
-  return <HomeContent initialSearchParams={initialSearchParams} />;
+  return (
+    <HomeContent
+      initialSearchParams={initialSearchParams}
+      initialFeedAdisos={initialFeedAdisos}
+    />
+  );
 }

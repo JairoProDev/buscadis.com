@@ -243,12 +243,34 @@ export function adisoToDb(adiso: Adiso): any {
   return dbData;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function applyAdisoListFilters(query: any, options?: {
+    soloActivos?: boolean;
+    categoria?: string;
+    busqueda?: string;
+  }): any {
+  let q = query;
+  if (options?.soloActivos === true) {
+    q = q.eq('esta_activo', true);
+  }
+  if (options?.categoria && options.categoria !== 'todos') {
+    q = q.eq('categoria', options.categoria);
+  }
+  if (options?.busqueda) {
+    const term = options.busqueda;
+    q = q.or(`titulo.ilike.%${term}%,descripcion.ilike.%${term}%,ubicacion.ilike.%${term}%`);
+  }
+  return q;
+}
+
 export async function getAdisosFromSupabase(options?: {
   limit?: number;
   offset?: number;
   soloActivos?: boolean;
   categoria?: string;
   busqueda?: string;
+  /** Pool para feed: recientes + destacados pagados (no solo promotion_rank alto legacy). */
+  marketplaceFeed?: boolean;
 }): Promise<Adiso[]> {
   if (!supabase) {
     throw new Error('Supabase no está configurado');
@@ -258,33 +280,46 @@ export async function getAdisosFromSupabase(options?: {
     // No bloquear el feed: la RPC puede tardar >1s y provocar statement timeout en la query.
     void clearExpiredPromotions();
 
-    const runQuery = (usePromotionOrder: boolean) => {
-      let query = supabase.from('adisos').select('*');
+    const poolSize = options?.limit ?? 50;
+    const { isEligibleForMarketplaceFeed } = await import('@/lib/feed/eligibility');
 
-      if (options?.soloActivos === true) {
-        query = query.eq('esta_activo', true);
-      }
+    if (options?.marketplaceFeed) {
+      const paidCap = Math.min(80, Math.max(24, Math.floor(poolSize * 0.2)));
+      const recentCap = poolSize;
 
-      if (options?.categoria && options.categoria !== 'todos') {
-        query = query.eq('categoria', options.categoria);
-      }
+      const runRecent = () =>
+        applyAdisoListFilters(supabase.from('adisos').select('*'), options)
+          .order('fecha_publicacion', { ascending: false })
+          .order('hora_publicacion', { ascending: false })
+          .range(0, recentCap - 1);
 
-      if (options?.busqueda) {
-        const q = options.busqueda;
-        query = query.or(`titulo.ilike.%${q}%,descripcion.ilike.%${q}%,ubicacion.ilike.%${q}%`);
-      }
-
-      if (usePromotionOrder) {
-        query = query
-          .order('promotion_rank', { ascending: false })
+      const runPaid = () =>
+        applyAdisoListFilters(supabase.from('adisos').select('*'), options)
+          .neq('promotion_tier', 'gratis')
+          .gt('promotion_rank', 0)
           .order('promoted_at', { ascending: false, nullsFirst: false })
           .order('fecha_publicacion', { ascending: false })
-          .order('hora_publicacion', { ascending: false });
-      } else {
-        query = query
-          .order('fecha_publicacion', { ascending: false })
-          .order('hora_publicacion', { ascending: false });
+          .range(0, paidCap - 1);
+
+      const [recentRes, paidRes] = await Promise.all([runRecent(), runPaid()]);
+      const error = recentRes.error ?? paidRes.error;
+      if (error) {
+        console.error('Error al obtener adisos (feed):', formatSupabaseError(error));
+        throw error;
       }
+
+      const byId = new Map<string, Adiso>();
+      for (const row of [...(paidRes.data ?? []), ...(recentRes.data ?? [])]) {
+        const adiso = dbToAdiso(row);
+        if (isEligibleForMarketplaceFeed(adiso)) byId.set(adiso.id, adiso);
+      }
+      return [...byId.values()];
+    }
+
+    const runQuery = () => {
+      let query = applyAdisoListFilters(supabase.from('adisos').select('*'), options)
+        .order('fecha_publicacion', { ascending: false })
+        .order('hora_publicacion', { ascending: false });
 
       if (options?.limit) {
         const from = options.offset || 0;
@@ -297,18 +332,18 @@ export async function getAdisosFromSupabase(options?: {
       return query;
     };
 
-    let { data, error } = await runQuery(true);
-
-    if (error?.code === '57014') {
-      ({ data, error } = await runQuery(false));
-    }
+    const { data, error } = await runQuery();
 
     if (error) {
       console.error('Error al obtener adisos:', formatSupabaseError(error));
       throw error;
     }
 
-    return data ? data.map(dbToAdiso) : [];
+    const mapped = data ? data.map(dbToAdiso) : [];
+    if (options?.marketplaceFeed) {
+      return mapped.filter(isEligibleForMarketplaceFeed);
+    }
+    return mapped;
   } catch (error: any) {
     // Si es un error de RLS, dar mensaje más claro
     if (error?.code === 'PGRST301' || error?.message?.includes('permission denied')) {
@@ -351,8 +386,6 @@ export async function getAdisosPageFromSupabase(options: {
     }
 
     query = query
-      .order('promotion_rank', { ascending: false })
-      .order('promoted_at', { ascending: false, nullsFirst: false })
       .order('fecha_publicacion', { ascending: false })
       .order('hora_publicacion', { ascending: false });
 
@@ -367,8 +400,11 @@ export async function getAdisosPageFromSupabase(options: {
       throw error;
     }
 
+    const { isEligibleForMarketplaceFeed } = await import('@/lib/feed/eligibility');
+    const items = (data ? data.map(dbToAdiso) : []).filter(isEligibleForMarketplaceFeed);
+
     return {
-      items: data ? data.map(dbToAdiso) : [],
+      items,
       total: count ?? 0,
     };
   } catch (error: any) {

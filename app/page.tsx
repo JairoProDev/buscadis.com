@@ -87,6 +87,7 @@ export default async function Home({ searchParams }: PageProps) {
       />
       <Suspense fallback={<HomeRouteFallback />}>
         <HomePageClient
+          initialFeedAdisos={ssrAdisos}
           initialSearchParams={{
             adiso: typeof params.adiso === 'string' ? params.adiso : undefined,
             categoria: typeof params.categoria === 'string' ? params.categoria : undefined,

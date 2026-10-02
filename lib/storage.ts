@@ -1,8 +1,9 @@
 import { Adiso } from '@/types';
 import { compareRecientesFeed } from '@/lib/feed/ranking';
 
-const STORAGE_KEY = 'buscadis_adisos_v3';
+const STORAGE_KEY = 'buscadis_adisos_v4';
 const LEGACY_STORAGE_KEY = 'buscadis_adisos_v2';
+const LEGACY_STORAGE_KEY_V3 = 'buscadis_adisos_v3';
 
 // Por defecto usa localStorage. Cambiar a false para usar API/Supabase
 const USE_LOCAL_STORAGE = process.env.NEXT_PUBLIC_USE_LOCAL_STORAGE === 'true';
@@ -13,9 +14,10 @@ const getAdisosLocal = (): Adiso[] => {
   try {
     let stored = localStorage.getItem(STORAGE_KEY);
     if (!stored) {
-      stored = localStorage.getItem(LEGACY_STORAGE_KEY);
+      stored = localStorage.getItem(LEGACY_STORAGE_KEY_V3) ?? localStorage.getItem(LEGACY_STORAGE_KEY);
       if (stored) {
         try {
+          localStorage.removeItem(LEGACY_STORAGE_KEY_V3);
           localStorage.removeItem(LEGACY_STORAGE_KEY);
         } catch {
           // ignore

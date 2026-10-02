@@ -5,6 +5,7 @@ import type { BusinessMemberRole, BusinessWithRole } from './business-access';
 import { normalizeBusinessProfile } from '@/lib/business/normalize-profile';
 import { normalizeBusinessSlug } from '@/lib/business/normalize-slug';
 import { compareRecientesFeed, isCatalogProduct } from '@/lib/feed/ranking';
+import { isEligibleForMarketplaceFeed } from '@/lib/feed/eligibility';
 import { withNewCatalogProductId } from '@/lib/catalog/product-id';
 
 export const BUSINESS_TABLE = 'business_profiles';
@@ -660,6 +661,7 @@ export async function getMarketplaceFeed(options: {
             offset: 0,
             soloActivos: options.soloActivos ?? false,
             categoria: productosTab ? undefined : options.categoria,
+            marketplaceFeed: true,
         }),
         getCatalogProductsAsAdisos({
             limit: catalogPoolSize,
@@ -673,7 +675,7 @@ export async function getMarketplaceFeed(options: {
     const mergedMap = new Map<string, Adiso>();
     [...adisosBase, ...catalogAdisos].forEach((item) => mergedMap.set(item.id, item));
 
-    const merged = Array.from(mergedMap.values());
+    const merged = Array.from(mergedMap.values()).filter(isEligibleForMarketplaceFeed);
 
     const sortMerged = () => {
         if (productosTab) {

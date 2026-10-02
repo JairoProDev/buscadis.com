@@ -2,6 +2,7 @@ import { Adiso, TamañoPaquete } from '@/types';
 import { adisoTieneImagen } from '@/lib/adiso-display';
 import { personalizationFreshnessBoostMs } from '@/lib/ai/personalization';
 import type { UserInterestProfile } from '@/lib/interactions';
+import { isActivePaidPromotion } from '@/lib/feed/eligibility';
 
 const PACKAGE_RANK: Record<TamañoPaquete, number> = {
   miniatura: 0,
@@ -112,37 +113,33 @@ function getPublishedDayKey(adiso: Adiso): string {
   return raw.slice(0, 10);
 }
 
+function paidPromotionSortKey(adiso: Adiso): number {
+  if (!isActivePaidPromotion(adiso)) return 0;
+  const tier =
+    adiso.promotionTier === 'premium' ? 3 : adiso.promotionTier === 'destacada' ? 2 : 1;
+  const rank = adiso.promotionRank ?? 0;
+  const bump = getPromotedBumpTimestamp(adiso);
+  return tier * 1e16 + rank * 1e12 + bump;
+}
+
 /**
  * Comparador del feed por defecto ("recientes"):
- * 1. Día de recencia (publicación o último destacado pagado)
- * 2. Dentro del mismo día: timestamp efectivo (foto/catálogo/personalización)
- * 3. Tier de promoción (desempate suave entre adisos del mismo momento)
- * 4. Tamaño de paquete legacy
- * 5. id estable
+ * 1. Destacados/premium vigentes (pago real)
+ * 2. Recencia efectiva (publicación, bump de destacado, foto, personalización suave)
+ * 3. id estable (sin favorecer paquetes legacy "gigante" en el grid)
  */
 export function compareRecientesFeed(
   a: Adiso,
   b: Adiso,
   interestProfile?: UserInterestProfile | null,
 ): number {
+  const promA = paidPromotionSortKey(a);
+  const promB = paidPromotionSortKey(b);
+  if (promA !== promB) return promB > promA ? 1 : -1;
+
   const fa = getFeedEffectiveTimestamp(a, interestProfile);
   const fb = getFeedEffectiveTimestamp(b, interestProfile);
-  const dateCmp = fb - fa;
-  if (dateCmp !== 0) return dateCmp;
-
-  const dayA = getPublishedDayKey(a);
-  const dayB = getPublishedDayKey(b);
-  if (dayA !== dayB) {
-    return dayB.localeCompare(dayA);
-  }
-
-  const ra = a.promotionRank ?? 0;
-  const rb = b.promotionRank ?? 0;
-  if (ra !== rb) return rb - ra;
-
-  const pa = getPackageRank(a.tamaño);
-  const pb = getPackageRank(b.tamaño);
-  if (pa !== pb) return pb - pa;
+  if (fb !== fa) return fb - fa;
 
   return a.id.localeCompare(b.id);
 }
