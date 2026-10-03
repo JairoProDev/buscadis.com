@@ -11,6 +11,7 @@ import {
 } from '@/lib/analytics/consent';
 import { captureUtmFromUrl } from '@/lib/analytics/attribution';
 import { isNativeWebViewClient } from '@/lib/native-webview-bootstrap';
+import { shouldExcludeFromProductAnalytics } from '@/lib/analytics/internal-traffic';
 
 function ClarityScript({ projectId }: { projectId: string }) {
   return (
@@ -63,7 +64,8 @@ export default function AnalyticsScripts() {
     return subscribeConsent(setConsent);
   }, []);
 
-  const analyticsAllowed = hasAnalyticsConsent() && consent !== null;
+  const analyticsAllowed =
+    hasAnalyticsConsent() && consent !== null && !shouldExcludeFromProductAnalytics();
   const skipThirdParty = isNativeWebViewClient();
 
   const useGtm = Boolean(gtmId?.trim());

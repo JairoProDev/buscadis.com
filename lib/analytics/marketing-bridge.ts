@@ -4,6 +4,7 @@ import type { BehavioralEventType } from '@/lib/events/schema';
 import { hasAnalyticsConsent } from './consent';
 import { getAttributionContext } from './attribution';
 import { trackGaEvent, trackGenerateLead, trackPurchase, trackSignUp } from './gtag';
+import { shouldExcludeFromProductAnalytics } from './internal-traffic';
 
 const VERCEL_TRACK_EVENTS = new Set<BehavioralEventType | string>([
   'search.performed',
@@ -105,7 +106,7 @@ export function bridgeBehavioralEvent(
     ),
   });
 
-  if (!hasAnalyticsConsent()) return;
+  if (!hasAnalyticsConsent() || shouldExcludeFromProductAnalytics()) return;
 
   const dealGaName = DEAL_GA4_MAP[eventType];
   if (dealGaName) {
@@ -153,7 +154,7 @@ export function bridgeDealEvent(
 
   void trackVercelCustomEvent(eventType, { clip_id: clipId });
 
-  if (!hasAnalyticsConsent()) return;
+  if (!hasAnalyticsConsent() || shouldExcludeFromProductAnalytics()) return;
 
   const gaName = DEAL_GA4_MAP[eventType];
   if (!gaName) return;

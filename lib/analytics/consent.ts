@@ -37,6 +37,12 @@ export function hasAnalyticsConsent(): boolean {
   return consent?.analytics === true;
 }
 
+/** Usuario eligió solo esenciales (analytics off) de forma persistente. */
+export function hasEssentialsOnlyConsent(): boolean {
+  const consent = getConsent();
+  return consent !== null && consent.analytics === false;
+}
+
 export function hasMarketingConsent(): boolean {
   const consent = getConsent();
   return consent?.marketing === true;

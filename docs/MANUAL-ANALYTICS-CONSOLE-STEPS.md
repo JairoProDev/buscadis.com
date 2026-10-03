@@ -86,12 +86,13 @@
 
 ### 3.4 Conversiones y búsqueda
 
+Los eventos **no se crean manualmente** en GA4: el sitio los envía con código (`marketing-bridge`). Tú solo **marcas conversiones**:
+
 1. GA4 → **Admin** → **Data display** → **Events**.
-2. Busca eventos (pueden tardar 24 h en aparecer; prueba Realtime antes):
-   - `generate_lead` → toggle **Mark as conversion**.
-   - `purchase` → conversion.
-   - `sign_up` → conversion.
-3. **Admin** → **Data streams** → tu stream web → **Enhanced measurement** ON (scrolls, outbound, etc.).
+2. Cuando aparezcan (Realtime ayuda): `generate_lead`, `purchase`, `sign_up` → **Mark as conversion**.
+3. **Admin** → **Data streams** → BuscAdis Web → **Enhanced measurement** ON.
+
+**Tus pruebas:** en producción ejecuta en consola `localStorage.setItem('buscadis_exclude_analytics','1')` antes de navegar; en localhost GA4 no se carga. Ver `docs/ANALYTICS-ECOSYSTEM-GOOGLE.md`.
 
 ### 3.5 Probar en vivo
 
@@ -108,15 +109,34 @@
 
 ## Etapa 4 — Google Search Console (SEO)
 
-**Objetivo:** indexación, sitemap, queries orgánicas. Requiere Etapa 2 + redeploy con la variable de verificación.
+**Objetivo:** indexación, sitemap, queries orgánicas.
 
-### 4.1 Añadir propiedad
+**Guía ampliada:** `docs/ANALYTICS-ECOSYSTEM-GOOGLE.md` (propiedades GA4, app, Publicadis, tráfico interno).
 
-1. [search.google.com/search-console](https://search.google.com/search-console).
-2. **Add property**.
-3. Elige **URL prefix** → `https://buscadis.com` → **Continue** (dominio `buscadis.com` también vale si controlas DNS; URL prefix es más simple al inicio).
+### 4.0 ¿Domain o URL prefix? (elige lo profesional)
 
-### 4.2 Verificación HTML (meta tag)
+| Opción | Cuándo | Verificación |
+|--------|--------|----------------|
+| **Domain** `buscadis.com` | **Recomendado** — cubre www, sin www, http/https y subdominios | Registro **TXT** en DNS (`google-site-verification=…`) |
+| **URL prefix** `https://www.buscadis.com` | Rápido si no quieres tocar DNS aún | Meta tag → `NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION` + redeploy |
+
+Puedes tener **solo Domain** (ideal) o Domain + prefix temporal; no necesitas ambos para siempre.
+
+### 4.1A — Propiedad Domain (recomendado)
+
+1. GSC → **Add property** → **Domain** → escribe `buscadis.com`.
+2. Copia el registro **TXT** que muestra Google.
+3. Donde gestionas DNS (Vercel → Domains → buscadis.com → DNS, o tu registrador):
+   - Tipo **TXT**, host `@` (o raíz), valor el que dio Google.
+4. Espera 5–60 min → **Verify** en GSC.
+5. **Sitemaps** → `https://www.buscadis.com/sitemap.xml` (o relativo `sitemap.xml`).
+
+### 4.1B — Propiedad URL prefix (alternativa rápida)
+
+1. GSC → **Add property** → **URL prefix** → `https://www.buscadis.com` (usa **www** porque es tu canónico en middleware).
+2. Sigue 4.2 meta tag.
+
+### 4.2 Verificación HTML (solo URL prefix)
 
 1. Método **HTML tag**.
 2. Google muestra algo como:
