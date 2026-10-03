@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
+import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '@/hooks/useAuth';
 import { trackViewHistory } from '@/lib/profile/view-history-client';
@@ -20,6 +21,7 @@ import {
 } from '@/lib/stories/caption-display';
 import { getAdisoById } from '@/lib/storage';
 import { getWhatsAppUrl } from '@/lib/utils';
+import { getAdisoUrl } from '@/lib/url';
 import {
   IconClose,
   IconSend,
@@ -28,7 +30,7 @@ import {
   IconHeart,
   IconHeartOutline,
   IconExternalLink,
-  IconChatbot,
+  IconMessages,
   IconChevronDown,
 } from '@/components/Icons';
 
@@ -41,6 +43,9 @@ interface StoryViewerProps {
 const STORY_DURATION_MS = 5000;
 const QUICK_REACTIONS = ['❤️', '🔥', '👏', '😮'] as const;
 const BOTTOM_CHROME_PX = 132;
+/** Umbral más bajo que antes (−70) para abrir el detalle al deslizar arriba. */
+const SHEET_OPEN_DRAG_PX = 42;
+const SHEET_OPEN_VELOCITY = 520;
 
 function formatStoryAge(iso: string): string {
   const ms = Date.now() - new Date(iso).getTime();
@@ -89,6 +94,7 @@ function RailAction({ label, onClick, disabled, active, children }: RailActionPr
 }
 
 export default function StoryViewer({ groups, initialGroupIndex, onClose }: StoryViewerProps) {
+  const router = useRouter();
   const { user, session } = useAuth();
   const { openAuthModal, openChat } = useUI();
   const { isFavorite, toggleFavorite } = useFavoritos();
@@ -97,6 +103,7 @@ export default function StoryViewer({ groups, initialGroupIndex, onClose }: Stor
   const [progress, setProgress] = useState(0);
   const [paused, setPaused] = useState(false);
   const [sheetOpen, setSheetOpen] = useState(false);
+  const [sheetPullY, setSheetPullY] = useState(0);
   const [linkedAdiso, setLinkedAdiso] = useState<Adiso | null>(null);
   const [favorited, setFavorited] = useState(false);
   const [replyText, setReplyText] = useState('');
@@ -108,6 +115,8 @@ export default function StoryViewer({ groups, initialGroupIndex, onClose }: Stor
   const rafRef = useRef<number | undefined>(undefined);
   const replyRef = useRef<HTMLInputElement>(null);
   const lastTapRef = useRef(0);
+  const holdStartRef = useRef(0);
+  const holdPointRef = useRef({ x: 0, y: 0 });
   const toastTimerRef = useRef<ReturnType<typeof setTimeout>>();
 
   const group = groups[pos.g];
@@ -123,6 +132,19 @@ export default function StoryViewer({ groups, initialGroupIndex, onClose }: Stor
     setToast(msg);
     if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
     toastTimerRef.current = setTimeout(() => setToast(null), 2000);
+  }, []);
+
+  const openAdisoSheet = useCallback(() => {
+    setSheetOpen(true);
+    setPaused(true);
+    setSheetPullY(0);
+  }, []);
+
+  const closeAdisoSheet = useCallback(() => {
+    setSheetOpen(false);
+    if (!replyRef.current || document.activeElement !== replyRef.current) {
+      setPaused(false);
+    }
   }, []);
 
   const goNext = useCallback(() => {
@@ -154,6 +176,7 @@ export default function StoryViewer({ groups, initialGroupIndex, onClose }: Stor
       trackViewHistory({ adisoId: story.adiso_id, source: 'story' }, session?.access_token);
     }
     setSheetOpen(false);
+    setSheetPullY(0);
     setReplyText('');
     setFavorited(story.adiso_id ? isFavorite(story.adiso_id) : false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -286,8 +309,26 @@ export default function StoryViewer({ groups, initialGroupIndex, onClose }: Stor
   const handleViewAdiso = async () => {
     if (!story) return;
     await recordStoryInteraction(story.id, 'cta_click', session?.access_token);
-    const url = story.cta_url || (story.adiso_id ? `/?adiso=${story.adiso_id}` : null);
-    if (url) window.open(url, '_blank');
+    if (linkedAdiso) {
+      router.push(getAdisoUrl(linkedAdiso));
+      return;
+    }
+    if (story.adiso_id) {
+      router.push(`/a/${story.adiso_id}`);
+      return;
+    }
+    const url = story.cta_url;
+    if (!url) return;
+    try {
+      const parsed = new URL(url, window.location.origin);
+      if (parsed.origin === window.location.origin) {
+        router.push(`${parsed.pathname}${parsed.search}${parsed.hash}`);
+      } else {
+        window.open(url, '_blank', 'noopener,noreferrer');
+      }
+    } catch {
+      window.open(url, '_blank', 'noopener,noreferrer');
+    }
   };
 
   const handleShare = async () => {
@@ -304,6 +345,33 @@ export default function StoryViewer({ groups, initialGroupIndex, onClose }: Stor
     }
     await navigator.clipboard.writeText(url);
     showToast('Enlace copiado');
+  };
+
+  const beginHoldPause = (e: React.PointerEvent) => {
+    if (e.pointerType === 'mouse' && e.button !== 0) return;
+    holdStartRef.current = Date.now();
+    holdPointRef.current = { x: e.clientX, y: e.clientY };
+    setPaused(true);
+  };
+
+  const endHoldPauseNavigate = (side: 'left' | 'right', e: React.PointerEvent) => {
+    setPaused(false);
+    const pointerType = e.pointerType;
+    const heldMs = Date.now() - holdStartRef.current;
+    const moved = Math.hypot(
+      e.clientX - holdPointRef.current.x,
+      e.clientY - holdPointRef.current.y,
+    );
+    const quickTap = heldMs < 320 && moved < 14;
+
+    if (pointerType === 'mouse' || pointerType === 'pen') {
+      if (quickTap) {
+        if (side === 'left') goPrev();
+        else goNext();
+      }
+      return;
+    }
+    handleMediaNavigate(side, pointerType);
   };
 
   const handleMediaNavigate = (side: 'left' | 'right', pointerType: string) => {
@@ -338,10 +406,24 @@ export default function StoryViewer({ groups, initialGroupIndex, onClose }: Stor
         className="relative mx-auto h-[min(92vh,900px)] w-full max-w-[min(100vw,calc(min(92vh,900px)*9/16))] select-none overflow-hidden rounded-2xl bg-black shadow-2xl md:max-w-none md:w-[min(calc(min(92vh,900px)*9/16),100vw-2rem)]"
         drag="y"
         dragConstraints={{ top: 0, bottom: 0 }}
-        dragElastic={0.5}
+        dragElastic={{ top: 0.08, bottom: 0.45 }}
+        onDrag={(_, info) => {
+          if (!hasAdiso || sheetOpen) return;
+          if (info.offset.y < 0) {
+            setSheetPullY(Math.max(info.offset.y, -140));
+          } else {
+            setSheetPullY(0);
+          }
+        }}
         onDragEnd={(_, info) => {
+          setSheetPullY(0);
           if (info.offset.y > 90) onClose();
-          else if (info.offset.y < -70) setSheetOpen(true);
+          else if (
+            hasAdiso &&
+            (info.offset.y < -SHEET_OPEN_DRAG_PX || info.velocity.y < -SHEET_OPEN_VELOCITY)
+          ) {
+            openAdisoSheet();
+          }
         }}
       >
         {/* Progreso por segmento (IG/WA) */}
@@ -457,26 +539,16 @@ export default function StoryViewer({ groups, initialGroupIndex, onClose }: Stor
             type="button"
             aria-label="Historia anterior"
             className="w-[35%] cursor-w-resize bg-transparent md:hover:bg-white/5"
-            onPointerUp={(e) => {
-              if (e.pointerType === 'touch') setPaused(false);
-              handleMediaNavigate('left', e.pointerType);
-            }}
-            onPointerDown={(e) => {
-              if (e.pointerType === 'touch') setPaused(true);
-            }}
+            onPointerUp={(e) => endHoldPauseNavigate('left', e)}
+            onPointerDown={beginHoldPause}
             onPointerCancel={() => setPaused(false)}
           />
           <button
             type="button"
             aria-label="Siguiente historia"
             className="flex-1 cursor-e-resize bg-transparent md:hover:bg-white/5"
-            onPointerUp={(e) => {
-              if (e.pointerType === 'touch') setPaused(false);
-              handleMediaNavigate('right', e.pointerType);
-            }}
-            onPointerDown={(e) => {
-              if (e.pointerType === 'touch') setPaused(true);
-            }}
+            onPointerUp={(e) => endHoldPauseNavigate('right', e)}
+            onPointerDown={beginHoldPause}
             onPointerCancel={() => setPaused(false)}
           />
         </div>
@@ -523,16 +595,41 @@ export default function StoryViewer({ groups, initialGroupIndex, onClose }: Stor
           </RailAction>
         </div>
 
-        {/* Swipe up pill (TikTok) — solo si hay adiso */}
-        {hasAdiso && !sheetOpen && (
+        {/* Peek al arrastrar hacia arriba (sigue el dedo, menos rebote) */}
+        {hasAdiso && !sheetOpen && sheetPullY < -6 && (
+          <div
+            className="pointer-events-none absolute inset-x-0 z-[28] rounded-t-2xl border-t border-white/10 bg-[var(--bg-primary)] shadow-2xl"
+            style={{
+              bottom: 0,
+              height: Math.min(120, Math.abs(sheetPullY) + 28),
+              transform: `translateY(${sheetPullY}px)`,
+            }}
+          >
+            <div className="mx-auto mt-2 h-1 w-10 rounded-full bg-[var(--border-color)]" />
+          </div>
+        )}
+
+        {/* Indicador subir (solo chevron, estilo TikTok) */}
+        {hasAdiso && !sheetOpen && sheetPullY >= -6 && (
           <button
             type="button"
-            onClick={() => setSheetOpen(true)}
-            className="absolute left-1/2 z-25 -translate-x-1/2 flex items-center gap-1 rounded-full bg-black/40 px-3 py-1 text-[11px] font-medium text-white/90 backdrop-blur-sm"
-            style={{ bottom: BOTTOM_CHROME_PX - 4 }}
+            onPointerDown={(e) => e.stopPropagation()}
+            onClick={(e) => {
+              e.stopPropagation();
+              openAdisoSheet();
+            }}
+            aria-label="Desliza hacia arriba para ver la publicación"
+            className="absolute left-1/2 z-[38] flex h-9 w-9 -translate-x-1/2 items-center justify-center rounded-full bg-black/25 text-white/75 backdrop-blur-sm transition-colors hover:bg-black/40 hover:text-white"
+            style={{ bottom: BOTTOM_CHROME_PX + 10 }}
           >
-            Ver publicación
-            <IconChevronDown size={12} className="rotate-180" />
+            <motion.span
+              aria-hidden
+              animate={{ y: [0, -5, 0] }}
+              transition={{ repeat: Infinity, duration: 1.35, ease: 'easeInOut' }}
+              className="flex items-center justify-center"
+            >
+              <IconChevronDown size={18} className="rotate-180" />
+            </motion.span>
           </button>
         )}
 
@@ -603,7 +700,7 @@ export default function StoryViewer({ groups, initialGroupIndex, onClose }: Stor
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 className="absolute inset-0 z-40 bg-black/50"
-                onClick={() => setSheetOpen(false)}
+                onClick={closeAdisoSheet}
                 aria-label="Cerrar detalle"
               />
               <motion.div
@@ -615,7 +712,7 @@ export default function StoryViewer({ groups, initialGroupIndex, onClose }: Stor
                 dragConstraints={{ top: 0, bottom: 0 }}
                 dragElastic={0.2}
                 onDragEnd={(_, info) => {
-                  if (info.offset.y > 80) setSheetOpen(false);
+                  if (info.offset.y > 80) closeAdisoSheet();
                 }}
                 className="absolute bottom-0 left-0 right-0 z-50 max-h-[72%] overflow-hidden rounded-t-2xl bg-[var(--bg-primary)] shadow-2xl"
               >
@@ -673,11 +770,11 @@ export default function StoryViewer({ groups, initialGroupIndex, onClose }: Stor
                         type="button"
                         onClick={() => {
                           replyRef.current?.focus();
-                          setSheetOpen(false);
+                          closeAdisoSheet();
                         }}
                         className="flex items-center justify-center gap-2 rounded-xl border border-[var(--border-color)] py-3 text-sm font-semibold text-[var(--text-primary)]"
                       >
-                        <IconChatbot size={18} />
+                        <IconMessages size={18} />
                         Escribir mensaje
                       </button>
                     </div>
