@@ -8,10 +8,14 @@ Manual steps to activate the analytics stack after deploying the code changes.
 2. Enable **Web Analytics**
 3. Enable **Speed Insights**
 4. Add environment variables (Production + Preview):
-   - `NEXT_PUBLIC_GA_MEASUREMENT_ID`
+   - `NEXT_PUBLIC_GA_MEASUREMENT_ID` (omit if using GTM-only)
+   - `NEXT_PUBLIC_GTM_CONTAINER_ID` (optional; when set, replaces direct GA4 script)
+   - `NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION` (Search Console meta content)
    - `NEXT_PUBLIC_SENTRY_DSN`
    - `NEXT_PUBLIC_CLARITY_PROJECT_ID` (optional)
+   - `CRON_SECRET` (for `/api/cron/analytics-snapshot`)
 5. Redeploy after saving env vars
+6. Apply Supabase migration `055_analytics_rollups.sql` (rollups + views)
 
 ## 2. Google Analytics 4
 
@@ -27,13 +31,7 @@ Manual steps to activate the analytics stack after deploying the code changes.
 
 1. Go to [search.google.com/search-console](https://search.google.com/search-console)
 2. Add property `buscadis.com`
-3. Verify via HTML meta tag — paste the code in `app/layout.tsx`:
-
-```ts
-verification: {
-  google: 'your-verification-code',
-},
-```
+3. Verify via HTML meta tag → copy **only the content value** into Vercel env `NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION` (wired in `app/layout.tsx` metadata).
 
 4. Submit sitemap: `https://buscadis.com/sitemap.xml`
 5. Use URL Inspection for homepage, one ad URL, and one `/@slug` business profile
@@ -81,8 +79,16 @@ QR scans via `/q/{code}` automatically append `utm_source=qr` and `utm_medium=of
 - [ ] Cookie banner: reject → no GA4 requests; accept → GA4 loads
 - [ ] `behavioral_events` table still receives product events
 
+## 8. Google Tag Manager (optional)
+
+1. Create container at [tagmanager.google.com](https://tagmanager.google.com) for `buscadis.com`
+2. Configure GA4 Configuration tag inside GTM (do **not** also set `NEXT_PUBLIC_GA_MEASUREMENT_ID` or you will double-count)
+3. Set `NEXT_PUBLIC_GTM_CONTAINER_ID=GTM-XXXX` in Vercel and redeploy
+
 ## Internal dashboards
 
-- **Product intelligence:** `/admin/intelligence` (Supabase behavioral events)
-- **Business owners:** Profile editor → Analytics widget + QR stats
-- **Platform:** Vercel Analytics, GA4, Search Console, Sentry
+- **Taxonomía:** `docs/ANALYTICS-TAXONOMY.md`
+- **Product intelligence:** `/admin/intelligence` (funnel 7d, zero searches, móvil 24h)
+- **Clasificados (anunciantes):** `/perfil?tab=resultados` + export CSV
+- **Business owners:** Profile editor → Analytics widget + QR stats; pixels Meta/TikTok en vitrina (consentimiento marketing)
+- **Platform:** Vercel Analytics, GA4/GTM, Search Console, Sentry, Play Console Vitals

@@ -28,6 +28,9 @@ export async function GET(request: NextRequest) {
     { data: demandByCategory },
     { data: recentInferences },
     { data: deliveryStats },
+    { data: funnelDays },
+    { data: zeroSearches },
+    { count: mobileEvents24h },
   ] = await Promise.all([
     supabaseAdmin.from('behavioral_events').select('id', { count: 'exact', head: true }),
     supabaseAdmin.from('user_behavior_profiles').select('user_id', { count: 'exact', head: true }),
@@ -48,6 +51,12 @@ export async function GET(request: NextRequest) {
       .order('created_at', { ascending: false })
       .limit(20),
     supabaseAdmin.from('campaign_deliveries').select('channel, status'),
+    supabaseAdmin.from('v_personalization_funnel_7d').select('*').limit(7),
+    supabaseAdmin.from('v_search_zero_results_7d').select('query_text, zero_count, last_seen').limit(15),
+    supabaseAdmin
+      .from('mobile_analytics_events')
+      .select('id', { count: 'exact', head: true })
+      .gte('received_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()),
   ]);
 
   const categoryHeatmap: Record<string, number> = {};
@@ -83,5 +92,8 @@ export async function GET(request: NextRequest) {
     demandByCategory: categoryHeatmap,
     deliveriesByChannel,
     recentInferences: recentInferences || [],
+    personalizationFunnel: funnelDays || [],
+    topZeroSearches: zeroSearches || [],
+    mobileAnalyticsEvents24h: mobileEvents24h || 0,
   });
 }

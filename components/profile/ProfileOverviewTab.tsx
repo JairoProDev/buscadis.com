@@ -11,6 +11,7 @@ import {
   IconMegaphone,
   IconSparkles,
   IconChevronRight,
+  IconChartBar,
 } from '@/components/Icons';
 import { ProfileTabId } from './ProfileTabs';
 import ProfileCompletionCard from './ProfileCompletionCard';
@@ -65,6 +66,14 @@ export default function ProfileOverviewTab({
             tab: 'publicar' as ProfileTabId,
             icon: <IconMegaphone size={20} color="var(--brand-yellow)" />,
             iconBg: 'bg-[rgba(var(--brand-yellow-rgb),0.15)]',
+            href: undefined as string | undefined,
+          },
+          {
+            title: 'Resultados',
+            desc: 'Impresiones, clics y contactos de tus anuncios',
+            tab: 'resultados' as ProfileTabId,
+            icon: <IconChartBar size={20} color="var(--brand-blue)" />,
+            iconBg: 'bg-[rgba(var(--brand-primary-rgb),0.12)]',
             href: undefined as string | undefined,
           },
         ]

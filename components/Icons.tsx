@@ -14,7 +14,7 @@ import {
   FaHandshake, FaUserPlus, FaUndo, FaRedo, FaCrop, FaPencilAlt, FaSmile,
   FaBed, FaBath, FaRulerCombined, FaCouch, FaKey, FaTree, FaWifi, FaGasPump, FaCogs,
   FaTachometerAlt, FaBicycle, FaTshirt, FaUtensils, FaGraduationCap, FaLaptop, FaPaw,
-  FaExchangeAlt, FaTruck, FaDoorOpen, FaTicketAlt, FaWeightHanging, FaCoins
+  FaExchangeAlt, FaTruck, FaDoorOpen, FaTicketAlt, FaWeightHanging, FaCoins, FaChartBar
 } from 'react-icons/fa';
 import { FcGoogle } from 'react-icons/fc';
 import { MdCenterFocusWeak } from 'react-icons/md';
@@ -117,6 +117,7 @@ export const IconBox = (p: IconProps) => <FaBox size={getSize(p)} color={p.color
 export const IconGratuitos = (p: IconProps) => <FaGift size={getSize(p)} color={p.color || 'currentColor'} className={p.className} onClick={p.onClick} />;
 export const IconTodos = (p: IconProps) => <FaTh size={getSize(p)} color={p.color || 'currentColor'} className={p.className} onClick={p.onClick} />;
 export const IconMegaphone = (p: IconProps) => <FaBullhorn size={getSize(p)} color={p.color || 'currentColor'} className={p.className} onClick={p.onClick} />;
+export const IconChartBar = (p: IconProps) => <FaChartBar size={getSize(p)} color={p.color || 'currentColor'} className={p.className} onClick={p.onClick} />;
 export const IconRobot = (p: IconProps) => <FaRobot size={getSize(p)} color={p.color || 'currentColor'} className={p.className} onClick={p.onClick} />;
 export const IconEmpleos = (p: IconProps) => <FaBriefcase size={getSize(p)} color={p.color || 'currentColor'} className={p.className} onClick={p.onClick} />;
 export const IconInmuebles = (p: IconProps) => <FaHome size={getSize(p)} color={p.color || 'currentColor'} className={p.className} onClick={p.onClick} />;

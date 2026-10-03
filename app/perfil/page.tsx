@@ -19,6 +19,7 @@ const VALID_TABS: ProfileTabId[] = [
   'interesados',
   'publicar',
   'negocios',
+  'resultados',
   'ajustes',
 ];
 

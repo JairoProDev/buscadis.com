@@ -11,6 +11,7 @@ import {
   IconStore,
   IconSettings,
   IconUser,
+  IconChartBar,
 } from '@/components/Icons';
 
 export type ProfileTabId =
@@ -22,6 +23,7 @@ export type ProfileTabId =
   | 'interesados'
   | 'publicar'
   | 'negocios'
+  | 'resultados'
   | 'ajustes';
 
 type TabIcon = ComponentType<{ size?: number; color?: string; className?: string }>;
@@ -40,6 +42,7 @@ export const PROFILE_TABS: {
   { id: 'ocultos', label: 'Ocultos', Icon: IconEyeOff },
   { id: 'interesados', label: 'Interesados', Icon: IconUser, publisherOnly: true },
   { id: 'publicar', label: 'Publicar', Icon: IconMegaphone, publisherOnly: true },
+  { id: 'resultados', label: 'Resultados', Icon: IconChartBar, publisherOnly: true },
   { id: 'negocios', label: 'Negocios', Icon: IconStore, businessOnly: true },
   { id: 'ajustes', label: 'Ajustes', Icon: IconSettings },
 ];

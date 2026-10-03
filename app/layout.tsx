@@ -86,8 +86,9 @@ export const metadata: Metadata = {
     },
   },
   verification: {
-    // Agregar cuando tengas Google Search Console
-    // google: 'verification-code',
+    ...(process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION
+      ? { google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION }
+      : {}),
   },
   manifest: '/site.webmanifest',
   icons: {

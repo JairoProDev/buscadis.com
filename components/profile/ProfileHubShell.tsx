@@ -24,6 +24,7 @@ import ProfileSettingsTab from './ProfileSettingsTab';
 import ProfilePublisherTab from './ProfilePublisherTab';
 import ProfileInterestedLeadsTab from './ProfileInterestedLeadsTab';
 import ProfileBusinessesTab from './ProfileBusinessesTab';
+import ProfileResultsTab from './ProfileResultsTab';
 import ProfileCompletionCard from './ProfileCompletionCard';
 import ProfileHubSkeleton from './ProfileHubSkeleton';
 import ModeIndicator from './ModeIndicator';
@@ -300,6 +301,9 @@ export default function ProfileHubShell({
           <ProfilePublisherTab token={session?.access_token} highlightId={highlightId} />
         )}
         {tab === 'negocios' && showBusinesses && <ProfileBusinessesTab />}
+        {tab === 'resultados' && showPublisher && (
+          <ProfileResultsTab accessToken={session?.access_token} />
+        )}
         {tab === 'ajustes' && <ProfileSettingsTab focusSection={settingsFocus} />}
       </div>
     </div>

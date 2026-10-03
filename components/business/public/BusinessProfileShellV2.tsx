@@ -26,6 +26,7 @@ import { trackProfileEvent } from '@/lib/business/analytics/track-profile-event'
 import { canUseProQr } from '@/lib/business/subscription';
 import { useUI } from '@/contexts/UIContext';
 import type { ProfileEditAccess } from '@/components/profile/ProfileChrome';
+import BusinessMarketingPixels from '@/components/analytics/BusinessMarketingPixels';
 
 export default function BusinessProfileShellV2({
   profile,
@@ -280,6 +281,13 @@ export default function BusinessProfileShellV2({
     >
       {!isPreviewMode && (
         <BusinessJsonLd profile={profile} products={adisos.slice(0, 5)} aggregate={reviewAggregate} />
+      )}
+
+      {isStorefront && !isPreviewMode && (
+        <BusinessMarketingPixels
+          pixelFacebook={profile.pixel_facebook}
+          pixelTiktok={profile.pixel_tiktok}
+        />
       )}
 
       <BlockRendererEngine
