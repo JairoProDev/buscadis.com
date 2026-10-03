@@ -38,6 +38,7 @@ function dbToStory(row: Record<string, unknown>): Story {
     source: (row.source as StorySource) || 'manual',
     objective: (row.objective as StoryObjective) || 'contactos',
     cta_url: (row.cta_url as string) || undefined,
+    sort_order: typeof row.sort_order === 'number' ? row.sort_order : 0,
     vendedor: vendedor || undefined,
   };
 }
@@ -61,6 +62,7 @@ export interface CreateStoryParams {
   source?: StorySource;
   ctaUrl?: string;
   status?: StoryStatus;
+  sortOrder?: number;
 }
 
 export async function createStoryServer(
@@ -86,6 +88,7 @@ export async function createStoryServer(
       status: params.status || DEFAULT_STORY_STATUS,
       visible_until: visibleUntil,
       expires_at: visibleUntil,
+      sort_order: params.sortOrder ?? 0,
     })
     .select('*')
     .single();

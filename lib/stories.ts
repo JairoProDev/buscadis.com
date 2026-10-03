@@ -35,6 +35,7 @@ function dbToStory(row: Record<string, unknown>, vendedor?: { nombre: string; av
     source: (row.source as StorySource) || 'manual',
     objective: (row.objective as StoryObjective) || 'contactos',
     cta_url: (row.cta_url as string) || undefined,
+    sort_order: typeof row.sort_order === 'number' ? row.sort_order : 0,
     vendedor,
   };
 }
@@ -126,6 +127,15 @@ export function groupStoriesByUser(
     if (STORY_TIER_ORDER[story.promotion_tier] < STORY_TIER_ORDER[group.topTier]) {
       group.topTier = story.promotion_tier;
     }
+  }
+
+  for (const group of groups.values()) {
+    group.stories.sort((a, b) => {
+      const orderA = a.sort_order ?? 0;
+      const orderB = b.sort_order ?? 0;
+      if (orderA !== orderB) return orderA - orderB;
+      return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+    });
   }
 
   const baseGroups = Array.from(groups.values());

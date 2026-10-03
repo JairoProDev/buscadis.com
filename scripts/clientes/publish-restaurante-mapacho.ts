@@ -13,19 +13,22 @@ import { adisoToDb } from '../../lib/supabase';
 import { onAdisoSearchIndexUpdate } from '../../lib/search/post-create';
 import { featuresForTier } from '../../lib/publish/tiers';
 import type { Adiso, Categoria } from '../../types';
+import type { FlyerTemplateId } from '../../lib/flyer/types';
 
 dotenv.config({ path: path.join(process.cwd(), '.env.local') });
 dotenv.config({ path: path.join(process.cwd(), '.env') });
 
 const BATCH_ID = 'cliente-restaurante-mapacho-2026-10';
 const SITE = (process.env.NEXT_PUBLIC_SITE_URL || 'https://buscadis.com').replace(/\/$/, '');
-const ROLE_STORY_SLUGS = new Set([
+const STORY_SLUGS_ORDER = [
+  'principal-8-vacantes',
   'maestro-panadero-pastelero',
   'ayudante-pasteleria',
   'ayudante-cocina',
   'vajillero',
   'moza-ingles',
-]);
+] as const;
+const STORY_SLUGS = new Set<string>(STORY_SLUGS_ORDER);
 const CLIENT_NAME = 'Restaurante Mapacho';
 const EMAIL = 'mapacho984759634@anunciantes.buscadis.com';
 const PHONE = '984759634';
@@ -59,6 +62,7 @@ type JobSpec = {
   imageKey?: 'flyer' | 'rueda';
   tamaño?: Adiso['tamaño'];
   promotionRank: number;
+  flyerTemplateId?: FlyerTemplateId;
 };
 
 const JOBS: JobSpec[] = [
@@ -88,6 +92,7 @@ const JOBS: JobSpec[] = [
     subcategoria: 'gastronomia',
     vacantes: 1,
     promotionRank: 2,
+    flyerTemplateId: 'editorial',
   },
   {
     slug: 'ayudante-pasteleria',
@@ -96,6 +101,7 @@ const JOBS: JobSpec[] = [
     subcategoria: 'gastronomia',
     vacantes: 1,
     promotionRank: 2,
+    flyerTemplateId: 'ribbon',
   },
   {
     slug: 'ayudante-cocina',
@@ -104,6 +110,7 @@ const JOBS: JobSpec[] = [
     subcategoria: 'gastronomia',
     vacantes: 2,
     promotionRank: 2,
+    flyerTemplateId: 'negocio',
   },
   {
     slug: 'vajillero',
@@ -112,6 +119,7 @@ const JOBS: JobSpec[] = [
     subcategoria: 'limpieza',
     vacantes: 2,
     promotionRank: 2,
+    flyerTemplateId: 'minimal-cream',
   },
   {
     slug: 'moza-ingles',
@@ -124,6 +132,7 @@ const JOBS: JobSpec[] = [
     subcategoria: 'atencion',
     vacantes: 2,
     promotionRank: 2,
+    flyerTemplateId: 'corner-mark',
   },
   {
     slug: 'rueda-negocios-referencia',
@@ -323,6 +332,13 @@ function buildAdiso(
       plan_amount_pen: 50,
       plan_end: '2026-10-31',
       contact_whatsapp: WHATSAPP,
+      ...(!imageUrl && spec.flyerTemplateId
+        ? {
+            coverSource: 'template' as const,
+            flyerTemplateId: spec.flyerTemplateId,
+            flyerConfig: {},
+          }
+        : {}),
     },
   };
 }
@@ -330,7 +346,7 @@ function buildAdiso(
 function storyCoverUrl(adiso: Adiso, imageUrl?: string): string {
   const priv = adiso.privateData as Record<string, unknown> | undefined;
   const slug = String(priv?.job_slug || '');
-  if (ROLE_STORY_SLUGS.has(slug)) {
+  if (slug !== 'principal-8-vacantes' && STORY_SLUGS.has(slug)) {
     return `${SITE}/og/adiso/${adiso.id}`;
   }
   return imageUrl || `${SITE}/og/adiso/${adiso.id}`;
@@ -340,6 +356,7 @@ async function insertStory(
   userId: string,
   adiso: Adiso,
   imageUrl: string,
+  sortOrder: number,
 ) {
   const admin = await getAdmin();
   const publicPath = `/a/${adiso.id}/${slugify(adiso.titulo)}`;
@@ -358,6 +375,7 @@ async function insertStory(
     status: 'active',
     visible_until: EXPIRES,
     expires_at: EXPIRES,
+    sort_order: sortOrder,
   });
   if (error) throw new Error(`story ${adiso.id}: ${error.message}`);
 }
@@ -409,6 +427,7 @@ async function main() {
   const businessId = await ensureBusinessProfile(user.id, flyerUrl);
 
   const published: { slug: string; id: string; url: string; story: boolean }[] = [];
+  let storySort = 0;
 
   for (const spec of JOBS) {
     let imageUrl: string | undefined;
@@ -430,15 +449,16 @@ async function main() {
 
     onAdisoSearchIndexUpdate(adiso);
 
-    if (ROLE_STORY_SLUGS.has(spec.slug)) {
-      await insertStory(user.id, adiso, imageUrl || '');
+    if (STORY_SLUGS.has(spec.slug)) {
+      await insertStory(user.id, adiso, imageUrl || '', storySort);
+      storySort += 1;
     }
 
     published.push({
       slug: spec.slug,
       id: adiso.id,
       url: `https://buscadis.com/a/${adiso.id}`,
-      story: ROLE_STORY_SLUGS.has(spec.slug),
+      story: STORY_SLUGS.has(spec.slug),
     });
   }
 

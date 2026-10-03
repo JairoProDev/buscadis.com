@@ -10,6 +10,7 @@ import {
   inferCategoryFromText,
 } from './tiers';
 import { createStoryFromAdiso } from '@/lib/stories/adiso-sync';
+import { adisoTierToStoryTier } from '@/lib/stories/config';
 import { PublishDraft, hasMinimumContent } from './publish-draft-types';
 import { calculateTotalPrice } from './pricing';
 import { supabaseAdmin } from '@/lib/supabase-admin';
@@ -157,11 +158,10 @@ export async function publishFromStudio(input: PublishStudioInput): Promise<{
     else orderId = order?.id;
   }
 
-  if (isFree) {
-    await createStoryFromAdiso(userId, created, {
-      promotionTier: 'gratis',
-    });
-  }
+  const storyTier = isFree ? 'gratis' : adisoTierToStoryTier(created.promotionTier);
+  await createStoryFromAdiso(userId, created, {
+    promotionTier: storyTier,
+  });
 
   if (!isFree) {
     try {

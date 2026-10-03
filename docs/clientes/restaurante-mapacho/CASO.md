@@ -29,7 +29,7 @@
 - Aviso principal con flyer diseñado (`media/flyer-8-vacantes.jpg`).
 - Avisos por puesto (búsqueda, filtros Empleos → Gastronomía / Atención / Limpieza según rol).
 - Referencia al aviso impreso en Rueda (`media/rueda-negocios-original.png`).
-- Historias vinculadas a cada aviso con promoción **premium** durante la vigencia del plan.
+- Carril de historias: **6 slides** (flyer principal JPG + 5 puestos con plantilla feed vía `/og/adiso/[id]`), promoción **premium** durante la vigencia.
 - Perfil de negocio: slug `restaurante-mapacho` (página propia del plan).
 
 ## Notas operativas
@@ -47,6 +47,14 @@ npx tsx scripts/clientes/publish-restaurante-mapacho.ts --dry-run
 
 Batch ID en `private_data`: `cliente-restaurante-mapacho-2026-10`.
 
+Sincronizar historias (orden flyer → puestos, `sort_order`):
+
+```bash
+npx tsx scripts/clientes/sync-mapacho-stories.ts
+npx tsx scripts/clientes/sync-mapacho-stories.ts --apply
+npx tsx scripts/clientes/sync-mapacho-stories.ts --apply --prewarm
+```
+
 ## Publicado en producción (2 oct 2026)
 
 | Rol | ID | URL |
@@ -61,7 +69,7 @@ Batch ID en `private_data`: `cliente-restaurante-mapacho-2026-10`.
 
 - **Perfil negocio:** https://buscadis.com/@restaurante-mapacho  
 - **User ID:** `bdb8904e-a4ce-4e5b-b8fd-20ebcdb4f9f8`  
-- **1 historia** en carril (flyer principal); las demás se archivaron para no repetir 7 slides idénticos.  
+- **6 historias** en carril: flyer principal primero (`sort_order` 0), luego un slide por puesto con `flyerTemplateId` distinto (editorial, ribbon, negocio, minimal-cream, corner-mark).  
 - El aviso “Rueda (referencia)” se mantiene en el feed a propósito (contraste B/N vs flyer); la captura de revista solo vive en `media/` como contexto interno.  
 - Cuenta: `mapacho984759634@anunciantes.buscadis.com` (contraseña temporal solo en registro interno / 1Password).
 

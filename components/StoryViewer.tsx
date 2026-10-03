@@ -14,6 +14,10 @@ import {
   recordStoryInteraction,
 } from '@/lib/stories';
 import { resolveStoryPublisherName } from '@/lib/stories/display-name';
+import {
+  shouldShowStoryCaptionOverlay,
+  storyCaptionSubtitle,
+} from '@/lib/stories/caption-display';
 import { getAdisoById } from '@/lib/storage';
 import { getWhatsAppUrl } from '@/lib/utils';
 import {
@@ -113,6 +117,7 @@ export default function StoryViewer({ groups, initialGroupIndex, onClose }: Stor
   const storyTotal = group?.stories.length ?? 0;
   const hasAdiso = Boolean(story?.adiso_id || story?.cta_url);
   const hasWhatsApp = Boolean(linkedAdiso?.contacto);
+  const isStoryOwner = Boolean(user?.id && story?.user_id && user.id === story.user_id);
 
   const showToast = useCallback((msg: string) => {
     setToast(msg);
@@ -187,6 +192,10 @@ export default function StoryViewer({ groups, initialGroupIndex, onClose }: Stor
       if (e.key === 'Escape') onClose();
       else if (e.key === 'ArrowRight') goNext();
       else if (e.key === 'ArrowLeft') goPrev();
+      else if (e.key === ' ' || e.code === 'Space') {
+        e.preventDefault();
+        setPaused((p) => !p);
+      }
     };
     window.addEventListener('keydown', handleKey);
     return () => window.removeEventListener('keydown', handleKey);
@@ -297,7 +306,12 @@ export default function StoryViewer({ groups, initialGroupIndex, onClose }: Stor
     showToast('Enlace copiado');
   };
 
-  const handleMediaTap = (side: 'left' | 'right') => {
+  const handleMediaNavigate = (side: 'left' | 'right', pointerType: string) => {
+    if (pointerType === 'mouse' || pointerType === 'pen') {
+      if (side === 'left') goPrev();
+      else goNext();
+      return;
+    }
     const now = Date.now();
     if (now - lastTapRef.current < 280) {
       void handleFavorite();
@@ -315,10 +329,13 @@ export default function StoryViewer({ groups, initialGroupIndex, onClose }: Stor
 
   if (!story || !group) return null;
 
+  const showCaptionOverlay = shouldShowStoryCaptionOverlay(story);
+  const categoryChip = storyCaptionSubtitle(story);
+
   return createPortal(
-    <div className="fixed inset-0 z-[10002] bg-black flex items-center justify-center">
+    <div className="fixed inset-0 z-[10002] flex items-center justify-center bg-black/95">
       <motion.div
-        className="relative w-full h-full max-w-[480px] mx-auto select-none"
+        className="relative mx-auto h-[min(92vh,900px)] w-full max-w-[min(100vw,calc(min(92vh,900px)*9/16))] select-none overflow-hidden rounded-2xl bg-black shadow-2xl md:max-w-none md:w-[min(calc(min(92vh,900px)*9/16),100vw-2rem)]"
         drag="y"
         dragConstraints={{ top: 0, bottom: 0 }}
         dragElastic={0.5}
@@ -368,7 +385,7 @@ export default function StoryViewer({ groups, initialGroupIndex, onClose }: Stor
                 <span className="font-medium text-white/90">
                   {storyIndex}/{storyTotal}
                 </span>
-                {story.view_count > 0 && (
+                {isStoryOwner && story.view_count > 0 && (
                   <>
                     <span aria-hidden>·</span>
                     <span>{formatViewCount(story.view_count)} vistas</span>
@@ -396,12 +413,12 @@ export default function StoryViewer({ groups, initialGroupIndex, onClose }: Stor
         </div>
 
         {/* Media */}
-        <div className="absolute inset-0 flex items-center justify-center bg-black">
+        <div className="absolute inset-0 bg-black">
           {story.media_type === 'video' ? (
             <video
               ref={videoRef}
               src={story.media_url}
-              className="h-full w-full object-contain"
+              className="h-full w-full object-cover"
               autoPlay
               playsInline
               onTimeUpdate={(e) => {
@@ -411,8 +428,17 @@ export default function StoryViewer({ groups, initialGroupIndex, onClose }: Stor
               onEnded={goNext}
             />
           ) : (
-            <img src={story.media_url} alt={story.caption || ''} className="h-full w-full object-contain" />
+            <img
+              src={story.media_url}
+              alt=""
+              className="h-full w-full object-cover"
+              draggable={false}
+            />
           )}
+          <div
+            className="pointer-events-none absolute inset-0 z-[5] bg-gradient-to-b from-black/55 via-black/5 to-black/70"
+            aria-hidden
+          />
         </div>
 
         {/* Double-tap heart (IG) */}
@@ -424,43 +450,51 @@ export default function StoryViewer({ groups, initialGroupIndex, onClose }: Stor
 
         {/* Zonas táctiles: no cubren controles inferiores ni rail derecho */}
         <div
-          className="absolute left-0 right-14 z-10 flex"
+          className="absolute left-0 right-0 z-20 flex md:right-14"
           style={{ top: 72, bottom: BOTTOM_CHROME_PX }}
         >
           <button
             type="button"
             aria-label="Historia anterior"
-            className="w-[38%] bg-transparent"
-            onClick={() => handleMediaTap('left')}
-            onPointerDown={() => setPaused(true)}
-            onPointerUp={() => setPaused(false)}
-            onPointerLeave={() => setPaused(false)}
+            className="w-[35%] cursor-w-resize bg-transparent md:hover:bg-white/5"
+            onPointerUp={(e) => {
+              if (e.pointerType === 'touch') setPaused(false);
+              handleMediaNavigate('left', e.pointerType);
+            }}
+            onPointerDown={(e) => {
+              if (e.pointerType === 'touch') setPaused(true);
+            }}
+            onPointerCancel={() => setPaused(false)}
           />
           <button
             type="button"
             aria-label="Siguiente historia"
-            className="flex-1 bg-transparent"
-            onClick={() => handleMediaTap('right')}
-            onPointerDown={() => setPaused(true)}
-            onPointerUp={() => setPaused(false)}
-            onPointerLeave={() => setPaused(false)}
+            className="flex-1 cursor-e-resize bg-transparent md:hover:bg-white/5"
+            onPointerUp={(e) => {
+              if (e.pointerType === 'touch') setPaused(false);
+              handleMediaNavigate('right', e.pointerType);
+            }}
+            onPointerDown={(e) => {
+              if (e.pointerType === 'touch') setPaused(true);
+            }}
+            onPointerCancel={() => setPaused(false)}
           />
         </div>
 
-        {/* Caption (IG/TikTok — abajo a la izquierda) */}
-        {(story.caption || hasAdiso) && (
+        {/* Caption solo en fotos reales (el arte OG ya trae el título) */}
+        {(showCaptionOverlay || categoryChip) && (
           <div
-            className="absolute left-3 z-25 max-w-[calc(100%-5rem)] pointer-events-none"
+            className="pointer-events-none absolute left-3 z-25 max-w-[calc(100%-5rem)]"
             style={{ bottom: BOTTOM_CHROME_PX + 8 }}
           >
-            {story.caption && (
-              <p className="text-sm font-medium text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)] line-clamp-2 mb-1">
+            {showCaptionOverlay && story.caption && (
+              <p className="mb-1 line-clamp-2 text-sm font-medium text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)]">
                 {story.caption}
               </p>
             )}
-            {hasAdiso && linkedAdiso && (
-              <p className="text-xs text-white/80 drop-shadow-md line-clamp-1">
-                {linkedAdiso.titulo}
+            {categoryChip && (
+              <p className="text-xs font-semibold uppercase tracking-wide text-white/85 drop-shadow-md">
+                {categoryChip}
               </p>
             )}
           </div>

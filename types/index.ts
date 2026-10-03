@@ -152,6 +152,7 @@ export interface Story {
   source: StorySource;
   objective: StoryObjective;
   cta_url?: string;
+  sort_order?: number;
   vendedor?: {
     nombre: string;
     avatarUrl?: string;
