@@ -75,6 +75,20 @@ location.reload();
 
 ---
 
+## DNS — dónde está `buscadis.com`
+
+Si verificaste GSC con **“Authorize DNS records from Google”** en **Cloudflare**, los nameservers del dominio apuntan a Cloudflare (el registrador, p. ej. Namecheap, solo renueva el dominio).
+
+**Configuración recomendada**
+
+1. **Namecheap** (o quien vendió el dominio): solo facturación; NS = Cloudflare.
+2. **Cloudflare**: DNS (TXT GSC, A/CNAME a Vercel), SSL **Full (strict)**, reglas de cache si las usas.
+3. **Vercel**: hosting del proyecto `buscadis.com`; dominio añadido en **Settings → Domains**.
+
+No añadas el mismo TXT en dos sitios. El registro `google-site-verification=…` **debe permanecer** en Cloudflare.
+
+---
+
 ## Search Console — Domain vs URL prefix
 
 | Tipo | Ventajas | Verificación |

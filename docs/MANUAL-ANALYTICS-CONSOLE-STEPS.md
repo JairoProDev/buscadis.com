@@ -111,7 +111,9 @@ Los eventos **no se crean manualmente** en GA4: el sitio los envía con código 
 
 **Objetivo:** indexación, sitemap, queries orgánicas.
 
-**Guía ampliada:** `docs/ANALYTICS-ECOSYSTEM-GOOGLE.md` (propiedades GA4, app, Publicadis, tráfico interno).
+**Guía ampliada:** `docs/ANALYTICS-ECOSYSTEM-GOOGLE.md` · **Checklist:** `docs/ANALYTICS-CHECKLIST.md`.
+
+**Si ya ves “Ownership verified” (Domain) vía Cloudflare:** el TXT ya está; pasa a **4.3 Sitemap** y **4.5 enlazar GA4**.
 
 ### 4.0 ¿Domain o URL prefix? (elige lo profesional)
 
