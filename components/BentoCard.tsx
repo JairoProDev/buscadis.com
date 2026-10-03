@@ -2,6 +2,7 @@
 
 import { motion } from 'framer-motion';
 import Image from 'next/image';
+import { shouldBypassVercelImageOptimization } from '@/lib/images/listing-image';
 import { Adiso, PAQUETES } from '@/types';
 import { cn } from '@/lib/utils';
 import { ReactNode } from 'react';
@@ -105,7 +106,9 @@ export default function BentoCard({ adiso, isSelected, onClick, icon, className,
               src={imagenUrl!}
               alt={adiso.titulo}
               fill
-              unoptimized={imagenUrl!.startsWith('data:')}
+              unoptimized={
+                imagenUrl!.startsWith('data:') || shouldBypassVercelImageOptimization(imagenUrl)
+              }
               sizes="(max-width: 768px) 50vw, 33vw"
               className="object-cover"
               loading="lazy"

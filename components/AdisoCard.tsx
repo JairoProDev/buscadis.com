@@ -19,6 +19,7 @@ import {
 import { useAdInteraction } from '@/hooks/useAdInteraction';
 import { useAdisoCardActions, type AdisoCardActionId } from '@/hooks/useAdisoCardActions';
 import AdisoCardActionsSheet from '@/components/adiso/AdisoCardActionsSheet';
+import { shouldBypassVercelImageOptimization } from '@/lib/images/listing-image';
 import AdisoCardLongPressMenu, {
   pickRadialAction,
   mapRadialToCardAction,
@@ -350,6 +351,7 @@ const AdisoCard = forwardRef<HTMLDivElement, AdisoCardProps>(
               src={imagenUrl!}
               alt={displayTitle}
               fill
+              unoptimized={shouldBypassVercelImageOptimization(imagenUrl)}
               sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 20vw"
               className="object-cover motion-reduce:transition-none"
               loading="lazy"

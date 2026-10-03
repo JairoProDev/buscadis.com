@@ -5,6 +5,11 @@ const nextConfig = {
     optimizePackageImports: ['react-icons', 'date-fns', 'framer-motion', 'country-state-city'],
   },
   images: {
+    // Fewer breakpoints → fewer unique transforms (Vercel Image Optimization cache writes).
+    deviceSizes: [640, 828, 1200, 1920],
+    imageSizes: [128, 256, 384],
+    // Reuse cached transforms longer (default 60s causes repeat writes on popular pages).
+    minimumCacheTTL: 60 * 60 * 24 * 30,
     remotePatterns: [
       {
         protocol: 'https',
