@@ -18,6 +18,14 @@ dotenv.config({ path: path.join(process.cwd(), '.env.local') });
 dotenv.config({ path: path.join(process.cwd(), '.env') });
 
 const BATCH_ID = 'cliente-restaurante-mapacho-2026-10';
+const SITE = (process.env.NEXT_PUBLIC_SITE_URL || 'https://buscadis.com').replace(/\/$/, '');
+const ROLE_STORY_SLUGS = new Set([
+  'maestro-panadero-pastelero',
+  'ayudante-pasteleria',
+  'ayudante-cocina',
+  'vajillero',
+  'moza-ingles',
+]);
 const CLIENT_NAME = 'Restaurante Mapacho';
 const EMAIL = 'mapacho984759634@anunciantes.buscadis.com';
 const PHONE = '984759634';
@@ -319,6 +327,15 @@ function buildAdiso(
   };
 }
 
+function storyCoverUrl(adiso: Adiso, imageUrl?: string): string {
+  const priv = adiso.privateData as Record<string, unknown> | undefined;
+  const slug = String(priv?.job_slug || '');
+  if (ROLE_STORY_SLUGS.has(slug)) {
+    return `${SITE}/og/adiso/${adiso.id}`;
+  }
+  return imageUrl || `${SITE}/og/adiso/${adiso.id}`;
+}
+
 async function insertStory(
   userId: string,
   adiso: Adiso,
@@ -326,9 +343,10 @@ async function insertStory(
 ) {
   const admin = await getAdmin();
   const publicPath = `/a/${adiso.id}/${slugify(adiso.titulo)}`;
+  const mediaUrl = storyCoverUrl(adiso, imageUrl);
   const { error } = await admin.from('stories').insert({
     user_id: userId,
-    media_url: imageUrl,
+    media_url: mediaUrl,
     media_type: 'image',
     caption: adiso.titulo,
     categoria: adiso.categoria,
@@ -412,15 +430,15 @@ async function main() {
 
     onAdisoSearchIndexUpdate(adiso);
 
-    if (spec.slug === 'principal-8-vacantes') {
-      await insertStory(user.id, adiso, flyerUrl);
+    if (ROLE_STORY_SLUGS.has(spec.slug)) {
+      await insertStory(user.id, adiso, imageUrl || '');
     }
 
     published.push({
       slug: spec.slug,
       id: adiso.id,
       url: `https://buscadis.com/a/${adiso.id}`,
-      story: spec.slug === 'principal-8-vacantes',
+      story: ROLE_STORY_SLUGS.has(spec.slug),
     });
   }
 
