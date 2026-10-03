@@ -19,7 +19,10 @@ import {
 import { useAdInteraction } from '@/hooks/useAdInteraction';
 import { useAdisoCardActions, type AdisoCardActionId } from '@/hooks/useAdisoCardActions';
 import AdisoCardActionsSheet from '@/components/adiso/AdisoCardActionsSheet';
-import { shouldBypassVercelImageOptimization } from '@/lib/images/listing-image';
+import {
+  getListingThumbnailUrl,
+  shouldBypassVercelImageOptimization,
+} from '@/lib/images/listing-image';
 import AdisoCardLongPressMenu, {
   pickRadialAction,
   mapRadialToCardAction,
@@ -348,7 +351,7 @@ const AdisoCard = forwardRef<HTMLDivElement, AdisoCardProps>(
 
           {showUserPhoto ? (
             <Image
-              src={imagenUrl!}
+              src={getListingThumbnailUrl(imagenUrl)!}
               alt={displayTitle}
               fill
               unoptimized={shouldBypassVercelImageOptimization(imagenUrl)}

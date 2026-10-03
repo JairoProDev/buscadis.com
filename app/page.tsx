@@ -13,7 +13,8 @@ import {
   isMarketplaceCategory,
 } from '@/lib/seo/category-metadata';
 
-export const dynamic = 'force-dynamic';
+/** Cache home feed shell; modal/search still client-driven. Improves TTFB / RES on `/`. */
+export const revalidate = 90;
 
 const HOME_SSR_LIMIT = 24;
 

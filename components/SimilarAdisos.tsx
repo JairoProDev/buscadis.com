@@ -9,6 +9,10 @@ import FlyerCanvas from '@/components/flyer/FlyerCanvas';
 import { buildFlyerContentFromAdiso, flyerStateFromPrivateData } from '@/lib/flyer/layout';
 import { adisoUsesGeneratedCover, resolveFlyerConfig } from '@/lib/flyer/templates';
 import { toDisplayTitle } from '@/lib/adiso-display';
+import {
+  getListingThumbnailUrl,
+  shouldBypassVercelImageOptimization,
+} from '@/lib/images/listing-image';
 
 interface SimilarAdisosProps {
   currentAdiso: Adiso;
@@ -98,9 +102,10 @@ export default function SimilarAdisos({ currentAdiso }: SimilarAdisosProps) {
             >
               {showPhoto ? (
                 <Image
-                  src={photo || ''}
+                  src={getListingThumbnailUrl(photo) || ''}
                   alt={displayTitle}
                   fill
+                  unoptimized={shouldBypassVercelImageOptimization(photo)}
                   className="object-contain p-2"
                   sizes="(max-width: 640px) 50vw, 200px"
                 />

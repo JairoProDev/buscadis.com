@@ -2,7 +2,10 @@
 
 import { motion } from 'framer-motion';
 import Image from 'next/image';
-import { shouldBypassVercelImageOptimization } from '@/lib/images/listing-image';
+import {
+  getListingThumbnailUrl,
+  shouldBypassVercelImageOptimization,
+} from '@/lib/images/listing-image';
 import { Adiso, PAQUETES } from '@/types';
 import { cn } from '@/lib/utils';
 import { ReactNode } from 'react';
@@ -103,7 +106,7 @@ export default function BentoCard({ adiso, isSelected, onClick, icon, className,
             transition={{ duration: 0.6, ease: [0.33, 1, 0.68, 1] }}
           >
             <Image
-              src={imagenUrl!}
+              src={getListingThumbnailUrl(imagenUrl)!}
               alt={adiso.titulo}
               fill
               unoptimized={

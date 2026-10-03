@@ -38,8 +38,11 @@
 
 **Objetivo:** dejar listas todas las claves antes de tocar Google.
 
+**Lee primero:** `docs/VERCEL-ENV-VARIABLES.md` (Config vs Secret, `NEXT_PUBLIC_SITE_URL=https://buscadis.com`, unificar duplicados).
+
 1. Vercel → proyecto → **Settings** → **Environment Variables**.
-2. Para cada fila: **Key**, **Value**, marcar **Production** (y **Preview** si quieres probar en previews).
+2. Para cada fila: **Key**, **Value**, entorno **All Environments** (salvo excepciones del doc de env).
+3. Variables `NEXT_PUBLIC_*` → tipo **Config**, nunca **Secret**.
 
 | Key | Dónde conseguir el valor | Notas |
 |-----|--------------------------|--------|
@@ -293,3 +296,20 @@ Respuesta esperada: `{"ok":true,"rowsUpserted":N}`.
 - `docs/PLAY_PUBLICATION_RUNBOOK.md` — app Android
 
 Cuando termines la **Etapa 4**, ya tienes el triángulo mínimo para decisiones: **GA4 + GSC + datos propios en Supabase**.
+
+---
+
+## ¿Conectar analytics hace más lenta la web?
+
+**En la práctica, casi no** si sigues el diseño actual:
+
+| Pieza | Impacto |
+|-------|---------|
+| **Vercel Web Analytics / Speed Insights** | Script pequeño; Speed Insights mide, no bloquea la UI |
+| **GA4 directo o GTM** | Solo tras **aceptar cookies analytics**; carga `afterInteractive` |
+| **Clarity** | Igual, con consentimiento |
+| **Sentry** | Solo errores; overhead mínimo en happy path |
+| **`behavioral_events`** | `fetch` en batch cada ~2s; no bloquea clics |
+| **Pixels Meta/TikTok en vitrina** | Solo con consentimiento **marketing** |
+
+Si el usuario **rechaza** cookies, no cargas GA/Clarity/pixels de terceros. Lo que sí afecta RES (rojo en Speed Insights) suele ser **LCP** (imágenes/peso JS en `/`) y **INP** (JS pesado en móvil), no la medición. Tras deploy de optimizaciones de home + thumbnails, revisa RES en 7–14 días.

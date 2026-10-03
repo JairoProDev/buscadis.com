@@ -11,8 +11,14 @@
 ## Cambios ya en código (deploy para aplicar)
 
 1. **`next.config.js`**: menos tamaños de imagen, `minimumCacheTTL` 30 días → menos re-escrituras de caché.
-2. **`lib/images/listing-image.ts`**: tarjetas del feed usan **`unoptimized`** para URLs de Supabase → **no pasan por Image Optimization** (gran ahorro en Cache Writes).
-3. Detalle/modal puede seguir usando optimización donde convenga.
+2. **`lib/images/listing-image.ts`**: tarjetas usan **Supabase Image Transform** (`width=512`, `quality=80`) + `unoptimized` → **no pasan por Vercel** pero **sí** se redimensionan en el CDN de Supabase.
+3. **Modal / ficha de anuncio** sigue pudiendo cargar la imagen original (máxima calidad al ampliar).
+
+### ¿Peor calidad en el feed?
+
+No debería verse peor en móvil/desktop normal: 512px de ancho a calidad 80 es suficiente para tarjetas de 2 columnas. En pantallas 4K muy grandes el thumbnail puede verse un poco más suave al hacer zoom; al abrir el anuncio ves la foto completa.
+
+Si Supabase Transform no está habilitado en tu plan, la URL hace fallback al objeto original (misma calidad que antes, más peso en red).
 
 ## Acciones en el dashboard Vercel (tú)
 
