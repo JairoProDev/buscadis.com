@@ -27,6 +27,10 @@
     {
       "path": "/api/cron/analytics-snapshot",
       "schedule": "15 5 * * *"
+    },
+    {
+      "path": "/api/cron/adiso-promotion-bumps",
+      "schedule": "0 13 * * *"
     }
   ]
 }
