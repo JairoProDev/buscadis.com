@@ -60,8 +60,16 @@ En esa página verás dos bloques (nombres en español pueden variar):
 | **Firma de la app** (App signing key) | Usuarios que instalan desde **Play Store** (casi siempre este) |
 | **Clave de subida** (Upload key) | Lo que firma el AAB que sube EAS antes de que Play lo re-firme |
 
-**Qué hacer:** copia el **SHA-1** de **Firma de la app** y compáralo con el de **Android client 1** en Google Cloud.  
-Si es distinto, en GCP puedes **añadir otro SHA-1** al mismo cliente Android (no hace falta crear otro cliente).
+**Qué hacer (Play Store):** el SHA-1 de **Firma de la app** (`E1:68:…` del botón azul) debe ser el que está en **Android client 1**. Si ya coincide, **no hace falta el de upload**.
+
+**¿No ves cómo poner dos SHA-1 en el mismo cliente?** Es normal: en Google Cloud cada cliente **Android** tiene **un solo** campo SHA-1. No hay “+ Añadir fingerprint” en esa pantalla.
+
+| Situación | Qué hacer |
+|-----------|-----------|
+| Usuarios instalan desde **Play** | Solo **App signing** SHA-1 en **Android client 1** (tu `E1:68:…`) |
+| Pruebas con APK/AAB firmado solo con **upload** (sin Play) | **Crear otro** cliente OAuth → Android, mismo package, SHA-1 `1C:D0:8A:…` (segundo Client ID; solo si realmente pruebas así) |
+
+Para producción en Play, con `E1:68:…` en **Android client 1** ya estás bien.
 
 También comprueba:
 
