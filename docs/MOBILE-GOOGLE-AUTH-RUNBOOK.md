@@ -59,14 +59,9 @@ Verifica **Orígenes JavaScript autorizados**:
 
 No hace falta cambiar el Client ID web para la app Android nativa, pero **sí** lo usa `expo-auth-session` como `webClientId` para obtener el **ID token**.
 
-### B1b. Redirect URIs en el cliente **Web** (error 400 en app)
+### B1b. Error 400 en la app (no añadas `buscadis://` al cliente Web)
 
-En el mismo cliente Web, **Authorized redirect URIs**:
-
-- `buscadis://oauthredirect`
-- `com.googleusercontent.apps.222349059154-59klc5eh40c4q8eng67gkvug7s4u04br:/oauth2redirect`
-
-Detalle: [GOOGLE-OAUTH-APP-400-FIX.md](./GOOGLE-OAUTH-APP-400-FIX.md)
+El cliente **Web** solo admite redirects `https://`. La app Android usa el cliente **Android** (package + SHA-1). Guía paso a paso: [GOOGLE-OAUTH-APP-400-FIX.md](./GOOGLE-OAUTH-APP-400-FIX.md)
 
 ### B2. Cliente OAuth **Android** (esto falta hoy)
 

@@ -1,53 +1,78 @@
-# Error 400 `invalid_request` — login Google en la app Android
+# Arreglar login con Google en la app Android (error 400)
 
-Pantalla: *Access blocked … sent an invalid request* / **Error 400: invalid_request**.
+## Lo que viste en la consola (normal)
 
-No es el One Tap de la web: la app usa **expo-auth-session** (`useIdTokenAuthRequest`) y abre el flujo OAuth de Google. Casi siempre falla por **redirect URI** o **cliente Android (SHA-1 / package)** mal configurados en Google Cloud.
+En **Adis Login** (cliente **Web**), Google **no deja** guardar:
 
-## 1. Cliente OAuth **Web** (el mismo `googleWebClientId`)
+- `buscadis://oauthredirect`
+- `com.googleusercontent.apps.222349059154-59klc…:/oauth2redirect`
 
-En [Credentials](https://console.cloud.google.com/apis/credentials) → tu cliente **Web** → **Authorized redirect URIs**, añade **todas** estas (sin espacios):
+Mensajes tipo *“must use http or https”* o *“must end with .com”*.
 
-```text
-buscadis://oauthredirect
-com.googleusercontent.apps.222349059154-59klc5eh40c4q8eng67gkvug7s4u04br:/oauth2redirect
-```
+**No es un error tuyo:** esas URLs **no van en el cliente Web**. Quítalas (borra las líneas 4 y 5) y deja solo las 3 `https://` que ya tenías.
 
-(Si cambias el Web Client ID, sustituye el segmento largo por el de tu cliente: quita `.apps.googleusercontent.com` y antepone `com.googleusercontent.apps.`)
+---
 
-Opcional si pruebas con Expo Go:
+## Cómo funciona (simple)
 
-```text
-https://auth.expo.io/@TU_USUARIO/buscadis-app
-```
+| Dónde entras | Qué cliente usa la app |
+|--------------|-------------------------|
+| Chrome → buscadis.com | Cliente **Web** “Adis Login” (solo URLs `https://`) |
+| App Android | Cliente **Android client 1** (paquete + SHA-1) |
 
-Guarda, **recarga la página** y confirma que siguen las 5 URIs (la consola a veces no persiste si el JS de `gstatic` no cargó). Espera 5–10 minutos.
+La app **no** usa el cliente Web para el popup de Google en el teléfono. Usa el **Android client** (`222349059154-lsfb…` en `app.json`).
 
-## 2. Cliente OAuth **Android**
+---
 
-- Package: `com.adisplatforms.buscadis`
-- **SHA-1 del certificado de firma de Play** (Play Console → Integridad de la app → App signing key)
-- Debe coincidir con `googleAndroidClientId` en `app.json` / EAS
+## Paso 1 — Cliente Web “Adis Login” (tu captura)
 
-## 3. Supabase
+1. Credenciales → **Adis Login** (Web).
+2. **Authorized redirect URIs**: solo estas **3** (nada de `buscadis://`):
 
-Authentication → Google → **mismo Web Client ID** + **Client Secret** del cliente Web.
+   - `https://qegqjshtxotdjjhvxmve.supabase.co/auth/v1/callback`
+   - `https://www.buscadis.com/auth/callback`
+   - `http://localhost:3000/auth/callback`
 
-## 4. Nuevo build de la app
+3. **Guardar**.
 
-Tras cambiar `App.tsx` (redirect explícito) o `app.json`:
+---
+
+## Paso 2 — Cliente **Android client 1**
+
+1. Credenciales → **Android client 1** (icono lápiz).
+2. Comprueba:
+   - **Package name:** `com.adisplatforms.buscadis`
+   - **SHA-1:** el de **Play Console** → Integridad de la app → **Certificado de firma de la app** (App signing key), no solo el upload key si difieren.
+
+Si el SHA-1 no coincide con el APK/AAB que instala Play, Google devuelve 400.
+
+---
+
+## Paso 3 — App en el teléfono
+
+El código usa el redirect correcto para Android:
+
+`com.googleusercontent.apps.222349059154-lsfb8gf494u7673ap374gk8t1fj9hgfl:/oauth2redirect`
+
+(derivado del **Android** Client ID, no del Web.)
+
+Necesitas un build **≥ 1.0.11** con ese cambio. El AAB 1.0.10 usaba `buscadis://`, que chocaba con esta configuración.
 
 ```bash
 cd ~/proyectos/sdk/buscadis-mobile
 eas build -p android --profile production
 ```
 
-La web (`buscadis.com`) no necesita rebuild para este error; sí un **nuevo AAB** si cambias código nativo.
+---
 
-## 5. Nombre en la pantalla de error
+## Paso 4 — Probar
 
-Si aún dice **ADIS TECHNOLOGICAL PLATFORMS S.A.C.**, revisa OAuth consent screen → **App name = Buscadis** (el nombre legal puede seguir en política de privacidad). La propagación puede tardar horas.
+1. Instala el build nuevo (Play internal o APK/AAB).
+2. Abre la app → Entrar con Google.
+3. Si falla, anota el texto exacto del error.
 
-## Verificación rápida (web)
+---
 
-One Tap en Chrome incógnito en `https://www.buscadis.com` → Entrar. Si la web falla, arregla web/Supabase antes de la app.
+## Resumen en una frase
+
+**No pegues URLs de la app en el cliente Web; arregla el cliente Android (package + SHA-1) e instala un build que use el redirect del cliente Android.**
