@@ -45,11 +45,15 @@ Eso debe coincidir con **el certificado con el que firma la app en el teléfono*
 
 ### Dónde ver el SHA-1 correcto (Play Console)
 
-La pantalla **“Protegido con Play”** no muestra el SHA-1. Ve a:
+Google **movió** “Integridad de la app” dentro de **Protegido con Play** (Protected with Play). Si ves el aviso *“App Integrity settings have moved…”*, estás en el sitio correcto; solo hay que entrar un nivel más.
 
-**Play Console** → app **Buscadis** → menú izquierdo **Configuración** (o **Release** / **Test and release**) → **Integridad de la app** / **App integrity**.
+**Ruta (2025–2026):**
 
-Ahí verás dos bloques (nombres en español pueden variar):
+1. Menú izquierdo → **Protegido con Play** / **Protected with Play**
+2. Despliega **Protección de Play Store** / **Play Store protection**
+3. **Administrar firma de Play** / **Manage Play app signing** (o **Ir a Firma de Play**)
+
+En esa página verás dos bloques (nombres en español pueden variar):
 
 | Certificado | Cuándo importa |
 |-------------|----------------|
