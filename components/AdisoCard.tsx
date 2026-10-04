@@ -21,6 +21,7 @@ import { useAdisoCardActions, type AdisoCardActionId } from '@/hooks/useAdisoCar
 import AdisoCardActionsSheet from '@/components/adiso/AdisoCardActionsSheet';
 import {
   getListingThumbnailUrl,
+  listingCardImageObjectClass,
   shouldBypassVercelImageOptimization,
 } from '@/lib/images/listing-image';
 import AdisoCardLongPressMenu, {
@@ -356,7 +357,7 @@ const AdisoCard = forwardRef<HTMLDivElement, AdisoCardProps>(
               fill
               unoptimized={shouldBypassVercelImageOptimization(imagenUrl)}
               sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 20vw"
-              className="object-cover motion-reduce:transition-none"
+              className={`${listingCardImageObjectClass(isCatalogProduct)} motion-reduce:transition-none`}
               loading="lazy"
             />
           ) : (

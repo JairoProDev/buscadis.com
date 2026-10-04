@@ -53,6 +53,16 @@ export function getListingThumbnailUrl(
   }
 }
 
+/**
+ * Flyers verticales en marco cuadrado: mostrar ancho completo (letterbox arriba/abajo).
+ * Fotos de catálogo suelen ser cuadradas → cover.
+ */
+export function listingCardImageObjectClass(isCatalogProduct: boolean): string {
+  return isCatalogProduct
+    ? 'object-cover object-center'
+    : 'object-contain object-center px-1.5 py-1';
+}
+
 /** Grid cards: never route through /_next/image (Vercel quota). */
 export function shouldBypassVercelImageOptimization(src: string | undefined | null): boolean {
   if (!src) return false;

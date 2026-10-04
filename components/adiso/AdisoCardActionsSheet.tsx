@@ -134,7 +134,13 @@ export default function AdisoCardActionsSheet({
 
               {thumb && !thumb.startsWith('data:') && (
                 <div className="mx-auto mt-2 h-[72px] w-[72px] overflow-hidden rounded-2xl border border-white/10 shadow-lg">
-                  <Image src={thumb} alt="" width={72} height={72} className="h-full w-full object-cover" />
+                  <Image
+                    src={thumb}
+                    alt=""
+                    width={72}
+                    height={72}
+                    className="h-full w-full object-contain object-center p-0.5"
+                  />
                 </div>
               )}
 
