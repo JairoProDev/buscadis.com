@@ -24,7 +24,9 @@ No uses bloques hero ni retrasar One Tap por “branding”.
 4. **Terms:** `https://www.buscadis.com/terminos`
 5. **Search Console:** dominio `buscadis.com` verificado (TXT DNS) — sin esto suele fallar todo el branding.
 
-Tras verificar dominio + deploy → esperar 24 h → reintentar verificación de branding.
+Tras verificar dominio + deploy → **Branding → View issues → I have fixed the issues → Proceed**. Si pasa la revisión, pulsa **Publish branding** (válido ~7 días).
+
+**Estado (2026-10-04):** branding **verificado** en proyecto GCP `buscadis`; publicación iniciada. Search Console dominio `buscadis.com` verificado; `sitemap.xml` enviado.
 
 ## ¿Ya está todo resuelto?
 
