@@ -37,14 +37,33 @@ La app **no** usa el cliente Web para el popup de Google en el teléfono. Usa el
 
 ---
 
-## Paso 2 — Cliente **Android client 1**
+## Paso 2 — Cliente **Android client 1** (SHA-1)
 
-1. Credenciales → **Android client 1** (icono lápiz).
-2. Comprueba:
-   - **Package name:** `com.adisplatforms.buscadis`
-   - **SHA-1:** el de **Play Console** → Integridad de la app → **Certificado de firma de la app** (App signing key), no solo el upload key si difieren.
+En GCP ya tienes algo como:  
+`E1:68:F3:4A:36:B8:30:B4:23:16:30:F5:65:D5:44:BF:AC:53:40:B3`  
+Eso debe coincidir con **el certificado con el que firma la app en el teléfono**.
 
-Si el SHA-1 no coincide con el APK/AAB que instala Play, Google devuelve 400.
+### Dónde ver el SHA-1 correcto (Play Console)
+
+La pantalla **“Protegido con Play”** no muestra el SHA-1. Ve a:
+
+**Play Console** → app **Buscadis** → menú izquierdo **Configuración** (o **Release** / **Test and release**) → **Integridad de la app** / **App integrity**.
+
+Ahí verás dos bloques (nombres en español pueden variar):
+
+| Certificado | Cuándo importa |
+|-------------|----------------|
+| **Firma de la app** (App signing key) | Usuarios que instalan desde **Play Store** (casi siempre este) |
+| **Clave de subida** (Upload key) | Lo que firma el AAB que sube EAS antes de que Play lo re-firme |
+
+**Qué hacer:** copia el **SHA-1** de **Firma de la app** y compáralo con el de **Android client 1** en Google Cloud.  
+Si es distinto, en GCP puedes **añadir otro SHA-1** al mismo cliente Android (no hace falta crear otro cliente).
+
+También comprueba:
+
+- **Package name:** `com.adisplatforms.buscadis`
+
+Si el SHA-1 no coincide con la firma real del APK en el dispositivo, Google devuelve 400.
 
 ---
 
