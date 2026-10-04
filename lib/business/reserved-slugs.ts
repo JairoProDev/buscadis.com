@@ -23,6 +23,7 @@ export const RESERVED_BUSINESS_SLUGS = new Set([
   'guia',
   'ayuda',
   'privacidad',
+  'terminos',
   'progreso',
   'ocultos',
   'promocionar',

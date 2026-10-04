@@ -107,15 +107,18 @@ import BrowseEmptyState from '@/components/BrowseEmptyState';
 import BrowseResultsLine from '@/components/browse/BrowseResultsLine';
 import ParaTiSection from '@/components/home/ParaTiSection';
 import BusinessDirectorySection from '@/components/home/BusinessDirectorySection';
+import MarketplaceLegalFooter from '@/components/legal/MarketplaceLegalFooter';
 const TEST_REGEX = /toyota test|test adiso|test anuncio/i;
 
 type HomeContentProps = {
   initialSearchParams?: Record<string, string | undefined>;
   /** Feed SSR (misma orden que producción) para evitar flash de cache vieja. */
   initialFeedAdisos?: Adiso[];
+  /** Pie legal al final del feed (home limpia). */
+  showLegalFooter?: boolean;
 };
 
-function HomeContent({ initialSearchParams, initialFeedAdisos = [] }: HomeContentProps) {
+function HomeContent({ initialSearchParams, initialFeedAdisos = [], showLegalFooter }: HomeContentProps) {
   const router = useRouter();
   const searchParams = useStableSearchParams(initialSearchParams);
   const { user, session } = useAuth();
@@ -1393,7 +1396,6 @@ function HomeContent({ initialSearchParams, initialFeedAdisos = [] }: HomeConten
               width: '100%',
               transition: 'padding-bottom 0.3s ease, padding-top 0.3s ease',
             }}>
-
               {/* Drawer de Filtros Mobile */}
               {!isDesktop && isMobileFiltersOpen && (
                 <div className="fixed inset-0 z-[1100] flex">
@@ -1679,6 +1681,7 @@ function HomeContent({ initialSearchParams, initialFeedAdisos = [] }: HomeConten
                 />
                 </>
               )}
+              {showLegalFooter ? <MarketplaceLegalFooter /> : null}
             </main>
             </div>
             {isDesktop && (
@@ -1760,14 +1763,17 @@ function HomeContent({ initialSearchParams, initialFeedAdisos = [] }: HomeConten
 export default function HomePageClient({
   initialSearchParams,
   initialFeedAdisos,
+  showLegalFooter,
 }: {
   initialSearchParams?: Record<string, string | undefined>;
   initialFeedAdisos?: Adiso[];
+  showLegalFooter?: boolean;
 }) {
   return (
     <HomeContent
       initialSearchParams={initialSearchParams}
       initialFeedAdisos={initialFeedAdisos}
+      showLegalFooter={showLegalFooter}
     />
   );
 }

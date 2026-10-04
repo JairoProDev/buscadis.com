@@ -6,6 +6,8 @@ import { CrawlableAdisoList } from '@/components/seo/CrawlableAdisoList';
 import { JsonLd } from '@/components/seo/JsonLd';
 import { buildAdisoMetadata } from '@/lib/seo/adiso-metadata';
 import { buildAdisoItemListJsonLd } from '@/lib/seo/adiso-jsonld';
+import { buildBuscadisOrganizationJsonLd } from '@/lib/seo/organization-jsonld';
+import { HomeCrawlerBrief } from '@/components/seo/HomeCrawlerBrief';
 import { getBusinessProductAsAdiso, getMarketplaceFeed } from '@/lib/business';
 import { getAdisoByIdFromSupabase } from '@/lib/supabase';
 import {
@@ -38,6 +40,13 @@ export async function generateMetadata({ searchParams }: PageProps): Promise<Met
   }
 
   const adisoId = typeof params.adiso === 'string' ? params.adiso : undefined;
+  if (!adisoId && !categoria) {
+    return {
+      title: 'Buscadis — Clasificados y marketplace en Perú',
+      description:
+        'Buscadis: publica y encuentra adisos (empleos, inmuebles, vehículos, servicios y negocios). Navega sin cuenta; inicia sesión con Google para publicar. Operado por ADIS TECHNOLOGICAL PLATFORMS S.A.C.',
+    };
+  }
   if (!adisoId) return {};
 
   try {
@@ -77,17 +86,20 @@ export default async function Home({ searchParams }: PageProps) {
   const listName = categoria
     ? `Adisos de ${categoria} en Buscadis`
     : 'Adisos recientes en Buscadis';
+  const isPlainHome =
+    !categoria &&
+    typeof params.adiso !== 'string' &&
+    typeof params.buscar !== 'string';
 
   return (
     <>
+      {isPlainHome ? <HomeCrawlerBrief /> : null}
+      <JsonLd data={buildBuscadisOrganizationJsonLd()} />
       <JsonLd data={buildAdisoItemListJsonLd(ssrAdisos, { name: listName, urlPath: listPath })} />
-      <CrawlableAdisoList
-        adisos={ssrAdisos}
-        heading={listName}
-        visuallyHidden
-      />
+      <CrawlableAdisoList adisos={ssrAdisos} heading={listName} visuallyHidden />
       <Suspense fallback={<HomeRouteFallback />}>
         <HomePageClient
+          showLegalFooter={isPlainHome}
           initialFeedAdisos={ssrAdisos}
           initialSearchParams={{
             adiso: typeof params.adiso === 'string' ? params.adiso : undefined,

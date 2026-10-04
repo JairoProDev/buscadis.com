@@ -114,6 +114,10 @@ export default function CookieConsentBanner() {
                 <Link href="/privacidad" className="font-medium text-[#007a8a] underline">
                   Privacidad
                 </Link>
+                {' · '}
+                <Link href="/terminos" className="font-medium text-[#007a8a] underline">
+                  Términos
+                </Link>
               </p>
             </div>
             <button

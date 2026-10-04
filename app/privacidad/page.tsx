@@ -115,7 +115,18 @@ export default function PrivacidadPage() {
         </section>
 
         <section className="space-y-3">
-          <h2 className="text-xl font-semibold">7. Contacto</h2>
+          <h2 className="text-xl font-semibold">7. Términos de uso</h2>
+          <p className="text-slate-600">
+            El uso de la plataforma se rige por nuestros{' '}
+            <Link href="/terminos" className="font-semibold text-blue-700 underline">
+              términos de servicio
+            </Link>
+            .
+          </p>
+        </section>
+
+        <section className="space-y-3">
+          <h2 className="text-xl font-semibold">8. Contacto</h2>
           <p className="text-slate-600">
             Para consultas sobre privacidad:{' '}
             <a href="mailto:soporte@buscadis.com" className="font-semibold text-blue-700 underline">

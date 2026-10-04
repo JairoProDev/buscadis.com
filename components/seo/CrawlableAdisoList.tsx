@@ -13,6 +13,7 @@ interface CrawlableAdisoListProps {
   heading?: string;
   /** When true, visually hidden but present in HTML for crawlers */
   visuallyHidden?: boolean;
+  className?: string;
 }
 
 function priceFor(adiso: Adiso): string | null {
@@ -30,17 +31,18 @@ export function CrawlableAdisoList({
   adisos,
   heading = 'Adisos',
   visuallyHidden = false,
+  className,
 }: CrawlableAdisoListProps) {
   if (!adisos.length) return null;
+
+  const layoutClass = visuallyHidden
+    ? 'sr-only'
+    : 'mx-auto max-w-[1400px] px-4 py-6';
 
   return (
     <section
       aria-label={heading}
-      className={
-        visuallyHidden
-          ? 'sr-only'
-          : 'mx-auto max-w-[1400px] px-4 py-6'
-      }
+      className={[layoutClass, className].filter(Boolean).join(' ')}
     >
       <h2 className={visuallyHidden ? undefined : 'mb-4 text-xl font-semibold text-[var(--bs-fg-default,var(--text-primary))]'}>
         {heading}
