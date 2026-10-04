@@ -38,7 +38,7 @@ Tras verificar dominio + deploy → **Branding → View issues → I have fixed 
 | Nombre app ≠ home | Home dice **Buscadis** + legal en pie | Branding → App name **Buscadis** |
 | Términos OAuth | `/terminos` | URL en consent screen |
 
-Hasta que **Search Console** no esté verde y no hayas **redeployado**, no marques “fixed”.
+Tras deploy en prod y dominio en Search Console, marca **I have fixed the issues**.
 
 ## ¿Qué opción marcar?
 

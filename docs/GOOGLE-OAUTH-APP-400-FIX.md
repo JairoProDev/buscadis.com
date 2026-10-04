@@ -21,7 +21,7 @@ Opcional si pruebas con Expo Go:
 https://auth.expo.io/@TU_USUARIO/buscadis-app
 ```
 
-Guarda y espera 5–10 minutos.
+Guarda, **recarga la página** y confirma que siguen las 5 URIs (la consola a veces no persiste si el JS de `gstatic` no cargó). Espera 5–10 minutos.
 
 ## 2. Cliente OAuth **Android**
 
