@@ -67,13 +67,14 @@ export async function matchAdsForUser(
     return [];
   }
 
-  let results = (data || []).map((r: { adiso_id: string; match_score: number }) => ({
+  type MatchRow = { adisoId: string; score: number };
+  let results: MatchRow[] = (data || []).map((r: { adiso_id: string; match_score: number }) => ({
     adisoId: r.adiso_id,
     score: r.match_score,
   }));
 
   if (scopedCategory && results.length > 0) {
-    const ids = results.map((r) => r.adisoId);
+    const ids = results.map((r: MatchRow) => r.adisoId);
     const { data: rows, error: catError } = await supabaseAdmin
       .from('adisos')
       .select('id')
@@ -86,7 +87,7 @@ export async function matchAdsForUser(
     }
 
     const allowed = new Set((rows || []).map((r: { id: string }) => r.id));
-    results = results.filter((r) => allowed.has(r.adisoId)).slice(0, limit);
+    results = results.filter((r: MatchRow) => allowed.has(r.adisoId)).slice(0, limit);
   }
 
   return results;

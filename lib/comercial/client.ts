@@ -126,6 +126,30 @@ export async function completeTaskApi(token: string, taskId: string) {
   return res.json();
 }
 
+export async function importWhatsAppExportApi(
+  token: string,
+  opportunityId: string,
+  exportText: string,
+  dryRun?: boolean,
+) {
+  const res = await fetch(
+    `/api/ops/comercial/opportunities/${opportunityId}/import-whatsapp`,
+    {
+      method: 'POST',
+      headers: authHeaders(token),
+      body: JSON.stringify({ export_text: exportText, dry_run: dryRun }),
+    },
+  );
+  if (!res.ok) throw new Error('Importación falló');
+  return res.json() as Promise<{
+    imported?: number;
+    total?: number;
+    preview?: unknown[];
+    inbound?: number;
+    outbound?: number;
+  }>;
+}
+
 export async function backfillPaidClientsApi(token: string) {
   const res = await fetch('/api/ops/comercial/paid/backfill', {
     method: 'POST',

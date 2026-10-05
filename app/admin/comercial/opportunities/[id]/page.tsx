@@ -8,6 +8,7 @@ import {
   completeTaskApi,
   createTaskApi,
   fetchOpportunityDetail,
+  importWhatsAppExportApi,
   patchOpportunityApi,
   postActivity,
   suggestReplyApi,
@@ -36,6 +37,8 @@ export default function OpportunityDetailPage() {
   const [note, setNote] = useState('');
   const [draft, setDraft] = useState('');
   const [taskTitle, setTaskTitle] = useState('');
+  const [waExport, setWaExport] = useState('');
+  const [waPreview, setWaPreview] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
@@ -202,6 +205,58 @@ export default function OpportunityDetailPage() {
             Registrar envío WA
           </button>
         </div>
+      </section>
+
+      <section className="mt-6 rounded-xl border border-[var(--border-color)] p-4">
+        <h2 className="text-sm font-bold">Importar chat WhatsApp</h2>
+        <p className="mt-1 text-xs text-[var(--text-secondary)]">
+          Export oficial: chat → ⋮ → Exportar chat → Sin archivos. Pega el .txt aquí (ver{' '}
+          <code className="text-[10px]">docs/comercial/IMPORTAR-CHATS-WHATSAPP.md</code>).
+        </p>
+        <textarea
+          value={waExport}
+          onChange={(e) => setWaExport(e.target.value)}
+          rows={6}
+          className="mt-3 w-full rounded-lg border border-[var(--border-color)] bg-[var(--bg-primary)] p-3 font-mono text-xs"
+          placeholder="[04/10/2026, 10:30:15] Cliente: Hola..."
+        />
+        <div className="mt-2 flex flex-wrap gap-2">
+          <button
+            type="button"
+            disabled={!token || waExport.length < 20}
+            onClick={() => {
+              if (!token) return;
+              void importWhatsAppExportApi(token, id, waExport, true)
+                .then((r) =>
+                  setWaPreview(
+                    `Vista previa: ${r.total} mensajes (${r.inbound} entrantes, ${r.outbound} salientes)`,
+                  ),
+                )
+                .catch((e) => setError(e instanceof Error ? e.message : 'Error'));
+            }}
+            className="rounded-lg border border-[var(--border-color)] px-3 py-2 text-xs"
+          >
+            Vista previa
+          </button>
+          <button
+            type="button"
+            disabled={!token || waExport.length < 20}
+            onClick={() => {
+              if (!token) return;
+              void importWhatsAppExportApi(token, id, waExport, false)
+                .then((r) => {
+                  setWaPreview(`Importados ${r.imported} mensajes`);
+                  setWaExport('');
+                  return load();
+                })
+                .catch((e) => setError(e instanceof Error ? e.message : 'Error'));
+            }}
+            className="rounded-lg bg-[var(--brand-blue)] px-3 py-2 text-xs text-white"
+          >
+            Importar al historial
+          </button>
+        </div>
+        {waPreview && <p className="mt-2 text-xs text-[var(--text-secondary)]">{waPreview}</p>}
       </section>
 
       <section className="mt-6">

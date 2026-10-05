@@ -3,6 +3,7 @@
 import React, { useState, useRef, useEffect, Suspense } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
+import { useUser } from '@/hooks/useUser';
 import { useHeaderIdentity } from '@/hooks/useHeaderIdentity';
 import { useUI } from '@/contexts/UIContext';
 import {
@@ -37,6 +38,7 @@ function UserMenuFallback() {
 function UserMenuContent({ onProgressClick }: UserMenuProps) {
   const router = useRouter();
   const { user, signOut } = useAuth();
+  const { isPlatformAdmin } = useUser();
   const identity = useHeaderIdentity();
   const { t } = useTranslation();
   const [mostrarMenu, setMostrarMenu] = useState(false);
@@ -233,6 +235,37 @@ function UserMenuContent({ onProgressClick }: UserMenuProps) {
               />
             )}
           </div>
+
+          {isPlatformAdmin && (
+            <>
+              <div className="mx-3 h-px bg-[var(--border-color)]" />
+              <div className="px-3 pb-1 pt-2">
+                <p className="px-2.5 text-[10px] font-bold uppercase tracking-wider text-[var(--text-tertiary)]">
+                  Equipo Buscadis
+                </p>
+              </div>
+              <div className="p-1.5 pt-0">
+                <MenuItem
+                  icon={<FaChartLine size={15} color="var(--brand-yellow)" />}
+                  iconBg="bg-[rgba(var(--brand-yellow-rgb),0.15)]"
+                  label="CRM Comercial"
+                  onClick={() => {
+                    setMostrarMenu(false);
+                    router.push('/admin/comercial');
+                  }}
+                />
+                <MenuItem
+                  icon={<FaChartLine size={15} color="var(--brand-blue)" />}
+                  iconBg="bg-[rgba(var(--brand-primary-rgb),0.12)]"
+                  label="Intelligence"
+                  onClick={() => {
+                    setMostrarMenu(false);
+                    router.push('/admin/intelligence');
+                  }}
+                />
+              </div>
+            </>
+          )}
 
           <div className="mx-3 h-px bg-[var(--border-color)]" />
 
