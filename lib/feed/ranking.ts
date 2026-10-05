@@ -113,29 +113,41 @@ function getPublishedDayKey(adiso: Adiso): string {
   return raw.slice(0, 10);
 }
 
-function paidPromotionSortKey(adiso: Adiso): number {
-  if (!isActivePaidPromotion(adiso)) return 0;
-  const tier =
-    adiso.promotionTier === 'premium' ? 3 : adiso.promotionTier === 'destacada' ? 2 : 1;
-  const rank = adiso.promotionRank ?? 0;
-  const bump = getPromotedBumpTimestamp(adiso);
-  return tier * 1e16 + rank * 1e12 + bump;
+function promotionTierScore(adiso: Adiso): number {
+  if (adiso.promotionTier === 'premium') return 3;
+  if (adiso.promotionTier === 'destacada') return 2;
+  return 1;
 }
 
 /**
  * Comparador del feed por defecto ("recientes"):
  * 1. Destacados/premium vigentes (pago real)
- * 2. Recencia efectiva (publicación, bump de destacado, foto, personalización suave)
- * 3. id estable (sin favorecer paquetes legacy "gigante" en el grid)
+ * 2. Entre pagos: último bump (resubida / publicación pagada), luego tier, luego rank
+ * 3. Recencia efectiva (publicación, foto, personalización suave)
+ * 4. id estable (sin favorecer paquetes legacy "gigante" en el grid)
  */
 export function compareRecientesFeed(
   a: Adiso,
   b: Adiso,
   interestProfile?: UserInterestProfile | null,
 ): number {
-  const promA = paidPromotionSortKey(a);
-  const promB = paidPromotionSortKey(b);
-  if (promA !== promB) return promB > promA ? 1 : -1;
+  const paidA = isActivePaidPromotion(a);
+  const paidB = isActivePaidPromotion(b);
+  if (paidA !== paidB) return paidB ? 1 : -1;
+
+  if (paidA && paidB) {
+    const bumpA = getPromotedBumpTimestamp(a);
+    const bumpB = getPromotedBumpTimestamp(b);
+    if (bumpB !== bumpA) return bumpB - bumpA;
+
+    const tierA = promotionTierScore(a);
+    const tierB = promotionTierScore(b);
+    if (tierB !== tierA) return tierB - tierA;
+
+    const rankA = a.promotionRank ?? 0;
+    const rankB = b.promotionRank ?? 0;
+    if (rankB !== rankA) return rankB - rankA;
+  }
 
   const fa = getFeedEffectiveTimestamp(a, interestProfile);
   const fb = getFeedEffectiveTimestamp(b, interestProfile);

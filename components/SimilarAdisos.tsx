@@ -99,7 +99,7 @@ export default function SimilarAdisos({ currentAdiso }: SimilarAdisosProps) {
           >
             <div
               className={`relative w-full bg-[var(--bg-secondary)] ${
-                usesGenerated || portraitJobFlyer ? 'aspect-[3/4]' : 'aspect-square'
+                usesGenerated ? 'aspect-[3/4]' : 'aspect-square'
               }`}
             >
               {showPhoto ? (
@@ -109,7 +109,7 @@ export default function SimilarAdisos({ currentAdiso }: SimilarAdisosProps) {
                   fill
                   unoptimized={shouldBypassVercelImageOptimization(photo)}
                   className={
-                    portraitJobFlyer ? 'object-contain object-center' : 'object-contain p-2'
+                    portraitJobFlyer ? 'object-cover object-center' : 'object-contain p-2'
                   }
                   sizes="(max-width: 640px) 50vw, 200px"
                 />

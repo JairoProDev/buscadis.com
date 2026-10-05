@@ -509,24 +509,14 @@ export default function AdisoLandingPage({ adiso, onVolver }: AdisoLandingPagePr
                 <button
                   type="button"
                   onClick={() => setLightboxUrl(imagenes[galleryIndex])}
-                  className={`group relative flex w-full cursor-zoom-in items-center justify-center overflow-hidden rounded-3xl border border-[var(--border-color)] bg-[var(--bg-primary)] shadow-sm ${
-                    portraitJobFlyer ? 'aspect-[2/3] max-h-[min(720px,78vh)]' : ''
-                  }`}
-                  style={
-                    portraitJobFlyer
-                      ? undefined
-                      : {
-                          minHeight: isDesktop ? '480px' : '320px',
-                          maxHeight: isDesktop ? '640px' : '420px',
-                        }
-                  }
+                  className="group relative flex aspect-square w-full max-h-[min(640px,72vh)] cursor-zoom-in items-center justify-center overflow-hidden rounded-3xl border border-[var(--border-color)] bg-[var(--bg-primary)] shadow-sm"
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={imagenes[galleryIndex]}
                     alt={displayTitle}
-                    className={`h-full w-full object-contain transition-transform duration-300 group-hover:scale-[1.02] ${
-                      portraitJobFlyer ? '' : 'max-h-[min(640px,70vh)] p-4'
+                    className={`h-full w-full transition-transform duration-300 group-hover:scale-[1.02] ${
+                      portraitJobFlyer ? 'object-cover object-center' : 'object-contain p-4'
                     }`}
                   />
                   <span className="absolute bottom-3 right-3 flex items-center gap-1 rounded-full bg-black/50 px-2.5 py-1 text-[0.65rem] font-semibold text-white backdrop-blur-sm">

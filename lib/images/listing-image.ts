@@ -70,31 +70,26 @@ export function adisoShowsPortraitJobFlyer(
 }
 
 /**
- * Flyers verticales: marco 3:4 para llenar ancho sin bandas laterales.
- * Fotos de catálogo suelen ser cuadradas → cover en marco 1:1.
+ * Grid: marco 1:1 fijo. Flyers verticales → cover (recorte arriba/abajo, sin bandas laterales).
  */
 export function listingCardImageObjectClass(
   isCatalogProduct: boolean,
   portraitJobFlyer = false,
 ): string {
-  if (isCatalogProduct) return 'object-cover object-center';
-  if (portraitJobFlyer) return 'object-contain object-center';
+  if (isCatalogProduct || portraitJobFlyer) return 'object-cover object-center';
   return 'object-contain object-center px-1.5 py-1';
 }
 
 export function listingCardMediaAspectClass(
   vista: 'list' | 'grid' | 'feed',
   isCatalogProduct: boolean,
-  portraitJobFlyer: boolean,
+  _portraitJobFlyer: boolean,
 ): string {
   if (vista === 'list') {
     return isCatalogProduct
       ? 'h-[112px] w-[112px] shrink-0'
-      : portraitJobFlyer
-        ? 'h-28 w-[84px] shrink-0 md:h-32 md:w-[96px]'
-        : 'h-24 w-24 shrink-0 md:h-24 md:w-24';
+      : 'h-24 w-24 shrink-0 md:h-24 md:w-24';
   }
-  if (portraitJobFlyer) return 'aspect-[3/4] w-full';
   return 'aspect-square w-full';
 }
 
