@@ -38,7 +38,7 @@ export async function importWhatsAppExportForOpportunity(
 ): Promise<number> {
   const outbound =
     outboundNames ||
-    (process.env.CRM_WA_OUTBOUND_NAMES || 'jairo,buscadis,shantall,adis')
+    (process.env.CRM_WA_OUTBOUND_NAMES || 'jairo,buscadis,publicadis,shantall,adis')
       .split(',')
       .map((s) => s.trim())
       .filter(Boolean);

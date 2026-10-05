@@ -25,7 +25,7 @@ export async function POST(request: NextRequest, { params }: RouteProps) {
     return NextResponse.json({ error: 'Texto inválido' }, { status: 400 });
   }
 
-  const outbound = (process.env.CRM_WA_OUTBOUND_NAMES || 'jairo,buscadis,shantall,adis')
+  const outbound = (process.env.CRM_WA_OUTBOUND_NAMES || 'jairo,buscadis,publicadis,shantall,adis')
     .split(',')
     .map((s) => s.trim())
     .filter(Boolean);

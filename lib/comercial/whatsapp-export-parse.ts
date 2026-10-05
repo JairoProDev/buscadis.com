@@ -5,11 +5,25 @@ export interface ParsedWhatsAppMessage {
   direction: 'outbound' | 'inbound' | 'system';
 }
 
-const LINE_PATTERNS = [
-  // [04/10/2026, 10:30:15] Nombre: mensaje
-  /^\[(\d{1,2}\/\d{1,2}\/\d{2,4}),?\s+(\d{1,2}:\d{2}(?::\d{2})?(?:\s?[AP]M)?)\]\s([^:]+):\s(.*)$/i,
-  // 04/10/2026, 10:30 - Nombre: mensaje
-  /^(\d{1,2}\/\d{1,2}\/\d{2,4}),?\s+(\d{1,2}:\d{2}(?::\d{2})?(?:\s?[AP]M)?)\s+-\s+([^:]+):\s(.*)$/i,
+const LINE_PATTERNS: Array<{
+  re: RegExp;
+  map: (m: RegExpMatchArray) => { date: string; time: string; sender: string; body: string };
+}> = [
+  {
+    // [04/10/2026, 10:30:15] Nombre: mensaje
+    re: /^\[(\d{1,2}\/\d{1,2}\/\d{2,4}),?\s+(\d{1,2}:\d{2}(?::\d{2})?(?:\s?[AP]M)?)\]\s([^:]+):\s(.*)$/i,
+    map: (m) => ({ date: m[1], time: m[2], sender: m[3], body: m[4] }),
+  },
+  {
+    // [17:46, 2/10/2026] Nombre: mensaje (copia manual desde WA)
+    re: /^\[(\d{1,2}:\d{2}),\s+(\d{1,2}\/\d{1,2}\/\d{4})\]\s([^:]+):\s(.*)$/i,
+    map: (m) => ({ date: m[2], time: m[1], sender: m[3], body: m[4] }),
+  },
+  {
+    // 04/10/2026, 10:30 - Nombre: mensaje
+    re: /^(\d{1,2}\/\d{1,2}\/\d{2,4}),?\s+(\d{1,2}:\d{2}(?::\d{2})?(?:\s?[AP]M)?)\s+-\s+([^:]+):\s(.*)$/i,
+    map: (m) => ({ date: m[1], time: m[2], sender: m[3], body: m[4] }),
+  },
 ];
 
 const SYSTEM_MARKERS = [
@@ -37,7 +51,13 @@ function isOutboundSender(sender: string, outboundNames: string[]): boolean {
 
 export function parseWhatsAppExportText(
   raw: string,
-  outboundSenderNames: string[] = ['jairo', 'buscadis', 'shantall', 'adis'],
+  outboundSenderNames: string[] = [
+    'jairo',
+    'buscadis',
+    'publicadis',
+    'shantall',
+    'adis',
+  ],
 ): ParsedWhatsAppMessage[] {
   const lines = raw.split(/\r?\n/);
   const messages: ParsedWhatsAppMessage[] = [];
@@ -45,11 +65,11 @@ export function parseWhatsAppExportText(
 
   for (const line of lines) {
     let matched = false;
-    for (const re of LINE_PATTERNS) {
+    for (const { re, map } of LINE_PATTERNS) {
       const m = line.match(re);
       if (!m) continue;
       if (current) messages.push(current);
-      const [, d, t, sender, body] = m;
+      const { date: d, time: t, sender, body } = map(m);
       const bodyLower = body.toLowerCase();
       const system = SYSTEM_MARKERS.some((x) => bodyLower.includes(x));
       const direction = system

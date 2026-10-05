@@ -1,6 +1,6 @@
 {
   "campaign": "rueda-negocios-2026-10",
-  "document_date": "2026-10-03",
+  "document_date": "2026-10-05",
   "note": "Contactos reales de campaña WA (~80–90). Los ~340 de source rueda son leads del PDF R2764 sin contactar masivo.",
   "prospects": [
     {
@@ -39,13 +39,15 @@
     },
     {
       "title": "Raquel — cocina peruana y parrillas (Magisterio)",
+      "contact_name": "Raquel",
       "contact_whatsapp": "984646887",
-      "etapa_label": "ESPERANDO PAGO",
-      "plan": "Básico S/15, 3 días, boleta",
+      "etapa_label": "PAGÓ",
+      "plan": "Básico S/15, 3 días, boleta; pago Yape Shantall",
       "amount_pen": 15,
-      "ultimo_movimiento": "3 oct: horario y datos; CCI enviado; audio pidió mozo+steward",
-      "proxima_accion": "Mostrar aviso; boleta al pagar",
-      "segment": "pipeline"
+      "ultimo_movimiento": "5 oct: publicado (adiso z77hrQbMYJ); links FB/TikTok; pagó Yape 3 oct noche",
+      "proxima_accion": "Boleta electrónica; reporte vistas ~10 oct",
+      "segment": "pipeline",
+      "notas_extra": "Insight: pidió redes + efectividad antes de S/15; honestidad en métricas cerró venta."
     },
     {
       "title": "Mountain Lodges",
@@ -251,35 +253,51 @@
     {
       "title": "Industrias e Inversiones Lalo",
       "contact_whatsapp": "970842362",
-      "etapa_label": "PIDIÓ PRECIO",
+      "etapa_label": "EVALÚA",
       "plan": "Aviso combinado 5 puestos; Plan Empresa S/50 propuesto",
       "amount_pen": 50,
-      "ultimo_movimiento": "3 oct: todos los puestos urgentes (admin, atención, conductor, taller, ventas)",
-      "proxima_accion": "Enviar aviso combinado + condiciones",
+      "ultimo_movimiento": "3 oct 16:53 «Todos»; propuesta aviso único 5 puestos + plan S/50 enviada",
+      "proxima_accion": "Follow-up 5 oct si sin respuesta 48h",
       "segment": "pipeline",
-      "notas_extra": "Tel. alt. 925 581 103"
+      "notas_extra": "Tel. alt. 925 581 103. Chat en data/comercial/wa-chats/970842362-lalo.txt"
     },
     {
-      "title": "Fábrica de Saylla",
+      "title": "Fábrica de Saylla (@bconcha23)",
+      "contact_handle": "@bconcha23",
       "contact_whatsapp": "905609008",
-      "etapa_label": "ALERTA",
-      "ultimo_movimiento": "Confundió con postulante; pendiente RUC y dirección",
-      "segment": "alerta"
+      "etapa_label": "PIDIÓ PRECIO",
+      "plan": "Plan Empresa S/50 propuesto (3 grupos de puestos)",
+      "amount_pen": 50,
+      "ultimo_movimiento": "3 oct: pidió yape y dónde publica; 👍 al mensaje canales; sin RUC/dirección",
+      "proxima_accion": "Un follow-up: datos fiscales + muestra aviso",
+      "segment": "pipeline",
+      "notas_extra": "WA @bconcha23. Revisar si 905609008 es el mismo chat. Chat: wa-chats/bconcha23-saylla.txt"
     },
     {
-      "title": "Hostal (983 724 785)",
+      "title": "Agencia de viajes (994 137 274)",
+      "contact_whatsapp": "994137274",
+      "etapa_label": "ALERTA",
+      "ultimo_movimiento": "5 oct: «Me podría pasar su CV» — confundió oferta Buscadis con postulación",
+      "proxima_accion": "Aclarar: vendemos difusión de avisos, no somos empleador",
+      "segment": "alerta",
+      "notas_extra": "Insight: abrir con «no busco trabajo, ofrezco publicar su vacante»"
+    },
+    {
+      "title": "OLE ALE TOURS / casa huéspedes",
       "contact_whatsapp": "983724785",
       "etapa_label": "PAUSA",
-      "ultimo_movimiento": "Ya no, siguiente edición",
-      "notas_extra": "Cerrar con cortesía",
-      "segment": "pausa"
+      "ultimo_movimiento": "Bot turismo; humano: ya no buscan, próxima edición; agradeció aviso web gratis",
+      "proxima_accion": "Nurture próxima Rueda",
+      "segment": "pausa",
+      "notas_extra": "Insight: hoteles/tours con bot — esperar humano o no contactar por WA genérico"
     },
     {
-      "title": "Hostal (992 230 299)",
+      "title": "REvant Hoteles (hostal)",
       "contact_whatsapp": "992230299",
       "etapa_label": "PAUSA",
-      "ultimo_movimiento": "Tonterías — no volver a escribir",
-      "segment": "pausa"
+      "ultimo_movimiento": "Bot + «Tonterías» tras explicación recepcionista — no insistir",
+      "segment": "pausa",
+      "notas_extra": "Patrón hostal: mensaje ventas leído como spam"
     },
     {
       "title": "Abittare Hotel",

@@ -1,0 +1,56 @@
+# Insights campaña Rueda oct 2026 (vivo)
+
+Actualizado: **5 oct 2026**. Fuente: chats pegados en Cursor + lista WA + `data/comercial/wa-chats/`.
+
+## Qué medir en cada contacto
+
+| Campo | Uso |
+|-------|-----|
+| `etapa_label` | Pipeline en JSON → CRM |
+| `ultimo_movimiento` | Último hecho verificable |
+| `notas_extra` | Aprendizaje / patrón |
+| Chats en `wa-chats/` | Historial para actividades (`import-whatsapp-exports-dir`) |
+
+## Patrones que ya vimos
+
+### Apertura «Buenas, vi el aviso de… ¿Siguen buscando?»
+
+- **Funciona** cuando hay humano y necesidad real (Raquel, ferretera, Lalo).
+- **Silencio o solo ✓✓** en muchos contactos del lote «chocolatería / hotel / turismo» (capturas 5 oct): sin respuesta humana.
+- **Bots de hotel/turismo** (OLE ALE, Wild Rover, Laramani, REVANT): mensaje de bienvenida; el humano a veces no entiende o rechaza («Tonterías»).
+- **Confusión empleador/postulante**: agencia 994137274 pidió **CV** — el copy suena a reclutador.
+
+**Optimización propuesta**
+
+1. Primera línea: *«No soy postulante: soy de Buscadis, publicamos avisos de empleo de Rueda en web y redes.»*
+2. Segmentar: **no insistir por WA** en hoteles con bot; intentar llamada o correo del aviso Rueda.
+3. Registrar en CRM `SIN HUMANO` vs `RESPONDIÓ` vs `PAUSA` para no recontactar en vano.
+
+### Precio y cierre
+
+- Preguntas típicas antes de pagar: **tarifa**, **redes**, **efectividad**.
+- Respuesta honesta en efectividad + **S/15 de prueba** cerró con Raquel.
+- **Yape Shantall** facilitó S/15; transferencia larga generó fricción («¿Dónde yapeo?» dos veces).
+
+### Producto
+
+- Raquel: publicado `z77hrQbMYJ` — validar reporte 7 días como prometido.
+- Ferretera: aprobó texto; atasco en **diseño + RUC** — recordar pedir fiscal antes del cobro en multi-puesto.
+
+## Contactos documentados en este lote
+
+| Teléfono | Negocio | Estado 5 oct |
+|----------|---------|----------------|
+| 984646887 | Raquel / Magisterio | **PAGÓ / publicado** |
+| 984666551 | Ferretera | Aprobó copy; **cobro pendiente** |
+| 970842362 | Lalo | Propuesta S/50 enviada; **sin respuesta** |
+| 994137274 | Agencia viajes | **ALERTA** (pidió CV) |
+| @bconcha23 | Saylla | Precio + canales; **like, sin cierre** |
+| 983724785 | OLE ALE | **PAUSA** (no buscan) |
+| 992230299 | REVANT | **PAUSA** (rechazo) |
+
+## Próximo paso operativo
+
+1. Pegar más chats en Cursor → se guardan en `wa-chats/` y se actualiza `campana-rueda-oct-2026.json`.
+2. Sincronizar CRM: `npx tsx scripts/comercial/import-campana-rueda-oct-2026.ts --apply`
+3. Actividades WA: `npx tsx scripts/comercial/import-whatsapp-exports-dir.ts --dir=data/comercial/wa-chats --apply`
