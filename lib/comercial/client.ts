@@ -22,8 +22,14 @@ export async function fetchPipeline(token: string) {
   return res.json() as Promise<{ stages: SalesStage[]; metrics: SalesPipelineMetrics }>;
 }
 
-export async function fetchOpportunities(token: string, source?: string) {
-  const q = source ? `?source=${encodeURIComponent(source)}` : '';
+export async function fetchOpportunities(
+  token: string,
+  opts?: { source?: string; campaign?: string },
+) {
+  const params = new URLSearchParams();
+  if (opts?.source) params.set('source', opts.source);
+  if (opts?.campaign) params.set('campaign', opts.campaign);
+  const q = params.toString() ? `?${params}` : '';
   const res = await fetch(`/api/ops/comercial/opportunities${q}`, {
     headers: authHeaders(token),
   });

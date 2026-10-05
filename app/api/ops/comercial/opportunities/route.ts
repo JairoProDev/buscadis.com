@@ -9,7 +9,8 @@ export async function GET(request: NextRequest) {
 
   const stageId = request.nextUrl.searchParams.get('stage') || undefined;
   const source = request.nextUrl.searchParams.get('source') || undefined;
-  const opportunities = await listOpportunities({ stageId, source, limit: 500 });
+  const campaign = request.nextUrl.searchParams.get('campaign') || undefined;
+  const opportunities = await listOpportunities({ stageId, source, campaign, limit: 500 });
   return NextResponse.json({ opportunities });
 }
 

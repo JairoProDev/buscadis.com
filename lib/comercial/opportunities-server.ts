@@ -50,6 +50,7 @@ export async function listSalesStages(): Promise<SalesStage[]> {
 export async function listOpportunities(params?: {
   stageId?: string;
   source?: string;
+  campaign?: string;
   limit?: number;
 }): Promise<SalesOpportunityWithAdiso[]> {
   let q = supabaseAdmin
@@ -59,6 +60,7 @@ export async function listOpportunities(params?: {
 
   if (params?.stageId) q = q.eq('stage_id', params.stageId);
   if (params?.source) q = q.eq('source', params.source);
+  if (params?.campaign) q = q.filter('metadata->>campaign', 'eq', params.campaign);
   if (params?.limit) q = q.limit(params.limit);
 
   const { data, error } = await q;

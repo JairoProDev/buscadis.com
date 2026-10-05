@@ -1,0 +1,471 @@
+{
+  "campaign": "rueda-negocios-2026-10",
+  "document_date": "2026-10-03",
+  "note": "Contactos reales de campaña WA (~80–90). Los ~340 de source rueda son leads del PDF R2764 sin contactar masivo.",
+  "prospects": [
+    {
+      "title": "Mapacho (restaurante, Machupicchu)",
+      "contact_whatsapp": "984759634",
+      "etapa_label": "PAGÓ",
+      "plan": "Empresa S/50, 30 días, vence 31 oct, 8 vacantes",
+      "amount_pen": 50,
+      "ultimo_movimiento": "Pagó el 1 oct por Yape; links enviados el 2 oct",
+      "proxima_accion": "Pedir logo; reporte jue 8 oct",
+      "segment": "pipeline"
+    },
+    {
+      "title": "Black Llama Hostel (ROFFA TRIP SAC)",
+      "business_name": "Black Llama / ROFFA TRIP SAC",
+      "contact_name": "Antu",
+      "contact_whatsapp": "955009160",
+      "etapa_label": "ESPERANDO PAGO",
+      "plan": "Empresa S/50, 30 días, factura E001-1",
+      "amount_pen": 50,
+      "ultimo_movimiento": "Factura E001-1 enviada 2 oct; contable procesa pago. Aviso mozo/a, bartender, limpieza aprobado (912 403 101)",
+      "proxima_accion": "Revisar Interbank; publicar al acreditarse y enviar link; reporte 7 días",
+      "segment": "pipeline"
+    },
+    {
+      "title": "Servicios Varios SAC — Supervisor ventas",
+      "business_name": "Servicios Varios SAC",
+      "contact_name": "David Andrich",
+      "contact_whatsapp": "932133383",
+      "etapa_label": "PAGÓ",
+      "plan": "S/30, 7 días, RUC 20603489528",
+      "amount_pen": 30,
+      "ultimo_movimiento": "Plin S/30; factura PDF y XML enviada",
+      "proxima_accion": "Publicar, enviar link; confirmar monto factura",
+      "segment": "pipeline"
+    },
+    {
+      "title": "Raquel — cocina peruana y parrillas (Magisterio)",
+      "contact_whatsapp": "984646887",
+      "etapa_label": "ESPERANDO PAGO",
+      "plan": "Básico S/15, 3 días, boleta",
+      "amount_pen": 15,
+      "ultimo_movimiento": "3 oct: horario y datos; CCI enviado; audio pidió mozo+steward",
+      "proxima_accion": "Mostrar aviso; boleta al pagar",
+      "segment": "pipeline"
+    },
+    {
+      "title": "Mountain Lodges",
+      "contact_name": "Yrami Chaparro",
+      "contact_whatsapp": "952633608",
+      "etapa_label": "ACORDADO",
+      "plan": "Empresa S/50 con factura",
+      "amount_pen": 50,
+      "ultimo_movimiento": "1 oct: plan y pago confirmados; dos mensajes sin respuesta",
+      "proxima_accion": "Lun 5 oct 10:00 un mensaje; si no responde, cerrar",
+      "segment": "pipeline"
+    },
+    {
+      "title": "Wild Rover Hostels",
+      "contact_name": "Estefanía",
+      "contact_whatsapp": "974442205",
+      "etapa_label": "EVALÚA",
+      "plan": "Propuesta S/50, 8 vacantes",
+      "ultimo_movimiento": "Llamada 26 min 1 oct; corrigió errores web",
+      "proxima_accion": "Lun 5 oct 10:15",
+      "segment": "pipeline"
+    },
+    {
+      "title": "Kantu Perú Tours",
+      "contact_whatsapp": "983784029",
+      "etapa_label": "PIDIÓ PRECIO",
+      "plan": "Propuesto S/50, 3 puestos",
+      "ultimo_movimiento": "2 oct 18:18 preguntó precios y factura; respuesta no entregada",
+      "proxima_accion": "Repetir precios y factura",
+      "segment": "pipeline"
+    },
+    {
+      "title": "Interseguro — Ronald Reyes",
+      "contact_name": "Ronald Reyes",
+      "contact_handle": "@ronaldreyess",
+      "etapa_label": "FRÍO",
+      "plan": "4 agentes; propuesta S/30 x 7 días",
+      "ultimo_movimiento": "Llamada 1 oct; pidió contacto jue tarde no hecho",
+      "proxima_accion": "Lun 5 oct 9:00 propuesta concreta 4 agentes",
+      "segment": "pipeline"
+    },
+    {
+      "title": "Casa Carbajal (Calle Márquez 208)",
+      "contact_whatsapp": "994303412",
+      "etapa_label": "CLIENTE PREVIO",
+      "plan": "Pagó S/30 25 sep, 7 días; plan terminó 2 oct",
+      "amount_pen": 30,
+      "ultimo_movimiento": "TikTok 597 vistas; falta reporte y republicación",
+      "proxima_accion": "Revisar resultados antes de renovación",
+      "segment": "pipeline"
+    },
+    {
+      "title": "Pucara (restaurante, Saphy)",
+      "contact_whatsapp": "940897397",
+      "etapa_label": "GRATIS",
+      "plan": "Aviso gratis; S/15 propuesto",
+      "ultimo_movimiento": "No gastará más hasta próxima semana",
+      "proxima_accion": "Lun 5 oct seguimiento",
+      "segment": "pipeline"
+    },
+    {
+      "title": "Grupo Gastronómico (Magisterio)",
+      "contact_whatsapp": "920076710",
+      "etapa_label": "SIN HUMANO",
+      "plan": "Propuesta S/50, 6 vacantes",
+      "ultimo_movimiento": "Solo respondió IA de Meta",
+      "proxima_accion": "Pedir contacto humano",
+      "segment": "pipeline"
+    },
+    {
+      "title": "Harold — RR.HH. cafetería",
+      "contact_handle": "@HansEnimen",
+      "etapa_label": "EVALÚA",
+      "plan": "Plan S/50",
+      "ultimo_movimiento": "Pidió redes; enviadas 1 oct",
+      "proxima_accion": "Muestra Chef Pastelero",
+      "segment": "pipeline"
+    },
+    {
+      "title": "Miguel Ángel — hotel centro histórico",
+      "contact_whatsapp": "925040653",
+      "etapa_label": "EVALÚA",
+      "plan": "S/50, 5 puestos",
+      "ultimo_movimiento": "1 oct: Déjame ver",
+      "proxima_accion": "Lun 5 oct 9:30 muestra recepcionista y auditor",
+      "segment": "pipeline"
+    },
+    {
+      "title": "Hotel Tecte",
+      "contact_whatsapp": "984774683",
+      "etapa_label": "EVALÚA",
+      "plan": "S/30 housekeeping",
+      "ultimo_movimiento": "2 oct: lo consultará",
+      "proxima_accion": "Lun 5 oct 10:00",
+      "segment": "pipeline"
+    },
+    {
+      "title": "Constructora",
+      "contact_whatsapp": "976722636",
+      "etapa_label": "EVALÚA",
+      "plan": "S/30 o S/50",
+      "ultimo_movimiento": "Consulta jefa; asistente ya cubierto",
+      "proxima_accion": "Lun 5 oct 10:30",
+      "segment": "pipeline"
+    },
+    {
+      "title": "Tuinen Star",
+      "contact_whatsapp": "984776669",
+      "etapa_label": "EVALÚA",
+      "plan": "S/30, 1 puesto (2 turnos)",
+      "ultimo_movimiento": "Pensará y avisará",
+      "proxima_accion": "Mar 6 oct",
+      "segment": "pipeline"
+    },
+    {
+      "title": "Olano",
+      "contact_whatsapp": "978847043",
+      "etapa_label": "PIDIÓ PRECIO",
+      "plan": "S/30, 2 puestos",
+      "segment": "pipeline"
+    },
+    {
+      "title": "Indie Café",
+      "contact_whatsapp": "933588562",
+      "etapa_label": "PIDIÓ PRECIO",
+      "plan": "S/30",
+      "ultimo_movimiento": "Costo y flyer enviados",
+      "proxima_accion": "Lun 5 oct 11:30",
+      "segment": "pipeline"
+    },
+    {
+      "title": "Cevichería (3 mozos, 3 ayudantes)",
+      "contact_whatsapp": "958110360",
+      "etapa_label": "DATOS",
+      "plan": "S/350 semanal",
+      "ultimo_movimiento": "Falta ubicación 3 locales",
+      "proxima_accion": "Borrador aviso",
+      "segment": "pipeline"
+    },
+    {
+      "title": "Cafetería de especialidad",
+      "contact_whatsapp": "985342636",
+      "etapa_label": "DATOS",
+      "plan": "Atención al cliente, turno tarde",
+      "ultimo_movimiento": "Falta horario y sueldo",
+      "segment": "pipeline"
+    },
+    {
+      "title": "Andino (Coca-Cola)",
+      "contact_whatsapp": "996989897",
+      "etapa_label": "PIDIÓ PRECIO",
+      "plan": "S/50, 4 perfiles",
+      "ultimo_movimiento": "Condiciones enviadas",
+      "segment": "pipeline"
+    },
+    {
+      "title": "Makyl",
+      "contact_whatsapp": "916163124",
+      "etapa_label": "SIGUE BUSCANDO",
+      "plan": "4 perfiles ingeniería",
+      "segment": "pipeline"
+    },
+    {
+      "title": "Alpaca Terra Hotel",
+      "contact_whatsapp": "913324452",
+      "etapa_label": "SIGUE BUSCANDO",
+      "plan": "5 puestos",
+      "segment": "pipeline"
+    },
+    {
+      "title": "Nesedys",
+      "contact_whatsapp": "950308938",
+      "etapa_label": "RESPONDIÓ",
+      "ultimo_movimiento": "Sigue buscando",
+      "segment": "pipeline"
+    },
+    {
+      "title": "Cocina peruana (Magisterio)",
+      "contact_whatsapp": "986973906",
+      "etapa_label": "RESPONDIÓ",
+      "plan": "Cotizado S/15 y S/30",
+      "ultimo_movimiento": "Sin respuesta tras precio",
+      "segment": "pipeline"
+    },
+    {
+      "title": "Águeda",
+      "contact_whatsapp": "959774455",
+      "etapa_label": "RESPONDIÓ",
+      "ultimo_movimiento": "Imagen y pulgar",
+      "segment": "pipeline"
+    },
+    {
+      "title": "Distribuidora ferretera",
+      "contact_whatsapp": "984666551",
+      "etapa_label": "ALERTA",
+      "plan": "4 puestos; plan S/50",
+      "ultimo_movimiento": "4 oct aprobó aviso; falta diseño, plan, RUC",
+      "proxima_accion": "Cerrar diseño y publicar",
+      "segment": "alerta"
+    },
+    {
+      "title": "Industrias e Inversiones Lalo",
+      "contact_whatsapp": "970842362",
+      "etapa_label": "ALERTA",
+      "plan": "5 puestos urgentes; aviso combinado S/50",
+      "ultimo_movimiento": "3 oct respondió Sí / Todos",
+      "segment": "alerta"
+    },
+    {
+      "title": "Fábrica de Saylla",
+      "contact_whatsapp": "905609008",
+      "etapa_label": "ALERTA",
+      "ultimo_movimiento": "Confundió con postulante; pendiente RUC y dirección",
+      "segment": "alerta"
+    },
+    {
+      "title": "Hostal (983 724 785)",
+      "contact_whatsapp": "983724785",
+      "etapa_label": "PAUSA",
+      "ultimo_movimiento": "Ya no, siguiente edición",
+      "notas_extra": "Cerrar con cortesía",
+      "segment": "pausa"
+    },
+    {
+      "title": "Hostal (992 230 299)",
+      "contact_whatsapp": "992230299",
+      "etapa_label": "PAUSA",
+      "ultimo_movimiento": "Tonterías — no volver a escribir",
+      "segment": "pausa"
+    },
+    {
+      "title": "Abittare Hotel",
+      "contact_whatsapp": "944773415",
+      "etapa_label": "PAUSA",
+      "ultimo_movimiento": "2 mensajes sin respuesta",
+      "proxima_accion": "Reintentar edición nueva",
+      "segment": "pausa"
+    },
+    {
+      "title": "Hotel",
+      "contact_whatsapp": "984634600",
+      "etapa_label": "PAUSA",
+      "segment": "pausa"
+    },
+    {
+      "title": "Pan Bimbo",
+      "contact_whatsapp": "984766770",
+      "etapa_label": "PAUSA",
+      "segment": "pausa"
+    },
+    {
+      "title": "La Quinta",
+      "contact_whatsapp": "944725623",
+      "etapa_label": "PAUSA",
+      "segment": "pausa"
+    },
+    {
+      "title": "Super Ahorro",
+      "contact_whatsapp": "910013966",
+      "etapa_label": "PAUSA",
+      "segment": "pausa"
+    },
+    {
+      "title": "DCR Minería",
+      "contact_whatsapp": "941495786",
+      "etapa_label": "PAUSA",
+      "segment": "pausa"
+    },
+    {
+      "title": "Quechua Plaza Hotel",
+      "contact_whatsapp": "954134169",
+      "etapa_label": "PAUSA",
+      "segment": "pausa"
+    },
+    {
+      "title": "CESIT",
+      "contact_whatsapp": "997860487",
+      "etapa_label": "PAUSA",
+      "segment": "pausa"
+    },
+    {
+      "title": "Mariposario Machupicchu",
+      "contact_whatsapp": "921281914",
+      "etapa_label": "PAUSA",
+      "segment": "pausa"
+    },
+    {
+      "title": "Ayni Boutique Hotel",
+      "contact_whatsapp": "922438858",
+      "etapa_label": "PAUSA",
+      "segment": "pausa"
+    },
+    {
+      "title": "Niños Hotel",
+      "contact_whatsapp": "964165292",
+      "etapa_label": "PAUSA",
+      "segment": "pausa"
+    },
+    {
+      "title": "Grupo La Granja",
+      "contact_whatsapp": "991344662",
+      "etapa_label": "PAUSA",
+      "segment": "pausa"
+    },
+    {
+      "title": "Coffee Bike",
+      "contact_whatsapp": "931209789",
+      "etapa_label": "PAUSA",
+      "segment": "pausa"
+    },
+    {
+      "title": "Andivia",
+      "contact_whatsapp": "919019876",
+      "etapa_label": "PAUSA",
+      "segment": "pausa"
+    },
+    {
+      "title": "TGI Fridays",
+      "contact_whatsapp": "990883331",
+      "etapa_label": "PAUSA",
+      "ultimo_movimiento": "Pocos postulantes; se explicó servicio",
+      "segment": "pausa"
+    },
+    {
+      "title": "Oscar — Alfa Agentes Inmobiliarios",
+      "contact_whatsapp": "984893115",
+      "etapa_label": "PAUSA",
+      "segment": "pausa"
+    },
+    {
+      "title": "Casablanca restaurante",
+      "contact_whatsapp": "922776585",
+      "etapa_label": "LOTE3",
+      "ultimo_movimiento": "1 mensaje 2 oct",
+      "proxima_accion": "Segundo mensaje A mar 6",
+      "segment": "lote3"
+    },
+    {
+      "title": "Grifo Surtidores Manu",
+      "contact_whatsapp": "984761957",
+      "etapa_label": "LOTE3",
+      "segment": "lote3"
+    },
+    {
+      "title": "Restaurante Plaza de Armas (Kintaro)",
+      "contact_whatsapp": "933851458",
+      "etapa_label": "LOTE3",
+      "segment": "lote3"
+    },
+    {
+      "title": "Hotel calle Inticcawarina",
+      "contact_whatsapp": "994820682",
+      "etapa_label": "LOTE3",
+      "segment": "lote3"
+    },
+    {
+      "title": "Empresa hotelera",
+      "contact_whatsapp": "984186268",
+      "etapa_label": "LOTE3",
+      "segment": "lote3"
+    },
+    {
+      "title": "Cebichería Kelly",
+      "contact_whatsapp": "910182447",
+      "etapa_label": "LOTE3",
+      "segment": "lote3"
+    },
+    {
+      "title": "Resto Tenta Sazón",
+      "contact_whatsapp": "932512853",
+      "etapa_label": "LOTE3",
+      "segment": "lote3"
+    },
+    {
+      "title": "Empresa de retail",
+      "contact_whatsapp": "974216069",
+      "etapa_label": "LOTE3",
+      "segment": "lote3"
+    },
+    {
+      "title": "Concretos Kallpa Mix",
+      "contact_whatsapp": "984108690",
+      "etapa_label": "LOTE3",
+      "segment": "lote3"
+    },
+    {
+      "title": "Telmicall",
+      "contact_whatsapp": "992538171",
+      "etapa_label": "LOTE3",
+      "segment": "lote3"
+    },
+    {
+      "title": "Top Alpaka Travel",
+      "contact_whatsapp": "957726468",
+      "etapa_label": "LOTE3",
+      "segment": "lote3"
+    },
+    {
+      "title": "Zoelife-Moringa",
+      "contact_whatsapp": "972847584",
+      "etapa_label": "LOTE3",
+      "segment": "lote3"
+    },
+    {
+      "title": "Pizzas Paraíso",
+      "contact_whatsapp": "921532972",
+      "etapa_label": "LOTE3",
+      "segment": "lote3"
+    },
+    {
+      "title": "Empresa para Machupicchu",
+      "contact_whatsapp": "941260271",
+      "etapa_label": "LOTE3",
+      "segment": "lote3"
+    },
+    {
+      "title": "Empresa gastronómica",
+      "contact_whatsapp": "923600672",
+      "etapa_label": "LOTE3",
+      "segment": "lote3"
+    }
+  ]
+}

@@ -11,6 +11,7 @@ import {
   patchOpportunityApi,
 } from '@/lib/comercial/client';
 import type { SalesOpportunityWithAdiso, SalesStage } from '@/lib/comercial/types';
+import { CAMPANA_RUEDA_OCT_2026 } from '@/lib/comercial/campana-rueda-oct-2026';
 import { RUEDA_R2764_BATCH_ID } from '@/lib/rueda/batch-constants';
 
 export default function AdminComercialPage() {
@@ -24,7 +25,7 @@ export default function AdminComercialPage() {
   } | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-  const [filterSource, setFilterSource] = useState<string>('');
+  const [filterMode, setFilterMode] = useState<string>('campana');
 
   const load = useCallback(async () => {
     if (!token) return;
@@ -33,7 +34,16 @@ export default function AdminComercialPage() {
     try {
       const [pipe, opps] = await Promise.all([
         fetchPipeline(token),
-        fetchOpportunities(token, filterSource || undefined),
+        fetchOpportunities(
+          token,
+          filterMode === 'campana'
+            ? { campaign: CAMPANA_RUEDA_OCT_2026 }
+            : filterMode === 'rueda'
+              ? { source: 'rueda' }
+              : filterMode === 'cliente'
+                ? { source: 'cliente_existente' }
+                : undefined,
+        ),
       ]);
       setStages(pipe.stages);
       setMetrics(pipe.metrics);
@@ -43,7 +53,7 @@ export default function AdminComercialPage() {
     } finally {
       setLoading(false);
     }
-  }, [token, filterSource]);
+  }, [token, filterMode]);
 
   useEffect(() => {
     void load();
@@ -104,20 +114,19 @@ export default function AdminComercialPage() {
         <div>
           <h1 className="text-2xl font-bold text-[var(--text-primary)]">Comercial</h1>
           <p className="text-sm text-[var(--text-secondary)]">
-            Pipeline de ventas · leads Rueda → cierre → publicación
+            Campaña WA contactados (~60) · filtro «Leads PDF» = ~340 sin contactar masivo
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
           <select
-            value={filterSource}
-            onChange={(e) => setFilterSource(e.target.value)}
+            value={filterMode}
+            onChange={(e) => setFilterMode(e.target.value)}
             className="rounded-lg border border-[var(--border-color)] bg-[var(--bg-primary)] px-3 py-2 text-sm"
           >
-            <option value="">Todas las fuentes</option>
-            <option value="rueda">Rueda</option>
-            <option value="manual">Manual</option>
-            <option value="inbound">Inbound</option>
-            <option value="cliente_existente">Clientes pagados</option>
+            <option value="campana">Campaña Rueda (contactados)</option>
+            <option value="">Todas</option>
+            <option value="rueda">Leads PDF R2764 (sin campaña)</option>
+            <option value="cliente">Clientes pagados</option>
           </select>
           <button
             type="button"
@@ -189,7 +198,7 @@ export default function AdminComercialPage() {
                         </p>
                       )}
                       <p className="mt-2 text-[10px] uppercase tracking-wide text-[var(--text-tertiary)]">
-                        {opp.source}
+                        {(opp.metadata?.campana_etapa as string) || opp.source}
                         {opp.adiso_id ? ` · ${opp.adiso_id}` : ''}
                       </p>
                     </Link>
