@@ -1,7 +1,7 @@
 {
   "campaign": "rueda-negocios-2026-10",
   "document_date": "2026-10-05",
-  "note": "Contactos reales de campaña WA (~80–90). Los ~340 de source rueda son leads del PDF R2764 sin contactar masivo.",
+  "note": "Contactos WA listados en capturas 5 oct + pipeline. ~85 en JSON. Los ~340 source=rueda son PDF R2764 sin contacto masivo.",
   "prospects": [
     {
       "title": "Mapacho (restaurante, Machupicchu)",
@@ -21,9 +21,10 @@
       "etapa_label": "ESPERANDO PAGO",
       "plan": "Empresa S/50, 30 días, factura E001-1",
       "amount_pen": 50,
-      "ultimo_movimiento": "Factura E001-1 enviada 2 oct; contable procesa pago. Aviso mozo/a, bartender, limpieza aprobado (912 403 101)",
-      "proxima_accion": "Revisar Interbank; publicar al acreditarse y enviar link; reporte 7 días",
-      "segment": "pipeline"
+      "ultimo_movimiento": "2 oct: Antu solicitará abono S/50; publicar solo aviso bar (Mesón Estrella → 912403101); CM Jr. backup",
+      "proxima_accion": "5 oct: confirmar pago Interbank; publicar aviso bar; CM en reserva",
+      "segment": "pipeline",
+      "notas_extra": "ROFFA TRIP SAC 20610881212. Factura E001-1. Bartender solo turno noche."
     },
     {
       "title": "Servicios Varios SAC — Supervisor ventas",
@@ -33,9 +34,10 @@
       "etapa_label": "PAGÓ",
       "plan": "S/30, 7 días, RUC 20603489528",
       "amount_pen": 30,
-      "ultimo_movimiento": "Plin S/30; factura PDF y XML enviada",
-      "proxima_accion": "Publicar, enviar link; confirmar monto factura",
-      "segment": "pipeline"
+      "ultimo_movimiento": "2 oct: pagó transferencia S/30; publicado supervisor; vigente ~hasta 9–11 oct",
+      "proxima_accion": "5 oct: enviar link publicación; reporte antes fin plan",
+      "segment": "pipeline",
+      "notas_extra": "PROMOCIÓN SERVICIOS VARIOS SAC 20603489528. Flyer: cambiar figura silla si piden."
     },
     {
       "title": "Raquel — cocina peruana y parrillas (Magisterio)",
@@ -53,12 +55,13 @@
       "title": "Mountain Lodges",
       "contact_name": "Yrami Chaparro",
       "contact_whatsapp": "952633608",
-      "etapa_label": "ACORDADO",
+      "etapa_label": "EVALÚA",
       "plan": "Empresa S/50 con factura",
       "amount_pen": 50,
-      "ultimo_movimiento": "1 oct: plan y pago confirmados; dos mensajes sin respuesta",
-      "proxima_accion": "Lun 5 oct 10:00 un mensaje; si no responde, cerrar",
-      "segment": "pipeline"
+      "ultimo_movimiento": "30 sep Yrami: interés S/50, factura, diseño cultural; equipo envía info (viernes). Se dio Plin personal por error",
+      "proxima_accion": "Corregir pago a Interbank; pedir RUC; ¿recibieron material?",
+      "segment": "pipeline",
+      "notas_extra": "Gerente GH Mountain Lodges of Peru. NO usar Plin 937054328 — solo cuenta empresa."
     },
     {
       "title": "Wild Rover Hostels",
@@ -66,18 +69,20 @@
       "contact_whatsapp": "974442205",
       "etapa_label": "EVALÚA",
       "plan": "Propuesta S/50, 8 vacantes",
-      "ultimo_movimiento": "Llamada 26 min 1 oct; corrigió errores web",
-      "proxima_accion": "Lun 5 oct 10:15",
-      "segment": "pipeline"
+      "ultimo_movimiento": "1 oct llamada WA + dudas diseño; 2 oct correcciones web; 2 oct 17:42 bot fuera de horario",
+      "proxima_accion": "Contactar lun–vie 10:00–15:00; ofrecer borrador mozos de bar",
+      "segment": "pipeline",
+      "notas_extra": "Estefanía RRHH. Perfil propio = página en buscadis.com, no sitio aparte."
     },
     {
       "title": "Kantu Perú Tours",
       "contact_whatsapp": "983784029",
       "etapa_label": "PIDIÓ PRECIO",
       "plan": "Propuesto S/50, 3 puestos",
-      "ultimo_movimiento": "2 oct 18:18 preguntó precios y factura; respuesta no entregada",
-      "proxima_accion": "Repetir precios y factura",
-      "segment": "pipeline"
+      "ultimo_movimiento": "2 oct precios+factura respondidos; 3 oct recordatorio sin respuesta en chat",
+      "proxima_accion": "5 oct: ¿S/30 o S/50? Borrador 2 conductores A-IIB + creador contenido",
+      "segment": "pipeline",
+      "notas_extra": "Bot turismo al inicio; luego humano respondió Sí."
     },
     {
       "title": "Interseguro — Ronald Reyes",
@@ -111,19 +116,21 @@
     {
       "title": "Grupo Gastronómico (Magisterio)",
       "contact_whatsapp": "920076710",
-      "etapa_label": "SIN HUMANO",
-      "plan": "Propuesta S/50, 6 vacantes",
-      "ultimo_movimiento": "Solo respondió IA de Meta",
-      "proxima_accion": "Pedir contacto humano",
-      "segment": "pipeline"
+      "etapa_label": "EVALÚA",
+      "plan": "Propuesta S/50, 6 vacantes Magisterio",
+      "ultimo_movimiento": "2 oct: humano derivó a equipo; revisan propuesta S/50 (corredor, bar, mozo, cocinero, contable, lavavajillas)",
+      "proxima_accion": "5 oct follow-up: ¿quién del equipo coordina?",
+      "segment": "pipeline",
+      "notas_extra": "No confundir con bot Meta posterior; hubo respuesta humana útil."
     },
     {
       "title": "Harold — RR.HH. cafetería",
+      "contact_name": "Harold",
       "contact_handle": "@HansEnimen",
       "etapa_label": "EVALÚA",
       "plan": "Plan S/50",
-      "ultimo_movimiento": "Pidió redes; enviadas 1 oct",
-      "proxima_accion": "Muestra Chef Pastelero",
+      "ultimo_movimiento": "30 sep–1 oct: costos, efectividad, redes enviadas; pendiente muestra Chef Pastelero",
+      "proxima_accion": "5 oct: publicar muestra gratis chef pastelero o llamada corta",
       "segment": "pipeline"
     },
     {
@@ -182,9 +189,9 @@
       "title": "Cevichería (3 mozos, 3 ayudantes)",
       "contact_whatsapp": "958110360",
       "etapa_label": "DATOS",
-      "plan": "S/350 semanal",
-      "ultimo_movimiento": "Falta ubicación 3 locales",
-      "proxima_accion": "Borrador aviso",
+      "plan": "S/350 semanal; 6 vacantes / 3 locales — proponer S/50 mes",
+      "ultimo_movimiento": "30 sep: 3 mozos + 3 ayudantes, 8:30–17h, con experiencia; faltan direcciones 3 locales",
+      "proxima_accion": "5 oct: pedir ubicaciones; enviar borrador aviso",
       "segment": "pipeline"
     },
     {
@@ -207,7 +214,9 @@
       "title": "Makyl",
       "contact_whatsapp": "916163124",
       "etapa_label": "SIGUE BUSCANDO",
-      "plan": "4 perfiles ingeniería",
+      "plan": "4 perfiles ingeniería (estructural civil/mec, proyectista, comercial minería)",
+      "ultimo_movimiento": "2 oct: siguen reclutando; pendiente indicar perfil más difícil",
+      "proxima_accion": "Enviar borrador del perfil prioritario",
       "segment": "pipeline"
     },
     {
@@ -268,8 +277,8 @@
       "etapa_label": "PIDIÓ PRECIO",
       "plan": "Plan Empresa S/50 propuesto (3 grupos de puestos)",
       "amount_pen": 50,
-      "ultimo_movimiento": "3 oct: pidió yape y dónde publica; 👍 al mensaje canales; sin RUC/dirección",
-      "proxima_accion": "Un follow-up: datos fiscales + muestra aviso",
+      "ultimo_movimiento": "3 oct: pidió yape y canales; explicado buscadis+redes; sin RUC/planta Saylla",
+      "proxima_accion": "5 oct: pedir RUC + dirección + borrador operarios",
       "segment": "pipeline",
       "notas_extra": "WA @bconcha23. Revisar si 905609008 es el mismo chat. Chat: wa-chats/bconcha23-saylla.txt"
     },
@@ -488,6 +497,161 @@
       "title": "Empresa gastronómica",
       "contact_whatsapp": "923600672",
       "etapa_label": "LOTE3",
+      "ultimo_movimiento": "Vie 3 oct: apertura enviada; ✓✓ sin respuesta (captura 5 oct)",
+      "proxima_accion": "Follow-up B mar 7 oct o silencio",
+      "segment": "lote3"
+    },
+    {
+      "title": "Cafetería Plaza Belén",
+      "contact_whatsapp": "969517531",
+      "etapa_label": "LOTE3",
+      "ultimo_movimiento": "Vie 3 oct: apertura Rueda; ✓✓ sin respuesta",
+      "proxima_accion": "Segundo toque mar 7 oct",
+      "segment": "lote3"
+    },
+    {
+      "title": "Chocolatería (Rueda)",
+      "contact_whatsapp": "924971200",
+      "etapa_label": "LOTE3",
+      "ultimo_movimiento": "Sáb 4 oct: solo apertura estándar; sin respuesta",
+      "proxima_accion": "Recontacto corto mié 8 oct",
+      "segment": "lote3"
+    },
+    {
+      "title": "Exploring Cusco Perú Tours",
+      "contact_whatsapp": "973141261",
+      "etapa_label": "LOTE3",
+      "ultimo_movimiento": "Sáb 4 oct: apertura; sin respuesta humana",
+      "segment": "lote3"
+    },
+    {
+      "title": "Turismo Tambopata",
+      "contact_whatsapp": "915206769",
+      "etapa_label": "LOTE3",
+      "ultimo_movimiento": "Sáb 4 oct: apertura; sin respuesta",
+      "segment": "lote3"
+    },
+    {
+      "title": "Hotel (aviso Rueda)",
+      "contact_whatsapp": "941661769",
+      "etapa_label": "LOTE3",
+      "ultimo_movimiento": "Sáb 4 oct: apertura hotel; sin respuesta",
+      "segment": "lote3"
+    },
+    {
+      "title": "Laramani Hotel Boutique",
+      "contact_whatsapp": "953940007",
+      "etapa_label": "SIN HUMANO",
+      "ultimo_movimiento": "Sáb 4 oct: solo bot bienvenida RRHH",
+      "proxima_accion": "Llamar o mail del aviso; no insistir WA",
+      "segment": "lote3"
+    },
+    {
+      "title": "Hotel boutique Choquechaca",
+      "contact_whatsapp": "979367116",
+      "etapa_label": "LOTE3",
+      "ultimo_movimiento": "Sáb 4 oct: apertura; sin respuesta",
+      "segment": "lote3"
+    },
+    {
+      "title": "Hotel Casa Cusco Guest House",
+      "contact_whatsapp": "943815285",
+      "etapa_label": "LOTE3",
+      "ultimo_movimiento": "Sáb 4 oct: apertura; sin respuesta",
+      "segment": "lote3"
+    },
+    {
+      "title": "Empresa Av. Huayruropata",
+      "contact_whatsapp": "946669556",
+      "etapa_label": "LOTE3",
+      "ultimo_movimiento": "Sáb 4 oct: apertura; sin respuesta",
+      "segment": "lote3"
+    },
+    {
+      "title": "Hidrozel Riego y Total Tools",
+      "contact_whatsapp": "902676639",
+      "etapa_label": "LOTE3",
+      "ultimo_movimiento": "Sáb 4 oct: apertura; sin respuesta",
+      "segment": "lote3"
+    },
+    {
+      "title": "Grupo JCM Motors",
+      "contact_whatsapp": "967466202",
+      "etapa_label": "LOTE3",
+      "ultimo_movimiento": "Sáb 4 oct: apertura; sin respuesta",
+      "segment": "lote3"
+    },
+    {
+      "title": "Empresa inmobiliaria",
+      "contact_whatsapp": "921631940",
+      "etapa_label": "LOTE3",
+      "ultimo_movimiento": "Sáb 4 oct: apertura; sin respuesta",
+      "segment": "lote3"
+    },
+    {
+      "title": "Distribuidora de alimentos",
+      "contact_whatsapp": "949704114",
+      "etapa_label": "LOTE3",
+      "ultimo_movimiento": "Sáb 4 oct: apertura; sin respuesta",
+      "segment": "lote3"
+    },
+    {
+      "title": "Cadena hotelera",
+      "contact_whatsapp": "970438247",
+      "etapa_label": "LOTE3",
+      "ultimo_movimiento": "Sáb 4 oct: apertura; sin respuesta",
+      "segment": "lote3"
+    },
+    {
+      "title": "Empresa de seguridad",
+      "contact_whatsapp": "908817673",
+      "etapa_label": "LOTE3",
+      "ultimo_movimiento": "Sáb 4 oct: apertura; sin respuesta",
+      "segment": "lote3"
+    },
+    {
+      "title": "Contacto campaña (961 205 709)",
+      "contact_whatsapp": "961205709",
+      "etapa_label": "LOTE3",
+      "ultimo_movimiento": "Sáb 4 oct: apertura empresa; ✓✓ sin respuesta",
+      "segment": "lote3"
+    },
+    {
+      "title": "Culqi",
+      "contact_whatsapp": "946365851",
+      "etapa_label": "SIN HUMANO",
+      "ultimo_movimiento": "Sáb 4 oct: mensaje automático Culqi",
+      "proxima_accion": "No WA; buscar contacto RRHH real",
+      "segment": "lote3"
+    },
+    {
+      "title": "Contacto (934 241 365)",
+      "contact_whatsapp": "934241365",
+      "etapa_label": "LOTE3",
+      "ultimo_movimiento": "Jue 2 oct: mensaje seguimiento Buscadis; ✓✓ sin respuesta",
+      "segment": "lote3"
+    },
+    {
+      "title": "Contacto de viaje",
+      "contact_whatsapp": "984719190",
+      "etapa_label": "PAUSA",
+      "ultimo_movimiento": "Mié 1 oct: de viaje, escribir después",
+      "proxima_accion": "Reintentar oct segunda semana",
+      "segment": "pausa"
+    },
+    {
+      "title": "Shirley Vidu",
+      "contact_handle": "@ShirleyViduCIA",
+      "etapa_label": "SIN HUMANO",
+      "ultimo_movimiento": "Vie 3 oct: bot bienvenida",
+      "segment": "lote3"
+    },
+    {
+      "title": "RR.HH. (LGR)",
+      "contact_handle": "@LGR.rrhh",
+      "etapa_label": "LOTE3",
+      "ultimo_movimiento": "Jue 2 oct: seguimiento Buscadis enviado; sin respuesta",
+      "proxima_accion": "Segundo mensaje con aviso concreto",
       "segment": "lote3"
     }
   ]

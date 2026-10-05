@@ -4,7 +4,9 @@ El panel **ya no** tiene import masivo. El flujo acordado:
 
 1. **Tú** pegas el chat en Cursor (como export de WhatsApp: `[hora, fecha] Nombre: texto`).
 2. **Cursor** guarda el texto en `data/comercial/wa-chats/9XXXXXXXX-nombre.txt`, actualiza `data/comercial/campana-rueda-oct-2026.json` y `data/comercial/campana-insights.md`.
-3. **Tú** (o deploy) sincronizas Supabase cuando quieras:
+3. **Seguimiento diario:** `data/comercial/SEGUIMIENTO-5-OCT.md` (prioridades + links `wa.me`).
+
+4. **Tú** (o deploy) sincronizas Supabase cuando quieras:
 
 ```bash
 npx tsx scripts/comercial/import-campana-rueda-oct-2026.ts --apply
