@@ -21,8 +21,8 @@
       "etapa_label": "ESPERANDO PAGO",
       "plan": "Empresa S/50, 30 días, factura E001-1",
       "amount_pen": 50,
-      "ultimo_movimiento": "2 oct: Antu solicitará abono S/50; publicar solo aviso bar (Mesón Estrella → 912403101); CM Jr. backup",
-      "proxima_accion": "5 oct: confirmar pago Interbank; publicar aviso bar; CM en reserva",
+      "ultimo_movimiento": "5 oct: preguntó cuenta BCP; solo Interbank. Sin confirmación de abono aún",
+      "proxima_accion": "Confirmar pago CCI; publicar bar al acreditarse",
       "segment": "pipeline",
       "notas_extra": "ROFFA TRIP SAC 20610881212. Factura E001-1. Bartender solo turno noche."
     },
@@ -34,8 +34,8 @@
       "etapa_label": "PAGÓ",
       "plan": "S/30, 7 días, RUC 20603489528",
       "amount_pen": 30,
-      "ultimo_movimiento": "2 oct: pagó transferencia S/30; publicado supervisor; vigente ~hasta 9–11 oct",
-      "proxima_accion": "5 oct: enviar link publicación; reporte antes fin plan",
+      "ultimo_movimiento": "Publicado 4 oct (retraso vs pago 2 oct); pendiente enviar link + kit compartir + día extra desde 5 oct",
+      "proxima_accion": "Mensaje disculpa breve + link BvyFOP0S0m + bonus 48h compartir",
       "segment": "pipeline",
       "notas_extra": "PROMOCIÓN SERVICIOS VARIOS SAC 20603489528. Flyer: cambiar figura silla si piden."
     },
@@ -108,18 +108,19 @@
       "title": "Pucara (restaurante, Saphy)",
       "contact_whatsapp": "940897397",
       "etapa_label": "GRATIS",
-      "plan": "Aviso gratis; S/15 propuesto",
-      "ultimo_movimiento": "No gastará más hasta próxima semana",
-      "proxima_accion": "Lun 5 oct seguimiento",
-      "segment": "pipeline"
+      "plan": "Gratis web/app AInRg3pBWg; upsell S/15 flyer+redes",
+      "ultimo_movimiento": "5 oct: 0 contactos por Buscadis; sí entrevista por Rueda",
+      "proxima_accion": "Explicar gratis sin redes; ofrecer S/15 3 días",
+      "segment": "pipeline",
+      "notas_extra": "Link: buscadis.com/a/AInRg3pBWg. No cobro automático."
     },
     {
       "title": "Grupo Gastronómico (Magisterio)",
       "contact_whatsapp": "920076710",
       "etapa_label": "EVALÚA",
       "plan": "Propuesta S/50, 6 vacantes Magisterio",
-      "ultimo_movimiento": "2 oct: humano derivó a equipo; revisan propuesta S/50 (corredor, bar, mozo, cocinero, contable, lavavajillas)",
-      "proxima_accion": "5 oct follow-up: ¿quién del equipo coordina?",
+      "ultimo_movimiento": "5 oct: solo respuestas bot Meta «conectado con equipo» — sin humano",
+      "proxima_accion": "Llamar 920076710; buscar mail/tel RRHH en aviso Rueda",
       "segment": "pipeline",
       "notas_extra": "No confundir con bot Meta posterior; hubo respuesta humana útil."
     },
@@ -134,13 +135,14 @@
       "segment": "pipeline"
     },
     {
-      "title": "Miguel Ángel — hotel centro histórico",
+      "title": "Hotel 3★ centro histórico (925 040 653)",
       "contact_whatsapp": "925040653",
       "etapa_label": "EVALÚA",
-      "plan": "S/50, 5 puestos",
-      "ultimo_movimiento": "1 oct: Déjame ver",
-      "proxima_accion": "Lun 5 oct 9:30 muestra recepcionista y auditor",
-      "segment": "pipeline"
+      "plan": "Muestra gratis web/app; upsell S/50 plan empresa",
+      "ultimo_movimiento": "5 oct: «Puede ser para ver cómo es» — publicar muestra + link",
+      "proxima_accion": "Enviar link + kit compartir; cerrar plan S/50 con flyer redes",
+      "segment": "pipeline",
+      "notas_extra": "Confundió postulante al inicio; ya aclarado. Muestra 7d ops."
     },
     {
       "title": "Hotel Tecte",
@@ -180,18 +182,20 @@
       "title": "Indie Café",
       "contact_whatsapp": "933588562",
       "etapa_label": "PIDIÓ PRECIO",
-      "plan": "S/30",
-      "ultimo_movimiento": "Costo y flyer enviados",
-      "proxima_accion": "Lun 5 oct 11:30",
+      "plan": "S/30 propuesto; sin muestra aún",
+      "ultimo_movimiento": "1 oct: flyers planes enviados; sin borrador publicado",
+      "proxima_accion": "Borrador cafetería o muestra web gratis + cierre S/30",
       "segment": "pipeline"
     },
     {
-      "title": "Cevichería (3 mozos, 3 ayudantes)",
+      "title": "Cevichería Don Pez Limón (Elicita)",
+      "business_name": "Sevichería Don Pez Limón",
       "contact_whatsapp": "958110360",
       "etapa_label": "DATOS",
       "plan": "S/350 semanal; 6 vacantes / 3 locales — proponer S/50 mes",
-      "ultimo_movimiento": "30 sep: 3 mozos + 3 ayudantes, 8:30–17h, con experiencia; faltan direcciones 3 locales",
-      "proxima_accion": "5 oct: pedir ubicaciones; enviar borrador aviso",
+      "ultimo_movimiento": "5 oct: 3 locales Don Pez Limón; armando aviso 3 mozos + 3 ayudantes (NO todo el PDF Rueda)",
+      "proxima_accion": "Alinear con cliente: urgente mozo+ayudante; resto bajo plan S/50",
+      "notas_extra": "Rueda lista 10+ roles; venta acotada a 6 puestos acordados por WA. Shantall: no publicar admin/cocinero/lavavajillas sin confirmar."
       "segment": "pipeline"
     },
     {
@@ -265,8 +269,8 @@
       "etapa_label": "EVALÚA",
       "plan": "Aviso combinado 5 puestos; Plan Empresa S/50 propuesto",
       "amount_pen": 50,
-      "ultimo_movimiento": "3 oct 16:53 «Todos»; propuesta aviso único 5 puestos + plan S/50 enviada",
-      "proxima_accion": "Follow-up 5 oct si sin respuesta 48h",
+      "ultimo_movimiento": "3 oct «Todos»; borrador 5 puestos + plan S/50 enviado; sin respuesta",
+      "proxima_accion": "5 oct follow-up: ¿texto OK? flyer muestra + factura",
       "segment": "pipeline",
       "notas_extra": "Tel. alt. 925 581 103. Chat en data/comercial/wa-chats/970842362-lalo.txt"
     },
@@ -277,8 +281,8 @@
       "etapa_label": "PIDIÓ PRECIO",
       "plan": "Plan Empresa S/50 propuesto (3 grupos de puestos)",
       "amount_pen": 50,
-      "ultimo_movimiento": "3 oct: pidió yape y canales; explicado buscadis+redes; sin RUC/planta Saylla",
-      "proxima_accion": "5 oct: pedir RUC + dirección + borrador operarios",
+      "ultimo_movimiento": "5 oct: «Le indico» (datos fiscales/planta pendientes)",
+      "proxima_accion": "Esperar datos; ofrecer WA directo sin factura si prefiere",
       "segment": "pipeline",
       "notas_extra": "WA @bconcha23. Revisar si 905609008 es el mismo chat. Chat: wa-chats/bconcha23-saylla.txt"
     },
@@ -286,8 +290,8 @@
       "title": "Agencia de viajes (994 137 274)",
       "contact_whatsapp": "994137274",
       "etapa_label": "ALERTA",
-      "ultimo_movimiento": "5 oct: «Me podría pasar su CV» — confundió oferta Buscadis con postulación",
-      "proxima_accion": "Aclarar: vendemos difusión de avisos, no somos empleador",
+      "ultimo_movimiento": "5 oct repitió «Me podría pasar su CV»",
+      "proxima_accion": "Mensaje aclaratorio + oferta publicar SU vacante",
       "segment": "alerta",
       "notas_extra": "Insight: abrir con «no busco trabajo, ofrezco publicar su vacante»"
     },
@@ -488,10 +492,14 @@
       "segment": "lote3"
     },
     {
-      "title": "Empresa para Machupicchu",
+      "title": "Full House / empresa Machupicchu (941 260 271)",
       "contact_whatsapp": "941260271",
-      "etapa_label": "LOTE3",
-      "segment": "lote3"
+      "etapa_label": "EVALÚA",
+      "plan": "Muestra web gratis; upsell S/30/S/50",
+      "ultimo_movimiento": "5 oct: «Entiendo» tras oferta muestra barra; contacto previo dic 2025 Shantall",
+      "proxima_accion": "Confirmar puesto (barra/cocinero) y publicar muestra o borrador",
+      "segment": "pipeline",
+      "notas_extra": "Histórico: cocinero criolla Full House Machu Picchu. Oct 5 ofreció barra — confirmar vacante actual Rueda."
     },
     {
       "title": "Empresa gastronómica",
