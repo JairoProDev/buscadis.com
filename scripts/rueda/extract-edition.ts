@@ -20,8 +20,8 @@ import {
   RUEDA_R2764_BATCH_ID,
   RUEDA_R2764_EDICION,
   RUEDA_R2764_FECHA_ORIGINAL,
-  RUEDA_R2764_PDF,
 } from '../../lib/rueda/batch-constants';
+import { RUEDA_R2764_PDF } from '../../lib/rueda/editions-server';
 
 dotenv.config({ path: path.join(process.cwd(), '.env.local') });
 dotenv.config({ path: path.join(process.cwd(), '.env') });

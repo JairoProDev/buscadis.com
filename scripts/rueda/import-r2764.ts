@@ -231,6 +231,12 @@ async function main() {
   }
   console.log(`\n✅ Insertados ${ok}, fallidos ${fail}`);
 
+  if (ok > 0) {
+    const { backfillOpportunitiesFromBatch } = await import('../../lib/comercial/rueda-sync');
+    const crm = await backfillOpportunitiesFromBatch(RUEDA_R2764_BATCH_ID, OPS_USER_ID);
+    console.log('oportunidades CRM:', crm);
+  }
+
   const contactsPath = path.join(process.cwd(), 'output', 'rueda', RUEDA_R2764_EDICION, 'contactos-outreach.csv');
   const lines = [
     'negocio,telefono,url,wa_url,estado,recurrente,prioridad_hoy',

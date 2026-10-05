@@ -14,7 +14,7 @@
 
 - Repo: `JairoProDev/buscadis-mobile` (Expo WebView).
 - **No usa Firebase Analytics.**
-- Login: **Supabase Auth** + Google OAuth nativo (`expo-auth-session`), no Firebase Auth.
+- Login: **Supabase Auth** + Google Sign-In nativo (`@react-native-google-signin/google-signin`), no Firebase Auth.
 - Métricas app: `POST https://www.buscadis.com/api/mobile-analytics` → tabla `mobile_analytics_events`.
 - Play Console: instalaciones y vitals (fuera de GA4).
 - El slug Expo `buscadis-app` **no implica** que GA4 `buscadis-app` reciba datos automáticamente.

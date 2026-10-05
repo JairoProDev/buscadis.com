@@ -57,7 +57,7 @@ Verifica **Orígenes JavaScript autorizados**:
 - `https://buscadis.com`
 - `http://localhost:3000`
 
-No hace falta cambiar el Client ID web para la app Android nativa, pero **sí** lo usa `expo-auth-session` como `webClientId` para obtener el **ID token**.
+No hace falta cambiar el Client ID web para la app Android nativa, pero **sí** lo usa `@react-native-google-signin/google-signin` como `webClientId` para obtener el **ID token**.
 
 ### B1b. Error 400 en la app (no añadas `buscadis://` al cliente Web)
 
@@ -122,7 +122,7 @@ cd ~/proyectos/sdk/buscadis-mobile
 npm install
 ```
 
-(Debe incluir `expo-auth-session`, `expo-web-browser`, `expo-crypto`.)
+(Debe incluir `@react-native-google-signin/google-signin`; no uses `expo-auth-session` en producción Android.)
 
 ### C2. Pegar el Android Client ID
 

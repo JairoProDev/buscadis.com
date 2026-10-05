@@ -13,7 +13,7 @@ No es un bug de Supabase ni de Decolecta: es **arquitectura WebView + GIS**.
 | Repo | Rol |
 |------|-----|
 | **buscadis.com** | Si detecta app nativa (`__BUSCADIS_APP__`), el botón pide login **nativo** vía `postMessage` y recibe el ID token con `buscadis:native-google-id-token`. |
-| **buscadis-mobile** | `expo-auth-session` + Google → ID token → inyecta evento al WebView → mismo `signInWithGoogleIdToken` que en web. |
+| **buscadis-mobile** | `@react-native-google-signin/google-signin` (selector nativo) → ID token → inyecta evento al WebView → mismo `signInWithGoogleIdToken` que en web. |
 
 ## Configuración Google Cloud (obligatorio para Android)
 

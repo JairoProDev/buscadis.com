@@ -277,6 +277,13 @@ async function main() {
   await insertStory(user.id, adiso, imageUrl);
 
   try {
+    const { syncPaidClientAdisoToCrm } = await import('../../lib/comercial/paid-client-sync');
+    await syncPaidClientAdisoToCrm(adiso.id, user.id);
+  } catch (e) {
+    console.warn('[crm]', e);
+  }
+
+  try {
     await runInstantMatchCampaign({
       adisoId: adiso.id,
       advertiserUserId: user.id,

@@ -1,0 +1,32 @@
+{
+  "editions_dir_env": "RUEDA_EDITIONS_DIR",
+  "editions_dir_default": "../ads/archive/editions",
+  "wordpress_revista_url": "https://ruedadenegocios.com.pe/wp-content/uploads/2026/10/revista.pdf",
+  "note": "Los PDF binarios viven en el repo ads (archive/editions), no en buscadis.com — ver docs/REPOSITORIOS.md",
+  "editions": [
+    {
+      "edicion": "R2764",
+      "fecha_inicio": "2026-09-28",
+      "fecha_fin": "2026-09-30",
+      "archivo": "R2764-Sep28-30.pdf",
+      "batch_id": "rueda-R2764-claimable-2026-09-28",
+      "source_url": "https://ruedadenegocios.com.pe/wp-content/uploads/2026/09/revista.pdf"
+    },
+    {
+      "edicion": "R2765",
+      "fecha_inicio": "2026-10-01",
+      "fecha_fin": "2026-10-04",
+      "archivo": "R2765-Oct1-4.pdf",
+      "source_url": "https://ruedadenegocios.com.pe/wp-content/uploads/2026/10/revista.pdf",
+      "sha256": "797864f13ea20c07b57b563a93ea21dc76d5c324890caab69565e822bc06e612"
+    },
+    {
+      "edicion": "R2766",
+      "fecha_inicio": "2026-10-05",
+      "fecha_fin": "2026-10-07",
+      "archivo": "R2766-Oct5-7.pdf",
+      "source_url": "https://ruedadenegocios.com.pe/wp-content/uploads/2026/10/revista.pdf",
+      "sha256": "5e9e683493ae9517ded6728447778816e8e2984887c8f7780a6a0cd77dd37f0a"
+    }
+  ]
+}

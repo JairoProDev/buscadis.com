@@ -454,6 +454,15 @@ async function main() {
       storySort += 1;
     }
 
+    if (spec.slug === 'principal-8-vacantes') {
+      try {
+        const { syncPaidClientAdisoToCrm } = await import('../../lib/comercial/paid-client-sync');
+        await syncPaidClientAdisoToCrm(adiso.id, user.id);
+      } catch (e) {
+        console.warn('[crm]', e);
+      }
+    }
+
     published.push({
       slug: spec.slug,
       id: adiso.id,
