@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 
@@ -54,9 +55,9 @@ export default function AdminIntelligencePage() {
     <main className="mx-auto max-w-4xl px-4 py-8">
       <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
         <h1 className="text-2xl font-bold">Intelligence Dashboard</h1>
-        <a href="/admin/comercial" className="text-sm font-medium text-[var(--brand-blue)]">
+        <Link href="/admin/comercial" className="text-sm font-medium text-[var(--brand-blue)]">
           Comercial →
-        </a>
+        </Link>
       </div>
       <p className="text-sm text-[var(--text-secondary)] mb-6">
         Demanda, perfiles de comportamiento y calidad de matching.

@@ -40,6 +40,17 @@ function isReservedStaticPath(slug: string[]): boolean {
   return false;
 }
 
+/** Rutas de app con varios segmentos (app/admin/..., no son avisos legacy). */
+function isReservedAppMultiSegmentPath(slug: string[]): boolean {
+  if (slug.length < 2) return false;
+  const root = slug[0].toLowerCase();
+  if (root === 'admin') return true;
+  if (root === 'negocio') return true;
+  if (root === 'v') return true;
+  if (root === 'account-deletion') return true;
+  return false;
+}
+
 function buildSearchQuery(
   searchParams: { [key: string]: string | string[] | undefined }
 ): string {
@@ -78,7 +89,7 @@ export async function generateMetadata(props: PageProps): Promise<Metadata> {
     const params = await props.params;
     const { slug } = params;
 
-    if (isReservedStaticPath(slug)) {
+    if (isReservedStaticPath(slug) || isReservedAppMultiSegmentPath(slug)) {
         return { title: 'No encontrado' };
     }
 
@@ -155,7 +166,7 @@ export default async function Page(props: PageProps) {
     const searchParams = props.searchParams ? await props.searchParams : {};
     const { slug } = params;
 
-    if (isReservedStaticPath(slug)) {
+    if (isReservedStaticPath(slug) || isReservedAppMultiSegmentPath(slug)) {
         notFound();
     }
 
