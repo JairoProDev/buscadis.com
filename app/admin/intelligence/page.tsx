@@ -37,9 +37,14 @@ export default function AdminIntelligencePage() {
   const { session } = useAuth();
   const [stats, setStats] = useState<IntelligenceStats | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!session?.access_token) return;
+    if (!session?.access_token) {
+      setLoading(false);
+      return;
+    }
+    setLoading(true);
     fetch('/api/admin/intelligence', {
       headers: { Authorization: `Bearer ${session.access_token}` },
     })
@@ -48,7 +53,8 @@ export default function AdminIntelligencePage() {
         return r.json();
       })
       .then(setStats)
-      .catch((e: Error) => setError(e.message));
+      .catch((e: Error) => setError(e.message))
+      .finally(() => setLoading(false));
   }, [session?.access_token]);
 
   return (
@@ -63,7 +69,18 @@ export default function AdminIntelligencePage() {
         Demanda, perfiles de comportamiento y calidad de matching.
       </p>
 
-      {error && <p className="text-red-500">{error}</p>}
+      {!session?.access_token && (
+        <p className="text-sm text-[var(--text-secondary)]">Inicia sesión como admin de plataforma.</p>
+      )}
+      {loading && <p className="text-sm text-[var(--text-secondary)]">Cargando métricas…</p>}
+      {error && (
+        <p className="text-red-500">
+          {error}
+          {error.includes('403') || error.includes('permisos')
+            ? ' — Tu cuenta debe estar en PLATFORM_ADMIN_EMAILS o rol admin.'
+            : ''}
+        </p>
+      )}
 
       {stats && (
         <div className="space-y-6">
@@ -98,9 +115,19 @@ export default function AdminIntelligencePage() {
             </ul>
           </section>
 
+          {Object.values(stats.totals).every((v) => v === 0) && (
+            <p className="rounded-lg border border-[var(--border-color)] bg-[var(--bg-secondary)] p-4 text-sm text-[var(--text-secondary)]">
+              Las tablas de comportamiento / demanda están en cero o aún no tienen datos en este
+              entorno. El panel funciona; usa <strong>CRM Comercial</strong> para la campaña Rueda.
+            </p>
+          )}
+
           <section>
             <h2 className="font-semibold mb-2">Entregas por canal</h2>
             <ul className="space-y-1 text-sm">
+              {Object.keys(stats.deliveriesByChannel || {}).length === 0 && (
+                <li className="text-[var(--text-tertiary)]">Sin entregas registradas</li>
+              )}
               {Object.entries(stats.deliveriesByChannel || {}).map(([ch, v]) => (
                 <li key={ch} className="flex justify-between border-b py-1">
                   <span>{ch}</span>
@@ -165,6 +192,9 @@ export default function AdminIntelligencePage() {
 
           <section>
             <h2 className="font-semibold mb-2">Inferencias recientes</h2>
+            {stats.recentInferences.length === 0 && (
+              <p className="text-sm text-[var(--text-secondary)]">Sin inferencias en inference_log.</p>
+            )}
             <ul className="text-xs space-y-1 text-[var(--text-secondary)]">
               {stats.recentInferences.map((inf, i) => (
                 <li key={i}>

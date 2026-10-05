@@ -26,6 +26,9 @@ export default function AdminComercialPage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [filterMode, setFilterMode] = useState<string>('campana');
+  const [batchImporting, setBatchImporting] = useState(false);
+  const [batchResult, setBatchResult] = useState<string | null>(null);
+  const [batchStatus, setBatchStatus] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     if (!token) return;
@@ -85,6 +88,38 @@ export default function AdminComercialPage() {
       await load();
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Backfill falló');
+    }
+  };
+
+  const onBatchWhatsAppFiles = async (fileList: FileList | null) => {
+    if (!token || !fileList?.length) return;
+    setBatchImporting(true);
+    setBatchResult(null);
+    setError(null);
+    try {
+      const form = new FormData();
+      for (const f of Array.from(fileList)) form.append('files', f);
+      const res = await fetch('/api/ops/comercial/import-whatsapp/batch', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+        body: form,
+      });
+      if (!res.ok) throw new Error('Importación masiva falló');
+      const data = (await res.json()) as {
+        imported: number;
+        files: number;
+        results: { filename: string; imported: number; error?: string }[];
+      };
+      const failed = data.results.filter((r) => r.error);
+      setBatchResult(
+        `${data.imported} mensajes en ${data.files} archivos` +
+          (failed.length ? ` · ${failed.length} sin match (revisa nombre 9XXXXXXXX.txt)` : ''),
+      );
+      await load();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Error');
+    } finally {
+      setBatchImporting(false);
     }
   };
 
@@ -159,6 +194,68 @@ export default function AdminComercialPage() {
           <Stat label="Conversión" value={`${(metrics.conversion.wonRate * 100).toFixed(1)}%`} />
         </div>
       )}
+
+      <section className="mb-6 rounded-xl border border-dashed border-[var(--border-color)] bg-[var(--bg-secondary)] p-4">
+        <h2 className="text-sm font-bold">Importar muchos chats (celular → PC)</h2>
+        <p className="mt-1 text-xs text-[var(--text-secondary)]">
+          En el <strong>celular</strong>: cada chat → Exportar → Sin archivos → guarda como{' '}
+          <code className="text-[10px]">984759634-nombre.txt</code>. Sube aquí todos los .txt de
+          una vez (WhatsApp Web no tiene exportar).
+        </p>
+        <input
+          type="file"
+          accept=".txt,text/plain"
+          multiple
+          className="mt-3 block w-full text-xs"
+          onChange={(e) => {
+            const files = e.target.files;
+            if (!files?.length || !token) return;
+            setBatchStatus('Importando…');
+            const form = new FormData();
+            for (const f of Array.from(files)) form.append('files', f);
+            void fetch('/api/ops/comercial/import-whatsapp/batch', {
+              method: 'POST',
+              headers: { Authorization: `Bearer ${token}` },
+              body: form,
+            })
+              .then(async (r) => {
+                if (!r.ok) throw new Error('Error en importación');
+                const data = (await r.json()) as {
+                  imported: number;
+                  files: number;
+                  results: { filename: string; imported: number; error?: string }[];
+                };
+                const failed = data.results.filter((x) => x.error);
+                setBatchStatus(
+                  `Listo: ${data.imported} mensajes en ${data.files} archivos` +
+                    (failed.length ? ` · ${failed.length} sin match (revisa el nombre)` : ''),
+                );
+                await load();
+              })
+              .catch((err) => setBatchStatus(err instanceof Error ? err.message : 'Error'));
+          }}
+        />
+        {batchStatus && <p className="mt-2 text-xs text-[var(--text-secondary)]">{batchStatus}</p>}
+      </section>
+
+      <section className="mb-6 rounded-xl border border-dashed border-[var(--border-color)] bg-[var(--bg-secondary)] p-4">
+        <h2 className="text-sm font-bold">Importar muchos chats (celular → PC)</h2>
+        <p className="mt-1 text-xs text-[var(--text-secondary)]">
+          WhatsApp Web no exporta. En el celular: exporta cada chat a .txt, renómbralos{' '}
+          <strong>984759634-nombre.txt</strong> y súbelos todos aquí. Guía:{' '}
+          <code className="text-[10px]">docs/comercial/IMPORTAR-CHATS-WHATSAPP.md</code>
+        </p>
+        <input
+          type="file"
+          accept=".txt,text/plain"
+          multiple
+          disabled={batchImporting}
+          className="mt-3 block w-full text-sm"
+          onChange={(e) => void onBatchWhatsAppFiles(e.target.files)}
+        />
+        {batchImporting && <p className="mt-2 text-xs">Importando…</p>}
+        {batchResult && <p className="mt-2 text-xs text-[var(--brand-blue)]">{batchResult}</p>}
+      </section>
 
       {error && <p className="mb-4 text-sm text-red-500">{error}</p>}
       {loading && <p className="text-sm text-[var(--text-secondary)]">Cargando…</p>}

@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { requireOpsUser } from '@/lib/ops/require-ops';
-import { getOpportunity, logActivity } from '@/lib/comercial/opportunities-server';
+import { getOpportunity } from '@/lib/comercial/opportunities-server';
+import { importWhatsAppExportForOpportunity } from '@/lib/comercial/whatsapp-batch-import';
 import { parseWhatsAppExportText } from '@/lib/comercial/whatsapp-export-parse';
 
 type RouteProps = { params: Promise<{ id: string }> };
@@ -39,36 +40,12 @@ export async function POST(request: NextRequest, { params }: RouteProps) {
     });
   }
 
-  let imported = 0;
-  for (const msg of messages) {
-    if (msg.direction === 'system') {
-      await logActivity({
-        opportunityId: id,
-        activityType: 'note',
-        body: `[WA sistema] ${msg.body.slice(0, 2000)}`,
-        createdBy: ops.id,
-        metadata: { wa_import: true, at: msg.at, sender: msg.sender },
-      });
-    } else {
-      await logActivity({
-        opportunityId: id,
-        activityType:
-          msg.direction === 'outbound' ? 'whatsapp_outbound' : 'whatsapp_inbound',
-        body: msg.body.slice(0, 4000),
-        createdBy: ops.id,
-        metadata: { wa_import: true, at: msg.at, sender: msg.sender },
-      });
-    }
-    imported += 1;
-  }
-
-  await logActivity({
-    opportunityId: id,
-    activityType: 'note',
-    body: `Importación WhatsApp: ${imported} mensajes registrados`,
-    createdBy: ops.id,
-    metadata: { wa_import_batch: true },
-  });
+  const imported = await importWhatsAppExportForOpportunity(
+    id,
+    parsed.data.export_text,
+    ops.id,
+    outbound,
+  );
 
   return NextResponse.json({ imported, total: messages.length });
 }

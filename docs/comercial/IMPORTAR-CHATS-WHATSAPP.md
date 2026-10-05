@@ -1,57 +1,51 @@
-# Importar historial de WhatsApp al CRM (sin extensiones raras)
+# Importar historial de WhatsApp al CRM
 
-## Lo que Meta permite (oficial y seguro)
+## ¿Puede Cursor/la IA entrar a mi WhatsApp?
 
-No existe un botón “exportar todos los chats de negocio” de una vez en la app. Lo **oficial** es **por conversación**:
+**No.** Nadie externo puede leer tus chats sin que exportes archivos o conectes la API oficial. No hay forma mágica ni segura de “hacerlo por ti” sin datos del teléfono.
 
-### En el teléfono (WhatsApp / WhatsApp Business)
+## WhatsApp Web vs celular
 
-1. Abre el chat del cliente.
-2. Menú **⋮** → **Más** → **Exportar chat**.
-3. Elige **Sin archivos** (más liviano; el texto basta para el CRM) o **Incluir archivos** si necesitas audios/imágenes aparte.
-4. Guarda el `.txt` (o envíatelo por correo / Drive).
+**Exportar chat solo está en la app móvil** (⋮ → Más → Exportar chat). En **WhatsApp Web / escritorio no aparece** esa opción. Es normal.
 
-El archivo trae líneas con **fecha, hora, nombre del remitente y mensaje**. Eso es lo que importamos.
+## La forma más rápida para ~100 contactos
 
-### Qué no recomendamos
+No es uno por uno en el CRM, sino **muchos exports + una sola subida**:
 
-- Extensiones de Chrome que piden acceso total a WhatsApp Web (riesgo de baneo y de robo de sesión).
-- Apps “backup” no oficiales.
-- Automatizar clics masivos en Web.
+1. **En el celular** (puedes hacerlo en varias sesiones): abre chat → Exportar → Sin archivos → guardar o enviar a Drive/correo.
+2. En el PC, renombra cada `.txt` con el **número de 9 dígitos** al inicio, por ejemplo:
+   - `984759634-mapacho.txt`
+   - `955009160-black-llama.txt`
+3. En **`/admin/comercial`**, bloque **「Importar muchos chats」** → selecciona **todos** los `.txt` → importa de golpe.
+4. O en local: carpeta `exports-wa/` y  
+   `npx tsx scripts/comercial/import-whatsapp-exports-dir.ts --dir=./exports-wa --apply`
 
-### Hacia adelante (cuando tengas Cloud API)
+El sistema **empareja por número** con la oportunidad del CRM y crea actividades (entrante/saliente).
 
-Solo los mensajes **después** de conectar el número quedan en servidor; el historial previo hay que traerlo con export `.txt` una vez.
+### Truco para ir más rápido en el teléfono
 
-## Qué capturamos al importar
+- Exporta solo chats con actividad de campaña (los que tienen mensajes tuyos).
+- Si usas **etiquetas** en WhatsApp Business, filtra por etiqueta y exporta ese lote.
+- Comparte los `.txt` a **Google Drive** desde el móvil y descarga la carpeta en el PC de una vez.
 
-| Dato | Origen |
-|------|--------|
-| Fecha y hora | Cada línea del `.txt` |
-| Remitente | Nombre en el export |
-| Mensaje | Texto (multilínea soportado) |
-| Entrante / saliente | Si el nombre coincide con `CRM_WA_OUTBOUND_NAMES` (Jairo, Buscadis, Shantall, ADIS) |
+## Qué datos trae el export oficial
 
-**Nombre de perfil WA / foto:** el export **no** incluye el perfil completo; en el CRM ya tienes `contact_whatsapp` y `business_name` en la oportunidad. Si hace falta, añade una nota manual con el nombre de perfil.
+| Sí | No |
+|----|-----|
+| Fecha, hora, nombre en el chat, texto | Foto de perfil WA completa |
+| | Export masivo de todos los chats en un clic |
 
-## Cómo importar en Buscadis
+## Un solo chat en la ficha
 
-1. Entra a `/admin/comercial` → abre la oportunidad del cliente.
-2. Sección **Importar chat WhatsApp** → pega el contenido del `.txt` o súbelo como texto.
-3. **Vista previa** (opcional) → **Importar** → los mensajes aparecen en **Actividades**.
+En la oportunidad: pegar `.txt` en **Importar chat WhatsApp**.
 
-API: `POST /api/ops/comercial/opportunities/{id}/import-whatsapp`  
-Body: `{ "export_text": "...", "dry_run": true }` para probar.
+## API
 
-## Ritmo sugerido para los ~60 contactados
+- Un chat: `POST /api/ops/comercial/opportunities/{id}/import-whatsapp`
+- Varios: `POST /api/ops/comercial/import-whatsapp/batch` (multipart `files`)
 
-- Prioridad: clientes **PAGÓ**, **ESPERANDO PAGO** y **EVALÚA** activos.
-- 5–10 exportaciones por sesión; pegar e importar en cada ficha.
-- Carpeta local: `exports-wa/984759634-mapacho.txt` (número + slug).
+Variable opcional: `CRM_WA_OUTBOUND_NAMES=jairo,buscadis,shantall,adis` para marcar mensajes salientes.
 
-## Script masivo (opcional)
+## Hacia adelante
 
-```bash
-# Próximo paso: script que lea exports-wa/*.txt, matchee por teléfono en el nombre del archivo
-# npx tsx scripts/comercial/import-whatsapp-exports-dir.ts --dir=./exports-wa --apply
-```
+WhatsApp **Cloud API**: solo mensajes desde el día de conexión; el pasado sigue siendo export `.txt` una vez.

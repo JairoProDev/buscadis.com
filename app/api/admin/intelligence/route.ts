@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase-admin';
 import { getUserFromRouteRequest } from '@/lib/supabase-route-auth';
+import { isPlatformAdminUser } from '@/lib/platform-admin';
 
 export async function GET(request: NextRequest) {
   const user = await getUserFromRouteRequest(request);
@@ -10,11 +11,11 @@ export async function GET(request: NextRequest) {
 
   const { data: profile } = await supabaseAdmin
     .from('profiles')
-    .select('rol')
+    .select('rol, is_platform_admin')
     .eq('id', user.id)
     .maybeSingle();
 
-  if (profile?.rol !== 'admin') {
+  if (!isPlatformAdminUser(user.email, profile)) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
