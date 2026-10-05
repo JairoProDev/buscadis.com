@@ -81,13 +81,11 @@ Si el SHA-1 no coincide con la firma real del APK en el dispositivo, Google devu
 
 ## Paso 3 — App en el teléfono
 
-El código usa el redirect correcto para Android:
+**1.0.11** aún abría **Chrome** (`accounts.google.com`) con `expo-auth-session` y redirect `com.googleusercontent.apps.…` → Google suele responder **400 solicitud no válida** (el cliente Android no encaja con ese flujo en navegador).
 
-`com.googleusercontent.apps.222349059154-lsfb8gf494u7673ap374gk8t1fj9hgfl:/oauth2redirect`
+Desde **1.0.12** la app usa **Google Sign-In nativo** (Play Services): mismo **Web Client ID** + cliente **Android** (package + SHA-1). **No** pasa por la pantalla de error en Chrome.
 
-(derivado del **Android** Client ID, no del Web.)
-
-Necesitas un build **≥ 1.0.11** con ese cambio. El AAB 1.0.10 usaba `buscadis://`, que chocaba con esta configuración.
+Necesitas un build **≥ 1.0.12** en Play Store.
 
 ```bash
 cd ~/proyectos/sdk/buscadis-mobile
