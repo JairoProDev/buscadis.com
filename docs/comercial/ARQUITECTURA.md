@@ -61,3 +61,7 @@ npx tsx scripts/comercial/backfill-paid-clients.ts
 - Protocolo edición → CRM: `docs/rueda/PROTOCOLO.md`
 - PDFs y repos: `docs/REPOSITORIOS.md`
 - WhatsApp Business API: `docs/comercial/WHATSAPP-BUSINESS.md`
+- **Catálogo planes + IGV:** `docs/comercial/OFERTA-PLANES.md` · flyers `docs/comercial/media/`
+- **Tarifas Rueda (referencia interna):** `docs/comercial/PRECIOS-RUEDA-NEGOCIOS.md`
+- **Traspaso campaña + conflictos:** `docs/comercial/TRASPASO-CAMPANA.md`
+- **Prospectos JSON:** `data/comercial/campana-rueda-oct-2026.json`
