@@ -9,6 +9,8 @@ export const PAID_CLIENT_BATCH_DOCS: Record<string, string> = {
   'cliente-restaurante-mapacho-2026-10': 'docs/clientes/restaurante-mapacho',
   'cliente-cooperativa-supervisor-ventas-2026-10': 'docs/clientes/cooperativa-supervisor-ventas',
   'cliente-mozos-steward-magisterio-2026-10': 'docs/clientes/mozos-steward-magisterio',
+  'cliente-cevicheria-prestigio-mozos-ayudantes-2026-10':
+    'docs/clientes/cevicheria-prestigio-mozos-ayudantes',
 };
 
 /** Un solo lead CRM por cliente multi-aviso (p. ej. Mapacho). */

@@ -20,8 +20,10 @@ import { useAdInteraction } from '@/hooks/useAdInteraction';
 import { useAdisoCardActions, type AdisoCardActionId } from '@/hooks/useAdisoCardActions';
 import AdisoCardActionsSheet from '@/components/adiso/AdisoCardActionsSheet';
 import {
+  adisoShowsPortraitJobFlyer,
   getListingThumbnailUrl,
   listingCardImageObjectClass,
+  listingCardMediaAspectClass,
   shouldBypassVercelImageOptimization,
 } from '@/lib/images/listing-image';
 import AdisoCardLongPressMenu, {
@@ -75,16 +77,6 @@ function getSellerDisplayName(adiso: Adiso): string | null {
   return rawName;
 }
 
-function getMediaAspectClass(vista: AdisoCardVista, isCatalogProduct: boolean): string {
-  if (vista === 'list') {
-    return isCatalogProduct
-      ? 'h-[112px] w-[112px] shrink-0'
-      : 'h-24 w-24 shrink-0 md:h-24 md:w-24';
-  }
-  // Marketplace: imagen cuadrada (1:1) en grid y feed
-  return 'aspect-square w-full';
-}
-
 const AdisoCard = forwardRef<HTMLDivElement, AdisoCardProps>(
   ({ adiso, onClick, estaSeleccionado, vista = 'grid' }, ref) => {
     const { isHidden, markNotInterested, giveFeedback, undoHide } = useAdInteraction(adiso);
@@ -111,6 +103,7 @@ const AdisoCard = forwardRef<HTMLDivElement, AdisoCardProps>(
     const imagenUrl = adiso.imagenesUrls?.[0] || adiso.imagenUrl;
     const usesGeneratedCover = adisoUsesGeneratedCover(adiso);
     const showUserPhoto = Boolean(imagenUrl) && !usesGeneratedCover;
+    const portraitJobFlyer = showUserPhoto && adisoShowsPortraitJobFlyer(adiso);
     const extraFotos = Math.max(0, (adiso.imagenesUrls?.length ?? 0) - 1);
     const textoRaw =
       adiso.privateData && typeof adiso.privateData === 'object'
@@ -315,7 +308,7 @@ const AdisoCard = forwardRef<HTMLDivElement, AdisoCardProps>(
         )}
 
         <div
-          className={`relative flex-shrink-0 overflow-hidden rounded-[var(--bs-radius-lg,var(--card-radius))] ${getMediaAspectClass(vista, isCatalogProduct)} ${
+          className={`relative flex-shrink-0 overflow-hidden rounded-[var(--bs-radius-lg,var(--card-radius))] ${listingCardMediaAspectClass(vista, isCatalogProduct, portraitJobFlyer)} ${
             isDestacado ? 'ring-2 ring-[var(--bs-color-sol-400)]' : ''
           } ${longPressActive ? 'z-[50] scale-[1.02] shadow-2xl ring-2 ring-white/40' : ''}`}
           style={{
@@ -357,7 +350,7 @@ const AdisoCard = forwardRef<HTMLDivElement, AdisoCardProps>(
               fill
               unoptimized={shouldBypassVercelImageOptimization(imagenUrl)}
               sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 20vw"
-              className={`${listingCardImageObjectClass(isCatalogProduct)} motion-reduce:transition-none`}
+              className={`${listingCardImageObjectClass(isCatalogProduct, portraitJobFlyer)} motion-reduce:transition-none`}
               loading="lazy"
             />
           ) : (

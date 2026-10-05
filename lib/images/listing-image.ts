@@ -5,6 +5,9 @@
  * @see https://supabase.com/docs/guides/storage/serving/image-transformations
  */
 
+import type { Adiso } from '@/types';
+import { adisoUsesGeneratedCover } from '@/lib/flyer/templates';
+
 const SUPABASE_HOST_SUFFIX = '.supabase.co';
 
 /** Width for feed cards (2-col mobile ~50vw). Detail/modal should use original URL. */
@@ -53,14 +56,46 @@ export function getListingThumbnailUrl(
   }
 }
 
+/** Aviso de empleo con flyer/foto subida (p. ej. diseño vertical), no portada OG generada. */
+export function adisoShowsPortraitJobFlyer(
+  adiso: Pick<Adiso, 'categoria' | 'imagenUrl' | 'imagenesUrls' | 'privateData'>,
+): boolean {
+  if (adiso.categoria !== 'empleos') return false;
+  const priv = adiso.privateData as Record<string, unknown> | undefined;
+  if (priv?.source === 'catalog_product') return false;
+  const url = adiso.imagenesUrls?.[0] || adiso.imagenUrl;
+  if (!url) return false;
+  if (adisoUsesGeneratedCover(adiso)) return false;
+  return true;
+}
+
 /**
- * Flyers verticales en marco cuadrado: mostrar ancho completo (letterbox arriba/abajo).
- * Fotos de catálogo suelen ser cuadradas → cover.
+ * Flyers verticales: marco 3:4 para llenar ancho sin bandas laterales.
+ * Fotos de catálogo suelen ser cuadradas → cover en marco 1:1.
  */
-export function listingCardImageObjectClass(isCatalogProduct: boolean): string {
-  return isCatalogProduct
-    ? 'object-cover object-center'
-    : 'object-contain object-center px-1.5 py-1';
+export function listingCardImageObjectClass(
+  isCatalogProduct: boolean,
+  portraitJobFlyer = false,
+): string {
+  if (isCatalogProduct) return 'object-cover object-center';
+  if (portraitJobFlyer) return 'object-contain object-center';
+  return 'object-contain object-center px-1.5 py-1';
+}
+
+export function listingCardMediaAspectClass(
+  vista: 'list' | 'grid' | 'feed',
+  isCatalogProduct: boolean,
+  portraitJobFlyer: boolean,
+): string {
+  if (vista === 'list') {
+    return isCatalogProduct
+      ? 'h-[112px] w-[112px] shrink-0'
+      : portraitJobFlyer
+        ? 'h-28 w-[84px] shrink-0 md:h-32 md:w-[96px]'
+        : 'h-24 w-24 shrink-0 md:h-24 md:w-24';
+  }
+  if (portraitJobFlyer) return 'aspect-[3/4] w-full';
+  return 'aspect-square w-full';
 }
 
 /** Grid cards: never route through /_next/image (Vercel quota). */

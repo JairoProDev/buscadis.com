@@ -10,6 +10,7 @@ import { buildFlyerContentFromAdiso, flyerStateFromPrivateData } from '@/lib/fly
 import { adisoUsesGeneratedCover, resolveFlyerConfig } from '@/lib/flyer/templates';
 import { toDisplayTitle } from '@/lib/adiso-display';
 import {
+  adisoShowsPortraitJobFlyer,
   getListingThumbnailUrl,
   shouldBypassVercelImageOptimization,
 } from '@/lib/images/listing-image';
@@ -87,6 +88,7 @@ export default function SimilarAdisos({ currentAdiso }: SimilarAdisosProps) {
           const usesGenerated = adisoUsesGeneratedCover(ad);
           const photo = ad.imagenesUrls?.[0] || ad.imagenUrl;
           const showPhoto = Boolean(photo) && !usesGenerated;
+          const portraitJobFlyer = showPhoto && adisoShowsPortraitJobFlyer(ad);
           const displayTitle = toDisplayTitle(ad.titulo) || ad.titulo;
 
           return (
@@ -97,7 +99,7 @@ export default function SimilarAdisos({ currentAdiso }: SimilarAdisosProps) {
           >
             <div
               className={`relative w-full bg-[var(--bg-secondary)] ${
-                usesGenerated ? 'aspect-[3/4]' : 'aspect-square'
+                usesGenerated || portraitJobFlyer ? 'aspect-[3/4]' : 'aspect-square'
               }`}
             >
               {showPhoto ? (
@@ -106,7 +108,9 @@ export default function SimilarAdisos({ currentAdiso }: SimilarAdisosProps) {
                   alt={displayTitle}
                   fill
                   unoptimized={shouldBypassVercelImageOptimization(photo)}
-                  className="object-contain p-2"
+                  className={
+                    portraitJobFlyer ? 'object-contain object-center' : 'object-contain p-2'
+                  }
                   sizes="(max-width: 640px) 50vw, 200px"
                 />
               ) : (
