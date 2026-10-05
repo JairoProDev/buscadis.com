@@ -1668,6 +1668,7 @@ function HomeContent({ initialSearchParams, initialFeedAdisos = [], showLegalFoo
                 <ParaTiSection
                   onAbrirAdiso={handleAbrirAdiso}
                   withPanel={isDesktop && !isSidebarMinimizado}
+                  categoria={categoriaFiltro}
                 />
                 <GrillaAdisos
                   adisos={adisosFiltrados.slice(0, visibleCount)}

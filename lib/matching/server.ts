@@ -49,10 +49,17 @@ export async function matchInterestedUsers(
   );
 }
 
-export async function matchAdsForUser(userId: string, limit = 12): Promise<{ adisoId: string; score: number }[]> {
+export async function matchAdsForUser(
+  userId: string,
+  limit = 12,
+  categoria?: string | null,
+): Promise<{ adisoId: string; score: number }[]> {
+  const scopedCategory = categoria && categoria !== 'todos' ? categoria : null;
+  const fetchLimit = scopedCategory ? Math.min(limit * 5, 60) : limit;
+
   const { data, error } = await supabaseAdmin.rpc('fn_match_ads_for_user', {
     p_user_id: userId,
-    p_limit: limit,
+    p_limit: fetchLimit,
   });
 
   if (error) {
@@ -60,10 +67,29 @@ export async function matchAdsForUser(userId: string, limit = 12): Promise<{ adi
     return [];
   }
 
-  return (data || []).map((r: { adiso_id: string; match_score: number }) => ({
+  let results = (data || []).map((r: { adiso_id: string; match_score: number }) => ({
     adisoId: r.adiso_id,
     score: r.match_score,
   }));
+
+  if (scopedCategory && results.length > 0) {
+    const ids = results.map((r) => r.adisoId);
+    const { data: rows, error: catError } = await supabaseAdmin
+      .from('adisos')
+      .select('id')
+      .in('id', ids)
+      .eq('categoria', scopedCategory);
+
+    if (catError) {
+      console.error('[matching] category filter error:', catError.message);
+      return [];
+    }
+
+    const allowed = new Set((rows || []).map((r: { id: string }) => r.id));
+    results = results.filter((r) => allowed.has(r.adisoId)).slice(0, limit);
+  }
+
+  return results;
 }
 
 export async function createSupplyDemandMatches(

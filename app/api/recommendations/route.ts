@@ -8,6 +8,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ adisoIds: [] });
   }
 
-  const matches = await matchAdsForUser(user.id, 12);
+  const categoria = request.nextUrl.searchParams.get('categoria');
+  const matches = await matchAdsForUser(user.id, 12, categoria);
   return NextResponse.json({ adisoIds: matches.map((m) => m.adisoId) });
 }
