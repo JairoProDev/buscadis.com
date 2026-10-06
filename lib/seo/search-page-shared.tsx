@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { executeSearch } from '@/lib/search/execute-search';
 import { CrawlableAdisoList } from '@/components/seo/CrawlableAdisoList';
+import { NativeAppRouteChrome } from '@/components/native/NativeAppRouteChrome';
 
 export async function SearchResultsBody({ query }: { query: string }) {
   const q = query.trim();
@@ -16,7 +17,9 @@ export async function SearchResultsBody({ query }: { query: string }) {
   }
 
   return (
-    <main className="mx-auto max-w-[1400px] px-4 py-8">
+    <>
+      <NativeAppRouteChrome />
+      <main className="mx-auto max-w-[1400px] px-4 py-8">
       <h1 className="mb-2 text-2xl font-bold text-[var(--bs-fg-default)]">Buscar en Buscadis</h1>
       {q ? (
         <p className="mb-6 text-[var(--bs-fg-muted)]">
@@ -39,6 +42,7 @@ export async function SearchResultsBody({ query }: { query: string }) {
           Publicar un aviso
         </Link>
       </p>
-    </main>
+      </main>
+    </>
   );
 }

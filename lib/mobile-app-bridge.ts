@@ -37,6 +37,17 @@ export function syncNativePushUser(userId: string | null): void {
 }
 
 /** GIS / One Tap no funcionan dentro de WebView — el shell nativo debe devolver un ID token. */
+export function notifyNativeShellReady(path: string = '/'): void {
+  if (!isBuscadisNativeApp()) return;
+  window.ReactNativeWebView?.postMessage(
+    JSON.stringify({
+      type: 'web_app_ready',
+      payload: { path },
+      ts: Date.now(),
+    })
+  );
+}
+
 export function requestNativeGoogleSignIn(): boolean {
   if (!isBuscadisNativeApp()) return false;
   window.ReactNativeWebView?.postMessage(

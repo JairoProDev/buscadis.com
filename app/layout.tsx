@@ -14,6 +14,7 @@ import SessionTracker from '@/components/SessionTracker';
 import AnalyticsProvider from '@/components/analytics/AnalyticsProvider';
 import ReferralCapture from '@/components/auth/ReferralCapture';
 import NativeWebViewBootstrap from '@/components/NativeWebViewBootstrap';
+import NativeShellLifecycle from '@/components/native/NativeShellLifecycle';
 import ChunkRecoveryBootstrap from '@/components/ChunkRecoveryBootstrap';
 import SiteFloatingActions from '@/components/SiteFloatingActions';
 import {
@@ -183,6 +184,7 @@ export default function RootLayout({
                   <AdisosGratuitosCacheProvider>
                     <NavigationProvider>
                       <NativeWebViewBootstrap />
+                      <NativeShellLifecycle />
                       <ChunkRecoveryBootstrap />
                       <SessionTracker />
                       <AnalyticsProvider />
