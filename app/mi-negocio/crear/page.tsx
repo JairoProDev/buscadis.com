@@ -16,6 +16,7 @@ import CreadorOnboarding from '@/components/business/creator/CreadorOnboarding';
 import type { BusinessProfile } from '@/types/business';
 import BusinessPublicView from '@/components/business/BusinessPublicView';
 import { publishBusinessViaAPI } from '@/lib/business-api';
+import CompletitudMeter from '@/components/business/creator/CompletitudMeter';
 import { supabase } from '@/lib/supabase';
 import { cn } from '@/lib/utils';
 
@@ -100,8 +101,13 @@ function CrearInner() {
     if (profile.id) {
       try {
         await publishBusinessViaAPI(profile.id, true);
-      } catch {
-        /* /v preview works; share anyway */
+      } catch (e) {
+        const err = e as Error & { code?: string; status?: number };
+        if (err.code === 'SUBSCRIPTION_REQUIRED' || err.status === 402) {
+          setShareHint(
+            'Tu enlace ya funciona para compartir. Para aparecer en el buscador público de Buscadis activa un plan cuando quieras.'
+          );
+        }
       }
     }
     const text = shareMessage(profile.slug, profile.name);
@@ -320,6 +326,14 @@ function CrearInner() {
               )}
             </div>
           </div>
+          {showPageActions && profile.slug && (
+            <CompletitudMeter
+              className="mt-3 lg:mt-4"
+              profile={profile}
+              productCount={catalogProducts.length}
+              slug={profile.slug}
+            />
+          )}
         </section>
       </main>
 

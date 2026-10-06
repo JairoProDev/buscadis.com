@@ -33,7 +33,13 @@ export async function publishBusinessViaAPI(
 
     const json = await res.json();
     if (!res.ok) {
-        throw new Error(json.error || `Error ${res.status}`);
+        const err = new Error(json.error || `Error ${res.status}`) as Error & {
+            code?: string;
+            status?: number;
+        };
+        err.code = json.code;
+        err.status = res.status;
+        throw err;
     }
     return json.profile as BusinessProfile;
 }

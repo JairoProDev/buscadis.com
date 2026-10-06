@@ -2,8 +2,15 @@
 
 ## Enlace para proyectar / QR
 
-**Crear perfil con IA (recomendado):**  
+**QR corto (recomendado):**  
+`https://www.buscadis.com/taller`
+
+**URL completa:**  
 `https://www.buscadis.com/mi-negocio/crear?taller=1`
+
+> **Compartir vs. publicar:** el enlace `/v/tu-negocio` funciona para WhatsApp e Instagram en cuanto Adis arma el perfil. “Publicar” en el buscador de Buscadis puede requerir plan; no bloquea el taller.
+>
+> Solo para pruebas internas del día: `PUBLISH_DEV_BYPASS=true` en Vercel (no dejar en producción permanente).
 
 ## Fase 1 — Descarga y cuenta (~5 min)
 

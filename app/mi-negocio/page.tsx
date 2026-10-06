@@ -17,14 +17,17 @@ function MiNegocioRedirect() {
     if (loading) return;
     if (!user) return;
 
+    const taller = searchParams.get('taller') === '1';
+    const crearPath = taller ? '/mi-negocio/crear?taller=1' : '/mi-negocio/crear';
+
     if (isNew) {
-      router.replace('/mi-negocio/crear');
+      router.replace(crearPath);
       return;
     }
 
     listBusinessProfilesForUser(user.id).then((list) => {
       if (list.length === 0) {
-        router.replace('/mi-negocio/crear');
+        router.replace(crearPath);
         return;
       }
       const picked = businessId

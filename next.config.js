@@ -96,6 +96,11 @@ const nextConfig = {
         destination: '/deals',
         permanent: true,
       },
+      {
+        source: '/taller',
+        destination: '/mi-negocio/crear?taller=1',
+        permanent: false,
+      },
     ];
 
     return redirects;
