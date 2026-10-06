@@ -3,6 +3,11 @@ import { pickCardSignal } from '@/lib/social-proof';
 import { maskPhonesInText, removePhonesFromText } from '@/lib/phone';
 import { resolveAdisoDisplayTitle } from '@/lib/adiso-title-repair';
 import { isGenericCuscoUbicacion } from '@/lib/rueda/parse-ubicacion';
+import {
+  getFeedRecencyAnchorMs,
+  getPromotedBumpTimestamp,
+  getPublishedTimestamp,
+} from '@/lib/adiso/recency';
 
 const CATEGORIA_LABELS: Record<Categoria, string> = {
   empleos: 'Empleos',
@@ -154,28 +159,16 @@ export function formatPrecioDisplay(adiso: Adiso): string | null {
 }
 
 function getPublishedDate(adiso: Pick<Adiso, 'fechaPublicacion' | 'horaPublicacion'>): Date | null {
-  if (!adiso.fechaPublicacion) return null;
-  const raw = String(adiso.fechaPublicacion).trim();
-  if (raw.includes('T') || raw.endsWith('Z')) {
-    const date = new Date(raw);
-    return Number.isNaN(date.getTime()) ? null : date;
-  }
-  let hora = (adiso.horaPublicacion || '00:00').trim();
-  if (hora.length >= 8) hora = hora.slice(0, 8);
-  else if (hora.length === 5) hora = `${hora}:00`;
-  else if (hora.length !== 8) hora = '00:00:00';
-  const date = new Date(`${raw}T${hora}`);
+  const ms = getPublishedTimestamp(adiso as Adiso);
+  if (ms <= 0) return null;
+  const date = new Date(ms);
   return Number.isNaN(date.getTime()) ? null : date;
 }
 
-/** Tiempo relativo legible para cards (ej. "Hace 2 h", "Ayer") */
-export function formatRelativePublishedAt(
-  adiso: Pick<Adiso, 'fechaPublicacion' | 'horaPublicacion'>,
-): string | null {
-  const date = getPublishedDate(adiso);
-  if (!date) return null;
-
-  const diffMs = Date.now() - date.getTime();
+/** Tiempo relativo desde un timestamp (misma lógica que el feed y las cards). */
+export function formatRelativeTimeFromMs(anchorMs: number, nowMs = Date.now()): string | null {
+  if (anchorMs <= 0) return null;
+  const diffMs = nowMs - anchorMs;
   if (diffMs < 0) return null;
 
   const minutes = Math.floor(diffMs / 60_000);
@@ -192,7 +185,8 @@ export function formatRelativePublishedAt(
   const weeks = Math.floor(days / 7);
   if (weeks < 5) return `Hace ${weeks} sem`;
 
-  const now = new Date();
+  const date = new Date(anchorMs);
+  const now = new Date(nowMs);
   const sameYear = date.getFullYear() === now.getFullYear();
   const showYear = !sameYear || days > 75;
   return date.toLocaleDateString('es-PE', {
@@ -202,13 +196,66 @@ export function formatRelativePublishedAt(
   });
 }
 
-/** Etiqueta de fecha para cards de catálogo (siempre muestra recencia). */
+/** Tiempo relativo legible para cards (ej. "Hace 2 h", "Ayer") — solo fecha de publicación. */
+export function formatRelativePublishedAt(
+  adiso: Pick<Adiso, 'fechaPublicacion' | 'horaPublicacion'>,
+): string | null {
+  const ms = getPublishedTimestamp(adiso as Adiso);
+  return formatRelativeTimeFromMs(ms);
+}
+
+const RESUBIDO_MIN_GAP_MS = 2 * 60 * 60 * 1000;
+
+export interface CardListingTime {
+  /** Texto corto en overlay (ej. "Resubido · Hace 2 h") */
+  label: string;
+  /** Tooltip accesible con contexto */
+  title?: string;
+}
+
+/**
+ * Recencia mostrada en cards: alineada con el feed (publicación vs bump/promo).
+ * - Resubida/promo reciente → "Resubido · …"
+ * - Catálogo de negocio → "Actualizado · …" cuando aplica
+ */
+export function formatCardListingTime(adiso: Adiso): CardListingTime | null {
+  const anchorMs = getFeedRecencyAnchorMs(adiso);
+  if (anchorMs <= 0) return null;
+
+  const pubMs = getPublishedTimestamp(adiso);
+  const bumpMs = getPromotedBumpTimestamp(adiso);
+  const relative = formatRelativeTimeFromMs(anchorMs);
+  if (!relative) return null;
+
+  const isCatalog = adiso.privateData?.source === 'catalog_product';
+  const bumpedRecently =
+    bumpMs > 0 && pubMs > 0 && bumpMs - pubMs >= RESUBIDO_MIN_GAP_MS && bumpMs >= anchorMs - 60_000;
+
+  if (bumpedRecently) {
+    return {
+      label: `Resubido · ${relative}`,
+      title: 'Volvió a aparecer arriba tras una resubida o promoción',
+    };
+  }
+
+  if (isCatalog) {
+    if (pubMs <= 0) {
+      return { label: 'Recién en catálogo', title: 'Producto agregado al catálogo del negocio' };
+    }
+    if (anchorMs > pubMs + 60_000) {
+      return {
+        label: `Actualizado · ${relative}`,
+        title: 'Producto del catálogo actualizado recientemente',
+      };
+    }
+  }
+
+  return { label: relative };
+}
+
+/** @deprecated Usar formatCardListingTime — mantiene compatibilidad breve */
 export function formatCatalogUpdatedAt(adiso: Adiso): string | null {
-  if (adiso.privateData?.source !== 'catalog_product') return null;
-  const relative = formatRelativePublishedAt(adiso);
-  if (!relative) return 'Recién publicado';
-  if (relative === 'Ahora' || relative.startsWith('Hace')) return relative;
-  return `Actualizado · ${relative}`;
+  return formatCardListingTime(adiso)?.label ?? null;
 }
 
 /** Parsea sueldo desde descripción de adisos importados/seed */
@@ -247,7 +294,7 @@ export interface AdisoCardMetaRow {
 
 /** Metadatos compactos bajo el título del card según categoría */
 export function getAdisoCardMetaRow(adiso: Adiso): AdisoCardMetaRow {
-  const relativeTime = formatRelativePublishedAt(adiso) ?? undefined;
+  const relativeTime = formatCardListingTime(adiso)?.label ?? undefined;
   const location =
     shouldShowLocationOnCard(adiso) ? formatUbicacionCorta(adiso.ubicacion) : undefined;
 

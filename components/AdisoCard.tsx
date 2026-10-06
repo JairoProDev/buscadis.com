@@ -39,8 +39,7 @@ import {
   shouldShowLocationOnCard,
   formatUbicacionCorta,
   toDisplayTitle,
-  formatRelativePublishedAt,
-  formatCatalogUpdatedAt,
+  formatCardListingTime,
   getJobSalaryLabel,
 } from '@/lib/adiso-display';
 import FlyerCanvas from '@/components/flyer/FlyerCanvas';
@@ -120,9 +119,7 @@ const AdisoCard = forwardRef<HTMLDivElement, AdisoCardProps>(
     const salaryLabel = adiso.categoria === 'empleos' ? getJobSalaryLabel(adiso) : null;
     const priceDisplay = salaryLabel || priceLabel;
     const isCatalogProduct = adiso.privateData?.source === 'catalog_product';
-    const relativeTime = isCatalogProduct
-      ? formatCatalogUpdatedAt(adiso) ?? formatRelativePublishedAt(adiso)
-      : formatRelativePublishedAt(adiso);
+    const listingTime = formatCardListingTime(adiso);
     const sellerName = getSellerDisplayName(adiso);
     const isPaused = adiso.estaActivo === false;
     const isDestacado =
@@ -138,13 +135,12 @@ const AdisoCard = forwardRef<HTMLDivElement, AdisoCardProps>(
     useEffect(() => {
       setShowRelativeMeta(true);
     }, []);
-    const relativeTimeSafe = showRelativeMeta ? relativeTime : null;
+    const timeOverlay = showRelativeMeta ? listingTime : null;
 
     const gridColumn = vista === 'list' || vista === 'feed' ? '1 / -1' : 'span 1';
     const minHeight = vista === 'list' ? '96px' : undefined;
 
-    const metaParts = [locationShort, relativeTimeSafe].filter(Boolean);
-    const metaLine = metaParts.join(' · ');
+    const showMediaMeta = Boolean(locationShort || timeOverlay?.label);
 
     const clearLongPressTimer = () => {
       if (longPressTimer.current) {
@@ -296,12 +292,6 @@ const AdisoCard = forwardRef<HTMLDivElement, AdisoCardProps>(
                     {sellerName}
                   </span>
                 )}
-                {locationShort && (
-                  <div className="flex items-center gap-1 truncate text-xs font-medium text-[var(--bs-fg-muted,var(--text-secondary))]">
-                    <IconLocation size={10} />
-                    <span className="truncate">{locationShort}</span>
-                  </div>
-                )}
               </div>
             </div>
           </div>
@@ -389,9 +379,45 @@ const AdisoCard = forwardRef<HTMLDivElement, AdisoCardProps>(
           )}
 
           {extraFotos > 0 && (
-            <span className="absolute bottom-2 right-2 z-10 rounded-full border border-white/20 bg-black/55 px-2 py-0.5 text-[11px] font-semibold text-white">
+            <span
+              className={`absolute right-2 z-10 rounded-full border border-white/20 bg-black/55 px-2 py-0.5 text-[11px] font-semibold text-white ${
+                showMediaMeta ? 'bottom-9' : 'bottom-2'
+              }`}
+            >
               +{extraFotos} {extraFotos === 1 ? 'foto' : 'fotos'}
             </span>
+          )}
+
+          {showMediaMeta && (
+            <div
+              className="pointer-events-none absolute inset-x-0 bottom-0 z-10 bg-gradient-to-t from-black/75 via-black/40 to-transparent px-2 pb-1.5 pt-7"
+              aria-hidden={!timeOverlay?.title}
+            >
+              <div className="flex items-end justify-between gap-2 text-[11px] font-medium leading-tight text-white">
+                {locationShort ? (
+                  <span className="flex min-w-0 flex-1 items-center gap-1 truncate drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)]">
+                    <IconLocation size={11} className="shrink-0 opacity-95" aria-hidden />
+                    <span className="truncate">{locationShort}</span>
+                  </span>
+                ) : (
+                  <span className="min-w-0 flex-1" />
+                )}
+                {timeOverlay?.label && (
+                  <time
+                    className="shrink-0 max-w-[52%] truncate text-right tabular-nums text-white/95 drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)]"
+                    dateTime={
+                      adiso.fechaPublicacion
+                        ? String(adiso.fechaPublicacion)
+                        : undefined
+                    }
+                    title={timeOverlay.title}
+                    suppressHydrationWarning
+                  >
+                    {timeOverlay.label}
+                  </time>
+                )}
+              </div>
+            </div>
           )}
         </div>
 
@@ -411,14 +437,6 @@ const AdisoCard = forwardRef<HTMLDivElement, AdisoCardProps>(
             </p>
           )}
 
-          {metaLine && (
-            <p
-              className="mt-0.5 truncate text-xs font-medium text-[var(--bs-fg-muted,var(--text-secondary))]"
-              suppressHydrationWarning
-            >
-              {metaLine}
-            </p>
-          )}
         </div>
       </div>
 

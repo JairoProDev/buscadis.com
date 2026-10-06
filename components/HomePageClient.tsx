@@ -110,6 +110,21 @@ import BusinessDirectorySection from '@/components/home/BusinessDirectorySection
 import MarketplaceLegalFooter from '@/components/legal/MarketplaceLegalFooter';
 const TEST_REGEX = /toyota test|test adiso|test anuncio/i;
 
+const HOME_CATEGORIAS: Categoria[] = [
+  'empleos',
+  'inmuebles',
+  'vehiculos',
+  'servicios',
+  'productos',
+  'eventos',
+  'negocios',
+  'comunidad',
+];
+
+function categoriaFromUrlParam(url: string | null): Categoria | 'todos' {
+  return url && HOME_CATEGORIAS.includes(url as Categoria) ? (url as Categoria) : 'todos';
+}
+
 type HomeContentProps = {
   initialSearchParams?: Record<string, string | undefined>;
   /** Feed SSR (misma orden que producción) para evitar flash de cache vieja. */
@@ -140,7 +155,9 @@ function HomeContent({ initialSearchParams, initialFeedAdisos = [], showLegalFoo
   const [alternativeQueries, setAlternativeQueries] = useState<string[]>([]);
   const [searchLoading, setSearchLoading] = useState(false);
   const initialSearchDone = useRef(false);
-  const [categoriaFiltro, setCategoriaFiltro] = useState<Categoria | 'todos'>(categoriaUrl && ['empleos', 'inmuebles', 'vehiculos', 'servicios', 'productos', 'eventos', 'negocios', 'comunidad'].includes(categoriaUrl) ? categoriaUrl : 'todos');
+  const [categoriaFiltro, setCategoriaFiltro] = useState<Categoria | 'todos'>(() =>
+    categoriaFromUrlParam(categoriaUrl),
+  );
   const [ordenamiento, setOrdenamiento] = useState<TipoOrdenamiento>('recientes');
   const [geoOrigen, setGeoOrigen] = useState<{ lat: number; lng: number } | null>(null);
   const [geoEstado, setGeoEstado] = useState<'idle' | 'pending' | 'ready' | 'denied'>('idle');
@@ -333,6 +350,12 @@ function HomeContent({ initialSearchParams, initialFeedAdisos = [], showLegalFoo
       cancelled = true;
     };
   }, [categoriaFiltro, committedQuery]);
+
+  // Atrás/adelante del navegador: mantener categoría alineada con ?categoria=
+  useEffect(() => {
+    const fromUrl = categoriaFromUrlParam(categoriaUrl);
+    setCategoriaFiltro((prev) => (prev === fromUrl ? prev : fromUrl));
+  }, [categoriaUrl]);
 
   // Detectar cambios en el estado de conexión
   useEffect(() => {
