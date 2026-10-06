@@ -17,8 +17,8 @@
 2. **Micrófono**: 30–45 s contando qué venden, dónde están y su WhatsApp.
    - Alternativa: escribir 2–3 líneas o pegar link de Facebook/Instagram.
    - Opcional: 1–3 fotos de productos o del local.
-3. Mirar la **vista previa en vivo** (derecha en pantalla grande; abajo en móvil).
-4. Tocar **Compartir en WhatsApp** y enviarse el enlace a sí mismos.
+3. Pestaña **«Mi página»** — así verán tus clientes.
+4. **Compartir enlace** (WhatsApp, Instagram o copiar al portapapeles).
 
 ### Frase para el salón
 

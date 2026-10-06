@@ -6,12 +6,13 @@
  * delegated to Gemini; links are fetched and stripped to readable text.
  */
 import {
-  transcribeAudio,
   extractTextFromDocument,
   describeImage,
   detectProductsInImage,
   isGeminiConfigured,
 } from '@/lib/ai/gemini';
+import { isProfileAIConfigured } from '@/lib/ai/structured-extract';
+import { transcribeAudioUniversal } from '@/lib/ai/transcribe-universal';
 import type { Artifact, IngestSource } from './types';
 
 function makeId(prefix: string): string {
@@ -65,6 +66,7 @@ async function ingestLink(url: string): Promise<string> {
 async function ingestOne(source: IngestSource, index: number): Promise<Artifact> {
   const label = source.filename || source.url || `${source.kind}-${index + 1}`;
   const geminiReady = isGeminiConfigured();
+  const aiReady = isProfileAIConfigured();
 
   try {
     switch (source.kind) {
@@ -88,7 +90,7 @@ async function ingestOne(source: IngestSource, index: number): Promise<Artifact>
 
       case 'audio': {
         const media = mediaSourceFor(source);
-        const rawText = media && geminiReady ? await transcribeAudio(media) : '';
+        const rawText = media && aiReady ? await transcribeAudioUniversal(media) : '';
         return { id: makeId('aud'), kind: 'audio', label, rawText, mimeType: source.mimeType };
       }
 

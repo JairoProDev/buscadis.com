@@ -19,7 +19,7 @@ import { isPlatformAdminEmail, isPlatformAdminProfile } from '@/lib/platform-adm
 import { ensureQrCodeForBusiness } from '@/lib/qr/service';
 import { revalidateTag } from 'next/cache';
 import { BUSINESS_CACHE_TAG } from '@/lib/business/seo';
-import { isGeminiConfigured } from '@/lib/ai/gemini';
+import { isProfileAIConfigured } from '@/lib/ai/structured-extract';
 import {
   ingestSources,
   structureArtifacts,
@@ -134,9 +134,9 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Token inválido' }, { status: 401 });
     }
 
-    if (!isGeminiConfigured()) {
+    if (!isProfileAIConfigured()) {
       return NextResponse.json(
-        { error: 'El asistente de IA no está configurado (falta GEMINI_API_KEY).' },
+        { error: 'El asistente de IA no está disponible. Configura GEMINI_API_KEY u OPENAI_API_KEY.' },
         { status: 503 }
       );
     }

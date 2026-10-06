@@ -5,7 +5,7 @@
  * profile patch, catalog product drafts, confidence/provenance, missing fields
  * and skippable follow-up questions. Uses Gemini structured extraction.
  */
-import { structuredExtract } from '@/lib/ai/gemini';
+import { structuredExtractWithFallback } from '@/lib/ai/structured-extract';
 import { VectorDraftSchema, type VectorDraft } from './schema';
 import type { StructureInput } from './types';
 
@@ -75,7 +75,7 @@ export async function structureArtifacts(input: StructureInput): Promise<VectorD
   const context = buildContext(input);
 
   try {
-    const draft = await structuredExtract<VectorDraft>([context], VectorDraftSchema, {
+    const draft = await structuredExtractWithFallback<VectorDraft>([context], VectorDraftSchema, {
       systemPrompt: SYSTEM_PROMPT,
       temperature: 0.3,
     });

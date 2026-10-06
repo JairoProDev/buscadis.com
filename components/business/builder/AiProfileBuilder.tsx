@@ -64,19 +64,20 @@ const FIELD_LABELS: Record<string, string> = {
 };
 
 const GREETING =
-  '¡Hola! Soy Adis. En menos de un minuto armo tu página profesional con catálogo.\n\n' +
-  'Mándame lo que tengas: un audio contándome tu negocio, fotos de productos, un PDF, un enlace o simplemente escribe. Yo hago el resto.';
+  '¡Hola! Soy Adis.\n\n' +
+  'Te armo una página que puedes poner en Instagram, TikTok o enviar por WhatsApp: nombre, descripción, contacto y catálogo.\n\n' +
+  'Toca el micrófono y cuéntame tu negocio, escribe un mensaje, pega un enlace o sube fotos.';
 
 const STARTERS_DEFAULT = [
-  'Vendo ropa y accesorios en Cusco',
-  'Tengo un restaurante / cafeteria',
-  'Ofrezco servicios (belleza, reparaciones…)',
+  'Vendo [producto] en Cusco, WhatsApp 9xxxxxxxx',
+  'Restaurante / pollería con delivery en [zona]',
+  'Servicios: belleza, taller, clases…',
 ];
 
 const STARTERS_WORKSHOP = [
-  'Soy [tu nombre], vendo [qué] en Cusco. Mi WhatsApp es 9…',
-  'Tengo un negocio de comida en San Jerónimo, delivery y local',
-  'Pega aquí el enlace de tu Facebook o Instagram',
+  'Me llamo…, vendo… en Cusco. WhatsApp 9…',
+  'Comida casera / menú del día en San Jerónimo',
+  'https://facebook.com/… o Instagram',
 ];
 
 const LOADING_STEPS = [
@@ -94,13 +95,11 @@ function attachmentKind(file: File): Attachment['kind'] {
 
 const GREETING_WORKSHOP =
   '¡Bienvenido al taller! Soy Adis.\n\n' +
-  'En 60 segundos te armo una página profesional con catálogo.\n\n' +
-  'Elige una opción:\n' +
-  '• Toca el micrófono y cuéntame tu negocio con tus palabras\n' +
-  '• Escribe qué vendes y tu WhatsApp\n' +
-  '• Pega el link de tu red social\n' +
-  '• Sube fotos de productos o tu local\n\n' +
-  'Mira la vista previa a la derecha — ahí aparece tu página en vivo.';
+  'En un minuto tendrás un enlace para tus clientes (como link en bio, pero con catálogo y WhatsApp).\n\n' +
+  '1) Toca el micrófono y habla 30 segundos\n' +
+  '2) O escribe qué vendes + tu WhatsApp\n' +
+  '3) O pega tu Facebook / Instagram\n\n' +
+  'Luego abre la pestaña «Mi página» para ver cómo quedó.';
 
 export default function AiProfileBuilder({
   profile,
@@ -275,7 +274,9 @@ export default function AiProfileBuilder({
     <div
       className={cn(
         'flex flex-col overflow-hidden bg-white border border-slate-200',
-        variant === 'hero' ? 'rounded-3xl shadow-xl h-[min(680px,78vh)]' : 'rounded-2xl h-[420px]',
+        variant === 'hero'
+          ? 'rounded-2xl sm:rounded-3xl shadow-xl h-[min(58dvh,520px)] sm:h-[min(680px,72dvh)]'
+          : 'rounded-2xl h-[min(420px,55dvh)]',
         className
       )}
       onDragOver={(e) => {
@@ -294,7 +295,7 @@ export default function AiProfileBuilder({
           <div>
             <p className="text-sm font-black text-slate-800 tracking-tight">Crear con IA</p>
             <p className="text-[11px] text-slate-500">
-              Texto, fotos, audio, PDF o enlaces — yo armo tu página.
+              Voz, texto, fotos o enlaces → página lista para compartir.
             </p>
           </div>
           <span className="shrink-0 text-[10px] font-bold uppercase tracking-wide px-2 py-1 rounded-full bg-teal-100 text-teal-800">
@@ -344,7 +345,9 @@ export default function AiProfileBuilder({
                   {msg.summary.createdCategories.length > 0 && (
                     <p>• Categorías: {msg.summary.createdCategories.join(', ')}</p>
                   )}
-                  <p className="mt-1 text-emerald-700/80">Mira la vista previa — puedes seguir afinando o publicar.</p>
+                  <p className="mt-1 text-emerald-700/80">
+                    Abre «Mi página» y comparte el enlace con tus clientes.
+                  </p>
                 </div>
               )}
 
@@ -442,7 +445,7 @@ export default function AiProfileBuilder({
         <button
           type="button"
           onClick={() => fileInputRef.current?.click()}
-          className="shrink-0 p-2.5 rounded-full text-slate-500 hover:bg-slate-100"
+          className="shrink-0 p-3 min-h-[44px] min-w-[44px] rounded-full text-slate-500 hover:bg-slate-100 flex items-center justify-center"
           title="Adjuntar fotos, PDF o documentos"
         >
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -453,10 +456,11 @@ export default function AiProfileBuilder({
           type="button"
           onClick={recording ? stopRecording : startRecording}
           className={cn(
-            'shrink-0 p-2.5 rounded-full transition-colors',
+            'shrink-0 p-3 min-h-[44px] min-w-[44px] rounded-full transition-colors flex items-center justify-center',
             recording ? 'bg-rose-500 text-white animate-pulse' : 'text-slate-500 hover:bg-slate-100'
           )}
           title={recording ? 'Detener grabación' : 'Grabar audio'}
+          aria-label={recording ? 'Detener grabación' : 'Grabar audio'}
         >
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z" />
@@ -466,7 +470,7 @@ export default function AiProfileBuilder({
         <textarea
           className="flex-1 text-sm border border-slate-200 rounded-xl px-3 py-2.5 outline-none resize-none max-h-28 focus:border-teal-400 focus:ring-2 focus:ring-teal-100"
           rows={1}
-          placeholder="Cuéntame tu negocio o pega un enlace…"
+          placeholder="Ej: vendo empanadas en Cusco, WhatsApp 987…"
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => {
@@ -481,9 +485,9 @@ export default function AiProfileBuilder({
           type="button"
           onClick={() => void send()}
           disabled={loading || (!input.trim() && attachments.length === 0)}
-          className="shrink-0 px-4 py-2.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-sm font-bold disabled:opacity-50 transition-colors"
+          className="shrink-0 px-4 py-2.5 min-h-[44px] rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-sm font-bold disabled:opacity-50 transition-colors"
         >
-          Enviar
+          Crear
         </button>
       </div>
     </div>
