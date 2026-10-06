@@ -204,9 +204,19 @@
       "contact_whatsapp": "976250507",
       "etapa_label": "RESPONDIÓ",
       "plan": "Por definir (varios puestos en Rueda: pollero, ayudantes, mozos)",
-      "ultimo_movimiento": "6 oct 09:48: confirmó que siguen buscando personal",
+      "ultimo_movimiento": "6 oct: sí buscan; enviado pitch corto + pregunta puestos (pollero/ayudantes/mozos)",
       "proxima_accion": "Confirmar puestos que buscan + datos (horario/sueldo); borrador antes de publicar; S/50 si varios puestos",
       "notas_extra": "Presentarse Alameda Pachacútec D-9 Wanchaq, frente parque Urpicha. Chat: wa-chats/976250507-polleria-nina.txt. No confundir con restaurante turístico El Sol 974888453.",
+      "segment": "pipeline"
+    },
+    {
+      "title": "Empresa Tambobamba (Rueda)",
+      "contact_whatsapp": "984271525",
+      "etapa_label": "RESPONDIÓ",
+      "plan": "Por definir",
+      "ultimo_movimiento": "6 oct 10:10: preguntó dónde está oficina/central para poner aviso",
+      "proxima_accion": "Aclarar: no es diario físico; todo por WA + web; ofrecer armar aviso sin ir a oficina",
+      "notas_extra": "Chat: wa-chats/984271525-tambobamba.txt. Apertura: aviso empresa Tambobamba.",
       "segment": "pipeline"
     },
     {

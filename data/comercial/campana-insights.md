@@ -50,7 +50,8 @@ Actualizado: **6 oct 2026**. Fuente: chats pegados en Cursor + lista WA + `data/
 |----------|---------|----------------|
 | 984646887 | Raquel / Magisterio | **PAGÓ / publicado** |
 | 958110360 | Cevichería / Elicita | **PAGÓ S/50** · `Rp7msAf6Hl` · objeción seguidores resuelta |
-| 976250507 | Pollería Nina | **RESPONDIÓ** 6 oct · tanda 09:45 · calificar vacantes |
+| 976250507 | Pollería Nina | **RESPONDIÓ** 6 oct · mensajes cortos 10:02–10:05 · espera puestos |
+| 984271525 | Tambobamba | **RESPONDIÓ** · pregunta oficina física (encuadre digital) |
 | 984666551 | Ferretera | Aprobó copy; **cobro pendiente** |
 | 970842362 | Lalo | Propuesta S/50 enviada; **sin respuesta** |
 | 994137274 | Agencia viajes | **ALERTA** (pidió CV) |
