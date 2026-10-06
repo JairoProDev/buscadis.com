@@ -1,6 +1,6 @@
 {
   "campaign": "rueda-negocios-2026-10",
-  "document_date": "2026-10-05",
+  "document_date": "2026-10-06",
   "note": "Contactos WA listados en capturas 5 oct + pipeline. ~85 en JSON. Los ~340 source=rueda son PDF R2764 sin contacto masivo.",
   "prospects": [
     {
@@ -196,6 +196,17 @@
       "ultimo_movimiento": "5 oct: objeción pocos seguidores → doble difusión S/50; transfirió ~17:45; Rp7msAf6Hl; factura Adelaida 10238972731",
       "proxima_accion": "Factura + kit co-marketing (repost en su fanpage 23k); reporte 7d",
       "notas_extra": "Cierre sin ofrecer S/30/S/15 en mensaje inicial. Objeción playbook: docs/comercial/OBJECION-POCOS-SEGUIDORES.md. 6 vacantes; no publicar otros roles Rueda sin plan.",
+      "segment": "pipeline"
+    },
+    {
+      "title": "Pollería Nina (CUSCO REAL POLLOS NINA)",
+      "business_name": "Pollería Nina",
+      "contact_whatsapp": "976250507",
+      "etapa_label": "RESPONDIÓ",
+      "plan": "Por definir (varios puestos en Rueda: pollero, ayudantes, mozos)",
+      "ultimo_movimiento": "6 oct 09:48: confirmó que siguen buscando personal",
+      "proxima_accion": "Calificar vacante urgente + ofrecer borrador antes de publicar; anclar S/50 si 3+ puestos",
+      "notas_extra": "Presentarse Alameda Pachacútec D-9 Wanchaq, frente parque Urpicha. Chat: wa-chats/976250507-polleria-nina.txt. No confundir con restaurante turístico El Sol 974888453.",
       "segment": "pipeline"
     },
     {
