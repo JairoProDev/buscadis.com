@@ -589,7 +589,10 @@ function HomeContent({ initialSearchParams, initialFeedAdisos = [], showLegalFoo
     getInteraccionesUsuario(user.id, 'not_interested').then(setHiddenAdIds);
   }, [user?.id]);
 
-  const handleSearchSubmit = useCallback(async (query: string) => {
+  const handleSearchSubmit = useCallback(async (
+    query: string,
+    opts?: { categoryRefine?: boolean },
+  ) => {
     const q = query.trim();
     if (!q) {
       resetSearch();
@@ -597,40 +600,48 @@ function HomeContent({ initialSearchParams, initialFeedAdisos = [], showLegalFoo
     }
 
     setSearchLoading(true);
-    setSearchResults(null);
-    setCommittedQuery(q);
+    if (!opts?.categoryRefine) {
+      setSearchResults(null);
+      setCommittedQuery(q);
+    }
     setFiltrando(true);
 
     try {
-      const res = await fetch('/api/search', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          query: q,
-          category: categoriaFiltro !== 'todos' ? categoriaFiltro : undefined,
-          location:
-            browseFilters.ubicacion?.distrito ??
-            browseFilters.ubicacion?.departamento ??
-            undefined,
-          userId: user?.id,
-          maxResults: 60,
+      const categoryParam = categoriaFiltro !== 'todos' ? categoriaFiltro : undefined;
+      const locationParam =
+        browseFilters.ubicacion?.distrito ??
+        browseFilters.ubicacion?.departamento ??
+        undefined;
+
+      const [res, catalogRaw] = await Promise.all([
+        fetch('/api/search', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            query: q,
+            category: categoryParam,
+            location: locationParam,
+            userId: user?.id,
+            maxResults: 60,
+          }),
         }),
-      });
+        getCatalogProductsAsAdisos({
+          limit: 60,
+          offset: 0,
+          categoria: categoryParam,
+          busqueda: q,
+          preferImages: true,
+        }),
+      ]);
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Error de búsqueda');
 
       const apiResults = ((data.adisos ?? []) as Adiso[]).filter(
         (a) => typeof a.titulo === 'string' && a.titulo.trim().length > 0
       );
-      const catalogResults = (
-        await getCatalogProductsAsAdisos({
-          limit: 60,
-          offset: 0,
-          categoria: categoriaFiltro !== 'todos' ? categoriaFiltro : undefined,
-          busqueda: q,
-          preferImages: true,
-        })
-      ).filter((a) => typeof a.titulo === 'string' && a.titulo.trim().length > 0);
+      const catalogResults = catalogRaw.filter(
+        (a) => typeof a.titulo === 'string' && a.titulo.trim().length > 0,
+      );
 
       const merged = new Map<string, Adiso>();
       apiResults.forEach((item) => {
@@ -689,6 +700,21 @@ function HomeContent({ initialSearchParams, initialFeedAdisos = [], showLegalFoo
       setFiltrando(false);
     }
   }, [adisos, browseFilters, categoriaFiltro, error, user?.id, resetSearch]);
+
+  const categoriaSearchRef = useRef(categoriaFiltro);
+  useEffect(() => {
+    if (!committedQuery.trim()) {
+      categoriaSearchRef.current = categoriaFiltro;
+      return;
+    }
+    if (!cargadoInicialmente.current) {
+      categoriaSearchRef.current = categoriaFiltro;
+      return;
+    }
+    if (categoriaSearchRef.current === categoriaFiltro) return;
+    categoriaSearchRef.current = categoriaFiltro;
+    void handleSearchSubmit(committedQuery, { categoryRefine: true });
+  }, [categoriaFiltro, committedQuery, handleSearchSubmit]);
 
   useEffect(() => {
     // Si el usuario borra el texto manualmente, quitar también el estado de búsqueda aplicada

@@ -75,6 +75,7 @@ const PALABRAS_CATEGORIA: Record<string, CategoriaPeso> = {
     'conductor': { cat: 'empleos', peso: 2 },
     'chofer': { cat: 'empleos', peso: 2 },
     'vendedor': { cat: 'empleos', peso: 2 },
+    'ventas': { cat: 'empleos', peso: 2 },
     'asesor': { cat: 'empleos', peso: 1.5 },
     'practicante': { cat: 'empleos', peso: 2 },
     'profesional': { cat: 'empleos', peso: 1 },
@@ -198,13 +199,13 @@ function detectarCategoria(texto: string): { primaria?: Categoria; secundaria?: 
             continue;
         }
 
-        // Búsqueda parcial (palabra contenida, menor peso)
-        // Solo para palabras largas (>4 letras)
+        // Búsqueda parcial: evitar falsos positivos (p. ej. "ventas" ⊃ "venta" → inmuebles)
         if (palabra.length > 4) {
             for (const [clave, valor] of Object.entries(PALABRAS_CATEGORIA)) {
-                if (clave.length > 4 && palabra.includes(clave)) {
-                    puntaje[valor.cat] = (puntaje[valor.cat] || 0) + (valor.peso * 0.5);
-                }
+                if (clave.length <= 4) continue;
+                if (!palabra.includes(clave)) continue;
+                if (palabra.length > clave.length && palabra.startsWith(clave)) continue;
+                puntaje[valor.cat] = (puntaje[valor.cat] || 0) + (valor.peso * 0.5);
             }
         }
     }

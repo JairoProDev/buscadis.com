@@ -149,10 +149,10 @@ export async function executeSearch(params: ExecuteSearchParams): Promise<Execut
     return { adisos: [], scores: {}, normalizedQuery: normalized, alternativeQueries: [], source: 'hybrid' };
   }
 
+  // Only honor an explicit UI/API category — NLU-inferred category (e.g. "ventas" → inmuebles via "venta")
+  // must not hard-filter results; users refine category with the rail after searching.
   const filterCategory =
-    params.category && params.category !== 'todos'
-      ? params.category
-      : normalized.category;
+    params.category && params.category !== 'todos' ? params.category : undefined;
 
   const filterLocation = params.location ?? normalized.location;
 
