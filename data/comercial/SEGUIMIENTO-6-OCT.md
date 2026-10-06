@@ -8,7 +8,9 @@
 | **984271525** | **Chifa Julio** (Tambobamba) | Cusco aclarado 10:45; espera confirmación puestos |
 | **920124104** | **Oly Pastelería** (Ricardo) | Solo hasta «¿siguen buscando?» |
 | **984903140** | **Tradiciones Apurímac** (Oswaldo) | Pidió **precio** |
-| **966364330** | **Quinta Poroy** (grupo Antonio) | Bot + **buen día** humano |
+| **966364330** | **Quinta Poroy** | **Ok — este anuncio** → datos + S/50 |
+| **976250507** | **Pollería Nina** | **1 cocinera + 2 mozas** |
+| **957806789** | **Casa hogar** (Aldomartin) | **¿Costo?** |
 
 **Nota:** El aviso de **restaurante turístico** (Av. El Sol 106 / Galerías La Merced 207, cels. **974888453**, **974888454**) es **otro negocio** distinto de Pollería Nina. Si también se escribió a ese número, documentar en archivo aparte.
 

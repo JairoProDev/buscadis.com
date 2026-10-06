@@ -204,8 +204,9 @@
       "contact_whatsapp": "976250507",
       "etapa_label": "RESPONDIÓ",
       "plan": "Por definir (varios puestos en Rueda: pollero, ayudantes, mozos)",
-      "ultimo_movimiento": "6 oct: sí buscan; enviado pitch corto + pregunta puestos (pollero/ayudantes/mozos)",
-      "proxima_accion": "Confirmar puestos que buscan + datos (horario/sueldo); borrador antes de publicar; S/50 si varios puestos",
+      "ultimo_movimiento": "6 oct 11:14: 1 cocinera + 2 mozas",
+      "proxima_accion": "Datos horario/sueldo/WA; borrador; anclar S/50 (3 puestos)",
+      "etapa_label": "DATOS",
       "notas_extra": "Presentarse Alameda Pachacútec D-9 Wanchaq, frente parque Urpicha. Chat: wa-chats/976250507-polleria-nina.txt. No confundir con restaurante turístico El Sol 974888453.",
       "segment": "pipeline"
     },
@@ -224,10 +225,10 @@
     {
       "title": "Quinta campestre Poroy (grupo Antonio)",
       "contact_whatsapp": "966364330",
-      "etapa_label": "RESPONDIÓ",
+      "etapa_label": "DATOS",
       "plan": "S/50 (4 perfiles urgentes)",
-      "ultimo_movimiento": "6 oct: mensajes auto luego «buen día» humano",
-      "proxima_accion": "Pitch corto + confirmar vacantes; no precio hasta pregunte",
+      "ultimo_movimiento": "6 oct 11:13: Ok — confirma aviso Rueda Poroy (4 puestos)",
+      "proxima_accion": "Pedir WA contacto + horario/sueldo; borrador; anclar S/50",
       "notas_extra": "Ayudantes cocina, mozos, cajera, niñera. Beneficios movilidad+alimentación. wa-chats/966364330-quinta-poroy-antonio.txt",
       "segment": "pipeline"
     },
@@ -253,6 +254,16 @@
       "ultimo_movimiento": "6 oct: pidió precio; confirmados ambos números en aviso",
       "proxima_accion": "Mensaje S/50 + borrador; reservar S/30 si pide más barato",
       "notas_extra": "wa-chats/984271525-tambobamba.txt. Tel alt 973165180.",
+      "segment": "pipeline"
+    },
+    {
+      "title": "Casa hogar adultos mayores (Aldomartin)",
+      "contact_whatsapp": "957806789",
+      "etapa_label": "PIDIÓ PRECIO",
+      "plan": "Anclar S/50; S/30 si refuta",
+      "ultimo_movimiento": "6 oct 11:12: ¿tiene costo?",
+      "proxima_accion": "Tarifa + borrador cuidadora/personal; tono claro sector social",
+      "notas_extra": "wa-chats/957806789-casa-hogar-aldomartin.txt",
       "segment": "pipeline"
     },
     {
