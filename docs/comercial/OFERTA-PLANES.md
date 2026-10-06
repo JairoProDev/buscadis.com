@@ -83,6 +83,8 @@ Cuando el cliente ya aprobó el aviso y encaja **Empresa S/50** (varias vacantes
 
 **Rescate táctico (no catálogo):** si comparan @buscadis con su fanpage grande, ofrecer **doble difusión (S/50)** vs **solo diseño S/25** + retirar posts nuestros; la cliente puede elegir sin sentirse presionada.
 
+**Remoto / un puesto (ej. Chifa Tambobamba, oct 2026):** aunque pida solo ayudante, **presentar primero S/50** (mes, republicaciones, puede sumar chifero/moza después). **S/30** solo si refuta el precio.
+
 ## Contraste flyer vs realidad producto (gaps conocidos)
 
 | Promesa en flyer | Estado |
