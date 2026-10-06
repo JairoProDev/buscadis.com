@@ -15,7 +15,8 @@
    - Un `/a/{id}/{slug}` real
    - Un `/@{slug}` publicado
 2. Verificar redirect 308: `https://buscadis.com/` → `https://www.buscadis.com/`
-3. Verificar redirect: `/?categoria=empleos` → `/categoria/empleos`
+3. Verificar feed: `/?categoria=empleos` carga el home con filtro (sin redirect a `/categoria/*`).
+4. Verificar SEO: `/categoria/empleos` sigue indexable; humanos pueden ir al feed vía enlace interno.
 4. `curl -sI https://www.buscadis.com/sitemap.xml` → 200
 
 ## Si hay errores de chunk en clientes

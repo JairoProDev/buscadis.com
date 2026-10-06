@@ -11,10 +11,20 @@ export function isNativeWebViewClient(): boolean {
   );
 }
 
+const NATIVE_CACHE_CLEAR_KEY = 'buscadis:native-sw-cleared-v1';
+
 export async function bootstrapNativeWebView(): Promise<void> {
   if (!isNativeWebViewClient()) return;
 
   document.documentElement.setAttribute('data-buscadis-app', 'true');
+
+  // Once per tab: wiping caches on every client navigation broke category/filter transitions.
+  try {
+    if (sessionStorage.getItem(NATIVE_CACHE_CLEAR_KEY) === '1') return;
+    sessionStorage.setItem(NATIVE_CACHE_CLEAR_KEY, '1');
+  } catch {
+    // continue best-effort
+  }
 
   try {
     if ('serviceWorker' in navigator) {

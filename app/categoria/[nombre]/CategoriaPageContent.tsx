@@ -28,12 +28,23 @@ export default function CategoriaPageContent({ categoria, adisos }: CategoriaPag
   const router = useRouter();
   const isDesktop = useMediaQuery('(min-width: 768px)');
 
-  // Redirigir a la página principal con filtro de categoría para mantener compatibilidad
+  // Humans: one hop to the home feed with ?categoria= (bots stay on /categoria/* for SEO).
   useEffect(() => {
-    // Solo redirigir si estamos en cliente y no es un bot
-    if (typeof window !== 'undefined' && !navigator.userAgent.match(/bot|crawler|spider|crawling/i)) {
-      router.replace(`/?categoria=${categoria}`, { scroll: false });
+    if (typeof window === 'undefined') return;
+    if (navigator.userAgent.match(/bot|crawler|spider|crawling/i)) return;
+    const params = new URLSearchParams(window.location.search);
+    if (params.has('page') && params.get('page') !== '1') return;
+    const target = new URL(`/?categoria=${encodeURIComponent(categoria)}`, window.location.origin);
+    if (window.location.hostname === 'buscadis.com') {
+      target.hostname = 'www.buscadis.com';
     }
+    if (
+      window.location.pathname === '/' &&
+      window.location.search === target.search
+    ) {
+      return;
+    }
+    router.replace(target.pathname + target.search, { scroll: false });
   }, [categoria, router]);
 
   return (

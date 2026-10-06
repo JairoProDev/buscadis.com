@@ -314,6 +314,7 @@ function HomeContent({ initialSearchParams, initialFeedAdisos = [], showLegalFoo
     let cancelled = false;
     const loadCategoryFeed = async () => {
       setFiltrando(true);
+      const filterWatchdog = window.setTimeout(() => setFiltrando(false), 20_000);
       try {
         const items = await getMarketplaceFeed({
           limit: ITEMS_POR_PAGINA,
@@ -336,6 +337,7 @@ function HomeContent({ initialSearchParams, initialFeedAdisos = [], showLegalFoo
       } catch (e) {
         console.error('[HomePage] category feed:', e);
       } finally {
+        window.clearTimeout(filterWatchdog);
         if (!cancelled) setFiltrando(false);
       }
     };

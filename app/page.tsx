@@ -81,16 +81,8 @@ export default async function Home({ searchParams }: PageProps) {
   if (buscarParam && buscarParam.length >= 2 && !adisoParam) {
     redirect(getSearchPathFromQuery(buscarParam));
   }
-  if (categoria && !adisoParam && !buscarParam) {
-    const q = new URLSearchParams();
-    for (const [key, value] of Object.entries(params)) {
-      if (key === 'categoria' || value === undefined) continue;
-      if (typeof value === 'string') q.set(key, value);
-      else if (Array.isArray(value)) value.forEach((v) => q.append(key, v));
-    }
-    const qs = q.toString();
-    redirect(`/categoria/${categoria}${qs ? `?${qs}` : ''}`);
-  }
+  // Keep ?categoria= on / for the interactive feed (CategoryRail). /categoria/* stays for SEO;
+  // redirecting here caused an infinite loop with CategoriaPageContent → /?categoria=.
 
   let ssrAdisos: Awaited<ReturnType<typeof getMarketplaceFeed>> = [];
   try {
