@@ -7,7 +7,7 @@ module.exports = {
         `${baseUrl}/`,
         `${baseUrl}/categoria/empleos`,
         `${baseUrl}/l/cusco/empleos`,
-        `${baseUrl}/buscar?q=empleo`,
+        `${baseUrl}/buscar/empleo-cusco`,
         `${baseUrl}/v/demo`,
       ],
       numberOfRuns: 1,

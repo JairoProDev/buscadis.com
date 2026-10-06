@@ -16,7 +16,8 @@
 - Categorías: https://www.buscadis.com/categoria/{empleos|inmuebles|vehiculos|servicios|productos|eventos|negocios|comunidad}
 - Adiso (canónico): https://www.buscadis.com/a/{id}/{titulo-slug}
 - Publicar: https://www.buscadis.com/publicar
-- Búsqueda: https://www.buscadis.com/buscar?q={consulta}
+- Búsqueda (canónica): https://www.buscadis.com/buscar/{consulta-en-slug} (ej. empleo-cusco)
+- Búsqueda (alias): https://www.buscadis.com/buscar?q={consulta} → redirige al slug
 - Hubs locales (Cusco): https://www.buscadis.com/l/cusco/{categoria}
 
 ## Perfiles de negocio

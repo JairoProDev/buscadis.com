@@ -15,6 +15,7 @@ import {
   buildCategoryShareMetadata,
   isMarketplaceCategory,
 } from '@/lib/seo/category-metadata';
+import { getSearchPathFromQuery } from '@/lib/seo/search-url';
 
 /** Cache home feed shell; modal/search still client-driven. Improves TTFB / RES on `/`. */
 export const revalidate = 90;
@@ -76,7 +77,10 @@ export default async function Home({ searchParams }: PageProps) {
       : undefined;
 
   const adisoParam = typeof params.adiso === 'string' ? params.adiso : undefined;
-  const buscarParam = typeof params.buscar === 'string' ? params.buscar : undefined;
+  const buscarParam = typeof params.buscar === 'string' ? params.buscar.trim() : undefined;
+  if (buscarParam && buscarParam.length >= 2 && !adisoParam) {
+    redirect(getSearchPathFromQuery(buscarParam));
+  }
   if (categoria && !adisoParam && !buscarParam) {
     const q = new URLSearchParams();
     for (const [key, value] of Object.entries(params)) {

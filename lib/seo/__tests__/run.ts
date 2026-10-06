@@ -7,6 +7,7 @@ import { getAdisoUrl } from '@/lib/url';
 import { buildBuscadisOrganizationJsonLd } from '../organization-jsonld';
 import { buildAdisoPageJsonLd, buildAdisoJobPostingJsonLd } from '../adiso-jsonld';
 import { getCuscoHubPath, listCuscoHubPaths } from '../cusco-hubs';
+import { getSearchCanonicalPath, searchQueryToSlug, searchSlugToQuery } from '../search-url';
 import type { Adiso } from '@/types';
 
 const url = getCanonicalSiteUrl();
@@ -39,6 +40,10 @@ const jobAdiso = {
 const pageGraph = buildAdisoPageJsonLd(jobAdiso)['@graph'] as Array<Record<string, unknown>>;
 assert.ok(pageGraph.some((n) => n['@type'] === 'JobPosting'));
 assert.equal(buildAdisoJobPostingJsonLd(jobAdiso)['@type'], 'JobPosting');
+
+assert.equal(searchQueryToSlug('Empleo Cusco'), 'empleo-cusco');
+assert.equal(searchSlugToQuery('empleo-cusco'), 'empleo cusco');
+assert.equal(getSearchCanonicalPath('empleo cusco'), '/buscar/empleo-cusco');
 
 const paths = listCuscoHubPaths();
 assert.ok(paths.length >= 8);

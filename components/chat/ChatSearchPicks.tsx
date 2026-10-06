@@ -14,6 +14,7 @@ import {
   getSearchPicks,
 } from '@/lib/chat/search-picks';
 import { formatUbicacionCorta } from '@/lib/adiso-display';
+import { getSearchPathFromQuery } from '@/lib/seo/search-url';
 
 interface ChatSearchPicksProps {
   items: Adiso[];
@@ -29,9 +30,8 @@ export default function ChatSearchPicks({ items, query, onOpen, onRefine }: Chat
   const comparisonHint = buildSearchComparisonHint(picks);
 
   const openExplorer = () => {
-    const params = new URLSearchParams();
-    if (query?.trim()) params.set('buscar', query.trim());
-    router.push(params.toString() ? `/?${params.toString()}` : '/');
+    const term = query?.trim();
+    router.push(term ? getSearchPathFromQuery(term) : '/buscar');
   };
 
   return (

@@ -2,6 +2,7 @@ import { nanoid } from 'nanoid';
 import { Adiso, Categoria } from '@/types';
 import { getAdisoAbsoluteUrl } from '@/lib/url';
 import { getSiteUrl } from '@/lib/seo/og-image';
+import { getSearchPathFromQuery } from '@/lib/seo/search-url';
 import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
@@ -96,15 +97,18 @@ export const compartirNativo = async (
 
 // Generar URL para compartir búsqueda
 export const getBusquedaUrl = (categoria?: Categoria | 'todos', buscar?: string): string => {
-  const params = new URLSearchParams();
+  const origin =
+    typeof window !== 'undefined' ? window.location.origin : getSiteUrl().replace(/\/$/, '');
+  const term = buscar?.trim() ?? '';
+  if (term) {
+    const withCategory =
+      categoria && categoria !== 'todos' ? `${term} ${categoria.replace(/-/g, ' ')}` : term;
+    return `${origin}${getSearchPathFromQuery(withCategory)}`;
+  }
   if (categoria && categoria !== 'todos') {
-    params.set('categoria', categoria);
+    return `${origin}/categoria/${categoria}`;
   }
-  if (buscar && buscar.trim()) {
-    params.set('buscar', buscar.trim());
-  }
-  const query = params.toString();
-  return `${typeof window !== 'undefined' ? window.location.origin : ''}${query ? `/?${query}` : '/'}`;
+  return `${origin}/`;
 };
 
 // Validación y formateo de teléfono

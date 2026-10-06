@@ -96,6 +96,12 @@ const nextConfig = {
         destination: '/deals',
         permanent: true,
       },
+      // Next puede servir chunks en /sitemap/0.xml; robots y GSC esperan /sitemap.xml
+      {
+        source: '/sitemap.xml',
+        destination: '/sitemap/0.xml',
+        permanent: false,
+      },
     ];
 
     return redirects;
