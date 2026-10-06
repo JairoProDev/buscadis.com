@@ -10,8 +10,21 @@ export interface ExternalContactChannel {
   ariaLabel: string;
 }
 
+/** Contacto directo al anunciante (WA/tel). Pendiente de pago self-serve = bloqueado; muestra ops = visible. */
+export function isAdvertiserContactVisible(
+  adiso: Pick<Adiso, 'contactLocked' | 'paymentStatus' | 'privateData'>,
+): boolean {
+  if (adiso.contactLocked) return false;
+  if (adiso.paymentStatus === 'underpaid') return false;
+  if (adiso.paymentStatus === 'pending') {
+    const priv = adiso.privateData as Record<string, unknown> | undefined;
+    return priv?.muestra_plan_s50 === true || priv?.muestra_comercial === true;
+  }
+  return true;
+}
+
 export function resolveExternalContact(adiso: Adiso): ExternalContactChannel | null {
-  if (adiso.contactLocked || adiso.paymentStatus === 'pending' || adiso.paymentStatus === 'underpaid') {
+  if (!isAdvertiserContactVisible(adiso)) {
     return null;
   }
   const contactos = adiso.contactosMultiples?.filter((c) => c.valor?.trim());

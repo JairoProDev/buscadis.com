@@ -72,7 +72,13 @@ import {
   getCategoriaLabel,
   getPublicationIsoDatetime,
 } from '@/lib/adiso-display';
-import { ExternalContactChannel, resolveExternalContact, isLeadCaptureAd, getOpsLeadWhatsAppUrl } from '@/lib/adiso-contact';
+import {
+  ExternalContactChannel,
+  resolveExternalContact,
+  isLeadCaptureAd,
+  getOpsLeadWhatsAppUrl,
+  isAdvertiserContactVisible,
+} from '@/lib/adiso-contact';
 
 // Función helper para formatear ubicación
 function formatearUbicacion(ubicacion: any): { texto: string; coordenadas: { lat: number; lng: number } | null } {
@@ -422,7 +428,7 @@ export default function ModalAdiso({
   };
 
   const handleContactar = async (contactoEspecifico?: string) => {
-    if (adiso.contactLocked || adiso.paymentStatus === 'pending' || adiso.paymentStatus === 'underpaid') {
+    if (!isAdvertiserContactVisible(adiso)) {
       return;
     }
 
@@ -690,7 +696,7 @@ export default function ModalAdiso({
 
   const ContactFooter = () => {
     const isOwnerView = esMiAdiso || esPropietario;
-    const contactLocked = adiso.contactLocked || adiso.paymentStatus === 'pending' || adiso.paymentStatus === 'underpaid';
+    const contactLocked = !isAdvertiserContactVisible(adiso);
     const showInApp = canMessageInApp && !isOwnerView && !contactLocked;
     const showExternal = Boolean(externalContact) && !contactLocked;
 

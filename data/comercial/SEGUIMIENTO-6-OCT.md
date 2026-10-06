@@ -11,6 +11,7 @@
 | **966364330** | **Quinta Poroy** | **Ok — este anuncio** → datos + S/50 |
 | **976250507** | **Pollería Nina** | **1 cocinera + 2 mozas** |
 | **957806789** | **Casa hogar** (Aldomartin) | **¿Costo?** |
+| **974752866** | **Vista Alegre** (María Cristina) | **Sí** buscan → datos + muestra |
 
 **Nota:** El aviso de **restaurante turístico** (Av. El Sol 106 / Galerías La Merced 207, cels. **974888453**, **974888454**) es **otro negocio** distinto de Pollería Nina. Si también se escribió a ese número, documentar en archivo aparte.
 

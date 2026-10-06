@@ -2,6 +2,7 @@
 
 - **Batch:** `cliente-chifa-tambobamba-julio-2026-10`
 - **Plan:** S/50 · 30 días (muestra web con pago **pending**; redes tras Yape)
+- **WA en ficha:** visible con `muestra_plan_s50` (fix `isAdvertiserContactVisible` en `lib/adiso-contact.ts`)
 - **Flyer:** `media/flyer-chifa-tambobamba.jpg`
 
 ## Scripts
