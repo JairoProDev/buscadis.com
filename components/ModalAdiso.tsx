@@ -75,6 +75,7 @@ import {
 import {
   ExternalContactChannel,
   resolveExternalContact,
+  resolveExternalWhatsAppContacts,
   isLeadCaptureAd,
   getOpsLeadWhatsAppUrl,
   isAdvertiserContactVisible,
@@ -263,7 +264,10 @@ export default function ModalAdiso({
   });
   const ctaLabel = getCtaLabelPorCategoria(adiso.categoria);
   const inAppCtaLabel = getInAppCtaLabelPorCategoria(adiso.categoria);
-  const externalContact = resolveExternalContact(adiso);
+  const whatsappContacts = resolveExternalWhatsAppContacts(adiso);
+  const multiWhatsApp = whatsappContacts.length >= 2;
+  const externalContact = multiWhatsApp ? null : resolveExternalContact(adiso);
+  const primaryExternalContact = multiWhatsApp ? whatsappContacts[0] : externalContact;
   const displayTitle = toDisplayTitle(adiso.titulo);
   const displayDescription = getCardDescriptionSnippet(adiso.descripcion, 2000);
   const priceLabel = formatPrecioDisplay(adiso);
@@ -526,14 +530,14 @@ export default function ModalAdiso({
 
     if (!sellerUserId && !leadCapture && !adiso.esHistorico) {
       const q = FIELD_QUESTIONS[field] || 'Hola, tengo una consulta';
-      if (externalContact) {
-        if (externalContact.kind === 'whatsapp' || externalContact.kind === 'telefono') {
-          const numero = externalContact.valor.replace(/\D/g, '');
+      if (primaryExternalContact) {
+        if (primaryExternalContact.kind === 'whatsapp' || primaryExternalContact.kind === 'telefono') {
+          const numero = primaryExternalContact.valor.replace(/\D/g, '');
           const text = encodeURIComponent(`${q}\n\nVi: ${adiso.titulo}`);
           window.open(`https://wa.me/${numero}?text=${text}`, '_blank');
           return;
         }
-        void handleExternalContact(externalContact);
+        void handleExternalContact(primaryExternalContact);
         return;
       }
       return;
@@ -694,11 +698,14 @@ export default function ModalAdiso({
           ? 'var(--brand-blue)'
           : contactChannel.whatsapp;
 
+  const whatsappBtnAccent = contactChannel.whatsapp;
+
   const ContactFooter = () => {
     const isOwnerView = esMiAdiso || esPropietario;
     const contactLocked = !isAdvertiserContactVisible(adiso);
     const showInApp = canMessageInApp && !isOwnerView && !contactLocked;
-    const showExternal = Boolean(externalContact) && !contactLocked;
+    const showExternal =
+      !contactLocked && (multiWhatsApp || Boolean(externalContact));
 
     if (!showInApp && !showExternal && !isOwnerView) return null;
     if (isOwnerView && !showExternal && !canMessageInApp) return null;
@@ -733,6 +740,25 @@ export default function ModalAdiso({
             <IconSend size={18} />
             <span className="truncate">{enviandoMensaje ? 'Abriendo chat…' : inAppCtaLabel}</span>
           </button>
+        ) : (showExternal || previewExternal) && multiWhatsApp ? (
+          whatsappContacts.map((ch) => (
+            <button
+              key={ch.valor}
+              type="button"
+              onClick={() => void handleExternalContact(ch)}
+              disabled={previewExternal}
+              className="flex min-w-0 flex-1 items-center justify-center gap-2 rounded-xl px-3 py-3.5 text-sm font-bold text-white transition-transform hover:brightness-105 active:scale-[0.98]"
+              style={{
+                backgroundColor: whatsappBtnAccent,
+                boxShadow: `0 8px 20px -6px ${whatsappBtnAccent}66`,
+              }}
+              aria-label={ch.ariaLabel}
+              title={ch.ariaLabel}
+            >
+              <IconWhatsApp size={22} />
+              <span className="truncate">{ch.buttonLabel ?? ctaLabel}</span>
+            </button>
+          ))
         ) : (showExternal || previewExternal) && externalContact ? (
           <button
             type="button"
@@ -748,6 +774,23 @@ export default function ModalAdiso({
             <span className="truncate">{ctaLabel}</span>
           </button>
         ) : null}
+
+        {(showInApp || previewInApp) && (showExternal || previewExternal) && multiWhatsApp
+          ? whatsappContacts.map((ch) => (
+              <button
+                key={ch.valor}
+                type="button"
+                onClick={() => void handleExternalContact(ch)}
+                disabled={previewExternal}
+                aria-label={ch.ariaLabel}
+                title={ch.ariaLabel}
+                className="flex h-[52px] min-w-[52px] shrink-0 items-center justify-center rounded-xl border border-[var(--border-color)] px-2 text-white transition-transform hover:brightness-105 active:scale-[0.98]"
+                style={{ backgroundColor: whatsappBtnAccent }}
+              >
+                <IconWhatsApp size={22} />
+              </button>
+            ))
+          : null}
 
         {(showInApp || previewInApp) && (showExternal || previewExternal) && externalContact && (
           <button

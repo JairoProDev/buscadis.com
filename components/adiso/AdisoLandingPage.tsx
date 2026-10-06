@@ -14,7 +14,13 @@ import { getWhatsAppUrl, copiarLink, compartirNativo } from '@/lib/utils';
 import { getBusinessProfilePath } from '@/lib/seo/business-metadata';
 import { FIELD_QUESTIONS, type RevealField } from '@/lib/interactions/field-reveal';
 import { chatContextFromAdiso } from '@/lib/chat/context-from-adiso';
-import { ExternalContactChannel, resolveExternalContact, isLeadCaptureAd, getOpsLeadWhatsAppUrl } from '@/lib/adiso-contact';
+import {
+  ExternalContactChannel,
+  resolveExternalContact,
+  resolveExternalWhatsAppContacts,
+  isLeadCaptureAd,
+  getOpsLeadWhatsAppUrl,
+} from '@/lib/adiso-contact';
 import {
   formatPrecioDisplay,
   formatCardListingTime,
@@ -148,7 +154,9 @@ export default function AdisoLandingPage({ adiso, onVolver }: AdisoLandingPagePr
   const publishedRelative = listingTime?.label || formatRelativePublishedAt(adiso) || 'Recientemente';
   const publishedExact = formatPublicationExactAt(adiso);
   const socialBadge = pickSocialBadge(adiso);
-  const externalContact = resolveExternalContact(adiso);
+  const whatsappContacts = resolveExternalWhatsAppContacts(adiso);
+  const multiWhatsApp = whatsappContacts.length >= 2;
+  const externalContact = multiWhatsApp ? null : resolveExternalContact(adiso);
   const ctaLabel = getCtaLabelPorCategoria(adiso.categoria);
   const inAppCtaLabel = getInAppCtaLabelPorCategoria(adiso.categoria);
   const businessSlug = (adiso.privateData as { business_slug?: string } | undefined)?.business_slug;
@@ -315,7 +323,27 @@ export default function AdisoLandingPage({ adiso, onVolver }: AdisoLandingPagePr
           <span className="truncate">{enviandoMensaje ? 'Abriendo chat…' : inAppCtaLabel}</span>
         </button>
       )}
-      {externalContact && (
+      {multiWhatsApp &&
+        whatsappContacts.map((ch) => (
+          <button
+            key={ch.valor}
+            type="button"
+            onClick={() => handleExternalContact(ch)}
+            className={`flex min-w-0 items-center justify-center gap-2 rounded-2xl bg-[var(--bs-color-social-whatsapp)] font-bold text-white shadow-lg transition-transform hover:brightness-105 active:scale-[0.98] ${
+              compact
+                ? 'flex-1 px-3 py-3 text-xs'
+                : canMessageInApp
+                  ? 'shrink-0 px-4 py-4 sm:w-auto'
+                  : 'min-w-0 flex-1 px-3 py-4 text-sm sm:text-base'
+            }`}
+            aria-label={ch.ariaLabel}
+            title={ch.ariaLabel}
+          >
+            <IconWhatsApp size={compact ? 20 : 24} className="shrink-0" />
+            {!compact && <span className="truncate">{ch.buttonLabel ?? ctaLabel}</span>}
+          </button>
+        ))}
+      {!multiWhatsApp && externalContact && (
         <button
           type="button"
           onClick={() => handleExternalContact(externalContact)}

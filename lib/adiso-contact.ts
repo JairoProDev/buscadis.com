@@ -8,6 +8,20 @@ export interface ExternalContactChannel {
   kind: ExternalContactKind;
   valor: string;
   ariaLabel: string;
+  /** Texto corto en botón (p. ej. etiqueta o últimos dígitos). */
+  buttonLabel?: string;
+}
+
+function normalizeContactDigits(valor: string): string {
+  return valor.replace(/\D/g, '');
+}
+
+export function formatWhatsAppCtaShortLabel(valor: string, etiqueta?: string): string {
+  const tag = etiqueta?.trim();
+  if (tag && tag.toLowerCase() !== 'whatsapp') return tag;
+  const d = normalizeContactDigits(valor);
+  if (d.length >= 9) return `WhatsApp ···${d.slice(-3)}`;
+  return 'WhatsApp';
 }
 
 /** Contacto directo al anunciante (WA/tel). Pendiente de pago self-serve = bloqueado; muestra ops = visible. */
@@ -49,6 +63,49 @@ export function resolveExternalContact(adiso: Adiso): ExternalContactChannel | n
     return { kind: 'link', valor: contacto, ariaLabel: 'Abrir enlace de contacto' };
   }
   return { kind: 'whatsapp', valor: contacto, ariaLabel: 'Contactar por WhatsApp' };
+}
+
+/** Hasta 3 líneas WhatsApp distintas (principal primero). */
+export function resolveExternalWhatsAppContacts(adiso: Adiso): ExternalContactChannel[] {
+  if (!isAdvertiserContactVisible(adiso)) return [];
+
+  const contactos = adiso.contactosMultiples?.filter((c) => c.valor?.trim()) ?? [];
+  const waEntries = contactos.filter((c) => c.tipo === 'whatsapp');
+
+  if (waEntries.length === 0) {
+    const contacto = adiso.contacto?.trim();
+    if (contacto && !contacto.includes('@') && !/^https?:\/\//i.test(contacto)) {
+      return [
+        {
+          kind: 'whatsapp',
+          valor: contacto,
+          ariaLabel: 'Contactar por WhatsApp',
+          buttonLabel: 'WhatsApp',
+        },
+      ];
+    }
+    return [];
+  }
+
+  const seen = new Set<string>();
+  const sorted = [...waEntries].sort((a, b) => Number(b.principal) - Number(a.principal));
+  const out: ExternalContactChannel[] = [];
+
+  for (const c of sorted) {
+    const key = normalizeContactDigits(c.valor);
+    if (!key || seen.has(key)) continue;
+    seen.add(key);
+    const buttonLabel = formatWhatsAppCtaShortLabel(c.valor, c.etiqueta);
+    out.push({
+      kind: 'whatsapp',
+      valor: c.valor,
+      ariaLabel: `Contactar por ${buttonLabel}`,
+      buttonLabel,
+    });
+    if (out.length >= 3) break;
+  }
+
+  return out;
 }
 
 /** Adisos caducados / inactivos / Rueda fuera de ventana: lead via chat + WhatsApp ops. */
