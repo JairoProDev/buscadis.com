@@ -31,6 +31,7 @@ Actualizado: **5 oct 2026**. Fuente: chats pegados en Cursor + lista WA + `data/
 - Preguntas típicas antes de pagar: **tarifa**, **redes**, **efectividad**.
 - Respuesta honesta en efectividad + **S/15 de prueba** cerró con Raquel.
 - **Yape Shantall** facilitó S/15; transferencia larga generó fricción («¿Dónde yapeo?» dos veces).
+- **Anclaje S/50:** cevichería 958110360 — al cerrar solo se ofreció **plan Empresa S/50** (sin S/30/S/15 en el mensaje); aceptó flyer y plan sin pedir plan barato. Objeción **después** fue fanpage (94 vs 23 k), no precio → playbook `docs/comercial/OBJECION-POCOS-SEGUIDORES.md` → **S/50 pagado** 5 oct.
 
 ### Producto
 
@@ -42,6 +43,7 @@ Actualizado: **5 oct 2026**. Fuente: chats pegados en Cursor + lista WA + `data/
 | Teléfono | Negocio | Estado 5 oct |
 |----------|---------|----------------|
 | 984646887 | Raquel / Magisterio | **PAGÓ / publicado** |
+| 958110360 | Cevichería / Elicita | **PAGÓ S/50** · `Rp7msAf6Hl` · objeción seguidores resuelta |
 | 984666551 | Ferretera | Aprobó copy; **cobro pendiente** |
 | 970842362 | Lalo | Propuesta S/50 enviada; **sin respuesta** |
 | 994137274 | Agencia viajes | **ALERTA** (pidió CV) |

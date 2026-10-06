@@ -72,6 +72,17 @@ Incluye **todo el Destacado**, más:
 | 1–2 | Destacado S/30 |
 | 4+ o varios roles | Empresa S/50 |
 
+### Anclaje al cerrar (no abrir con planes baratos)
+
+Cuando el cliente ya aprobó el aviso y encaja **Empresa S/50** (varias vacantes, varios locales, campaña mensual):
+
+- En el mensaje de cierre enviar **un solo plan recomendado: S/50** (web/app, destacado, redes, grupos, republicaciones en el mes).
+- **No** listar S/30 ni S/15 en el mismo mensaje si no los pidió — reduce “¿y el más barato?” y ancla el valor del paquete completo.
+
+**Caso oct 2026 (cevichería 958110360):** solo se ofreció S/50 al cerrar; aceptó sin negociar plan menor. La objeción posterior fue **seguidores de fanpage**, no precio — ver `OBJECION-POCOS-SEGUIDORES.md`.
+
+**Rescate táctico (no catálogo):** si comparan @buscadis con su fanpage grande, ofrecer **doble difusión (S/50)** vs **solo diseño S/25** + retirar posts nuestros; la cliente puede elegir sin sentirse presionada.
+
 ## Contraste flyer vs realidad producto (gaps conocidos)
 
 | Promesa en flyer | Estado |
