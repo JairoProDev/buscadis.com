@@ -13,6 +13,12 @@ Actualizado: **6 oct 2026**. Fuente: chats pegados en Cursor + lista WA + `data/
 
 ## Patrones que ya vimos
 
+### Rueda ya leída → no preguntar puesto a ciegas (oct 2026)
+
+- Si el PDF/Rueda lista roles, **citarlos** y pedir solo **horario, sueldo, dirección, WA de CV**.
+- Cierre: **muestra publicada en buscadis.com** (link real) + diseño, no solo imagen suelta — ver `MUESTRA-EN-WEB.md`.
+- Caso **empresa informática** (958317767 / jorgemen): 2 señoritas ventas + 3 practicantes pro.
+
 ### «¿Cuál es el más urgente?»
 
 - Sirve para **abrir** cuando hay muchos puestos (Raquel terminó publicando **los dos** en un solo aviso).

@@ -20,3 +20,7 @@ Opcional: en la ficha de una oportunidad sigue existiendo **pegar un solo chat**
 ## Insights
 
 Cada chat debe dejar al menos una línea en `notas_extra` o en `campana-insights.md`: qué funcionó, qué falló, qué cambiar en el mensaje o en el segmento.
+
+## Muestra en web (oct 2026)
+
+Ver `MUESTRA-EN-WEB.md`: si ya tenemos el aviso de Rueda, **no** preguntar “¿qué puesto?”; citar puestos y pedir solo horario/sueldo/dirección. Entregar **link en buscadis.com**, no solo JPG.

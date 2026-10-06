@@ -249,11 +249,23 @@
       "business_name": "Chifa — Tambobamba, Cotabambas (Apurímac)",
       "contact_name": "Julio Salas Ayerve",
       "contact_whatsapp": "984271525",
-      "etapa_label": "PIDIÓ PRECIO",
-      "plan": "Anclar S/50 mes; S/30 solo si refuta",
-      "ultimo_movimiento": "6 oct: pidió precio; confirmados ambos números en aviso",
-      "proxima_accion": "Mensaje S/50 + borrador; reservar S/30 si pide más barato",
-      "notas_extra": "wa-chats/984271525-tambobamba.txt. Tel alt 973165180.",
+      "etapa_label": "EVALÚA",
+      "plan": "S/50 · 30 días (muestra o5HUswFyUk, pago pendiente)",
+      "ultimo_movimiento": "6 oct: aviso publicado destacado en web; redes tras Yape",
+      "proxima_accion": "Enviar link; confirmar; Yape → activate-paid + FB/IG/TK/grupos",
+      "notas_extra": "Adiso o5HUswFyUk. wa-chats/984271525-tambobamba.txt. Sin pago: demote-chifa-tambobamba-julio-gratis.ts",
+      "segment": "pipeline"
+    },
+    {
+      "title": "Empresa informática (@jorgemen_com)",
+      "business_name": "Empresa informática (Cusco)",
+      "contact_name": "Jorge",
+      "contact_whatsapp": "958317767",
+      "etapa_label": "DATOS",
+      "plan": "S/50 (5 plazas: 2 ventas + 3 practicantes)",
+      "ultimo_movimiento": "6 oct 11:15: confirmó que siguen buscando",
+      "proxima_accion": "Muestra en buscadis.com + flyer; confirmar horario/sueldo/dirección oficina",
+      "notas_extra": "CV al 958317767. wa-chats/958317767-empresa-informatica-jorge.txt. No preguntar puesto a ciegas.",
       "segment": "pipeline"
     },
     {
