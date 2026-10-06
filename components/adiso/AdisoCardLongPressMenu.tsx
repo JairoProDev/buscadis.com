@@ -9,24 +9,29 @@ import {
   IconEyeOff,
   IconShare,
   IconHeart,
+  IconSparkles,
 } from '@/components/Icons';
 import type { AdisoCardActionId } from '@/hooks/useAdisoCardActions';
 
 export type LongPressRadialAction = 'see_more' | 'see_less' | 'save' | 'share';
 
-const ACTIONS: {
+/** Matemáticas de pantalla: 0° = derecha, 90° = abajo, 180° = izquierda, 270° = arriba */
+export const RADIAL_ACTIONS: {
   id: LongPressRadialAction;
   label: string;
   angleDeg: number;
   Icon: React.FC<{ size?: number; className?: string }>;
 }[] = [
-  { id: 'save', label: 'Guardar', angleDeg: 200, Icon: IconHeartOutline },
-  { id: 'share', label: 'Compartir', angleDeg: 250, Icon: IconShare },
-  { id: 'see_more', label: 'Ver más', angleDeg: 310, Icon: IconHeart },
-  { id: 'see_less', label: 'Ver menos', angleDeg: 20, Icon: IconEyeOff },
+  { id: 'share', label: 'Compartir', angleDeg: 270, Icon: IconShare },
+  { id: 'see_more', label: 'Ver más así', angleDeg: 0, Icon: IconSparkles },
+  { id: 'see_less', label: 'Ver menos', angleDeg: 90, Icon: IconEyeOff },
+  { id: 'save', label: 'Guardar', angleDeg: 180, Icon: IconHeartOutline },
 ];
 
-const RADIUS = 88;
+export const RADIAL_RADIUS_PX = 80;
+const INNER_DEAD_ZONE = 32;
+const OUTER_LIMIT = RADIAL_RADIUS_PX + 52;
+const ANGLE_TOLERANCE_DEG = 48;
 
 interface AdisoCardLongPressMenuProps {
   active: boolean;
@@ -45,9 +50,6 @@ export default function AdisoCardLongPressMenu({
   centerY,
   highlighted,
   isSaved,
-  onHighlight,
-  onCommit,
-  onCancel,
 }: AdisoCardLongPressMenuProps) {
   const [mounted, setMounted] = useState(false);
 
@@ -69,60 +71,59 @@ export default function AdisoCardLongPressMenu({
       {active && (
         <>
           <motion.div
-            className="fixed inset-0 bg-black/45"
-            style={{ zIndex: OVERLAY_BACKDROP_Z }}
+            className="fixed inset-0 touch-none bg-black/45"
+            style={{ zIndex: OVERLAY_BACKDROP_Z, pointerEvents: 'none' }}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            onPointerUp={() => {
-              if (highlighted) onCommit(highlighted);
-              else onCancel();
-            }}
           />
           <div
-            className="pointer-events-none fixed inset-0"
+            className="pointer-events-none fixed inset-0 touch-none"
             style={{ zIndex: OVERLAY_SHEET_Z }}
             aria-hidden
           >
             <motion.div
-              className="absolute h-24 w-24 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white/25 bg-white/10 backdrop-blur-sm"
+              className="absolute h-[52px] w-[52px] -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white/30 bg-white/12 backdrop-blur-sm"
               style={{ left: centerX, top: centerY }}
-              initial={{ scale: 0.6, opacity: 0 }}
+              initial={{ scale: 0.65, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.8, opacity: 0 }}
+              exit={{ scale: 0.85, opacity: 0 }}
             />
-            {ACTIONS.map((action) => {
+            {RADIAL_ACTIONS.map((action) => {
               const rad = (action.angleDeg * Math.PI) / 180;
-              const x = centerX + Math.cos(rad) * RADIUS;
-              const y = centerY + Math.sin(rad) * RADIUS;
+              const x = centerX + Math.cos(rad) * RADIAL_RADIUS_PX;
+              const y = centerY + Math.sin(rad) * RADIAL_RADIUS_PX;
               const isHi = highlighted === action.id;
-              const Icon = action.id === 'save' && isSaved ? IconHeart : action.Icon;
+              const Icon =
+                action.id === 'save' && isSaved ? IconHeart : action.Icon;
               return (
-                <motion.button
+                <motion.div
                   key={action.id}
-                  type="button"
-                  className={`pointer-events-auto absolute flex h-14 w-14 -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center rounded-full border shadow-lg transition-colors ${
+                  className={`pointer-events-none absolute flex h-12 w-12 -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center rounded-full border shadow-lg ${
                     isHi
                       ? 'scale-110 border-white bg-white text-[#1c1c1e]'
-                      : 'border-white/20 bg-[#2c2c2e]/95 text-white'
+                      : 'scale-100 border-white/25 bg-[#2c2c2e]/95 text-white'
                   }`}
                   style={{ left: x, top: y }}
                   initial={{ scale: 0, opacity: 0 }}
-                  animate={{ scale: isHi ? 1.12 : 1, opacity: 1 }}
-                  onPointerEnter={() => onHighlight(action.id)}
+                  animate={{ scale: isHi ? 1.14 : 1, opacity: 1 }}
+                  transition={{ type: 'spring', stiffness: 420, damping: 28 }}
                 >
-                  <Icon size={20} className={isHi && action.id === 'save' && isSaved ? 'text-red-500' : ''} />
-                </motion.button>
+                  <Icon
+                    size={20}
+                    className={isHi && action.id === 'save' && isSaved ? 'text-red-500' : ''}
+                  />
+                </motion.div>
               );
             })}
             {highlighted && (
               <motion.p
-                className="absolute max-w-[160px] -translate-x-1/2 text-center text-sm font-semibold text-white drop-shadow-md"
-                style={{ left: centerX, top: centerY + RADIUS + 36 }}
+                className="absolute max-w-[200px] -translate-x-1/2 text-center text-sm font-semibold text-white drop-shadow-md"
+                style={{ left: centerX, top: centerY + RADIAL_RADIUS_PX + 28 }}
                 initial={{ opacity: 0, y: 4 }}
                 animate={{ opacity: 1, y: 0 }}
               >
-                {ACTIONS.find((a) => a.id === highlighted)?.label}
+                {RADIAL_ACTIONS.find((a) => a.id === highlighted)?.label}
               </motion.p>
             )}
           </div>
@@ -138,19 +139,20 @@ export function pickRadialAction(
   centerX: number,
   centerY: number,
   pointerX: number,
-  pointerY: number
+  pointerY: number,
 ): LongPressRadialAction | null {
   const dx = pointerX - centerX;
   const dy = pointerY - centerY;
   const dist = Math.hypot(dx, dy);
-  if (dist < 36) return null;
-  if (dist > RADIUS + 48) return null;
+  if (dist < INNER_DEAD_ZONE) return null;
+  if (dist > OUTER_LIMIT) return null;
+
   let angle = (Math.atan2(dy, dx) * 180) / Math.PI;
   if (angle < 0) angle += 360;
 
   let best: LongPressRadialAction | null = null;
   let bestDiff = 999;
-  for (const a of ACTIONS) {
+  for (const a of RADIAL_ACTIONS) {
     let diff = Math.abs(angle - a.angleDeg);
     if (diff > 180) diff = 360 - diff;
     if (diff < bestDiff) {
@@ -158,7 +160,7 @@ export function pickRadialAction(
       best = a.id;
     }
   }
-  return bestDiff <= 42 ? best : null;
+  return bestDiff <= ANGLE_TOLERANCE_DEG ? best : null;
 }
 
 export function mapRadialToCardAction(id: LongPressRadialAction): AdisoCardActionId {

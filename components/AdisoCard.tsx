@@ -88,6 +88,11 @@ const AdisoCard = forwardRef<HTMLDivElement, AdisoCardProps>(
     const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
     const pointerStart = useRef<{ x: number; y: number } | null>(null);
     const suppressClickRef = useRef(false);
+    const mediaRef = useRef<HTMLDivElement>(null);
+    const longPressCenterRef = useRef({ x: 0, y: 0 });
+    const longPressPointerRef = useRef({ x: 0, y: 0 });
+    const longPressFinishHandled = useRef(false);
+    const longPressActiveRef = useRef(false);
 
     const handleHiddenFromMenu = useCallback(async () => {
       await markNotInterested();
@@ -158,51 +163,95 @@ const AdisoCard = forwardRef<HTMLDivElement, AdisoCardProps>(
       void cardActions.runAction(id, extra);
     };
 
-    const onMediaPointerDown = (e: React.PointerEvent) => {
-      if (menuOpen) return;
-      pointerStart.current = { x: e.clientX, y: e.clientY };
-      clearLongPressTimer();
-      longPressTimer.current = setTimeout(() => {
-        suppressClickRef.current = true;
-        setLongPressPoint({ x: e.clientX, y: e.clientY });
-        setLongPressActive(true);
-        setRadialHighlight(null);
-      }, 480);
+    const updateRadialFromPointer = (clientX: number, clientY: number) => {
+      const { x, y } = longPressCenterRef.current;
+      const picked = pickRadialAction(x, y, clientX, clientY);
+      radialHighlightRef.current = picked;
+      setRadialHighlight(picked);
     };
 
-    const onMediaPointerMove = (e: React.PointerEvent) => {
-      if (pointerStart.current && !longPressActive) {
-        const dx = e.clientX - pointerStart.current.x;
-        const dy = e.clientY - pointerStart.current.y;
-        if (Math.hypot(dx, dy) > 12) clearLongPressTimer();
+    const finishLongPress = (clientX: number, clientY: number, pointerId: number) => {
+      if (longPressFinishHandled.current) return;
+      longPressFinishHandled.current = true;
+      updateRadialFromPointer(clientX, clientY);
+      const picked = radialHighlightRef.current;
+      if (picked) commitLongPress(picked);
+      else cancelLongPress();
+      try {
+        mediaRef.current?.releasePointerCapture(pointerId);
+      } catch {
+        /* already released */
       }
     };
 
-    const onMediaPointerUp = () => {
+    const onMediaPointerDown = (e: React.PointerEvent) => {
+      if (menuOpen) return;
+      if (e.pointerType === 'mouse' && e.button !== 0) return;
+      pointerStart.current = { x: e.clientX, y: e.clientY };
+      longPressPointerRef.current = { x: e.clientX, y: e.clientY };
       clearLongPressTimer();
+      const pointerId = e.pointerId;
+      longPressTimer.current = setTimeout(() => {
+        suppressClickRef.current = true;
+        longPressFinishHandled.current = false;
+        longPressCenterRef.current = { ...longPressPointerRef.current };
+        setLongPressPoint(longPressCenterRef.current);
+        longPressActiveRef.current = true;
+        setLongPressActive(true);
+        setRadialHighlight(null);
+        radialHighlightRef.current = null;
+        try {
+          mediaRef.current?.setPointerCapture(pointerId);
+        } catch {
+          /* ignore */
+        }
+        updateRadialFromPointer(
+          longPressPointerRef.current.x,
+          longPressPointerRef.current.y,
+        );
+      }, 420);
+    };
+
+    const onMediaPointerMove = (e: React.PointerEvent) => {
+      longPressPointerRef.current = { x: e.clientX, y: e.clientY };
+      if (longPressActiveRef.current) {
+        updateRadialFromPointer(e.clientX, e.clientY);
+        return;
+      }
+      if (pointerStart.current) {
+        const dx = e.clientX - pointerStart.current.x;
+        const dy = e.clientY - pointerStart.current.y;
+        if (Math.hypot(dx, dy) > 14) clearLongPressTimer();
+      }
+    };
+
+    const onMediaPointerUp = (e: React.PointerEvent) => {
+      clearLongPressTimer();
+      if (longPressActiveRef.current) {
+        e.preventDefault();
+        finishLongPress(e.clientX, e.clientY, e.pointerId);
+        pointerStart.current = null;
+        return;
+      }
       pointerStart.current = null;
     };
 
-    useEffect(() => {
-      if (!longPressActive) return;
-      const onMove = (e: PointerEvent) => {
-        const picked = pickRadialAction(longPressPoint.x, longPressPoint.y, e.clientX, e.clientY);
-        radialHighlightRef.current = picked;
-        setRadialHighlight(picked);
-      };
-      const onUp = () => {
-        const picked = radialHighlightRef.current;
-        if (picked) commitLongPress(picked);
-        else cancelLongPress();
-      };
-      window.addEventListener('pointermove', onMove);
-      window.addEventListener('pointerup', onUp, { once: true });
-      return () => {
-        window.removeEventListener('pointermove', onMove);
-      };
-    }, [longPressActive, longPressPoint.x, longPressPoint.y]);
+    const onMediaPointerCancel = (e: React.PointerEvent) => {
+      clearLongPressTimer();
+      if (longPressActiveRef.current) {
+        longPressActiveRef.current = false;
+        cancelLongPress();
+        try {
+          mediaRef.current?.releasePointerCapture(e.pointerId);
+        } catch {
+          /* ignore */
+        }
+      }
+      pointerStart.current = null;
+    };
 
     const commitLongPress = (action: LongPressRadialAction) => {
+      longPressActiveRef.current = false;
       void cardActions.runAction(mapRadialToCardAction(action));
       setLongPressActive(false);
       setRadialHighlight(null);
@@ -212,6 +261,7 @@ const AdisoCard = forwardRef<HTMLDivElement, AdisoCardProps>(
     };
 
     const cancelLongPress = () => {
+      longPressActiveRef.current = false;
       setLongPressActive(false);
       setRadialHighlight(null);
       setTimeout(() => {
@@ -301,15 +351,16 @@ const AdisoCard = forwardRef<HTMLDivElement, AdisoCardProps>(
         <div
           className={`relative flex-shrink-0 overflow-hidden rounded-[var(--bs-radius-lg,var(--card-radius))] ${listingCardMediaAspectClass(vista, isCatalogProduct, portraitJobFlyer)} ${
             isDestacado ? 'ring-2 ring-[var(--bs-color-sol-400)]' : ''
-          } ${longPressActive ? 'z-[50] scale-[1.02] shadow-2xl ring-2 ring-white/40' : ''}`}
+          } ${longPressActive ? 'z-[50] shadow-2xl ring-2 ring-white/40' : ''}`}
           style={{
             backgroundColor: showUserPhoto ? 'var(--bs-bg-sunken, var(--bg-secondary))' : placeholderBg,
+            touchAction: longPressActive ? 'none' : 'manipulation',
           }}
+          ref={mediaRef}
           onPointerDown={onMediaPointerDown}
           onPointerMove={onMediaPointerMove}
           onPointerUp={onMediaPointerUp}
-          onPointerCancel={onMediaPointerUp}
-          onPointerLeave={onMediaPointerUp}
+          onPointerCancel={onMediaPointerCancel}
         >
           <button
             type="button"
