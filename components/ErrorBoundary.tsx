@@ -45,7 +45,7 @@ export class ErrorBoundary extends Component<Props, State> {
         }}>
           <h2 style={{ marginBottom: '1rem' }}>Algo salió mal</h2>
           <p style={{ color: 'var(--text-secondary)', marginBottom: '1rem' }}>
-            {this.state.error?.message || 'Ocurrió un error inesperado'}
+            No pudimos cargar esta pantalla. Intenta recargar la página.
           </p>
           <button
             onClick={() => {

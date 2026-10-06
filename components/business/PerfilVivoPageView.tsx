@@ -15,6 +15,7 @@ import {
 import { supabaseAdmin } from '@/lib/supabase-admin';
 import { PerfilVivoAnalytics } from '@/components/business/PerfilVivoAnalytics';
 import '@buscadis/perfil-vivo/chrome.css';
+import { getSiteUrl } from '@/lib/seo/og-image';
 
 async function fetchReviewRows(businessProfileId: string) {
   if (!supabaseAdmin) return [];
@@ -37,7 +38,7 @@ async function fetchReviewRows(businessProfileId: string) {
 export function buildPerfilVivoJsonLd(payload: PerfilPayload, canonicalPath: string) {
   const { negocio, productos, resenas, metricas, faqs } = payload;
   const u = negocio.ubicacion;
-  const base = `https://buscadis.com${canonicalPath}`;
+  const base = `${getSiteUrl()}${canonicalPath}`;
   const graph: Record<string, unknown>[] = [
     {
       '@type': 'LocalBusiness',

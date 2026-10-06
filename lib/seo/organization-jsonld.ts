@@ -1,4 +1,5 @@
 import { BUSCADIS_LEGAL_NAME, BUSCADIS_PURPOSE_SUMMARY } from '@/lib/legal/operator';
+import { BUSCADIS_SOCIAL_LINKS } from '@/lib/buscadis-social';
 import { getSiteUrl } from '@/lib/seo/og-image';
 
 /** Organization + WebSite for OAuth branding and rich results. */
@@ -15,7 +16,7 @@ export function buildBuscadisOrganizationJsonLd(): Record<string, unknown> {
         url: siteUrl,
         logo: `${siteUrl}/logo-mark.png`,
         description: BUSCADIS_PURPOSE_SUMMARY,
-        sameAs: [],
+        sameAs: BUSCADIS_SOCIAL_LINKS.map((link) => link.href),
       },
       {
         '@type': 'WebSite',
@@ -28,7 +29,7 @@ export function buildBuscadisOrganizationJsonLd(): Record<string, unknown> {
           '@type': 'SearchAction',
           target: {
             '@type': 'EntryPoint',
-            urlTemplate: `${siteUrl}/?buscar={search_term_string}`,
+            urlTemplate: `${siteUrl}/buscar?q={search_term_string}`,
           },
           'query-input': 'required name=search_term_string',
         },

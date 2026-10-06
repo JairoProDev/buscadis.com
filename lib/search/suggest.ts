@@ -116,7 +116,9 @@ export async function getSearchSuggestions(prefix: string, limit = 8): Promise<S
   return pg;
 }
 
-export async function syncAdisoToTypesense(adiso: Pick<Adiso, 'id' | 'titulo' | 'categoria'>): Promise<void> {
+export async function syncAdisoToTypesense(
+  adiso: Pick<Adiso, 'id' | 'titulo' | 'categoria'> & Partial<Adiso>
+): Promise<void> {
   if (!adiso.titulo?.trim()) return;
   await upsertAdisoTitle({
     id: adiso.id,
@@ -124,4 +126,16 @@ export async function syncAdisoToTypesense(adiso: Pick<Adiso, 'id' | 'titulo' | 
     categoria: adiso.categoria,
     popularity_score: 0,
   });
+  const { upsertAdisoMarketplace } = await import('./typesense-marketplace');
+  await upsertAdisoMarketplace({
+    id: adiso.id,
+    titulo: adiso.titulo,
+    categoria: adiso.categoria,
+    descripcion: adiso.descripcion ?? '',
+    contacto: adiso.contacto ?? '',
+    ubicacion: adiso.ubicacion ?? 'Perú',
+    fechaPublicacion: adiso.fechaPublicacion ?? '',
+    horaPublicacion: adiso.horaPublicacion ?? '',
+    ...adiso,
+  } as Adiso);
 }

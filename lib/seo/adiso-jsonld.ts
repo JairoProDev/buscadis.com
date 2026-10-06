@@ -2,6 +2,7 @@ import type { Adiso } from '@/types';
 import { getAdisoUrl } from '@/lib/url';
 import { getSiteUrl, resolveAdisoOgImage } from '@/lib/seo/og-image';
 import { sanitizeAdisoDescripcion, toDisplayTitle } from '@/lib/adiso-display';
+import { BUSCADIS_LEGAL_NAME } from '@/lib/legal/operator';
 
 function locationLabel(adiso: Adiso): string {
   if (typeof adiso.ubicacion === 'string' && adiso.ubicacion.trim()) {
@@ -18,7 +19,118 @@ function locationLabel(adiso: Adiso): string {
   return 'Perú';
 }
 
-/** Product + Offer JSON-LD for an adiso detail page. */
+function jobLocationPlace(adiso: Adiso): Record<string, unknown> {
+  const label = locationLabel(adiso);
+  if (adiso.ubicacion && typeof adiso.ubicacion === 'object') {
+    return {
+      '@type': 'Place',
+      address: {
+        '@type': 'PostalAddress',
+        addressLocality: adiso.ubicacion.distrito || label,
+        addressRegion: adiso.ubicacion.provincia || adiso.ubicacion.departamento,
+        addressCountry: 'PE',
+      },
+    };
+  }
+  return {
+    '@type': 'Place',
+    address: {
+      '@type': 'PostalAddress',
+      addressLocality: label,
+      addressCountry: 'PE',
+    },
+  };
+}
+
+function datePostedIso(adiso: Adiso): string {
+  const date = adiso.fechaPublicacion || new Date().toISOString().slice(0, 10);
+  const time = adiso.horaPublicacion || '09:00';
+  return `${date}T${time}:00-05:00`;
+}
+
+function hiringOrganizationName(adiso: Adiso): string {
+  const vendor = adiso.vendedor?.nombre?.trim();
+  if (vendor) return vendor;
+  const fromPrivate =
+    typeof adiso.privateData?.empresa === 'string'
+      ? adiso.privateData.empresa.trim()
+      : '';
+  if (fromPrivate) return fromPrivate;
+  return 'Empleador publicado en Buscadis';
+}
+
+export function buildAdisoBreadcrumbJsonLd(adiso: Adiso): Record<string, unknown> {
+  const siteUrl = getSiteUrl();
+  const path = getAdisoUrl(adiso);
+  const title = toDisplayTitle(adiso.titulo) || adiso.titulo;
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Buscadis', item: siteUrl },
+      {
+        '@type': 'ListItem',
+        position: 2,
+        name: adiso.categoria,
+        item: `${siteUrl}/categoria/${adiso.categoria}`,
+      },
+      { '@type': 'ListItem', position: 3, name: title, item: `${siteUrl}${path}` },
+    ],
+  };
+}
+
+export function buildAdisoJobPostingJsonLd(adiso: Adiso): Record<string, unknown> {
+  const siteUrl = getSiteUrl();
+  const path = getAdisoUrl(adiso);
+  const url = `${siteUrl}${path}`;
+  const title = toDisplayTitle(adiso.titulo) || adiso.titulo;
+  const description =
+    sanitizeAdisoDescripcion(adiso.descripcion)?.slice(0, 5000) ||
+    `Vacante: ${title}. Publicada en Buscadis, Perú.`;
+  const hasSalary = typeof adiso.precio === 'number' && adiso.precio > 0;
+
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'JobPosting',
+    title,
+    description,
+    identifier: {
+      '@type': 'PropertyValue',
+      name: 'Buscadis',
+      value: adiso.id,
+    },
+    url,
+    datePosted: datePostedIso(adiso),
+    validThrough: adiso.expiresAt || undefined,
+    employmentType: 'FULL_TIME',
+    hiringOrganization: {
+      '@type': 'Organization',
+      name: hiringOrganizationName(adiso),
+      sameAs: siteUrl,
+    },
+    jobLocation: jobLocationPlace(adiso),
+    ...(hasSalary
+      ? {
+          baseSalary: {
+            '@type': 'MonetaryAmount',
+            currency: adiso.moneda || 'PEN',
+            value: {
+              '@type': 'QuantitativeValue',
+              unitText: 'MONTH',
+              value: adiso.precio,
+            },
+          },
+        }
+      : {}),
+    applicantLocationRequirements: {
+      '@type': 'Country',
+      name: 'Perú',
+    },
+    directApply: true,
+  };
+}
+
+/** Product + Offer JSON-LD for non-job adisos. */
 export function buildAdisoProductJsonLd(adiso: Adiso): Record<string, unknown> {
   const siteUrl = getSiteUrl();
   const path = getAdisoUrl(adiso);
@@ -38,6 +150,7 @@ export function buildAdisoProductJsonLd(adiso: Adiso): Record<string, unknown> {
     image: image ? [image] : undefined,
     url,
     category: adiso.categoria,
+    brand: { '@type': 'Brand', name: BUSCADIS_LEGAL_NAME },
     offers: {
       '@type': 'Offer',
       url,
@@ -50,6 +163,27 @@ export function buildAdisoProductJsonLd(adiso: Adiso): Record<string, unknown> {
         : 'https://schema.org/InStock',
       areaServed: locationLabel(adiso),
     },
+  };
+}
+
+/** Breadcrumb + primary entity (JobPosting or Product) for adiso detail. */
+export function buildAdisoPageJsonLd(adiso: Adiso): Record<string, unknown> {
+  const primary =
+    adiso.categoria === 'empleos'
+      ? buildAdisoJobPostingJsonLd(adiso)
+      : buildAdisoProductJsonLd(adiso);
+  const breadcrumb = buildAdisoBreadcrumbJsonLd(adiso);
+  const { '@context': _c, ...primaryNode } = primary as {
+    '@context': string;
+    [key: string]: unknown;
+  };
+  const { '@context': _b, ...breadcrumbNode } = breadcrumb as {
+    '@context': string;
+    [key: string]: unknown;
+  };
+  return {
+    '@context': 'https://schema.org',
+    '@graph': [breadcrumbNode, primaryNode],
   };
 }
 

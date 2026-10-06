@@ -17,6 +17,9 @@ export default function GlobalError({
 
   return (
     <html lang="es">
+      <head>
+        <meta name="robots" content="noindex, nofollow" />
+      </head>
       <body>
         <div style={{ padding: '2rem', textAlign: 'center', fontFamily: 'system-ui, sans-serif' }}>
           <h2>Algo salió mal</h2>

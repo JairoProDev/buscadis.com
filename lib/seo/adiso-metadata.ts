@@ -38,6 +38,12 @@ export function buildAdisoMetadata(adiso: Adiso): Metadata {
   const priv = adiso.privateData as { noindex_until_claimed?: boolean; pending_owner_transfer?: boolean } | undefined;
   const noindex = Boolean(priv?.noindex_until_claimed && priv?.pending_owner_transfer);
 
+  let publishedTime: string | undefined;
+  if (adiso.fechaPublicacion) {
+    const time = adiso.horaPublicacion || '09:00';
+    publishedTime = `${adiso.fechaPublicacion}T${time}:00-05:00`;
+  }
+
   return {
     title,
     description,
@@ -51,6 +57,8 @@ export function buildAdisoMetadata(adiso: Adiso): Metadata {
       images: [{ url: imageUrl, width: 1200, height: 630, alt: adiso.titulo }],
       locale: 'es_PE',
       type: 'article',
+      publishedTime,
+      modifiedTime: publishedTime,
     },
     twitter: {
       card: 'summary_large_image',

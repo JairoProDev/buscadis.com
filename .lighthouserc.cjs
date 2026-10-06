@@ -1,10 +1,17 @@
+const baseUrl = process.env.LHCI_BASE_URL || 'http://127.0.0.1:3000';
+
 module.exports = {
   ci: {
     collect: {
-      url: ['http://127.0.0.1:3000/v/demo'],
+      url: [
+        `${baseUrl}/`,
+        `${baseUrl}/categoria/empleos`,
+        `${baseUrl}/l/cusco/empleos`,
+        `${baseUrl}/buscar?q=empleo`,
+        `${baseUrl}/v/demo`,
+      ],
       numberOfRuns: 1,
       settings: {
-        // Presupuesto doc 08: Moto G / 4G → LCP < 1.8s
         preset: 'mobile',
         throttlingMethod: 'simulate',
         throttling: {
@@ -19,7 +26,7 @@ module.exports = {
         'largest-contentful-paint': ['error', { maxNumericValue: 1800 }],
         'cumulative-layout-shift': ['error', { maxNumericValue: 0.05 }],
         'total-byte-weight': ['warn', { maxNumericValue: 600000 }],
-        'interactive': ['warn', { maxNumericValue: 3500 }],
+        interactive: ['warn', { maxNumericValue: 3500 }],
       },
     },
     upload: {

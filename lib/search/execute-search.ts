@@ -6,6 +6,11 @@ import { rerankSearchResults, type ScoredAdiso } from './rerank';
 import { adisoMatchesSearchQuery, searchQueryRelevanceScore } from '@/lib/search/query-match';
 import { Adiso, Categoria } from '@/types';
 import type { UserInterestProfile } from '@/lib/interactions';
+import {
+  isTypesenseConfigured,
+  searchMarketplaceIds,
+} from '@/lib/search/typesense-marketplace';
+import { getAdisoByIdFromSupabase } from '@/lib/supabase';
 
 export interface ExecuteSearchParams {
   query: string;
@@ -21,7 +26,7 @@ export interface ExecuteSearchResult {
   scores: Record<string, number>;
   normalizedQuery: ReturnType<typeof normalizeQuery>;
   alternativeQueries: string[];
-  source: 'hybrid' | 'trgm' | 'hybrid+trgm';
+  source: 'hybrid' | 'trgm' | 'hybrid+trgm' | 'typesense+hybrid';
 }
 
 function mapRowToAdiso(row: Record<string, unknown>): Adiso {
@@ -159,7 +164,31 @@ export async function executeSearch(params: ExecuteSearchParams): Promise<Execut
   let scored: ScoredAdiso[] = [];
   let source: ExecuteSearchResult['source'] = 'hybrid';
 
+  if (isTypesenseConfigured()) {
+    const ids = await searchMarketplaceIds(
+      normalized.raw,
+      maxResults,
+      filterCategory
+    );
+    if (ids.length > 0) {
+      const loaded = await Promise.all(ids.map((id) => getAdisoByIdFromSupabase(id)));
+      scored = loaded
+        .filter((a): a is Adiso => Boolean(a))
+        .map((adiso, index) => ({
+          adiso,
+          score: 1 - index * 0.01,
+          hybrid_score: 1 - index * 0.01,
+          rerank_score: 1 - index * 0.01,
+        }));
+      source = 'typesense+hybrid';
+    }
+  }
+
   try {
+    if (scored.length >= maxResults) {
+      // skip hybrid when Typesense filled the page
+      throw new Error('typesense_sufficient');
+    }
     const hybridResults = await hybridSearch({
       // Use raw query for embedding + FTS. Expanded synonym soup ANDs in plainto_tsquery and kills matches.
       query: normalized.raw,
@@ -170,16 +199,31 @@ export async function executeSearch(params: ExecuteSearchParams): Promise<Execut
       onlyActive: true,
     });
 
-    scored = hybridResults.map((r) => ({
+    const hybridScored = hybridResults.map((r) => ({
       adiso: r.adiso,
       score: r.rerank_score ?? r.hybrid_score,
       hybrid_score: r.hybrid_score,
       rerank_score: r.rerank_score,
     }));
+    if (scored.length > 0 && source === 'typesense+hybrid') {
+      const byId = new Map(scored.map((s) => [s.adiso.id, s]));
+      for (const hit of hybridScored) {
+        if (!byId.has(hit.adiso.id)) byId.set(hit.adiso.id, hit);
+      }
+      scored = [...byId.values()];
+    } else {
+      scored = hybridScored;
+    }
   } catch (err) {
-    console.warn('[search] hybrid failed, using trgm:', err);
-    scored = await trgmFallback(normalized.raw, maxResults);
-    source = 'trgm';
+    if (err instanceof Error && err.message === 'typesense_sufficient') {
+      // keep Typesense hits only
+    } else {
+      console.warn('[search] hybrid failed, using trgm:', err);
+      if (scored.length === 0) {
+        scored = await trgmFallback(normalized.raw, maxResults);
+        source = 'trgm';
+      }
+    }
   }
 
   // Only pad with trigram when hybrid returned nothing — never dilute good matches with fuzzy noise

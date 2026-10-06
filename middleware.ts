@@ -5,6 +5,8 @@ import {
   isPerfilVivoHardCutover,
   listPerfilVivoEnvCohort,
 } from '@/lib/business/perfil-vivo-flag';
+import { APEX_HOST } from '@/lib/seo/canonical-site';
+import { PRODUCTION_CANONICAL_ORIGIN } from '@/lib/qr/resolve-url';
 
 /**
  * Rutas canónicas de perfil Buscadis:
@@ -34,8 +36,14 @@ export function middleware(req: NextRequest) {
   const { pathname, search } = req.nextUrl;
 
   if (LEGACY_QR_HOSTS.has(host)) {
-    const canonical = 'https://www.buscadis.com';
-    return NextResponse.redirect(`${canonical}${pathname}${search}`, 308);
+    return NextResponse.redirect(`${PRODUCTION_CANONICAL_ORIGIN}${pathname}${search}`, 308);
+  }
+
+  if (host === APEX_HOST) {
+    return NextResponse.redirect(
+      `${PRODUCTION_CANONICAL_ORIGIN}${pathname}${search}`,
+      308
+    );
   }
 
   const pMatch = pathname.match(/^\/p\/([^/?#]+)\/?$/);

@@ -149,9 +149,9 @@ const nextConfig = {
 
 const withPwa = require('@ducanh2912/next-pwa').default({
   dest: 'public',
-  cacheOnFrontEndNav: true,
-  aggressiveFrontEndNavCaching: true,
-  reloadOnOnline: false,
+  cacheOnFrontEndNav: process.env.NEXT_PUBLIC_PWA_NAV_CACHE === '1',
+  aggressiveFrontEndNavCaching: false,
+  reloadOnOnline: true,
   disable: process.env.NODE_ENV === 'development',
   workboxOptions: {
     skipWaiting: true,

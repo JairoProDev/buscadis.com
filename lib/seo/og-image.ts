@@ -7,8 +7,10 @@ export const DEFAULT_OG_IMAGE_ALT =
 export const DEFAULT_OG_IMAGE_WIDTH = 1200;
 export const DEFAULT_OG_IMAGE_HEIGHT = 630;
 
+import { getCanonicalSiteUrl } from '@/lib/seo/canonical-site';
+
 export function getSiteUrl(): string {
-  return (process.env.NEXT_PUBLIC_SITE_URL || 'https://buscadis.com').replace(/\/$/, '');
+  return getCanonicalSiteUrl();
 }
 
 export function getDefaultOgImageUrl(): string {

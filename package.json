@@ -22,6 +22,8 @@
     "db:migrations": "npx supabase migration list --linked",
     "db:migrate": "node scripts/supabase-migrate.mjs",
     "search:sync-typesense": "node scripts/sync-typesense.mjs",
+    "search:sync-marketplace": "npx tsx scripts/sync-typesense-marketplace.ts",
+    "test:seo": "npx tsx lib/seo/__tests__/run.ts",
     "deals:seed": "node scripts/seed-deal-clips.mjs",
     "seed:buscadis": "npx tsx scripts/seed-buscadis-profile.ts",
     "demo:buscadis": "npm run seed:buscadis && npm run dev",

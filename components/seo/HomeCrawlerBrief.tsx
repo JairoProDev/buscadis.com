@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { BUSCADIS_LEGAL_NAME, BUSCADIS_PURPOSE_SUMMARY } from '@/lib/legal/operator';
+import { getCuscoHubPath } from '@/lib/seo/cusco-hubs';
 
 /**
  * Copy de propósito en HTML inicial para crawlers y lectores de pantalla.
@@ -12,6 +13,13 @@ export function HomeCrawlerBrief() {
       <h1>Buscadis</h1>
       <p>{BUSCADIS_PURPOSE_SUMMARY}</p>
       <p>Operado por {BUSCADIS_LEGAL_NAME}.</p>
+      <p>
+        <Link href={getCuscoHubPath('empleos')}>Empleos en Cusco</Link>
+        {' · '}
+        <Link href={getCuscoHubPath('inmuebles')}>Inmuebles en Cusco</Link>
+        {' · '}
+        <Link href="/categoria/empleos">Empleos en Perú</Link>
+      </p>
       <p>
         <Link href="/privacidad">Política de privacidad</Link>
         {' · '}

@@ -14,6 +14,7 @@ import SessionTracker from '@/components/SessionTracker';
 import AnalyticsProvider from '@/components/analytics/AnalyticsProvider';
 import ReferralCapture from '@/components/auth/ReferralCapture';
 import NativeWebViewBootstrap from '@/components/NativeWebViewBootstrap';
+import ChunkRecoveryBootstrap from '@/components/ChunkRecoveryBootstrap';
 import SiteFloatingActions from '@/components/SiteFloatingActions';
 import {
   buildDefaultOgImageMeta,
@@ -182,6 +183,7 @@ export default function RootLayout({
                   <AdisosGratuitosCacheProvider>
                     <NavigationProvider>
                       <NativeWebViewBootstrap />
+                      <ChunkRecoveryBootstrap />
                       <SessionTracker />
                       <AnalyticsProvider />
                       <ReferralCapture />

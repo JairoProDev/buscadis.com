@@ -34,9 +34,13 @@ export async function generateMetadata({ searchParams }: PageProps): Promise<Met
   const categoria =
     typeof params.categoria === 'string' ? params.categoria.trim().toLowerCase() : undefined;
   if (categoria && isMarketplaceCategory(categoria)) {
-    return buildCategoryShareMetadata(categoria, {
-      urlPath: `/?categoria=${categoria}`,
+    const meta = buildCategoryShareMetadata(categoria, {
+      urlPath: `/categoria/${categoria}`,
     });
+    return {
+      ...meta,
+      alternates: { canonical: `/categoria/${categoria}` },
+    };
   }
 
   const adisoId = typeof params.adiso === 'string' ? params.adiso : undefined;

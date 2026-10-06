@@ -24,7 +24,7 @@ export interface SuggestHit {
   completionSuffix?: string;
 }
 
-function getTypesenseConfig() {
+export function getTypesenseConfig() {
   const host = process.env.TYPESENSE_HOST;
   const apiKey = process.env.TYPESENSE_API_KEY;
   const port = process.env.TYPESENSE_PORT ?? '443';

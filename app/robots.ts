@@ -1,21 +1,21 @@
 import { MetadataRoute } from 'next';
-
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://buscadis.com';
+import { getSiteUrl } from '@/lib/seo/og-image';
 
 export default function robots(): MetadataRoute.Robots {
+  const siteUrl = getSiteUrl();
+
   return {
     rules: [
       {
         userAgent: '*',
         allow: '/',
-        disallow: ['/api/', '/admin/', '/mi-negocio/'],
+        disallow: ['/api/', '/admin/', '/mi-negocio/', '/ocultos/', '/chat/'],
       },
       {
         userAgent: 'Googlebot',
         allow: '/',
-        disallow: ['/api/', '/admin/', '/mi-negocio/'],
+        disallow: ['/api/', '/admin/', '/mi-negocio/', '/ocultos/', '/chat/'],
       },
-      // AEO: permitir citación por IAs (08 §5)
       { userAgent: 'GPTBot', allow: '/' },
       { userAgent: 'ChatGPT-User', allow: '/' },
       { userAgent: 'PerplexityBot', allow: '/' },

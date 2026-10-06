@@ -6,6 +6,7 @@ import { JsonLd } from '@/components/seo/JsonLd';
 import { isPerfilVivoEnabled } from '@/lib/business/perfil-vivo-flag';
 import { PerfilVivoPageView, loadPerfilVivoPayload } from '@/components/business/PerfilVivoPageView';
 import { buildPerfilVivoShareMetadata } from '@/lib/seo/perfil-vivo-metadata';
+import { getBusinessProfileShareUrl } from '@/lib/seo/business-metadata';
 import PublicBusinessPageClient from './PublicBusinessPageClient';
 
 export const revalidate = 60;
@@ -52,7 +53,7 @@ export async function generateMetadata({ params, searchParams }: PageProps): Pro
   return {
     title,
     description,
-    alternates: { canonical: `https://buscadis.com/@${slug}` },
+    alternates: { canonical: getBusinessProfileShareUrl(slug) },
     robots: {
       index: profile.is_published !== false,
       follow: true,

@@ -6,7 +6,8 @@ import { getIdFromSlug, getAdisoUrl, createAdisoTitleSlug } from '@/lib/url';
 import ClientAdisoWrapper from '@/components/ClientAdisoWrapper';
 import { JsonLd } from '@/components/seo/JsonLd';
 import { buildAdisoMetadata } from '@/lib/seo/adiso-metadata';
-import { buildAdisoProductJsonLd } from '@/lib/seo/adiso-jsonld';
+import { buildAdisoPageJsonLd } from '@/lib/seo/adiso-jsonld';
+import { AdisoCrawlerSection } from '@/components/seo/AdisoCrawlerSection';
 import type { Adiso } from '@/types';
 
 export const revalidate = 3600;
@@ -54,7 +55,8 @@ export default async function AdisoShortPage(props: PageProps) {
 
   return (
     <>
-      <JsonLd data={buildAdisoProductJsonLd(adiso)} />
+      <JsonLd data={buildAdisoPageJsonLd(adiso)} />
+      <AdisoCrawlerSection adiso={adiso} />
       <ClientAdisoWrapper id={adiso.id} initialAdiso={adiso} />
     </>
   );
