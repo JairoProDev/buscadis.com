@@ -213,6 +213,51 @@ export interface CardListingTime {
   title?: string;
 }
 
+/** Fecha y hora exactas (ancla de recencia del feed). */
+export function formatPublicationExactAt(adiso: Adiso): string | null {
+  const anchorMs = getFeedRecencyAnchorMs(adiso);
+  if (anchorMs <= 0) return null;
+  return new Date(anchorMs).toLocaleString('es-PE', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+}
+
+export function getPublicationIsoDatetime(adiso: Adiso): string | undefined {
+  const anchorMs = getFeedRecencyAnchorMs(adiso);
+  if (anchorMs <= 0) return undefined;
+  return new Date(anchorMs).toISOString();
+}
+
+/** Hora corta para overlay de cards (mismo día → solo hora). */
+export function formatPublicationExactShort(adiso: Adiso): string | null {
+  const anchorMs = getFeedRecencyAnchorMs(adiso);
+  if (anchorMs <= 0) return null;
+  const d = new Date(anchorMs);
+  const now = new Date();
+  if (d.toDateString() === now.toDateString()) {
+    return d.toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' });
+  }
+  return d.toLocaleString('es-PE', {
+    day: 'numeric',
+    month: 'short',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+}
+
+function withPublicationExactTooltip(adiso: Adiso, item: CardListingTime): CardListingTime {
+  const exact = formatPublicationExactAt(adiso);
+  if (!exact) return item;
+  return {
+    ...item,
+    title: [item.title, exact].filter(Boolean).join(' · '),
+  };
+}
+
 /**
  * Recencia mostrada en cards: alineada con el feed (publicación vs bump/promo).
  * - Resubida/promo reciente → "Resubido · …"
@@ -232,25 +277,28 @@ export function formatCardListingTime(adiso: Adiso): CardListingTime | null {
     bumpMs > 0 && pubMs > 0 && bumpMs - pubMs >= RESUBIDO_MIN_GAP_MS && bumpMs >= anchorMs - 60_000;
 
   if (bumpedRecently) {
-    return {
+    return withPublicationExactTooltip(adiso, {
       label: `Resubido · ${relative}`,
       title: 'Volvió a aparecer arriba tras una resubida o promoción',
-    };
+    });
   }
 
   if (isCatalog) {
     if (pubMs <= 0) {
-      return { label: 'Recién en catálogo', title: 'Producto agregado al catálogo del negocio' };
+      return withPublicationExactTooltip(adiso, {
+        label: 'Recién en catálogo',
+        title: 'Producto agregado al catálogo del negocio',
+      });
     }
     if (anchorMs > pubMs + 60_000) {
-      return {
+      return withPublicationExactTooltip(adiso, {
         label: `Actualizado · ${relative}`,
         title: 'Producto del catálogo actualizado recientemente',
-      };
+      });
     }
   }
 
-  return { label: relative };
+  return withPublicationExactTooltip(adiso, { label: relative });
 }
 
 /** @deprecated Usar formatCardListingTime — mantiene compatibilidad breve */

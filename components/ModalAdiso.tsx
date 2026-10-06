@@ -66,7 +66,11 @@ import {
   getCardDescriptionSnippet,
   toDisplayTitle,
   formatPrecioDisplay,
+  formatCardListingTime,
+  formatPublicationExactAt,
+  formatUbicacionCorta,
   getCategoriaLabel,
+  getPublicationIsoDatetime,
 } from '@/lib/adiso-display';
 import { ExternalContactChannel, resolveExternalContact, isLeadCaptureAd, getOpsLeadWhatsAppUrl } from '@/lib/adiso-contact';
 
@@ -950,6 +954,47 @@ export default function ModalAdiso({
       <h2 style={{ fontSize: '1.25rem', fontWeight: 700, lineHeight: 1.25, color: 'var(--text-primary)' }}>
         {displayTitle}
       </h2>
+
+      {(() => {
+        const listingTime = formatCardListingTime(adiso);
+        const exact = formatPublicationExactAt(adiso);
+        const ubicacionCorta = formatUbicacionCorta(adiso.ubicacion);
+        if (!listingTime && !ubicacionCorta) return null;
+        return (
+          <div
+            style={{
+              display: 'flex',
+              flexWrap: 'wrap',
+              gap: '12px 16px',
+              fontSize: '0.8125rem',
+              color: 'var(--text-secondary)',
+            }}
+          >
+            {ubicacionCorta && (
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                <IconLocation size={15} color="var(--brand-blue)" />
+                {ubicacionCorta}
+              </span>
+            )}
+            {listingTime && (
+              <time
+                dateTime={getPublicationIsoDatetime(adiso)}
+                title={listingTime.title}
+                style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}
+                suppressHydrationWarning
+              >
+                <IconClock size={15} />
+                <span>
+                  {listingTime.label}
+                  {exact ? (
+                    <span style={{ color: 'var(--text-tertiary)' }}> · {exact}</span>
+                  ) : null}
+                </span>
+              </time>
+            )}
+          </div>
+        );
+      })()}
 
       {displayDescription && fieldIsRevealed('descripcion') && (
         <div style={{ fontSize: '0.9375rem', lineHeight: 1.55, color: 'var(--text-secondary)', whiteSpace: 'pre-wrap' }}>

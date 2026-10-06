@@ -40,6 +40,8 @@ import {
   formatUbicacionCorta,
   toDisplayTitle,
   formatCardListingTime,
+  formatPublicationExactShort,
+  getPublicationIsoDatetime,
   getJobSalaryLabel,
 } from '@/lib/adiso-display';
 import FlyerCanvas from '@/components/flyer/FlyerCanvas';
@@ -120,6 +122,7 @@ const AdisoCard = forwardRef<HTMLDivElement, AdisoCardProps>(
     const priceDisplay = salaryLabel || priceLabel;
     const isCatalogProduct = adiso.privateData?.source === 'catalog_product';
     const listingTime = formatCardListingTime(adiso);
+    const exactTimeShort = formatPublicationExactShort(adiso);
     const sellerName = getSellerDisplayName(adiso);
     const isPaused = adiso.estaActivo === false;
     const isDestacado =
@@ -381,7 +384,7 @@ const AdisoCard = forwardRef<HTMLDivElement, AdisoCardProps>(
           {extraFotos > 0 && (
             <span
               className={`absolute right-2 z-10 rounded-full border border-white/20 bg-black/55 px-2 py-0.5 text-[11px] font-semibold text-white ${
-                showMediaMeta ? 'bottom-9' : 'bottom-2'
+                showMediaMeta ? 'bottom-8' : 'bottom-2'
               }`}
             >
               +{extraFotos} {extraFotos === 1 ? 'foto' : 'fotos'}
@@ -390,13 +393,13 @@ const AdisoCard = forwardRef<HTMLDivElement, AdisoCardProps>(
 
           {showMediaMeta && (
             <div
-              className="pointer-events-none absolute inset-x-0 bottom-0 z-10 bg-gradient-to-t from-black/75 via-black/40 to-transparent px-2 pb-1.5 pt-7"
+              className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-10 bg-gradient-to-t from-black/80 via-black/45 to-transparent"
               aria-hidden={!timeOverlay?.title}
             >
-              <div className="flex items-end justify-between gap-2 text-[11px] font-medium leading-tight text-white">
+              <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-1.5 px-2 pb-1 text-[10px] font-medium leading-tight text-white">
                 {locationShort ? (
-                  <span className="flex min-w-0 flex-1 items-center gap-1 truncate drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)]">
-                    <IconLocation size={11} className="shrink-0 opacity-95" aria-hidden />
+                  <span className="flex min-w-0 flex-1 items-center gap-0.5 truncate drop-shadow-[0_1px_2px_rgba(0,0,0,0.65)]">
+                    <IconLocation size={10} className="shrink-0 opacity-95" aria-hidden />
                     <span className="truncate">{locationShort}</span>
                   </span>
                 ) : (
@@ -404,16 +407,15 @@ const AdisoCard = forwardRef<HTMLDivElement, AdisoCardProps>(
                 )}
                 {timeOverlay?.label && (
                   <time
-                    className="shrink-0 max-w-[52%] truncate text-right tabular-nums text-white/95 drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)]"
-                    dateTime={
-                      adiso.fechaPublicacion
-                        ? String(adiso.fechaPublicacion)
-                        : undefined
-                    }
+                    className="shrink-0 max-w-[58%] text-right text-white/95 drop-shadow-[0_1px_2px_rgba(0,0,0,0.65)]"
+                    dateTime={getPublicationIsoDatetime(adiso)}
                     title={timeOverlay.title}
                     suppressHydrationWarning
                   >
-                    {timeOverlay.label}
+                    <span className="block truncate tabular-nums">
+                      {timeOverlay.label}
+                      {exactTimeShort ? ` · ${exactTimeShort}` : ''}
+                    </span>
                   </time>
                 )}
               </div>

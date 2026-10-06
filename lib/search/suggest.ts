@@ -128,14 +128,14 @@ export async function syncAdisoToTypesense(
   });
   const { upsertAdisoMarketplace } = await import('./typesense-marketplace');
   await upsertAdisoMarketplace({
+    descripcion: '',
+    contacto: '',
+    ubicacion: 'Perú',
+    fechaPublicacion: '',
+    horaPublicacion: '',
+    ...adiso,
     id: adiso.id,
     titulo: adiso.titulo,
     categoria: adiso.categoria,
-    descripcion: adiso.descripcion ?? '',
-    contacto: adiso.contacto ?? '',
-    ubicacion: adiso.ubicacion ?? 'Perú',
-    fechaPublicacion: adiso.fechaPublicacion ?? '',
-    horaPublicacion: adiso.horaPublicacion ?? '',
-    ...adiso,
   } as Adiso);
 }

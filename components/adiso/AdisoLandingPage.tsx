@@ -17,8 +17,11 @@ import { chatContextFromAdiso } from '@/lib/chat/context-from-adiso';
 import { ExternalContactChannel, resolveExternalContact, isLeadCaptureAd, getOpsLeadWhatsAppUrl } from '@/lib/adiso-contact';
 import {
   formatPrecioDisplay,
+  formatCardListingTime,
+  formatPublicationExactAt,
   formatRelativePublishedAt,
   formatUbicacionCorta,
+  getPublicationIsoDatetime,
   getCategoriaLabel,
   getCtaLabelPorCategoria,
   getInAppCtaLabelPorCategoria,
@@ -141,7 +144,9 @@ export default function AdisoLandingPage({ adiso, onVolver }: AdisoLandingPagePr
   const displayDescription = getCardDescriptionSnippet(adiso.descripcion, 2000);
   const priceLabel = formatPrecioDisplay(adiso);
   const locationLabel = formatUbicacionCorta(adiso.ubicacion) || 'Perú';
-  const publishedLabel = formatRelativePublishedAt(adiso) || 'Recientemente';
+  const listingTime = formatCardListingTime(adiso);
+  const publishedRelative = listingTime?.label || formatRelativePublishedAt(adiso) || 'Recientemente';
+  const publishedExact = formatPublicationExactAt(adiso);
   const socialBadge = pickSocialBadge(adiso);
   const externalContact = resolveExternalContact(adiso);
   const ctaLabel = getCtaLabelPorCategoria(adiso.categoria);
@@ -393,7 +398,16 @@ export default function AdisoLandingPage({ adiso, onVolver }: AdisoLandingPagePr
         </span>
         <span className="flex items-center gap-1.5">
           <IconClock size={16} />
-          {publishedLabel}
+          <time
+            dateTime={getPublicationIsoDatetime(adiso)}
+            title={listingTime?.title}
+            suppressHydrationWarning
+          >
+            {publishedRelative}
+            {publishedExact ? (
+              <span className="text-[var(--text-tertiary)]"> · {publishedExact}</span>
+            ) : null}
+          </time>
         </span>
         {(adiso.vistas ?? 0) > 0 && (
           <span className="flex items-center gap-1.5">

@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState, useRef, useEffect, Suspense } from 'react';
+import React, { useState, useRef, useEffect, useCallback, useLayoutEffect, Suspense } from 'react';
+import { createPortal } from 'react-dom';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { useUser } from '@/hooks/useUser';
@@ -42,16 +43,68 @@ function UserMenuContent({ onProgressClick }: UserMenuProps) {
   const identity = useHeaderIdentity();
   const { t } = useTranslation();
   const [mostrarMenu, setMostrarMenu] = useState(false);
+  const [menuMounted, setMenuMounted] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const [menuStyle, setMenuStyle] = useState<React.CSSProperties>({});
+
+  const updateMenuPosition = useCallback(() => {
+    const el = triggerRef.current;
+    if (!el) return;
+    const rect = el.getBoundingClientRect();
+    const margin = 12;
+    const width = Math.min(300, window.innerWidth - margin * 2);
+    let left = rect.right - width;
+    left = Math.max(margin, Math.min(left, window.innerWidth - width - margin));
+    const maxHeight = Math.max(160, window.innerHeight - rect.bottom - margin);
+    setMenuStyle({
+      position: 'fixed',
+      top: rect.bottom + 8,
+      left,
+      width,
+      zIndex: 1101,
+      maxHeight: `min(85dvh, ${maxHeight}px)`,
+    });
+  }, []);
+
+  useEffect(() => {
+    setMenuMounted(true);
+  }, []);
+
+  useLayoutEffect(() => {
+    if (!mostrarMenu) return;
+    updateMenuPosition();
+  }, [mostrarMenu, updateMenuPosition]);
+
+  useEffect(() => {
+    if (!mostrarMenu) return;
+    const onReposition = () => updateMenuPosition();
+    window.addEventListener('resize', onReposition);
+    window.addEventListener('scroll', onReposition, true);
+    return () => {
+      window.removeEventListener('resize', onReposition);
+      window.removeEventListener('scroll', onReposition, true);
+    };
+  }, [mostrarMenu, updateMenuPosition]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
-        setMostrarMenu(false);
-      }
+      const target = event.target as Node;
+      if (triggerRef.current?.contains(target)) return;
+      if (menuRef.current?.contains(target)) return;
+      setMostrarMenu(false);
     };
     if (mostrarMenu) document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [mostrarMenu]);
+
+  useEffect(() => {
+    if (!mostrarMenu) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setMostrarMenu(false);
+    };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
   }, [mostrarMenu]);
 
   const goTo = (tab?: string) => {
@@ -128,6 +181,7 @@ function UserMenuContent({ onProgressClick }: UserMenuProps) {
     <div className="relative" ref={menuRef}>
       {/* Trigger */}
       <button
+        ref={triggerRef}
         type="button"
         onClick={() => setMostrarMenu(!mostrarMenu)}
         aria-expanded={mostrarMenu}
@@ -170,11 +224,22 @@ function UserMenuContent({ onProgressClick }: UserMenuProps) {
         />
       </button>
 
-      {mostrarMenu && (
-        <div
-          role="menu"
-          className="absolute right-0 top-[calc(100%+0.5rem)] z-[1001] w-[min(100vw-1.5rem,300px)] overflow-hidden rounded-2xl border border-[var(--border-color)] bg-[var(--bg-primary)] shadow-[var(--popover-shadow)]"
-        >
+      {mostrarMenu && menuMounted && typeof document !== 'undefined' && createPortal(
+        <>
+          <div
+            className="fixed inset-0 z-[1100] bg-black/25 sm:bg-transparent"
+            aria-hidden
+            onClick={() => setMostrarMenu(false)}
+          />
+          <div
+            ref={menuRef}
+            role="menu"
+            style={menuStyle}
+            className="flex flex-col overflow-hidden rounded-2xl border border-[var(--border-color)] bg-[var(--bg-primary)] shadow-[var(--popover-shadow)]"
+          >
+          <div
+            className="min-h-0 flex-1 overflow-y-auto overscroll-contain [-webkit-overflow-scrolling:touch]"
+          >
           {/* Cabecera */}
           <div className="border-b border-[var(--border-color)] p-1.5">
             <button
@@ -295,7 +360,7 @@ function UserMenuContent({ onProgressClick }: UserMenuProps) {
 
           <div className="mx-3 h-px bg-[var(--border-color)]" />
 
-          <div className="p-1.5">
+          <div className="p-1.5 pb-2">
             <MenuItem
               icon={<IconSignOut size={16} color={semantic.dangerFg} />}
               iconBg="bg-red-500/8"
@@ -304,7 +369,10 @@ function UserMenuContent({ onProgressClick }: UserMenuProps) {
               danger
             />
           </div>
+          </div>
         </div>
+        </>,
+        document.body,
       )}
     </div>
   );
