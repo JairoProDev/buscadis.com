@@ -13,6 +13,12 @@ Actualizado: **6 oct 2026**. Fuente: chats pegados en Cursor + lista WA + `data/
 
 ## Patrones que ya vimos
 
+### «¿Cuál es el más urgente?»
+
+- Sirve para **abrir** cuando hay muchos puestos (Raquel terminó publicando **los dos** en un solo aviso).
+- **No obligatorio:** si el cliente ya dijo que buscan, mejor **confirmar todos los puestos** y armar **un aviso** (o el plan mensual) en lugar de forzar uno solo.
+- Evitar en el 2.º mensaje: párrafos largos + «no somos postulantes» si ya dijeron Buscadis y ven el perfil.
+
 ### Apertura «Buenas, vi el aviso de… ¿Siguen buscando?»
 
 - **Funciona** cuando hay humano y necesidad real (Raquel, ferretera, Lalo).

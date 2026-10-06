@@ -185,18 +185,18 @@ export function defaultFlyerForCategory(categoria?: Categoria | string): {
   };
 }
 
-/** True when the card visual is a generated flyer (live or exported), not a user photo. */
+/** True when the card visual is a generated flyer (live), not a stored image file. */
 export function adisoUsesGeneratedCover(adiso: Pick<Adiso, 'imagenUrl' | 'imagenesUrls' | 'privateData'>): boolean {
+  const hasPhoto = Boolean(
+    adiso.imagenUrl?.trim() || adiso.imagenesUrls?.some((u) => u?.trim()),
+  );
+  if (hasPhoto) return false;
+
   const priv =
     adiso.privateData && typeof adiso.privateData === 'object'
       ? (adiso.privateData as Record<string, unknown>)
       : {};
-  if (priv.coverSource === 'template') return true;
   if (priv.coverSource === 'user') return false;
-  // Published with flyer metadata → treat as generated even if JPEG export exists
-  if (isFlyerTemplateId(priv.flyerTemplateId)) return true;
-  const hasPhoto = Boolean(
-    adiso.imagenUrl?.trim() || adiso.imagenesUrls?.some((u) => u?.trim())
-  );
-  return !hasPhoto;
+  if (priv.coverSource === 'template' || isFlyerTemplateId(priv.flyerTemplateId)) return true;
+  return true;
 }

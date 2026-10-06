@@ -21,7 +21,6 @@ import { useAdisoCardActions, type AdisoCardActionId } from '@/hooks/useAdisoCar
 import AdisoCardActionsSheet from '@/components/adiso/AdisoCardActionsSheet';
 import {
   getListingThumbnailUrl,
-  LISTING_CARD_IMAGE_WIDTH,
   listingCardGridPhotoClass,
   listingCardListThumbImageClass,
   listingCardMediaAspectClass,
@@ -379,7 +378,7 @@ const AdisoCard = forwardRef<HTMLDivElement, AdisoCardProps>(
         )}
 
         <div
-          className={`relative flex-shrink-0 overflow-hidden rounded-[var(--bs-radius-lg,var(--card-radius))] ${listingCardMediaAspectClass(vista, isCatalogProduct, false)} ${
+          className={`relative flex-shrink-0 overflow-hidden rounded-[var(--bs-radius-lg,var(--card-radius))] ${listingCardMediaAspectClass(vista, isCatalogProduct, showUserPhoto)} ${
             isDestacado ? 'ring-2 ring-[var(--bs-color-sol-400)]' : ''
           } ${longPressActive ? 'z-[50] shadow-2xl ring-2 ring-white/40' : ''}`}
           style={{
@@ -418,7 +417,7 @@ const AdisoCard = forwardRef<HTMLDivElement, AdisoCardProps>(
           {showUserPhoto ? (
             vista === 'list' ? (
               <Image
-                src={getListingThumbnailUrl(imagenUrl)!}
+                src={getListingThumbnailUrl(imagenUrl, undefined, { variant: 'listThumb' })!}
                 alt={displayTitle}
                 fill
                 unoptimized={shouldBypassVercelImageOptimization(imagenUrl)}
@@ -427,15 +426,13 @@ const AdisoCard = forwardRef<HTMLDivElement, AdisoCardProps>(
                 loading="lazy"
               />
             ) : (
-              <Image
+              // eslint-disable-next-line @next/next/no-img-element -- URL original; sin recorte Supabase render
+              <img
                 src={getListingThumbnailUrl(imagenUrl)!}
                 alt={displayTitle}
-                width={LISTING_CARD_IMAGE_WIDTH}
-                height={LISTING_CARD_IMAGE_WIDTH}
-                unoptimized={shouldBypassVercelImageOptimization(imagenUrl)}
-                sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 20vw"
                 className={`${listingCardGridPhotoClass()} motion-reduce:transition-none`}
                 loading="lazy"
+                decoding="async"
               />
             )
           ) : (

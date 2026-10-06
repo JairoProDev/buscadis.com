@@ -22,33 +22,59 @@ export function isSupabaseStorageUrl(src: string): boolean {
   }
 }
 
+/** Original public object URL (no Supabase render — evita recorte cover por `?width=`). */
+export function supabaseStorageObjectPublicUrl(src: string): string {
+  try {
+    const u = new URL(src);
+    u.pathname = u.pathname.replace(
+      '/storage/v1/render/image/public/',
+      '/storage/v1/object/public/',
+    );
+    u.search = '';
+    return u.toString();
+  } catch {
+    return src;
+  }
+}
+
 /**
- * Supabase render endpoint: WebP/JPEG at target width (quality 80).
- * Non-Supabase URLs unchanged (may still use Next/Image on detail pages).
+ * Imagen para cards del feed/grid: archivo original escalado en CSS (ancho 100%).
+ * No usar `/render/image?width=` solo: Supabase/imgproxy recorta con modo cover por defecto.
  */
 export function getListingThumbnailUrl(
   src: string | undefined | null,
-  width: number = LISTING_CARD_IMAGE_WIDTH
+  width: number = LISTING_CARD_IMAGE_WIDTH,
+  options?: { variant?: 'feed' | 'listThumb' },
 ): string | undefined {
   if (!src) return undefined;
   if (!isSupabaseStorageUrl(src)) return src;
 
+  const variant = options?.variant ?? 'feed';
+
   try {
     const u = new URL(src);
+
+    if (variant === 'feed') {
+      return supabaseStorageObjectPublicUrl(u.toString());
+    }
+
+    // Miniatura lista: transformar con contain (nunca cover).
     if (u.pathname.includes('/render/image/')) {
-      u.searchParams.set('width', String(width));
-      u.searchParams.set('quality', '80');
-      return u.toString();
+      u.pathname = u.pathname.replace(
+        '/storage/v1/render/image/public/',
+        '/storage/v1/object/public/',
+      );
     }
     if (!u.pathname.includes('/object/public/')) return src;
 
     u.pathname = u.pathname.replace(
       '/storage/v1/object/public/',
-      '/storage/v1/render/image/public/'
+      '/storage/v1/render/image/public/',
     );
     u.search = new URLSearchParams({
       width: String(width),
       quality: '80',
+      resize: 'contain',
     }).toString();
     return u.toString();
   } catch {
@@ -85,12 +111,15 @@ export function listingCardGridPhotoClass(): string {
 export function listingCardMediaAspectClass(
   vista: 'list' | 'grid' | 'feed',
   isCatalogProduct: boolean,
-  _portraitJobFlyer: boolean,
+  hasUserPhoto: boolean,
 ): string {
   if (vista === 'list') {
     return isCatalogProduct
       ? 'h-[112px] w-[112px] shrink-0'
       : 'h-24 w-24 shrink-0 md:h-24 md:w-24';
+  }
+  if (hasUserPhoto) {
+    return 'w-full';
   }
   return 'aspect-square w-full';
 }

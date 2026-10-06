@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Adiso } from '@/types';
 import { getAdisosCache, getAdisos } from '@/lib/storage';
-import Image from 'next/image';
 import Link from 'next/link';
 import { getAdisoUrl } from '@/lib/url';
 import { IconLocation } from './Icons';
@@ -12,8 +11,6 @@ import { toDisplayTitle } from '@/lib/adiso-display';
 import {
   getListingThumbnailUrl,
   listingCardGridPhotoClass,
-  LISTING_CARD_IMAGE_WIDTH,
-  shouldBypassVercelImageOptimization,
 } from '@/lib/images/listing-image';
 
 interface SimilarAdisosProps {
@@ -99,18 +96,17 @@ export default function SimilarAdisos({ currentAdiso }: SimilarAdisosProps) {
           >
             <div
               className={`relative w-full bg-[var(--bg-secondary)] ${
-                usesGenerated ? 'aspect-[3/4]' : 'aspect-square'
+                usesGenerated ? 'aspect-[3/4]' : showPhoto ? '' : 'aspect-square'
               }`}
             >
               {showPhoto ? (
-                <Image
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
                   src={getListingThumbnailUrl(photo) || ''}
                   alt={displayTitle}
-                  width={LISTING_CARD_IMAGE_WIDTH}
-                  height={LISTING_CARD_IMAGE_WIDTH}
-                  unoptimized={shouldBypassVercelImageOptimization(photo)}
                   className={listingCardGridPhotoClass()}
-                  sizes="(max-width: 640px) 50vw, 200px"
+                  loading="lazy"
+                  decoding="async"
                 />
               ) : (
                 (() => {
