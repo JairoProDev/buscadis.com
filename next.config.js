@@ -96,12 +96,6 @@ const nextConfig = {
         destination: '/deals',
         permanent: true,
       },
-      // Next puede servir chunks en /sitemap/0.xml; robots y GSC esperan /sitemap.xml
-      {
-        source: '/sitemap.xml',
-        destination: '/sitemap/0.xml',
-        permanent: false,
-      },
     ];
 
     return redirects;
@@ -110,6 +104,8 @@ const nextConfig = {
     return {
       beforeFiles: [
         { source: '/@:slug', destination: '/negocio/:slug' },
+        // Índice completo (incl. chunks de adisos); el catch-all bloqueaba /sitemap.xml con notFound()
+        { source: '/sitemap.xml', destination: '/api/seo/sitemap-index' },
       ],
     };
   },

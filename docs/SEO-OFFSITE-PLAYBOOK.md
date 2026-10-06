@@ -14,11 +14,12 @@ Responsable: equipo Buscadis. Tiempo estimado primera pasada: **2–3 horas** + 
 
 ### 1.2 Sitemap
 
-1. GSC → **Sitemaps** → campo **solo ruta relativa** (sin `https://`): `sitemap/0.xml`  
-   - También válido tras deploy reciente: `sitemap.xml` (redirect interno al chunk principal).
-2. Estado esperado: “Correcto” en 24–48 h (primera lectura puede tardar horas).
-3. Si falla: comprobar en navegador `https://www.buscadis.com/sitemap/0.xml` (200 + URLs `/a/...`) y `NEXT_PUBLIC_SITE_URL=https://www.buscadis.com`.
-4. **Hecho en sesión (oct 2025):** enviado `sitemap/0.xml` en propiedad `sc-domain:buscadis.com`.
+1. GSC → **Sitemaps** → añadir **`sitemap.xml`** (ruta relativa, sin `https://`).
+   - Debe listar en el XML los chunks `/sitemap/0.xml`, `/sitemap/1.xml`, … (0 = categorías/hubs; 1+ = adisos).
+   - Si ya enviaste solo `sitemap/0.xml`, **añade también `sitemap.xml`** tras el deploy del índice (no borres el anterior).
+2. Estado esperado: “Correcto” en 24–48 h.
+3. Comprobar: `https://www.buscadis.com/sitemap.xml` (200, índice) y `https://www.buscadis.com/sitemap/1.xml` (200 con URLs `/a/...` si hay muchos avisos).
+4. `NEXT_PUBLIC_SITE_URL=https://www.buscadis.com`.
 
 ### 1.3 URL con snippet roto (chunk error)
 

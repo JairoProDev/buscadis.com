@@ -1,5 +1,13 @@
 # Estrategia de URLs (Buscadis)
 
+## Principios (por qué está así)
+
+1. **Una canónica por intención** — Google no castiga `?q=`; castiga duplicar el mismo contenido en muchas URLs sin `canonical`/redirect.
+2. **Home = app de browse** — En cliente, `/?categoria=&buscar=&adiso=` mantiene modal, atrás/adelante y filtros sin recargar. En **carga fría** (enlace compartido, crawler), el servidor **redirige** a `/categoria/…` o `/buscar/{slug}` cuando aplica.
+3. **Compartir ≠ barra del navegador** — “Copiar link de búsqueda” usa rutas legibles (`getBusquedaUrl`); la barra puede seguir en `/?buscar=` mientras navegas (no es la URL que indexamos).
+4. **Adisos estables** — `/a/{id}/{slug}`: el id es la verdad; el slug es legibilidad.
+5. **Sitemap** — `sitemap/0.xml` = hubs/categorías; `sitemap/1+` = adisos. **`/sitemap.xml` debe ser índice** de todos los chunks (no solo el 0).
+
 ## ¿Importan `?`, `q` y `=` para SEO?
 
 - **No son “malos”.** Google indexa URLs con query string sin problema.

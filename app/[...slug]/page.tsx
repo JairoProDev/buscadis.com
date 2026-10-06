@@ -24,7 +24,6 @@ const RESERVED_STATIC_PREFIXES = new Set([
   '_next',
   'favicon.ico',
   'robots.txt',
-  'sitemap.xml',
   'site.webmanifest',
   'manifest.json',
   'sw.js',

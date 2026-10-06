@@ -104,7 +104,7 @@ export default async function Home({ searchParams }: PageProps) {
     console.error('[home] SSR feed failed:', err);
   }
 
-  const listPath = categoria ? `/?categoria=${categoria}` : '/';
+  const listPath = categoria ? `/categoria/${categoria}` : '/';
   const listName = categoria
     ? `Adisos de ${categoria} en Buscadis`
     : 'Adisos recientes en Buscadis';

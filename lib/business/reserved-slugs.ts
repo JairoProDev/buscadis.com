@@ -44,6 +44,10 @@ export const RESERVED_BUSINESS_SLUGS = new Set([
   'comunidad',
   'adiso',
   'a',
+  'sitemap.xml',
+  'sitemap',
+  'buscar',
+  'l',
 ]);
 
 export function isReservedBusinessSlug(slug: string): boolean {

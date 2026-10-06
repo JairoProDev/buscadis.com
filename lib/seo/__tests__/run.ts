@@ -8,8 +8,10 @@ import { buildBuscadisOrganizationJsonLd } from '../organization-jsonld';
 import { buildAdisoPageJsonLd, buildAdisoJobPostingJsonLd } from '../adiso-jsonld';
 import { getCuscoHubPath, listCuscoHubPaths } from '../cusco-hubs';
 import { getSearchCanonicalPath, searchQueryToSlug, searchSlugToQuery } from '../search-url';
+import { buildSitemapIndexXml } from '../sitemap-index';
 import type { Adiso } from '@/types';
 
+async function main() {
 const url = getCanonicalSiteUrl();
 assert.match(url, /^https:\/\/www\.buscadis\.com$/);
 assert.equal(CANONICAL_HOST, 'www.buscadis.com');
@@ -45,6 +47,11 @@ assert.equal(searchQueryToSlug('Empleo Cusco'), 'empleo-cusco');
 assert.equal(searchSlugToQuery('empleo-cusco'), 'empleo cusco');
 assert.equal(getSearchCanonicalPath('empleo cusco'), '/buscar/empleo-cusco');
 
+const indexXml = await buildSitemapIndexXml();
+assert.match(indexXml, /<sitemapindex/);
+assert.match(indexXml, /\/sitemap\/0\.xml/);
+assert.doesNotMatch(indexXml, /&amp;amp;/);
+
 const paths = listCuscoHubPaths();
 assert.ok(paths.length >= 8);
 assert.equal(getCuscoHubPath('empleos'), '/l/cusco/empleos');
@@ -65,3 +72,9 @@ const inmGraph = buildAdisoPageJsonLd(inmueble)['@graph'] as Array<Record<string
 assert.ok(inmGraph.some((n) => n['@type'] === 'RealEstateListing'));
 
 console.log('✓ SEO regression checks passed');
+}
+
+main().catch((err) => {
+  console.error(err);
+  process.exit(1);
+});

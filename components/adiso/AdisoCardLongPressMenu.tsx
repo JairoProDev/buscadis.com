@@ -143,33 +143,36 @@ export default function AdisoCardLongPressMenu({
               return (
                 <motion.div
                   key={action.id}
-                  className={`pointer-events-none absolute flex h-12 w-12 -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center rounded-full border shadow-lg ${
-                    isHi
-                      ? 'scale-110 border-white bg-white text-[#1c1c1e]'
-                      : 'scale-100 border-white/25 bg-[#2c2c2e]/95 text-white'
-                  }`}
+                  className="pointer-events-none absolute flex -translate-x-1/2 -translate-y-1/2 flex-col items-center"
                   style={{ left: x, top: y }}
                   initial={{ scale: 0, opacity: 0 }}
-                  animate={{ scale: isHi ? 1.14 : 1, opacity: 1 }}
+                  animate={{ scale: 1, opacity: 1 }}
                   transition={{ type: 'spring', stiffness: 420, damping: 28 }}
                 >
-                  <Icon
-                    size={20}
-                    className={isHi && action.id === 'save' && isSaved ? 'text-red-500' : ''}
-                  />
+                  <div
+                    className={`flex h-12 w-12 items-center justify-center rounded-full border shadow-lg ${
+                      isHi
+                        ? 'scale-110 border-white bg-white text-[#1c1c1e]'
+                        : 'scale-100 border-white/25 bg-[#2c2c2e]/95 text-white'
+                    }`}
+                  >
+                    <Icon
+                      size={20}
+                      className={isHi && action.id === 'save' && isSaved ? 'text-red-500' : ''}
+                    />
+                  </div>
+                  {isHi && (
+                    <motion.span
+                      className="mt-1.5 max-w-[88px] text-center text-[11px] font-semibold leading-tight text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.85)]"
+                      initial={{ opacity: 0, y: 2 }}
+                      animate={{ opacity: 1, y: 0 }}
+                    >
+                      {action.label}
+                    </motion.span>
+                  )}
                 </motion.div>
               );
             })}
-            {highlighted && (
-              <motion.p
-                className="absolute max-w-[200px] -translate-x-1/2 text-center text-sm font-semibold text-white drop-shadow-md"
-                style={{ left: centerX, top: centerY + RADIAL_RADIUS_PX + 28 }}
-                initial={{ opacity: 0, y: 4 }}
-                animate={{ opacity: 1, y: 0 }}
-              >
-                {RADIAL_ACTIONS.find((a) => a.id === highlighted)?.label}
-              </motion.p>
-            )}
           </div>
         </>
       )}
