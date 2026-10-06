@@ -210,6 +210,28 @@
       "segment": "pipeline"
     },
     {
+      "title": "Restaurante Tradiciones Apurímac (Oswaldo)",
+      "business_name": "Tradiciones Apurímac",
+      "contact_name": "Oswaldo",
+      "contact_whatsapp": "984903140",
+      "etapa_label": "PIDIÓ PRECIO",
+      "plan": "Recomendar S/50 (varios puestos); S/30 prueba 1 aviso",
+      "ultimo_movimiento": "6 oct: respondió «precio»",
+      "proxima_accion": "Enviar tarifas + preguntar puestos vigentes; borrador",
+      "notas_extra": "San Andrés 372. Ayudante cocina + mozas TC/medio tiempo. wa-chats/984903140-tradiciones-apurimac-oswaldo.txt",
+      "segment": "pipeline"
+    },
+    {
+      "title": "Quinta campestre Poroy (grupo Antonio)",
+      "contact_whatsapp": "966364330",
+      "etapa_label": "RESPONDIÓ",
+      "plan": "S/50 (4 perfiles urgentes)",
+      "ultimo_movimiento": "6 oct: mensajes auto luego «buen día» humano",
+      "proxima_accion": "Pitch corto + confirmar vacantes; no precio hasta pregunte",
+      "notas_extra": "Ayudantes cocina, mozos, cajera, niñera. Beneficios movilidad+alimentación. wa-chats/966364330-quinta-poroy-antonio.txt",
+      "segment": "pipeline"
+    },
+    {
       "title": "Oly Pastelería Artesanal (Ricardo)",
       "business_name": "Oly Pastelería Artesanal",
       "contact_name": "Ricardo",
