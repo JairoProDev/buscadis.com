@@ -95,8 +95,8 @@ export default function SimilarAdisos({ currentAdiso }: SimilarAdisosProps) {
             className="group flex flex-col overflow-hidden rounded-2xl border border-[var(--border-color)] bg-[var(--bg-primary)] transition-transform hover:-translate-y-0.5 hover:shadow-md"
           >
             <div
-              className={`relative w-full bg-[var(--bg-secondary)] ${
-                usesGenerated ? 'aspect-[3/4]' : showPhoto ? '' : 'aspect-square'
+              className={`relative w-full overflow-hidden bg-[var(--bg-secondary)] ${
+                usesGenerated ? 'aspect-[3/4]' : 'aspect-square'
               }`}
             >
               {showPhoto ? (

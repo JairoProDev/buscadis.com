@@ -101,25 +101,23 @@ export function listingCardListThumbImageClass(): string {
 }
 
 /**
- * Feed/grid con foto: escala al 100% del ancho (sin recorte lateral).
- * El contenedor cuadrado recorta solo el exceso inferior.
+ * Feed/grid con foto: ancho 100%, ancla arriba; el marco `aspect-square` recorta abajo.
+ * (No usar Supabase render ?width= solo — recorta lados con cover.)
  */
 export function listingCardGridPhotoClass(): string {
-  return 'block h-auto w-full max-w-full';
+  return 'block h-auto w-full max-w-full align-top';
 }
 
+/** Marco del media en grid/feed: cuadrado uniforme (plantillas y fotos). */
 export function listingCardMediaAspectClass(
   vista: 'list' | 'grid' | 'feed',
   isCatalogProduct: boolean,
-  hasUserPhoto: boolean,
+  _hasUserPhoto: boolean,
 ): string {
   if (vista === 'list') {
     return isCatalogProduct
       ? 'h-[112px] w-[112px] shrink-0'
       : 'h-24 w-24 shrink-0 md:h-24 md:w-24';
-  }
-  if (hasUserPhoto) {
-    return 'w-full';
   }
   return 'aspect-square w-full';
 }
