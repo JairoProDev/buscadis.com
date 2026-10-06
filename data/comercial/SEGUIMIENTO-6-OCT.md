@@ -5,8 +5,9 @@
 | Teléfono | Negocio (apertura / Rueda) | Respuesta 6 oct |
 |----------|----------------------------|-----------------|
 | **976250507** | **Pollería Nina** (Alameda Pachacútec Wanchaq) | **Sí** — datos enviados 10:02–10:05; espera puestos |
-| **984271525** | **Empresa Tambobamba** (Rueda) | Pregunta **oficina física** — aclarar servicio digital |
-| _pendiente_ | _completar los otros 3 de la tanda 09:45_ | — |
+| **984271525** | **Chifa Julio** (Tambobamba) | Cusco aclarado 10:45; espera confirmación puestos |
+| **920124104** | **Oly Pastelería** (Ricardo) | **Buenos días** — responder ahora |
+| _pendiente_ | _completar resto tanda 09:45_ | — |
 
 **Nota:** El aviso de **restaurante turístico** (Av. El Sol 106 / Galerías La Merced 207, cels. **974888453**, **974888454**) es **otro negocio** distinto de Pollería Nina. Si también se escribió a ese número, documentar en archivo aparte.
 
