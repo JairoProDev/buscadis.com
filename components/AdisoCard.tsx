@@ -378,7 +378,7 @@ const AdisoCard = forwardRef<HTMLDivElement, AdisoCardProps>(
         )}
 
         <div
-          className={`relative flex-shrink-0 overflow-hidden rounded-[var(--bs-radius-lg,var(--card-radius))] ${listingCardMediaAspectClass(vista, isCatalogProduct, showUserPhoto)} ${
+          className={`relative flex-shrink-0 overflow-hidden rounded-[var(--bs-radius-lg,var(--card-radius))] ${listingCardMediaAspectClass(vista, isCatalogProduct, isDestacado)} ${
             isDestacado ? 'ring-2 ring-[var(--bs-color-sol-400)]' : ''
           } ${longPressActive ? 'z-[50] shadow-2xl ring-2 ring-white/40' : ''}`}
           style={{

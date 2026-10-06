@@ -108,16 +108,19 @@ export function listingCardGridPhotoClass(): string {
   return 'block h-auto w-full max-w-full align-top';
 }
 
-/** Marco del media en grid/feed: cuadrado uniforme (plantillas y fotos). */
+/** Marco del media en grid/feed: 1:1 estándar; destacados/premium 4:5. */
 export function listingCardMediaAspectClass(
   vista: 'list' | 'grid' | 'feed',
   isCatalogProduct: boolean,
-  _hasUserPhoto: boolean,
+  isDestacadoEnFeed: boolean,
 ): string {
   if (vista === 'list') {
     return isCatalogProduct
       ? 'h-[112px] w-[112px] shrink-0'
       : 'h-24 w-24 shrink-0 md:h-24 md:w-24';
+  }
+  if (isDestacadoEnFeed && (vista === 'grid' || vista === 'feed')) {
+    return 'aspect-[4/5] w-full';
   }
   return 'aspect-square w-full';
 }
