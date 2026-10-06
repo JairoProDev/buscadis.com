@@ -28,10 +28,9 @@ export const RADIAL_ACTIONS: {
   { id: 'save', label: 'Guardar', angleDeg: 180, Icon: IconHeartOutline },
 ];
 
-export const RADIAL_RADIUS_PX = 80;
-const INNER_DEAD_ZONE = 32;
-const OUTER_LIMIT = RADIAL_RADIUS_PX + 52;
-const ANGLE_TOLERANCE_DEG = 48;
+export const RADIAL_RADIUS_PX = 84;
+const INNER_DEAD_ZONE = 22;
+const ANGLE_TOLERANCE_DEG = 52;
 
 interface AdisoCardLongPressMenuProps {
   active: boolean;
@@ -39,9 +38,11 @@ interface AdisoCardLongPressMenuProps {
   centerY: number;
   highlighted: LongPressRadialAction | null;
   isSaved: boolean;
-  onHighlight: (id: LongPressRadialAction | null) => void;
-  onCommit: (id: LongPressRadialAction) => void;
-  onCancel: () => void;
+  onHighlight?: (id: LongPressRadialAction | null) => void;
+  onCommit?: (id: LongPressRadialAction) => void;
+  onCancel?: () => void;
+  onGestureMove?: (clientX: number, clientY: number) => void;
+  onGestureEnd?: (clientX: number, clientY: number) => void;
 }
 
 export default function AdisoCardLongPressMenu({
@@ -50,6 +51,8 @@ export default function AdisoCardLongPressMenu({
   centerY,
   highlighted,
   isSaved,
+  onGestureMove,
+  onGestureEnd,
 }: AdisoCardLongPressMenuProps) {
   const [mounted, setMounted] = useState(false);
 
@@ -61,7 +64,15 @@ export default function AdisoCardLongPressMenu({
     if (!active) return;
     const prevent = (e: Event) => e.preventDefault();
     document.addEventListener('contextmenu', prevent);
-    return () => document.removeEventListener('contextmenu', prevent);
+    const prevHtmlOverflow = document.documentElement.style.overflow;
+    const prevBodyOverflow = document.body.style.overflow;
+    document.documentElement.style.overflow = 'hidden';
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.removeEventListener('contextmenu', prevent);
+      document.documentElement.style.overflow = prevHtmlOverflow;
+      document.body.style.overflow = prevBodyOverflow;
+    };
   }, [active]);
 
   if (!mounted) return null;
@@ -76,6 +87,39 @@ export default function AdisoCardLongPressMenu({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
+          />
+          {/* Captura el dedo: evita scroll del feed y alimenta la selección radial */}
+          <div
+            className="fixed inset-0 touch-none"
+            style={{ zIndex: OVERLAY_SHEET_Z + 2, touchAction: 'none' }}
+            onPointerMove={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              onGestureMove?.(e.clientX, e.clientY);
+            }}
+            onPointerUp={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              onGestureEnd?.(e.clientX, e.clientY);
+            }}
+            onPointerCancel={(e) => {
+              e.preventDefault();
+              onGestureEnd?.(e.clientX, e.clientY);
+            }}
+            onTouchMove={(e) => {
+              e.preventDefault();
+              const t = e.touches[0];
+              if (t) onGestureMove?.(t.clientX, t.clientY);
+            }}
+            onTouchEnd={(e) => {
+              e.preventDefault();
+              const t = e.changedTouches[0];
+              if (t) onGestureEnd?.(t.clientX, t.clientY);
+            }}
+            onTouchCancel={(e) => {
+              const t = e.changedTouches[0];
+              if (t) onGestureEnd?.(t.clientX, t.clientY);
+            }}
           />
           <div
             className="pointer-events-none fixed inset-0 touch-none"
@@ -145,7 +189,6 @@ export function pickRadialAction(
   const dy = pointerY - centerY;
   const dist = Math.hypot(dx, dy);
   if (dist < INNER_DEAD_ZONE) return null;
-  if (dist > OUTER_LIMIT) return null;
 
   let angle = (Math.atan2(dy, dx) * 180) / Math.PI;
   if (angle < 0) angle += 360;

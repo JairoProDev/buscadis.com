@@ -93,6 +93,7 @@ const AdisoCard = forwardRef<HTMLDivElement, AdisoCardProps>(
     const longPressPointerRef = useRef({ x: 0, y: 0 });
     const longPressFinishHandled = useRef(false);
     const longPressActiveRef = useRef(false);
+    const gestureCleanupRef = useRef<(() => void) | null>(null);
 
     const handleHiddenFromMenu = useCallback(async () => {
       await markNotInterested();
@@ -170,19 +171,77 @@ const AdisoCard = forwardRef<HTMLDivElement, AdisoCardProps>(
       setRadialHighlight(picked);
     };
 
-    const finishLongPress = (clientX: number, clientY: number, pointerId: number) => {
+    const detachLongPressGesture = useCallback(() => {
+      gestureCleanupRef.current?.();
+      gestureCleanupRef.current = null;
+    }, []);
+
+    const finishLongPress = useCallback((clientX: number, clientY: number) => {
       if (longPressFinishHandled.current) return;
       longPressFinishHandled.current = true;
+      detachLongPressGesture();
       updateRadialFromPointer(clientX, clientY);
       const picked = radialHighlightRef.current;
-      if (picked) commitLongPress(picked);
-      else cancelLongPress();
-      try {
-        mediaRef.current?.releasePointerCapture(pointerId);
-      } catch {
-        /* already released */
+      if (picked) {
+        longPressActiveRef.current = false;
+        void cardActions.runAction(mapRadialToCardAction(picked));
+        setLongPressActive(false);
+        setRadialHighlight(null);
+        setTimeout(() => {
+          suppressClickRef.current = false;
+        }, 400);
+      } else {
+        longPressActiveRef.current = false;
+        setLongPressActive(false);
+        setRadialHighlight(null);
+        setTimeout(() => {
+          suppressClickRef.current = false;
+        }, 200);
       }
-    };
+    }, [cardActions, detachLongPressGesture]);
+
+    const attachLongPressGesture = useCallback(() => {
+      detachLongPressGesture();
+      const onMove = (e: PointerEvent) => {
+        if (!longPressActiveRef.current) return;
+        e.preventDefault();
+        updateRadialFromPointer(e.clientX, e.clientY);
+      };
+      const onEnd = (e: PointerEvent) => {
+        if (!longPressActiveRef.current) return;
+        e.preventDefault();
+        finishLongPress(e.clientX, e.clientY);
+      };
+      const onTouchMove = (e: TouchEvent) => {
+        if (!longPressActiveRef.current) return;
+        e.preventDefault();
+        const t = e.touches[0];
+        if (t) updateRadialFromPointer(t.clientX, t.clientY);
+      };
+      const onTouchEnd = (e: TouchEvent) => {
+        if (!longPressActiveRef.current) return;
+        e.preventDefault();
+        const t = e.changedTouches[0];
+        if (t) finishLongPress(t.clientX, t.clientY);
+      };
+      const opts = { capture: true, passive: false } as const;
+      document.addEventListener('pointermove', onMove, opts);
+      document.addEventListener('pointerup', onEnd, opts);
+      document.addEventListener('pointercancel', onEnd, opts);
+      document.addEventListener('touchmove', onTouchMove, opts);
+      document.addEventListener('touchend', onTouchEnd, opts);
+      document.addEventListener('touchcancel', onTouchEnd, opts);
+      gestureCleanupRef.current = () => {
+        document.removeEventListener('pointermove', onMove, true);
+        document.removeEventListener('pointerup', onEnd, true);
+        document.removeEventListener('pointercancel', onEnd, true);
+        document.removeEventListener('touchmove', onTouchMove, true);
+        document.removeEventListener('touchend', onTouchEnd, true);
+        document.removeEventListener('touchcancel', onTouchEnd, true);
+      };
+    }, [detachLongPressGesture, finishLongPress]);
+
+    useEffect(() => () => detachLongPressGesture(), [detachLongPressGesture]);
 
     const onMediaPointerDown = (e: React.PointerEvent) => {
       if (menuOpen) return;
@@ -190,21 +249,16 @@ const AdisoCard = forwardRef<HTMLDivElement, AdisoCardProps>(
       pointerStart.current = { x: e.clientX, y: e.clientY };
       longPressPointerRef.current = { x: e.clientX, y: e.clientY };
       clearLongPressTimer();
-      const pointerId = e.pointerId;
       longPressTimer.current = setTimeout(() => {
         suppressClickRef.current = true;
         longPressFinishHandled.current = false;
         longPressCenterRef.current = { ...longPressPointerRef.current };
         setLongPressPoint(longPressCenterRef.current);
         longPressActiveRef.current = true;
+        attachLongPressGesture();
         setLongPressActive(true);
         setRadialHighlight(null);
         radialHighlightRef.current = null;
-        try {
-          mediaRef.current?.setPointerCapture(pointerId);
-        } catch {
-          /* ignore */
-        }
         updateRadialFromPointer(
           longPressPointerRef.current.x,
           longPressPointerRef.current.y,
@@ -215,6 +269,7 @@ const AdisoCard = forwardRef<HTMLDivElement, AdisoCardProps>(
     const onMediaPointerMove = (e: React.PointerEvent) => {
       longPressPointerRef.current = { x: e.clientX, y: e.clientY };
       if (longPressActiveRef.current) {
+        e.preventDefault();
         updateRadialFromPointer(e.clientX, e.clientY);
         return;
       }
@@ -229,7 +284,7 @@ const AdisoCard = forwardRef<HTMLDivElement, AdisoCardProps>(
       clearLongPressTimer();
       if (longPressActiveRef.current) {
         e.preventDefault();
-        finishLongPress(e.clientX, e.clientY, e.pointerId);
+        finishLongPress(e.clientX, e.clientY);
         pointerStart.current = null;
         return;
       }
@@ -239,34 +294,9 @@ const AdisoCard = forwardRef<HTMLDivElement, AdisoCardProps>(
     const onMediaPointerCancel = (e: React.PointerEvent) => {
       clearLongPressTimer();
       if (longPressActiveRef.current) {
-        longPressActiveRef.current = false;
-        cancelLongPress();
-        try {
-          mediaRef.current?.releasePointerCapture(e.pointerId);
-        } catch {
-          /* ignore */
-        }
+        finishLongPress(e.clientX, e.clientY);
       }
       pointerStart.current = null;
-    };
-
-    const commitLongPress = (action: LongPressRadialAction) => {
-      longPressActiveRef.current = false;
-      void cardActions.runAction(mapRadialToCardAction(action));
-      setLongPressActive(false);
-      setRadialHighlight(null);
-      setTimeout(() => {
-        suppressClickRef.current = false;
-      }, 400);
-    };
-
-    const cancelLongPress = () => {
-      longPressActiveRef.current = false;
-      setLongPressActive(false);
-      setRadialHighlight(null);
-      setTimeout(() => {
-        suppressClickRef.current = false;
-      }, 200);
     };
 
     if (isHidden) {
@@ -354,7 +384,7 @@ const AdisoCard = forwardRef<HTMLDivElement, AdisoCardProps>(
           } ${longPressActive ? 'z-[50] shadow-2xl ring-2 ring-white/40' : ''}`}
           style={{
             backgroundColor: showUserPhoto ? 'var(--bs-bg-sunken, var(--bg-secondary))' : placeholderBg,
-            touchAction: longPressActive ? 'none' : 'manipulation',
+            touchAction: 'manipulation',
           }}
           ref={mediaRef}
           onPointerDown={onMediaPointerDown}
@@ -503,9 +533,11 @@ const AdisoCard = forwardRef<HTMLDivElement, AdisoCardProps>(
         centerY={longPressPoint.y}
         highlighted={radialHighlight}
         isSaved={cardActions.isSaved}
-        onHighlight={setRadialHighlight}
-        onCommit={commitLongPress}
-        onCancel={cancelLongPress}
+        onGestureMove={(x, y) => {
+          if (!longPressActiveRef.current) return;
+          updateRadialFromPointer(x, y);
+        }}
+        onGestureEnd={(x, y) => finishLongPress(x, y)}
       />
       </>
     );
