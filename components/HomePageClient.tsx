@@ -1260,7 +1260,10 @@ function HomeContent({ initialSearchParams, initialFeedAdisos = [], showLegalFoo
   }, [adisoAbierto, indiceAdisoActual, adisosFiltrados]);
 
   // Structured data para SEO - usar URL base consistente
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://buscadis.com';
+  const siteUrl =
+    typeof window !== 'undefined'
+      ? window.location.origin.replace(/^https?:\/\/buscadis\.com/i, 'https://www.buscadis.com')
+      : 'https://www.buscadis.com';
   const structuredData = {
     '@context': 'https://schema.org',
     '@type': 'WebSite',
@@ -1271,7 +1274,7 @@ function HomeContent({ initialSearchParams, initialFeedAdisos = [], showLegalFoo
       '@type': 'SearchAction',
       target: {
         '@type': 'EntryPoint',
-        urlTemplate: `${siteUrl}/?buscar={search_term_string}`
+        urlTemplate: `${siteUrl}/buscar?q={search_term_string}`
       },
       'query-input': 'required name=search_term_string'
     }

@@ -9,9 +9,10 @@ import {
 } from '@/lib/business/theme-css-vars';
 
 import { getBusinessProfilePath } from '@/lib/seo/business-metadata';
+import { getSiteOrigin } from '@/lib/site-origin';
 
 export function getBusinessCanonicalUrl(slug: string): string {
-  const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_APP_URL || 'https://buscadis.com').replace(/\/$/, '');
+  const siteUrl = getSiteOrigin();
   return `${siteUrl}${getBusinessProfilePath(slug)}`;
 }
 

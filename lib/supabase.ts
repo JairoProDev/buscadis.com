@@ -357,6 +357,8 @@ export async function getAdisosPageFromSupabase(options: {
   soloActivos?: boolean;
   categoria?: string;
   busqueda?: string;
+  /** Filtro ILIKE sobre columna ubicacion (texto), p. ej. "cusco". */
+  regionIlike?: string;
 }): Promise<{ items: Adiso[]; total: number }> {
   if (!supabase) {
     throw new Error('Supabase no está configurado');
@@ -380,6 +382,13 @@ export async function getAdisosPageFromSupabase(options: {
     if (options.busqueda) {
       const q = options.busqueda;
       query = query.or(`titulo.ilike.%${q}%,descripcion.ilike.%${q}%,ubicacion.ilike.%${q}%`);
+    }
+
+    if (options.regionIlike) {
+      const region = options.regionIlike.replace(/[%_]/g, '').trim();
+      if (region) {
+        query = query.ilike('ubicacion', `%${region}%`);
+      }
     }
 
     query = query

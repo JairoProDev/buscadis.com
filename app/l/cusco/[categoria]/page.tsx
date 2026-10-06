@@ -2,42 +2,28 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import type { Categoria } from '@/types';
-import { getMarketplaceFeed } from '@/lib/business';
 import { CrawlableAdisoList, ListingPagination } from '@/components/seo/CrawlableAdisoList';
 import { JsonLd } from '@/components/seo/JsonLd';
 import { buildAdisoItemListJsonLd } from '@/lib/seo/adiso-jsonld';
-import { getSiteUrl } from '@/lib/seo/og-image';
+import { getSiteUrl, withDefaultShareImage } from '@/lib/seo/og-image';
 import {
-  CUSCO_HUB_MIN_ADISOS_INDEX,
-  filterAdisosForCusco,
   getCuscoHubCopy,
   getCuscoHubPath,
   isCuscoHubCategory,
 } from '@/lib/seo/cusco-hubs';
-import { withDefaultShareImage } from '@/lib/seo/og-image';
+import {
+  countCuscoHubAdisos,
+  getCuscoHubAdisosPage,
+  isCuscoHubIndexable,
+} from '@/lib/seo/cusco-feed';
 
 const PAGE_SIZE = 24;
-const FETCH_POOL = 200;
 
 export const revalidate = 300;
 
 interface PageProps {
   params: Promise<{ categoria: string }>;
   searchParams: Promise<{ page?: string }>;
-}
-
-async function loadCuscoHubIndexable(categoria: Categoria): Promise<boolean> {
-  try {
-    const pool = await getMarketplaceFeed({
-      limit: FETCH_POOL,
-      offset: 0,
-      soloActivos: true,
-      categoria,
-    });
-    return filterAdisosForCusco(pool).length >= CUSCO_HUB_MIN_ADISOS_INDEX;
-  } catch {
-    return false;
-  }
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
@@ -49,7 +35,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const copy = getCuscoHubCopy(categoria);
   const path = getCuscoHubPath(categoria);
   const url = `${getSiteUrl()}${path}`;
-  const indexable = await loadCuscoHubIndexable(categoria);
+  const total = await countCuscoHubAdisos(categoria);
+  const indexable = isCuscoHubIndexable(total);
 
   return {
     title: copy.title,
@@ -61,6 +48,24 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       description: copy.description,
       url,
     }),
+  };
+}
+
+function buildFaqJsonLd(
+  copy: ReturnType<typeof getCuscoHubCopy>,
+  listPath: string
+): Record<string, unknown> | null {
+  if (copy.faq.length < 2) return null;
+  const base = `${getSiteUrl()}${listPath}`;
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    '@id': `${base}#faq`,
+    mainEntity: copy.faq.map((item) => ({
+      '@type': 'Question',
+      name: item.q,
+      acceptedAnswer: { '@type': 'Answer', text: item.a },
+    })),
   };
 }
 
@@ -77,23 +82,24 @@ export default async function CuscoHubPage({ params, searchParams }: PageProps) 
   const page = Math.max(1, parseInt(sp.page || '1', 10) || 1);
   const offset = (page - 1) * PAGE_SIZE;
 
-  let pool: Awaited<ReturnType<typeof getMarketplaceFeed>> = [];
+  let pageItems: Awaited<ReturnType<typeof getCuscoHubAdisosPage>>['items'] = [];
+  let total = 0;
   try {
-    pool = await getMarketplaceFeed({
-      limit: FETCH_POOL,
-      offset: 0,
-      soloActivos: true,
+    const result = await getCuscoHubAdisosPage({
       categoria,
+      limit: PAGE_SIZE,
+      offset,
     });
+    pageItems = result.items;
+    total = result.total;
   } catch (err) {
     console.error('[cusco-hub] feed failed:', err);
   }
 
-  const filtered = filterAdisosForCusco(pool);
-  const pageItems = filtered.slice(offset, offset + PAGE_SIZE);
-  const hasNext = filtered.length > offset + PAGE_SIZE;
+  const hasNext = offset + PAGE_SIZE < total;
   const listPath = getCuscoHubPath(categoria);
   const listName = `${copy.title} — listado`;
+  const faqLd = buildFaqJsonLd(copy, listPath);
 
   const collectionJsonLd = {
     '@context': 'https://schema.org',
@@ -107,6 +113,7 @@ export default async function CuscoHubPage({ params, searchParams }: PageProps) 
   return (
     <>
       <JsonLd data={collectionJsonLd} />
+      {faqLd ? <JsonLd data={faqLd} /> : null}
       <JsonLd
         data={buildAdisoItemListJsonLd(pageItems, { name: listName, urlPath: listPath })}
       />

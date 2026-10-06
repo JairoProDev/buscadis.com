@@ -6,6 +6,7 @@ import { isPerfilVivoEnabled } from '@/lib/business/perfil-vivo-flag';
 import { DEMO_META, isDemoPerfilVivoSlug } from '@buscadis/perfil-vivo/server';
 import { PerfilVivoPageView, loadPerfilVivoPayload } from '@/components/business/PerfilVivoPageView';
 import { buildPerfilVivoShareMetadata } from '@/lib/seo/perfil-vivo-metadata';
+import { getBusinessProfileShareUrl } from '@/lib/seo/business-metadata';
 
 export const revalidate = 60;
 
@@ -23,7 +24,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     if (profile && isPerfilVivoEnabled(profile)) {
       return {
         robots: { index: false, follow: true },
-        alternates: { canonical: `https://buscadis.com/@${slug}` },
+        alternates: { canonical: getBusinessProfileShareUrl(slug) },
       };
     }
   }

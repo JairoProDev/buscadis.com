@@ -45,4 +45,18 @@ assert.ok(paths.length >= 8);
 assert.equal(getCuscoHubPath('empleos'), '/l/cusco/empleos');
 paths.forEach((p) => assert.ok(p.startsWith('/l/cusco/')));
 
+const inmueble = {
+  id: 'inm1234567',
+  titulo: 'Departamento en alquiler',
+  categoria: 'inmuebles',
+  descripcion: 'Cerca al centro de Cusco',
+  fechaPublicacion: '2026-03-01',
+  horaPublicacion: '10:00',
+  ubicacion: 'Cusco',
+  contacto: '999999999',
+  atributos: { area_m2: 85 },
+} as Adiso;
+const inmGraph = buildAdisoPageJsonLd(inmueble)['@graph'] as Array<Record<string, unknown>>;
+assert.ok(inmGraph.some((n) => n['@type'] === 'RealEstateListing'));
+
 console.log('✓ SEO regression checks passed');

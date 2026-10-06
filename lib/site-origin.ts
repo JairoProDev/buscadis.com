@@ -1,7 +1,17 @@
+import { getCanonicalSiteUrl } from '@/lib/seo/canonical-site';
+
 export function getSiteOrigin(): string {
-  return (
-    process.env.NEXT_PUBLIC_SITE_URL ||
-    process.env.NEXT_PUBLIC_APP_URL ||
-    'https://buscadis.com'
-  ).replace(/\/$/, '');
+  const fromApp = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, '');
+  if (fromApp) {
+    try {
+      const host = new URL(fromApp).hostname;
+      if (host === 'buscadis.com' || host === 'www.buscadis.com') {
+        return getCanonicalSiteUrl();
+      }
+      return fromApp;
+    } catch {
+      return getCanonicalSiteUrl();
+    }
+  }
+  return getCanonicalSiteUrl();
 }

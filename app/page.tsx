@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { redirect } from 'next/navigation';
 import { Suspense } from 'react';
 import HomePageClient from '@/components/HomePageClient';
 import HomeRouteFallback from '@/components/home/HomeRouteFallback';
@@ -73,6 +74,19 @@ export default async function Home({ searchParams }: PageProps) {
     typeof params.categoria === 'string' && isMarketplaceCategory(params.categoria)
       ? params.categoria.trim().toLowerCase()
       : undefined;
+
+  const adisoParam = typeof params.adiso === 'string' ? params.adiso : undefined;
+  const buscarParam = typeof params.buscar === 'string' ? params.buscar : undefined;
+  if (categoria && !adisoParam && !buscarParam) {
+    const q = new URLSearchParams();
+    for (const [key, value] of Object.entries(params)) {
+      if (key === 'categoria' || value === undefined) continue;
+      if (typeof value === 'string') q.set(key, value);
+      else if (Array.isArray(value)) value.forEach((v) => q.append(key, v));
+    }
+    const qs = q.toString();
+    redirect(`/categoria/${categoria}${qs ? `?${qs}` : ''}`);
+  }
 
   let ssrAdisos: Awaited<ReturnType<typeof getMarketplaceFeed>> = [];
   try {

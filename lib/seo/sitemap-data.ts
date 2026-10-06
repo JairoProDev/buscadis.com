@@ -6,7 +6,9 @@ import { getAdisoUrl } from '@/lib/url';
 import { getSiteUrl } from '@/lib/seo/og-image';
 import { getBusinessProfilePath } from '@/lib/seo/business-metadata';
 import { MARKETPLACE_CATEGORIES } from '@/lib/seo/category-metadata';
-import { listCuscoHubPaths } from '@/lib/seo/cusco-hubs';
+import type { Categoria } from '@/types';
+import { countCuscoHubAdisos, isCuscoHubIndexable } from '@/lib/seo/cusco-feed';
+import { getCuscoHubPath } from '@/lib/seo/cusco-hubs';
 
 export const ADISO_SITEMAP_PAGE_SIZE = 5000;
 
@@ -36,14 +38,26 @@ export function buildStaticSitemapEntries(siteUrl: string): MetadataRoute.Sitema
   ];
 }
 
-export function buildCuscoHubSitemapEntries(siteUrl: string): MetadataRoute.Sitemap {
+export async function buildCuscoHubSitemapEntries(siteUrl: string): Promise<MetadataRoute.Sitemap> {
   const now = new Date();
-  return listCuscoHubPaths().map((path) => ({
-    url: `${siteUrl}${path}`,
-    lastModified: now,
-    changeFrequency: 'daily' as const,
-    priority: 0.75,
-  }));
+  const entries: MetadataRoute.Sitemap = [];
+
+  for (const categoria of MARKETPLACE_CATEGORIES) {
+    try {
+      const total = await countCuscoHubAdisos(categoria as Categoria);
+      if (!isCuscoHubIndexable(total)) continue;
+      entries.push({
+        url: `${siteUrl}${getCuscoHubPath(categoria as Categoria)}`,
+        lastModified: now,
+        changeFrequency: 'daily',
+        priority: 0.75,
+      });
+    } catch {
+      // omit hub if count fails
+    }
+  }
+
+  return entries;
 }
 
 export function buildCategorySitemapEntries(siteUrl: string): MetadataRoute.Sitemap {
@@ -142,10 +156,12 @@ export async function buildSitemapById(id: number): Promise<MetadataRoute.Sitema
       console.error('[sitemap] negocios:', error);
     }
 
+    const cuscoHubPages = await buildCuscoHubSitemapEntries(siteUrl);
+
     return [
       ...buildStaticSitemapEntries(siteUrl),
       ...buildCategorySitemapEntries(siteUrl),
-      ...buildCuscoHubSitemapEntries(siteUrl),
+      ...cuscoHubPages,
       ...businessPages,
     ];
   }

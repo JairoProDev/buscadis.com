@@ -14,6 +14,7 @@ import { loadProductoEnPerfil } from '@/components/business/PerfilVivoPageView';
 import { PerfilVivoWaLink } from '@/components/business/PerfilVivoWaLink';
 import '@buscadis/perfil-vivo/chrome.css';
 import { sfInline } from '@/lib/storefront/inline-theme';
+import { getSiteUrl } from '@/lib/seo/og-image';
 
 export const revalidate = 60;
 
@@ -31,9 +32,10 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   const profile = slug === 'demo' ? null : await getBusinessProfileBySlug(slug);
   const cutover = profile ? isPerfilVivoEnabled(profile) : false;
+  const siteUrl = getSiteUrl();
   const canonical = cutover
-    ? `https://buscadis.com/@${slug}/producto/${productoId}`
-    : `https://buscadis.com/v/${slug}/producto/${productoId}`;
+    ? `${siteUrl}/@${slug}/producto/${productoId}`
+    : `${siteUrl}/v/${slug}/producto/${productoId}`;
 
   const d = payload.negocio.ubicacion?.distrito ?? 'Cusco';
   const precio =
@@ -121,8 +123,8 @@ export default async function ProductoPerfilVivoPage({ params }: PageProps) {
               ? 'https://schema.org/OutOfStock'
               : 'https://schema.org/InStock',
           url: cutover
-            ? `https://buscadis.com/@${slug}/producto/${productoId}`
-            : `https://buscadis.com/v/${slug}/producto/${productoId}`,
+            ? `${getSiteUrl()}/@${slug}/producto/${productoId}`
+            : `${getSiteUrl()}/v/${slug}/producto/${productoId}`,
           seller: {
             '@type': 'Organization',
             name: payload.negocio.nombre,

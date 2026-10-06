@@ -130,7 +130,56 @@ export function buildAdisoJobPostingJsonLd(adiso: Adiso): Record<string, unknown
   };
 }
 
-/** Product + Offer JSON-LD for non-job adisos. */
+/** RealEstateListing for inmuebles (Google rich results where applicable). */
+export function buildAdisoRealEstateJsonLd(adiso: Adiso): Record<string, unknown> {
+  const siteUrl = getSiteUrl();
+  const path = getAdisoUrl(adiso);
+  const url = `${siteUrl}${path}`;
+  const title = toDisplayTitle(adiso.titulo) || adiso.titulo;
+  const description =
+    sanitizeAdisoDescripcion(adiso.descripcion)?.slice(0, 500) ||
+    `Inmueble: ${title}. Anuncio en Buscadis, Perú.`;
+  const image = resolveAdisoOgImage(adiso);
+  const hasPrice = typeof adiso.precio === 'number' && adiso.precio > 0;
+  const attrs = adiso.atributos as Record<string, unknown> | undefined;
+  const floorSize =
+    typeof attrs?.area_m2 === 'number'
+      ? attrs.area_m2
+      : typeof attrs?.metros === 'number'
+        ? attrs.metros
+        : undefined;
+
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'RealEstateListing',
+    name: title,
+    description,
+    url,
+    image: image ? [image] : undefined,
+    datePosted: datePostedIso(adiso),
+    address: jobLocationPlace(adiso).address,
+    ...(floorSize
+      ? {
+          floorSize: {
+            '@type': 'QuantitativeValue',
+            value: floorSize,
+            unitCode: 'MTK',
+          },
+        }
+      : {}),
+    offers: {
+      '@type': 'Offer',
+      url,
+      priceCurrency: adiso.moneda || 'PEN',
+      ...(hasPrice ? { price: adiso.precio } : {}),
+      availability: adiso.estaActivo === false
+        ? 'https://schema.org/SoldOut'
+        : 'https://schema.org/InStock',
+    },
+  };
+}
+
+/** Product + Offer JSON-LD for general classified listings. */
 export function buildAdisoProductJsonLd(adiso: Adiso): Record<string, unknown> {
   const siteUrl = getSiteUrl();
   const path = getAdisoUrl(adiso);
@@ -167,11 +216,14 @@ export function buildAdisoProductJsonLd(adiso: Adiso): Record<string, unknown> {
 }
 
 /** Breadcrumb + primary entity (JobPosting or Product) for adiso detail. */
+function buildAdisoPrimaryJsonLd(adiso: Adiso): Record<string, unknown> {
+  if (adiso.categoria === 'empleos') return buildAdisoJobPostingJsonLd(adiso);
+  if (adiso.categoria === 'inmuebles') return buildAdisoRealEstateJsonLd(adiso);
+  return buildAdisoProductJsonLd(adiso);
+}
+
 export function buildAdisoPageJsonLd(adiso: Adiso): Record<string, unknown> {
-  const primary =
-    adiso.categoria === 'empleos'
-      ? buildAdisoJobPostingJsonLd(adiso)
-      : buildAdisoProductJsonLd(adiso);
+  const primary = buildAdisoPrimaryJsonLd(adiso);
   const breadcrumb = buildAdisoBreadcrumbJsonLd(adiso);
   const { '@context': _c, ...primaryNode } = primary as {
     '@context': string;
