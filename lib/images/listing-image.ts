@@ -69,15 +69,17 @@ export function adisoShowsPortraitJobFlyer(
   return true;
 }
 
+/** Miniatura lista (cuadrado fijo): rellenar el marco. */
+export function listingCardListThumbImageClass(): string {
+  return 'object-cover object-center';
+}
+
 /**
- * Grid: marco 1:1 fijo. Flyers verticales → cover (recorte arriba/abajo, sin bandas laterales).
+ * Feed/grid con foto: escala al 100% del ancho (sin recorte lateral).
+ * El contenedor cuadrado recorta solo el exceso inferior.
  */
-export function listingCardImageObjectClass(
-  isCatalogProduct: boolean,
-  portraitJobFlyer = false,
-): string {
-  if (isCatalogProduct || portraitJobFlyer) return 'object-cover object-center';
-  return 'object-contain object-center px-1.5 py-1';
+export function listingCardGridPhotoClass(): string {
+  return 'block h-auto w-full max-w-full';
 }
 
 export function listingCardMediaAspectClass(

@@ -20,9 +20,10 @@ import { useAdInteraction } from '@/hooks/useAdInteraction';
 import { useAdisoCardActions, type AdisoCardActionId } from '@/hooks/useAdisoCardActions';
 import AdisoCardActionsSheet from '@/components/adiso/AdisoCardActionsSheet';
 import {
-  adisoShowsPortraitJobFlyer,
   getListingThumbnailUrl,
-  listingCardImageObjectClass,
+  LISTING_CARD_IMAGE_WIDTH,
+  listingCardGridPhotoClass,
+  listingCardListThumbImageClass,
   listingCardMediaAspectClass,
   shouldBypassVercelImageOptimization,
 } from '@/lib/images/listing-image';
@@ -109,7 +110,6 @@ const AdisoCard = forwardRef<HTMLDivElement, AdisoCardProps>(
     const imagenUrl = adiso.imagenesUrls?.[0] || adiso.imagenUrl;
     const usesGeneratedCover = adisoUsesGeneratedCover(adiso);
     const showUserPhoto = Boolean(imagenUrl) && !usesGeneratedCover;
-    const portraitJobFlyer = showUserPhoto && adisoShowsPortraitJobFlyer(adiso);
     const extraFotos = Math.max(0, (adiso.imagenesUrls?.length ?? 0) - 1);
     const textoRaw =
       adiso.privateData && typeof adiso.privateData === 'object'
@@ -379,7 +379,7 @@ const AdisoCard = forwardRef<HTMLDivElement, AdisoCardProps>(
         )}
 
         <div
-          className={`relative flex-shrink-0 overflow-hidden rounded-[var(--bs-radius-lg,var(--card-radius))] ${listingCardMediaAspectClass(vista, isCatalogProduct, portraitJobFlyer)} ${
+          className={`relative flex-shrink-0 overflow-hidden rounded-[var(--bs-radius-lg,var(--card-radius))] ${listingCardMediaAspectClass(vista, isCatalogProduct, false)} ${
             isDestacado ? 'ring-2 ring-[var(--bs-color-sol-400)]' : ''
           } ${longPressActive ? 'z-[50] shadow-2xl ring-2 ring-white/40' : ''}`}
           style={{
@@ -416,15 +416,28 @@ const AdisoCard = forwardRef<HTMLDivElement, AdisoCardProps>(
           />
 
           {showUserPhoto ? (
-            <Image
-              src={getListingThumbnailUrl(imagenUrl)!}
-              alt={displayTitle}
-              fill
-              unoptimized={shouldBypassVercelImageOptimization(imagenUrl)}
-              sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 20vw"
-              className={`${listingCardImageObjectClass(isCatalogProduct, portraitJobFlyer)} motion-reduce:transition-none`}
-              loading="lazy"
-            />
+            vista === 'list' ? (
+              <Image
+                src={getListingThumbnailUrl(imagenUrl)!}
+                alt={displayTitle}
+                fill
+                unoptimized={shouldBypassVercelImageOptimization(imagenUrl)}
+                sizes="96px"
+                className={`${listingCardListThumbImageClass()} motion-reduce:transition-none`}
+                loading="lazy"
+              />
+            ) : (
+              <Image
+                src={getListingThumbnailUrl(imagenUrl)!}
+                alt={displayTitle}
+                width={LISTING_CARD_IMAGE_WIDTH}
+                height={LISTING_CARD_IMAGE_WIDTH}
+                unoptimized={shouldBypassVercelImageOptimization(imagenUrl)}
+                sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 20vw"
+                className={`${listingCardGridPhotoClass()} motion-reduce:transition-none`}
+                loading="lazy"
+              />
+            )
           ) : (
             (() => {
               const flyer = flyerStateFromPrivateData(

@@ -10,8 +10,9 @@ import { buildFlyerContentFromAdiso, flyerStateFromPrivateData } from '@/lib/fly
 import { adisoUsesGeneratedCover, resolveFlyerConfig } from '@/lib/flyer/templates';
 import { toDisplayTitle } from '@/lib/adiso-display';
 import {
-  adisoShowsPortraitJobFlyer,
   getListingThumbnailUrl,
+  listingCardGridPhotoClass,
+  LISTING_CARD_IMAGE_WIDTH,
   shouldBypassVercelImageOptimization,
 } from '@/lib/images/listing-image';
 
@@ -88,7 +89,6 @@ export default function SimilarAdisos({ currentAdiso }: SimilarAdisosProps) {
           const usesGenerated = adisoUsesGeneratedCover(ad);
           const photo = ad.imagenesUrls?.[0] || ad.imagenUrl;
           const showPhoto = Boolean(photo) && !usesGenerated;
-          const portraitJobFlyer = showPhoto && adisoShowsPortraitJobFlyer(ad);
           const displayTitle = toDisplayTitle(ad.titulo) || ad.titulo;
 
           return (
@@ -106,11 +106,10 @@ export default function SimilarAdisos({ currentAdiso }: SimilarAdisosProps) {
                 <Image
                   src={getListingThumbnailUrl(photo) || ''}
                   alt={displayTitle}
-                  fill
+                  width={LISTING_CARD_IMAGE_WIDTH}
+                  height={LISTING_CARD_IMAGE_WIDTH}
                   unoptimized={shouldBypassVercelImageOptimization(photo)}
-                  className={
-                    portraitJobFlyer ? 'object-cover object-center' : 'object-contain p-2'
-                  }
+                  className={listingCardGridPhotoClass()}
                   sizes="(max-width: 640px) 50vw, 200px"
                 />
               ) : (
