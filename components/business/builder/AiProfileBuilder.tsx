@@ -36,6 +36,8 @@ interface AiProfileBuilderProps {
   onProductsChanged?: () => void;
   /** Compact for sidebar; full for dedicated create page. */
   variant?: 'embedded' | 'hero';
+  /** Copy and starters tuned for live workshops (e.g. ?taller=1). */
+  workshopMode?: boolean;
   className?: string;
 }
 
@@ -65,10 +67,16 @@ const GREETING =
   '¡Hola! Soy Adis. En menos de un minuto armo tu página profesional con catálogo.\n\n' +
   'Mándame lo que tengas: un audio contándome tu negocio, fotos de productos, un PDF, un enlace o simplemente escribe. Yo hago el resto.';
 
-const STARTERS = [
+const STARTERS_DEFAULT = [
   'Vendo ropa y accesorios en Cusco',
   'Tengo un restaurante / cafeteria',
   'Ofrezco servicios (belleza, reparaciones…)',
+];
+
+const STARTERS_WORKSHOP = [
+  'Soy [tu nombre], vendo [qué] en Cusco. Mi WhatsApp es 9…',
+  'Tengo un negocio de comida en San Jerónimo, delivery y local',
+  'Pega aquí el enlace de tu Facebook o Instagram',
 ];
 
 const LOADING_STEPS = [
@@ -84,15 +92,28 @@ function attachmentKind(file: File): Attachment['kind'] {
   return 'doc';
 }
 
+const GREETING_WORKSHOP =
+  '¡Bienvenido al taller! Soy Adis.\n\n' +
+  'En 60 segundos te armo una página profesional con catálogo.\n\n' +
+  'Elige una opción:\n' +
+  '• Toca el micrófono y cuéntame tu negocio con tus palabras\n' +
+  '• Escribe qué vendes y tu WhatsApp\n' +
+  '• Pega el link de tu red social\n' +
+  '• Sube fotos de productos o tu local\n\n' +
+  'Mira la vista previa a la derecha — ahí aparece tu página en vivo.';
+
 export default function AiProfileBuilder({
   profile,
   onUpdate,
   onProfileCreated,
   onProductsChanged,
   variant = 'embedded',
+  workshopMode = false,
   className,
 }: AiProfileBuilderProps) {
-  const [messages, setMessages] = useState<ChatMessage[]>([{ role: 'assistant', content: GREETING }]);
+  const greeting = workshopMode ? GREETING_WORKSHOP : GREETING;
+  const starters = workshopMode ? STARTERS_WORKSHOP : STARTERS_DEFAULT;
+  const [messages, setMessages] = useState<ChatMessage[]>([{ role: 'assistant', content: greeting }]);
   const [input, setInput] = useState('');
   const [attachments, setAttachments] = useState<Attachment[]>([]);
   const [loading, setLoading] = useState(false);
@@ -362,7 +383,7 @@ export default function AiProfileBuilder({
 
         {showStarters && (
           <div className="flex flex-wrap gap-1.5 pt-1">
-            {STARTERS.map((s) => (
+            {starters.map((s) => (
               <button
                 key={s}
                 type="button"

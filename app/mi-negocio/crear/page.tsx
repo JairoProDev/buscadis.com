@@ -3,7 +3,8 @@
 /**
  * Experiencia creador — Perfil Vivo (P04)
  * Route: /mi-negocio/crear
- * ?modo=adis → chat IA legado como atajo
+ * Default: crear con Adis (IA). ?modo=guia → wizard paso a paso.
+ * ?modo=adis → alias del default. ?taller=1 → copy para facilitadores.
  */
 import { useCallback, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -14,11 +15,13 @@ import AiProfileBuilder from '@/components/business/builder/AiProfileBuilder';
 import CreadorOnboarding from '@/components/business/creator/CreadorOnboarding';
 import type { BusinessProfile } from '@/types/business';
 import BusinessPublicView from '@/components/business/BusinessPublicView';
+import { publishBusinessViaAPI } from '@/lib/business-api';
 
 function CrearInner() {
   const router = useRouter();
   const search = useSearchParams();
-  const modoAdis = search.get('modo') === 'adis';
+  const modoGuia = search.get('modo') === 'guia';
+  const taller = search.get('taller') === '1' || search.get('taller') === 'true';
   const { user, loading: authLoading } = useAuth();
   const [profile, setProfile] = useState<Partial<BusinessProfile>>({
     name: '',
@@ -41,6 +44,26 @@ function CrearInner() {
     }
   }, [profile.slug, router]);
 
+  const goToLivePreview = useCallback(() => {
+    if (profile.slug) {
+      router.push(`/v/${encodeURIComponent(profile.slug)}`);
+    }
+  }, [profile.slug, router]);
+
+  const publishAndShare = useCallback(async () => {
+    if (!profile.id || !profile.slug) return;
+    try {
+      await publishBusinessViaAPI(profile.id, true);
+    } catch {
+      /* preview still works if paywall */
+    }
+    const link = `${typeof window !== 'undefined' ? window.location.origin : 'https://buscadis.com'}/v/${profile.slug}`;
+    const text = encodeURIComponent(
+      `¡Mira la página de mi negocio en Buscadis!\n${link}`
+    );
+    window.open(`https://wa.me/?text=${text}`, '_blank');
+  }, [profile.id, profile.slug]);
+
   if (authLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-50">
@@ -62,7 +85,7 @@ function CrearInner() {
     );
   }
 
-  if (!modoAdis) {
+  if (modoGuia) {
     return <CreadorOnboarding />;
   }
 
@@ -71,25 +94,45 @@ function CrearInner() {
       <header className="border-b border-slate-200/80 bg-white/80 backdrop-blur sticky top-0 z-20">
         <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
           <div>
-            <Link href="/mi-negocio/crear" className="text-xs font-bold text-teal-700 hover:underline">
-              ← Volver al guía paso a paso
+            <Link href="/mi-negocio/crear?modo=guia" className="text-xs font-bold text-slate-500 hover:text-teal-700 hover:underline">
+              Preferir guía paso a paso
             </Link>
             <h1 className="text-lg font-black text-slate-900 tracking-tight">
-              Habla con Adis
+              {taller ? 'Tu negocio en 1 minuto' : 'Habla con Adis'}
             </h1>
             <p className="text-xs text-slate-500">
-              Atajo con IA. También puedes armar tu perfil pregunta por pregunta.
+              {taller
+                ? 'Graba un audio, escribe en tus palabras o pega el enlace de Facebook/Instagram. La IA arma tu página al instante.'
+                : 'Audio, fotos, enlaces o texto — tu página profesional en minutos.'}
             </p>
           </div>
-          {profile.slug && (
-            <button
-              type="button"
-              onClick={goToEditor}
-              className="shrink-0 rounded-full bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold px-4 py-2.5 shadow-sm"
-            >
-              Abrir editor
-            </button>
-          )}
+          <div className="flex flex-col sm:flex-row gap-2 shrink-0">
+            {profile.slug && (
+              <>
+                <button
+                  type="button"
+                  onClick={goToLivePreview}
+                  className="rounded-full border border-teal-200 bg-white text-teal-800 text-xs font-bold px-4 py-2.5"
+                >
+                  Ver mi página
+                </button>
+                <button
+                  type="button"
+                  onClick={() => void publishAndShare()}
+                  className="rounded-full bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-4 py-2.5 shadow-sm"
+                >
+                  Compartir en WhatsApp
+                </button>
+                <button
+                  type="button"
+                  onClick={goToEditor}
+                  className="rounded-full bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold px-4 py-2.5 shadow-sm"
+                >
+                  Afinar en editor
+                </button>
+              </>
+            )}
+          </div>
         </div>
       </header>
 
@@ -97,6 +140,7 @@ function CrearInner() {
         <section className="space-y-3">
           <AiProfileBuilder
             variant="hero"
+            workshopMode={taller}
             profile={profile}
             onUpdate={onUpdate}
             onProfileCreated={(id, slug) => {

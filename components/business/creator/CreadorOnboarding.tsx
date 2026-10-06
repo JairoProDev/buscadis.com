@@ -404,8 +404,18 @@ export default function CreadorOnboarding() {
               ¿Por dónde empezamos?
             </h1>
             <p className="text-[17px] text-slate-600 leading-snug">
-              Si ya tienes un adiso en Buscadis, lo convertimos en tu perfil en menos de un minuto.
+              Lo más rápido: cuéntale a Adis con audio o texto y mira tu página al instante.
             </p>
+
+            <Link
+              href="/mi-negocio/crear?taller=1"
+              className="block w-full min-h-[64px] rounded-2xl bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white text-[17px] font-bold text-center leading-tight py-4 px-4 shadow-lg shadow-teal-600/20"
+            >
+              Crear con Adis (IA) — recomendado
+              <span className="block text-sm font-semibold text-teal-50/90 mt-0.5">
+                Audio, fotos, enlaces o un mensaje corto
+              </span>
+            </Link>
 
             {profile.id && profile.slug && (
               <button
@@ -421,7 +431,7 @@ export default function CreadorOnboarding() {
               <div className="h-24 rounded-2xl bg-white border border-slate-200 animate-pulse" />
             ) : adisos.length > 0 ? (
               <div className="space-y-3">
-                <p className="text-sm font-bold text-slate-700">Tus adisos</p>
+                <p className="text-sm font-bold text-slate-700">Convierte un adiso que ya publicaste</p>
                 {adisos.map((a) => (
                   <button
                     key={a.id}
@@ -454,25 +464,10 @@ export default function CreadorOnboarding() {
             <button
               type="button"
               onClick={() => go(1)}
-              className="w-full min-h-[56px] rounded-2xl bg-teal-600 hover:bg-teal-700 text-white text-[17px] font-bold"
+              className="w-full min-h-[56px] rounded-2xl border-2 border-slate-200 bg-white hover:border-teal-300 text-slate-800 text-[17px] font-bold"
             >
-              Empezar de cero
+              Guía paso a paso (sin IA)
             </button>
-
-            <details className="rounded-2xl border border-slate-200 bg-white/80 p-4">
-              <summary className="text-[15px] font-semibold text-slate-600 cursor-pointer">
-                Prefiero hablar con Adis (IA)
-              </summary>
-              <p className="mt-2 text-sm text-slate-500 mb-3">
-                Atajo opcional. El camino recomendado son las preguntas de abajo.
-              </p>
-              <Link
-                href="/mi-negocio/crear?modo=adis"
-                className="inline-flex min-h-[48px] items-center justify-center rounded-xl border border-teal-200 bg-teal-50 px-4 text-sm font-bold text-teal-800"
-              >
-                Abrir chat con Adis
-              </Link>
-            </details>
           </section>
         )}
 
