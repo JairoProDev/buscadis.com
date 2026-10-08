@@ -13,76 +13,6 @@
       "notes": "Hueco entre R2759 y R2761 — recuperar WP/Wayback"
     },
     {
-      "edicion": "R1660",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R1660-recovered.pdf",
-      "sha256": "c1214881cb57db3f77ea639a33528395865b6531928014e7bf1f44461eb159e3",
-      "page_count": 16,
-      "source": "downloads",
-      "downloaded_at": "2026-10-08T15:57:04.251Z"
-    },
-    {
-      "edicion": "R2635",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2635-recovered.pdf",
-      "sha256": "e16af3aa058c04dba7a33d64d5247b8457feeb99452793da7c48d7dfd29bf2d8",
-      "page_count": 16,
-      "source": "downloads",
-      "downloaded_at": "2026-10-08T15:57:04.707Z"
-    },
-    {
-      "edicion": "R2684",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2684-recovered.pdf",
-      "sha256": "82bd57a029c7ac0a954b76c7fbed7858d27c0e046fc0766590bc710012c2e9f6",
-      "page_count": 16,
-      "source": "downloads",
-      "downloaded_at": "2026-10-08T15:57:05.126Z"
-    },
-    {
-      "edicion": "R2686",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2686-recovered.pdf",
-      "sha256": "ad1fd4702a80c328ab557a8f7b68c10584e4f70de52308af8de38080ff12c9e0",
-      "page_count": 16,
-      "source": "downloads",
-      "downloaded_at": "2026-10-08T15:57:05.588Z"
-    },
-    {
-      "edicion": "R2687",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2687-recovered.pdf",
-      "sha256": "181ca5b565713c2de61251cd0244410d67c50b581d11afe20117da6c2e5100d7",
-      "page_count": 16,
-      "source": "downloads",
-      "downloaded_at": "2026-10-08T15:57:06.045Z"
-    },
-    {
-      "edicion": "R2690",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2690-recovered.pdf",
-      "sha256": "8c84a42eba1b8d5f94a56d20f25ab5c9756211264d3e6d25e31dee74230b3f50",
-      "page_count": 16,
-      "source": "downloads",
-      "downloaded_at": "2026-10-08T15:57:06.401Z"
-    },
-    {
-      "edicion": "R2706",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2706-recovered.pdf",
-      "sha256": "93853e0cd5feafe01e8d15294d2f881b5101bd56f9997b81047202d540a7cefd",
-      "page_count": 20,
-      "source": "downloads",
-      "downloaded_at": "2026-10-08T15:57:06.898Z"
-    },
-    {
       "edicion": "R2590",
       "fecha_inicio": "2024-01-02",
       "fecha_fin": "2024-01-05",
@@ -613,6 +543,18 @@
       "batch_id": "rueda-R2735-claimable-2025-06-11"
     },
     {
+      "edicion": "R2635",
+      "fecha_inicio": "2025-06-12",
+      "fecha_fin": "2025-06-15",
+      "archivo": "R2635-Jun12-15.pdf",
+      "sha256": "e16af3aa058c04dba7a33d64d5247b8457feeb99452793da7c48d7dfd29bf2d8",
+      "page_count": 16,
+      "source": "manual",
+      "downloaded_at": "2026-10-08T15:57:04.707Z",
+      "batch_id": "rueda-R2635-claimable-2025-06-12",
+      "notes": "Renombrado desde recovered vía portada PDF"
+    },
+    {
       "edicion": "R2736",
       "fecha_inicio": "2025-06-15",
       "fecha_fin": "2025-06-17",
@@ -873,6 +815,18 @@
       "batch_id": "rueda-R2759-claimable-2025-09-10"
     },
     {
+      "edicion": "R1660",
+      "fecha_inicio": "2025-09-11",
+      "fecha_fin": "2025-09-14",
+      "archivo": "R1660-Sep11-14.pdf",
+      "sha256": "c1214881cb57db3f77ea639a33528395865b6531928014e7bf1f44461eb159e3",
+      "page_count": 16,
+      "source": "manual",
+      "downloaded_at": "2026-10-08T15:57:04.251Z",
+      "batch_id": "rueda-R1660-claimable-2025-09-11",
+      "notes": "Renombrado desde recovered vía portada PDF"
+    },
+    {
       "edicion": "R2660",
       "fecha_inicio": "2025-09-11",
       "fecha_fin": "2025-09-14",
@@ -1111,6 +1065,66 @@
       "page_count": 16,
       "source": "unknown",
       "batch_id": "rueda-R2683-claimable-2025-12-01"
+    },
+    {
+      "edicion": "R2684",
+      "fecha_inicio": "2025-12-04",
+      "fecha_fin": "2025-12-07",
+      "archivo": "R2684-Dic4-7.pdf",
+      "sha256": "82bd57a029c7ac0a954b76c7fbed7858d27c0e046fc0766590bc710012c2e9f6",
+      "page_count": 16,
+      "source": "manual",
+      "downloaded_at": "2026-10-08T15:57:05.126Z",
+      "batch_id": "rueda-R2684-claimable-2025-12-04",
+      "notes": "Renombrado desde recovered vía portada PDF"
+    },
+    {
+      "edicion": "R2686",
+      "fecha_inicio": "2025-12-11",
+      "fecha_fin": "2025-12-14",
+      "archivo": "R2686-Dic11-14.pdf",
+      "sha256": "ad1fd4702a80c328ab557a8f7b68c10584e4f70de52308af8de38080ff12c9e0",
+      "page_count": 16,
+      "source": "manual",
+      "downloaded_at": "2026-10-08T15:57:05.588Z",
+      "batch_id": "rueda-R2686-claimable-2025-12-11",
+      "notes": "Renombrado desde recovered vía portada PDF"
+    },
+    {
+      "edicion": "R2687",
+      "fecha_inicio": "2025-12-15",
+      "fecha_fin": "2025-12-17",
+      "archivo": "R2687-Dic15-17.pdf",
+      "sha256": "181ca5b565713c2de61251cd0244410d67c50b581d11afe20117da6c2e5100d7",
+      "page_count": 16,
+      "source": "manual",
+      "downloaded_at": "2026-10-08T15:57:06.045Z",
+      "batch_id": "rueda-R2687-claimable-2025-12-15",
+      "notes": "Renombrado desde recovered vía portada PDF"
+    },
+    {
+      "edicion": "R2690",
+      "fecha_inicio": "2025-12-29",
+      "fecha_fin": "2026-01-04",
+      "archivo": "R2690-Dic29-Ene4.pdf",
+      "sha256": "8c84a42eba1b8d5f94a56d20f25ab5c9756211264d3e6d25e31dee74230b3f50",
+      "page_count": 16,
+      "source": "manual",
+      "downloaded_at": "2026-10-08T15:57:06.401Z",
+      "batch_id": "rueda-R2690-claimable-2025-12-29",
+      "notes": "Renombrado desde recovered vía portada PDF"
+    },
+    {
+      "edicion": "R2706",
+      "fecha_inicio": "2026-02-26",
+      "fecha_fin": "2026-03-01",
+      "archivo": "R2706-Feb26-Mar1.pdf",
+      "sha256": "93853e0cd5feafe01e8d15294d2f881b5101bd56f9997b81047202d540a7cefd",
+      "page_count": 20,
+      "source": "manual",
+      "downloaded_at": "2026-10-08T15:57:06.898Z",
+      "batch_id": "rueda-R2706-claimable-2026-02-26",
+      "notes": "Renombrado desde recovered vía portada PDF"
     },
     {
       "edicion": "R2518",

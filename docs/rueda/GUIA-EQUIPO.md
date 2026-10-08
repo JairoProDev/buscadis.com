@@ -6,6 +6,25 @@
 
 ---
 
+## Publicar y contactar (cuando el equipo diga «sí»)
+
+Flujo técnico completo: **`ARQUITECTURA-PUBLICACION-Y-CONTACTO.md`** y checklist **`CHECKLIST-PRE-PUBLICACION.md`**.
+
+Comando resumen (ejemplo edición R2766):
+
+```bash
+npm run rueda:preflight -- --edicion=R2766
+npm run rueda:publish -- --edicion=R2766              # simulación
+npm run rueda:publish -- --edicion=R2766 --apply      # inserta en web (inactivos)
+npm run rueda:go-live -- --edicion=R2766             # activa de a uno
+```
+
+Catálogos para el equipo (sin PDF):  
+`output/rueda/catalogo-avisos-historico-completo.csv` y  
+`output/rueda/catalogo-avisos-reciente-R2747-en-adelante.csv`.
+
+---
+
 ## ¿Dónde vive cada cosa? (local vs nube)
 
 Piensa en **tres cajones**:

@@ -70,7 +70,9 @@ function main() {
   const masterCsv = [masterColumns.join(','), ...masterRows].join('\n') + '\n';
 
   const masterCsvPath = path.join(root, 'MASTER-avisos.csv');
+  const catalogoHistorico = path.join(root, 'catalogo-avisos-historico-completo.csv');
   fs.writeFileSync(masterCsvPath, masterCsv, 'utf8');
+  fs.writeFileSync(catalogoHistorico, masterCsv, 'utf8');
 
   const recent = all.filter(({ edicion }) => editionNum(edicion) >= recentFrom);
   const perEdRecent = new Map<string, number>();
@@ -83,7 +85,12 @@ function main() {
   const recentCsv =
     [masterColumns.join(','), ...recentCsvRows].join('\n') + '\n';
   const recentPath = path.join(root, 'MASTER-reciente.csv');
+  const catalogoReciente = path.join(
+    root,
+    `catalogo-avisos-reciente-R${recentFrom}-en-adelante.csv`,
+  );
   fs.writeFileSync(recentPath, recentCsv, 'utf8');
+  fs.writeFileSync(catalogoReciente, recentCsv, 'utf8');
   fs.writeFileSync(
     path.join(root, 'MASTER-reciente-summary.json'),
     JSON.stringify(
@@ -124,7 +131,9 @@ function main() {
     JSON.stringify(
       {
         masterCsvPath,
+        catalogoHistorico,
         recentPath,
+        catalogoReciente,
         jsonlPath,
         summaryPath,
         total_avisos: all.length,

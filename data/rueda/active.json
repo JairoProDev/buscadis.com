@@ -1,6 +1,7 @@
 {
-  "edicion": "R2746",
-  "batch_id": "rueda-R2746-claimable-2025-07-23",
-  "fecha_publicacion_original": "2025-07-23",
-  "updated_at": "2026-10-08T16:28:08.362Z"
+  "edicion": "R2766",
+  "batch_id": "rueda-R2766-claimable-2026-10-05",
+  "fecha_publicacion_original": "2026-10-05",
+  "updated_at": "2026-10-08T18:00:00.000Z",
+  "notes": "Edición piloto para import/go-live cuando el equipo apruebe --apply"
 }

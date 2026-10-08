@@ -46,7 +46,10 @@
 - [x] Visión **solo portada** (`--vision-portada`) en R2747–R2766
 - [x] `VALIDATION-summary.json` — 19/19 ediciones pasan QG (100% teléfono)
 - [x] PDFs sueltos renombrados a `*-recovered.pdf` (normalize-names)
-- [ ] Renombrar recovered → nombres con rango exacto (manual/meta PDF si hace falta)
+- [x] Renombrar recovered → nombres canónicos (`canonicalize-recovered-editions.ts` + portada PDF)
+- [x] Pipeline publicación: `preflight`, `publish-edition`, `post-import`, `go-live-loop --edicion`
+- [x] Catálogos con nombres claros: `catalogo-avisos-historico-completo.csv`, `catalogo-avisos-reciente-R2747-en-adelante.csv`
+- [x] Docs: `ARQUITECTURA-PUBLICACION-Y-CONTACTO.md`, `CHECKLIST-PRE-PUBLICACION.md`
 - [ ] Resolver duplicado R2684 (dos archivos Downloads)
 - [ ] `extract-edition --vision` en R2766 p1 y páginas imagen
 - [ ] `db:migrate` en entorno linked para `rueda_*`

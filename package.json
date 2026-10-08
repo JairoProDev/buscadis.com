@@ -47,7 +47,12 @@
     "rueda:fix-fechas": "npx tsx scripts/rueda/fix-manifest-fechas.ts --apply",
     "rueda:reexport": "npx tsx scripts/rueda/reexport-all-catalogs.ts --sync-fechas",
     "rueda:validate-all": "npx tsx scripts/rueda/batch-validate-all.ts",
-    "rueda:extract-missing": "npx tsx scripts/rueda/batch-extract-missing.ts --min=2630 --split"
+    "rueda:extract-missing": "npx tsx scripts/rueda/batch-extract-missing.ts --min=2630 --split",
+    "rueda:canonicalize-recovered": "npx tsx scripts/rueda/canonicalize-recovered-editions.ts",
+    "rueda:preflight": "npx tsx scripts/rueda/preflight-edition.ts",
+    "rueda:publish": "npx tsx scripts/rueda/publish-edition.ts",
+    "rueda:go-live": "npx tsx scripts/rueda/go-live-loop.ts",
+    "rueda:outreach": "npx tsx scripts/rueda/prepare-outreach-edition.ts"
   },
   "dependencies": {
     "@ai-sdk/openai": "^4.0.0",

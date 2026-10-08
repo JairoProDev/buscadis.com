@@ -5,7 +5,7 @@
 **Estado:** En implementación — ver [`IMPLEMENTACION-PROGRESO.md`](./IMPLEMENTACION-PROGRESO.md)  
 **Propietario sugerido:** Ops + ingeniería Buscadis  
 
-**Documentos relacionados:** `PROTOCOLO.md`, `../REPOSITORIOS.md`, `../comercial/PRECIOS-RUEDA-NEGOCIOS.md`, `../comercial/ARQUITECTURA.md`, `data/rueda/manifest.json`
+**Documentos relacionados:** `PROTOCOLO.md`, `ARQUITECTURA-PUBLICACION-Y-CONTACTO.md`, `CHECKLIST-PRE-PUBLICACION.md`, `GUIA-EQUIPO.md`, `../REPOSITORIOS.md`, `../comercial/PRECIOS-RUEDA-NEGOCIOS.md`, `../comercial/ARQUITECTURA.md`, `data/rueda/manifest.json`
 
 ---
 

@@ -1,0 +1,27 @@
+{
+  "import": {
+    "tier": "free",
+    "esta_activo_initial": false,
+    "noindex_until_claimed": true,
+    "default_start_in_minutes": 60,
+    "default_interval_seconds": 60
+  },
+  "go_live": {
+    "activate_per_tick": 1,
+    "tick_ms": 60000
+  },
+  "outreach": {
+    "country_dial": "51",
+    "estado_pre_import": "pendiente_import",
+    "estado_post_import": "importado_pendiente_contacto"
+  },
+  "catalogos": {
+    "historico": "output/rueda/catalogo-avisos-historico-completo.csv",
+    "reciente_desde_edicion": 2747,
+    "reciente": "output/rueda/catalogo-avisos-reciente-R2747-en-adelante.csv"
+  },
+  "gaps": {
+    "ediciones_sin_pdf": ["R2760"],
+    "notas": "R2760 no recuperable desde WP actual; contactar editorial si aparece copia."
+  }
+}
