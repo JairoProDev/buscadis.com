@@ -10,7 +10,7 @@ import * as path from 'path';
 const pdfParse = require('pdf-parse');
 import { estructurarAnuncios, esPublicable, type AnuncioExtraido } from '../lib/extraer-anuncios-rueda';
 
-const ARCHIVE = '/home/jairoprodev/proyectos/ads/archive/pages';
+import { findEditionPagesDir, getRuedaReportsDir } from '../lib/rueda/paths';
 
 function parsePaginas(spec: string): number[] {
   // "4-10" o "5,6,7"
@@ -27,9 +27,7 @@ function arg(name: string): string | undefined {
 }
 
 function findEditionDir(ed: string): string | null {
-  const dirs = fs.readdirSync(ARCHIVE).filter((d) => d.startsWith(ed + '-') || d === ed);
-  if (!dirs.length) return null;
-  return path.join(ARCHIVE, dirs[0]);
+  return findEditionPagesDir(ed);
 }
 
 interface PageResult {
@@ -147,7 +145,7 @@ async function main() {
   fs.writeFileSync(path.join(outRoot, 'summary.json'), JSON.stringify(summary, null, 2));
 
   // Also copy to ads reports
-  const reportDir = '/home/jairoprodev/proyectos/ads/reports/qa-extraccion';
+  const reportDir = path.join(getRuedaReportsDir(), 'qa-extraccion');
   fs.mkdirSync(reportDir, { recursive: true });
   fs.writeFileSync(path.join(reportDir, 'summary.json'), JSON.stringify(summary, null, 2));
 

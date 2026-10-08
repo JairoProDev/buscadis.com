@@ -5,6 +5,8 @@ import { ensureRuedaAdvertiserUser } from '@/lib/rueda/ensure-advertiser';
 import { onAdisoSearchIndexUpdate } from '@/lib/search/post-create';
 import { RUEDA_R2764_BATCH_ID } from '@/lib/rueda/batch-constants';
 
+const RUEDA_PIPELINE = 'rueda_claimable';
+
 function limaNowParts() {
   const parts = new Intl.DateTimeFormat('en-CA', {
     timeZone: 'America/Lima',
@@ -19,17 +21,25 @@ function limaNowParts() {
   return { fecha: `${get('year')}-${get('month')}-${get('day')}`, hora: `${get('hour')}:${get('minute')}` };
 }
 
-export async function activateScheduledRuedaAds(limit = 1): Promise<{
+export async function activateScheduledRuedaAds(
+  limit = 1,
+  batchId?: string,
+): Promise<{
   activated: string[];
   skipped: number;
+  batch_id?: string;
 }> {
   const now = new Date().toISOString();
+  const filterBatch = batchId || process.env.RUEDA_ACTIVE_BATCH_ID || RUEDA_R2764_BATCH_ID;
+
+  const privateFilter: Record<string, string> = { import_pipeline: RUEDA_PIPELINE };
+  if (filterBatch) privateFilter.batch_id = filterBatch;
 
   const { data: candidates, error } = await supabaseAdmin
     .from('adisos')
     .select('*')
     .eq('esta_activo', false)
-    .contains('private_data', { batch_id: RUEDA_R2764_BATCH_ID, import_pipeline: 'rueda_claimable' })
+    .contains('private_data', privateFilter)
     .limit(500);
 
   if (error) throw new Error(error.message);
@@ -115,7 +125,11 @@ export async function activateScheduledRuedaAds(limit = 1): Promise<{
     }
   }
 
-  return { activated, skipped: (due?.length || 0) - activated.length };
+  return {
+    activated,
+    skipped: (due?.length || 0) - activated.length,
+    batch_id: filterBatch,
+  };
 }
 
 /** Republicación inmediata al reclamar (sube en feed). */

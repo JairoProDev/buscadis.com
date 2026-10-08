@@ -31,7 +31,15 @@
     "smoke:ssr": "bash scripts/smoke-ssr-indexing.sh",
     "smoke:storefront": "npm run verify --workspace=@buscadis/storefront-kit",
     "verify:perfil-vivo": "npm run verify:tema --workspace=@buscadis/perfil-vivo && npm run verify:types --workspace=@buscadis/perfil-vivo && npm run verify:promo --workspace=@buscadis/perfil-vivo && npm run verify:ia --workspace=@buscadis/perfil-vivo",
-    "lhci:perfil-vivo": "npx --yes @lhci/cli@0.14.0 autorun --config=./.lighthouserc.cjs"
+    "lhci:perfil-vivo": "npx --yes @lhci/cli@0.14.0 autorun --config=./.lighthouserc.cjs",
+    "rueda:inventory": "npx tsx scripts/rueda/inventory-report.ts",
+    "rueda:ingest-downloads": "npx tsx scripts/rueda/ingest-from-downloads.ts",
+    "rueda:split": "npx tsx scripts/rueda/split-edition-pages.ts",
+    "rueda:extract": "npx tsx scripts/rueda/extract-edition.ts",
+    "rueda:validate": "npx tsx scripts/rueda/validate-avisos.ts",
+    "rueda:import": "npx tsx scripts/rueda/import-edition.ts",
+    "rueda:daily-check": "npx tsx scripts/rueda/rueda-daily-check.ts",
+    "rueda:manifest-backfill": "npx tsx scripts/rueda/backfill-manifest-from-disk.ts"
   },
   "dependencies": {
     "@ai-sdk/openai": "^4.0.0",

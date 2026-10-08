@@ -12,7 +12,7 @@ import {
 } from '@/lib/comercial/client';
 import type { SalesOpportunityWithAdiso, SalesStage } from '@/lib/comercial/types';
 import { CAMPANA_RUEDA_OCT_2026 } from '@/lib/comercial/campana-rueda-oct-2026';
-import { RUEDA_R2764_BATCH_ID } from '@/lib/rueda/batch-constants';
+import ruedaActive from '@/data/rueda/active.json';
 
 export default function AdminComercialPage() {
   const { session } = useAuth();
@@ -80,7 +80,7 @@ export default function AdminComercialPage() {
     if (!token) return;
     setError(null);
     try {
-      const r = await backfillRuedaApi(token, RUEDA_R2764_BATCH_ID);
+      const r = await backfillRuedaApi(token, ruedaActive.batch_id);
       alert(`Rueda: ${r.created} creadas, ${r.skipped} omitidas`);
       await load();
     } catch (e) {

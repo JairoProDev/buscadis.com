@@ -1,0 +1,2 @@
+# Python deps for scripts/rueda (PDF text, render, split)
+pymupdf>=1.24.0

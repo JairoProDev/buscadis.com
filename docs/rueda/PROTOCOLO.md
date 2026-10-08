@@ -1,5 +1,8 @@
 # Protocolo Rueda → prospecto → cliente Buscadis
 
+**Programa completo (checklist ~310 tareas):** [`PROGRAMA-MAESTRO.md`](./PROGRAMA-MAESTRO.md)  
+**Operación día a día:** [`RUNBOOK-INGESTA.md`](./RUNBOOK-INGESTA.md) · **QA:** [`RUNBOOK-QA.md`](./RUNBOOK-QA.md)
+
 Cadena objetivo: **PDF** → **avisos estructurados** → **analítica de anunciante** → **CRM** → **contacto WA** → **publicación** → **cuenta** → **seguimiento / recompra**.
 
 ## 1. Archivo de ediciones
@@ -42,7 +45,7 @@ Con eso respondes: *¿cada cuánto publica?, ¿qué tamaño?, ¿cambia de rubro?
 
 ## 4. Import a Buscadis + CRM
 
-1. `scripts/rueda/import-r2764.ts` (plantilla para nueva edición: copiar y ajustar batch).
+1. `scripts/rueda/import-edition.ts --edicion=R####` (sustituye import-r2764).
 2. Tras insertar adisos: `backfillOpportunitiesFromBatch` → `/admin/comercial`.
 3. En la oportunidad: contexto del aviso (`adiso_id`, notas batch, actividades).
 

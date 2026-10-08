@@ -16,40 +16,16 @@ import { extractRuedaAdsFromPagePng } from '../../lib/rueda/pdf-page-vision';
 import { classifyRuedaListing } from '../../lib/rueda/classify-from-text';
 import { polishRuedaListing } from '../../lib/rueda/listing-quality';
 import { esWhatsApp } from '../../lib/limpiar-contactos';
-import {
-  RUEDA_R2764_BATCH_ID,
-  RUEDA_R2764_EDICION,
-  RUEDA_R2764_FECHA_ORIGINAL,
-} from '../../lib/rueda/batch-constants';
-import { RUEDA_R2764_PDF } from '../../lib/rueda/editions-server';
+import { resolveEditionRunContext } from '../../lib/rueda/batch';
+import { resolveEditionPdfPath } from '../../lib/rueda/editions-server';
+import { RUEDA_AVISO_SCHEMA_VERSION } from '../../lib/rueda/schema';
+import type { RuedaExtractedAd } from '../../lib/rueda/types';
+import { getRuedaDataDir, getRuedaOutputDir } from '../../lib/rueda/paths';
 
 dotenv.config({ path: path.join(process.cwd(), '.env.local') });
 dotenv.config({ path: path.join(process.cwd(), '.env') });
 
-export interface RuedaExtractedAd {
-  batch_id: string;
-  edicion: string;
-  pagina: number;
-  import_key: string;
-  titulo: string;
-  categoria: string;
-  subcategoria?: string;
-  ubicacion: string;
-  vacantes: string[];
-  descripcion: string;
-  telefonos: string[];
-  whatsapp: string | null;
-  email: string | null;
-  es_empresa: boolean;
-  confianza: number;
-  requiere_revision: boolean;
-  recurrente: boolean;
-  score: number;
-  issues: string[];
-  texto_raw: string;
-  flyer_template: string;
-  hide_generic_location: boolean;
-}
+export type { RuedaExtractedAd } from '../../lib/rueda/types';
 
 function arg(name: string): string | undefined {
   const hit = process.argv.find((a) => a.startsWith(`--${name}=`));
@@ -117,10 +93,14 @@ async function visionForPage(pdf: string, pagina: number): Promise<AnuncioExtrai
 }
 
 async function main() {
-  const pdf = arg('pdf') || RUEDA_R2764_PDF;
-  const edicion = arg('edicion') || RUEDA_R2764_EDICION;
-  const batchId = arg('batch') || RUEDA_R2764_BATCH_ID;
-  const fechaOriginal = arg('fecha') || RUEDA_R2764_FECHA_ORIGINAL;
+  const edicionArg = arg('edicion') || 'R2764';
+  const ctx = resolveEditionRunContext({
+    edicion: edicionArg,
+    batch: arg('batch'),
+    fecha: arg('fecha'),
+  });
+  const pdf = arg('pdf') || resolveEditionPdfPath(ctx.edicion);
+  const { edicion, batchId, fechaPublicacionOriginal: fechaOriginal } = ctx;
   const useOcr = process.argv.includes('--ocr');
   const useVision = process.argv.includes('--vision');
 
@@ -129,7 +109,7 @@ async function main() {
     process.exit(1);
   }
 
-  const outDir = path.join(process.cwd(), 'output', 'rueda', edicion);
+  const outDir = getRuedaOutputDir(edicion);
   fs.mkdirSync(outDir, { recursive: true });
 
   const pyArgs = ['scripts/rueda/pdf-pages-text.py', pdf];
@@ -223,6 +203,7 @@ async function main() {
 
   const deduped = [...byImportKey.values()];
   const payload = {
+    schema_version: RUEDA_AVISO_SCHEMA_VERSION,
     edicion,
     batch_id: batchId,
     fecha_publicacion_original: fechaOriginal,
@@ -245,6 +226,20 @@ async function main() {
     ),
   ].join('\n');
   fs.writeFileSync(path.join(outDir, 'revision.csv'), reviewCsv);
+
+  fs.writeFileSync(
+    path.join(getRuedaDataDir(), 'active.json'),
+    JSON.stringify(
+      {
+        edicion,
+        batch_id: batchId,
+        fecha_publicacion_original: fechaOriginal,
+        updated_at: new Date().toISOString(),
+      },
+      null,
+      2,
+    ) + '\n',
+  );
 
   console.log(
     JSON.stringify(
