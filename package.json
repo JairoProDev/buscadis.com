@@ -39,7 +39,15 @@
     "rueda:validate": "npx tsx scripts/rueda/validate-avisos.ts",
     "rueda:import": "npx tsx scripts/rueda/import-edition.ts",
     "rueda:daily-check": "npx tsx scripts/rueda/rueda-daily-check.ts",
-    "rueda:manifest-backfill": "npx tsx scripts/rueda/backfill-manifest-from-disk.ts"
+    "rueda:manifest-backfill": "npx tsx scripts/rueda/backfill-manifest-from-disk.ts",
+    "rueda:normalize-names": "npx tsx scripts/rueda/normalize-edition-filenames.ts",
+    "rueda:extract-recent": "npx tsx scripts/rueda/batch-extract-recent.ts",
+    "rueda:export-master": "npx tsx scripts/rueda/export-master-catalog.ts",
+    "rueda:export-reciente": "npx tsx scripts/rueda/export-master-catalog.ts --recent-from=2747",
+    "rueda:fix-fechas": "npx tsx scripts/rueda/fix-manifest-fechas.ts --apply",
+    "rueda:reexport": "npx tsx scripts/rueda/reexport-all-catalogs.ts --sync-fechas",
+    "rueda:validate-all": "npx tsx scripts/rueda/batch-validate-all.ts",
+    "rueda:extract-missing": "npx tsx scripts/rueda/batch-extract-missing.ts --min=2630 --split"
   },
   "dependencies": {
     "@ai-sdk/openai": "^4.0.0",

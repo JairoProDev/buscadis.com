@@ -1,6 +1,7 @@
 import { generateObject } from 'ai';
 import { z } from 'zod';
 import { openai, hasOpenAIKey, AI_MODELS } from '@/lib/ai/openai-client';
+import { ruedaUseOpenAiApi } from '@/lib/rueda/extraction-policy';
 
 const polishSchema = z.object({
   titulo: z.string().max(100),
@@ -14,7 +15,7 @@ export async function aiPolishRuedaListing(raw: {
   categoria: string;
   telefono: string;
 }): Promise<z.infer<typeof polishSchema> | null> {
-  if (!hasOpenAIKey()) return null;
+  if (!ruedaUseOpenAiApi() || !hasOpenAIKey()) return null;
 
   const { object } = await generateObject({
     model: openai(AI_MODELS.ROUTER),

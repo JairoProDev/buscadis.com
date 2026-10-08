@@ -17,10 +17,14 @@ import { classifyRuedaListing } from '../../lib/rueda/classify-from-text';
 import { polishRuedaListing } from '../../lib/rueda/listing-quality';
 import { esWhatsApp } from '../../lib/limpiar-contactos';
 import { resolveEditionRunContext } from '../../lib/rueda/batch';
+import { getEditionByCode } from '../../lib/rueda/editions';
+import { parseEditionDatesFromArchivo } from '../../lib/rueda/parse-filename-dates';
 import { resolveEditionPdfPath } from '../../lib/rueda/editions-server';
 import { RUEDA_AVISO_SCHEMA_VERSION } from '../../lib/rueda/schema';
 import type { RuedaExtractedAd } from '../../lib/rueda/types';
 import { getRuedaDataDir, getRuedaOutputDir } from '../../lib/rueda/paths';
+import { writeEditionAvisosCsv, writeEditionAvisosTxt } from '../../lib/rueda/export-catalog';
+import { ruedaExtractionMode } from '../../lib/rueda/extraction-policy';
 
 dotenv.config({ path: path.join(process.cwd(), '.env.local') });
 dotenv.config({ path: path.join(process.cwd(), '.env') });
@@ -94,15 +98,30 @@ async function visionForPage(pdf: string, pagina: number): Promise<AnuncioExtrai
 
 async function main() {
   const edicionArg = arg('edicion') || 'R2764';
+  const man = getEditionByCode(edicionArg);
+  const fromFile = man?.archivo ? parseEditionDatesFromArchivo(man.archivo, edicionArg) : null;
   const ctx = resolveEditionRunContext({
     edicion: edicionArg,
-    batch: arg('batch'),
-    fecha: arg('fecha'),
+    batch: arg('batch') || man?.batch_id,
+    fecha: arg('fecha') || man?.fecha_inicio || fromFile?.fecha_inicio,
   });
   const pdf = arg('pdf') || resolveEditionPdfPath(ctx.edicion);
   const { edicion, batchId, fechaPublicacionOriginal: fechaOriginal } = ctx;
   const useOcr = process.argv.includes('--ocr');
-  const useVision = process.argv.includes('--vision');
+  const useVisionPortada = process.argv.includes('--vision-portada');
+  const useVisionFull = process.argv.includes('--vision');
+  const useVision =
+    (useVisionFull || useVisionPortada) && ruedaExtractionMode() === 'openai';
+  if ((useVisionFull || useVisionPortada) && !useVision) {
+    console.warn(
+      '[rueda] Visión OpenAI desactivada (política local). Usa --ocr o RUEDA_USE_OPENAI=1 si lo necesitas.',
+    );
+  }
+
+  const shouldVisionPage = (page: { pagina: number; texto: string; images?: number; chars?: number }) => {
+    if (useVisionPortada && !useVisionFull) return page.pagina === 1;
+    return visionCandidate(page);
+  };
 
   if (!fs.existsSync(pdf)) {
     console.error('PDF no encontrado:', pdf);
@@ -129,7 +148,7 @@ async function main() {
 
   for (const p of pages) {
     let anuncios = estructurarAnunciosMaximo(p.texto);
-    if (useVision && visionCandidate(p)) {
+    if (useVision && shouldVisionPage(p)) {
       try {
         const fromVision = await visionForPage(pdf, p.pagina);
         const seen = new Set(anuncios.map((a) => `${a.telefonos[0]}:${a.titulo.slice(0, 40)}`));
@@ -207,6 +226,7 @@ async function main() {
     edicion,
     batch_id: batchId,
     fecha_publicacion_original: fechaOriginal,
+    fecha_sesion_fin: man?.fecha_fin || fromFile?.fecha_fin || fechaOriginal,
     pdf,
     extracted_at: new Date().toISOString(),
     total_paginas: pages.length,
@@ -226,6 +246,12 @@ async function main() {
     ),
   ].join('\n');
   fs.writeFileSync(path.join(outDir, 'revision.csv'), reviewCsv);
+  const fechasCsv = {
+    inicio: fechaOriginal,
+    fin: man?.fecha_fin || fromFile?.fecha_fin || fechaOriginal,
+  };
+  writeEditionAvisosCsv(outDir, deduped, fechasCsv);
+  writeEditionAvisosTxt(outDir, deduped);
 
   fs.writeFileSync(
     path.join(getRuedaDataDir(), 'active.json'),

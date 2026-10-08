@@ -1,5 +1,15 @@
 # Runbook — Ingesta Rueda (lun/jue)
 
+## Local primero, Supabase después
+
+| Paso | ¿Toca Supabase? |
+|------|-----------------|
+| sync PDF, split, extract, validate | **No** |
+| `load-warehouse --apply` | Sí (tablas `rueda_*`, opcional) |
+| `import-edition --apply` | Sí (`adisos` + CRM) |
+
+En plan gratis: extraer siempre en local; publicar solo con OK de ops.
+
 ## Antes de empezar
 
 - `RUEDA_EDITIONS_DIR` apunta a `../ads/archive/editions` (o ruta absoluta).
@@ -40,8 +50,10 @@ npx tsx scripts/rueda/split-edition-pages.ts --all-recent
 
 ```bash
 npx tsx scripts/rueda/extract-edition.ts \
-  --edicion=R2767 --batch=rueda-R2767-claimable-2026-10-08 --fecha=2026-10-08 --vision
+  --edicion=R2767 --batch=rueda-R2767-claimable-2026-10-08 --fecha=2026-10-08
 ```
+
+Sin `--vision`: extracción local. OCR opcional: `--ocr`. OpenAI solo con `RUEDA_USE_OPENAI=1`.
 
 ## 6. Validación (QG-EXTRACT)
 

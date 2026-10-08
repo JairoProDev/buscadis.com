@@ -5,1311 +5,6 @@
   "note": "Los PDF binarios viven en el repo ads (archive/editions), no en buscadis.com — ver docs/REPOSITORIOS.md",
   "editions": [
     {
-      "edicion": "R2518",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2518-Abr11-14.pdf",
-      "sha256": "342037e765aec669ef0e320c1fc67c106b4c285d9a95b39766f08f96f0fe1a1f",
-      "page_count": 16,
-      "source": "unknown"
-    },
-    {
-      "edicion": "R2519",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2519-Abr15-17.pdf",
-      "sha256": "d08e32d6ce1c4e38e56bf4d338a2845363bd473abdbd0a9658baba4eebb6b4bc",
-      "page_count": 16,
-      "source": "unknown"
-    },
-    {
-      "edicion": "R2520",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2520-Abr18-21.pdf",
-      "sha256": "eaa750aa6f90be549854eb98e4ea11286e9a4a64280918c02a6412e055eb5edc",
-      "page_count": 16,
-      "source": "unknown"
-    },
-    {
-      "edicion": "R2527",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2527-May13-15.pdf",
-      "sha256": "825be57fdb5d757153641eb7d9a09afa2ffea5d0d16b1cb22afbdd8bbabef76c",
-      "page_count": 16,
-      "source": "unknown"
-    },
-    {
-      "edicion": "R2528",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2528-May16-19.pdf",
-      "sha256": "95f623cda90ff0d51a638dbfcc949579c830ee37451319ba03d57ef64099f21b",
-      "page_count": 16,
-      "source": "unknown"
-    },
-    {
-      "edicion": "R2531",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2531-May27-29.pdf",
-      "sha256": "2c9f7e49c3f17ca5fa888f921eab3b006c039dc64e81b3b0062796d78cbffeaa",
-      "page_count": 16,
-      "source": "unknown"
-    },
-    {
-      "edicion": "R2532",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2532-May30-Jun2.pdf",
-      "sha256": "4255c18bfe7f9b89555be3a8c53746a340b14d041f0073388a2149dd6dd5ca62",
-      "page_count": 16,
-      "source": "unknown"
-    },
-    {
-      "edicion": "R2535",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2535-Jun10-12.pdf",
-      "sha256": "868b1257333f3510531483d5df123b8bed13311982b9ae0d6f593b99e3722cbf",
-      "page_count": 16,
-      "source": "unknown"
-    },
-    {
-      "edicion": "R2536",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2536-Jun13-16.pdf",
-      "sha256": "ac0ca681eb90274ae01697f41a532cc566e83edb8efa5d61f64e1cba0a456ec5",
-      "page_count": 16,
-      "source": "unknown"
-    },
-    {
-      "edicion": "R2537",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2537-Jun17-19.pdf",
-      "sha256": "6fc8fee8302ff75d9753fda9343ae23b831c11ee4758fd29749c50e16086dd3d",
-      "page_count": 16,
-      "source": "unknown"
-    },
-    {
-      "edicion": "R2538",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2538-Jun20-26.pdf",
-      "sha256": "bc8f623796304c0e73c68a19036d1de405c5f34d962ce4146815df3b2c880e7a",
-      "page_count": 16,
-      "source": "unknown"
-    },
-    {
-      "edicion": "R2539",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2539-Jun27-30.pdf",
-      "sha256": "96508259538470c9f0fc2834f25eb9b73becc144ade8db1558ca1ace414b4d6f",
-      "page_count": 24,
-      "source": "unknown"
-    },
-    {
-      "edicion": "R2540",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2540-Jul1-3.pdf",
-      "sha256": "371be7a3c4fec73b9b8c0bee98ad2914b896bc98f985ed50f0f88c1340426562",
-      "page_count": 16,
-      "source": "unknown"
-    },
-    {
-      "edicion": "R2541",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2541-Jul4-7.pdf",
-      "sha256": "f7145eda2b7a7957fa6a8f2a91648aa463db82da41f51c43c1d804327d48645e",
-      "page_count": 16,
-      "source": "unknown"
-    },
-    {
-      "edicion": "R2542",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2542-Jul8-10.pdf",
-      "sha256": "5f5e92136390b207f0031bda5ad2f05186ff80c68a1eb654ed78ee956f571dc2",
-      "page_count": 16,
-      "source": "unknown"
-    },
-    {
-      "edicion": "R2546",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2546-Jul22-24.pdf",
-      "sha256": "1d645941841bab46492c3e6e2712675f9a08f0cb7722cb6254252e55c1e3221e",
-      "page_count": 16,
-      "source": "unknown"
-    },
-    {
-      "edicion": "R2547",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2547-Jul25-31.pdf",
-      "sha256": "4202780e45dc1c7154503ae760a9e058b99262cba3dedbd11926b35fc82bfbfd",
-      "page_count": 16,
-      "source": "unknown"
-    },
-    {
-      "edicion": "R2548",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2548-Ago1-4.pdf",
-      "sha256": "caa3580147f1b563f737b9eceb707cd95876e69ac0b0de4c18ff9f1632002e60",
-      "page_count": 20,
-      "source": "unknown"
-    },
-    {
-      "edicion": "R2556",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2556-Ago29-Sep1.pdf",
-      "sha256": "82f172a08c6580d716bca79022cfdd949d5b3b7935fc4ac4426538ff9391e4fc",
-      "page_count": 16,
-      "source": "unknown"
-    },
-    {
-      "edicion": "R2557",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2557-Sep2-4.pdf",
-      "sha256": "3ed5ffa32e9d63dd5e3a4a040a59e910f44c896f68979ae1445a91260c951f45",
-      "page_count": 16,
-      "source": "unknown"
-    },
-    {
-      "edicion": "R2558",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2558-Sep5-8.pdf",
-      "sha256": "d61c630a1903eaf885096fb73994badcd7aaca97208da660b9d7cfddf6865530",
-      "page_count": 16,
-      "source": "unknown"
-    },
-    {
-      "edicion": "R2559",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2559-Sep9-11.pdf",
-      "sha256": "a5d5c7e444b2e76ac352fa713048a635eb7ccef0e132f375c70cf3692b1577ae",
-      "page_count": 16,
-      "source": "unknown"
-    },
-    {
-      "edicion": "R2560",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2560-Sep12-15.pdf",
-      "sha256": "120d07c71dfabbf52d9b2595644cfcbe3f18c0b3f0abe7c748b792bb6f53f71f",
-      "page_count": 16,
-      "source": "unknown"
-    },
-    {
-      "edicion": "R2561",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2561-Sep16-18.pdf",
-      "sha256": "44a4eefada6ea0b8b4f7872079168f75358b7df843cd07f418d9540f81786b62",
-      "page_count": 16,
-      "source": "unknown"
-    },
-    {
-      "edicion": "R2562",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2562-Sep19-22.pdf",
-      "sha256": "aa8ac85ada21b54bd77c0b7af2586a0bbddbfd67b6ba93601e56c8a6e55f0858",
-      "page_count": 16,
-      "source": "unknown"
-    },
-    {
-      "edicion": "R2563",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2563-Sep23-25.pdf",
-      "sha256": "863098a9c066149172c9d11562b7ca8fdb1e4bb383e9cc7815f9d4908a0f57dd",
-      "page_count": 16,
-      "source": "unknown"
-    },
-    {
-      "edicion": "R2564",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2564-Sep26-29.pdf",
-      "sha256": "729044879bcd5507fe031d5a400d22b3b7e91f2d3e8d30a8e6052cd01c6433f3",
-      "page_count": 16,
-      "source": "unknown"
-    },
-    {
-      "edicion": "R2565",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2565-Sep30-Oct2.pdf",
-      "sha256": "45ca805e2ceecfb5983ead71edbdb44e80c9847db9e96ceb5c26fee8eb11118d",
-      "page_count": 16,
-      "source": "unknown"
-    },
-    {
-      "edicion": "R2566",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2566-Oct3-6.pdf",
-      "sha256": "113fa1c550f3ef4170f02a2378b7636790f9175b53b886142cfd756699b297df",
-      "page_count": 16,
-      "source": "unknown"
-    },
-    {
-      "edicion": "R2567",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2567-Oct7-9.pdf",
-      "sha256": "7a1ef0bed7868474ed577beab2eceec02ecf4f1c925e4ce7fd8472c0cc58312d",
-      "page_count": 16,
-      "source": "unknown"
-    },
-    {
-      "edicion": "R2568",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2568-Oct10-13.pdf",
-      "sha256": "973cb4ea1a93e920264b4eb5d21079c55372771d7b5abc21a74bfa172a4cb495",
-      "page_count": 16,
-      "source": "unknown"
-    },
-    {
-      "edicion": "R2569",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2569-Oct14-16.pdf",
-      "sha256": "9972a8647735aa813884a523fb77d24d06fbe5573657857bec9f171496cd0994",
-      "page_count": 16,
-      "source": "unknown"
-    },
-    {
-      "edicion": "R2570",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2570-Oct17-20.pdf",
-      "sha256": "21e6a10fa88d45ce1dc7ef9168c0bb8429f2a8330ccff7925e743a8e54c30ad4",
-      "page_count": 16,
-      "source": "unknown"
-    },
-    {
-      "edicion": "R2571",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2571-Oct21-23.pdf",
-      "sha256": "9c7fabf40202c27836f6eba62179bdac8cf88df18f62363070c4f3f1c46a2c6f",
-      "page_count": 16,
-      "source": "unknown"
-    },
-    {
-      "edicion": "R2572",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2572-Oct24-27.pdf",
-      "sha256": "880e9135c777fabc0aa889c453abaf3588fe8f77cd6a7aeda454558c1770d846",
-      "page_count": 16,
-      "source": "unknown"
-    },
-    {
-      "edicion": "R2573",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2573-Oct28-30.pdf",
-      "sha256": "ea0ca019017310b992d21bd5d1b658bc8c22fce1c0c03a6bacfb52cf2e5127ab",
-      "page_count": 16,
-      "source": "unknown"
-    },
-    {
-      "edicion": "R2574",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2574-Oct31-Nov3.pdf",
-      "sha256": "c30c867866fa84efeaee77be10fbcbd55151e9653ed16ad5fa4667d38bd95948",
-      "page_count": 16,
-      "source": "unknown"
-    },
-    {
-      "edicion": "R2575",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2575-Nov4-6.pdf",
-      "sha256": "6dd78879bd3865a78e529878c57cb0b31872ae9d21ef0dda415bdbdeadb1e265",
-      "page_count": 16,
-      "source": "unknown"
-    },
-    {
-      "edicion": "R2576",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2576-Nov7-10.pdf",
-      "sha256": "698fc90a0aee8abad940df14bd2f0aa3bb1586b09f06a9a1e1b3597824a694a5",
-      "page_count": 16,
-      "source": "unknown"
-    },
-    {
-      "edicion": "R2577",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2577-Nov11-13.pdf",
-      "sha256": "d6e9bc96209c173cf3f3e38560abb327d939d9b9595395895ac34605fe848950",
-      "page_count": 16,
-      "source": "unknown"
-    },
-    {
-      "edicion": "R2578",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2578-Nov14-17.pdf",
-      "sha256": "8c9113f0c9f10079c42a8d83874e449307df092ff701ea718881b9562e40881e",
-      "page_count": 16,
-      "source": "unknown"
-    },
-    {
-      "edicion": "R2579",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2579-Nov18-20.pdf",
-      "sha256": "d725f2e05d73e159c179a1903a12e4b74a13bd554ab047d4af09098684fdb34e",
-      "page_count": 16,
-      "source": "unknown"
-    },
-    {
-      "edicion": "R2583",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2583-Dic2-4.pdf",
-      "sha256": "5c3c6610cb057a2902b4714167bac9565ea62344c1a4d03b2bb0743ce235d4ac",
-      "page_count": 16,
-      "source": "unknown"
-    },
-    {
-      "edicion": "R2584",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2584-Dic5-8.pdf",
-      "sha256": "3bb601938c9d24ddf5cd77c5d9d47838600c2f2d38fba700664c8dd9b6395535",
-      "page_count": 16,
-      "source": "unknown"
-    },
-    {
-      "edicion": "R2585",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2585-Dic9-11.pdf",
-      "sha256": "b7ac7d92af52ebdb5ad6c5e71c8a80aa675916ad71dd50da12503aab47f14ea9",
-      "page_count": 16,
-      "source": "unknown"
-    },
-    {
-      "edicion": "R2586",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2586-Dic12-15.pdf",
-      "sha256": "e716e82a1368bde69b7754c495cc6227bc11d6279cbb40b77e8a6bdcc529ec6e",
-      "page_count": 16,
-      "source": "unknown"
-    },
-    {
-      "edicion": "R2587",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2587-Dic16-18.pdf",
-      "sha256": "9dc1baaae79daee70cfe41088e91d6b2df4a9fae871a3d6b43347bc2885cb91f",
-      "page_count": 16,
-      "source": "unknown"
-    },
-    {
-      "edicion": "R2588",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2588-Dic19-25.pdf",
-      "sha256": "b6632ca0404d9e6e349180d4e51bec56bce18525294a742d2c04e9e92d336e06",
-      "page_count": 16,
-      "source": "unknown"
-    },
-    {
-      "edicion": "R2589",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2589-Dic26-Ene1.pdf",
-      "sha256": "3ba0a5a7eb4c8347464c73d58a231bd99a1ac4a6209380b91a523f8c54bbe7d1",
-      "page_count": 16,
-      "source": "unknown"
-    },
-    {
-      "edicion": "R2590",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2590-Ene2-5.pdf",
-      "sha256": "0b6674c4e6e8e1e5ae7ac98861754f9459829be89cadcbd3b4f8375a64f37dee",
-      "page_count": 16,
-      "source": "unknown"
-    },
-    {
-      "edicion": "R2591",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2591-Ene6-8.pdf",
-      "sha256": "c7d374912e09ab9113e47d226508af4341e4862051e6593fa984730b85d945bd",
-      "page_count": 20,
-      "source": "unknown"
-    },
-    {
-      "edicion": "R2592",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2592-Ene9-12.pdf",
-      "sha256": "117082b06a2e09f81bdb43b29e7a9fda113a3d527471664ac51477bf1eb08c02",
-      "page_count": 16,
-      "source": "unknown"
-    },
-    {
-      "edicion": "R2593",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2593-Ene13-15.pdf",
-      "sha256": "8fec5c61e7361645fd37d747e12895a471779ffdc5ea162e8ac8f110c149b6e2",
-      "page_count": 16,
-      "source": "unknown"
-    },
-    {
-      "edicion": "R2594",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2594-Ene16-19.pdf",
-      "sha256": "d0a77780069528675f7e9d205a190e467afa67615b8cbc953f8911e9d773bff0",
-      "page_count": 16,
-      "source": "unknown"
-    },
-    {
-      "edicion": "R2595",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2595-Ene20-22.pdf",
-      "sha256": "28389f2bc93186728e421085bdc69cd0f8011510ecad75c1995847ab1337b58e",
-      "page_count": 16,
-      "source": "unknown"
-    },
-    {
-      "edicion": "R2596",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2596-Ene23-26.pdf",
-      "sha256": "7b16b111e91d2120112360c2f36ed5a55bdf076ef5ffce9f1c5548c26c761554",
-      "page_count": 16,
-      "source": "unknown"
-    },
-    {
-      "edicion": "R2597",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2597-Ene27-29.pdf",
-      "sha256": "4ae383e121fb0dba7fb35fcbce13d8629811177e858c01690ad2c759649ff301",
-      "page_count": 16,
-      "source": "unknown"
-    },
-    {
-      "edicion": "R2598",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2598-Ene30-Feb2.pdf",
-      "sha256": "aa2bd8d1c4809b99d1e24fbdcaba0299c4f13399685aff43dba5c8038ac747da",
-      "page_count": 16,
-      "source": "unknown"
-    },
-    {
-      "edicion": "R2599",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2599-Feb3-5.pdf",
-      "sha256": "0b52f7db4de6d7dfebcb0bafd99222d52a4dd9ea5ff1ebc5d9fa73a3e6bfc132",
-      "page_count": 16,
-      "source": "unknown"
-    },
-    {
-      "edicion": "R2600",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2600-Feb6-9.pdf",
-      "sha256": "b4efcf1de66b34a92b06234341619cd3276b8591de45f5a1d92637bf5fdb2469",
-      "page_count": 16,
-      "source": "unknown"
-    },
-    {
-      "edicion": "R2601",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2601-Feb10-12.pdf",
-      "sha256": "17938a6c5d97c32b2ef7df7ee3a71d81f9e788d687eb189ca2011fc1d5f52110",
-      "page_count": 16,
-      "source": "unknown"
-    },
-    {
-      "edicion": "R2602",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2602-Feb13-16.pdf",
-      "sha256": "d817fe1684b6067984570c6105de705441a0b42e178b1895526744ba5342eb1f",
-      "page_count": 16,
-      "source": "unknown"
-    },
-    {
-      "edicion": "R2603",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2603-Feb17-19.pdf",
-      "sha256": "e37f7aa868d88a2efcc91fad6155063ddf3aaad7ca7721ed3008da5def9f4ddb",
-      "page_count": 16,
-      "source": "unknown"
-    },
-    {
-      "edicion": "R2604",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2604-Feb20-23.pdf",
-      "sha256": "b80bec1770a868a8c69202416e74fe31a8fb16e88d2bcd0e975f00a85e2b548f",
-      "page_count": 16,
-      "source": "unknown"
-    },
-    {
-      "edicion": "R2605",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2605-Feb24-26.pdf",
-      "sha256": "2f45c2c39b2260963958ef40a48c50fd14f92eca332cd8586cabac931c6b74b9",
-      "page_count": 16,
-      "source": "unknown"
-    },
-    {
-      "edicion": "R2606",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2606-Feb27-Mar2.pdf",
-      "sha256": "6ca641e96b45eceaabccd62816aae492b8dcd50e2d378ba81579a9557d9c800b",
-      "page_count": 16,
-      "source": "unknown"
-    },
-    {
-      "edicion": "R2607",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2607-Mar3-5.pdf",
-      "sha256": "fe779e26ff901e1e8db392067826de02b851c1d718cbc3ebf84fc9741597c3f2",
-      "page_count": 16,
-      "source": "unknown"
-    },
-    {
-      "edicion": "R2608",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2608-Mar6-9.pdf",
-      "sha256": "cdaa6186b71060c11571e3906d742f92f8a30ee2a1a3353ad0fda0f97110d5be",
-      "page_count": 16,
-      "source": "unknown"
-    },
-    {
-      "edicion": "R2609",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2609-Mar10-12.pdf",
-      "sha256": "a1d562f5683023ce9baf90f9a8a2aecde8654b83d384f11adced44206e21f8a0",
-      "page_count": 16,
-      "source": "unknown"
-    },
-    {
-      "edicion": "R2610",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2610-Mar13-16.pdf",
-      "sha256": "4644628a832cd0f796acfbc5f2c3e07f10e84bc34dcd237cbf436d803f34bc6c",
-      "page_count": 16,
-      "source": "unknown"
-    },
-    {
-      "edicion": "R2611",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2611-Mar17-19.pdf",
-      "sha256": "05fd005432536a08145ab6a4105da481422052bfb4654f46ec2a7c11354f3391",
-      "page_count": 16,
-      "source": "unknown"
-    },
-    {
-      "edicion": "R2612",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2612-Mar20-23.pdf",
-      "sha256": "f9babfe1fdbb8dbd4ab5cacedfbdca5ce5f6d46c4d5ae8adbd67a63f83ae5810",
-      "page_count": 16,
-      "source": "unknown"
-    },
-    {
-      "edicion": "R2613",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2613-Mar24-26.pdf",
-      "sha256": "22929e1479c894187540febc0a5d324d1c499c928a60678a4a4e2cbd14ac1295",
-      "page_count": 16,
-      "source": "unknown"
-    },
-    {
-      "edicion": "R2614",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2614-Mar27-30.pdf",
-      "sha256": "ef8316d427bdd2409609900d8ad69da059a036659ec6100effe1921fe7cdd17c",
-      "page_count": 16,
-      "source": "unknown"
-    },
-    {
-      "edicion": "R2615",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2615-Mar31-Abr2.pdf",
-      "sha256": "a9a93ecdc8fd05f48b8adcf2560e468aa290982b971312d774d0cc606c32d19f",
-      "page_count": 16,
-      "source": "unknown"
-    },
-    {
-      "edicion": "R2616",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2616-Abr3-6.pdf",
-      "sha256": "8c3d136cb533a5ece3f3ced9407b5a2887df5228ca3849ced9d79102d9dbab08",
-      "page_count": 16,
-      "source": "unknown"
-    },
-    {
-      "edicion": "R2617",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2617-Abr7-9.pdf",
-      "sha256": "5f647d06dc2def09139e09a752b85ae5ff26594ab721b494beebe465fbce9b8d",
-      "page_count": 16,
-      "source": "unknown"
-    },
-    {
-      "edicion": "R2618",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2618-Abr10-13.pdf",
-      "sha256": "0643c19e6bf02b8cd71a64a29fc849b809b071165c22ce23c7bba8d2e33e9119",
-      "page_count": 16,
-      "source": "unknown"
-    },
-    {
-      "edicion": "R2619",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2619-Abr14-20.pdf",
-      "sha256": "a953594ea6c8886c5b355bb45f57e3c2e23eb5578ca9cb959aaebb059575c339",
-      "page_count": 16,
-      "source": "unknown"
-    },
-    {
-      "edicion": "R2620",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2620-Abr21-23.pdf",
-      "sha256": "685a0e0ad0738e5f7f2c0e253e40aab56f2a8e710cc8a540e7165b403733172c",
-      "page_count": 20,
-      "source": "unknown"
-    },
-    {
-      "edicion": "R2621",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2621-Abr24-27.pdf",
-      "sha256": "9ebb105dc8a74fbce06e60eb54dd2fc5041761a42abdc1b26c4a5309f18b562c",
-      "page_count": 20,
-      "source": "unknown"
-    },
-    {
-      "edicion": "R2622",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2622-Abr28-30.pdf",
-      "sha256": "5a46d84527b0c156b40ea7fa1dfccbb8c4e797599fa782c86294a7e8d6152a53",
-      "page_count": 16,
-      "source": "unknown"
-    },
-    {
-      "edicion": "R2623",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2623-May1-4.pdf",
-      "sha256": "0247f64786390a3e1fe4e931fad204df6d21fdf2d1b7edf5d41a030322e68086",
-      "page_count": 16,
-      "source": "unknown"
-    },
-    {
-      "edicion": "R2624",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2624-May5-7.pdf",
-      "sha256": "85bdeab0482af341d43bc61e795695daa78d6739a620c91219dfc8be2340a497",
-      "page_count": 16,
-      "source": "unknown"
-    },
-    {
-      "edicion": "R2625",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2625-May8-11.pdf",
-      "sha256": "5e2f8d3331c4f91c939599caec23d5be8d36336799f53abb21fd3e2b0e0a5e82",
-      "page_count": 16,
-      "source": "unknown"
-    },
-    {
-      "edicion": "R2626",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2626-May12-14.pdf",
-      "sha256": "98b25bc0cc9edf2632bc8fdc62b457f92c7e3e5675f8ca056e862172d54527fb",
-      "page_count": 16,
-      "source": "unknown"
-    },
-    {
-      "edicion": "R2627",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2627-May15-18.pdf",
-      "sha256": "fdea42b66c83904a810189629355acba660a1c0511c62708d5673b89e9ca7d5d",
-      "page_count": 16,
-      "source": "unknown"
-    },
-    {
-      "edicion": "R2628",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2628-May19-21.pdf",
-      "sha256": "cc8b8ba9124fea0330beaa3114adc318c7d2f09f8798db117b4c40e5bc044bf3",
-      "page_count": 16,
-      "source": "unknown"
-    },
-    {
-      "edicion": "R2629",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2629-May22-25.pdf",
-      "sha256": "0553644cd58ceca5d5a8f944666a82266d64771fa7f0ac73aa4b19ac299795d1",
-      "page_count": 16,
-      "source": "unknown"
-    },
-    {
-      "edicion": "R2630",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2630-May26-28.pdf",
-      "sha256": "66f6a555b7d24ec09552858b8be26f4a436b3c61ce649a7e0f9b5c12d6a15c51",
-      "page_count": 16,
-      "source": "unknown"
-    },
-    {
-      "edicion": "R2631",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2631-May29-Jun1.pdf",
-      "sha256": "d9ce4ca8ad99cb1228fb6bf4acc47ebd461b14616ba3814449e7ba8b9fd4190c",
-      "page_count": 16,
-      "source": "unknown"
-    },
-    {
-      "edicion": "R2632",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2632-Jun2-4.pdf",
-      "sha256": "fe7914e63f7c689f96752ae3964dc8c984423fc51fd0b11992d15ef8fed57593",
-      "page_count": 16,
-      "source": "unknown"
-    },
-    {
-      "edicion": "R2633",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2633-Jun5-8.pdf",
-      "sha256": "9fbd1eb95ca1510e05bb53389d0dc6782089f3aaec7088d579f5dff93b8d9521",
-      "page_count": 16,
-      "source": "unknown"
-    },
-    {
-      "edicion": "R2634",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2634-Jun9-11.pdf",
-      "sha256": "918cfae54dd839fc98aab17f24b72ec63787e0dcb2aa8b112e5dfa694543973e",
-      "page_count": 16,
-      "source": "unknown"
-    },
-    {
-      "edicion": "R2658",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2658-Sep4-7.pdf",
-      "sha256": "529e342ef78b968c48eebaf97e47d55ec7bc3801d5d494fb99909ae357c580e3",
-      "page_count": 16,
-      "source": "unknown"
-    },
-    {
-      "edicion": "R2659",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2659-Sep8-10.pdf",
-      "sha256": "9c9d657cd86843d9d821872be72a1feb7a187965124a13d09325da75f90470ce",
-      "page_count": 16,
-      "source": "unknown"
-    },
-    {
-      "edicion": "R2660",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2660-Sep11-14.pdf",
-      "sha256": "c1214881cb57db3f77ea639a33528395865b6531928014e7bf1f44461eb159e3",
-      "page_count": 16,
-      "source": "unknown"
-    },
-    {
-      "edicion": "R2661",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2661-Sep15-17.pdf",
-      "sha256": "da12b61e8052186894a921defc346f42fce06ff27ecb0a8a377586b7b19d3328",
-      "page_count": 16,
-      "source": "unknown"
-    },
-    {
-      "edicion": "R2662",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2662-Sep18-21.pdf",
-      "sha256": "31a4166940b75a49363f48fda88e7eacec3563789484bb99743f796a906d23b8",
-      "page_count": 16,
-      "source": "unknown"
-    },
-    {
-      "edicion": "R2663",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2663-Sep22-24.pdf",
-      "sha256": "6de0326446c4ad99449f51ccb659701d22ff0e5c83c3ca8e5446ab3fd1209495",
-      "page_count": 16,
-      "source": "unknown"
-    },
-    {
-      "edicion": "R2664",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2664-Sep25-28.pdf",
-      "sha256": "9c3117798a389522b9d5a921ad6da5f1c5de116bf17d387473f5032b0d0f1c25",
-      "page_count": 16,
-      "source": "unknown"
-    },
-    {
-      "edicion": "R2665",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2665-Sep29-Oct1.pdf",
-      "sha256": "8afd45b86b44edb6b4a8ebebe0b373cb73514ac0a201f096455bb7b6909fc518",
-      "page_count": 16,
-      "source": "unknown"
-    },
-    {
-      "edicion": "R2666",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2666-Oct2-5.pdf",
-      "sha256": "6476314f9551ac509cc2c4c6aab01c9afe8eb54a52d738d26a1eb1559a126a2d",
-      "page_count": 16,
-      "source": "unknown"
-    },
-    {
-      "edicion": "R2667",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2667-Oct6-8.pdf",
-      "sha256": "79e2e588290036d43770a663974e9a4faf7e7f7ae994b8da63e356a784cb85fc",
-      "page_count": 16,
-      "source": "unknown"
-    },
-    {
-      "edicion": "R2668",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2668-Oct9-12.pdf",
-      "sha256": "4549bcf715d24c1fcdf2b67f00f6d7aeb5c1954fb7bb69e05beca2c067e7e831",
-      "page_count": 16,
-      "source": "unknown"
-    },
-    {
-      "edicion": "R2669",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2669-Oct13-15.pdf",
-      "sha256": "152e895da51c5ea8595fcd528b5532756a266c89dd0fed83216938019681e138",
-      "page_count": 16,
-      "source": "unknown"
-    },
-    {
-      "edicion": "R2670",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2670-Oct16-19.pdf",
-      "sha256": "3d250bf1c41a7c3b028968608f402d1caf9ba5ab595abdd1449cacc53a07558c",
-      "page_count": 16,
-      "source": "unknown"
-    },
-    {
-      "edicion": "R2671",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2671-Oct20-22.pdf",
-      "sha256": "ca12f0d5e964926daa3fed49311723b496a97adee23e655730bfea63ca7bc28e",
-      "page_count": 16,
-      "source": "unknown"
-    },
-    {
-      "edicion": "R2672",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2672-Oct23-26.pdf",
-      "sha256": "ceba003379623a7927d46f49e81b2aed8aaef6324ed7b77e7b9b1f1c53c8268d",
-      "page_count": 16,
-      "source": "unknown"
-    },
-    {
-      "edicion": "R2673",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2673-Oct27-29.pdf",
-      "sha256": "4497fafcac39d8914f08d312b41001b915c45d91dbc19307910c8b733f7c8796",
-      "page_count": 16,
-      "source": "unknown"
-    },
-    {
-      "edicion": "R2674",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2674-Oct30-Nov2.pdf",
-      "sha256": "018a5ee1cbad8fff03745f8f0259118f357191b9d8a6c180bb37f86c7e770730",
-      "page_count": 16,
-      "source": "unknown"
-    },
-    {
-      "edicion": "R2675",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2675-Nov3-5.pdf",
-      "sha256": "7f32ada2d592e0575a0e89f5c27bb4df312d54d2836d4b7f8f9f7e969601f6ab",
-      "page_count": 16,
-      "source": "unknown"
-    },
-    {
-      "edicion": "R2676",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2676-Nov6-9.pdf",
-      "sha256": "51000dcd300989860c8cc631542d44e3c48ddd0f02cd686caa45a740befcf0e9",
-      "page_count": 16,
-      "source": "unknown"
-    },
-    {
-      "edicion": "R2677",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2677-Nov10-12.pdf",
-      "sha256": "5e76544f49c1fcc2e924786630d72fd04b11ca97d877ea6c01d9380006477284",
-      "page_count": 16,
-      "source": "unknown"
-    },
-    {
-      "edicion": "R2678",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2678-Nov13-16.pdf",
-      "sha256": "f9e53a08f7576c0819397fe1e6c802ab15d67b2fb53db5729b063eaee2c0eae4",
-      "page_count": 16,
-      "source": "unknown"
-    },
-    {
-      "edicion": "R2679",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2679-Nov17-19.pdf",
-      "sha256": "fb2fd5b0a1cf809ab3b8caf29c8ef3418775917100c9769cb8c9c5f692002c43",
-      "page_count": 16,
-      "source": "unknown"
-    },
-    {
-      "edicion": "R2680",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2680-Nov20-23.pdf",
-      "sha256": "bce0409142d20c7e918cf4587895ca6f00adb9c2f7d16b3c6ca4b8501d139874",
-      "page_count": 16,
-      "source": "unknown"
-    },
-    {
-      "edicion": "R2681",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2681-Nov24-26.pdf",
-      "sha256": "113437d86a3200496b1ca70e9ec0dd7c6b0e48c44f30c49b2f8a00400d44d782",
-      "page_count": 16,
-      "source": "unknown"
-    },
-    {
-      "edicion": "R2682",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2682-Nov27-30.pdf",
-      "sha256": "e7f5a084947dde2da4bb9094f7e3d826418a61fb4343ef9feab3560ecf007aa4",
-      "page_count": 16,
-      "source": "unknown"
-    },
-    {
-      "edicion": "R2683",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2683-Dic1-3.pdf",
-      "sha256": "909b0c89041d9adaca7b590eeda82567ae603a616228b72f2b17a0aaac1ba4ad",
-      "page_count": 16,
-      "source": "unknown"
-    },
-    {
-      "edicion": "R2735",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2735-Jun11-14.pdf",
-      "sha256": "c2da93ac5e14b7854c78f463da4d847ddd21e759a2c9795893be8049f5d1779a",
-      "page_count": 16,
-      "source": "unknown"
-    },
-    {
-      "edicion": "R2736",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2736-Jun15-17.pdf",
-      "sha256": "f8aa4784df5417ca917cadbe08609c626e13890df2afecbaa4da5e80072e1e17",
-      "page_count": 16,
-      "source": "unknown"
-    },
-    {
-      "edicion": "R2737",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2737-Jun18-21.pdf",
-      "sha256": "1b89b16c48f905d50cc48a0c900f2b59492ac5faf25a08c15942868e43565dbd",
-      "page_count": 16,
-      "source": "unknown"
-    },
-    {
-      "edicion": "R2738",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2738-Jun22-28.pdf",
-      "sha256": "7c7ac90b84008467619904517b39dac0bb49aae4e6867c91f5676ca0b8cedb54",
-      "page_count": 16,
-      "source": "unknown"
-    },
-    {
-      "edicion": "R2739",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2739-Jun29-Jul1.pdf",
-      "sha256": "ed04f49dbddb68b4e54745a964ab1f29bcb72eef8824e56078e41166e6bfeb81",
-      "page_count": 20,
-      "source": "unknown"
-    },
-    {
-      "edicion": "R2740",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2740-Jul2-5.pdf",
-      "sha256": "bdfa63aa539e72366c455e53557175369626f5057e5d447405071b49ef46e735",
-      "page_count": 16,
-      "source": "unknown"
-    },
-    {
-      "edicion": "R2741",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2741-Jul6-8.pdf",
-      "sha256": "1184ee5dad483e2153ab67e7523e512afe4272f11234b3cce57d7de582f794bd",
-      "page_count": 16,
-      "source": "unknown"
-    },
-    {
-      "edicion": "R2742",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2742-Jul9-12.pdf",
-      "sha256": "94e163f98ff4f7389a5791ddce24ced8031730f2ff4314674e3af088a2995a35",
-      "page_count": 16,
-      "source": "unknown"
-    },
-    {
-      "edicion": "R2743",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2743-Jul13-15.pdf",
-      "sha256": "30bc1797fa0198c4a128a4339471c59a267ef56ac97a68a8802772154e501b20",
-      "page_count": 16,
-      "source": "unknown"
-    },
-    {
-      "edicion": "R2744",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2744-Jul16-19.pdf",
-      "sha256": "374f5718866a0e072a0b9d7dafa932ae65dfd4254b51477485cd6b5c5febaef8",
-      "page_count": 16,
-      "source": "unknown"
-    },
-    {
-      "edicion": "R2745",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2745-Jul20-22.pdf",
-      "sha256": "cc0c5ae9c3a21a5ee1f1316c717c71288fb6a4f25971d5bfedac30ccfe1477cb",
-      "page_count": 16,
-      "source": "unknown"
-    },
-    {
-      "edicion": "R2746",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2746-Jul23-26.pdf",
-      "sha256": "f1b71176c93351f857b9d30bb999bcaf1fe3885fc23644ded124a84f2124e337",
-      "page_count": 16,
-      "source": "unknown"
-    },
-    {
-      "edicion": "R2747",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2747-Jul27-Ago2.pdf",
-      "sha256": "739208c4eb4ec949a7893ef01d9da9dab39b126091d8d056739cd74e036be785",
-      "page_count": 16,
-      "source": "unknown"
-    },
-    {
-      "edicion": "R2748",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2748-Ago3-5.pdf",
-      "sha256": "97ea098110c48ae15a9bfd3966a0a7c499de83fa80a9b3bb1299054487e4542a",
-      "page_count": 20,
-      "source": "unknown"
-    },
-    {
-      "edicion": "R2749",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2749-Ago6-9.pdf",
-      "sha256": "fa84ee1a01ed4900cc7139f06cb66b1f0a531c0e4b4aa3397b5ce30411c3d44b",
-      "page_count": 16,
-      "source": "unknown"
-    },
-    {
-      "edicion": "R2750",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2750-Ago10-12.pdf",
-      "sha256": "7a9426558c3872c354f31a97265929322b17695edfb36abdd0100bc41fd1ebe9",
-      "page_count": 16,
-      "source": "unknown"
-    },
-    {
-      "edicion": "R2751",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2751-Ago13-16.pdf",
-      "sha256": "57fae2fcf91b04a2ed3bb27c0842006798816d28e199c4c185e87bd263365455",
-      "page_count": 16,
-      "source": "unknown"
-    },
-    {
-      "edicion": "R2752",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2752-Ago17-19.pdf",
-      "sha256": "37d6ffc330f5928cb6de0e7880432524b9998545ec21b17e79df8230007f3b52",
-      "page_count": 16,
-      "source": "unknown"
-    },
-    {
-      "edicion": "R2753",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2753-Ago20-23.pdf",
-      "sha256": "65b30a030df5a490d88c2a551f78c240cd2070dba9dfaff97d2f759135240c44",
-      "page_count": 16,
-      "source": "unknown"
-    },
-    {
-      "edicion": "R2754",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2754-Ago24-26.pdf",
-      "sha256": "1db8023c4530b88851bf6d625bb9388533b2149bf9cfb4b358576a521f4e01cc",
-      "page_count": 16,
-      "source": "unknown"
-    },
-    {
-      "edicion": "R2755",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2755-Ago27-30.pdf",
-      "sha256": "cbd7ca6338bc8cce53439c701705a86efb7908bed7ed41347ed534958fc171d8",
-      "page_count": 16,
-      "source": "unknown"
-    },
-    {
-      "edicion": "R2756",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2756-Ago31-Sep2.pdf",
-      "sha256": "2fb7ea8d80b05ac4f1d0f63ff7ad6f1eb7b0bdb632ea9fe89e678956a6270bd7",
-      "page_count": 16,
-      "source": "unknown"
-    },
-    {
-      "edicion": "R2757",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2757-Sep3-6.pdf",
-      "sha256": "b1bc2cf007a17c3ac54984dde7f1213f37607cf8da560efd80858fe696f2fdf1",
-      "page_count": 16,
-      "source": "unknown"
-    },
-    {
-      "edicion": "R2758",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2758-Sep9.pdf",
-      "sha256": "e979eb0be8e77dba03c50c4092254fec2f95ce35bb592e85a477704b9f3f61ba",
-      "page_count": 16,
-      "source": "unknown"
-    },
-    {
-      "edicion": "R2759",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2759-Sep10-13.pdf",
-      "sha256": "1832af5085879907ce4a6f050f5080b6e4b406ac96fa0aab3d070a796aee7d28",
-      "page_count": 16,
-      "source": "unknown"
-    },
-    {
       "edicion": "R2760",
       "fecha_inicio": "",
       "fecha_fin": "",
@@ -1318,37 +13,10 @@
       "notes": "Hueco entre R2759 y R2761 — recuperar WP/Wayback"
     },
     {
-      "edicion": "R2761",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2761-Sep17-20.pdf",
-      "sha256": "1236f16f1daf5a5ad7fd12055ec42da52142885acf498884f2f36128ffa161d5",
-      "page_count": 16,
-      "source": "unknown"
-    },
-    {
-      "edicion": "R2762",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2762-Sep21-23.pdf",
-      "sha256": "2f381aa63eba6ba9006697df0bf1280632447d278d7026f0e68efc245b30e5c5",
-      "page_count": 16,
-      "source": "unknown"
-    },
-    {
-      "edicion": "R2763",
-      "fecha_inicio": "",
-      "fecha_fin": "",
-      "archivo": "R2763-Sep24-27.pdf",
-      "sha256": "afb79aa4cc9c0024ce2e1062d4757f4d5abb076aa14023ee1b91e3fccf76078e",
-      "page_count": 16,
-      "source": "unknown"
-    },
-    {
       "edicion": "R1660",
       "fecha_inicio": "",
       "fecha_fin": "",
-      "archivo": "R1660.pdf",
+      "archivo": "R1660-recovered.pdf",
       "sha256": "c1214881cb57db3f77ea639a33528395865b6531928014e7bf1f44461eb159e3",
       "page_count": 16,
       "source": "downloads",
@@ -1358,7 +26,7 @@
       "edicion": "R2635",
       "fecha_inicio": "",
       "fecha_fin": "",
-      "archivo": "R2635.pdf",
+      "archivo": "R2635-recovered.pdf",
       "sha256": "e16af3aa058c04dba7a33d64d5247b8457feeb99452793da7c48d7dfd29bf2d8",
       "page_count": 16,
       "source": "downloads",
@@ -1368,7 +36,7 @@
       "edicion": "R2684",
       "fecha_inicio": "",
       "fecha_fin": "",
-      "archivo": "R2684.pdf",
+      "archivo": "R2684-recovered.pdf",
       "sha256": "82bd57a029c7ac0a954b76c7fbed7858d27c0e046fc0766590bc710012c2e9f6",
       "page_count": 16,
       "source": "downloads",
@@ -1378,7 +46,7 @@
       "edicion": "R2686",
       "fecha_inicio": "",
       "fecha_fin": "",
-      "archivo": "R2686.pdf",
+      "archivo": "R2686-recovered.pdf",
       "sha256": "ad1fd4702a80c328ab557a8f7b68c10584e4f70de52308af8de38080ff12c9e0",
       "page_count": 16,
       "source": "downloads",
@@ -1388,7 +56,7 @@
       "edicion": "R2687",
       "fecha_inicio": "",
       "fecha_fin": "",
-      "archivo": "R2687.pdf",
+      "archivo": "R2687-recovered.pdf",
       "sha256": "181ca5b565713c2de61251cd0244410d67c50b581d11afe20117da6c2e5100d7",
       "page_count": 16,
       "source": "downloads",
@@ -1398,7 +66,7 @@
       "edicion": "R2690",
       "fecha_inicio": "",
       "fecha_fin": "",
-      "archivo": "R2690.pdf",
+      "archivo": "R2690-recovered.pdf",
       "sha256": "8c84a42eba1b8d5f94a56d20f25ab5c9756211264d3e6d25e31dee74230b3f50",
       "page_count": 16,
       "source": "downloads",
@@ -1408,11 +76,1341 @@
       "edicion": "R2706",
       "fecha_inicio": "",
       "fecha_fin": "",
-      "archivo": "R2706.pdf",
+      "archivo": "R2706-recovered.pdf",
       "sha256": "93853e0cd5feafe01e8d15294d2f881b5101bd56f9997b81047202d540a7cefd",
       "page_count": 20,
       "source": "downloads",
       "downloaded_at": "2026-10-08T15:57:06.898Z"
+    },
+    {
+      "edicion": "R2590",
+      "fecha_inicio": "2024-01-02",
+      "fecha_fin": "2024-01-05",
+      "archivo": "R2590-Ene2-5.pdf",
+      "sha256": "0b6674c4e6e8e1e5ae7ac98861754f9459829be89cadcbd3b4f8375a64f37dee",
+      "page_count": 16,
+      "source": "unknown",
+      "batch_id": "rueda-R2590-claimable-2024-01-02"
+    },
+    {
+      "edicion": "R2591",
+      "fecha_inicio": "2024-01-06",
+      "fecha_fin": "2024-01-08",
+      "archivo": "R2591-Ene6-8.pdf",
+      "sha256": "c7d374912e09ab9113e47d226508af4341e4862051e6593fa984730b85d945bd",
+      "page_count": 20,
+      "source": "unknown",
+      "batch_id": "rueda-R2591-claimable-2024-01-06"
+    },
+    {
+      "edicion": "R2592",
+      "fecha_inicio": "2024-01-09",
+      "fecha_fin": "2024-01-12",
+      "archivo": "R2592-Ene9-12.pdf",
+      "sha256": "117082b06a2e09f81bdb43b29e7a9fda113a3d527471664ac51477bf1eb08c02",
+      "page_count": 16,
+      "source": "unknown",
+      "batch_id": "rueda-R2592-claimable-2024-01-09"
+    },
+    {
+      "edicion": "R2593",
+      "fecha_inicio": "2024-01-13",
+      "fecha_fin": "2024-01-15",
+      "archivo": "R2593-Ene13-15.pdf",
+      "sha256": "8fec5c61e7361645fd37d747e12895a471779ffdc5ea162e8ac8f110c149b6e2",
+      "page_count": 16,
+      "source": "unknown",
+      "batch_id": "rueda-R2593-claimable-2024-01-13"
+    },
+    {
+      "edicion": "R2594",
+      "fecha_inicio": "2024-01-16",
+      "fecha_fin": "2024-01-19",
+      "archivo": "R2594-Ene16-19.pdf",
+      "sha256": "d0a77780069528675f7e9d205a190e467afa67615b8cbc953f8911e9d773bff0",
+      "page_count": 16,
+      "source": "unknown",
+      "batch_id": "rueda-R2594-claimable-2024-01-16"
+    },
+    {
+      "edicion": "R2595",
+      "fecha_inicio": "2024-01-20",
+      "fecha_fin": "2024-01-22",
+      "archivo": "R2595-Ene20-22.pdf",
+      "sha256": "28389f2bc93186728e421085bdc69cd0f8011510ecad75c1995847ab1337b58e",
+      "page_count": 16,
+      "source": "unknown",
+      "batch_id": "rueda-R2595-claimable-2024-01-20"
+    },
+    {
+      "edicion": "R2596",
+      "fecha_inicio": "2024-01-23",
+      "fecha_fin": "2024-01-26",
+      "archivo": "R2596-Ene23-26.pdf",
+      "sha256": "7b16b111e91d2120112360c2f36ed5a55bdf076ef5ffce9f1c5548c26c761554",
+      "page_count": 16,
+      "source": "unknown",
+      "batch_id": "rueda-R2596-claimable-2024-01-23"
+    },
+    {
+      "edicion": "R2597",
+      "fecha_inicio": "2024-01-27",
+      "fecha_fin": "2024-01-29",
+      "archivo": "R2597-Ene27-29.pdf",
+      "sha256": "4ae383e121fb0dba7fb35fcbce13d8629811177e858c01690ad2c759649ff301",
+      "page_count": 16,
+      "source": "unknown",
+      "batch_id": "rueda-R2597-claimable-2024-01-27"
+    },
+    {
+      "edicion": "R2598",
+      "fecha_inicio": "2024-01-30",
+      "fecha_fin": "2024-02-02",
+      "archivo": "R2598-Ene30-Feb2.pdf",
+      "sha256": "aa2bd8d1c4809b99d1e24fbdcaba0299c4f13399685aff43dba5c8038ac747da",
+      "page_count": 16,
+      "source": "unknown",
+      "batch_id": "rueda-R2598-claimable-2024-01-30"
+    },
+    {
+      "edicion": "R2599",
+      "fecha_inicio": "2024-02-03",
+      "fecha_fin": "2024-02-05",
+      "archivo": "R2599-Feb3-5.pdf",
+      "sha256": "0b52f7db4de6d7dfebcb0bafd99222d52a4dd9ea5ff1ebc5d9fa73a3e6bfc132",
+      "page_count": 16,
+      "source": "unknown",
+      "batch_id": "rueda-R2599-claimable-2024-02-03"
+    },
+    {
+      "edicion": "R2600",
+      "fecha_inicio": "2024-02-06",
+      "fecha_fin": "2024-02-09",
+      "archivo": "R2600-Feb6-9.pdf",
+      "sha256": "b4efcf1de66b34a92b06234341619cd3276b8591de45f5a1d92637bf5fdb2469",
+      "page_count": 16,
+      "source": "unknown",
+      "batch_id": "rueda-R2600-claimable-2024-02-06"
+    },
+    {
+      "edicion": "R2601",
+      "fecha_inicio": "2024-02-10",
+      "fecha_fin": "2024-02-12",
+      "archivo": "R2601-Feb10-12.pdf",
+      "sha256": "17938a6c5d97c32b2ef7df7ee3a71d81f9e788d687eb189ca2011fc1d5f52110",
+      "page_count": 16,
+      "source": "unknown",
+      "batch_id": "rueda-R2601-claimable-2024-02-10"
+    },
+    {
+      "edicion": "R2602",
+      "fecha_inicio": "2024-02-13",
+      "fecha_fin": "2024-02-16",
+      "archivo": "R2602-Feb13-16.pdf",
+      "sha256": "d817fe1684b6067984570c6105de705441a0b42e178b1895526744ba5342eb1f",
+      "page_count": 16,
+      "source": "unknown",
+      "batch_id": "rueda-R2602-claimable-2024-02-13"
+    },
+    {
+      "edicion": "R2603",
+      "fecha_inicio": "2024-02-17",
+      "fecha_fin": "2024-02-19",
+      "archivo": "R2603-Feb17-19.pdf",
+      "sha256": "e37f7aa868d88a2efcc91fad6155063ddf3aaad7ca7721ed3008da5def9f4ddb",
+      "page_count": 16,
+      "source": "unknown",
+      "batch_id": "rueda-R2603-claimable-2024-02-17"
+    },
+    {
+      "edicion": "R2604",
+      "fecha_inicio": "2024-02-20",
+      "fecha_fin": "2024-02-23",
+      "archivo": "R2604-Feb20-23.pdf",
+      "sha256": "b80bec1770a868a8c69202416e74fe31a8fb16e88d2bcd0e975f00a85e2b548f",
+      "page_count": 16,
+      "source": "unknown",
+      "batch_id": "rueda-R2604-claimable-2024-02-20"
+    },
+    {
+      "edicion": "R2605",
+      "fecha_inicio": "2024-02-24",
+      "fecha_fin": "2024-02-26",
+      "archivo": "R2605-Feb24-26.pdf",
+      "sha256": "2f45c2c39b2260963958ef40a48c50fd14f92eca332cd8586cabac931c6b74b9",
+      "page_count": 16,
+      "source": "unknown",
+      "batch_id": "rueda-R2605-claimable-2024-02-24"
+    },
+    {
+      "edicion": "R2606",
+      "fecha_inicio": "2024-02-27",
+      "fecha_fin": "2024-03-02",
+      "archivo": "R2606-Feb27-Mar2.pdf",
+      "sha256": "6ca641e96b45eceaabccd62816aae492b8dcd50e2d378ba81579a9557d9c800b",
+      "page_count": 16,
+      "source": "unknown",
+      "batch_id": "rueda-R2606-claimable-2024-02-27"
+    },
+    {
+      "edicion": "R2607",
+      "fecha_inicio": "2024-03-03",
+      "fecha_fin": "2024-03-05",
+      "archivo": "R2607-Mar3-5.pdf",
+      "sha256": "fe779e26ff901e1e8db392067826de02b851c1d718cbc3ebf84fc9741597c3f2",
+      "page_count": 16,
+      "source": "unknown",
+      "batch_id": "rueda-R2607-claimable-2024-03-03"
+    },
+    {
+      "edicion": "R2608",
+      "fecha_inicio": "2024-03-06",
+      "fecha_fin": "2024-03-09",
+      "archivo": "R2608-Mar6-9.pdf",
+      "sha256": "cdaa6186b71060c11571e3906d742f92f8a30ee2a1a3353ad0fda0f97110d5be",
+      "page_count": 16,
+      "source": "unknown",
+      "batch_id": "rueda-R2608-claimable-2024-03-06"
+    },
+    {
+      "edicion": "R2609",
+      "fecha_inicio": "2024-03-10",
+      "fecha_fin": "2024-03-12",
+      "archivo": "R2609-Mar10-12.pdf",
+      "sha256": "a1d562f5683023ce9baf90f9a8a2aecde8654b83d384f11adced44206e21f8a0",
+      "page_count": 16,
+      "source": "unknown",
+      "batch_id": "rueda-R2609-claimable-2024-03-10"
+    },
+    {
+      "edicion": "R2610",
+      "fecha_inicio": "2024-03-13",
+      "fecha_fin": "2024-03-16",
+      "archivo": "R2610-Mar13-16.pdf",
+      "sha256": "4644628a832cd0f796acfbc5f2c3e07f10e84bc34dcd237cbf436d803f34bc6c",
+      "page_count": 16,
+      "source": "unknown",
+      "batch_id": "rueda-R2610-claimable-2024-03-13"
+    },
+    {
+      "edicion": "R2611",
+      "fecha_inicio": "2024-03-17",
+      "fecha_fin": "2024-03-19",
+      "archivo": "R2611-Mar17-19.pdf",
+      "sha256": "05fd005432536a08145ab6a4105da481422052bfb4654f46ec2a7c11354f3391",
+      "page_count": 16,
+      "source": "unknown",
+      "batch_id": "rueda-R2611-claimable-2024-03-17"
+    },
+    {
+      "edicion": "R2612",
+      "fecha_inicio": "2024-03-20",
+      "fecha_fin": "2024-03-23",
+      "archivo": "R2612-Mar20-23.pdf",
+      "sha256": "f9babfe1fdbb8dbd4ab5cacedfbdca5ce5f6d46c4d5ae8adbd67a63f83ae5810",
+      "page_count": 16,
+      "source": "unknown",
+      "batch_id": "rueda-R2612-claimable-2024-03-20"
+    },
+    {
+      "edicion": "R2613",
+      "fecha_inicio": "2024-03-24",
+      "fecha_fin": "2024-03-26",
+      "archivo": "R2613-Mar24-26.pdf",
+      "sha256": "22929e1479c894187540febc0a5d324d1c499c928a60678a4a4e2cbd14ac1295",
+      "page_count": 16,
+      "source": "unknown",
+      "batch_id": "rueda-R2613-claimable-2024-03-24"
+    },
+    {
+      "edicion": "R2614",
+      "fecha_inicio": "2024-03-27",
+      "fecha_fin": "2024-03-30",
+      "archivo": "R2614-Mar27-30.pdf",
+      "sha256": "ef8316d427bdd2409609900d8ad69da059a036659ec6100effe1921fe7cdd17c",
+      "page_count": 16,
+      "source": "unknown",
+      "batch_id": "rueda-R2614-claimable-2024-03-27"
+    },
+    {
+      "edicion": "R2615",
+      "fecha_inicio": "2024-03-31",
+      "fecha_fin": "2024-04-02",
+      "archivo": "R2615-Mar31-Abr2.pdf",
+      "sha256": "a9a93ecdc8fd05f48b8adcf2560e468aa290982b971312d774d0cc606c32d19f",
+      "page_count": 16,
+      "source": "unknown",
+      "batch_id": "rueda-R2615-claimable-2024-03-31"
+    },
+    {
+      "edicion": "R2616",
+      "fecha_inicio": "2024-04-03",
+      "fecha_fin": "2024-04-06",
+      "archivo": "R2616-Abr3-6.pdf",
+      "sha256": "8c3d136cb533a5ece3f3ced9407b5a2887df5228ca3849ced9d79102d9dbab08",
+      "page_count": 16,
+      "source": "unknown",
+      "batch_id": "rueda-R2616-claimable-2024-04-03"
+    },
+    {
+      "edicion": "R2617",
+      "fecha_inicio": "2024-04-07",
+      "fecha_fin": "2024-04-09",
+      "archivo": "R2617-Abr7-9.pdf",
+      "sha256": "5f647d06dc2def09139e09a752b85ae5ff26594ab721b494beebe465fbce9b8d",
+      "page_count": 16,
+      "source": "unknown",
+      "batch_id": "rueda-R2617-claimable-2024-04-07"
+    },
+    {
+      "edicion": "R2618",
+      "fecha_inicio": "2024-04-10",
+      "fecha_fin": "2024-04-13",
+      "archivo": "R2618-Abr10-13.pdf",
+      "sha256": "0643c19e6bf02b8cd71a64a29fc849b809b071165c22ce23c7bba8d2e33e9119",
+      "page_count": 16,
+      "source": "unknown",
+      "batch_id": "rueda-R2618-claimable-2024-04-10"
+    },
+    {
+      "edicion": "R2619",
+      "fecha_inicio": "2024-04-14",
+      "fecha_fin": "2024-04-20",
+      "archivo": "R2619-Abr14-20.pdf",
+      "sha256": "a953594ea6c8886c5b355bb45f57e3c2e23eb5578ca9cb959aaebb059575c339",
+      "page_count": 16,
+      "source": "unknown",
+      "batch_id": "rueda-R2619-claimable-2024-04-14"
+    },
+    {
+      "edicion": "R2620",
+      "fecha_inicio": "2024-04-21",
+      "fecha_fin": "2024-04-23",
+      "archivo": "R2620-Abr21-23.pdf",
+      "sha256": "685a0e0ad0738e5f7f2c0e253e40aab56f2a8e710cc8a540e7165b403733172c",
+      "page_count": 20,
+      "source": "unknown",
+      "batch_id": "rueda-R2620-claimable-2024-04-21"
+    },
+    {
+      "edicion": "R2621",
+      "fecha_inicio": "2024-04-24",
+      "fecha_fin": "2024-04-27",
+      "archivo": "R2621-Abr24-27.pdf",
+      "sha256": "9ebb105dc8a74fbce06e60eb54dd2fc5041761a42abdc1b26c4a5309f18b562c",
+      "page_count": 20,
+      "source": "unknown",
+      "batch_id": "rueda-R2621-claimable-2024-04-24"
+    },
+    {
+      "edicion": "R2622",
+      "fecha_inicio": "2024-04-28",
+      "fecha_fin": "2024-04-30",
+      "archivo": "R2622-Abr28-30.pdf",
+      "sha256": "5a46d84527b0c156b40ea7fa1dfccbb8c4e797599fa782c86294a7e8d6152a53",
+      "page_count": 16,
+      "source": "unknown",
+      "batch_id": "rueda-R2622-claimable-2024-04-28"
+    },
+    {
+      "edicion": "R2623",
+      "fecha_inicio": "2024-05-01",
+      "fecha_fin": "2024-05-04",
+      "archivo": "R2623-May1-4.pdf",
+      "sha256": "0247f64786390a3e1fe4e931fad204df6d21fdf2d1b7edf5d41a030322e68086",
+      "page_count": 16,
+      "source": "unknown",
+      "batch_id": "rueda-R2623-claimable-2024-05-01"
+    },
+    {
+      "edicion": "R2624",
+      "fecha_inicio": "2024-05-05",
+      "fecha_fin": "2024-05-07",
+      "archivo": "R2624-May5-7.pdf",
+      "sha256": "85bdeab0482af341d43bc61e795695daa78d6739a620c91219dfc8be2340a497",
+      "page_count": 16,
+      "source": "unknown",
+      "batch_id": "rueda-R2624-claimable-2024-05-05"
+    },
+    {
+      "edicion": "R2625",
+      "fecha_inicio": "2024-05-08",
+      "fecha_fin": "2024-05-11",
+      "archivo": "R2625-May8-11.pdf",
+      "sha256": "5e2f8d3331c4f91c939599caec23d5be8d36336799f53abb21fd3e2b0e0a5e82",
+      "page_count": 16,
+      "source": "unknown",
+      "batch_id": "rueda-R2625-claimable-2024-05-08"
+    },
+    {
+      "edicion": "R2626",
+      "fecha_inicio": "2024-05-12",
+      "fecha_fin": "2024-05-14",
+      "archivo": "R2626-May12-14.pdf",
+      "sha256": "98b25bc0cc9edf2632bc8fdc62b457f92c7e3e5675f8ca056e862172d54527fb",
+      "page_count": 16,
+      "source": "unknown",
+      "batch_id": "rueda-R2626-claimable-2024-05-12"
+    },
+    {
+      "edicion": "R2627",
+      "fecha_inicio": "2024-05-15",
+      "fecha_fin": "2024-05-18",
+      "archivo": "R2627-May15-18.pdf",
+      "sha256": "fdea42b66c83904a810189629355acba660a1c0511c62708d5673b89e9ca7d5d",
+      "page_count": 16,
+      "source": "unknown",
+      "batch_id": "rueda-R2627-claimable-2024-05-15"
+    },
+    {
+      "edicion": "R2628",
+      "fecha_inicio": "2024-05-19",
+      "fecha_fin": "2024-05-21",
+      "archivo": "R2628-May19-21.pdf",
+      "sha256": "cc8b8ba9124fea0330beaa3114adc318c7d2f09f8798db117b4c40e5bc044bf3",
+      "page_count": 16,
+      "source": "unknown",
+      "batch_id": "rueda-R2628-claimable-2024-05-19"
+    },
+    {
+      "edicion": "R2629",
+      "fecha_inicio": "2024-05-22",
+      "fecha_fin": "2024-05-25",
+      "archivo": "R2629-May22-25.pdf",
+      "sha256": "0553644cd58ceca5d5a8f944666a82266d64771fa7f0ac73aa4b19ac299795d1",
+      "page_count": 16,
+      "source": "unknown",
+      "batch_id": "rueda-R2629-claimable-2024-05-22"
+    },
+    {
+      "edicion": "R2630",
+      "fecha_inicio": "2024-05-26",
+      "fecha_fin": "2024-05-28",
+      "archivo": "R2630-May26-28.pdf",
+      "sha256": "66f6a555b7d24ec09552858b8be26f4a436b3c61ce649a7e0f9b5c12d6a15c51",
+      "page_count": 16,
+      "source": "unknown",
+      "batch_id": "rueda-R2630-claimable-2024-05-26"
+    },
+    {
+      "edicion": "R2631",
+      "fecha_inicio": "2024-05-29",
+      "fecha_fin": "2024-06-01",
+      "archivo": "R2631-May29-Jun1.pdf",
+      "sha256": "d9ce4ca8ad99cb1228fb6bf4acc47ebd461b14616ba3814449e7ba8b9fd4190c",
+      "page_count": 16,
+      "source": "unknown",
+      "batch_id": "rueda-R2631-claimable-2024-05-29"
+    },
+    {
+      "edicion": "R2632",
+      "fecha_inicio": "2024-06-02",
+      "fecha_fin": "2024-06-04",
+      "archivo": "R2632-Jun2-4.pdf",
+      "sha256": "fe7914e63f7c689f96752ae3964dc8c984423fc51fd0b11992d15ef8fed57593",
+      "page_count": 16,
+      "source": "unknown",
+      "batch_id": "rueda-R2632-claimable-2024-06-02"
+    },
+    {
+      "edicion": "R2633",
+      "fecha_inicio": "2024-06-05",
+      "fecha_fin": "2024-06-08",
+      "archivo": "R2633-Jun5-8.pdf",
+      "sha256": "9fbd1eb95ca1510e05bb53389d0dc6782089f3aaec7088d579f5dff93b8d9521",
+      "page_count": 16,
+      "source": "unknown",
+      "batch_id": "rueda-R2633-claimable-2024-06-05"
+    },
+    {
+      "edicion": "R2634",
+      "fecha_inicio": "2024-06-09",
+      "fecha_fin": "2024-06-11",
+      "archivo": "R2634-Jun9-11.pdf",
+      "sha256": "918cfae54dd839fc98aab17f24b72ec63787e0dcb2aa8b112e5dfa694543973e",
+      "page_count": 16,
+      "source": "unknown",
+      "batch_id": "rueda-R2634-claimable-2024-06-09"
+    },
+    {
+      "edicion": "R2583",
+      "fecha_inicio": "2024-12-02",
+      "fecha_fin": "2024-12-04",
+      "archivo": "R2583-Dic2-4.pdf",
+      "sha256": "5c3c6610cb057a2902b4714167bac9565ea62344c1a4d03b2bb0743ce235d4ac",
+      "page_count": 16,
+      "source": "unknown",
+      "batch_id": "rueda-R2583-claimable-2024-12-02"
+    },
+    {
+      "edicion": "R2584",
+      "fecha_inicio": "2024-12-05",
+      "fecha_fin": "2024-12-08",
+      "archivo": "R2584-Dic5-8.pdf",
+      "sha256": "3bb601938c9d24ddf5cd77c5d9d47838600c2f2d38fba700664c8dd9b6395535",
+      "page_count": 16,
+      "source": "unknown",
+      "batch_id": "rueda-R2584-claimable-2024-12-05"
+    },
+    {
+      "edicion": "R2585",
+      "fecha_inicio": "2024-12-09",
+      "fecha_fin": "2024-12-11",
+      "archivo": "R2585-Dic9-11.pdf",
+      "sha256": "b7ac7d92af52ebdb5ad6c5e71c8a80aa675916ad71dd50da12503aab47f14ea9",
+      "page_count": 16,
+      "source": "unknown",
+      "batch_id": "rueda-R2585-claimable-2024-12-09"
+    },
+    {
+      "edicion": "R2586",
+      "fecha_inicio": "2024-12-12",
+      "fecha_fin": "2024-12-15",
+      "archivo": "R2586-Dic12-15.pdf",
+      "sha256": "e716e82a1368bde69b7754c495cc6227bc11d6279cbb40b77e8a6bdcc529ec6e",
+      "page_count": 16,
+      "source": "unknown",
+      "batch_id": "rueda-R2586-claimable-2024-12-12"
+    },
+    {
+      "edicion": "R2587",
+      "fecha_inicio": "2024-12-16",
+      "fecha_fin": "2024-12-18",
+      "archivo": "R2587-Dic16-18.pdf",
+      "sha256": "9dc1baaae79daee70cfe41088e91d6b2df4a9fae871a3d6b43347bc2885cb91f",
+      "page_count": 16,
+      "source": "unknown",
+      "batch_id": "rueda-R2587-claimable-2024-12-16"
+    },
+    {
+      "edicion": "R2588",
+      "fecha_inicio": "2024-12-19",
+      "fecha_fin": "2024-12-25",
+      "archivo": "R2588-Dic19-25.pdf",
+      "sha256": "b6632ca0404d9e6e349180d4e51bec56bce18525294a742d2c04e9e92d336e06",
+      "page_count": 16,
+      "source": "unknown",
+      "batch_id": "rueda-R2588-claimable-2024-12-19"
+    },
+    {
+      "edicion": "R2589",
+      "fecha_inicio": "2024-12-26",
+      "fecha_fin": "2025-01-01",
+      "archivo": "R2589-Dic26-Ene1.pdf",
+      "sha256": "3ba0a5a7eb4c8347464c73d58a231bd99a1ac4a6209380b91a523f8c54bbe7d1",
+      "page_count": 16,
+      "source": "unknown",
+      "batch_id": "rueda-R2589-claimable-2024-12-26"
+    },
+    {
+      "edicion": "R2735",
+      "fecha_inicio": "2025-06-11",
+      "fecha_fin": "2025-06-14",
+      "archivo": "R2735-Jun11-14.pdf",
+      "sha256": "c2da93ac5e14b7854c78f463da4d847ddd21e759a2c9795893be8049f5d1779a",
+      "page_count": 16,
+      "source": "unknown",
+      "batch_id": "rueda-R2735-claimable-2025-06-11"
+    },
+    {
+      "edicion": "R2736",
+      "fecha_inicio": "2025-06-15",
+      "fecha_fin": "2025-06-17",
+      "archivo": "R2736-Jun15-17.pdf",
+      "sha256": "f8aa4784df5417ca917cadbe08609c626e13890df2afecbaa4da5e80072e1e17",
+      "page_count": 16,
+      "source": "unknown",
+      "batch_id": "rueda-R2736-claimable-2025-06-15"
+    },
+    {
+      "edicion": "R2737",
+      "fecha_inicio": "2025-06-18",
+      "fecha_fin": "2025-06-21",
+      "archivo": "R2737-Jun18-21.pdf",
+      "sha256": "1b89b16c48f905d50cc48a0c900f2b59492ac5faf25a08c15942868e43565dbd",
+      "page_count": 16,
+      "source": "unknown",
+      "batch_id": "rueda-R2737-claimable-2025-06-18"
+    },
+    {
+      "edicion": "R2738",
+      "fecha_inicio": "2025-06-22",
+      "fecha_fin": "2025-06-28",
+      "archivo": "R2738-Jun22-28.pdf",
+      "sha256": "7c7ac90b84008467619904517b39dac0bb49aae4e6867c91f5676ca0b8cedb54",
+      "page_count": 16,
+      "source": "unknown",
+      "batch_id": "rueda-R2738-claimable-2025-06-22"
+    },
+    {
+      "edicion": "R2739",
+      "fecha_inicio": "2025-06-29",
+      "fecha_fin": "2025-07-01",
+      "archivo": "R2739-Jun29-Jul1.pdf",
+      "sha256": "ed04f49dbddb68b4e54745a964ab1f29bcb72eef8824e56078e41166e6bfeb81",
+      "page_count": 20,
+      "source": "unknown",
+      "batch_id": "rueda-R2739-claimable-2025-06-29"
+    },
+    {
+      "edicion": "R2740",
+      "fecha_inicio": "2025-07-02",
+      "fecha_fin": "2025-07-05",
+      "archivo": "R2740-Jul2-5.pdf",
+      "sha256": "bdfa63aa539e72366c455e53557175369626f5057e5d447405071b49ef46e735",
+      "page_count": 16,
+      "source": "unknown",
+      "batch_id": "rueda-R2740-claimable-2025-07-02"
+    },
+    {
+      "edicion": "R2741",
+      "fecha_inicio": "2025-07-06",
+      "fecha_fin": "2025-07-08",
+      "archivo": "R2741-Jul6-8.pdf",
+      "sha256": "1184ee5dad483e2153ab67e7523e512afe4272f11234b3cce57d7de582f794bd",
+      "page_count": 16,
+      "source": "unknown",
+      "batch_id": "rueda-R2741-claimable-2025-07-06"
+    },
+    {
+      "edicion": "R2742",
+      "fecha_inicio": "2025-07-09",
+      "fecha_fin": "2025-07-12",
+      "archivo": "R2742-Jul9-12.pdf",
+      "sha256": "94e163f98ff4f7389a5791ddce24ced8031730f2ff4314674e3af088a2995a35",
+      "page_count": 16,
+      "source": "unknown",
+      "batch_id": "rueda-R2742-claimable-2025-07-09"
+    },
+    {
+      "edicion": "R2743",
+      "fecha_inicio": "2025-07-13",
+      "fecha_fin": "2025-07-15",
+      "archivo": "R2743-Jul13-15.pdf",
+      "sha256": "30bc1797fa0198c4a128a4339471c59a267ef56ac97a68a8802772154e501b20",
+      "page_count": 16,
+      "source": "unknown",
+      "batch_id": "rueda-R2743-claimable-2025-07-13"
+    },
+    {
+      "edicion": "R2744",
+      "fecha_inicio": "2025-07-16",
+      "fecha_fin": "2025-07-19",
+      "archivo": "R2744-Jul16-19.pdf",
+      "sha256": "374f5718866a0e072a0b9d7dafa932ae65dfd4254b51477485cd6b5c5febaef8",
+      "page_count": 16,
+      "source": "unknown",
+      "batch_id": "rueda-R2744-claimable-2025-07-16"
+    },
+    {
+      "edicion": "R2745",
+      "fecha_inicio": "2025-07-20",
+      "fecha_fin": "2025-07-22",
+      "archivo": "R2745-Jul20-22.pdf",
+      "sha256": "cc0c5ae9c3a21a5ee1f1316c717c71288fb6a4f25971d5bfedac30ccfe1477cb",
+      "page_count": 16,
+      "source": "unknown",
+      "batch_id": "rueda-R2745-claimable-2025-07-20"
+    },
+    {
+      "edicion": "R2746",
+      "fecha_inicio": "2025-07-23",
+      "fecha_fin": "2025-07-26",
+      "archivo": "R2746-Jul23-26.pdf",
+      "sha256": "f1b71176c93351f857b9d30bb999bcaf1fe3885fc23644ded124a84f2124e337",
+      "page_count": 16,
+      "source": "unknown",
+      "batch_id": "rueda-R2746-claimable-2025-07-23"
+    },
+    {
+      "edicion": "R2747",
+      "fecha_inicio": "2025-07-27",
+      "fecha_fin": "2025-08-02",
+      "archivo": "R2747-Jul27-Ago2.pdf",
+      "sha256": "739208c4eb4ec949a7893ef01d9da9dab39b126091d8d056739cd74e036be785",
+      "page_count": 16,
+      "source": "unknown",
+      "batch_id": "rueda-R2747-claimable-2025-07-27"
+    },
+    {
+      "edicion": "R2748",
+      "fecha_inicio": "2025-08-03",
+      "fecha_fin": "2025-08-05",
+      "archivo": "R2748-Ago3-5.pdf",
+      "sha256": "97ea098110c48ae15a9bfd3966a0a7c499de83fa80a9b3bb1299054487e4542a",
+      "page_count": 20,
+      "source": "unknown",
+      "batch_id": "rueda-R2748-claimable-2025-08-03"
+    },
+    {
+      "edicion": "R2749",
+      "fecha_inicio": "2025-08-06",
+      "fecha_fin": "2025-08-09",
+      "archivo": "R2749-Ago6-9.pdf",
+      "sha256": "fa84ee1a01ed4900cc7139f06cb66b1f0a531c0e4b4aa3397b5ce30411c3d44b",
+      "page_count": 16,
+      "source": "unknown",
+      "batch_id": "rueda-R2749-claimable-2025-08-06"
+    },
+    {
+      "edicion": "R2750",
+      "fecha_inicio": "2025-08-10",
+      "fecha_fin": "2025-08-12",
+      "archivo": "R2750-Ago10-12.pdf",
+      "sha256": "7a9426558c3872c354f31a97265929322b17695edfb36abdd0100bc41fd1ebe9",
+      "page_count": 16,
+      "source": "unknown",
+      "batch_id": "rueda-R2750-claimable-2025-08-10"
+    },
+    {
+      "edicion": "R2751",
+      "fecha_inicio": "2025-08-13",
+      "fecha_fin": "2025-08-16",
+      "archivo": "R2751-Ago13-16.pdf",
+      "sha256": "57fae2fcf91b04a2ed3bb27c0842006798816d28e199c4c185e87bd263365455",
+      "page_count": 16,
+      "source": "unknown",
+      "batch_id": "rueda-R2751-claimable-2025-08-13"
+    },
+    {
+      "edicion": "R2752",
+      "fecha_inicio": "2025-08-17",
+      "fecha_fin": "2025-08-19",
+      "archivo": "R2752-Ago17-19.pdf",
+      "sha256": "37d6ffc330f5928cb6de0e7880432524b9998545ec21b17e79df8230007f3b52",
+      "page_count": 16,
+      "source": "unknown",
+      "batch_id": "rueda-R2752-claimable-2025-08-17"
+    },
+    {
+      "edicion": "R2753",
+      "fecha_inicio": "2025-08-20",
+      "fecha_fin": "2025-08-23",
+      "archivo": "R2753-Ago20-23.pdf",
+      "sha256": "65b30a030df5a490d88c2a551f78c240cd2070dba9dfaff97d2f759135240c44",
+      "page_count": 16,
+      "source": "unknown",
+      "batch_id": "rueda-R2753-claimable-2025-08-20"
+    },
+    {
+      "edicion": "R2754",
+      "fecha_inicio": "2025-08-24",
+      "fecha_fin": "2025-08-26",
+      "archivo": "R2754-Ago24-26.pdf",
+      "sha256": "1db8023c4530b88851bf6d625bb9388533b2149bf9cfb4b358576a521f4e01cc",
+      "page_count": 16,
+      "source": "unknown",
+      "batch_id": "rueda-R2754-claimable-2025-08-24"
+    },
+    {
+      "edicion": "R2755",
+      "fecha_inicio": "2025-08-27",
+      "fecha_fin": "2025-08-30",
+      "archivo": "R2755-Ago27-30.pdf",
+      "sha256": "cbd7ca6338bc8cce53439c701705a86efb7908bed7ed41347ed534958fc171d8",
+      "page_count": 16,
+      "source": "unknown",
+      "batch_id": "rueda-R2755-claimable-2025-08-27"
+    },
+    {
+      "edicion": "R2756",
+      "fecha_inicio": "2025-08-31",
+      "fecha_fin": "2025-09-02",
+      "archivo": "R2756-Ago31-Sep2.pdf",
+      "sha256": "2fb7ea8d80b05ac4f1d0f63ff7ad6f1eb7b0bdb632ea9fe89e678956a6270bd7",
+      "page_count": 16,
+      "source": "unknown",
+      "batch_id": "rueda-R2756-claimable-2025-08-31"
+    },
+    {
+      "edicion": "R2757",
+      "fecha_inicio": "2025-09-03",
+      "fecha_fin": "2025-09-06",
+      "archivo": "R2757-Sep3-6.pdf",
+      "sha256": "b1bc2cf007a17c3ac54984dde7f1213f37607cf8da560efd80858fe696f2fdf1",
+      "page_count": 16,
+      "source": "unknown",
+      "batch_id": "rueda-R2757-claimable-2025-09-03"
+    },
+    {
+      "edicion": "R2658",
+      "fecha_inicio": "2025-09-04",
+      "fecha_fin": "2025-09-07",
+      "archivo": "R2658-Sep4-7.pdf",
+      "sha256": "529e342ef78b968c48eebaf97e47d55ec7bc3801d5d494fb99909ae357c580e3",
+      "page_count": 16,
+      "source": "unknown",
+      "batch_id": "rueda-R2658-claimable-2025-09-04"
+    },
+    {
+      "edicion": "R2659",
+      "fecha_inicio": "2025-09-08",
+      "fecha_fin": "2025-09-10",
+      "archivo": "R2659-Sep8-10.pdf",
+      "sha256": "9c9d657cd86843d9d821872be72a1feb7a187965124a13d09325da75f90470ce",
+      "page_count": 16,
+      "source": "unknown",
+      "batch_id": "rueda-R2659-claimable-2025-09-08"
+    },
+    {
+      "edicion": "R2758",
+      "fecha_inicio": "2025-09-09",
+      "fecha_fin": "2025-09-09",
+      "archivo": "R2758-Sep9.pdf",
+      "sha256": "e979eb0be8e77dba03c50c4092254fec2f95ce35bb592e85a477704b9f3f61ba",
+      "page_count": 16,
+      "source": "unknown",
+      "batch_id": "rueda-R2758-claimable-2025-09-09"
+    },
+    {
+      "edicion": "R2759",
+      "fecha_inicio": "2025-09-10",
+      "fecha_fin": "2025-09-13",
+      "archivo": "R2759-Sep10-13.pdf",
+      "sha256": "1832af5085879907ce4a6f050f5080b6e4b406ac96fa0aab3d070a796aee7d28",
+      "page_count": 16,
+      "source": "unknown",
+      "batch_id": "rueda-R2759-claimable-2025-09-10"
+    },
+    {
+      "edicion": "R2660",
+      "fecha_inicio": "2025-09-11",
+      "fecha_fin": "2025-09-14",
+      "archivo": "R2660-Sep11-14.pdf",
+      "sha256": "c1214881cb57db3f77ea639a33528395865b6531928014e7bf1f44461eb159e3",
+      "page_count": 16,
+      "source": "unknown",
+      "batch_id": "rueda-R2660-claimable-2025-09-11"
+    },
+    {
+      "edicion": "R2661",
+      "fecha_inicio": "2025-09-15",
+      "fecha_fin": "2025-09-17",
+      "archivo": "R2661-Sep15-17.pdf",
+      "sha256": "da12b61e8052186894a921defc346f42fce06ff27ecb0a8a377586b7b19d3328",
+      "page_count": 16,
+      "source": "unknown",
+      "batch_id": "rueda-R2661-claimable-2025-09-15"
+    },
+    {
+      "edicion": "R2662",
+      "fecha_inicio": "2025-09-18",
+      "fecha_fin": "2025-09-21",
+      "archivo": "R2662-Sep18-21.pdf",
+      "sha256": "31a4166940b75a49363f48fda88e7eacec3563789484bb99743f796a906d23b8",
+      "page_count": 16,
+      "source": "unknown",
+      "batch_id": "rueda-R2662-claimable-2025-09-18"
+    },
+    {
+      "edicion": "R2663",
+      "fecha_inicio": "2025-09-22",
+      "fecha_fin": "2025-09-24",
+      "archivo": "R2663-Sep22-24.pdf",
+      "sha256": "6de0326446c4ad99449f51ccb659701d22ff0e5c83c3ca8e5446ab3fd1209495",
+      "page_count": 16,
+      "source": "unknown",
+      "batch_id": "rueda-R2663-claimable-2025-09-22"
+    },
+    {
+      "edicion": "R2664",
+      "fecha_inicio": "2025-09-25",
+      "fecha_fin": "2025-09-28",
+      "archivo": "R2664-Sep25-28.pdf",
+      "sha256": "9c3117798a389522b9d5a921ad6da5f1c5de116bf17d387473f5032b0d0f1c25",
+      "page_count": 16,
+      "source": "unknown",
+      "batch_id": "rueda-R2664-claimable-2025-09-25"
+    },
+    {
+      "edicion": "R2665",
+      "fecha_inicio": "2025-09-29",
+      "fecha_fin": "2025-10-01",
+      "archivo": "R2665-Sep29-Oct1.pdf",
+      "sha256": "8afd45b86b44edb6b4a8ebebe0b373cb73514ac0a201f096455bb7b6909fc518",
+      "page_count": 16,
+      "source": "unknown",
+      "batch_id": "rueda-R2665-claimable-2025-09-29"
+    },
+    {
+      "edicion": "R2666",
+      "fecha_inicio": "2025-10-02",
+      "fecha_fin": "2025-10-05",
+      "archivo": "R2666-Oct2-5.pdf",
+      "sha256": "6476314f9551ac509cc2c4c6aab01c9afe8eb54a52d738d26a1eb1559a126a2d",
+      "page_count": 16,
+      "source": "unknown",
+      "batch_id": "rueda-R2666-claimable-2025-10-02"
+    },
+    {
+      "edicion": "R2667",
+      "fecha_inicio": "2025-10-06",
+      "fecha_fin": "2025-10-08",
+      "archivo": "R2667-Oct6-8.pdf",
+      "sha256": "79e2e588290036d43770a663974e9a4faf7e7f7ae994b8da63e356a784cb85fc",
+      "page_count": 16,
+      "source": "unknown",
+      "batch_id": "rueda-R2667-claimable-2025-10-06"
+    },
+    {
+      "edicion": "R2668",
+      "fecha_inicio": "2025-10-09",
+      "fecha_fin": "2025-10-12",
+      "archivo": "R2668-Oct9-12.pdf",
+      "sha256": "4549bcf715d24c1fcdf2b67f00f6d7aeb5c1954fb7bb69e05beca2c067e7e831",
+      "page_count": 16,
+      "source": "unknown",
+      "batch_id": "rueda-R2668-claimable-2025-10-09"
+    },
+    {
+      "edicion": "R2669",
+      "fecha_inicio": "2025-10-13",
+      "fecha_fin": "2025-10-15",
+      "archivo": "R2669-Oct13-15.pdf",
+      "sha256": "152e895da51c5ea8595fcd528b5532756a266c89dd0fed83216938019681e138",
+      "page_count": 16,
+      "source": "unknown",
+      "batch_id": "rueda-R2669-claimable-2025-10-13"
+    },
+    {
+      "edicion": "R2670",
+      "fecha_inicio": "2025-10-16",
+      "fecha_fin": "2025-10-19",
+      "archivo": "R2670-Oct16-19.pdf",
+      "sha256": "3d250bf1c41a7c3b028968608f402d1caf9ba5ab595abdd1449cacc53a07558c",
+      "page_count": 16,
+      "source": "unknown",
+      "batch_id": "rueda-R2670-claimable-2025-10-16"
+    },
+    {
+      "edicion": "R2671",
+      "fecha_inicio": "2025-10-20",
+      "fecha_fin": "2025-10-22",
+      "archivo": "R2671-Oct20-22.pdf",
+      "sha256": "ca12f0d5e964926daa3fed49311723b496a97adee23e655730bfea63ca7bc28e",
+      "page_count": 16,
+      "source": "unknown",
+      "batch_id": "rueda-R2671-claimable-2025-10-20"
+    },
+    {
+      "edicion": "R2672",
+      "fecha_inicio": "2025-10-23",
+      "fecha_fin": "2025-10-26",
+      "archivo": "R2672-Oct23-26.pdf",
+      "sha256": "ceba003379623a7927d46f49e81b2aed8aaef6324ed7b77e7b9b1f1c53c8268d",
+      "page_count": 16,
+      "source": "unknown",
+      "batch_id": "rueda-R2672-claimable-2025-10-23"
+    },
+    {
+      "edicion": "R2673",
+      "fecha_inicio": "2025-10-27",
+      "fecha_fin": "2025-10-29",
+      "archivo": "R2673-Oct27-29.pdf",
+      "sha256": "4497fafcac39d8914f08d312b41001b915c45d91dbc19307910c8b733f7c8796",
+      "page_count": 16,
+      "source": "unknown",
+      "batch_id": "rueda-R2673-claimable-2025-10-27"
+    },
+    {
+      "edicion": "R2674",
+      "fecha_inicio": "2025-10-30",
+      "fecha_fin": "2025-11-02",
+      "archivo": "R2674-Oct30-Nov2.pdf",
+      "sha256": "018a5ee1cbad8fff03745f8f0259118f357191b9d8a6c180bb37f86c7e770730",
+      "page_count": 16,
+      "source": "unknown",
+      "batch_id": "rueda-R2674-claimable-2025-10-30"
+    },
+    {
+      "edicion": "R2675",
+      "fecha_inicio": "2025-11-03",
+      "fecha_fin": "2025-11-05",
+      "archivo": "R2675-Nov3-5.pdf",
+      "sha256": "7f32ada2d592e0575a0e89f5c27bb4df312d54d2836d4b7f8f9f7e969601f6ab",
+      "page_count": 16,
+      "source": "unknown",
+      "batch_id": "rueda-R2675-claimable-2025-11-03"
+    },
+    {
+      "edicion": "R2676",
+      "fecha_inicio": "2025-11-06",
+      "fecha_fin": "2025-11-09",
+      "archivo": "R2676-Nov6-9.pdf",
+      "sha256": "51000dcd300989860c8cc631542d44e3c48ddd0f02cd686caa45a740befcf0e9",
+      "page_count": 16,
+      "source": "unknown",
+      "batch_id": "rueda-R2676-claimable-2025-11-06"
+    },
+    {
+      "edicion": "R2677",
+      "fecha_inicio": "2025-11-10",
+      "fecha_fin": "2025-11-12",
+      "archivo": "R2677-Nov10-12.pdf",
+      "sha256": "5e76544f49c1fcc2e924786630d72fd04b11ca97d877ea6c01d9380006477284",
+      "page_count": 16,
+      "source": "unknown",
+      "batch_id": "rueda-R2677-claimable-2025-11-10"
+    },
+    {
+      "edicion": "R2678",
+      "fecha_inicio": "2025-11-13",
+      "fecha_fin": "2025-11-16",
+      "archivo": "R2678-Nov13-16.pdf",
+      "sha256": "f9e53a08f7576c0819397fe1e6c802ab15d67b2fb53db5729b063eaee2c0eae4",
+      "page_count": 16,
+      "source": "unknown",
+      "batch_id": "rueda-R2678-claimable-2025-11-13"
+    },
+    {
+      "edicion": "R2679",
+      "fecha_inicio": "2025-11-17",
+      "fecha_fin": "2025-11-19",
+      "archivo": "R2679-Nov17-19.pdf",
+      "sha256": "fb2fd5b0a1cf809ab3b8caf29c8ef3418775917100c9769cb8c9c5f692002c43",
+      "page_count": 16,
+      "source": "unknown",
+      "batch_id": "rueda-R2679-claimable-2025-11-17"
+    },
+    {
+      "edicion": "R2680",
+      "fecha_inicio": "2025-11-20",
+      "fecha_fin": "2025-11-23",
+      "archivo": "R2680-Nov20-23.pdf",
+      "sha256": "bce0409142d20c7e918cf4587895ca6f00adb9c2f7d16b3c6ca4b8501d139874",
+      "page_count": 16,
+      "source": "unknown",
+      "batch_id": "rueda-R2680-claimable-2025-11-20"
+    },
+    {
+      "edicion": "R2681",
+      "fecha_inicio": "2025-11-24",
+      "fecha_fin": "2025-11-26",
+      "archivo": "R2681-Nov24-26.pdf",
+      "sha256": "113437d86a3200496b1ca70e9ec0dd7c6b0e48c44f30c49b2f8a00400d44d782",
+      "page_count": 16,
+      "source": "unknown",
+      "batch_id": "rueda-R2681-claimable-2025-11-24"
+    },
+    {
+      "edicion": "R2682",
+      "fecha_inicio": "2025-11-27",
+      "fecha_fin": "2025-11-30",
+      "archivo": "R2682-Nov27-30.pdf",
+      "sha256": "e7f5a084947dde2da4bb9094f7e3d826418a61fb4343ef9feab3560ecf007aa4",
+      "page_count": 16,
+      "source": "unknown",
+      "batch_id": "rueda-R2682-claimable-2025-11-27"
+    },
+    {
+      "edicion": "R2683",
+      "fecha_inicio": "2025-12-01",
+      "fecha_fin": "2025-12-03",
+      "archivo": "R2683-Dic1-3.pdf",
+      "sha256": "909b0c89041d9adaca7b590eeda82567ae603a616228b72f2b17a0aaac1ba4ad",
+      "page_count": 16,
+      "source": "unknown",
+      "batch_id": "rueda-R2683-claimable-2025-12-01"
+    },
+    {
+      "edicion": "R2518",
+      "fecha_inicio": "2026-04-11",
+      "fecha_fin": "2026-04-14",
+      "archivo": "R2518-Abr11-14.pdf",
+      "sha256": "342037e765aec669ef0e320c1fc67c106b4c285d9a95b39766f08f96f0fe1a1f",
+      "page_count": 16,
+      "source": "unknown",
+      "batch_id": "rueda-R2518-claimable-2026-04-11"
+    },
+    {
+      "edicion": "R2519",
+      "fecha_inicio": "2026-04-15",
+      "fecha_fin": "2026-04-17",
+      "archivo": "R2519-Abr15-17.pdf",
+      "sha256": "d08e32d6ce1c4e38e56bf4d338a2845363bd473abdbd0a9658baba4eebb6b4bc",
+      "page_count": 16,
+      "source": "unknown",
+      "batch_id": "rueda-R2519-claimable-2026-04-15"
+    },
+    {
+      "edicion": "R2520",
+      "fecha_inicio": "2026-04-18",
+      "fecha_fin": "2026-04-21",
+      "archivo": "R2520-Abr18-21.pdf",
+      "sha256": "eaa750aa6f90be549854eb98e4ea11286e9a4a64280918c02a6412e055eb5edc",
+      "page_count": 16,
+      "source": "unknown",
+      "batch_id": "rueda-R2520-claimable-2026-04-18"
+    },
+    {
+      "edicion": "R2527",
+      "fecha_inicio": "2026-05-13",
+      "fecha_fin": "2026-05-15",
+      "archivo": "R2527-May13-15.pdf",
+      "sha256": "825be57fdb5d757153641eb7d9a09afa2ffea5d0d16b1cb22afbdd8bbabef76c",
+      "page_count": 16,
+      "source": "unknown",
+      "batch_id": "rueda-R2527-claimable-2026-05-13"
+    },
+    {
+      "edicion": "R2528",
+      "fecha_inicio": "2026-05-16",
+      "fecha_fin": "2026-05-19",
+      "archivo": "R2528-May16-19.pdf",
+      "sha256": "95f623cda90ff0d51a638dbfcc949579c830ee37451319ba03d57ef64099f21b",
+      "page_count": 16,
+      "source": "unknown",
+      "batch_id": "rueda-R2528-claimable-2026-05-16"
+    },
+    {
+      "edicion": "R2531",
+      "fecha_inicio": "2026-05-27",
+      "fecha_fin": "2026-05-29",
+      "archivo": "R2531-May27-29.pdf",
+      "sha256": "2c9f7e49c3f17ca5fa888f921eab3b006c039dc64e81b3b0062796d78cbffeaa",
+      "page_count": 16,
+      "source": "unknown",
+      "batch_id": "rueda-R2531-claimable-2026-05-27"
+    },
+    {
+      "edicion": "R2532",
+      "fecha_inicio": "2026-05-30",
+      "fecha_fin": "2026-06-02",
+      "archivo": "R2532-May30-Jun2.pdf",
+      "sha256": "4255c18bfe7f9b89555be3a8c53746a340b14d041f0073388a2149dd6dd5ca62",
+      "page_count": 16,
+      "source": "unknown",
+      "batch_id": "rueda-R2532-claimable-2026-05-30"
+    },
+    {
+      "edicion": "R2535",
+      "fecha_inicio": "2026-06-10",
+      "fecha_fin": "2026-06-12",
+      "archivo": "R2535-Jun10-12.pdf",
+      "sha256": "868b1257333f3510531483d5df123b8bed13311982b9ae0d6f593b99e3722cbf",
+      "page_count": 16,
+      "source": "unknown",
+      "batch_id": "rueda-R2535-claimable-2026-06-10"
+    },
+    {
+      "edicion": "R2536",
+      "fecha_inicio": "2026-06-13",
+      "fecha_fin": "2026-06-16",
+      "archivo": "R2536-Jun13-16.pdf",
+      "sha256": "ac0ca681eb90274ae01697f41a532cc566e83edb8efa5d61f64e1cba0a456ec5",
+      "page_count": 16,
+      "source": "unknown",
+      "batch_id": "rueda-R2536-claimable-2026-06-13"
+    },
+    {
+      "edicion": "R2537",
+      "fecha_inicio": "2026-06-17",
+      "fecha_fin": "2026-06-19",
+      "archivo": "R2537-Jun17-19.pdf",
+      "sha256": "6fc8fee8302ff75d9753fda9343ae23b831c11ee4758fd29749c50e16086dd3d",
+      "page_count": 16,
+      "source": "unknown",
+      "batch_id": "rueda-R2537-claimable-2026-06-17"
+    },
+    {
+      "edicion": "R2538",
+      "fecha_inicio": "2026-06-20",
+      "fecha_fin": "2026-06-26",
+      "archivo": "R2538-Jun20-26.pdf",
+      "sha256": "bc8f623796304c0e73c68a19036d1de405c5f34d962ce4146815df3b2c880e7a",
+      "page_count": 16,
+      "source": "unknown",
+      "batch_id": "rueda-R2538-claimable-2026-06-20"
+    },
+    {
+      "edicion": "R2539",
+      "fecha_inicio": "2026-06-27",
+      "fecha_fin": "2026-06-30",
+      "archivo": "R2539-Jun27-30.pdf",
+      "sha256": "96508259538470c9f0fc2834f25eb9b73becc144ade8db1558ca1ace414b4d6f",
+      "page_count": 24,
+      "source": "unknown",
+      "batch_id": "rueda-R2539-claimable-2026-06-27"
+    },
+    {
+      "edicion": "R2540",
+      "fecha_inicio": "2026-07-01",
+      "fecha_fin": "2026-07-03",
+      "archivo": "R2540-Jul1-3.pdf",
+      "sha256": "371be7a3c4fec73b9b8c0bee98ad2914b896bc98f985ed50f0f88c1340426562",
+      "page_count": 16,
+      "source": "unknown",
+      "batch_id": "rueda-R2540-claimable-2026-07-01"
+    },
+    {
+      "edicion": "R2541",
+      "fecha_inicio": "2026-07-04",
+      "fecha_fin": "2026-07-07",
+      "archivo": "R2541-Jul4-7.pdf",
+      "sha256": "f7145eda2b7a7957fa6a8f2a91648aa463db82da41f51c43c1d804327d48645e",
+      "page_count": 16,
+      "source": "unknown",
+      "batch_id": "rueda-R2541-claimable-2026-07-04"
+    },
+    {
+      "edicion": "R2542",
+      "fecha_inicio": "2026-07-08",
+      "fecha_fin": "2026-07-10",
+      "archivo": "R2542-Jul8-10.pdf",
+      "sha256": "5f5e92136390b207f0031bda5ad2f05186ff80c68a1eb654ed78ee956f571dc2",
+      "page_count": 16,
+      "source": "unknown",
+      "batch_id": "rueda-R2542-claimable-2026-07-08"
+    },
+    {
+      "edicion": "R2546",
+      "fecha_inicio": "2026-07-22",
+      "fecha_fin": "2026-07-24",
+      "archivo": "R2546-Jul22-24.pdf",
+      "sha256": "1d645941841bab46492c3e6e2712675f9a08f0cb7722cb6254252e55c1e3221e",
+      "page_count": 16,
+      "source": "unknown",
+      "batch_id": "rueda-R2546-claimable-2026-07-22"
+    },
+    {
+      "edicion": "R2547",
+      "fecha_inicio": "2026-07-25",
+      "fecha_fin": "2026-07-31",
+      "archivo": "R2547-Jul25-31.pdf",
+      "sha256": "4202780e45dc1c7154503ae760a9e058b99262cba3dedbd11926b35fc82bfbfd",
+      "page_count": 16,
+      "source": "unknown",
+      "batch_id": "rueda-R2547-claimable-2026-07-25"
+    },
+    {
+      "edicion": "R2548",
+      "fecha_inicio": "2026-08-01",
+      "fecha_fin": "2026-08-04",
+      "archivo": "R2548-Ago1-4.pdf",
+      "sha256": "caa3580147f1b563f737b9eceb707cd95876e69ac0b0de4c18ff9f1632002e60",
+      "page_count": 20,
+      "source": "unknown",
+      "batch_id": "rueda-R2548-claimable-2026-08-01"
+    },
+    {
+      "edicion": "R2556",
+      "fecha_inicio": "2026-08-29",
+      "fecha_fin": "2026-09-01",
+      "archivo": "R2556-Ago29-Sep1.pdf",
+      "sha256": "82f172a08c6580d716bca79022cfdd949d5b3b7935fc4ac4426538ff9391e4fc",
+      "page_count": 16,
+      "source": "unknown",
+      "batch_id": "rueda-R2556-claimable-2026-08-29"
+    },
+    {
+      "edicion": "R2557",
+      "fecha_inicio": "2026-09-02",
+      "fecha_fin": "2026-09-04",
+      "archivo": "R2557-Sep2-4.pdf",
+      "sha256": "3ed5ffa32e9d63dd5e3a4a040a59e910f44c896f68979ae1445a91260c951f45",
+      "page_count": 16,
+      "source": "unknown",
+      "batch_id": "rueda-R2557-claimable-2026-09-02"
+    },
+    {
+      "edicion": "R2558",
+      "fecha_inicio": "2026-09-05",
+      "fecha_fin": "2026-09-08",
+      "archivo": "R2558-Sep5-8.pdf",
+      "sha256": "d61c630a1903eaf885096fb73994badcd7aaca97208da660b9d7cfddf6865530",
+      "page_count": 16,
+      "source": "unknown",
+      "batch_id": "rueda-R2558-claimable-2026-09-05"
+    },
+    {
+      "edicion": "R2559",
+      "fecha_inicio": "2026-09-09",
+      "fecha_fin": "2026-09-11",
+      "archivo": "R2559-Sep9-11.pdf",
+      "sha256": "a5d5c7e444b2e76ac352fa713048a635eb7ccef0e132f375c70cf3692b1577ae",
+      "page_count": 16,
+      "source": "unknown",
+      "batch_id": "rueda-R2559-claimable-2026-09-09"
+    },
+    {
+      "edicion": "R2560",
+      "fecha_inicio": "2026-09-12",
+      "fecha_fin": "2026-09-15",
+      "archivo": "R2560-Sep12-15.pdf",
+      "sha256": "120d07c71dfabbf52d9b2595644cfcbe3f18c0b3f0abe7c748b792bb6f53f71f",
+      "page_count": 16,
+      "source": "unknown",
+      "batch_id": "rueda-R2560-claimable-2026-09-12"
+    },
+    {
+      "edicion": "R2561",
+      "fecha_inicio": "2026-09-16",
+      "fecha_fin": "2026-09-18",
+      "archivo": "R2561-Sep16-18.pdf",
+      "sha256": "44a4eefada6ea0b8b4f7872079168f75358b7df843cd07f418d9540f81786b62",
+      "page_count": 16,
+      "source": "unknown",
+      "batch_id": "rueda-R2561-claimable-2026-09-16"
+    },
+    {
+      "edicion": "R2761",
+      "fecha_inicio": "2026-09-17",
+      "fecha_fin": "2026-09-20",
+      "archivo": "R2761-Sep17-20.pdf",
+      "sha256": "1236f16f1daf5a5ad7fd12055ec42da52142885acf498884f2f36128ffa161d5",
+      "page_count": 16,
+      "source": "unknown",
+      "batch_id": "rueda-R2761-claimable-2026-09-17"
+    },
+    {
+      "edicion": "R2562",
+      "fecha_inicio": "2026-09-19",
+      "fecha_fin": "2026-09-22",
+      "archivo": "R2562-Sep19-22.pdf",
+      "sha256": "aa8ac85ada21b54bd77c0b7af2586a0bbddbfd67b6ba93601e56c8a6e55f0858",
+      "page_count": 16,
+      "source": "unknown",
+      "batch_id": "rueda-R2562-claimable-2026-09-19"
+    },
+    {
+      "edicion": "R2762",
+      "fecha_inicio": "2026-09-21",
+      "fecha_fin": "2026-09-23",
+      "archivo": "R2762-Sep21-23.pdf",
+      "sha256": "2f381aa63eba6ba9006697df0bf1280632447d278d7026f0e68efc245b30e5c5",
+      "page_count": 16,
+      "source": "unknown",
+      "batch_id": "rueda-R2762-claimable-2026-09-21"
+    },
+    {
+      "edicion": "R2563",
+      "fecha_inicio": "2026-09-23",
+      "fecha_fin": "2026-09-25",
+      "archivo": "R2563-Sep23-25.pdf",
+      "sha256": "863098a9c066149172c9d11562b7ca8fdb1e4bb383e9cc7815f9d4908a0f57dd",
+      "page_count": 16,
+      "source": "unknown",
+      "batch_id": "rueda-R2563-claimable-2026-09-23"
+    },
+    {
+      "edicion": "R2763",
+      "fecha_inicio": "2026-09-24",
+      "fecha_fin": "2026-09-27",
+      "archivo": "R2763-Sep24-27.pdf",
+      "sha256": "afb79aa4cc9c0024ce2e1062d4757f4d5abb076aa14023ee1b91e3fccf76078e",
+      "page_count": 16,
+      "source": "unknown",
+      "batch_id": "rueda-R2763-claimable-2026-09-24"
+    },
+    {
+      "edicion": "R2564",
+      "fecha_inicio": "2026-09-26",
+      "fecha_fin": "2026-09-29",
+      "archivo": "R2564-Sep26-29.pdf",
+      "sha256": "729044879bcd5507fe031d5a400d22b3b7e91f2d3e8d30a8e6052cd01c6433f3",
+      "page_count": 16,
+      "source": "unknown",
+      "batch_id": "rueda-R2564-claimable-2026-09-26"
     },
     {
       "edicion": "R2764",
@@ -1425,6 +1423,16 @@
       "source": "unknown"
     },
     {
+      "edicion": "R2565",
+      "fecha_inicio": "2026-09-30",
+      "fecha_fin": "2026-10-02",
+      "archivo": "R2565-Sep30-Oct2.pdf",
+      "sha256": "45ca805e2ceecfb5983ead71edbdb44e80c9847db9e96ceb5c26fee8eb11118d",
+      "page_count": 16,
+      "source": "unknown",
+      "batch_id": "rueda-R2565-claimable-2026-09-30"
+    },
+    {
       "edicion": "R2765",
       "fecha_inicio": "2026-10-01",
       "fecha_fin": "2026-10-04",
@@ -1435,6 +1443,16 @@
       "source": "unknown"
     },
     {
+      "edicion": "R2566",
+      "fecha_inicio": "2026-10-03",
+      "fecha_fin": "2026-10-06",
+      "archivo": "R2566-Oct3-6.pdf",
+      "sha256": "113fa1c550f3ef4170f02a2378b7636790f9175b53b886142cfd756699b297df",
+      "page_count": 16,
+      "source": "unknown",
+      "batch_id": "rueda-R2566-claimable-2026-10-03"
+    },
+    {
       "edicion": "R2766",
       "fecha_inicio": "2026-10-05",
       "fecha_fin": "2026-10-07",
@@ -1443,6 +1461,136 @@
       "page_count": 16,
       "batch_id": "rueda-R2766-claimable-2026-10-05",
       "source": "unknown"
+    },
+    {
+      "edicion": "R2567",
+      "fecha_inicio": "2026-10-07",
+      "fecha_fin": "2026-10-09",
+      "archivo": "R2567-Oct7-9.pdf",
+      "sha256": "7a1ef0bed7868474ed577beab2eceec02ecf4f1c925e4ce7fd8472c0cc58312d",
+      "page_count": 16,
+      "source": "unknown",
+      "batch_id": "rueda-R2567-claimable-2026-10-07"
+    },
+    {
+      "edicion": "R2568",
+      "fecha_inicio": "2026-10-10",
+      "fecha_fin": "2026-10-13",
+      "archivo": "R2568-Oct10-13.pdf",
+      "sha256": "973cb4ea1a93e920264b4eb5d21079c55372771d7b5abc21a74bfa172a4cb495",
+      "page_count": 16,
+      "source": "unknown",
+      "batch_id": "rueda-R2568-claimable-2026-10-10"
+    },
+    {
+      "edicion": "R2569",
+      "fecha_inicio": "2026-10-14",
+      "fecha_fin": "2026-10-16",
+      "archivo": "R2569-Oct14-16.pdf",
+      "sha256": "9972a8647735aa813884a523fb77d24d06fbe5573657857bec9f171496cd0994",
+      "page_count": 16,
+      "source": "unknown",
+      "batch_id": "rueda-R2569-claimable-2026-10-14"
+    },
+    {
+      "edicion": "R2570",
+      "fecha_inicio": "2026-10-17",
+      "fecha_fin": "2026-10-20",
+      "archivo": "R2570-Oct17-20.pdf",
+      "sha256": "21e6a10fa88d45ce1dc7ef9168c0bb8429f2a8330ccff7925e743a8e54c30ad4",
+      "page_count": 16,
+      "source": "unknown",
+      "batch_id": "rueda-R2570-claimable-2026-10-17"
+    },
+    {
+      "edicion": "R2571",
+      "fecha_inicio": "2026-10-21",
+      "fecha_fin": "2026-10-23",
+      "archivo": "R2571-Oct21-23.pdf",
+      "sha256": "9c7fabf40202c27836f6eba62179bdac8cf88df18f62363070c4f3f1c46a2c6f",
+      "page_count": 16,
+      "source": "unknown",
+      "batch_id": "rueda-R2571-claimable-2026-10-21"
+    },
+    {
+      "edicion": "R2572",
+      "fecha_inicio": "2026-10-24",
+      "fecha_fin": "2026-10-27",
+      "archivo": "R2572-Oct24-27.pdf",
+      "sha256": "880e9135c777fabc0aa889c453abaf3588fe8f77cd6a7aeda454558c1770d846",
+      "page_count": 16,
+      "source": "unknown",
+      "batch_id": "rueda-R2572-claimable-2026-10-24"
+    },
+    {
+      "edicion": "R2573",
+      "fecha_inicio": "2026-10-28",
+      "fecha_fin": "2026-10-30",
+      "archivo": "R2573-Oct28-30.pdf",
+      "sha256": "ea0ca019017310b992d21bd5d1b658bc8c22fce1c0c03a6bacfb52cf2e5127ab",
+      "page_count": 16,
+      "source": "unknown",
+      "batch_id": "rueda-R2573-claimable-2026-10-28"
+    },
+    {
+      "edicion": "R2574",
+      "fecha_inicio": "2026-10-31",
+      "fecha_fin": "2026-11-03",
+      "archivo": "R2574-Oct31-Nov3.pdf",
+      "sha256": "c30c867866fa84efeaee77be10fbcbd55151e9653ed16ad5fa4667d38bd95948",
+      "page_count": 16,
+      "source": "unknown",
+      "batch_id": "rueda-R2574-claimable-2026-10-31"
+    },
+    {
+      "edicion": "R2575",
+      "fecha_inicio": "2026-11-04",
+      "fecha_fin": "2026-11-06",
+      "archivo": "R2575-Nov4-6.pdf",
+      "sha256": "6dd78879bd3865a78e529878c57cb0b31872ae9d21ef0dda415bdbdeadb1e265",
+      "page_count": 16,
+      "source": "unknown",
+      "batch_id": "rueda-R2575-claimable-2026-11-04"
+    },
+    {
+      "edicion": "R2576",
+      "fecha_inicio": "2026-11-07",
+      "fecha_fin": "2026-11-10",
+      "archivo": "R2576-Nov7-10.pdf",
+      "sha256": "698fc90a0aee8abad940df14bd2f0aa3bb1586b09f06a9a1e1b3597824a694a5",
+      "page_count": 16,
+      "source": "unknown",
+      "batch_id": "rueda-R2576-claimable-2026-11-07"
+    },
+    {
+      "edicion": "R2577",
+      "fecha_inicio": "2026-11-11",
+      "fecha_fin": "2026-11-13",
+      "archivo": "R2577-Nov11-13.pdf",
+      "sha256": "d6e9bc96209c173cf3f3e38560abb327d939d9b9595395895ac34605fe848950",
+      "page_count": 16,
+      "source": "unknown",
+      "batch_id": "rueda-R2577-claimable-2026-11-11"
+    },
+    {
+      "edicion": "R2578",
+      "fecha_inicio": "2026-11-14",
+      "fecha_fin": "2026-11-17",
+      "archivo": "R2578-Nov14-17.pdf",
+      "sha256": "8c9113f0c9f10079c42a8d83874e449307df092ff701ea718881b9562e40881e",
+      "page_count": 16,
+      "source": "unknown",
+      "batch_id": "rueda-R2578-claimable-2026-11-14"
+    },
+    {
+      "edicion": "R2579",
+      "fecha_inicio": "2026-11-18",
+      "fecha_fin": "2026-11-20",
+      "archivo": "R2579-Nov18-20.pdf",
+      "sha256": "d725f2e05d73e159c179a1903a12e4b74a13bd554ab047d4af09098684fdb34e",
+      "page_count": 16,
+      "source": "unknown",
+      "batch_id": "rueda-R2579-claimable-2026-11-18"
     }
   ]
 }

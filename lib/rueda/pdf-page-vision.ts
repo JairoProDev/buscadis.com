@@ -1,6 +1,7 @@
 import { generateObject } from 'ai';
 import { z } from 'zod';
 import { openai, hasOpenAIKey, AI_MODELS } from '@/lib/ai/openai-client';
+import { ruedaUseOpenAiApi } from '@/lib/rueda/extraction-policy';
 
 const visionAdSchema = z.object({
   anuncios: z.array(
@@ -24,7 +25,7 @@ export async function extractRuedaAdsFromPagePng(
   pngBase64: string,
   pageNum: number,
 ): Promise<VisionExtractedAd[]> {
-  if (!hasOpenAIKey()) return [];
+  if (!ruedaUseOpenAiApi() || !hasOpenAIKey()) return [];
 
   const { object } = await generateObject({
     model: openai(AI_MODELS.VISION),

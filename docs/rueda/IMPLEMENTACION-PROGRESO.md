@@ -24,14 +24,29 @@
 - [x] QA paths sin hardcode `/home/jairo...`
 - [x] npm scripts `rueda:*` en package.json
 - [x] Piloto extracción **R2766**: 398 avisos, **QG-EXTRACT pass** (100% teléfono)
+- [x] **Batch R2747–R2766**: 7 906 avisos (luego ampliado)
+- [x] **`batch-extract-missing` R2630+**: **68 ediciones**, **~29 587 avisos** en `MASTER-avisos.csv` (solo local, sin OpenAI)
+- [x] Política `extraction-policy.ts`: OpenAI **off** por defecto
+- [x] Por edición: `avisos.csv`, `avisos-enumerados.txt`, `avisos.json`
+- [x] `export-master-catalog.ts`, `batch-extract-recent.ts`
 
 ### Datos
 - [x] PDFs nuevos en archive desde Downloads: R2635, R2684, R2686, R2687, R2690, R2706 (nombres `R####.pdf` — renombrar en siguiente paso)
 - [ ] **R2760** — confirmado: URLs WP sep/oct son otras ediciones (SHA R2757/R2765)
 
+## Política almacenamiento (2026-10-08)
+
+- **Pipeline PDF → JSON:** local (`ads` + `output/rueda`).
+- **Supabase:** solo publicación web + CRM; warehouse `rueda_*` opcional.
+- **Import masivo R2766:** pendiente de OK explícito (capa gratis).
+
 ## Pendiente prioritario (siguiente sesión)
 
-- [ ] Renombrar `R2635.pdf` → convención `R2635-Jun12-15.pdf` (+ meta)
+- [x] Fechas sesión en manifest (`fix-manifest-fechas`, 148 ediciones) + columnas CSV
+- [x] Visión **solo portada** (`--vision-portada`) en R2747–R2766
+- [x] `VALIDATION-summary.json` — 19/19 ediciones pasan QG (100% teléfono)
+- [x] PDFs sueltos renombrados a `*-recovered.pdf` (normalize-names)
+- [ ] Renombrar recovered → nombres con rango exacto (manual/meta PDF si hace falta)
 - [ ] Resolver duplicado R2684 (dos archivos Downloads)
 - [ ] `extract-edition --vision` en R2766 p1 y páginas imagen
 - [ ] `db:migrate` en entorno linked para `rueda_*`
