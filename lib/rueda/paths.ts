@@ -46,18 +46,11 @@ export function getRuedaReportsDir(): string {
   );
 }
 
-/** Carpeta de páginas partidas: `R2764-Sep28-30` o fallback `R2764`. */
+/** Carpeta de páginas partidas: `by-month/YYYY-MM/...` o legacy `archive/pages`. */
 export function findEditionPagesDir(edicion: string): string | null {
-  const root = getRuedaPagesDir();
-  if (!fs.existsSync(root)) return null;
-  const code = edicion.toUpperCase();
-  const dirs = fs.readdirSync(root).filter((d) => {
-    const full = path.join(root, d);
-    return fs.statSync(full).isDirectory() && (d === code || d.startsWith(`${code}-`));
-  });
-  if (!dirs.length) return null;
-  dirs.sort((a, b) => b.length - a.length);
-  return path.join(root, dirs[0]);
+  // Lazy import evita ciclo month-archive ↔ paths
+  const { resolveEditionPagesDir } = require('./month-archive') as typeof import('./month-archive');
+  return resolveEditionPagesDir(edicion);
 }
 
 export function defaultWindowsDownloadsDir(): string | null {

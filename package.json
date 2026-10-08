@@ -53,7 +53,10 @@
     "rueda:publish": "npx tsx scripts/rueda/publish-edition.ts",
     "rueda:go-live": "npx tsx scripts/rueda/go-live-loop.ts",
     "rueda:outreach": "npx tsx scripts/rueda/prepare-outreach-edition.ts",
-    "rueda:audit-calidad": "npx tsx scripts/rueda/audit-extraction-quality.ts --from=2747"
+    "rueda:audit-calidad": "npx tsx scripts/rueda/audit-extraction-quality.ts --from=2747",
+    "rueda:sync-monthly": "npx tsx scripts/rueda/sync-monthly-pages.ts",
+    "rueda:extract-by-page": "npx tsx scripts/rueda/extract-from-page-pdfs.ts",
+    "rueda:leads-empleos": "npx tsx scripts/rueda/export-leads-empleos.ts"
   },
   "dependencies": {
     "@ai-sdk/openai": "^4.0.0",
