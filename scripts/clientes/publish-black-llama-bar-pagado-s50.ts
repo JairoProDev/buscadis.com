@@ -1,8 +1,8 @@
 /**
- * Muestra plan S/50 (pago pendiente) — Quinta Campestre Poroy, Grupo Antonio.
+ * Black Llama Hostel — bar centro histórico. Plan S/50 pagado (Yape).
+ * Contacto postulantes: 912403101. Comercial Antu: 955009160 (solo private).
  *
- *   npx tsx scripts/clientes/publish-quinta-poroy-antonio-muestra-s50.ts
- *   npx tsx scripts/clientes/publish-quinta-poroy-antonio-muestra-s50.ts --dry-run
+ *   npx tsx scripts/clientes/publish-black-llama-bar-pagado-s50.ts
  */
 import * as fs from 'node:fs';
 import * as path from 'node:path';
@@ -17,44 +17,35 @@ import type { Adiso } from '../../types';
 dotenv.config({ path: path.join(process.cwd(), '.env.local') });
 dotenv.config({ path: path.join(process.cwd(), '.env') });
 
-const BATCH_ID = 'cliente-quinta-poroy-antonio-2026-10';
-const CLIENT_LABEL = 'Quinta Campestre — Poroy';
-const WHATSAPP = '966364330';
+const BATCH_ID = 'cliente-black-llama-bar-2026-10';
+const CLIENT_LABEL = 'Black Llama Hostel';
+const WHATSAPP = '912403101';
 const SITE = (process.env.NEXT_PUBLIC_SITE_URL || 'https://buscadis.com').replace(/\/$/, '');
 
-const FECHA_PUB = '2026-10-06';
-const HORA_PUB = '12:30';
-const PROMOTED_AT = '2026-10-06T12:30:00-05:00';
-const EXPIRES = '2026-11-05T23:59:59-05:00';
+const FECHA_PUB = '2026-10-08';
+const HORA_PUB = '09:30';
+const PROMOTED_AT = '2026-10-08T09:30:00-05:00';
+const EXPIRES = '2026-11-07T23:59:59-05:00';
 
 const FLYER_FILE = path.join(
   process.cwd(),
-  'docs/clientes/quinta-campestre-poroy-antonio/media/flyer-quinta-poroy-oct-2026.jpg',
+  'docs/clientes/black-llama-hostel-antu/media/flyer-black-llama-bar-oct-2026.jpg',
 );
 
-const TITULO =
-  'Quinta campestre Poroy | Cocina, mozos, cajera, niñera y asistente admin — urgente';
+const TITULO = 'Black Llama Hostel | Mozo, bartender, limpieza y seguridad — centro histórico';
 
 const DESCRIPCION = [
-  '¡Urgente! Quinta campestre en Poroy (Cusco) busca personal para sumarse al equipo.',
+  'Black Llama Hostel busca personal para su bar en el centro histórico de Cusco (zona Mesón de la Estrella).',
   '',
   'Vacantes:',
-  '• Ayudantes de cocina (con experiencia)',
-  '• Mozos con o sin experiencia',
-  '• Cajera',
-  '• Niñera',
-  '• Asistente administrativo',
+  '• Mozo/a de servicio — turno tarde/noche',
+  '• Bartender — turno noche',
+  '• Personal de limpieza — turno rotativo de día',
+  '• Seguridad (con o sin experiencia) — turno rotativo',
   '',
-  'Se brinda:',
-  '• Buen pago / excelente sueldo',
-  '• Movilidad (transporte ida y vuelta)',
-  '• Alimentación cubierta',
+  'En planilla, con beneficios de ley.',
   '',
-  'Modalidad: trabajo permanente o fines de semana (tiempo completo o parcial).',
-  '',
-  'Ubicación: carretera principal Cusco–Abancay, carril de subida, a 20 m del puente peatonal de Poroy (Quinta Campestre Antonios).',
-  '',
-  'Contacto WhatsApp: 966 364 330',
+  'Informes y CV por WhatsApp: 912 403 101',
 ].join('\n');
 
 async function getAdmin() {
@@ -71,11 +62,11 @@ async function findExistingBatch() {
   return data || [];
 }
 
-async function ensureUser(): Promise<{ id: string; created: boolean }> {
+async function ensureUser(): Promise<{ id: string }> {
   const admin = await getAdmin();
-  const stubEmail = 'quintaporoy966364330@anunciantes.buscadis.com';
+  const stubEmail = 'blackllama912403101@anunciantes.buscadis.com';
   const { data: profile } = await admin.from('profiles').select('id').eq('email', stubEmail).maybeSingle();
-  if (profile?.id) return { id: profile.id, created: false };
+  if (profile?.id) return { id: profile.id };
 
   const password = nanoid(18);
   const created = await admin.auth.admin.createUser({
@@ -89,25 +80,17 @@ async function ensureUser(): Promise<{ id: string; created: boolean }> {
   }
   const id = created.data.user.id;
   await admin.from('profiles').upsert(
-    {
-      id,
-      email: stubEmail,
-      nombre: CLIENT_LABEL,
-      telefono: WHATSAPP,
-      rol: 'anunciante',
-    },
+    { id, email: stubEmail, nombre: CLIENT_LABEL, telefono: WHATSAPP, rol: 'anunciante' },
     { onConflict: 'id' },
   );
-  return { id, created: true };
+  return { id };
 }
 
 async function uploadFlyer(userId: string): Promise<string> {
-  if (!fs.existsSync(FLYER_FILE)) {
-    throw new Error(`Falta flyer: ${FLYER_FILE}`);
-  }
+  if (!fs.existsSync(FLYER_FILE)) throw new Error(`Falta flyer: ${FLYER_FILE}`);
   const admin = await getAdmin();
   const buffer = fs.readFileSync(FLYER_FILE);
-  const storagePath = `${userId}/adisos/quinta-poroy-${Date.now()}.jpg`;
+  const storagePath = `${userId}/adisos/black-llama-bar-${Date.now()}.jpg`;
 
   for (const bucket of ADISO_IMAGES_BUCKET_FALLBACKS) {
     const { error } = await admin.storage.from(bucket).upload(storagePath, buffer, {
@@ -123,17 +106,11 @@ async function uploadFlyer(userId: string): Promise<string> {
 }
 
 async function main() {
-  const dryRun = process.argv.includes('--dry-run');
   const existing = await findExistingBatch();
   if (existing.length > 0) {
     const id = existing[0].id;
     const shareUrl = `${SITE}${getAdisoUrl({ id, titulo: existing[0].titulo || TITULO, categoria: 'empleos' })}`;
     console.log(JSON.stringify({ skipped: true, existing, shareUrl }, null, 2));
-    return;
-  }
-
-  if (dryRun) {
-    console.log(JSON.stringify({ dryRun: true, batch: BATCH_ID, plan: 'S/50 muestra pago pendiente' }, null, 2));
     return;
   }
 
@@ -150,17 +127,17 @@ async function main() {
     descripcion: DESCRIPCION.slice(0, 2000),
     contacto: WHATSAPP,
     contactosMultiples: [
-      { tipo: 'whatsapp', valor: WHATSAPP, principal: true, etiqueta: 'WhatsApp' },
+      { tipo: 'whatsapp', valor: WHATSAPP, principal: true, etiqueta: 'CV / informes' },
       { tipo: 'telefono', valor: WHATSAPP, principal: false, etiqueta: 'Cel.' },
     ],
     ubicacion: {
       pais: 'Perú',
       departamento: 'Cusco',
       provincia: 'Cusco',
-      distrito: 'Poroy',
-      direccion: 'Carretera Cusco–Abancay, subida Poroy (20 m puente peatonal)',
-      latitud: -13.489,
-      longitud: -72.005,
+      distrito: 'Cusco',
+      direccion: 'Centro histórico — zona Mesón de la Estrella',
+      latitud: -13.5169,
+      longitud: -71.9785,
     },
     fechaPublicacion: FECHA_PUB,
     horaPublicacion: HORA_PUB,
@@ -175,7 +152,7 @@ async function main() {
     fechaExpiracion: EXPIRES,
     expiresAt: EXPIRES,
     publishTier: 'paid',
-    paymentStatus: 'pending',
+    paymentStatus: 'verified',
     promotionTier: 'destacada',
     promotionRank: 1,
     promotionExpiresAt: EXPIRES,
@@ -192,26 +169,31 @@ async function main() {
       story_priority: true,
     },
     atributos: {
-      negocio: 'Quinta Campestre Antonios',
+      negocio: CLIENT_LABEL,
       empleos_jornada: 'completo',
       empleos_modalidad: 'presencial',
-      areas: ['Ayudante de cocina', 'Mozo', 'Cajera', 'Niñera', 'Asistente administrativo'],
-      plan: 'destacado_30d_50_muestra',
+      areas: ['Mozo/a', 'Bartender', 'Limpieza', 'Seguridad'],
+      plan: 'destacado_30d_50',
     },
     privateData: {
       batch_id: BATCH_ID,
       client_name: CLIENT_LABEL,
-      contact_name: 'Grupo Antonio (Poroy)',
-      contact_whatsapp: WHATSAPP,
-      client_docs_path: 'docs/clientes/quinta-campestre-poroy-antonio',
+      contact_name: 'Antu',
+      contact_whatsapp: '955009160',
+      applicant_whatsapp: WHATSAPP,
+      client_docs_path: 'docs/clientes/black-llama-hostel-antu',
       plan_amount_pen: 50,
       plan_days: 30,
       plan_start: FECHA_PUB,
-      plan_end: '2026-11-05',
-      muestra_plan_s50: true,
-      social_diffusion_hold: true,
-      payment_note: 'Muestra web oct 6 — confirmó aviso Rueda; redes tras Yape',
+      plan_end: '2026-11-07',
+      factura_ruc: '20610881212',
+      factura_titular: 'ROFFA TRIP SAC',
+      factura_ref: 'E001-1',
+      paid_at: new Date().toISOString(),
+      social_diffusion_hold: false,
+      payment_note: 'Yape S/50 confirmado por Jairo oct 2026 — aviso bar (no CM)',
       campaign_ref: 'rueda-oct-2026',
+      cm_backup: true,
     },
   };
 
@@ -222,10 +204,29 @@ async function main() {
     promotion_rank: 1,
     promotion_expires_at: EXPIRES,
     promoted_at: PROMOTED_AT,
+    payment_status: 'verified',
   };
 
   const { error } = await admin.from('adisos').insert(row);
   if (error) throw new Error(error.message);
+
+  const publicPath = getAdisoUrl(adiso);
+  await admin.from('stories').insert({
+    user_id: user.id,
+    media_url: imageUrl,
+    media_type: 'image',
+    caption: adiso.titulo,
+    categoria: adiso.categoria,
+    adiso_id: id,
+    promotion_tier: 'destacada',
+    objective: 'contactos',
+    source: 'adiso_auto',
+    cta_url: `${SITE}${publicPath}`,
+    status: 'active',
+    visible_until: EXPIRES,
+    expires_at: EXPIRES,
+    sort_order: 0,
+  });
 
   const { onAdisoSearchIndexUpdate } = await import('../../lib/search/post-create');
   const { generateAndStoreEmbedding } = await import('../../lib/ai/embeddings');
@@ -244,18 +245,15 @@ async function main() {
     console.warn('[crm]', e);
   }
 
-  const sharePath = getAdisoUrl(adiso);
-  const shareUrl = `${SITE}${sharePath}`;
-
   console.log(
     JSON.stringify(
       {
         published: true,
+        paid: true,
         adisoId: id,
-        shareUrl,
-        sharePath,
-        paymentStatus: 'pending',
-        social_hold: true,
+        shareUrl: `${SITE}${publicPath}`,
+        applicantWhatsApp: WHATSAPP,
+        note: 'Difusión FB/IG/TK/grupos (Shantall). CM queda en backup.',
       },
       null,
       2,

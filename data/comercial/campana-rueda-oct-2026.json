@@ -21,10 +21,10 @@
       "etapa_label": "PAGÓ",
       "plan": "Empresa S/50, 30 días, factura E001-1",
       "amount_pen": 50,
-      "ultimo_movimiento": "6 oct: Yape S/50 Shantall; Antu dice «otro anuncio» — confirmar bar vs CM antes de publicar",
-      "proxima_accion": "Confirmar aviso activo + bartender solo noche; borrador → publicar",
+      "ultimo_movimiento": "8 oct: publicado aviso bar pagado S/50 (4XwOcOI4OR); CM en backup",
+      "proxima_accion": "Enviar link a Antu; Shantall FB/IG/TK/grupos",
       "segment": "pipeline",
-      "notas_extra": "ROFFA TRIP SAC 20610881212. Factura E001-1. Bartender solo turno noche."
+      "notas_extra": "ROFFA TRIP SAC 20610881212. Factura E001-1. Postulantes 912403101. CM backup."
     },
     {
       "title": "Servicios Varios SAC — Supervisor ventas",
@@ -225,11 +225,11 @@
     {
       "title": "Quinta campestre Poroy (grupo Antonio)",
       "contact_whatsapp": "966364330",
-      "etapa_label": "DATOS",
-      "plan": "S/50 (4 perfiles urgentes)",
-      "ultimo_movimiento": "6 oct 11:13: Ok — confirma aviso Rueda Poroy (4 puestos)",
-      "proxima_accion": "Pedir WA contacto + horario/sueldo; borrador; anclar S/50",
-      "notas_extra": "Ayudantes cocina, mozos, cajera, niñera. Beneficios movilidad+alimentación. wa-chats/966364330-quinta-poroy-antonio.txt",
+      "etapa_label": "CIERRE",
+      "plan": "S/50 · muestra ZbJTPPJpXr",
+      "ultimo_movimiento": "7 oct: pide agregar Asistente administrativo; datos pago enviados 6 oct",
+      "proxima_accion": "Confirmar texto admin + captura Yape; activate-paid + redes",
+      "notas_extra": "+ asist. admin (7 oct). Link muestra. Beneficios movilidad+alimentación. wa-chats/966364330-quinta-poroy-antonio.txt",
       "segment": "pipeline"
     },
     {
