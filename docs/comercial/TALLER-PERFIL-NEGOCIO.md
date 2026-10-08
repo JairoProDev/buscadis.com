@@ -2,11 +2,11 @@
 
 ## Enlace para proyectar / QR
 
-**QR corto (recomendado):**  
-`https://www.buscadis.com/taller`
+**QR corto:** `https://www.buscadis.com/taller`  
+**Link para grupo de WhatsApp (abre bien en la app):**  
+`https://www.buscadis.com/mi-negocio?taller=1`
 
-**URL completa:**  
-`https://www.buscadis.com/mi-negocio/crear?taller=1`
+**Sin link (solo app instalada):** Perfil → pestaña **Negocios** → **Crear negocio**, o menú → **Mi negocio** (si no tienen página, entran al creador con IA). El texto del taller aparece si antes abrieron un link con `?taller=1` o `/taller`.
 
 > **Compartir vs. publicar:** el enlace `/v/tu-negocio` funciona para WhatsApp e Instagram en cuanto Adis arma el perfil. “Publicar” en el buscador de Buscadis puede requerir plan; no bloquea el taller.
 >

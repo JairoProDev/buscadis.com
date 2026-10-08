@@ -19,6 +19,11 @@ import { publishBusinessViaAPI } from '@/lib/business-api';
 import CompletitudMeter from '@/components/business/creator/CompletitudMeter';
 import { supabase } from '@/lib/supabase';
 import { cn } from '@/lib/utils';
+import {
+  enableWorkshopMode,
+  isWorkshopActive,
+  workshopQueryFromUrl,
+} from '@/lib/workshop-mode';
 
 type MobilePanel = 'crear' | 'pagina';
 
@@ -33,8 +38,13 @@ function CrearInner() {
   const router = useRouter();
   const search = useSearchParams();
   const modoGuia = search.get('modo') === 'guia';
-  const taller = search.get('taller') === '1' || search.get('taller') === 'true';
+  const [taller, setTaller] = useState(false);
   const { user, loading: authLoading } = useAuth();
+
+  useEffect(() => {
+    if (workshopQueryFromUrl(search)) enableWorkshopMode();
+    setTaller(isWorkshopActive(search));
+  }, [search]);
   const [profile, setProfile] = useState<Partial<BusinessProfile>>({
     name: '',
     is_published: false,

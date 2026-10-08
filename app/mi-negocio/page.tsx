@@ -5,6 +5,11 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { listBusinessProfilesForUser } from '@/lib/business';
 import AuthModal from '@/components/AuthModal';
+import {
+  enableWorkshopMode,
+  isWorkshopModeEnabled,
+  workshopQueryFromUrl,
+} from '@/lib/workshop-mode';
 
 function MiNegocioRedirect() {
   const router = useRouter();
@@ -12,12 +17,14 @@ function MiNegocioRedirect() {
   const { user, loading } = useAuth();
   const businessId = searchParams.get('business');
   const isNew = searchParams.get('new') === '1';
+  const tallerQuery = searchParams.get('taller');
 
   useEffect(() => {
     if (loading) return;
     if (!user) return;
 
-    const taller = searchParams.get('taller') === '1';
+    if (workshopQueryFromUrl(searchParams)) enableWorkshopMode();
+    const taller = isWorkshopModeEnabled() || workshopQueryFromUrl(searchParams);
     const crearPath = taller ? '/mi-negocio/crear?taller=1' : '/mi-negocio/crear';
 
     if (isNew) {
@@ -40,7 +47,7 @@ function MiNegocioRedirect() {
         router.replace(`/mi-negocio/catalogo?business=${picked.profile.id}`);
       }
     });
-  }, [user, loading, businessId, isNew, router]);
+  }, [user, loading, businessId, isNew, tallerQuery, router, searchParams]);
 
   if (!loading && !user) {
     return (
