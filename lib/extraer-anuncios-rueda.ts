@@ -12,7 +12,9 @@ export type CalidadIssue =
   | 'muchos_telefonos'
   | 'ruido_masthead'
   | 'titulo_debil'
-  | 'descripcion_con_telefono';
+  | 'descripcion_con_telefono'
+  | 'fragmento_cortado'
+  | 'posible_duplicado';
 
 export interface AnuncioExtraido {
   textoRaw: string;
@@ -55,8 +57,9 @@ export function filtrarMetadatos(texto: string): string {
     /^FM$/gim,
     /^R$/gm,
     /^Cusco, del .*Edición Nº?\s*\d+.*$/gim,
-    /^Precio\s+S\/\.?\s*$/gim,
-    /^Precio\s+S\/\.?\s*\d+.*$/gim,
+    // Solo precio de portada revista (no sueldos/precios dentro del aviso)
+    /^Precio\s+S\/\.?\s*0\.\d+.*$/gim,
+    /^Precio\s+S\/\.?\s*1\.00\s*$/gim,
     /^Edición Regional.*$/gim,
     /^Www\..*$/gim,
     /^Oficina .*$/gim,
@@ -68,6 +71,14 @@ export function filtrarMetadatos(texto: string): string {
     /^e\s*s\s*c\s*u\s*c\s*h\s*a\s*n\s*o\s*s.*$/gim,
   ];
   for (const p of linePatterns) t = t.replace(p, '');
+
+  // Texto vertical “escúchanos en LA RADIO 96.1FM” (PyMuPDF lo parte en letras)
+  t = t.replace(
+    /e\s*\n\s*s\s*\n\s*c\s*\n\s*u\s*\n\s*c\s*\n\s*h\s*\n\s*a\s*\n\s*n\s*\n\s*o\s*\n\s*s[\s\n]*(?:en\s*)?/gi,
+    '',
+  );
+  t = t.replace(/\b96\.1\s*FM\b/gi, ' ');
+  t = t.replace(/\bLA RADIO\b/gi, ' ');
 
   // Cabecera de edición embebida: "Cusco, 23, 24… Edición Nº 2746 Precio …"
   t = t.replace(
@@ -400,6 +411,13 @@ export function tituloYDesc(texto: string): { titulo: string; descripcion: strin
 
   const WEAK_LEFT = /^(?:por\s+)?ocasi[oó]n$|^requiere$|^se\s+requiere$|^se\s+solicita$|^urgente!?$|^buscamos$|^necesito$/i;
 
+  // Avisos laborales: no partir en "SÁBADO:" / "HORARIO:" / bullets
+  if (/\bSE\s+(?:NECESITA|REQUIERE|SOLICITA)\b/i.test(t)) {
+    const words = t.split(/\s+/);
+    const n = Math.min(16, Math.max(8, words.length > 28 ? 12 : 10));
+    return { titulo: limpiarTitulo(words.slice(0, n).join(' ')), descripcion: t };
+  }
+
   // "TITULO: resto"
   const colon = t.match(/^(.{3,90}?):\s+([\s\S]+)$/);
   if (colon && !/\d{9}/.test(colon[1]) && colon[1].length < 90) {
@@ -464,6 +482,13 @@ export function evaluarCalidad(
   if (/\b9\d{8}\b/.test(descripcion)) issues.push('descripcion_con_telefono');
 
   let score = 100;
+  if (
+    (/^\s*[\(•*]/.test(descripcion) && !/\bSE\s+(?:NECESITA|REQUIERE|SOLICITA)\b/i.test(textoRaw)) ||
+    (descripcion.length < 55 && textoRaw.length > 120)
+  ) {
+    issues.push('fragmento_cortado');
+  }
+
   const penal: Record<CalidadIssue, number> = {
     sin_telefono: 40,
     muy_corto: 25,
@@ -473,6 +498,8 @@ export function evaluarCalidad(
     ruido_masthead: 20,
     titulo_debil: 10,
     descripcion_con_telefono: 5,
+    fragmento_cortado: 35,
+    posible_duplicado: 10,
   };
   for (const i of issues) score -= penal[i];
   return { issues, score: Math.max(0, score) };
@@ -507,59 +534,127 @@ function mapTextoRawToAnuncio(textoRaw: string): AnuncioExtraido {
   return { textoRaw, titulo, descripcion: desc.slice(0, 2000), categoria, telefonos, issues, score };
 }
 
-export function estructurarAnuncios(textoPagina: string): AnuncioExtraido[] {
-  const partes = separarAnuncios(textoPagina);
-  return partes.map((textoRaw) => mapTextoRawToAnuncio(textoRaw));
+/** Marcadores de inicio de aviso (columna Rueda) — partir ANTES de aplanar a una línea. */
+const BLOQUE_START =
+  /(?=(?:SE NECESITA|SE REQUIERE|SE SOLICITA|PARA MACHUPICCHU|BLACK LLAMA|INDIE CAFÉ|CASA CARBAJAL|VETERINARIOS DE|AGENCIA DE VIAJES|IMPORTANTE EMPRESA|Alquilo |Vendo |Se alquila |Se vende |ALQUILER DE|En venta |Remato |Anticresis |Traspaso ))/gi;
+
+const PRIMER_AVISO_PORTADA =
+  /\b(?:VETERINARIOS DE|BLACK LLAMA|SE SOLICITA|SE NECESITA|SE REQUIERE|PARA MACHUPICCHU|INDIE CAFÉ|CASA CARBAJAL|Alquilo |Vendo |Se alquila )/i;
+
+function quitarCabeceraPortada(texto: string): string {
+  const m = texto.match(PRIMER_AVISO_PORTADA);
+  if (!m || m.index === undefined || m.index === 0) return texto;
+  if (m.index > 0 && m.index < 3200) return texto.slice(m.index);
+  return texto;
 }
 
-/**
- * Import Rueda: split extra por teléfono y rescata números no cubiertos en la página.
- */
-export function estructurarAnunciosMaximo(textoPagina: string): AnuncioExtraido[] {
+export function partirPaginaEnBloques(textoPagina: string): string[] {
+  const t = quitarCabeceraPortada(filtrarMetadatos(normalizarTelefonosEnTexto(textoPagina)));
+  if (!t.trim()) return [];
+
+  const hits: number[] = [0];
+  const re = new RegExp(BLOQUE_START.source, 'gi');
+  for (const m of t.matchAll(re)) {
+    if (m.index !== undefined && m.index > 40) hits.push(m.index);
+  }
+  hits.sort((a, b) => a - b);
+  const uniq = hits.filter((v, i, arr) => i === 0 || v - arr[i - 1] > 35);
+
+  const blocks: string[] = [];
+  for (let i = 0; i < uniq.length; i++) {
+    const slice = t.slice(uniq[i], i + 1 < uniq.length ? uniq[i + 1] : t.length).trim();
+    if (slice.length >= 45) blocks.push(slice);
+  }
+  return blocks.length ? blocks : [t];
+}
+
+/** Une trozos partidos por error (p. ej. “TRABAJO INMEDIATO” sin teléfono en el bloque anterior). */
+function fusionarBloquesSinTelefono(blocks: string[]): string[] {
+  const out: string[] = [];
+  let pending = '';
+  for (const b of blocks) {
+    const piece = pending ? `${pending} ${b}` : b;
+    if (/\b9\d{8}\b/.test(piece)) {
+      out.push(piece.trim());
+      pending = '';
+    } else {
+      pending = piece;
+    }
+  }
+  if (pending.trim()) out.push(pending.trim());
+  return out;
+}
+
+function normFingerprint(s: string): string {
+  return s
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/\p{M}/gu, '')
+    .replace(/\b9\d{8}\b/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function postProcesarAnuncios(ads: AnuncioExtraido[]): AnuncioExtraido[] {
+  const sorted = [...ads].sort((a, b) => b.textoRaw.length - a.textoRaw.length);
+  const kept: AnuncioExtraido[] = [];
+
+  for (const ad of sorted) {
+    const fp = normFingerprint(ad.textoRaw);
+    if (fp.length < 20) continue;
+
+    let dup = false;
+    for (const k of kept) {
+      const kfp = normFingerprint(k.textoRaw);
+      if (fp === kfp || (fp.length > 100 && (kfp.includes(fp) || fp.includes(kfp)))) {
+        dup = true;
+        if (!k.issues.includes('posible_duplicado')) {
+          k.issues = [...k.issues, 'posible_duplicado'];
+        }
+        break;
+      }
+    }
+    if (!dup) kept.push(ad);
+  }
+
+  return kept.sort((a, b) => (a.telefonos[0] || '').localeCompare(b.telefonos[0] || ''));
+}
+
+/** Extracción canónica por página: bloques editoriales + separación conservadora (sin cortar por teléfono compartido). */
+export function estructurarAnunciosPaginaRueda(textoPagina: string): AnuncioExtraido[] {
+  const bloques = fusionarBloquesSinTelefono(partirPaginaEnBloques(textoPagina));
+  const rawChunks: string[] = [];
+  for (const b of bloques) {
+    rawChunks.push(...separarAnuncios(b));
+  }
+  const mapped = rawChunks.map((textoRaw) => mapTextoRawToAnuncio(textoRaw));
+
   const limpio = filtrarMetadatos(normalizarTelefonosEnTexto(textoPagina));
   const flat = limpio.replace(/\n/g, ' ').replace(/\s{2,}/g, ' ').trim();
-  const partesBase = separarAnuncios(textoPagina);
-  const expanded: string[] = [];
-
-  for (const chunk of partesBase) {
-    const byPhone = fragmentarUnoPorTelefono(chunk);
-    expanded.push(...(byPhone.length > 1 ? byPhone : [chunk]));
-  }
-
-  const dedupeKey = (ad: AnuncioExtraido) =>
-    `${ad.telefonos[0] || 'x'}:${ad.titulo.toLowerCase().replace(/\s+/g, ' ').slice(0, 48)}`;
-
-  const byKey = new Map<string, AnuncioExtraido>();
-  for (const textoRaw of expanded) {
-    const ad = mapTextoRawToAnuncio(textoRaw);
-    const primary = ad.telefonos[0];
-    if (!primary) continue;
-    const key = dedupeKey(ad);
-    const prev = byKey.get(key);
-    if (!prev || ad.score > prev.score) byKey.set(key, ad);
-  }
-
-  const usedPhones = new Set(
-    [...byKey.values()].flatMap((a) => a.telefonos),
-  );
+  const usedPhones = new Set(mapped.flatMap((a) => a.telefonos));
   for (const phone of extraerTelefonos9(flat)) {
     if (usedPhones.has(phone)) continue;
     const idx = flat.indexOf(phone);
     if (idx < 0) continue;
-    const start = Math.max(0, idx - 520);
-    let piece = flat.slice(start, idx + 9).trim();
-    if (piece.length < 20 && idx > 0) {
-      piece = flat.slice(Math.max(0, idx - 80), Math.min(flat.length, idx + 120)).trim();
-    }
-    if (piece.length < 18) continue;
+    const start = Math.max(0, idx - 640);
+    const piece = flat.slice(start, idx + 9).trim();
+    if (piece.length < 55) continue;
     const ad = mapTextoRawToAnuncio(piece);
-    if (!ad.telefonos[0]) continue;
-    const key = dedupeKey(ad);
-    if (!byKey.has(key)) {
-      byKey.set(key, ad);
-      for (const t of ad.telefonos) usedPhones.add(t);
-    }
+    if (!ad.telefonos[0] || ad.score < 45) continue;
+    mapped.push(ad);
+    for (const t of ad.telefonos) usedPhones.add(t);
   }
 
-  return [...byKey.values()].sort((a, b) => (a.telefonos[0] || '').localeCompare(b.telefonos[0] || ''));
+  return postProcesarAnuncios(mapped);
+}
+
+export function estructurarAnuncios(textoPagina: string): AnuncioExtraido[] {
+  return estructurarAnunciosPaginaRueda(textoPagina);
+}
+
+/**
+ * @deprecated Usar `estructurarAnunciosPaginaRueda` — el modo “máximo” partía por teléfono y generaba cortes.
+ */
+export function estructurarAnunciosMaximo(textoPagina: string): AnuncioExtraido[] {
+  return estructurarAnunciosPaginaRueda(textoPagina);
 }

@@ -1,5 +1,18 @@
 # Runbook — QA extracción Rueda
 
+## Cómo se extrae (expectativas realistas)
+
+El flujo por defecto es **texto del PDF + reglas** (`lib/extraer-anuncios-rueda.ts`), no lectura “humana” con IA. La visión (`--vision`) solo si se activa a propósito.
+
+Tras mejorar reglas:
+
+```bash
+npm run rueda:extract-recent -- --force
+npm run rueda:audit-calidad
+```
+
+Informe: `output/rueda/informe-calidad-R2747-en-adelante.json`. Publicar solo filas sin `requiere_revision` o corregidas en `revision.csv`.
+
 ## Quality gates
 
 | Gate | Comando | Criterio |

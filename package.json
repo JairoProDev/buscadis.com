@@ -52,7 +52,8 @@
     "rueda:preflight": "npx tsx scripts/rueda/preflight-edition.ts",
     "rueda:publish": "npx tsx scripts/rueda/publish-edition.ts",
     "rueda:go-live": "npx tsx scripts/rueda/go-live-loop.ts",
-    "rueda:outreach": "npx tsx scripts/rueda/prepare-outreach-edition.ts"
+    "rueda:outreach": "npx tsx scripts/rueda/prepare-outreach-edition.ts",
+    "rueda:audit-calidad": "npx tsx scripts/rueda/audit-extraction-quality.ts --from=2747"
   },
   "dependencies": {
     "@ai-sdk/openai": "^4.0.0",

@@ -11,7 +11,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as os from 'os';
 import { execFileSync } from 'child_process';
-import { estructurarAnunciosMaximo, type AnuncioExtraido } from '../../lib/extraer-anuncios-rueda';
+import { estructurarAnunciosPaginaRueda, type AnuncioExtraido } from '../../lib/extraer-anuncios-rueda';
 import { extractRuedaAdsFromPagePng } from '../../lib/rueda/pdf-page-vision';
 import { classifyRuedaListing } from '../../lib/rueda/classify-from-text';
 import { polishRuedaListing } from '../../lib/rueda/listing-quality';
@@ -147,7 +147,7 @@ async function main() {
   const phonePages = new Map<string, Set<number>>();
 
   for (const p of pages) {
-    let anuncios = estructurarAnunciosMaximo(p.texto);
+    let anuncios = estructurarAnunciosPaginaRueda(p.texto);
     if (useVision && shouldVisionPage(p)) {
       try {
         const fromVision = await visionForPage(pdf, p.pagina);
@@ -175,7 +175,13 @@ async function main() {
       if (byImportKey.has(importKey)) continue;
 
       const confianza = Math.min(1, a.score / 100);
-      const requiere_revision = a.score < 70 || a.issues.includes('multi_inicio') || a.issues.includes('muy_largo');
+      const requiere_revision =
+        a.score < 70 ||
+        a.issues.includes('multi_inicio') ||
+        a.issues.includes('muy_largo') ||
+        a.issues.includes('fragmento_cortado') ||
+        a.issues.includes('muy_corto') ||
+        a.issues.includes('ruido_masthead');
 
       const pagesForPhone = phonePages.get(primary) || new Set<number>();
       const recurrente = pagesForPhone.size > 0 && !pagesForPhone.has(p.pagina);
