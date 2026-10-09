@@ -92,3 +92,65 @@ export function loadAviso(): AvisoEmpleo {
 export function saveAviso(aviso: AvisoEmpleo) {
   sessionStorage.setItem(AVISO_STORAGE_KEY, JSON.stringify(aviso));
 }
+
+export type Hecho = 'si' | 'poco' | 'no';
+
+export const HECHO_LABEL: Record<Hecho, string> = {
+  si: 'Ya lo he hecho',
+  poco: 'Lo he hecho un poco',
+  no: 'Todavía no, y quiero aprender',
+};
+
+export type AvisoCerca = {
+  id: string;
+  puesto: string;
+  negocio: string;
+  zona: string;
+  pago: string;
+  horario: string;
+};
+
+export const AVISOS_CERCA: AvisoCerca[] = [
+  {
+    id: 'san-blas',
+    puesto: 'Ayudante de barra',
+    negocio: 'Cafetería en San Blas',
+    zona: 'A una cuadra de la plazuela',
+    pago: '1,350 + propina',
+    horario: '8:00 a.m. a 4:30 p.m.',
+  },
+  {
+    id: 'molino',
+    puesto: 'Cajero',
+    negocio: 'Bodega en El Molino',
+    zona: 'Av. de la Cultura',
+    pago: 'A conversar',
+    horario: 'Turno tarde, lunes a sábado',
+  },
+];
+
+export function fichaTexto(
+  aviso: AvisoEmpleo,
+  turno: TurnoAviso,
+  ficha: { nombre: string; zona: string; hecho: Hecho },
+) {
+  return [
+    `Hola, postulo desde Buscadis a ${aviso.puesto} en ${aviso.negocio}.`,
+    `Horario: ${turno.nombre} (${turno.horario}).`,
+    `Me llamo ${ficha.nombre.trim()}. Vengo de ${ficha.zona.trim()}.`,
+    HECHO_LABEL[ficha.hecho] + '.',
+  ].join('\n');
+}
+
+export function textoGrupo(aviso: AvisoEmpleo, url: string) {
+  const pagos = aviso.turnos
+    .map((t) => `${t.nombre}: S/ ${t.pago}`)
+    .join(' · ');
+  return [
+    `Se busca ${aviso.puesto}`,
+    `${aviso.negocio} · ${aviso.zona}`,
+    pagos,
+    'Postula por este enlace. No escribas solo “info”:',
+    url,
+  ].join('\n');
+}

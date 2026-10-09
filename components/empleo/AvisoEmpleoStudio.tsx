@@ -1,16 +1,22 @@
 'use client';
 
-import { useEffect, useId, useMemo, useState } from 'react';
+import { useEffect, useId, useMemo, useRef, useState } from 'react';
 import QRCode from 'qrcode';
 import styles from './aviso-empleo.module.css';
 import {
   AVISO_PUCARA,
+  AVISOS_CERCA,
+  type AvisoCerca,
   type AvisoEmpleo,
+  type Hecho,
+  HECHO_LABEL,
   type TurnoAviso,
   digitsOnly,
+  fichaTexto,
   formatPhone,
   loadAviso,
   saveAviso,
+  textoGrupo,
   whatsappNumber,
 } from './aviso-data';
 import { renderAvisoPng } from './render-aviso-png';
@@ -26,15 +32,6 @@ const EMPTY_TURNO = (id: string): TurnoAviso => ({
   detalle: '',
 });
 
-function candidateText(aviso: AvisoEmpleo, turno: TurnoAviso) {
-  return `Hola, vi el aviso de ${aviso.puesto} en ${aviso.negocio}. Me interesa el horario ${turno.nombre.toLowerCase()} (${turno.horario}). ¿Siguen buscando?`;
-}
-
-function ownerText(aviso: AvisoEmpleo, url: string) {
-  const pagos = aviso.turnos.map((t) => `${t.nombre}: S/ ${t.pago}`).join('. ');
-  return `${aviso.negocio} busca ${aviso.puesto.toLowerCase()}. ${pagos}. ${aviso.zona}. Postula aquí: ${url}`;
-}
-
 export default function AvisoEmpleoStudio({ className }: { className?: string }) {
   const [aviso, setAviso] = useState<AvisoEmpleo>(AVISO_PUCARA);
   const [ready, setReady] = useState(false);
@@ -44,6 +41,15 @@ export default function AvisoEmpleoStudio({ className }: { className?: string })
   const [toast, setToast] = useState('');
   const [confirmClose, setConfirmClose] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [fichaAbierta, setFichaAbierta] = useState(false);
+  const [ficha, setFicha] = useState<{ nombre: string; zona: string; hecho: Hecho | '' }>({
+    nombre: '',
+    zona: '',
+    hecho: '',
+  });
+  const [vecino, setVecino] = useState<AvisoCerca | null>(null);
+  const [stats, setStats] = useState({ vistas: 0, fichas: 0 });
+  const fichaContada = useRef(false);
   const formId = useId();
 
   useEffect(() => {
@@ -56,6 +62,20 @@ export default function AvisoEmpleoStudio({ className }: { className?: string })
   useEffect(() => {
     if (ready) saveAviso(aviso);
   }, [aviso, ready]);
+
+  useEffect(() => {
+    if (!ready) return;
+    const key = 'buscadis-aviso-stats';
+    const seen = sessionStorage.getItem('buscadis-aviso-vista');
+    const prev = JSON.parse(sessionStorage.getItem(key) || '{"vistas":0,"fichas":0}') as {
+      vistas: number;
+      fichas: number;
+    };
+    const next = seen ? prev : { ...prev, vistas: prev.vistas + 1 };
+    if (!seen) sessionStorage.setItem('buscadis-aviso-vista', '1');
+    sessionStorage.setItem(key, JSON.stringify(next));
+    setStats(next);
+  }, [ready]);
 
   const pageUrl = useMemo(() => {
     if (typeof window === 'undefined') return 'https://buscadis.com/empleo/probar';
@@ -99,21 +119,30 @@ export default function AvisoEmpleoStudio({ className }: { className?: string })
   }
 
   function shareWhatsApp() {
-    const text = encodeURIComponent(ownerText(aviso, pageUrl));
+    const text = encodeURIComponent(textoGrupo(aviso, pageUrl));
     window.open(`https://wa.me/?text=${text}`, '_blank', 'noopener,noreferrer');
   }
 
-  async function downloadImage() {
+  async function copyGrupo() {
+    try {
+      await navigator.clipboard.writeText(textoGrupo(aviso, pageUrl));
+      flash('Texto del grupo copiado');
+    } catch {
+      flash('No se pudo copiar el texto');
+    }
+  }
+
+  async function downloadImage(format: 'feed' | 'estado') {
     try {
       const probe = document.querySelector('[data-aviso-root]');
       const computed = probe ? getComputedStyle(probe) : null;
       const display = computed?.getPropertyValue('--font-aviso').trim() || 'system-ui, sans-serif';
       const body = computed?.getPropertyValue('--font-aviso-body').trim() || 'system-ui, sans-serif';
-      const blob = await renderAvisoPng(aviso, { display, body });
+      const blob = await renderAvisoPng(aviso, { display, body }, format);
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `${aviso.puesto.toLowerCase().replace(/\s+/g, '-')}.png`;
+      a.download = `${aviso.puesto.toLowerCase().replace(/\s+/g, '-')}-${format}.png`;
       a.click();
       URL.revokeObjectURL(url);
       flash('Imagen lista');
@@ -140,10 +169,32 @@ export default function AvisoEmpleoStudio({ className }: { className?: string })
     flash('Aviso actualizado');
   }
 
+  const fichaLista = Boolean(ficha.nombre.trim().length > 1 && ficha.zona.trim() && ficha.hecho && turno);
   const applyHref =
-    wa && turno
-      ? `https://wa.me/${wa}?text=${encodeURIComponent(candidateText(aviso, turno))}`
+    wa && turno && ficha.hecho
+      ? `https://wa.me/${wa}?text=${encodeURIComponent(
+          fichaTexto(aviso, turno, {
+            nombre: ficha.nombre,
+            zona: ficha.zona,
+            hecho: ficha.hecho,
+          }),
+        )}`
       : undefined;
+
+  function abrirFicha() {
+    setVecino(null);
+    setFichaAbierta(true);
+    if (fichaContada.current) return;
+    fichaContada.current = true;
+    const key = 'buscadis-aviso-stats';
+    const prev = JSON.parse(sessionStorage.getItem(key) || '{"vistas":0,"fichas":0}') as {
+      vistas: number;
+      fichas: number;
+    };
+    const next = { ...prev, fichas: prev.fichas + 1 };
+    sessionStorage.setItem(key, JSON.stringify(next));
+    setStats(next);
+  }
 
   return (
     <div
@@ -173,25 +224,60 @@ export default function AvisoEmpleoStudio({ className }: { className?: string })
         {vista === 'aviso' && (
           <>
             <div className={styles.scroll}>
-              <Cartel
-                aviso={aviso}
-                turnoId={turno?.id}
-                onSelect={setTurnoId}
-                choosing
-              />
-            </div>
-            <div className={`${styles.bar} ${styles.noPrint}`}>
-              {aviso.cubierta || !applyHref ? (
-                <button type="button" className={styles.wa} disabled>
-                  {aviso.cubierta ? 'Vacante cubierta' : 'Falta un WhatsApp válido'}
-                </button>
+              {vecino ? (
+                <Vecino aviso={vecino} onBack={() => setVecino(null)} />
               ) : (
-                <a className={styles.wa} href={applyHref} target="_blank" rel="noopener noreferrer">
-                  Postular · {turno?.nombre}
-                </a>
+                <>
+                  <Cartel aviso={aviso} turnoId={turno?.id} onSelect={setTurnoId} choosing />
+                  <section className={styles.cerca}>
+                    <h3>Otros avisos cerca</h3>
+                    <p>
+                      Quien escanea este cartel ya está buscando. Al terminar, ve más vacantes sin volver a Facebook.
+                    </p>
+                    {AVISOS_CERCA.map((item) => (
+                      <button
+                        key={item.id}
+                        type="button"
+                        className={styles.cercaCard}
+                        onClick={() => {
+                          setFichaAbierta(false);
+                          setVecino(item);
+                        }}
+                      >
+                        <strong>{item.puesto}</strong>
+                        <span>
+                          {item.negocio} · S/ {item.pago}
+                        </span>
+                        <span>{item.zona}</span>
+                      </button>
+                    ))}
+                  </section>
+                </>
               )}
-              <p>Abre WhatsApp con el horario que elegiste ya escrito.</p>
             </div>
+            {!vecino && (
+              <div className={`${styles.bar} ${styles.noPrint}`}>
+                <button
+                  type="button"
+                  className={styles.wa}
+                  disabled={aviso.cubierta || !wa}
+                  onClick={abrirFicha}
+                >
+                  {aviso.cubierta ? 'Vacante cubierta' : `Postular · ${turno?.nombre || 'este horario'}`}
+                </button>
+                <p>Primero tu nombre y de dónde vienes. El local no recibe un “info”.</p>
+              </div>
+            )}
+            {fichaAbierta && !aviso.cubierta && wa && turno && (
+              <FichaSheet
+                turnoNombre={turno.nombre}
+                ficha={ficha}
+                setFicha={setFicha}
+                lista={fichaLista}
+                href={applyHref}
+                onClose={() => setFichaAbierta(false)}
+              />
+            )}
           </>
         )}
 
@@ -199,24 +285,32 @@ export default function AvisoEmpleoStudio({ className }: { className?: string })
           <div className={styles.panel}>
             <h1>Listo para pegar y pasar</h1>
             <p>
-              El mismo aviso sale para la puerta, el estado y el grupo. Si cambias el pago o lo cierras, esta página es la que queda.
+              El papel no lleva tu número. Quien postula llega con nombre, zona y horario. En este celular: {stats.vistas} {stats.vistas === 1 ? 'apertura' : 'aperturas'} y {stats.fichas} {stats.fichas === 1 ? 'ficha' : 'fichas'}.
             </p>
             <div className={styles.grid}>
               <button type="button" className={styles.action} onClick={shareWhatsApp}>
                 <strong>WhatsApp</strong>
-                <span>Texto para un grupo o un estado</span>
+                <span>Texto para un grupo, con el enlace</span>
+              </button>
+              <button type="button" className={styles.action} onClick={copyGrupo}>
+                <strong>Texto del grupo</strong>
+                <span>Para pegarlo en Facebook</span>
               </button>
               <button type="button" className={styles.action} onClick={copyLink}>
                 <strong>Copiar enlace</strong>
                 <span>Para pegarlo donde quieras</span>
               </button>
-              <button type="button" className={styles.action} onClick={downloadImage}>
+              <button type="button" className={styles.action} onClick={() => downloadImage('estado')}>
+                <strong>Estado</strong>
+                <span>Imagen vertical para WhatsApp</span>
+              </button>
+              <button type="button" className={styles.action} onClick={() => downloadImage('feed')}>
                 <strong>Imagen</strong>
-                <span>Para publicar sin abrir otro programa</span>
+                <span>Para un post, sin abrir otro programa</span>
               </button>
               <button type="button" className={styles.action} onClick={() => window.print()}>
                 <strong>Imprimir</strong>
-                <span>Cartel para la puerta o el mostrador</span>
+                <span>Afiche con QR y tiras para arrancar</span>
               </button>
             </div>
             {toast && <p className={styles.toast}>{toast}</p>}
@@ -371,8 +465,133 @@ export default function AvisoEmpleoStudio({ className }: { className?: string })
             </div>
           </form>
         )}
+        <PrintSheet aviso={aviso} qr={qr} url={pageUrl.replace(/^https?:\/\//, '')} />
       </div>
     </div>
+  );
+}
+
+function FichaSheet({
+  turnoNombre,
+  ficha,
+  setFicha,
+  lista,
+  href,
+  onClose,
+}: {
+  turnoNombre: string;
+  ficha: { nombre: string; zona: string; hecho: Hecho | '' };
+  setFicha: (next: { nombre: string; zona: string; hecho: Hecho | '' }) => void;
+  lista: boolean;
+  href?: string;
+  onClose: () => void;
+}) {
+  return (
+    <form
+      className={styles.sheet}
+      onSubmit={(event) => {
+        event.preventDefault();
+      }}
+    >
+      <div className={styles.turnoHead}>
+        <h2>Tu ficha, en un mensaje</h2>
+        <button type="button" onClick={onClose}>
+          Cerrar
+        </button>
+      </div>
+      <p>Horario elegido: {turnoNombre}. El local lee esto en vez de un “info”.</p>
+      <label className={styles.field}>
+        <span>Tu nombre</span>
+        <input
+          value={ficha.nombre}
+          autoComplete="name"
+          onChange={(e) => setFicha({ ...ficha, nombre: e.target.value })}
+        />
+      </label>
+      <label className={styles.field}>
+        <span>De dónde vienes</span>
+        <input
+          value={ficha.zona}
+          placeholder="San Sebastián, Wanchaq…"
+          onChange={(e) => setFicha({ ...ficha, zona: e.target.value })}
+        />
+      </label>
+      <div className={styles.choices}>
+        {(Object.keys(HECHO_LABEL) as Hecho[]).map((key) => (
+          <button
+            key={key}
+            type="button"
+            aria-pressed={ficha.hecho === key}
+            onClick={() => setFicha({ ...ficha, hecho: key })}
+          >
+            {HECHO_LABEL[key]}
+          </button>
+        ))}
+      </div>
+      {lista && href ? (
+        <a className={styles.wa} href={href} target="_blank" rel="noopener noreferrer">
+          Enviar por WhatsApp
+        </a>
+      ) : (
+        <button type="button" className={styles.wa} disabled>
+          Completa los tres datos
+        </button>
+      )}
+    </form>
+  );
+}
+
+function Vecino({ aviso, onBack }: { aviso: AvisoCerca; onBack: () => void }) {
+  return (
+    <article className={styles.body}>
+      <button type="button" className={styles.ghost} onClick={onBack}>
+        Volver a este aviso
+      </button>
+      <p className={styles.seeking}>Otro aviso cerca</p>
+      <h2 className={styles.puesto}>{aviso.puesto}</h2>
+      <p className={styles.zona}>
+        {aviso.negocio} · {aviso.zona}
+      </p>
+      <p className={styles.pago}>
+        <small>S/</small>
+        {aviso.pago}
+      </p>
+      <p className={styles.complemento}>{aviso.horario}</p>
+      <p className={styles.presentarse}>
+        En el marketplace este aviso tiene su propia página, su QR y su ficha. Aquí es una muestra para ver el recorrido.
+      </p>
+    </article>
+  );
+}
+
+function PrintSheet({ aviso, qr, url }: { aviso: AvisoEmpleo; qr: string; url: string }) {
+  const pago = aviso.turnos[0]?.pago || '';
+  return (
+    <section className={styles.printSheet} aria-hidden="true">
+      <p className={styles.printKicker}>{aviso.cubierta ? 'Vacante cubierta' : 'Se busca'}</p>
+      <h1>{aviso.puesto}</h1>
+      <p className={styles.printMeta}>
+        {aviso.negocio} · {aviso.zona}
+      </p>
+      {aviso.turnos.map((turno) => (
+        <p key={turno.id} className={styles.printTurno}>
+          {turno.nombre}: S/ {turno.pago} · {turno.horario}
+        </p>
+      ))}
+      <div className={styles.printQr}>
+        {qr ? <img src={qr} alt="" /> : null}
+        <p>Postula escaneando. No escribas solo “info”: el aviso ya dice sueldo y horario.</p>
+      </div>
+      <div className={styles.strips}>
+        {[0, 1, 2, 3].map((n) => (
+          <div key={n} className={styles.strip}>
+            <span>{aviso.puesto}</span>
+            <span>S/ {pago}</span>
+            <span>{url}</span>
+          </div>
+        ))}
+      </div>
+    </section>
   );
 }
 

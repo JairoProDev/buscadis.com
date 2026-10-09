@@ -1,9 +1,6 @@
 import type { AvisoEmpleo } from './aviso-data';
 import { formatPhone } from './aviso-data';
 
-const W = 1080;
-const H = 1350;
-
 function wrap(ctx: CanvasRenderingContext2D, text: string, max: number): string[] {
   const words = text.split(/\s+/).filter(Boolean);
   const lines: string[] = [];
@@ -24,7 +21,10 @@ function wrap(ctx: CanvasRenderingContext2D, text: string, max: number): string[
 export async function renderAvisoPng(
   aviso: AvisoEmpleo,
   fonts: { display: string; body: string },
+  format: 'feed' | 'estado' = 'feed',
 ): Promise<Blob> {
+  const W = 1080;
+  const H = format === 'estado' ? 1920 : 1350;
   await document.fonts.ready;
   const canvas = document.createElement('canvas');
   canvas.width = W;
