@@ -51,10 +51,12 @@ Con eso respondes: *¿cada cuánto publica?, ¿qué tamaño?, ¿cambia de rubro?
 
 ## 5. Contacto y venta
 
-1. IA: borradores por intent (`first_contact`, `follow_up`, …).
-2. WhatsApp: manual hoy; Cloud API según `docs/comercial/WHATSAPP-BUSINESS.md`.
-3. Etapas hasta **ganado** → `sales_accounts` + carpeta `docs/clientes/`.
-4. Publicación pagada: `scripts/clientes/*` + `syncPaidClientAdisoToCrm`.
+1. **QA página a página** con operador + Cursor; ver `docs/comercial/FUNNEL-VENTAS-RUEDA.md` §2.
+2. IA: borradores por intent (`first_contact`, `follow_up`, …).
+3. WhatsApp: manual hoy; uno a uno; embudo M1→M2→muestra→pago medido en JSON/CRM.
+4. Cloud API según `docs/comercial/WHATSAPP-BUSINESS.md`.
+5. Etapas hasta **ganado** → `sales_accounts` + carpeta `docs/clientes/`.
+6. Publicación pagada: `scripts/clientes/*` + `syncPaidClientAdisoToCrm`.
 
 ## 6. Cadencia operativa sugerida
 

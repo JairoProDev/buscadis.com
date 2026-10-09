@@ -4,11 +4,14 @@ Actualizado: **9 oct 2026**. Estado completo del inbox: **`PIPELINE-ESTADO-2026-
 
 ## Qué medir en cada contacto
 
+**Embudo completo:** `docs/comercial/FUNNEL-VENTAS-RUEDA.md` · checklist copiable: `data/comercial/CHECKLIST-EMBUDO-LEAD.md`
+
 | Campo | Uso |
 |-------|-----|
 | `etapa_label` | Pipeline en JSON → CRM |
 | `ultimo_movimiento` | Último hecho verificable |
 | `notas_extra` | Aprendizaje / patrón |
+| `funnel.micro.*` | Guardó contacto, compartió, reclamo cuenta, etc. |
 | Chats en `wa-chats/` | Historial para actividades (`import-whatsapp-exports-dir`) |
 
 ## Patrones que ya vimos
