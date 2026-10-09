@@ -67,6 +67,7 @@ function main() {
     'descripcion_corregida',
     'notas_equipo',
     'mensaje_wa_sugerido',
+    'wa_url',
     'prioridad',
   ].join(',');
 
@@ -84,6 +85,17 @@ function main() {
       const phone = a.telefonos[0] || '';
       if (!/^9\d{8}$/.test(phone)) continue;
       const full = `${a.titulo}\n${a.descripcion}`;
+      const sueldoTexto = extractSueldoTexto(full);
+      const mensaje = mensajeWaEmpleoCusco({
+        titulo: a.titulo,
+        descripcion: a.descripcion,
+        edicion: ed,
+        pagina: a.pagina,
+        sueldoTexto,
+        importKey: a.import_key,
+        telefono: phone,
+      });
+      const waUrl = `https://wa.me/51${phone}?text=${encodeURIComponent(mensaje)}`;
       const prioridad = a.requiere_revision ? 'baja' : a.score >= 85 ? 'alta' : 'media';
       rows.push(
         [
@@ -99,7 +111,7 @@ function main() {
           a.whatsapp || phone,
           a.email || '',
           a.es_empresa ? 'si' : 'no',
-          extractSueldoTexto(full),
+          sueldoTexto,
           extractHorarioTexto(full),
           a.ubicacion || '',
           a.score,
@@ -109,7 +121,8 @@ function main() {
           '',
           '',
           '',
-          mensajeWaEmpleoCusco({ titulo: a.titulo, empresaHint: a.titulo }),
+          mensaje,
+          waUrl,
           prioridad,
         ]
           .map((c) => csvCell(String(c)))

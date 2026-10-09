@@ -7,7 +7,11 @@
 import * as dotenv from 'dotenv';
 import * as fs from 'fs';
 import * as path from 'path';
-import { ensureSpreadsheet, uploadCsvToSheet } from '../../lib/google/sheets-client';
+import {
+  ensureSpreadsheet,
+  uploadCsvGroupedByColumn,
+  uploadCsvToSheet,
+} from '../../lib/google/sheets-client';
 import { getRuedaOutputDir } from '../../lib/rueda/paths';
 
 dotenv.config({ path: path.join(process.cwd(), '.env.local') });
@@ -25,6 +29,8 @@ async function main() {
     process.exit(1);
   }
   const csv = fs.readFileSync(csvPath, 'utf8');
+  const lineCount = csv.trim().split(/\r?\n/).filter(Boolean).length;
+  console.log(`CSV: ${csvPath} (${lineCount} líneas incl. encabezado)`);
 
   let spreadsheetId = process.env.RUEDA_LEADS_SPREADSHEET_ID || arg('spreadsheet');
   if (process.argv.includes('--create') || !spreadsheetId) {
@@ -35,16 +41,29 @@ async function main() {
     console.log('\nGuarda en .env.local:\nRUEDA_LEADS_SPREADSHEET_ID=' + spreadsheetId + '\n');
   }
 
-  const r = await uploadCsvToSheet({
-    spreadsheetId,
-    sheetName: 'Empleos',
-    csvText: csv,
-  });
+  const multi = !process.argv.includes('--single-sheet');
+  const r = multi
+    ? await uploadCsvGroupedByColumn({
+        spreadsheetId,
+        masterSheetName: 'Empleos_todos',
+        groupColumn: 'mes_edicion',
+        csvText: csv,
+      })
+    : {
+        master: await uploadCsvToSheet({
+          spreadsheetId,
+          sheetName: 'Empleos',
+          csvText: csv,
+        }),
+        tabs: {},
+      };
+
   console.log(
     JSON.stringify(
       {
         spreadsheetId,
         url: `https://docs.google.com/spreadsheets/d/${spreadsheetId}`,
+        mode: multi ? 'multi-tab-por-mes' : 'single-sheet',
         ...r,
       },
       null,

@@ -34,17 +34,29 @@ npm run rueda:extract-by-page -- --from=2747
 npm run rueda:leads-empleos -- --from=2747
 ```
 
-## Google Sheets (sin API en el repo)
 
-No hay OAuth de Google en el proyecto; la forma más rápida de **trabajar juntos** en correcciones:
+
+## Google Sheets (API + OAuth)
+
+```bash
+npm run rueda:leads-empleos -- --from=2747
+npm run rueda:sync-sheets          # pestañas: Indice, Empleos_todos, 2025-08, …
+npm run rueda:sync-sheets -- --single-sheet   # solo una hoja (legacy)
+```
+
+- **Empleos_todos**: las **3.377** filas con celular válido (mismo CSV); si la grilla parece corta, revisa fila 3378 o la pestaña del mes.
+- **Indice**: conteo por `mes_edicion`.
+- Columnas nuevas: `mensaje_wa_sugerido` (gancho primero, sin pitch “somos Buscadis”) y `wa_url` (abrir chat con texto).
+
+Import manual (sin API):
 
 1. Sube `output/rueda/leads/empleos-cusco-desde-R2747.csv` a Google Drive.
 2. Abrir con **Google Hojas de cálculo** → Compartir con el equipo (editar).
 3. Columnas para ustedes:
-   - `estado_revision`: `pendiente` | `OK` | `CORREGIR` | `NO_CONTACTAR`
-   - `titulo_corregido`, `descripcion_corregida`, `notas_equipo`
-4. Cuando corrijan, exporten **Descargar → CSV** y guarden como  
-   `output/rueda/leads/empleos-cusco-CORREGIDO.csv`  
+  - `estado_revision`: `pendiente` | `OK` | `CORREGIR` | `NO_CONTACTAR`
+  - `titulo_corregido`, `descripcion_corregida`, `notas_equipo`
+4. Cuando corrijan, exporten **Descargar → CSV** y guarden como
+  `output/rueda/leads/empleos-cusco-CORREGIDO.csv`  
    (luego importamos a Supabase / publicación con un script `apply-sheet-corrections` — pendiente si lo piden).
 
 **Sincronización “en vivo”** (Drive ↔ carpeta local) se puede hacer con Google Drive for Desktop en Windows y la ruta WSL `/mnt/c/Users/.../Drive/`; el CSV en esa carpeta se reimporta con un comando.

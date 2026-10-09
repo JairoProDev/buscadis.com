@@ -1,4 +1,5 @@
 import type { RuedaExtractedAd } from '@/lib/rueda/types';
+import { limpiarTituloVacante } from '@/lib/rueda/lead-fields';
 
 export interface OutreachRow {
   edicion: string;
@@ -14,7 +15,11 @@ export interface OutreachRow {
 }
 
 export function buildOutreachMessage(titulo: string, urlAviso: string): string {
-  return `Hola, somos Buscadis. Publicamos gratis su aviso «${titulo.slice(0, 55)}» aquí: ${urlAviso}. Si no lo autorizó, lo retiramos al instante. ¿Desea reclamar su cuenta y editarlo?`;
+  const rol = limpiarTituloVacante(titulo, 48);
+  return (
+    `¿Publicó el aviso de ${rol}? Ya está visible aquí: ${urlAviso} ` +
+    `Si no fue usted, lo retiramos al toque. Si sí, puede reclamar la ficha y editarla cuando quiera.`
+  );
 }
 
 export function outreachRowsFromAds(
