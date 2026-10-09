@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import {
   acceptAllConsent,
   getConsent,
@@ -15,6 +16,7 @@ import { isBuscadisNativeApp } from '@/lib/mobile-app-bridge';
  * Maximiza aceptación de medición: un CTA principal claro; rechazo solo tras flujo en "Preferencias".
  */
 export default function CookieConsentBanner() {
+  const pathname = usePathname();
   const [visible, setVisible] = useState(false);
   const [showCustomize, setShowCustomize] = useState(false);
   const [customizeStep, setCustomizeStep] = useState(1);
@@ -24,7 +26,7 @@ export default function CookieConsentBanner() {
   const primaryRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
-    if (isBuscadisNativeApp()) {
+    if (isBuscadisNativeApp() || pathname?.startsWith('/empleo')) {
       setVisible(false);
       return;
     }
@@ -34,7 +36,7 @@ export default function CookieConsentBanner() {
       setAnalytics(Boolean(consent.analytics));
       setMarketing(Boolean(consent.marketing));
     }
-  }, []);
+  }, [pathname]);
 
   useEffect(() => {
     if (!visible || typeof document === 'undefined') return;

@@ -1,5 +1,6 @@
 'use client';
 
+import { usePathname } from 'next/navigation';
 import FeedbackButton from '@/components/FeedbackButton';
 import BuscadisSocialFloat from '@/components/BuscadisSocialFloat';
 
@@ -8,6 +9,9 @@ const FLOAT_BOTTOM =
 
 /** Ayuda + redes Buscadis (izquierda). Redes encima de Ayuda para no confundirlas con contacto del anuncio. */
 export default function SiteFloatingActions() {
+  const pathname = usePathname();
+  if (pathname?.startsWith('/empleo')) return null;
+
   return (
     <div
       style={{

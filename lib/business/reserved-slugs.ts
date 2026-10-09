@@ -35,6 +35,7 @@ export const RESERVED_BUSINESS_SLUGS = new Set([
   'q',
   'categoria',
   'empleos',
+  'empleo',
   'inmuebles',
   'vehiculos',
   'servicios',
