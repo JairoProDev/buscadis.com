@@ -1,6 +1,6 @@
 # Insights campaña Rueda oct 2026 (vivo)
 
-Actualizado: **6 oct 2026**. Fuente: chats pegados en Cursor + lista WA + `data/comercial/wa-chats/`.
+Actualizado: **9 oct 2026**. Estado completo del inbox: **`PIPELINE-ESTADO-2026-10-09.md`**. Fuente: chats + capturas WA + `wa-chats/`.
 
 ## Qué medir en cada contacto
 
@@ -34,7 +34,7 @@ Actualizado: **6 oct 2026**. Fuente: chats pegados en Cursor + lista WA + `data/
 
 **Optimización propuesta**
 
-1. Primera línea: *«No soy postulante: soy de Buscadis, publicamos avisos de empleo de Rueda en web y redes.»*
+1. Primera línea: gancho por **rol** («¿siguen buscando mozos?»). **No** «Rueda». «No soy postulante» solo si piden CV o en 2.º mensaje.
 2. Segmentar: **no insistir por WA** en hoteles con bot; intentar llamada o correo del aviso Rueda.
 3. Registrar en CRM `SIN HUMANO` vs `RESPONDIÓ` vs `PAUSA` para no recontactar en vano.
 

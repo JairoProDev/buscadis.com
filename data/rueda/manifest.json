@@ -1487,6 +1487,18 @@
       "batch_id": "rueda-R2567-claimable-2026-10-07"
     },
     {
+      "edicion": "R2767",
+      "fecha_inicio": "2026-10-08",
+      "fecha_fin": "2026-10-10",
+      "archivo": "R2767-Oct8-10.pdf",
+      "source_url": "https://ruedadenegocios.com.pe/wp-content/uploads/2026/10/revista.pdf",
+      "sha256": "797864f13ea20c07b57b563a93ea21dc76d5c324890caab69565e822bc06e612",
+      "downloaded_at": "2026-10-09T17:35:56.096Z",
+      "page_count": 16,
+      "source": "wordpress",
+      "batch_id": "rueda-R2767-claimable-2026-10-08"
+    },
+    {
       "edicion": "R2568",
       "fecha_inicio": "2026-10-10",
       "fecha_fin": "2026-10-13",
