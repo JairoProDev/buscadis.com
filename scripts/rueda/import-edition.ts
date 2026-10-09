@@ -65,7 +65,10 @@ async function main() {
   const intervalMs = argNum('interval-seconds', 60) * 1000;
 
   const payload = loadAvisosPayload(ctx.edicion);
-  const avisos = payload.avisos.sort((a, b) => a.pagina - b.pagina || a.titulo.localeCompare(b.titulo));
+  let avisos = payload.avisos.sort((a, b) => a.pagina - b.pagina || a.titulo.localeCompare(b.titulo));
+  if (hasFlag('--only-ready')) {
+    avisos = avisos.filter((a) => !a.requiere_revision);
+  }
   let baseTime = Date.now() + startInMinutes * 60 * 1000;
 
   const missingOnly = hasFlag('--missing-only');

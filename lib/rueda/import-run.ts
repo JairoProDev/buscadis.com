@@ -9,6 +9,7 @@ import { flyerTemplateForRuedaImport } from '@/lib/rueda/listing-quality';
 import type { FlyerTemplateId } from '@/lib/flyer/types';
 import type { RuedaExtractedAd } from '@/lib/rueda/types';
 import type { EditionRunContext } from './batch';
+import { ruedaAdvertiserPhoneKey } from './advertiser-key';
 import { getRuedaOutputDir } from './paths';
 
 const OPS_USER_ID = process.env.RUEDA_OPS_USER_ID || 'ef81f31b-a11d-4417-9325-e737daaad32e';
@@ -19,6 +20,8 @@ export function toAdisoFromRuedaExtract(
   scheduledGoLiveAt: string,
   claimToken: string,
 ): Adiso {
+  const phoneKey = ruedaAdvertiserPhoneKey(item.telefonos[0]);
+
   const contactos: ContactoMultiple[] = item.telefonos.map((n, idx) => ({
     tipo: item.whatsapp === n || /^9\d{8}$/.test(n) ? 'whatsapp' : 'telefono',
     valor: n,
@@ -75,6 +78,9 @@ export function toAdisoFromRuedaExtract(
       flyerConfig: {},
       hide_generic_location: item.hide_generic_location,
       noindex_until_claimed: true,
+      rueda_advertiser_phone_key: phoneKey,
+      rueda_edicion: ctx.edicion,
+      rueda_import_key: item.import_key,
     },
   };
 }

@@ -79,6 +79,16 @@ export async function activateScheduledRuedaAds(
       displayName: (row.titulo as string)?.slice(0, 40) || 'Anunciante',
     });
 
+    if (process.env.RUEDA_ENFORCE_ONE_FREE_ACTIVE === '1') {
+      await supabaseAdmin
+        .from('adisos')
+        .update({ esta_activo: false })
+        .eq('user_id', ensured.userId)
+        .eq('esta_activo', true)
+        .contains('private_data', { import_pipeline: RUEDA_PIPELINE })
+        .neq('id', row.id);
+    }
+
     const nextPrivate = {
       ...priv,
       go_live_completed_at: now,

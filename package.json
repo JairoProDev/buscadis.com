@@ -56,7 +56,10 @@
     "rueda:audit-calidad": "npx tsx scripts/rueda/audit-extraction-quality.ts --from=2747",
     "rueda:sync-monthly": "npx tsx scripts/rueda/sync-monthly-pages.ts",
     "rueda:extract-by-page": "npx tsx scripts/rueda/extract-from-page-pdfs.ts",
-    "rueda:leads-empleos": "npx tsx scripts/rueda/export-leads-empleos.ts"
+    "rueda:leads-empleos": "npx tsx scripts/rueda/export-leads-empleos.ts",
+    "rueda:sync-sheets": "npx tsx scripts/rueda/sync-leads-empleos-sheets.ts",
+    "rueda:google-oauth": "npx tsx scripts/rueda/google-oauth-setup.ts",
+    "rueda:plan-go-live": "npx tsx scripts/rueda/plan-go-live.ts"
   },
   "dependencies": {
     "@ai-sdk/openai": "^4.0.0",
@@ -88,6 +91,7 @@
     "exceljs": "^4.4.0",
     "fastest-levenshtein": "^1.0.16",
     "framer-motion": "^12.23.26",
+    "googleapis": "^144.0.0",
     "html-to-image": "^1.11.13",
     "html2canvas": "^1.4.1",
     "jsdom": "^29.1.1",
