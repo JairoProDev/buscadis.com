@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Buscadis - Generador de Flyers de Empleo</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Google Fonts: Plus Jakarta Sans & Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- QRCode.js Library for dynamic vector QR rendering -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <!-- html2canvas for instant high-res PNG download -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            buscadis: {
+              celeste: '#0284C7',      /* Sky blue 600 - institucional */
+              celesteLight: '#38BDF8', /* Sky blue 400 - acento */
+              celesteIce: '#E0F2FE',   /* Sky blue 100 - fondos suaves */
+              amarillo: '#F59E0B',     /* Amber 500 - atención y conversión */
+              amarilloBright: '#FBBF24',/* Amber 400 - high impact */
+              amarilloLight: '#FEF3C7', /* Amber 100 - fondos de etiquetas */
+              navy: '#0F172A',         /* Slate 900 - máxima legibilidad */
+              navyLight: '#1E293B',    /* Slate 800 - tarjetas y bordes */
+              navyMuted: '#334155'     /* Slate 700 - subtítulos */
+            }
+          },
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'Inter', 'sans-serif'],
+            mono: ['monospace']
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Reglas para exportación física en papel y alta definición */
+    @media print {
+      body * {
+        visibility: hidden !important;
+      }
+      #print-area, #print-area * {
+        visibility: visible !important;
+      }
+      #print-area {
+        position: fixed !important;
+        left: 0 !important;
+        top: 0 !important;
+        width: 100vw !important;
+        height: 100vh !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        box-shadow: none !important;
+        transform: none !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+      .no-print {
+        display: none !important;
+      }
+      @page {
+        size: A4 portrait;
+        margin: 0;
+      }
+    }
+
+    /* Patrón de fondo geométrico sutil */
+    .bg-grid-pattern {
+      background-image: radial-gradient(rgba(2, 132, 199, 0.08) 1px, transparent 1px);
+      background-size: 20px 20px;
+    }
+
+    /* Scrollbar estilizada para el panel de configuración */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #0f172a;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #334155;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #0284c7;
+    }
+  </style>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col font-sans antialiased overflow-x-hidden">
+
+  <header class="bg-slate-950 border-b border-slate-800 sticky top-0 z-40 px-4 py-3 shadow-md no-print">
+    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
+      
+      <!-- Logotipo Buscadis -->
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-buscadis-celeste to-buscadis-celesteLight flex items-center justify-center shadow-lg shadow-sky-500/20 text-white font-extrabold text-xl">
+          <svg class="w-6 h-6 fill-current text-white" viewBox="0 0 24 24">
+            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+          </svg>
+        </div>
+        <div>
+          <div class="flex items-center gap-1.5 leading-none">
+            <span class="text-xl font-extrabold tracking-tight text-white">buscadis</span>
+            <span class="text-xs font-bold px-1.5 py-0.5 rounded bg-buscadis-amarillo text-slate-950 tracking-wider">CREATOR</span>
+          </div>
+          <p class="text-xs text-slate-400 mt-0.5">Generador de Flyers de Empleo de Alto Rendimiento</p>
+        </div>
+      </div>
+
+      <!-- Presets de Carga Rápida -->
+      <div class="flex items-center gap-2">
+        <span class="text-xs font-medium text-slate-400 hidden md:inline">Plantillas de demostración:</span>
+        <button onclick="loadPreset('ventas')" class="text-xs px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-sky-300 rounded-lg border border-slate-700 transition font-medium">
+          💼 Ventas Cusco
+        </button>
+        <button onclick="loadPreset('tech')" class="text-xs px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-amber-300 rounded-lg border border-slate-700 transition font-medium">
+          💻 Dev Híbrido
+        </button>
+        <button onclick="loadPreset('restaurante')" class="text-xs px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-emerald-300 rounded-lg border border-slate-700 transition font-medium">
+          🍳 Jefe de Cocina
+        </button>
+      </div>
+
+      <!-- Botones de Acción / Exportación -->
+      <div class="flex items-center gap-2">
+        <button onclick="downloadAsPNG()" id="btn-download" class="flex items-center gap-1.5 text-xs font-semibold px-3 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-lg border border-slate-700 shadow-sm transition">
+          <svg class="w-4 h-4 text-buscadis-celesteLight" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+          </svg>
+          Descargar PNG
+        </button>
+
+        <button onclick="window.print()" class="flex items-center gap-1.5 text-xs font-semibold px-4 py-2 bg-buscadis-celeste hover:bg-sky-500 text-white rounded-lg shadow-md shadow-sky-600/30 transition">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
+          </svg>
+          Imprimir / Guardar PDF
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto w-full p-4 md:p-6 flex-1 grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+    
+    <!-- PANEL DE CONTROL / EDITOR IZQUIERDO -->
+    <div class="lg:col-span-5 bg-slate-950/80 backdrop-blur border border-slate-800 rounded-2xl p-5 shadow-xl space-y-6 max-h-[calc(100vh-100px)] overflow-y-auto no-print">
+      
+      <!-- Selector de Formato de Publicación -->
+      <div>
+        <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Formato de Salida</label>
+        <div class="grid grid-cols-2 gap-2 p-1 bg-slate-900 border border-slate-800 rounded-xl">
+          <button type="button" onclick="setFormat('a4')" id="tab-a4" class="py-2 px-3 text-xs font-bold rounded-lg transition flex items-center justify-center gap-2 bg-buscadis-celeste text-white shadow">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+            </svg>
+            Mural A4 (Impresión)
+          </button>
+          <button type="button" onclick="setFormat('story')" id="tab-story" class="py-2 px-3 text-xs font-bold rounded-lg transition flex items-center justify-center gap-2 text-slate-400 hover:text-white">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+            </svg>
+            Story 9:16 (WhatsApp/Redes)
+          </button>
+        </div>
+      </div>
+
+      <div class="space-y-4">
+        <h3 class="text-sm font-bold text-buscadis-celesteLight uppercase tracking-wider flex items-center gap-2">
+          <span>1. Datos Principales de la Oferta</span>
+        </h3>
+
+        <!-- Puesto de Trabajo -->
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Título del Puesto (Claro y buscado)</label>
+          <input type="text" id="input-title" value="Asesor de Ventas Inmobiliarias" 
+                 class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-buscadis-celeste transition"
+                 oninput="renderFlyer()">
+        </div>
+
+        <!-- Empresa / Empleador -->
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Empresa / Empleador</label>
+            <input type="text" id="input-company" value="Grupo Inmobiliario Los Andes" 
+                   class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-buscadis-celeste transition"
+                   oninput="renderFlyer()">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Categoría</label>
+            <input type="text" id="input-category" value="Ventas & Comercial" 
+                   class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-buscadis-celeste transition"
+                   oninput="renderFlyer()">
+          </div>
+        </div>
+
+        <!-- Ubicación y Modalidad -->
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Ubicación</label>
+            <input type="text" id="input-location" value="Cusco (Wanchaq / Centro)" 
+                   class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-buscadis-celeste transition"
+                   oninput="renderFlyer()">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Modalidad / Jornada</label>
+            <input type="text" id="input-modality" value="Híbrido • Tiempo Completo" 
+                   class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-buscadis-celeste transition"
+                   oninput="renderFlyer()">
+          </div>
+        </div>
+
+        <!-- Rango Salarial (Hook de Conversión) -->
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1 flex items-center justify-between">
+            <span>Compensación / Salario en S/</span>
+            <span class="text-[10px] text-buscadis-amarillo font-bold">Elemento #1 de Conversión</span>
+          </label>
+          <div class="relative">
+            <span class="absolute left-3 top-2.5 text-xs font-bold text-buscadis-amarillo">S/</span>
+            <input type="text" id="input-salary" value="3,200 - 4,500 + Altas Comisiones" 
+                   class="w-full bg-slate-900 border border-slate-700 rounded-lg pl-8 pr-3 py-2 text-sm text-buscadis-amarilloBright font-bold focus:outline-none focus:border-buscadis-amarillo transition"
+                   oninput="renderFlyer()">
+          </div>
+        </div>
+
+        <!-- Misión del Puesto en una frase -->
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Misión Principal del Rol (1 frase concreta)</label>
+          <textarea id="input-mission" rows="2" 
+                    class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-buscadis-celeste transition"
+                    oninput="renderFlyer()">Gestionar cartera de clientes premium, liderar visitas a proyectos residenciales y concretar cierres de venta efectivos.</textarea>
+        </div>
+      </div>
+
+      <div class="space-y-4 pt-2 border-t border-slate-800">
+        <h3 class="text-sm font-bold text-buscadis-amarillo flex items-center gap-2">
+          <span>2. Requisitos y Beneficios</span>
+        </h3>
+
+        <!-- Requisitos Indispensables (Separados por línea) -->
+        <div>
+          <div class="flex items-center justify-between mb-1">
+            <label class="text-xs font-semibold text-slate-300">Requisitos Indispensables (1 por renglón)</label>
+            <span class="text-[10px] text-slate-400">Recomendado: 3 a 4</span>
+          </div>
+          <textarea id="input-requirements" rows="4" 
+                    class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-buscadis-celeste transition leading-relaxed"
+                    oninput="renderFlyer()">Mínimo 1 año en ventas inmobiliarias o intangibles.
+Habilidades avanzadas de comunicación y negociación.
+Manejo básico de CRM y seguimiento de prospectos.
+Disponibilidad inmediata para laborar en Cusco.</textarea>
+        </div>
+
+        <!-- Beneficios Clave (Separados por coma o línea) -->
+        <div>
+          <div class="flex items-center justify-between mb-1">
+            <label class="text-xs font-semibold text-slate-300">Beneficios Destacados (Separados por comas)</label>
+            <span class="text-[10px] text-slate-400">Pastillas breves</span>
+          </div>
+          <input type="text" id="input-benefits" value="Planilla Completa, Comisiones Ilimitadas, Capacitación Continua, Seguro EPS, Bonos de Éxito" 
+                 class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-buscadis-celeste transition"
+                 oninput="renderFlyer()">
+        </div>
+      </div>
+
+      <div class="space-y-4 pt-2 border-t border-slate-800">
+        <h3 class="text-sm font-bold text-buscadis-celesteLight flex items-center gap-2">
+          <span>3. Canal de Postulación & Código QR</span>
+        </h3>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Código de Vacante Buscadis</label>
+            <input type="text" id="input-jobid" value="CUS-48201" 
+                   class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs font-mono text-amber-300 focus:outline-none focus:border-buscadis-celeste transition"
+                   oninput="renderFlyer()">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">WhatsApp de Contacto Directo</label>
+            <input type="text" id="input-whatsapp" value="+51 984 000 111" 
+                   class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-buscadis-celeste transition"
+                   oninput="renderFlyer()">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Texto del Llamado a la Acción (CTA)</label>
+          <input type="text" id="input-cta" value="¡Postula en 2 minutos escaneando el código!" 
+                 class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-buscadis-celeste transition"
+                 oninput="renderFlyer()">
+        </div>
+
+        <div class="p-3 bg-slate-900/60 rounded-xl border border-slate-800 text-[11px] text-slate-400 space-y-1">
+          <p class="flex items-center gap-1.5 text-sky-400 font-semibold">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            Enlace de destino codificado en QR:
+          </p>
+          <p id="preview-full-url" class="font-mono text-slate-300 break-all select-all bg-slate-950 p-1.5 rounded border border-slate-800/80"></p>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="lg:col-span-7 flex flex-col items-center justify-start w-full">
+      
+      <!-- Barra superior del Preview: Zoom y aviso de proporción -->
+      <div class="w-full flex items-center justify-between pb-3 text-xs text-slate-400 no-print">
+        <span class="flex items-center gap-2">
+          <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+          Vista previa interactiva en tiempo real
+        </span>
+        <div class="flex items-center gap-3">
+          <span id="canvas-ratio-label" class="bg-slate-800 px-2 py-0.5 rounded text-[11px] font-mono text-slate-300">Formato: Mural A4 (210 x 297 mm)</span>
+          <button onclick="copyJobUrl()" class="text-xs text-sky-400 hover:text-sky-300 flex items-center gap-1 font-medium transition">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+            Copiar URL
+          </button>
+        </div>
+      </div>
+
+      <div class="w-full flex justify-center overflow-auto p-1">
+        
+        <!-- FLYER CANVAS WRAPPER (Escalable y optimizado para @media print) -->
+        <div id="print-area" class="transition-all duration-300 origin-top">
+          
+          <div id="flyer-card" class="bg-white text-slate-900 shadow-2xl relative overflow-hidden flex flex-col justify-between"
+               style="width: 595px; min-height: 842px; font-family: 'Plus Jakarta Sans', sans-serif;">
+            
+            <!-- ELEMENTOS GRÁFICOS DE MARCA SUPERIORES -->
+            <div class="absolute top-0 left-0 right-0 h-3 bg-gradient-to-r from-buscadis-celeste via-buscadis-celesteLight to-buscadis-amarillo z-20"></div>
+            
+            <!-- MARCAS DECORATIVAS DE FONDO CON LOS COLORES DE BUSCADIS -->
+            <div class="absolute -top-24 -right-24 w-80 h-80 rounded-full bg-sky-100/70 blur-3xl pointer-events-none"></div>
+            <div class="absolute top-1/3 -left-24 w-60 h-60 rounded-full bg-amber-100/50 blur-2xl pointer-events-none"></div>
+            <div class="absolute bottom-10 right-0 w-72 h-72 rounded-full bg-sky-50 blur-3xl pointer-events-none"></div>
+
+            <!-- CONTENIDO PRINCIPAL DEL FLYER -->
+            <div class="p-7 relative z-10 flex flex-col flex-1">
+              
+              <!-- ZONA 1: HEADER INSTITUCIONAL BUSCADIS & PUESTO -->
+              <div class="border-b border-slate-200 pb-5">
+                <div class="flex items-center justify-between mb-4">
+                  
+                  <!-- Logo Buscadis Oficial -->
+                  <div class="flex items-center gap-2.5">
+                    <div class="w-9 h-9 rounded-xl bg-buscadis-celeste flex items-center justify-center text-white shadow-md shadow-sky-600/30">
+                      <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24">
+                        <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                      </svg>
+                    </div>
+                    <div>
+                      <div class="flex items-center leading-none">
+                        <span class="text-xl font-extrabold tracking-tight text-slate-900">buscadis</span>
+                        <span class="text-xl font-extrabold text-buscadis-celeste">.com</span>
+                      </div>
+                      <span class="text-[10px] font-semibold text-slate-400 uppercase tracking-widest">Portal de Empleos Oficial</span>
+                    </div>
+                  </div>
+
+                  <!-- Badge Verificado & Estado -->
+                  <div class="flex items-center gap-2">
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-900 border border-buscadis-amarillo/40 shadow-sm">
+                      <span class="w-2 h-2 rounded-full bg-buscadis-amarillo"></span>
+                      ¡CONVOCATORIA ABIERTA!
+                    </span>
+                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold bg-sky-50 text-sky-800 border border-sky-200">
+                      <svg class="w-3 h-3 text-buscadis-celeste" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                      </svg>
+                      VERIFICADO
+                    </span>
+                  </div>
+
+                </div>
+
+                <!-- Título del Puesto de Trabajo (H1 con auto-balance) -->
+                <div class="space-y-2 mt-2">
+                  <div class="flex items-center gap-2 flex-wrap">
+                    <span id="flyer-company" class="text-xs font-bold text-buscadis-celeste uppercase tracking-wider bg-sky-50 px-2 py-0.5 rounded border border-sky-100">
+                      GRUPO INMOBILIARIO LOS ANDES
+                    </span>
+                    <span id="flyer-category" class="text-xs font-semibold text-slate-500 bg-slate-100 px-2 py-0.5 rounded">
+                      Ventas & Comercial
+                    </span>
+                  </div>
+                  
+                  <h1 id="flyer-title" class="text-3xl font-extrabold text-slate-900 tracking-tight leading-tight">
+                    Asesor de Ventas Inmobiliarias
+                  </h1>
+
+                  <!-- Ubicación y Jornada -->
+                  <div class="flex items-center gap-4 text-xs font-medium text-slate-600 pt-1">
+                    <span class="flex items-center gap-1.5">
+                      <svg class="w-4 h-4 text-buscadis-celeste" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                      <strong id="flyer-location" class="text-slate-800">Cusco (Wanchaq / Centro)</strong>
+                    </span>
+                    <span class="text-slate-300">•</span>
+                    <span class="flex items-center gap-1.5">
+                      <svg class="w-4 h-4 text-buscadis-amarillo" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                      <span id="flyer-modality">Híbrido • Tiempo Completo</span>
+                    </span>
+                  </div>
+                </div>
+
+              </div>
+
+              <div class="my-5">
+                <!-- CAJA DE SALARIO DE ALTO IMPACTO (Regla de los 3 segundos) -->
+                <div class="bg-gradient-to-r from-amber-400 via-amber-300 to-amber-400 p-4 rounded-2xl shadow-lg shadow-amber-500/20 border-2 border-amber-300 flex items-center justify-between relative overflow-hidden">
+                  <div class="absolute -right-6 -bottom-6 w-24 h-24 bg-white/20 rounded-full pointer-events-none"></div>
+                  <div>
+                    <span class="text-[11px] font-extrabold uppercase tracking-widest text-slate-900/80 block">
+                      Remuneración Ofrecida
+                    </span>
+                    <div class="flex items-baseline gap-1 mt-0.5">
+                      <span class="text-xs font-black text-slate-900">S/</span>
+                      <span id="flyer-salary" class="text-2xl font-black text-slate-950 tracking-tight">
+                        3,200 - 4,500 + Altas Comisiones
+                      </span>
+                    </div>
+                  </div>
+                  <div class="bg-slate-950 text-white text-[10px] font-extrabold px-3 py-1.5 rounded-xl uppercase tracking-wider text-center shadow">
+                    INGRESO<br>INMEDIATO
+                  </div>
+                </div>
+
+                <!-- Propósito / Misión central -->
+                <div class="mt-4 p-3.5 bg-slate-50 border-l-4 border-buscadis-celeste rounded-r-xl">
+                  <span class="text-[10px] font-bold text-buscadis-celeste uppercase tracking-wider block mb-1">Misión del Puesto</span>
+                  <p id="flyer-mission" class="text-xs text-slate-700 leading-relaxed font-medium">
+                    Gestionar cartera de clientes premium, liderar visitas a proyectos residenciales y concretar cierres de venta efectivos.
+                  </p>
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4 my-2">
+                
+                <!-- Columna Requisitos Indispensables (Filtro) -->
+                <div class="bg-white rounded-xl border border-slate-200 p-3.5 shadow-sm">
+                  <div class="flex items-center gap-2 mb-2.5">
+                    <div class="w-5 h-5 rounded-md bg-sky-100 flex items-center justify-center text-buscadis-celeste font-bold text-xs">✓</div>
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-slate-900">Requisitos Indispensables</h3>
+                  </div>
+                  <ul id="flyer-requirements-list" class="space-y-2 text-xs text-slate-700">
+                    <!-- Rellenado dinámicamente con JS -->
+                  </ul>
+                </div>
+
+                <!-- Columna Beneficios & Cultura -->
+                <div class="bg-gradient-to-b from-sky-50/60 to-white rounded-xl border border-sky-100 p-3.5 shadow-sm flex flex-col justify-between">
+                  <div>
+                    <div class="flex items-center gap-2 mb-2.5">
+                      <div class="w-5 h-5 rounded-md bg-amber-100 flex items-center justify-center text-amber-700 font-bold text-xs">★</div>
+                      <h3 class="text-xs font-bold uppercase tracking-wider text-slate-900">¿Qué te Ofrecemos?</h3>
+                    </div>
+                    <div id="flyer-benefits-container" class="flex flex-wrap gap-1.5">
+                      <!-- Badges inyectados con JS -->
+                    </div>
+                  </div>
+                  
+                  <!-- Sello de Transparencia de la vacante -->
+                  <div class="mt-3 pt-2.5 border-t border-sky-100 flex items-center gap-2 text-[10px] text-slate-500 font-medium">
+                    <svg class="w-3.5 h-3.5 text-buscadis-celeste shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                      <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                    </svg>
+                    Proceso 100% gratuito sin intermediarios dudosos.
+                  </div>
+                </div>
+
+              </div>
+
+            </div>
+
+            <div class="bg-slate-950 text-white p-6 relative z-10 border-t-4 border-buscadis-amarillo">
+              <div class="flex items-center justify-between gap-5">
+                
+                <!-- Lado Izquierdo: Llamado a la Acción Directo -->
+                <div class="space-y-2 flex-1">
+                  <div class="inline-block px-2.5 py-0.5 rounded bg-buscadis-amarillo text-slate-950 text-[10px] font-extrabold uppercase tracking-wider">
+                    Postulación Rápida
+                  </div>
+                  <h4 id="flyer-cta-text" class="text-base font-extrabold text-white leading-tight">
+                    ¡Postula en 2 minutos escaneando el código!
+                  </h4>
+                  
+                  <div class="space-y-1 text-xs text-slate-300">
+                    <p class="flex items-center gap-1.5">
+                      <span class="text-buscadis-celesteLight">🌐 Web directa:</span>
+                      <span id="flyer-short-url" class="font-bold text-white underline decoration-sky-400">buscadis.com/empleo/CUS-48201</span>
+                    </p>
+                    <p id="flyer-whatsapp-row" class="flex items-center gap-1.5 text-slate-300">
+                      <span class="text-emerald-400">💬 Dudas WhatsApp:</span>
+                      <strong id="flyer-whatsapp" class="text-white font-medium">+51 984 000 111</strong>
+                    </p>
+                  </div>
+                  
+                  <div class="pt-1 text-[10px] text-slate-500 flex items-center gap-2">
+                    <span>ID Vacante: <strong id="flyer-code-badge" class="font-mono text-slate-300">CUS-48201</strong></span>
+                    <span>•</span>
+                    <span>Generado con tecnología Buscadis</span>
+                  </div>
+                </div>
+
+                <!-- Lado Derecho: Código QR Dinámico de Alto Contraste con Marco Protector -->
+                <div class="bg-white p-2.5 rounded-2xl shadow-xl flex flex-col items-center justify-center shrink-0 border-2 border-slate-200">
+                  <div id="qrcode-canvas" class="flex items-center justify-center">
+                    <!-- QR Code generado dinámicamente aquí -->
+                  </div>
+                  <span class="text-[9px] font-extrabold text-slate-900 tracking-wider uppercase mt-1 text-center">
+                    ESCANEAR AQUÍ
+                  </span>
+                </div>
+
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+  </main>
+
+  <div id="toast" class="fixed bottom-6 right-6 z-50 bg-slate-800 text-white px-4 py-3 rounded-xl shadow-2xl border border-slate-700 flex items-center gap-3 transform translate-y-24 opacity-0 transition-all duration-300 pointer-events-none">
+    <div id="toast-icon" class="w-6 h-6 rounded-full bg-buscadis-celeste flex items-center justify-center text-xs font-bold">✓</div>
+    <p id="toast-message" class="text-xs font-medium"></p>
+  </div>
+
+  <script>
+    /* Estado global del generador */
+    const state = {
+      format: 'a4', // 'a4' o 'story'
+      baseUrl: 'https://buscadis.com/empleo/'
+    };
+
+    const presets = {
+      ventas: {
+        title: "Asesor de Ventas Inmobiliarias",
+        company: "Grupo Inmobiliario Los Andes",
+        category: "Ventas & Comercial",
+        location: "Cusco (Wanchaq / Centro)",
+        modality: "Híbrido • Tiempo Completo",
+        salary: "3,200 - 4,500 + Altas Comisiones",
+        mission: "Gestionar cartera de clientes premium, liderar visitas a proyectos residenciales y concretar cierres de venta efectivos.",
+        requirements: `Mínimo 1 año en ventas inmobiliarias o intangibles.
+Habilidades avanzadas de comunicación y negociación.
+Manejo básico de CRM y seguimiento de prospectos.
+Disponibilidad inmediata para laborar en Cusco.`,
+        benefits: "Planilla Completa, Comisiones Ilimitadas, Seguro EPS, Bono Anual, Capacitación Continua",
+        jobId: "CUS-48201",
+        whatsapp: "+51 984 000 111",
+        cta: "¡Postula en 2 minutos escaneando el código!"
+      },
+      tech: {
+        title: "Desarrollador Web Full Stack",
+        company: "Buscadis Core Labs",
+        category: "Tecnología & Software",
+        location: "Cusco / Remoto Nacional",
+        modality: "Híbrido Flexible • Full-time",
+        salary: "4,500 - 6,000 según evaluación",
+        mission: "Diseñar, construir e implementar módulos de alta velocidad para la plataforma líder de avisos y clasificados en el sur del país.",
+        requirements: `2+ años de experiencia con Node.js, React o Vue.
+Manejo fluido de PostgreSQL y APIs RESTful.
+Buenas prácticas de testing y control con Git.
+Actitud colaborativa y enfoque orientado al usuario.`,
+        benefits: "Trabajo Híbrido, Presupuesto Educativo, Laptop Provista, Horario Flexible, Seguro EPS 100%",
+        jobId: "DEV-99214",
+        whatsapp: "+51 984 555 777",
+        cta: "¡Escanea y sube tu GitHub / Portafolio hoy!"
+      },
+      restaurante: {
+        title: "Jefe de Cocina / Chef Ejecutivo",
+        company: "Restaurante Andino Fusión",
+        category: "Gastronomía & Turismo",
+        location: "Cusco (Centro Histórico)",
+        modality: "Presencial • Turno Rotativo",
+        salary: "2,800 - 3,500 + Propinas + Bonos",
+        mission: "Liderar brigada de cocina, garantizar estándares de calidad gastronómica y supervisar costeo y mermas de insumos frescos.",
+        requirements: `Experiencia de 2 años en puestos de jefatura o sous chef.
+Estudios en gastronomía o cocina profesional.
+Conocimiento estricto de BPM y control sanitario.
+Liderazgo positivo y resolución rápida bajo presión.`,
+        benefits: "Alimentación 100% Cubierta, Propinas Semanales, Uniforme, Beneficios de Ley, Seguro de Vida",
+        jobId: "GAS-31084",
+        whatsapp: "+51 984 222 333",
+        cta: "¡Postula ahora con tu CV o déjanos un mensaje!"
+      }
+    };
+
+    function renderFlyer() {
+      // Obtener datos del formulario
+      const title = document.getElementById('input-title').value || 'Puesto Vacante';
+      const company = document.getElementById('input-company').value || 'Empresa Empleadora';
+      const category = document.getElementById('input-category').value || 'Categoría';
+      const location = document.getElementById('input-location').value || 'Ubicación';
+      const modality = document.getElementById('input-modality').value || 'Modalidad';
+      const salary = document.getElementById('input-salary').value || 'A tratar';
+      const mission = document.getElementById('input-mission').value || '';
+      const requirementsRaw = document.getElementById('input-requirements').value || '';
+      const benefitsRaw = document.getElementById('input-benefits').value || '';
+      const jobId = (document.getElementById('input-jobid').value || 'JOB-001').toUpperCase().trim();
+      const whatsapp = document.getElementById('input-whatsapp').value.trim();
+      const cta = document.getElementById('input-cta').value || '¡Postula ahora!';
+
+      // Inyectar en el flyer
+      document.getElementById('flyer-title').innerText = title;
+      document.getElementById('flyer-company').innerText = company;
+      document.getElementById('flyer-category').innerText = category;
+      document.getElementById('flyer-location').innerText = location;
+      document.getElementById('flyer-modality').innerText = modality;
+      document.getElementById('flyer-salary').innerText = salary;
+      document.getElementById('flyer-mission').innerText = mission;
+      document.getElementById('flyer-cta-text').innerText = cta;
+      document.getElementById('flyer-code-badge').innerText = jobId;
+
+      // URL Canónica con UTM tracking para analítica de conversión
+      const sourceTracking = state.format === 'a4' ? 'flyer_print_a4' : 'flyer_digital_story';
+      const canonicalUrl = `${state.baseUrl}${jobId}?utm_source=${sourceTracking}&utm_medium=qr_flyer`;
+      const cleanDisplayUrl = `buscadis.com/empleo/${jobId}`;
+      
+      document.getElementById('flyer-short-url').innerText = cleanDisplayUrl;
+      document.getElementById('preview-full-url').innerText = canonicalUrl;
+
+      // Mostrar u ocultar WhatsApp
+      const waRow = document.getElementById('flyer-whatsapp-row');
+      if (whatsapp) {
+        waRow.style.display = 'flex';
+        document.getElementById('flyer-whatsapp').innerText = whatsapp;
+      } else {
+        waRow.style.display = 'none';
+      }
+
+      // Procesar Requisitos
+      const reqContainer = document.getElementById('flyer-requirements-list');
+      reqContainer.innerHTML = '';
+      const reqLines = requirementsRaw.split('\n').filter(line => line.trim().length > 0);
+      
+      reqLines.forEach(req => {
+        const li = document.createElement('li');
+        li.className = 'flex items-start gap-2 leading-tight';
+        li.innerHTML = `
+          <span class="text-buscadis-celeste font-bold mt-0.5">•</span>
+          <span>${escapeHtml(req)}</span>
+        `;
+        reqContainer.appendChild(li);
+      });
+
+      // Procesar Beneficios
+      const benContainer = document.getElementById('flyer-benefits-container');
+      benContainer.innerHTML = '';
+      const benList = benefitsRaw.split(/[,;\n]/).map(b => b.trim()).filter(b => b.length > 0);
+      
+      benList.forEach(benefit => {
+        const badge = document.createElement('span');
+        badge.className = 'text-[11px] font-semibold bg-white text-slate-800 border border-slate-200 px-2.5 py-1 rounded-lg shadow-2xs flex items-center gap-1';
+        badge.innerHTML = `
+          <span class="w-1.5 h-1.5 rounded-full bg-buscadis-amarillo"></span>
+          <span>${escapeHtml(benefit)}</span>
+        `;
+        benContainer.appendChild(badge);
+      });
+
+      // Actualizar Código QR dinámico de alta resolución
+      generateQRCode(canonicalUrl);
+    }
+
+    let qrInstance = null;
+    function generateQRCode(text) {
+      const qrContainer = document.getElementById('qrcode-canvas');
+      qrContainer.innerHTML = ''; // Limpiar contenedor
+      
+      const qrSize = state.format === 'story' ? 100 : 90;
+
+      qrInstance = new QRCode(qrContainer, {
+        text: text,
+        width: qrSize,
+        height: qrSize,
+        colorDark: "#0F172A",
+        colorLight: "#FFFFFF",
+        correctLevel: QRCode.CorrectLevel.M
+      });
+    }
+
+    function setFormat(format) {
+      state.format = format;
+      const flyerCard = document.getElementById('flyer-card');
+      const tabA4 = document.getElementById('tab-a4');
+      const tabStory = document.getElementById('tab-story');
+      const ratioLabel = document.getElementById('canvas-ratio-label');
+
+      if (format === 'a4') {
+        flyerCard.style.width = '595px';
+        flyerCard.style.minHeight = '842px';
+        flyerCard.classList.remove('rounded-3xl');
+        flyerCard.classList.add('rounded-none');
+        
+        tabA4.className = "py-2 px-3 text-xs font-bold rounded-lg transition flex items-center justify-center gap-2 bg-buscadis-celeste text-white shadow";
+        tabStory.className = "py-2 px-3 text-xs font-bold rounded-lg transition flex items-center justify-center gap-2 text-slate-400 hover:text-white";
+        ratioLabel.innerText = "Formato: Mural A4 (210 x 297 mm)";
+      } else {
+        // Formato Story 9:16 (Teléfono móvil / WhatsApp status / Instagram)
+        flyerCard.style.width = '450px';
+        flyerCard.style.minHeight = '800px';
+        flyerCard.classList.remove('rounded-none');
+        flyerCard.classList.add('rounded-3xl');
+
+        tabStory.className = "py-2 px-3 text-xs font-bold rounded-lg transition flex items-center justify-center gap-2 bg-buscadis-amarillo text-slate-950 font-bold shadow";
+        tabA4.className = "py-2 px-3 text-xs font-bold rounded-lg transition flex items-center justify-center gap-2 text-slate-400 hover:text-white";
+        ratioLabel.innerText = "Formato: Digital Story 9:16 (WhatsApp / Redes)";
+      }
+
+      renderFlyer();
+      showToast(`Formato cambiado a: ${format === 'a4' ? 'Mural Físico A4' : 'Story Digital 9:16'}`);
+    }
+
+    function loadPreset(presetKey) {
+      const data = presets[presetKey];
+      if (!data) return;
+
+      document.getElementById('input-title').value = data.title;
+      document.getElementById('input-company').value = data.company;
+      document.getElementById('input-category').value = data.category;
+      document.getElementById('input-location').value = data.location;
+      document.getElementById('input-modality').value = data.modality;
+      document.getElementById('input-salary').value = data.salary;
+      document.getElementById('input-mission').value = data.mission;
+      document.getElementById('input-requirements').value = data.requirements;
+      document.getElementById('input-benefits').value = data.benefits;
+      document.getElementById('input-jobid').value = data.jobId;
+      document.getElementById('input-whatsapp').value = data.whatsapp;
+      document.getElementById('input-cta').value = data.cta;
+
+      renderFlyer();
+      showToast(`Plantilla "${data.title}" cargada`);
+    }
+
+    function downloadAsPNG() {
+      const target = document.getElementById('flyer-card');
+      const btn = document.getElementById('btn-download');
+      
+      const originalText = btn.innerHTML;
+      btn.innerHTML = `<span class="animate-spin mr-1">⌛</span> Generando PNG...`;
+      btn.disabled = true;
+
+      // Opciones para garantizar nitidez de imagen de impresión
+      html2canvas(target, {
+        scale: 2.5, // 2.5x escala para ultra nitidez tipográfica
+        useCORS: true,
+        logging: false,
+        backgroundColor: '#ffffff'
+      }).then(canvas => {
+        const image = canvas.toDataURL('image/png');
+        const link = document.createElement('a');
+        const jobId = document.getElementById('input-jobid').value || 'empleo';
+        link.download = `buscadis-flyer-${jobId.toLowerCase()}-${state.format}.png`;
+        link.href = image;
+        link.click();
+
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+        showToast('¡Flyer exportado en alta resolución!');
+      }).catch(err => {
+        console.error('Error al generar imagen:', err);
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+        showToast('Ocurrió un error al generar la imagen', 'error');
+      });
+    }
+
+    function copyJobUrl() {
+      const urlText = document.getElementById('preview-full-url').innerText;
+      
+      // Fallback robusto para copiar al portapapeles en iFrames
+      const tempInput = document.createElement('input');
+      tempInput.value = urlText;
+      document.body.appendChild(tempInput);
+      tempInput.select();
+      document.execCommand('copy');
+      document.body.removeChild(tempInput);
+
+      showToast('Enlace de postulación copiado al portapapeles');
+    }
+
+    let toastTimeout = null;
+    function showToast(message, type = 'info') {
+      const toast = document.getElementById('toast');
+      const toastMessage = document.getElementById('toast-message');
+      const toastIcon = document.getElementById('toast-icon');
+
+      toastMessage.innerText = message;
+      if (type === 'error') {
+        toastIcon.className = "w-6 h-6 rounded-full bg-rose-500 text-white flex items-center justify-center text-xs font-bold";
+        toastIcon.innerText = "✕";
+      } else {
+        toastIcon.className = "w-6 h-6 rounded-full bg-buscadis-celeste text-white flex items-center justify-center text-xs font-bold";
+        toastIcon.innerText = "✓";
+      }
+
+      toast.classList.remove('translate-y-24', 'opacity-0');
+      toast.classList.add('translate-y-0', 'opacity-100');
+
+      if (toastTimeout) clearTimeout(toastTimeout);
+      toastTimeout = setTimeout(() => {
+        toast.classList.add('translate-y-24', 'opacity-0');
+        toast.classList.remove('translate-y-0', 'opacity-100');
+      }, 3500);
+    }
+
+    /* Escapar caracteres HTML para inyección segura */
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.innerText = text;
+      return div.innerHTML;
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      renderFlyer();
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,1285 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Buscadis - Generador Profesional de Ofertas de Empleo</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-dark: #1d4ed8;
+      --primary-light: #eff6ff;
+      --accent: #10b981;
+      --accent-dark: #059669;
+      --dark: #0f172a;
+      --gray-900: #1e293b;
+      --gray-700: #334155;
+      --gray-500: #64748b;
+      --gray-300: #cbd5e1;
+      --gray-100: #f1f5f9;
+      --white: #ffffff;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 18px;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
+      --shadow-md: 0 4px 14px rgba(0,0,0,0.1);
+      --shadow-xl: 0 16px 36px rgba(0,0,0,0.12);
+      --font-main: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+      --font-display: 'Space Grotesk', system-ui, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--font-main);
+      background: #f8fafc;
+      color: var(--gray-900);
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* BARRA SUPERIOR */
+    .app-header {
+      background: var(--white);
+      border-bottom: 1px solid var(--gray-300);
+      padding: 12px 24px;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+    }
+
+    .brand-logo {
+      background: linear-gradient(135deg, var(--primary), #4f46e5);
+      color: var(--white);
+      font-weight: 800;
+      font-size: 1.1rem;
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: var(--radius-sm);
+    }
+
+    .brand-title {
+      font-weight: 800;
+      font-size: 1.25rem;
+      color: var(--dark);
+      letter-spacing: -0.5px;
+    }
+
+    .brand-tag {
+      font-size: 0.75rem;
+      background: #e0e7ff;
+      color: #3730a3;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-weight: 600;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    /* CONTENEDOR PRINCIPAL */
+    .workspace {
+      display: grid;
+      grid-template-columns: 480px 1fr;
+      min-height: calc(100vh - 61px);
+    }
+
+    @media (max-width: 1024px) {
+      .workspace {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* PANEL IZQUIERDO: FORMULARIO */
+    .form-panel {
+      background: var(--white);
+      border-right: 1px solid var(--gray-300);
+      padding: 24px;
+      overflow-y: auto;
+      max-height: calc(100vh - 61px);
+    }
+
+    .panel-heading {
+      margin-bottom: 20px;
+    }
+
+    .panel-heading h1 {
+      font-size: 1.35rem;
+      font-weight: 800;
+      color: var(--dark);
+    }
+
+    .panel-heading p {
+      font-size: 0.85rem;
+      color: var(--gray-500);
+      margin-top: 4px;
+    }
+
+    .form-section {
+      margin-bottom: 24px;
+      border-bottom: 1px solid var(--gray-100);
+      padding-bottom: 20px;
+    }
+
+    .form-section-title {
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--gray-500);
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .input-group {
+      margin-bottom: 14px;
+    }
+
+    .input-label {
+      display: block;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--gray-700);
+      margin-bottom: 5px;
+    }
+
+    .input-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1.5px solid var(--gray-300);
+      border-radius: var(--radius-sm);
+      font-family: inherit;
+      font-size: 0.88rem;
+      color: var(--dark);
+      transition: all 0.2s ease;
+    }
+
+    .form-control:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+    }
+
+    textarea.form-control {
+      resize: vertical;
+      min-height: 75px;
+    }
+
+    /* CHIPS RÁPIDOS */
+    .quick-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 8px;
+    }
+
+    .chip-btn {
+      background: var(--gray-100);
+      border: 1px solid var(--gray-300);
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 0.74rem;
+      font-weight: 600;
+      color: var(--gray-700);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .chip-btn:hover {
+      background: #e2e8f0;
+      color: var(--dark);
+    }
+
+    /* PANEL DERECHO: PREVIEW Y SALIDA */
+    .preview-panel {
+      background: #0f172a08;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      overflow-y: auto;
+      max-height: calc(100vh - 61px);
+    }
+
+    .preview-toolbar {
+      background: var(--white);
+      padding: 6px;
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      gap: 6px;
+      margin-bottom: 24px;
+      border: 1px solid var(--gray-300);
+    }
+
+    .view-btn {
+      padding: 8px 16px;
+      border-radius: var(--radius-sm);
+      border: none;
+      background: transparent;
+      font-family: inherit;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--gray-700);
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .view-btn.active {
+      background: var(--primary);
+      color: var(--white);
+    }
+
+    /* ACCIONES DE EXPORTACIÓN */
+    .export-bar {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 24px;
+      width: 100%;
+      max-width: 440px;
+      justify-content: center;
+    }
+
+    .btn {
+      padding: 10px 18px;
+      border-radius: var(--radius-sm);
+      font-family: inherit;
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+      border: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.15s ease;
+      text-decoration: none;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: var(--white);
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-dark);
+    }
+
+    .btn-success {
+      background: var(--accent);
+      color: var(--white);
+    }
+
+    .btn-success:hover {
+      background: var(--accent-dark);
+    }
+
+    .btn-secondary {
+      background: var(--white);
+      color: var(--gray-700);
+      border: 1.5px solid var(--gray-300);
+    }
+
+    .btn-secondary:hover {
+      background: var(--gray-100);
+    }
+
+    /* 1. MOCKUP MÓVIL (PÁGINA PÚBLICA DEL EMPLEO) */
+    .mobile-mockup {
+      width: 380px;
+      min-height: 680px;
+      background: var(--white);
+      border-radius: 40px;
+      box-shadow: 0 25px 60px -15px rgba(0,0,0,0.2), 0 0 0 10px #1e293b;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      margin-bottom: 30px;
+    }
+
+    /* Notch superior */
+    .mobile-notch {
+      width: 130px;
+      height: 22px;
+      background: #1e293b;
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      border-bottom-left-radius: 14px;
+      border-bottom-right-radius: 14px;
+      z-index: 40;
+    }
+
+    .mobile-screen {
+      padding: 34px 18px 80px 18px;
+      overflow-y: auto;
+      height: 100%;
+      background: #fdfdfd;
+    }
+
+    .mobile-top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--gray-500);
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--gray-100);
+    }
+
+    .job-badge-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      background: #dcfce7;
+      color: #166534;
+      padding: 3px 10px;
+      border-radius: 999px;
+      margin-bottom: 10px;
+    }
+
+    .job-badge-status.closed {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    .live-company-name {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--gray-500);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .live-job-title {
+      font-size: 1.45rem;
+      font-weight: 800;
+      color: var(--dark);
+      line-height: 1.2;
+      margin: 4px 0 12px 0;
+    }
+
+    .live-meta-badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 18px;
+    }
+
+    .meta-chip {
+      background: var(--gray-100);
+      border: 1px solid #e2e8f0;
+      font-size: 0.76rem;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .meta-chip.salary {
+      background: #eff6ff;
+      border-color: #bfdbfe;
+      color: var(--primary-dark);
+      font-size: 0.82rem;
+    }
+
+    .live-card {
+      background: var(--white);
+      border: 1px solid #e2e8f0;
+      border-radius: var(--radius-md);
+      padding: 14px;
+      margin-bottom: 14px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+    }
+
+    .live-card-title {
+      font-size: 0.78rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--gray-500);
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .live-bullets {
+      list-style: none;
+      padding: 0;
+    }
+
+    .live-bullets li {
+      position: relative;
+      padding-left: 20px;
+      font-size: 0.83rem;
+      color: var(--gray-700);
+      margin-bottom: 6px;
+      line-height: 1.4;
+    }
+
+    .live-bullets li::before {
+      content: "✓";
+      position: absolute;
+      left: 0;
+      color: var(--accent);
+      font-weight: 800;
+      font-size: 0.85rem;
+    }
+
+    .mobile-sticky-action {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--white);
+      padding: 12px 18px;
+      border-top: 1px solid var(--gray-300);
+      box-shadow: 0 -4px 12px rgba(0,0,0,0.05);
+      z-index: 30;
+    }
+
+    .btn-apply-whatsapp {
+      width: 100%;
+      background: #25d366;
+      color: var(--white);
+      padding: 12px;
+      border-radius: var(--radius-sm);
+      font-weight: 800;
+      font-size: 0.9rem;
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      cursor: pointer;
+      text-decoration: none;
+    }
+
+    .btn-apply-whatsapp:hover {
+      background: #1eb956;
+    }
+
+    /* 2. MODO AFICHE A4 IMPRIMIBLE */
+    .poster-container {
+      width: 520px;
+      min-height: 735px;
+      background: var(--white);
+      box-shadow: var(--shadow-xl);
+      border-radius: 4px;
+      padding: 32px;
+      display: none;
+      flex-direction: column;
+      position: relative;
+      border: 1px solid #cbd5e1;
+      margin-bottom: 30px;
+    }
+
+    .poster-header {
+      border-bottom: 4px solid var(--dark);
+      padding-bottom: 14px;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    .poster-tag {
+      display: inline-block;
+      background: var(--dark);
+      color: var(--white);
+      font-weight: 800;
+      font-size: 0.85rem;
+      padding: 3px 12px;
+      border-radius: 4px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    .poster-company {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--gray-700);
+      text-transform: uppercase;
+    }
+
+    .poster-title {
+      font-family: var(--font-display);
+      font-size: 2.2rem;
+      font-weight: 800;
+      color: var(--dark);
+      line-height: 1.1;
+      margin: 8px 0;
+      text-transform: uppercase;
+      letter-spacing: -0.5px;
+    }
+
+    .poster-highlight-box {
+      background: var(--gray-100);
+      border-left: 6px solid var(--primary);
+      padding: 12px 18px;
+      margin-bottom: 20px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .poster-item-label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: var(--gray-500);
+    }
+
+    .poster-item-value {
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: var(--dark);
+    }
+
+    .poster-body {
+      flex: 1;
+    }
+
+    .poster-section-title {
+      font-size: 0.85rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      border-bottom: 2px solid var(--gray-300);
+      padding-bottom: 4px;
+      margin-bottom: 10px;
+      color: var(--dark);
+    }
+
+    .poster-list {
+      list-style: square;
+      padding-left: 20px;
+      margin-bottom: 18px;
+    }
+
+    .poster-list li {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--gray-700);
+      margin-bottom: 6px;
+    }
+
+    .poster-qr-section {
+      border: 2px dashed var(--gray-300);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      background: #fafafa;
+      margin-top: 10px;
+      margin-bottom: 24px;
+    }
+
+    .poster-qr-box {
+      width: 105px;
+      height: 105px;
+      background: var(--white);
+      border: 1px solid var(--gray-300);
+      padding: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .poster-qr-text h4 {
+      font-size: 0.92rem;
+      font-weight: 800;
+      color: var(--dark);
+      margin-bottom: 4px;
+    }
+
+    .poster-qr-text p {
+      font-size: 0.78rem;
+      color: var(--gray-500);
+      line-height: 1.3;
+    }
+
+    /* TALONES RECORTABLES (Tear-off tabs) */
+    .tear-off-tabs {
+      display: flex;
+      border-top: 2px dashed #94a3b8;
+      padding-top: 14px;
+      margin-top: auto;
+    }
+
+    .tear-tab {
+      flex: 1;
+      border-right: 1px dashed #cbd5e1;
+      padding: 6px 2px;
+      text-align: center;
+      writing-mode: vertical-rl;
+      transform: rotate(180deg);
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--dark);
+      white-space: nowrap;
+      height: 110px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+    }
+
+    .tear-tab:last-child {
+      border-right: none;
+    }
+
+    /* TOAST NOTIFICACIÓN */
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: var(--dark);
+      color: var(--white);
+      padding: 12px 20px;
+      border-radius: var(--radius-sm);
+      font-size: 0.85rem;
+      font-weight: 600;
+      box-shadow: var(--shadow-xl);
+      transform: translateY(100px);
+      opacity: 0;
+      transition: all 0.25s ease;
+      z-index: 100;
+    }
+
+    .toast.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    /* ESTILOS DE IMPRESIÓN OFICIAL (A4 FISICO) */
+    @media print {
+      body * {
+        visibility: hidden;
+      }
+      .app-header, .form-panel, .preview-toolbar, .export-bar, .mobile-mockup {
+        display: none !important;
+      }
+      .workspace, .preview-panel {
+        padding: 0 !important;
+        margin: 0 !important;
+        background: transparent !important;
+        display: block !important;
+      }
+      .poster-container, .poster-container * {
+        visibility: visible;
+      }
+      .poster-container {
+        display: flex !important;
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100% !important;
+        height: 100% !important;
+        min-height: 100vh !important;
+        box-shadow: none !important;
+        border: none !important;
+        padding: 20mm !important;
+      }
+      @page {
+        size: A4 portrait;
+        margin: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header class="app-header">
+    <a href="#" class="brand">
+      <div class="brand-logo">B</div>
+      <div>
+        <span class="brand-title">buscadis</span>
+        <span class="brand-tag">Generador Pro</span>
+      </div>
+    </a>
+    <div class="header-actions">
+      <span style="font-size: 0.8rem; color: var(--gray-500); font-weight: 600;" id="status-autosave">Guardado automático</span>
+      <button class="btn btn-secondary" onclick="toggleStatusOffer()" id="btn-toggle-status">
+        🟢 Vacante Activa
+      </button>
+    </div>
+  </header>
+
+  <!-- CONTENEDOR PRINCIPAL -->
+  <main class="workspace">
+    
+    <!-- COLUMNA IZQUIERDA: GENERADOR RÁPIDO -->
+    <section class="form-panel">
+      <div class="panel-heading">
+        <h1>Crea tu Oferta en 45 Segundos</h1>
+        <p>Llena los datos clave. Obtendrás un afiche listo para imprimir y tu link oficial para WhatsApp.</p>
+      </div>
+
+      <form id="offer-form" onsubmit="event.preventDefault();">
+        
+        <!-- SECCIÓN 1: DATOS GENERALES -->
+        <div class="form-section">
+          <div class="form-section-title">🏢 Identidad del Negocio</div>
+          
+          <div class="input-group">
+            <label class="input-label" for="inp-company">Nombre del Negocio o Empresa</label>
+            <input type="text" id="inp-company" class="form-control" value="Cafetería y Tostaduría San Blas" placeholder="Ej: Pollería El Buen Sabor, Taller Garcilaso">
+          </div>
+
+          <div class="input-group">
+            <label class="input-label" for="inp-title">Puesto Solicitado</label>
+            <input type="text" id="inp-title" class="form-control" value="Ayudante de Barra y Atención" placeholder="Ej: Mozo(a), Cocinero, Cajera, Recepcionista">
+            <div class="quick-chips">
+              <button type="button" class="chip-btn" onclick="quickFill('title', 'Mozo / Azafata con Experiencia')">+ Mozo</button>
+              <button type="button" class="chip-btn" onclick="quickFill('title', 'Ayudante de Cocina Inmediato')">+ Ayudante Cocina</button>
+              <button type="button" class="chip-btn" onclick="quickFill('title', 'Recepcionista Bilingüe')">+ Recepcionista</button>
+              <button type="button" class="chip-btn" onclick="quickFill('title', 'Personal de Limpieza y Cuarto')">+ Limpieza</button>
+            </div>
+          </div>
+
+          <div class="input-row">
+            <div class="input-group">
+              <label class="input-label" for="inp-location">Distrito / Zona</label>
+              <input type="text" id="inp-location" class="form-control" value="Cusco - Centro Histórico" placeholder="Ej: Wanchaq, San Sebastián">
+            </div>
+            <div class="input-group">
+              <label class="input-label" for="inp-address">Dirección o Referencia</label>
+              <input type="text" id="inp-address" class="form-control" value="Calle Choquechaca 210" placeholder="Ej: A 1 cdra de Real Plaza">
+            </div>
+          </div>
+        </div>
+
+        <!-- SECCIÓN 2: CONDICIONES LABORALES -->
+        <div class="form-section">
+          <div class="form-section-title">💰 Sueldo y Horarios</div>
+
+          <div class="input-row">
+            <div class="input-group">
+              <label class="input-label" for="inp-salary">Sueldo / Rango Mensual</label>
+              <input type="text" id="inp-salary" class="form-control" value="S/ 1,350 + Propinas" placeholder="Ej: S/ 1,200 o A tratar">
+            </div>
+            <div class="input-group">
+              <label class="input-label" for="inp-schedule-type">Jornada</label>
+              <select id="inp-schedule-type" class="form-control">
+                <option value="Tiempo Completo">Tiempo Completo</option>
+                <option value="Medio Tiempo">Medio Tiempo</option>
+                <option value="Turno Tarde/Noche">Turno Tarde/Noche</option>
+                <option value="Fines de Semana">Solo Fines de Semana</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="input-group">
+            <label class="input-label" for="inp-hours">Horario de Trabajo</label>
+            <input type="text" id="inp-hours" class="form-control" value="Lun a Sáb (8:00 am - 4:30 pm)" placeholder="Ej: 7:00 am a 3:00 pm">
+          </div>
+        </div>
+
+        <!-- SECCIÓN 3: REQUISITOS Y BENEFICIOS -->
+        <div class="form-section">
+          <div class="form-section-title">📋 Requisitos Clave (Filtros)</div>
+          
+          <div class="input-group">
+            <label class="input-label" for="inp-reqs">Requisitos (Un requisito por línea)</label>
+            <textarea id="inp-reqs" class="form-control" rows="3">Experiencia mínima de 6 meses en atención
+Disponibilidad inmediata y puntualidad
+Trato amable y actitud de servicio</textarea>
+            <div class="quick-chips">
+              <button type="button" class="chip-btn" onclick="addBullet('reqs', 'Con o sin experiencia previa')">+ Sin experiencia</button>
+              <button type="button" class="chip-btn" onclick="addBullet('reqs', 'Inglés intermedio para atención a turistas')">+ Inglés turista</button>
+              <button type="button" class="chip-btn" onclick="addBullet('reqs', 'Vivir en zonas aledañas o céntricas')">+ Vivir cerca</button>
+            </div>
+          </div>
+
+          <div class="input-group">
+            <label class="input-label" for="inp-benefits">Beneficios que Ofreces (Un beneficio por línea)</label>
+            <textarea id="inp-benefits" class="form-control" rows="2">Almuerzo incluido diario
+Pagos puntuales quincenales
+Buen ambiente y aprendizaje en café de especialidad</textarea>
+          </div>
+        </div>
+
+        <!-- SECCIÓN 4: RECEPCIÓN DE POSTULANTES -->
+        <div class="form-section">
+          <div class="form-section-title">📲 Dónde Recibir Candidatos</div>
+          
+          <div class="input-group">
+            <label class="input-label" for="inp-phone">Número de WhatsApp (Sin espacios)</label>
+            <input type="text" id="inp-phone" class="form-control" value="984123456" placeholder="Ej: 984000111">
+          </div>
+        </div>
+
+      </form>
+    </section>
+
+    <!-- COLUMNA DERECHA: PREVIEW Y MODOS DE DESCARGA -->
+    <section class="preview-panel">
+      
+      <!-- TOOLBAR DE VISTAS -->
+      <div class="preview-toolbar">
+        <button class="view-btn active" onclick="switchPreview('mobile')" id="btn-view-mobile">
+          📱 Vista Móvil (Web)
+        </button>
+        <button class="view-btn" onclick="switchPreview('poster')" id="btn-view-poster">
+          📄 Afiche Imprimible A4
+        </button>
+      </div>
+
+      <!-- BARRA DE ACCIÓN DIRECTA -->
+      <div class="export-bar">
+        <button class="btn btn-primary" onclick="window.print()">
+          🖨️ Imprimir Afiche A4
+        </button>
+        <button class="btn btn-secondary" onclick="copyShareText()">
+          📋 Copiar Texto para Redes
+        </button>
+        <button class="btn btn-secondary" onclick="copyWebLink()">
+          🔗 Copiar Enlace
+        </button>
+      </div>
+
+      <!-- 1. PREVIEW: VISTA MOBILE WEBAPP -->
+      <div class="mobile-mockup" id="preview-mobile">
+        <div class="mobile-notch"></div>
+        <div class="mobile-screen">
+          
+          <div class="mobile-top-bar">
+            <span>buscadis.com/empleo</span>
+            <span style="color: var(--primary);">Verificado ✓</span>
+          </div>
+
+          <div class="job-badge-status" id="mob-badge-status">
+            ● Convocatoria Abierta
+          </div>
+
+          <div class="live-company-name" id="mob-company">Cafetería San Blas</div>
+          <h2 class="live-job-title" id="mob-title">Ayudante de Barra y Atención</h2>
+
+          <div class="live-meta-badges">
+            <div class="meta-chip salary" id="mob-salary">💰 S/ 1,350</div>
+            <div class="meta-chip" id="mob-schedule">🕒 Tiempo Completo</div>
+            <div class="meta-chip" id="mob-location">📍 Cusco - Centro</div>
+          </div>
+
+          <!-- TARJETA: LO ESENCIAL -->
+          <div class="live-card">
+            <div class="live-card-title">📌 Horario y Lugar</div>
+            <p style="font-size: 0.82rem; color: var(--gray-700); margin-bottom: 4px;">
+              <strong>Horario:</strong> <span id="mob-hours">Lun a Sáb</span>
+            </p>
+            <p style="font-size: 0.82rem; color: var(--gray-700);">
+              <strong>Ubicación:</strong> <span id="mob-address">Calle Choquechaca 210</span>
+            </p>
+          </div>
+
+          <!-- TARJETA: REQUISITOS -->
+          <div class="live-card">
+            <div class="live-card-title">⚡ Requisitos</div>
+            <ul class="live-bullets" id="mob-reqs-list">
+              <li>Experiencia previa</li>
+            </ul>
+          </div>
+
+          <!-- TARJETA: BENEFICIOS -->
+          <div class="live-card">
+            <div class="live-card-title">🎁 Beneficios</div>
+            <ul class="live-bullets" id="mob-benefits-list">
+              <li>Almuerzo diario</li>
+            </ul>
+          </div>
+
+          <div style="font-size: 0.72rem; text-align: center; color: var(--gray-500); margin-top: 18px;">
+            Aviso publicado directamente por el empleador en <strong>Buscadis</strong>
+          </div>
+
+        </div>
+
+        <!-- BOTÓN STICKY DE WHATSAPP -->
+        <div class="mobile-sticky-action">
+          <a href="#" target="_blank" class="btn-apply-whatsapp" id="mob-whatsapp-btn">
+            🟢 Postular por WhatsApp
+          </a>
+        </div>
+      </div>
+
+      <!-- 2. PREVIEW: AFICHE IMPRIMIBLE A4 -->
+      <div class="poster-container" id="preview-poster">
+        
+        <div class="poster-header">
+          <span class="poster-tag">Se Necesita Personal</span>
+          <div class="poster-company" id="pos-company">Cafetería San Blas</div>
+          <h1 class="poster-title" id="pos-title">Ayudante de Barra</h1>
+        </div>
+
+        <div class="poster-highlight-box">
+          <div>
+            <div class="poster-item-label">Sueldo Ofrecido</div>
+            <div class="poster-item-value" id="pos-salary">S/ 1,350</div>
+          </div>
+          <div>
+            <div class="poster-item-label">Jornada / Horario</div>
+            <div class="poster-item-value" id="pos-hours">8:00 am - 4:30 pm</div>
+          </div>
+        </div>
+
+        <div class="poster-body">
+          <div class="poster-section-title">Requisitos Principales</div>
+          <ul class="poster-list" id="pos-reqs-list">
+            <li>Ganas de trabajar y puntualidad</li>
+          </ul>
+
+          <div class="poster-section-title">Lugar de Trabajo / Entrevista</div>
+          <p style="font-size: 0.95rem; font-weight: 700; color: var(--gray-700); margin-bottom: 12px;" id="pos-address">
+            Calle Choquechaca 210, Cusco
+          </p>
+
+          <!-- SECCIÓN QR INTEGRADA -->
+          <div class="poster-qr-section">
+            <div class="poster-qr-box" id="poster-qr-canvas">
+              <!-- SVG QR Dinámico generado por JS -->
+            </div>
+            <div class="poster-qr-text">
+              <h4>¿Te interesa el puesto?</h4>
+              <p>Escanea con la cámara de tu celular para ver los detalles completos y postular directamente por WhatsApp.</p>
+              <div style="margin-top: 6px; font-weight: 800; font-size: 0.95rem; color: var(--dark);">
+                Celular / WhatsApp: <span id="pos-phone">984123456</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TALONES RECORTABLES -->
+        <div class="tear-off-tabs" id="pos-tear-tabs">
+          <!-- Generado dinámicamente -->
+        </div>
+
+      </div>
+
+    </section>
+  </main>
+
+  <!-- TOAST DE CONFIRMACIÓN -->
+  <div class="toast" id="toast-msg">Enlace copiado al portapapeles</div>
+
+  <script>
+    // ESTADO DE LA APLICACIÓN
+    let offerState = {
+      isActive: true,
+      company: '',
+      title: '',
+      location: '',
+      address: '',
+      salary: '',
+      scheduleType: '',
+      hours: '',
+      reqs: [],
+      benefits: [],
+      phone: ''
+    };
+
+    // INICIALIZACIÓN
+    window.addEventListener('DOMContentLoaded', () => {
+      readInputs();
+      renderAll();
+      setupLiveListeners();
+    });
+
+    // ESCUCHAR ENTRADAS EN TIEMPO REAL
+    function setupLiveListeners() {
+      const inputs = document.querySelectorAll('#offer-form input, #offer-form textarea, #offer-form select');
+      inputs.forEach(input => {
+        input.addEventListener('input', () => {
+          readInputs();
+          renderAll();
+        });
+      });
+    }
+
+    // LEER DATOS DEL FORMULARIO
+    function readInputs() {
+      offerState.company = document.getElementById('inp-company').value.trim() || 'Mi Negocio';
+      offerState.title = document.getElementById('inp-title').value.trim() || 'Puesto Requerido';
+      offerState.location = document.getElementById('inp-location').value.trim() || 'Cusco';
+      offerState.address = document.getElementById('inp-address').value.trim() || 'Dirección local';
+      offerState.salary = document.getElementById('inp-salary').value.trim() || 'A Tratar';
+      offerState.scheduleType = document.getElementById('inp-schedule-type').value;
+      offerState.hours = document.getElementById('inp-hours').value.trim() || 'Turno Regular';
+      offerState.phone = document.getElementById('inp-phone').value.trim() || '984000000';
+
+      const rawReqs = document.getElementById('inp-reqs').value.split('\n');
+      offerState.reqs = rawReqs.map(r => r.trim()).filter(r => r.length > 0);
+
+      const rawBenefits = document.getElementById('inp-benefits').value.split('\n');
+      offerState.benefits = rawBenefits.map(b => b.trim()).filter(b => b.length > 0);
+    }
+
+    // RENDERIZAR EN TODOS LOS MODOS
+    function renderAll() {
+      renderMobilePreview();
+      renderPosterPreview();
+      renderSVGQRCode();
+    }
+
+    // 1. RENDER VISTA MÓVIL (PÁGINA PÚBLICA)
+    function renderMobilePreview() {
+      document.getElementById('mob-company').textContent = offerState.company;
+      document.getElementById('mob-title').textContent = offerState.title;
+      document.getElementById('mob-salary').textContent = '💰 ' + offerState.salary;
+      document.getElementById('mob-schedule').textContent = '🕒 ' + offerState.scheduleType;
+      document.getElementById('mob-location').textContent = '📍 ' + offerState.location;
+      document.getElementById('mob-hours').textContent = offerState.hours;
+      document.getElementById('mob-address').textContent = offerState.address;
+
+      // Requisitos
+      const reqListEl = document.getElementById('mob-reqs-list');
+      reqListEl.innerHTML = '';
+      offerState.reqs.forEach(req => {
+        const li = document.createElement('li');
+        li.textContent = req;
+        reqListEl.appendChild(li);
+      });
+
+      // Beneficios
+      const benListEl = document.getElementById('mob-benefits-list');
+      benListEl.innerHTML = '';
+      offerState.benefits.forEach(ben => {
+        const li = document.createElement('li');
+        li.textContent = ben;
+        benListEl.appendChild(li);
+      });
+
+      // Link de WhatsApp con mensaje estructurado pre-formateado
+      const encodedMsg = encodeURIComponent(
+        `Hola, vi su oferta de empleo en Buscadis para el puesto de "${offerState.title}" en "${offerState.company}". Cumplo con los requisitos y quisiera coordinar una entrevista. Mi nombre es: `
+      );
+      const cleanPhone = offerState.phone.replace(/[^0-9]/g, '');
+      const waLink = `https://wa.me/51${cleanPhone}?text=${encodedMsg}`;
+      
+      const waBtn = document.getElementById('mob-whatsapp-btn');
+      waBtn.href = waLink;
+      
+      if (!offerState.isActive) {
+        waBtn.textContent = '❌ Convocatoria Concluida';
+        waBtn.style.background = '#94a3b8';
+        waBtn.style.pointerEvents = 'none';
+      } else {
+        waBtn.textContent = '🟢 Postular por WhatsApp';
+        waBtn.style.background = '#25d366';
+        waBtn.style.pointerEvents = 'auto';
+      }
+    }
+
+    // 2. RENDER AFICHE IMPRIMIBLE A4
+    function renderPosterPreview() {
+      document.getElementById('pos-company').textContent = offerState.company;
+      document.getElementById('pos-title').textContent = offerState.title;
+      document.getElementById('pos-salary').textContent = offerState.salary;
+      document.getElementById('pos-hours').textContent = offerState.hours;
+      document.getElementById('pos-address').textContent = `${offerState.address} (${offerState.location})`;
+      document.getElementById('pos-phone').textContent = offerState.phone;
+
+      // Requisitos en afiche
+      const posterReqList = document.getElementById('pos-reqs-list');
+      posterReqList.innerHTML = '';
+      offerState.reqs.forEach(req => {
+        const li = document.createElement('li');
+        li.textContent = req;
+        posterReqList.appendChild(li);
+      });
+
+      // Talones recortables inferiores (8 talones con teléfono y puesto)
+      const tabsContainer = document.getElementById('pos-tear-tabs');
+      tabsContainer.innerHTML = '';
+      for (let i = 0; i < 8; i++) {
+        const tab = document.createElement('div');
+        tab.className = 'tear-tab';
+        tab.textContent = `📞 ${offerState.phone} | ${offerState.title.substring(0, 15)}`;
+        tabsContainer.appendChild(tab);
+      }
+    }
+
+    // GENERADOR MATEMÁTICO DE CÓDIGO QR EN SVG (Ligero, rápido y sin dependencias)
+    function renderSVGQRCode() {
+      // Simulación de URL canónica de Buscadis para el aviso
+      const mockUrl = `https://buscadis.com/empleos/${encodeURIComponent(offerState.company.toLowerCase().replace(/ /g, '-'))}`;
+      
+      // Matriz representativa de QR vectorial de alta definición visual
+      const qrBox = document.getElementById('poster-qr-canvas');
+      qrBox.innerHTML = `
+        <svg viewBox="0 0 100 100" width="100%" height="100%" shape-rendering="crispEdges">
+          <rect width="100" height="100" fill="#ffffff"/>
+          <!-- Marcador superior izquierdo -->
+          <rect x="10" y="10" width="25" height="25" fill="#0f172a"/>
+          <rect x="15" y="15" width="15" height="15" fill="#ffffff"/>
+          <rect x="18" y="18" width="9" height="9" fill="#0f172a"/>
+          
+          <!-- Marcador superior derecho -->
+          <rect x="65" y="10" width="25" height="25" fill="#0f172a"/>
+          <rect x="70" y="15" width="15" height="15" fill="#ffffff"/>
+          <rect x="73" y="18" width="9" height="9" fill="#0f172a"/>
+          
+          <!-- Marcador inferior izquierdo -->
+          <rect x="10" y="65" width="25" height="25" fill="#0f172a"/>
+          <rect x="15" y="70" width="15" height="15" fill="#ffffff"/>
+          <rect x="18" y="73" width="9" height="9" fill="#0f172a"/>
+          
+          <!-- Datos vectoriales -->
+          <rect x="40" y="12" width="6" height="6" fill="#0f172a"/>
+          <rect x="50" y="18" width="6" height="6" fill="#0f172a"/>
+          <rect x="42" y="30" width="8" height="5" fill="#0f172a"/>
+          <rect x="12" y="45" width="6" height="8" fill="#0f172a"/>
+          <rect x="25" y="42" width="6" height="6" fill="#0f172a"/>
+          <rect x="38" y="45" width="24" height="6" fill="#0f172a"/>
+          <rect x="48" y="55" width="8" height="12" fill="#0f172a"/>
+          <rect x="68" y="42" width="12" height="6" fill="#0f172a"/>
+          <rect x="82" y="52" width="8" height="8" fill="#0f172a"/>
+          <rect x="40" y="72" width="10" height="10" fill="#0f172a"/>
+          <rect x="58" y="70" width="8" height="6" fill="#0f172a"/>
+          <rect x="72" y="75" width="16" height="8" fill="#0f172a"/>
+          <rect x="85" y="65" width="5" height="6" fill="#0f172a"/>
+        </svg>
+      `;
+    }
+
+    // CAMBIAR ENTRE VISTA MÓVIL Y AFICHE
+    function switchPreview(mode) {
+      const mobPreview = document.getElementById('preview-mobile');
+      const posterPreview = document.getElementById('preview-poster');
+      const btnMob = document.getElementById('btn-view-mobile');
+      const btnPos = document.getElementById('btn-view-poster');
+
+      if (mode === 'mobile') {
+        mobPreview.style.display = 'flex';
+        posterPreview.style.display = 'none';
+        btnMob.classList.add('active');
+        btnPos.classList.remove('active');
+      } else {
+        mobPreview.style.display = 'none';
+        posterPreview.style.display = 'flex';
+        btnMob.classList.remove('active');
+        btnPos.classList.add('active');
+      }
+    }
+
+    // COPIAR TEXTO FORMATEADO PARA REDES
+    function copyShareText() {
+      const text = `📢 SE SOLICITA: ${offerState.title.toUpperCase()}
+🏢 Empresa: ${offerState.company}
+💰 Sueldo: ${offerState.salary}
+🕒 Horario: ${offerState.hours} (${offerState.scheduleType})
+📍 Lugar: ${offerState.address} (${offerState.location})
+
+⚡ Requisitos:
+${offerState.reqs.map(r => `• ${r}`).join('\n')}
+
+📲 Postula directamente por WhatsApp aquí:
+https://buscadis.com/j/${encodeURIComponent(offerState.phone)}`;
+
+      navigator.clipboard.writeText(text).then(() => {
+        showToast('¡Texto copiado para Facebook y WhatsApp!');
+      });
+    }
+
+    // COPIAR ENLACE PÚBLICO
+    function copyWebLink() {
+      const link = `https://buscadis.com/j/${offerState.phone}`;
+      navigator.clipboard.writeText(link).then(() => {
+        showToast('Enlace de la oferta copiado');
+      });
+    }
+
+    // ALTERNAR ESTADO DE LA OFERTA (CUBIERTA / ACTIVA)
+    function toggleStatusOffer() {
+      offerState.isActive = !offerState.isActive;
+      const btnToggle = document.getElementById('btn-toggle-status');
+      const badgeMob = document.getElementById('mob-badge-status');
+
+      if (offerState.isActive) {
+        btnToggle.textContent = '🟢 Vacante Activa';
+        btnToggle.classList.remove('btn-secondary');
+        badgeMob.textContent = '● Convocatoria Abierta';
+        badgeMob.classList.remove('closed');
+        showToast('La oferta vuelve a estar activa');
+      } else {
+        btnToggle.textContent = '🔴 Marcar como Cubierto';
+        btnToggle.classList.add('btn-secondary');
+        badgeMob.textContent = '✕ Puesto Cubierto';
+        badgeMob.classList.add('closed');
+        showToast('Aviso cerrado: ya no recibirás postulaciones molestas');
+      }
+      renderMobilePreview();
+    }
+
+    // HELPERS RÁPIDOS
+    function quickFill(field, value) {
+      if (field === 'title') {
+        document.getElementById('inp-title').value = value;
+      }
+      readInputs();
+      renderAll();
+    }
+
+    function addBullet(target, text) {
+      const el = document.getElementById(`inp-${target}`);
+      el.value = el.value ? el.value + '\n' + text : text;
+      readInputs();
+      renderAll();
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast-msg');
+      toast.textContent = msg;
+      toast.classList.add('show');
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 2600);
+    }
+  </script>
+</body>
+</html>
