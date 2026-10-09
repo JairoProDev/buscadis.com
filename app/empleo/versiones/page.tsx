@@ -8,6 +8,11 @@ export const metadata: Metadata = {
 
 const VERSIONS = [
   {
+    href: '/empleo',
+    name: 'Para usar',
+    what: 'El creador en la app: afiche A4 o historia, impresión, enlace real y postulación por WhatsApp. Los HTML de abajo quedan como referencia.',
+  },
+  {
     href: '/empleo-lab/gemini-creator.html',
     name: 'Gemini · Creator',
     what: 'Taller oscuro para armar el afiche. Dos salidas: mural A4 y estado 9:16. Presets, descarga PNG e impresión aislada.',
