@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ejemplos reales y aviso ideal</title>
+  <style>
+    :root { --ink:#14343f; --soft:#3e5560; --line:#d5e0e6; --paper:#f7f9fa; --street:#e7eef1; --gold:#8a5a12; --ok:#0e6b56; }
+    * { box-sizing: border-box; }
+    body { margin:0; background:var(--street); color:var(--ink); font:16px/1.4 system-ui, sans-serif; }
+    a { color:inherit; }
+    .lab { display:block; background:var(--ink); color:#f7f9fa; text-align:center; padding:8px 12px; font-size:13px; font-weight:700; text-decoration:none; }
+    .wrap { width:min(100%, 440px); margin:0 auto; min-height:100dvh; background:var(--paper); display:flex; flex-direction:column; }
+    .switch { display:flex; gap:6px; overflow:auto; padding:10px 12px; position:sticky; top:0; background:var(--paper); border-bottom:1px solid var(--line); }
+    .switch button { border:1px solid var(--line); background:#fff; border-radius:999px; padding:8px 12px; font:inherit; font-size:13px; font-weight:700; white-space:nowrap; cursor:pointer; }
+    .switch button[aria-pressed="true"] { background:var(--ink); color:#fff; border-color:var(--ink); }
+    .scroll { padding:14px 16px 120px; }
+    .kicker { margin:0; font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--soft); font-weight:700; }
+    h1 { margin:4px 0 0; font-size:32px; line-height:.95; letter-spacing:-.04em; }
+    .pay { margin:8px 0 0; font-size:28px; font-weight:800; letter-spacing:-.03em; }
+    .pay.gap { color:var(--gold); font-size:18px; font-weight:700; }
+    .chips { display:flex; flex-wrap:wrap; gap:6px; margin:12px 0; }
+    .chip { background:var(--street); border-radius:999px; padding:6px 10px; font-size:13px; font-weight:650; font-weight:600; }
+    .note, .card { border:1px solid var(--line); border-radius:14px; padding:12px; margin-top:10px; background:#fff; }
+    .note { background:#f4e7c3; border-color:#e2b657; font-size:14px; }
+    h2 { margin:0 0 6px; font-size:13px; letter-spacing:.08em; text-transform:uppercase; }
+    ul { margin:0; padding-left:18px; }
+    li { margin:4px 0; }
+    .pair { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+    .muted { color:var(--soft); font-size:14px; }
+    .bar { position:sticky; bottom:0; padding:10px 16px 14px; background:var(--paper); border-top:1px solid var(--line); }
+    .bar button { width:100%; min-height:48px; border:0; border-radius:14px; background:var(--ok); color:#f4fff9; font:inherit; font-weight:800; }
+    .src { margin:8px 0 0; font-size:12px; color:var(--soft); }
+  </style>
+</head>
+<body>
+  <a class="lab" href="/empleo/versiones">Todas las versiones del laboratorio</a>
+  <div class="wrap">
+    <div class="switch" id="switch"></div>
+    <div class="scroll" id="view"></div>
+    <div class="bar"><button type="button" id="apply">Postular en 1 minuto</button></div>
+  </div>
+  <script>
+    const cases = {
+      pucara: {
+        label: 'Pucará',
+        fuente: 'Aviso real publicado para Restaurante Pucará, Saphy. Dos horarios y pagos concretos.',
+        negocio: 'Restaurante Pucará',
+        sello: 'Sin sello todavía. El local no pasó verificación de RUC en esta prueba.',
+        puesto: 'Ayudante de cocina',
+        pago: 'Día S/ 1,725 · Tarde S/ 600',
+        pagoGap: false,
+        chips: ['Día o tarde', 'Descanso miércoles', 'Experiencia deseable, no excluyente'],
+        seguridad: 'Nunca pagues por postular. El local no pide dinero, claves ni Yape.',
+        haras: ['Apoyo en cocina durante el servicio', 'El día entra a las 10:00 a.m.', 'La tarde entra a las 5:30 p.m.; la hora se conversa'],
+        necesitas: ['DNI físico para presentarte', 'Poder trabajar en Saphy'],
+        noNecesitas: ['CV en PDF', 'Experiencia que te deje fuera'],
+        beneficios: ['Alimentación en el local', 'Horas extras al minuto', 'Movilidad y propina, según el turno'],
+        lugar: 'Esquina Amargura con Saphy. Presentarse de 4 a 7 p.m.',
+        perfil: 'Un solo aviso de cocina. No hay todavía página del negocio con más vacantes.',
+        cerca: ['Black Llama · mozo y bartender · centro', 'Chifa en Tambobamba · maestro y moza'],
+        huecos: 'Falta el sello, el mapa y separar “lo que harás” de las condiciones. El pago sí está, y eso ya lo pone delante de la mayoría.'
+      },
+      llama: {
+        label: 'Black Llama',
+        fuente: 'Aviso real de Black Llama Hostel, bar en Mesón de la Estrella. Plan de pago. Pide CV.',
+        negocio: 'Black Llama Hostel',
+        sello: 'Sin sello. El aviso dice planilla y beneficios de ley, no muestra RUC.',
+        puesto: 'Mozo, bartender, limpieza o seguridad',
+        pago: 'No publicó sueldo',
+        pagoGap: true,
+        chips: ['Tarde, noche o rotativo', 'Inicio no dicho', 'Seguridad: con o sin experiencia'],
+        seguridad: 'Nunca pagues por postular. Si te piden dinero para “apartar el puesto”, no es este aviso.',
+        haras: ['Mozo de servicio en el bar', 'Bartender de noche', 'Limpieza de día o seguridad en turno rotativo'],
+        necesitas: ['Elegir uno de los cuatro puestos', 'Estar en el centro histórico'],
+        noNecesitas: ['Experiencia para el puesto de seguridad'],
+        beneficios: ['Planilla', 'Beneficios de ley'],
+        lugar: 'Bar en el centro, zona Mesón de la Estrella. No hay referencia de cuadra.',
+        perfil: 'Cuatro vacantes metidas en un solo texto. En el ideal, cada puesto es su propio aviso.',
+        cerca: ['Pucará · ayudante de cocina · Saphy', 'Wild Rover · mozos de bar · Santa Ana'],
+        huecos: 'El candidato no ve sueldo ni horario exacto. Pide CV, que es justo lo que este flujo quiere evitar. Varios puestos en uno obligan a adivinar.'
+      },
+      tambo: {
+        label: 'Tambobamba',
+        fuente: 'Aviso real del chifa en Tambobamba, Cotabambas. Ofrece pasajes, comida y cuarto. Dos WhatsApp.',
+        negocio: 'Chifa y restaurante',
+        sello: 'Sin sello. El nombre del local no está en el título.',
+        puesto: 'Maestro chifero, ayudante o moza',
+        pago: 'No publicó sueldo',
+        pagoGap: true,
+        chips: ['Con experiencia', 'Hay que vivir en Tambobamba', 'Inicio no dicho'],
+        seguridad: 'Nunca pagues por postular ni por el pasaje por adelantado.',
+        haras: ['Cocina oriental, si entras de maestro', 'Apoyo de cocina', 'Atención en salón, si entras de moza'],
+        necesitas: ['Experiencia en el puesto que eliges', 'Disponibilidad para quedarte en Tambobamba'],
+        noNecesitas: ['Estar ya en Cusco: ofrecen pasajes'],
+        beneficios: ['Pasajes de ida y vuelta', 'Alimentación completa', 'Cuarto'],
+        lugar: 'Tambobamba, Cotabambas, Apurímac. Sin dirección de la puerta.',
+        perfil: 'Tres puestos y dos teléfonos. El candidato no sabe a cuál escribir ni cuánto pagan.',
+        cerca: ['En Cotabambas este aviso está solo. En Cusco hay cocina y salón.'],
+        huecos: 'El beneficio real es el paquete (pasaje, comida, cuarto) y queda debajo del título. El sueldo falta. Dos números reabren el “info”.'
+      },
+      ideal: {
+        label: 'Ideal',
+        fuente: 'Modelo, no es un cliente. Usa la estructura completa. Los datos de pago y lugar salen de Pucará para no inventar un sueldo.',
+        negocio: 'Restaurante Pucará',
+        sello: 'Verificado con RUC. Sello de modelo: ningún aviso real lo tiene todavía.',
+        puesto: 'Ayudante de cocina',
+        pago: 'S/ 1,725 el día · S/ 600 la tarde',
+        pagoGap: false,
+        chips: ['Entras esta semana', 'Día o tarde', 'Sin experiencia también puedes'],
+        seguridad: 'Nunca pagues por postular. No hay Yape, clave ni “curso” antes de la entrevista.',
+        haras: ['Armar mise en place', 'Apoyar el pase en hora punta', 'Dejar la estación limpia al cierre'],
+        necesitas: ['DNI en la mano', 'Llegar a Saphy'],
+        noNecesitas: ['CV', 'Título', 'Experiencia que te cierre la puerta'],
+        beneficios: ['Comida en el turno', 'Extras al minuto', 'Propina y movilidad según horario'],
+        lugar: 'Amargura con Saphy. Mapa cuando la ficha del negocio tenga la puerta.',
+        perfil: 'La ficha del negocio muestra esta vacante y las que se abran después. Ahí se apoya el plan de difusión, no en esconder el aviso.',
+        cerca: ['Un aviso = un puesto. Los otros puestos del mismo local aparecen aquí, no dentro del título.'],
+        huecos: 'Esta es la estructura a la que queremos llegar. Lo que un aviso real no tenga se muestra vacío, no se inventa.'
+      }
+    };
+
+    const order = ['pucara', 'llama', 'tambo', 'ideal'];
+    let current = 'pucara';
+    const switcher = document.getElementById('switch');
+    const view = document.getElementById('view');
+
+    function paint() {
+      const c = cases[current];
+      switcher.innerHTML = order.map((id) =>
+        `<button type="button" data-id="${id}" aria-pressed="${id === current}">${cases[id].label}</button>`
+      ).join('');
+      view.innerHTML = `
+        <p class="kicker">${c.negocio}</p>
+        <p class="src">${c.sello}</p>
+        <h1>${c.puesto}</h1>
+        <p class="${c.pagoGap ? 'pay gap' : 'pay'}">${c.pago}</p>
+        <div class="chips">${c.chips.map((x) => `<span class="chip">${x}</span>`).join('')}</div>
+        <div class="note">${c.seguridad}</div>
+        <section class="card"><h2>Lo que harás</h2><ul>${c.haras.map((x) => `<li>${x}</li>`).join('')}</ul></section>
+        <div class="pair">
+          <section class="card"><h2>Necesitas</h2><ul>${c.necesitas.map((x) => `<li>${x}</li>`).join('')}</ul></section>
+          <section class="card"><h2>No necesitas</h2><ul>${c.noNecesitas.map((x) => `<li>${x}</li>`).join('')}</ul></section>
+        </div>
+        <section class="card"><h2>Beneficios</h2><ul>${c.beneficios.map((x) => `<li>${x}</li>`).join('')}</ul></section>
+        <section class="card"><h2>Dónde</h2><p class="muted">${c.lugar}</p></section>
+        <section class="card"><h2>El negocio</h2><p class="muted">${c.perfil}</p></section>
+        <section class="card"><h2>Cerca</h2><ul>${c.cerca.map((x) => `<li>${x}</li>`).join('')}</ul></section>
+        <section class="card"><h2>Qué le falta al aviso real</h2><p class="muted">${c.huecos}</p><p class="src">${c.fuente}</p></section>
+      `;
+    }
+
+    switcher.addEventListener('click', (event) => {
+      const id = event.target.getAttribute('data-id');
+      if (!id) return;
+      current = id;
+      paint();
+    });
+    document.getElementById('apply').addEventListener('click', () => {
+      const c = cases[current];
+      alert('En el aviso de verdad esto abre la ficha: nombre, teléfono y disponibilidad. Aquí solo muestra el caso ' + c.label + '.');
+    });
+    paint();
+  </script>
+</body>
+</html>

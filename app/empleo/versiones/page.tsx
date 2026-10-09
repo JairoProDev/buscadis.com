@@ -32,6 +32,16 @@ const VERSIONS = [
     name: 'Fusión',
     what: 'La suite de Gemini, con datos de Pucará, ficha en vez de un chat vacío, talones sin teléfono y avisos cerca.',
   },
+  {
+    href: '/empleo-lab/claude-mobile.html',
+    name: 'Claude · seis pantallas',
+    what: 'El aviso, el creador de una frase, el kit, la bandeja, el afiche A4 y la historia 9:16. El paquete original, sin recortes.',
+  },
+  {
+    href: '/empleo-lab/ejemplos.html',
+    name: 'Ejemplos reales y el ideal',
+    what: 'El mismo esqueleto con Pucará, Black Llama y el chifa de Tambobamba, más un modelo completo. Lo que el aviso real no dice, se ve vacío.',
+  },
 ];
 
 export default function VersionesEmpleoPage() {
@@ -52,7 +62,7 @@ export default function VersionesEmpleoPage() {
         Cinco versiones del mismo aviso
       </h1>
       <p style={{ fontSize: 17, lineHeight: 1.45, maxWidth: 560 }}>
-        Ábrelas una por una. Las tres de Gemini están igual que en los HTML. La fusión junta lo que conviene probar junto. El detalle de ideas buenas y malas está en el documento del laboratorio.
+        Ábrelas una por una. Las de Gemini y la de Claude están como llegaron. La estrategia, las pantallas, lo descartado y las contradicciones están en docs/empleo/ESTRATEGIA-AVISO.md.
       </p>
       <ul style={{ listStyle: 'none', padding: 0, margin: '28px 0 0', display: 'flex', flexDirection: 'column', gap: 12 }}>
         {VERSIONS.map((item) => (
